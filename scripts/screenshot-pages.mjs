@@ -26,7 +26,9 @@ async function settle(page) {
     return !slot || slot.dataset.state !== 'loading';
   }, null, { timeout: 30000 }).catch(() => {});
   // 量測前逐一帶入視野，否則未 reveal 的區塊仍帶著進場位移，量到的會是動畫中繼值。
-  for (const el of await page.$$('[data-reveal]')) { await el.scrollIntoViewIfNeeded().catch(() => {}); await page.waitForTimeout(250); }
+  for (const el of await page.$$('[data-reveal], .page-foreground')) { await el.scrollIntoViewIfNeeded().catch(() => {}); await page.waitForTimeout(250); }
+  await page.waitForFunction(() => document.querySelector('.page-foreground')?.classList.contains('is-visible'), null, { timeout: 20000 }).catch(() => console.error('page-foreground never revealed'));
+  await page.waitForTimeout(1000);
   await page.evaluate(() => scrollTo(0, 0));
   await page.waitForTimeout(900);
 }

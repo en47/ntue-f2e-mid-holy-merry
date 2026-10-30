@@ -1,4 +1,3 @@
-import { mountForeground } from './components/game-foreground.js';
 import { mountSleigh } from './components/game-sleigh.js';
 import { mountWreath } from './components/game-wreath.js';
 import { pauseOffscreen } from './components/paper-art.js';
@@ -109,8 +108,6 @@ window.addEventListener('pageshow', event => { if (event.persisted) observeGameP
 
 const flyingSlot = document.querySelector('[data-illustration-slot="santa-flying"]');
 const matchingSlot = document.querySelector('[data-illustration-slot="christmas-matching"]');
-const foreground = document.querySelector('.matching-foreground');
 mountSleigh(flyingSlot);
 mountWreath(matchingSlot);
-mountForeground(foreground);
-pauseOffscreen([flyingSlot, matchingSlot, foreground]);
+pauseOffscreen([flyingSlot, matchingSlot]);

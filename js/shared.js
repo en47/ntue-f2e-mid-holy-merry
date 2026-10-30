@@ -1,4 +1,6 @@
 // 所有頁面共用；此模組不會啟動其他頁面的遊戲或計時器。
+import { mountForeground } from './components/page-foreground.js';
+
 document.documentElement.classList.add('js-ready');
 // Animate only deliberate section-link activation; native manual scrolling stays untouched.
 document.addEventListener('click', event => {
@@ -103,3 +105,5 @@ window.addEventListener('pagehide', event => {
   audio.pause();
   if (objectURL && !event.persisted) URL.revokeObjectURL(objectURL);
 });
+
+mountForeground(document.querySelector('.page-foreground'));
