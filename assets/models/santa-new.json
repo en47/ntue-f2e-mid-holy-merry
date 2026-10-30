@@ -1,0 +1,14 @@
+{
+  "sourceFilename": "santa claus.glb",
+  "model": "santa-new.glb",
+  "bytes": 1165576,
+  "sha256": "1840b00b8f638d894501b5aa6dc5180a7c0c0fb12288c06e523dc34938b305fb",
+  "animations": [
+    "dance_02"
+  ],
+  "animationSource": "santa-dance.glb（重定向）",
+  "playbackRangeSeconds": [
+    1,
+    4
+  ]
+}

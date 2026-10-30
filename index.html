@@ -9,10 +9,10 @@
   <title>Home — Holy Merry!</title>
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/shared.css?v=20261031-9">
+  <link rel="stylesheet" href="css/shared.css?v=20261031-10">
   <link rel="stylesheet" href="css/home.css">
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js"}}</script>
-  <script type="module" src="js/shared.js?v=20261031-2"></script>
+  <script type="module" src="js/shared.js?v=20261031-3"></script>
   <script type="module" src="js/home.js"></script>
   <script type="module" src="js/santa-model.js"></script>
 </head>
@@ -59,7 +59,7 @@
           <button type="button" class="character-stage" data-model-slot="santa" data-state="loading"
             data-animation="character-santa" aria-label="點擊聖誕老人，閱讀聖誕小信" aria-describedby="character-help"
             aria-controls="santa-letter" aria-expanded="false" aria-busy="true">
-            <span class="model-fallback"><span>聖誕老人正在趕來…</span><progress max="100" value="0" role="progressbar"
+            <span class="model-fallback"><span class="santa-placeholder-host" data-santa-placeholder></span><span>聖誕老人正在趕來…</span><progress max="100" value="0" role="progressbar"
                 aria-label="聖誕老人載入進度"></progress></span>
             <span class="stage-key-hint">按 Enter 閱讀小信</span>
           </button>

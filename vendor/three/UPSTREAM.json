@@ -12,6 +12,7 @@
     "examples/jsm/loaders/GLTFLoader.js": "e4e692923224a10bbc00be04365d6356b5e8c48b2bbd1f22a7fe929591646fb8",
     "examples/jsm/utils/BufferGeometryUtils.js": "fda7e946b8e0b5ab39b779206589e7a1079a22eb24efb89d7223e03fdfb1f751",
     "examples/jsm/environments/RoomEnvironment.js": "55f466192cc84298755a424c5e040345006b2ee1455589b3b54126c2ea4123f4",
-    "examples/jsm/utils/SkeletonUtils.js": "0761b1e003917b215d25dd81439d854b36034b5a57ce84c2cfe3b02428d7b253"
+    "examples/jsm/utils/SkeletonUtils.js": "0761b1e003917b215d25dd81439d854b36034b5a57ce84c2cfe3b02428d7b253",
+    "examples/jsm/libs/meshopt_decoder.module.js": "97901fb3d2d296eeea2a57348a734ef0a17e35f2d4aea5a65223635d3f0e1709"
   }
 }
