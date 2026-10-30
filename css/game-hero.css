@@ -3,25 +3,30 @@
    Back to front: clouds, mountains, scenery, Santa, snow hill, signs, snowbank, torn edge. */
 .games-hero { position: relative; isolation: isolate; width: 100%; height: calc(100svh - var(--games-header-height)); min-height: 600px; margin: 0; padding: 0; overflow: hidden; overflow: clip; background: linear-gradient(180deg, #c7e3ec 0%, #dcedf1 42%, #f4efe4 74%, #fbf6ea 100%); }
 .hero-paper { transform-origin: 50% 100%; }
-.games-hero-clouds, .games-hero-mountains, .games-hero-scenery, .games-hero-santa, .games-hero-hill, .games-hero-front, .games-hero-edge { position: absolute; pointer-events: none; }
-.games-hero-clouds { z-index: 1; top: 7%; right: 8%; width: 21%; clip-path: inset(0 0 36% 0); opacity: .9; --art-mask: url('../assets/illustrations/storybook/masks/06_clouds.svg'); -webkit-mask: var(--art-mask) 0 0 / 100% 100% no-repeat; mask: var(--art-mask) 0 0 / 100% 100% no-repeat; mask-mode: alpha; }
-.games-hero-clouds-left { top: 13%; right: auto; left: 6%; width: 15%; transform: scaleX(-1); opacity: .7; }
-.games-hero-mountains { z-index: 2; bottom: 24%; left: 8%; width: 84%; opacity: .92; filter: drop-shadow(1px 2px 0 #f5ead8) drop-shadow(2px 6px 3px #536c7b40); }
-.games-hero-mountains img { display: block; width: 100%; height: auto; }
-.games-hero-scenery { z-index: 3; bottom: 4%; left: -1%; display: block; width: 102%; height: auto; max-width: none; filter: drop-shadow(0 4px 3px #536c7b38); }
+.games-bunting { z-index: 1; top: -1%; left: 0; width: 100%; aspect-ratio: 1600 / 150; transform-origin: 50% 0; }
+.games-cloud { z-index: 1; aspect-ratio: 240 / 110; }
+.games-cloud-a { top: 22%; left: 28%; width: 12%; }
+.games-cloud-b { top: 15%; right: 30%; width: 14%; }
+.games-balloon { z-index: 2; top: 15%; left: 9%; width: 8.5%; aspect-ratio: 200 / 270; }
+.games-balloon img { animation: balloon-float 6s ease-in-out infinite alternate; }
+.games-far { z-index: 2; left: -1%; width: 102%; bottom: 20%; height: 34%; }
+.games-carousel { z-index: 3; left: 15%; width: 21%; aspect-ratio: 460 / 420; bottom: 38%; }
+.games-ferris { z-index: 3; right: 15%; width: 25%; aspect-ratio: 520 / 540; bottom: 33%; }
+.games-wheel { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 1; animation: wheel-spin 48s linear infinite; }
+.games-wheel-art { inset: 0; position: absolute; }
+.games-seat { position: absolute; width: 15%; aspect-ratio: 80 / 90; margin: -1.5% 0 0 -7.5%; transform-origin: 50% 6%; animation: wheel-spin 48s linear infinite reverse; }
+.games-seat-art { inset: 0; position: absolute; }
+.games-ridge { z-index: 4; left: -1%; width: 102%; bottom: 0; height: 41%; }
+.games-mid { z-index: 4; left: -1%; width: 102%; aspect-ratio: 1600 / 340; bottom: 13%; }
 /* Clipped at the hill line, so Santa rises from behind it rather than from the page edge. */
-.games-hero-santa { z-index: 4; left: 27%; width: 46%; bottom: 17%; height: 48%; overflow: hidden; overflow: clip; }
+.games-hero-santa { position: absolute; pointer-events: none; z-index: 5; left: 30%; width: 40%; bottom: 17%; height: 42%; overflow: hidden; overflow: clip; }
 .games-hero-santa canvas { display: block; width: 100%; height: 100%; }
 .games-hero-model-status { position: absolute; z-index: 9; left: 0; bottom: 38%; width: 100%; margin: 0; padding: .5rem; text-align: center; color: #634d3b; font-size: .8rem; }
-/* Sprite rows of snowbanks.png: row 4 is the hill, row 1 the near bank. */
-.games-hero-hill, .games-hero-front { left: -3%; width: 106%; overflow: hidden; filter: drop-shadow(0 -3px 3px #5d7f9130); }
-.games-hero-hill img, .games-hero-front img { display: block; width: 100%; height: auto; max-width: none; }
-.games-hero-hill { z-index: 5; bottom: 8%; aspect-ratio: 2172 / 214; }
-.games-hero-hill img { margin-top: -23.45%; }
-.games-hero-front { z-index: 7; bottom: -2.5%; aspect-ratio: 2172 / 192; }
-.games-hero-edge { z-index: 8; left: 0; bottom: -1px; width: 100%; height: clamp(24px, 3.4vw, 48px); fill: var(--blue); filter: drop-shadow(0 -2px 2px #5d7f9133); }
+.games-hero-hill { z-index: 6; left: -1%; width: 102%; bottom: 0; height: 25%; }
+.games-hero-front { z-index: 8; left: -1%; width: 102%; bottom: -1%; height: 13%; }
+.games-hero-edge { position: absolute; pointer-events: none; z-index: 9; left: 0; bottom: -1px; width: 100%; height: clamp(24px, 3.4vw, 48px); fill: var(--blue); filter: drop-shadow(0 -2px 2px #5d7f9133); }
 
-.games-hero-title-sign, .games-hero-navigation { position: absolute; z-index: 6; aspect-ratio: 1120 / 724; }
+.games-hero-title-sign, .games-hero-navigation { position: absolute; z-index: 7; aspect-ratio: 1120 / 724; }
 .games-hero-title-sign { left: 5%; bottom: 9%; width: min(33%, 480px); }
 .games-hero-navigation { right: 5%; bottom: 9%; width: min(31%, 451px); aspect-ratio: 1052 / 724; }
 .sign-layer { position: absolute; inset: 0; pointer-events: none; }
@@ -42,45 +47,53 @@
 
 /* Opening: wait for decoded art, but never leave the scene hidden if the module fails. */
 @media (scripting: enabled) {
-  .games-hero:not(.is-opening) .hero-paper { opacity: 0; animation: hero-failsafe .3s 4s forwards; }
+  .games-hero:not(.is-opening) .hero-paper, .games-hero:not(.is-opening) .pop { opacity: 0; animation: hero-failsafe .3s 4s forwards; }
 }
-.games-hero.is-opening .games-hero-clouds-left { --paper-mirror: -1; }
-.games-hero.is-opening .hero-paper { animation: hero-unfold 1.05s cubic-bezier(.17,1.3,.35,1) both; }
-.games-hero.is-opening .games-hero-mountains { animation-delay: .1s; }
-.games-hero.is-opening .games-hero-clouds { animation-delay: .35s; }
-.games-hero.is-opening .games-hero-scenery { animation-delay: .5s; }
-.games-hero.is-opening .games-hero-hill { animation-delay: .9s; }
-.games-hero.is-opening .games-hero-title-sign { animation-delay: 1.15s; }
-.games-hero.is-opening .games-hero-navigation { animation-delay: 1.35s; }
-.games-hero.is-opening .games-hero-front { animation-delay: 1.5s; }
+.games-hero.is-opening .hero-paper, .games-hero.is-opening .pop { animation: pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay, 0s) both; }
+.games-hero.is-opening .games-hero-title-sign { --pop-delay: 1.15s; }
+.games-hero.is-opening .games-hero-navigation { --pop-delay: 1.3s; }
+.games-hero.is-opening .games-wheel .pop { animation: none; }
 .games-hero-santa[data-state='ready'] canvas { animation: santa-rise 1.5s cubic-bezier(.22,.8,.3,1) 1.9s both; }
-@keyframes hero-unfold { 0% { transform: perspective(1000px) rotateX(-87deg) scaleX(var(--paper-mirror, 1)) translateY(45px); opacity: 0; } 76% { transform: perspective(1000px) rotateX(4deg) scaleX(var(--paper-mirror, 1)); opacity: 1; } 100% { transform: perspective(1000px) rotateX(0) scaleX(var(--paper-mirror, 1)); opacity: 1; } }
+@keyframes wheel-spin { to { rotate: 360deg; } }
+@keyframes balloon-float { from { translate: 0 -7px; } to { translate: 0 7px; } }
 @keyframes hero-failsafe { to { opacity: 1; } }
 @keyframes santa-rise { from { transform: translateY(102%); } to { transform: translateY(0); } }
 @keyframes sign-swing { from { transform: rotate(calc(var(--sign-swing) * -1)); } to { transform: rotate(var(--sign-swing)); } }
 @media (prefers-reduced-motion: reduce) {
-  .games-hero.is-opening .hero-paper, .games-hero.is-opening .sign-board, .games-hero-santa[data-state='ready'] canvas { animation: none; }
+  .games-hero.is-opening .hero-paper, .games-hero.is-opening .sign-board, .games-hero-santa[data-state='ready'] canvas, .games-wheel, .games-seat, .games-balloon img { animation: none; }
 }
 
 @media (max-width: 900px) {
-  .games-hero-clouds { top: 3%; }
-  .games-hero-mountains { left: -36%; width: 172%; bottom: 22%; }
-  .games-hero-scenery { left: -20%; width: 140%; bottom: 3%; }
-  .games-hero-santa { left: 14%; width: 72%; bottom: 13%; height: 44%; }
-  .games-hero-hill { left: -20%; width: 140%; bottom: 6%; }
-  .games-hero-front { left: -20%; width: 140%; }
+  .games-bunting { width: 150%; left: -25%; }
+  .games-cloud-a { top: 16%; left: 34%; width: 20%; }
+  .games-cloud-b { top: 24%; right: 6%; width: 22%; }
+  .games-balloon { top: 13%; left: 7%; width: 15%; }
+  .games-far { left: -20%; width: 140%; bottom: 18%; height: 30%; }
+  .games-carousel { left: 2%; width: 34%; bottom: 40%; }
+  .games-ferris { right: 2%; width: 42%; bottom: 34%; }
+  .games-ridge { left: -20%; width: 140%; height: 43%; }
+  .games-mid { left: -30%; width: 160%; bottom: 13%; }
+  .games-hero-santa { left: 18%; width: 64%; bottom: 13%; height: 33%; }
+  .games-hero-hill { left: -20%; width: 140%; height: 20%; }
+  .games-hero-front { left: -20%; width: 140%; height: 11%; }
   .games-hero-title-sign { left: 1%; bottom: 6%; width: 42%; }
   .games-hero-navigation { right: 1%; bottom: 6%; width: 40%; }
 }
 @media (max-width: 600px) {
   .games-hero { min-height: 640px; }
-  .games-hero-clouds { top: 27%; right: 3%; width: 36%; }
-  .games-hero-clouds-left { display: none; }
-  .games-hero-mountains { left: -50%; width: 200%; bottom: 25%; }
-  .games-hero-scenery { left: -55%; width: 210%; bottom: 7%; }
-  .games-hero-santa { left: 0; width: 100%; bottom: 20%; height: 41%; }
-  .games-hero-hill { left: -30%; width: 160%; bottom: 13%; }
-  .games-hero-title-sign { left: 50%; bottom: auto; top: 2%; width: 74%; margin-left: -37%; }
+  .games-bunting { width: 240%; left: -70%; }
+  .games-cloud-a { display: none; }
+  .games-cloud-b { top: 27%; right: 4%; width: 32%; }
+  .games-balloon { display: none; }
+  .games-far { left: -50%; width: 200%; bottom: 24%; height: 24%; }
+  .games-carousel { left: -12%; width: 50%; bottom: 46%; }
+  .games-ferris { right: -14%; width: 56%; bottom: 40%; }
+  .games-ridge { left: -30%; width: 160%; height: 49%; }
+  .games-mid { left: -60%; width: 220%; bottom: 20%; }
+  .games-hero-santa { left: 4%; width: 92%; bottom: 25%; height: 26%; }
+  .games-hero-hill { left: -30%; width: 160%; height: 30%; }
+  .games-hero-front { left: -30%; width: 160%; height: 9%; }
+  .games-hero-title-sign { left: 50%; bottom: auto; top: 5%; width: 74%; margin-left: -37%; }
   .games-hero-navigation { right: 50%; bottom: 3%; width: 76%; margin-right: -38%; }
   .games-hero-title-sign h1 { font-size: clamp(1.5rem, 7.2vw, 2.3rem); }
   .games-hero-link { font-size: clamp(.95rem, 4.6vw, 1.4rem); }

@@ -1,0 +1,69 @@
+// Paper-cut scenery shared by the Home and Game scenes. Light comes from the upper left,
+// so every prop keeps its shaded side on the right and sits on its own base line.
+import { holly, pine, shape } from './paper-art.js';
+
+export const SNOW = '#fbf8f1', SHADE = '#d6e3e9', WOOD = '#9c7f64', LIT = '#efbe62';
+
+export function cloud(parent, x, y, scale = 1, fill = '#fbf7ef') {
+  const group = shape('g', { transform: `translate(${x} ${y}) scale(${scale})` }, parent);
+  shape('path', { d: 'M-90 22C-104 22-110 4-94 -2-94-22-66-30-52-16-42-44 0-48 14-22 30-40 62-32 62-8 82-10 92 16 76 22Z', fill: SHADE, transform: 'translate(0 7)' }, group);
+  shape('path', { d: 'M-90 22C-104 22-110 4-94 -2-94-22-66-30-52-16-42-44 0-48 14-22 30-40 62-32 62-8 82-10 92 16 76 22Z', fill }, group);
+}
+
+export function roofHouse(parent, x, base, width, height, { wall = '#e4d0b0', roof = '#a8564c', door = '#8a6248', chimney = true } = {}) {
+  const half = width / 2, eave = base - height, peak = eave - width * .46;
+  if (chimney) shape('path', { d: `M${x + half * .38} ${eave - width * .1}V${peak + 2}H${x + half * .66}V${eave - width * .02}Z`, fill: '#8f6f5b' }, parent);
+  shape('path', { d: `M${x - half} ${base}V${eave}H${x + half}V${base}Z`, fill: wall }, parent);
+  shape('path', { d: `M${x + half * .3} ${base}V${eave}H${x + half}V${base}Z`, fill: '#000', opacity: .06 }, parent);
+  shape('path', { d: `M${x - half * 1.24} ${eave + 3}L${x} ${peak}L${x + half * 1.24} ${eave + 3}Z`, fill: roof }, parent);
+  const drip = width * .12;
+  shape('path', { d: `M${x - half * 1.3} ${eave + 5}L${x} ${peak - 7}L${x + half * 1.3} ${eave + 5}C${x + half} ${eave + 4 - drip} ${x + half * .66} ${eave - drip * 1.4} ${x + half * .4} ${eave - drip * 2.2} ${x + half * .2} ${eave - drip} ${x} ${eave - drip * 2.8} ${x - half * .2} ${eave - drip * 1.7} ${x - half * .5} ${eave - drip * .6} ${x - half * .8} ${eave - drip * 1.1} ${x - half * 1.3} ${eave + 5}Z`, fill: SNOW }, parent);
+  const pane = width * .2;
+  for (const offset of [-.56, .2]) {
+    shape('rect', { x: x + half * offset, y: eave + height * .2, width: pane, height: pane, rx: 2, fill: LIT }, parent);
+    shape('path', { d: `M${x + half * offset + pane / 2} ${eave + height * .2}v${pane}M${x + half * offset} ${eave + height * .2 + pane / 2}h${pane}`, stroke: '#94785f', 'stroke-width': 2, fill: 'none' }, parent);
+  }
+  shape('path', { d: `M${x - half * .18} ${base}V${base - height * .42}C${x - half * .18} ${base - height * .58} ${x + half * .18} ${base - height * .58} ${x + half * .18} ${base - height * .42}V${base}Z`, fill: door }, parent);
+}
+
+export function church(parent, x, base) {
+  roofHouse(parent, x + 56, base, 118, 76, { wall: '#ecdcc0', roof: '#a8564c', chimney: false });
+  shape('path', { d: `M${x - 34} ${base}V${base - 150}H${x + 30}V${base}Z`, fill: '#efe2c8' }, parent);
+  shape('path', { d: `M${x + 8} ${base}V${base - 150}H${x + 30}V${base}Z`, fill: '#000', opacity: .06 }, parent);
+  shape('path', { d: `M${x - 44} ${base - 148}L${x - 2} ${base - 256}L${x + 40} ${base - 148}Z`, fill: '#b5624f' }, parent);
+  shape('path', { d: `M${x - 48} ${base - 146}C${x - 30} ${base - 160} ${x - 24} ${base - 184} ${x - 16} ${base - 204} ${x - 8} ${base - 176} ${x + 8} ${base - 170} ${x + 12} ${base - 182} ${x + 22} ${base - 166} ${x + 32} ${base - 158} ${x + 44} ${base - 146}Z`, fill: SNOW }, parent);
+  shape('path', { d: `M${x - 2} ${base - 256}v-30M${x - 11} ${base - 276}h18`, stroke: '#7c5f49', 'stroke-width': 5, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  shape('path', { d: `M${x - 16} ${base - 92}V${base - 116}C${x - 16} ${base - 136} ${x + 14} ${base - 136} ${x + 14} ${base - 116}V${base - 92}Z`, fill: LIT }, parent);
+  shape('path', { d: `M${x - 13} ${base}V${base - 34}C${x - 13} ${base - 52} ${x + 11} ${base - 52} ${x + 11} ${base - 34}V${base}Z`, fill: '#8a6248' }, parent);
+}
+
+export function fence(parent, x, base, count, gap = 30) {
+  shape('path', { d: `M${x - 10} ${base - 34}H${x + (count - 1) * gap + 10}V${base - 26}H${x - 10}ZM${x - 10} ${base - 16}H${x + (count - 1) * gap + 10}V${base - 8}H${x - 10}Z`, fill: '#ad9076' }, parent);
+  for (let index = 0; index < count; index++) {
+    const px = x + index * gap;
+    shape('path', { d: `M${px - 6} ${base}V${base - 44}L${px} ${base - 52}L${px + 6} ${base - 44}V${base}Z`, fill: WOOD }, parent);
+    shape('ellipse', { cx: px, cy: base - 50, rx: 10, ry: 5, fill: SNOW }, parent);
+  }
+}
+
+export function lamp(parent, x, base) {
+  shape('path', { d: `M${x - 5} ${base}L${x - 3} ${base - 120}H${x + 3}L${x + 5} ${base}Z`, fill: '#6d5a50' }, parent);
+  shape('path', { d: `M${x - 15} ${base - 122}L${x - 10} ${base - 152}H${x + 10}L${x + 15} ${base - 122}Z`, fill: LIT }, parent);
+  shape('path', { d: `M${x - 19} ${base - 152}L${x} ${base - 170}L${x + 19} ${base - 152}Z`, fill: '#6d5a50' }, parent);
+  shape('ellipse', { cx: x, cy: base - 160, rx: 22, ry: 7, fill: SNOW }, parent);
+}
+
+export function berryBush(parent, x, base) {
+  shape('path', { d: `M${x} ${base}C${x - 2} ${base - 34} ${x - 30} ${base - 50} ${x - 50} ${base - 74}M${x} ${base - 26}C${x + 8} ${base - 50} ${x + 26} ${base - 66} ${x + 46} ${base - 78}M${x} ${base - 34}C${x - 4} ${base - 60} ${x} ${base - 80} ${x + 2} ${base - 96}M${x - 22} ${base - 44}C${x - 40} ${base - 48} ${x - 54} ${base - 44} ${x - 64} ${base - 40}M${x + 18} ${base - 52}C${x + 36} ${base - 50} ${x + 50} ${base - 44} ${x + 60} ${base - 38}`, stroke: '#8a6a55', 'stroke-width': 5, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  for (const [dx, dy] of [[-50, -74], [46, -78], [2, -96], [-64, -40], [60, -38], [-34, -62], [26, -70], [-14, -84], [38, -52], [-44, -52], [14, -92]]) shape('circle', { cx: x + dx, cy: base + dy, r: 7, fill: '#b5544c' }, parent);
+}
+
+export function star(parent, x, y, size, fill = '#e0b04f') {
+  const points = Array.from({ length: 10 }, (_, index) => {
+    const angle = Math.PI * index / 5 - Math.PI / 2, radius = index % 2 ? size * .45 : size;
+    return `${(x + Math.cos(angle) * radius).toFixed(1)} ${(y + Math.sin(angle) * radius).toFixed(1)}`;
+  });
+  shape('path', { d: `M${points.join('L')}Z`, fill }, parent);
+}
+
+export { holly, pine };

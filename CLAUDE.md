@@ -33,7 +33,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 
 | 頁面 | 進入模組 |
 | --- | --- |
-| `index.html` | `js/shared.js`、`js/home.js`、`js/santa-model.js` |
+| `index.html` | `js/shared.js`、`js/home-scene.js`、`js/home.js`、`js/santa-model.js` |
 | `intro.html` | `js/shared.js`、`js/intro.js` |
 | `game.html` | `js/shared.js`、`js/game.js`、`js/game-hero.js` |
 | `wish.html` | `js/shared.js`、`js/wish.js` |
@@ -47,7 +47,8 @@ HTML 內的 `?v=YYYYMMDD-n` 是手動快取破壞參數；改動對應 CSS / JS 
 
 ### 目錄分工
 - `js/components/` — DOM 與 Three.js 行為單元（角色場景、精靈、信封、世界地圖、Intro 故事書）。
-- `js/data/` — 純資料表。多數由 `scripts/` 的 `.mjs` / `.py` 產生（`elf-actions.json`、`elf-ground.js`、`envelope-shapes.js`、`wish-tree-anchors.js`、`storybook-masks`）；**不要手改產出檔**，改腳本後重新產生。
+- `js/components/paper-art.js`、`paper-props.js` — SVG 紙雕工法與道具。每片紙只轉成圖片一次，會動的部位拆成獨立圖層以 CSS 移動，不要動畫 SVG 內部（濾鏡重算成本很高）。
+- `js/data/` — 純資料表。多數由 `scripts/` 的 `.mjs` / `.py` 產生（`title-glyphs.js`、`elf-actions.json`、`elf-ground.js`、`envelope-shapes.js`、`wish-tree-anchors.js`、`storybook-masks`）；**不要手改產出檔**，改腳本後重新產生。
 - `js/services/` — 儲存與 Firebase。
 - `js/games/` — 配對遊戲適配層；`js/games/matching.js` 是保留的舊單關原型，已不載入。
 - `css/tokens.css` 設計變數 → `css/shared.css` 導覽／按鈕／Footer／音樂 → 各頁 CSS。

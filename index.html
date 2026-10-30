@@ -9,10 +9,11 @@
   <title>Home — Holy Merry!</title>
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/shared.css?v=20261031-10">
-  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/shared.css?v=20261031-11">
+  <link rel="stylesheet" href="css/home.css?v=20261031-2">
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js"}}</script>
-  <script type="module" src="js/shared.js?v=20261031-3"></script>
+  <script type="module" src="js/shared.js?v=20261031-4"></script>
+  <script type="module" src="js/home-scene.js?v=20261031-2"></script>
   <script type="module" src="js/home.js"></script>
   <script type="module" src="js/santa-model.js"></script>
 </head>
@@ -40,20 +41,8 @@
         <span><strong data-unit="seconds">--</strong><small>秒</small></span>
       </div>
     </div>
-    <h1 class="storybook-title"><span class="sr-only">Merry Christmas</span><span class="title-motion"><img
-          src="assets/illustrations/storybook/05_merry_christmas.png" alt="" width="503" height="255"
-          fetchpriority="high"></span></h1>
+    <h1 class="storybook-title"><span class="sr-only">Merry Christmas</span><span class="title-motion" data-title-art></span></h1>
     <div class="story-stage" id="story-stage">
-      <img class="hand-cloud" src="assets/illustrations/storybook/06_clouds.png" alt="" width="373" height="246"
-        aria-hidden="true">
-      <div class="paper-layer mountains" aria-hidden="true"><img
-          src="assets/illustrations/storybook/mountains-clean.png" alt="" width="2134" height="737"></div>
-      <div class="paper-layer side-scenery side-scenery-left" aria-hidden="true"><img
-          src="assets/illustrations/storybook/04_foreground_snow.png" alt="" width="965" height="190"></div>
-      <div class="paper-layer side-scenery side-scenery-right" aria-hidden="true"><img
-          src="assets/illustrations/storybook/04_foreground_snow.png" alt="" width="965" height="190"></div>
-      <div class="paper-layer village" aria-hidden="true"><img src="assets/illustrations/storybook/village-clean.png"
-          alt="" width="1577" height="997"></div>
       <section class="characters" id="characters" aria-label="和聖誕夥伴聊聊天">
         <article id="santa-card" class="character character-santa" aria-label="聖誕老人">
           <button type="button" class="character-stage" data-model-slot="santa" data-state="loading"
@@ -82,26 +71,6 @@
           </div>
         </article>
       </section>
-      <div class="paper-layer foreground" aria-hidden="true"><img
-          src="assets/illustrations/storybook/04_foreground_snow.png" alt="" width="965" height="190"></div>
-      <div class="scenery-trees" aria-hidden="true">
-        <div class="tree-grove tree-grove-left">
-          <div class="paper-tree tree-small tree-far-left"><img src="assets/illustrations/storybook/pine-tree-clean.png"
-              alt="" width="1261" height="1247"></div>
-          <div class="paper-tree tree-medium tree-middle-left"><img
-              src="assets/illustrations/storybook/pine-tree-berry.png" alt="" width="1144" height="1375"></div>
-        </div>
-        <div class="tree-grove tree-grove-front">
-          <div class="paper-tree tree-large tree-near-left"><img
-              src="assets/illustrations/storybook/pine-tree-clean.png" alt="" width="1261" height="1247"></div>
-          <div class="paper-tree tree-large tree-near-right"><img
-              src="assets/illustrations/storybook/pine-tree-clean.png" alt="" width="1261" height="1247"></div>
-        </div>
-      </div>
-      <img class="snow-accent left" src="assets/illustrations/storybook/07_small_snowbanks.png" alt="" width="381"
-        height="87" aria-hidden="true">
-      <img class="snow-accent right" src="assets/illustrations/storybook/07_small_snowbanks.png" alt="" width="381"
-        height="87" aria-hidden="true">
     </div>
     <button type="button" class="christmas-letter left" id="santa-letter" aria-label="收起聖誕小信"
       aria-describedby="santa-dialogue" hidden><span class="letter-body"><span class="letter-copy"

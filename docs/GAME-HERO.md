@@ -4,7 +4,7 @@
 
 ## 圖層（後到前）
 
-雲 → 雪山（首頁 `mountains-clean.png`）→ 中景 `winter-scenery.png` → 3D Santa → 雪丘 → 立牌 → 雪堤 → 紙邊。天空由導覽列色 `#c7e3ec` 漸層到奶油色，與首頁深藍區隔。
+彩旗、雲、熱氣球 → 遠方雪丘 → 旋轉木馬與摩天輪 → 雪坡 → 松樹與圍欄 → 3D Santa → 雪丘 → 立牌 → 前景雪堤 → 紙邊。全部由 `js/components/game-scene.js` 以 SVG 繪製；首頁是雪地村莊（`js/components/home-scene.js`），兩頁刻意不重複，也都不用山。光源固定在左上，道具集中在 `paper-props.js`。
 
 ## 立牌
 
@@ -12,7 +12,7 @@
 
 ## Santa
 
-`js/game-hero.js` 於執行時姿勢化骨架，不改 GLB：手臂轉成向下，`Spine1`／`Neck`／`Head` 以小幅正弦擺動。離開視野、分頁隱藏或減少動態時停止繪製。升起是畫布在 `.games-hero-santa` 裁切範圍內的 CSS 位移。可調常數：`VIEW_HEIGHT`（越大角色越小）、`VIEW_CENTER`。
+模型為 `assets/models/santa-new.glb`，由 `scripts/build-santa-model.mjs` 從 `assets/santa claus.glb` 壓縮並烘入重定向後的舞步。`js/game-hero.js` 於執行時姿勢化骨架：手臂轉成向下，`Spine1`／`Neck`／`Head` 以小幅正弦擺動；`js/components/santa-head.js` 再讓頭頸跟隨滑鼠（首頁共用），觸控與減少動態不追蹤。離開視野、分頁隱藏或減少動態時停止繪製。升起是畫布在 `.games-hero-santa` 裁切範圍內的 CSS 位移。可調常數：`VIEW_HEIGHT`（越大角色越小）、`VIEW_CENTER`。
 
 ## SVG 紙雕
 

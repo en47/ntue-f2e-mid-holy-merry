@@ -580,7 +580,7 @@ await test('V5：遮罩對位與本機 SVG 資源、原生角色按鈕、移除�
   assert.equal((html.match(/<button[^>]*data-model-slot=/g)??[]).length,2);
   assert.equal((html.match(/class="christmas-letter /g)??[]).length,2);
   assert.ok(html.includes('href="intro.html">Explore the Story')); assert.ok(html.includes('href="wish.html">Make a Wish'));
-  assert.ok(!css.includes('.speech-bubble')); assert.ok(css.includes('mask-mode: alpha'));
+  assert.ok(!css.includes('.speech-bubble'));
   for(const match of css.matchAll(/url\(['"]?([^)'"\s]+)['"]?\)/g)) {
     const file = localRef(match[1]);
     if (file) await fs.access(path.resolve(project,'css',file));
@@ -595,7 +595,7 @@ await test('V5：遮罩對位與本機 SVG 資源、原生角色按鈕、移除�
     assert.ok(svg.includes(`preserveAspectRatio="${item.preserveAspectRatio}"`),'Mask must match the image object-fit and object-position');
     assert.equal(item.preserveAspectRatio,name==='03_pine_trees'?'xMidYMax meet':name==='06_clouds'?'xMidYMid meet':'none');
     for(const polygon of [...item.polygons,...(item.holes??[])]) for(const [x,y] of polygon) assert.ok(x>=0&&x<=item.size[0]&&y>=0&&y<=item.size[1]);
-    if (!['01_mountains','02_village','03_pine_trees'].includes(name)) assert.ok(css.includes(`masks/${name}.svg`));
+    await fs.access(path.join(project,item.mask));
   }
 });
 await test('最終紙雕清理：新素材完整性、單一村落、三種樹尺寸及來源殘片遮罩', async () => {
@@ -607,18 +607,20 @@ await test('最終紙雕清理：新素材完整性、單一村落、三種樹�
     assert.equal(createHash('sha256').update(bytes).digest('hex'),item.sha256);
     assert.equal(bytes.length,item.bytes);
   }
-  assert.equal((html.match(/src="assets\/illustrations\/storybook\/village-clean.png"/g)??[]).length,1);
-  assert.equal((html.match(/src="assets\/illustrations\/storybook\/pine-tree-clean.png"/g)??[]).length,3);
-  assert.equal((html.match(/src="assets\/illustrations\/storybook\/pine-tree-berry.png"/g)??[]).length,1);
-  assert.ok(!html.includes('01_mountains.png')); assert.ok(!html.includes('02_village.png')); assert.ok(!html.includes('03_pine_trees.png'));
-  assert.ok(!css.includes('masks/01_mountains.svg')); assert.ok(!css.includes('masks/02_village.svg')); assert.ok(!css.includes('masks/03_pine_trees.svg'));
-  for (const [size,scale,count] of [['large','1',2],['medium','.72',1],['small','.48',1]]) {
-    assert.equal((html.match(new RegExp(`paper-tree tree-${size} `,'g'))??[]).length,count);
-    assert.ok(css.includes(`.tree-${size} { --tree-size: ${scale};`));
-  }
-  assert.ok(css.includes('.village img { object-fit: contain;'));
-  assert.ok(css.includes('.paper-tree img { display: block; width: 100%; height: auto;'));
-  assert.ok(css.includes('.storybook.is-opening .paper-tree { animation: paper-unfold'));
+  // 首頁與 Game 頁的紙雕改為 SVG；原始 PNG 只留作素材，頁面不再載入。
+  const gameHtml=await fs.readFile(path.join(project,'game.html'),'utf8');
+  const homeScene=await fs.readFile(path.join(project,'js/components/home-scene.js'),'utf8');
+  const gameScene=await fs.readFile(path.join(project,'js/components/game-scene.js'),'utf8');
+  for (const page of [html,gameHtml]) assert.ok(!/assets\/illustrations\/(storybook|games\/hero)\//.test(page),'Paper scenes must not load raster art');
+  assert.ok(html.includes('data-title-art')); assert.ok(html.includes('js/home-scene.js'));
+  assert.ok(!/mountain/i.test(homeScene)); assert.ok(!/mountain/i.test(gameScene));
+  const homeLayers=[...homeScene.matchAll(/popLayer\(stage, '[^']+', '([^']+)'/g)].map(match=>match[1].split(' ')[0]);
+  const gameLayers=[...gameScene.matchAll(/popLayer\(hero, '[^']+', '([^']+)'/g)].map(match=>match[1].split(' ')[0]);
+  assert.ok(homeLayers.length>=9); assert.ok(gameLayers.length>=8);
+  for (const layer of new Set(homeLayers)) assert.ok(css.includes(`.${layer}`),layer);
+  assert.ok(homeScene.includes('home-near-left')&&homeScene.includes('home-village-left'),'Left side carries its own village and near scenery');
+  assert.ok(css.includes('.storybook.is-opening .pop { animation: pop-up'));
+  assert.ok((await fs.readFile(path.join(project,'css/shared.css'),'utf8')).includes('@keyframes pop-up'));
   const masks=JSON.parse(await fs.readFile(path.join(project,'docs/STORYBOOK-MASKS.json'),'utf8'));
   const inside=(polygon,x,y)=>polygon.reduce((hit,[ax,ay],i)=>{
     const [bx,by]=polygon[(i+1)%polygon.length];
@@ -628,7 +630,6 @@ await test('最終紙雕清理：新素材完整性、單一村落、三種樹�
     const item=masks[name];
     return item.polygons.some(p=>inside(p,x,y))&&!(item.holes??[]).some(p=>inside(p,x,y));
   };
-  assert.equal((html.match(/src="assets\/illustrations\/storybook\/mountains-clean.png"/g)??[]).length,1,'Use the complete clean mountains instead of a punched-out church repair');
   assert.equal(keeps('07_small_snowbanks',40,60),false,'Remove the cut neighbouring berry fragment');
   assert.equal(keeps('07_small_snowbanks',151,30),true,'Preserve the snowbank and cream border');
 });

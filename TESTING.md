@@ -234,3 +234,9 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - 改以一次性轉圖片加合成器圖層移動後，軟體渲染下 Game 02 由 2.3 升到約 20 fps、底部由 1.7 升到約 23 fps。
 - 詳見 [GAME-HERO.md](docs/GAME-HERO.md)。真實 GPU 與實體手機仍待驗收。
+
+## 2026-10-31：SVG 紙雕場景與新 Santa 模型
+
+- `npm test`：24 組 smoke 與 18 項 node:test 通過；`npm run test:firebase` 未執行（缺 Java）。
+- 舊測試中「HTML 必須載入指定 PNG」的斷言改為檢查 SVG 場景，素材雜湊與遮罩檢查保留；新增 Santa 模型與頭部追蹤測試。
+- 動態檢查：`node scripts/check-game-hero.mjs`、`node scripts/check-santa.mjs`（需本機伺服器，不在 `npm test` 內）。
