@@ -8,6 +8,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 if (!vm.SourceTextModule) throw new Error('請使用 node --experimental-vm-modules tests/smoke.mjs');
+// 本機引用檢查前先去掉 ?v= 快取破壞參數與 #fragment；外部協定、protocol-relative 與純片段一律跳過。
+const localRef = value => {
+  const file = value.split(/[?#]/)[0];
+  return !file || /^(?:[a-z][a-z0-9+.-]*:|\/\/|%23)/i.test(file) ? null : file;
+};
 
 class Element {
   constructor() {
@@ -90,9 +95,9 @@ await test('全部模組語法、HTML 本機資源及四頁導覽', async () => 
     const html = await fs.readFile(path.join(project, page), 'utf8');
     for (const target of ['index.html', 'intro.html', 'game.html', 'wish.html']) assert.ok(html.includes(`href="${target}"`));
     assert.equal((html.match(/aria-current="page"/g) ?? []).length, 1);
-    for (const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
-      if (/^(https?:|data:)/.test(match[1])) continue;
-      await fs.access(path.resolve(project, match[1]));
+    for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
+      const file = localRef(match[1]);
+      if (file) await fs.access(path.resolve(project, file));
     }
     const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
     assert.equal(new Set(ids).size, ids.length, `${page}: duplicate IDs`);
@@ -182,7 +187,10 @@ await test('game2：原始副本雜湊、22 張圖片與正式載入入口', asy
   const script = await fs.readFile(path.join(project, 'js/game.js'), 'utf8');
   assert.ok(!script.includes('initChristmasMatchingGame')); 
   const css = await fs.readFile(path.join(project, 'css/game2-matching.css'), 'utf8');
-  for (const match of css.matchAll(/url\(['"]?([^)'"\s]+)['"]?\)/g)) await fs.access(path.resolve(project, 'css', match[1]));
+  for (const match of css.matchAll(/url\(['"]?([^)'"\s]+)['"]?\)/g)) {
+    const file = localRef(match[1]);
+    if (file) await fs.access(path.resolve(project, 'css', file));
+  }
 });
 
 async function game2Environment() {
@@ -572,8 +580,8 @@ await test('V5：遮罩對位與本機 SVG 資源、原生角色按鈕、移除�
   assert.ok(html.includes('href="intro.html">Explore the Story')); assert.ok(html.includes('href="wish.html">Make a Wish'));
   assert.ok(!css.includes('.speech-bubble')); assert.ok(css.includes('mask-mode: alpha'));
   for(const match of css.matchAll(/url\(['"]?([^)'"\s]+)['"]?\)/g)) {
-    if(/^(data:|%23|#)/.test(match[1])) continue;
-    await fs.access(path.resolve(project,'css',match[1]));
+    const file = localRef(match[1]);
+    if (file) await fs.access(path.resolve(project,'css',file));
   }
   const masks=JSON.parse(await fs.readFile(path.join(project,'docs/STORYBOOK-MASKS.json'),'utf8'));
   assert.equal(Object.keys(masks).length,6);

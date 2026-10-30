@@ -11,3 +11,5 @@ node_modules/
 *.pem
 *.key
 tools/firebase-admin/credentials/
+screenshots/
+.DS_Store

@@ -222,3 +222,15 @@ node --experimental-vm-modules tests/smoke.mjs
 - `prefers-reduced-motion` 的停用規則已加入並檢查程式；尚未在多種作業系統偏好設定中逐一實測。
 - 尚無原始雪橇遊戲、插畫、自訂字體及 GLB / GLTF，相關整合與素材裁切需待檔案提供後再檢查。
 - 尚無後端及多訪客共享功能；localStorage 不提供跨瀏覽器共享或交易保證。
+
+## 2026-10-31：Game Hero 無邊框紙雕舞台
+
+- `npm test`：23 組 smoke 與 18 項 node:test 通過；未執行 `npm run test:firebase`（缺 Java）。
+- Chromium headless（SwiftShader）375／768／1440：第一屏不見 Game 01、無水平溢出、無 console 錯誤。
+- 1440×900：進場順序、立牌與 Santa 持續變化、擺動中按鈕可點、遊戲面板置中（190–710／192–712）、花圈 Hover、減少動態皆確認。
+- 尚未實機驗收：真實 GPU 下的材質與效能、實體手機觸控。詳見 [GAME-HERO.md](docs/GAME-HERO.md)。
+
+## 2026-10-31：Game 頁 SVG 紙雕（路牌、雪橇、底部場景）
+
+- 改以一次性轉圖片加合成器圖層移動後，軟體渲染下 Game 02 由 2.3 升到約 20 fps、底部由 1.7 升到約 23 fps。
+- 詳見 [GAME-HERO.md](docs/GAME-HERO.md)。真實 GPU 與實體手機仍待驗收。

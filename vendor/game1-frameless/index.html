@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>聖誕飛行遊戲</title><link rel="stylesheet" href="style.css"></head>
+<body><main><section class="game" aria-label="聖誕飛行遊戲：方向鍵上下移動，空白鍵或 P 暫停，Enter 開始">
+<div class="hud"><div class="stat"><span data-word="distance" aria-label="距離"></span><div id="score" class="score" aria-label="0 公尺"></div></div><div class="stat"><span data-word="best" aria-label="最遠"></span><div id="best" class="score" aria-label="0 公尺"></div></div></div>
+<div class="stage"><canvas id="canvas" width="1100" height="510" aria-label="聖誕老人與馴鹿，躲避煙囪、雲朵及氣球"></canvas><div id="overlay"><div class="overlay-inner"><div id="result" class="score" hidden></div><button id="start" aria-label="開始" disabled></button></div></div><div class="laneIndicator" aria-hidden="true"><i></i><i></i><i class="active"></i><i></i><i></i></div></div>
+<div class="controls"><button id="pause" aria-label="暫停" disabled><span data-word="pause"></span></button><div class="touch"><button id="up" aria-label="向上移動"><span data-word="up"></span></button><button id="down" aria-label="向下移動"><span data-word="down"></span></button></div></div>
+<p id="announcement" class="sr-only" aria-live="polite"></p></section></main><script src="game.js"></script></body></html>
