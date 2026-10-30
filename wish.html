@@ -7,12 +7,12 @@
   <meta name="description" content="Holy Merry! 聖誕小天地：聖誕故事、節日遊戲與屬於你的願望信封。">
   <title>Wish — Holy Merry!</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/shared.css?v=20261030-8">
+  <link rel="stylesheet" href="css/shared.css?v=20261031-9">
   <link rel="stylesheet" href="css/wish.css">
   <link rel="stylesheet" href="css/wish-delivery.css">
   <link rel="stylesheet" href="css/wish-cloud.css">
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js"}}</script>
-  <script type="module" src="js/shared.js"></script>
+  <script type="module" src="js/shared.js?v=20261031-2"></script>
   <script type="module" src="js/wish.js"></script>
 </head>
 <body class="wish-page">
@@ -80,6 +80,7 @@
 <dialog id="wish-dialog" aria-labelledby="wish-dialog-title"><button class="dialog-close" data-close-dialog aria-label="關閉願望">×</button><span class="eyebrow">A little wish, safely kept.</span><h2 id="wish-dialog-title"></h2><p class="wish-date" id="wish-dialog-date"></p><p class="wish-message" id="wish-dialog-content"></p><p class="hint" id="wish-dialog-privacy"></p></dialog>
 <noscript><p class="shell">請啟用 JavaScript，以載入聖誕樹、精靈及保存願望。</p></noscript>
 </main>
+<div class="page-foreground" data-foreground="wish" aria-hidden="true"></div>
 <footer class="site-footer"><div class="shell footer-inner"><div class="footer-links"><button class="text-button" data-info="accessibility">Site Accessibility</button><span>/</span><button class="text-button" data-info="faq">FAQ</button></div><p>© 2026 Holy Merry! <span aria-hidden="true">✧</span></p><div><button class="text-button" data-info="contact">Contact us</button><span class="footer-note"> · 社群連結待補</span></div></div></footer>
 <div class="music-widget"><section class="music-panel" id="music-panel" hidden aria-labelledby="music-title"><h2 id="music-title">A little Christmas tune.</h2><p class="hint" id="music-status" role="status">音樂素材待補。你也可以選擇本機音檔試聽，不會上傳。</p><label for="music-file">選擇音檔（重新整理後需重選）</label><input id="music-file" type="file" accept="audio/*"><label for="music-volume">音量</label><input id="music-volume" type="range" min="0" max="1" step=".05" value=".3"><button class="button small" id="music-play" disabled>播放</button></section><button class="music-toggle" id="music-toggle" aria-expanded="false" aria-controls="music-panel" aria-label="開啟音樂控制">♫<span>音樂</span></button><audio id="site-audio" loop preload="none"></audio></div>
 <dialog id="info-dialog" aria-labelledby="info-title"><button class="dialog-close" data-close-dialog aria-label="關閉說明">×</button><h2 id="info-title"></h2><p id="info-content"></p></dialog>

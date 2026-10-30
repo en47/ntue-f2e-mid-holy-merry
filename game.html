@@ -7,13 +7,13 @@
   <meta name="description" content="Holy Merry! 聖誕小天地：聖誕故事、節日遊戲與屬於你的願望信封。">
   <title>Game — Holy Merry!</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/shared.css?v=20261030-8">
-  <link rel="stylesheet" href="css/game.css?v=20261031-7">
+  <link rel="stylesheet" href="css/shared.css?v=20261031-9">
+  <link rel="stylesheet" href="css/game.css?v=20261031-8">
   <link rel="stylesheet" href="css/game-hero.css?v=20261031-5">
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js"}}</script>
   <script type="module" src="js/game-hero.js?v=20261031-10"></script>
-  <script type="module" src="js/shared.js"></script>
-  <script type="module" src="js/game.js?v=20261031-6"></script>
+  <script type="module" src="js/shared.js?v=20261031-2"></script>
+  <script type="module" src="js/game.js?v=20261031-7"></script>
 </head>
 <body class="games-body">
 <a class="skip-link" href="#main">跳至主要內容</a>
@@ -76,10 +76,10 @@
     </div>
       <details class="matching-fallback"><summary>無法載入遊戲？</summary><a href="games/christmas-matching.html" target="_blank" rel="noopener noreferrer">另開聖誕配對挑戰 ↗</a></details>
   </div>
-<div class="matching-foreground" data-reveal="gifts" aria-hidden="true"></div>
 </section>
 <noscript><p>請啟用 JavaScript，以使用倒數、互動地圖、遊戲與願望儲存功能。</p></noscript>
 </main>
+<div class="page-foreground" data-foreground="game" aria-hidden="true"></div>
 <footer class="site-footer"><div class="shell footer-inner"><div class="footer-links"><button class="text-button" data-info="accessibility">Site Accessibility</button><span>/</span><button class="text-button" data-info="faq">FAQ</button></div><p>© 2026 Holy Merry! <span aria-hidden="true">✧</span></p><div><button class="text-button" data-info="contact">Contact us</button><span class="footer-note"> · 社群連結待補</span></div></div></footer>
 <div class="music-widget"><section class="music-panel" id="music-panel" hidden aria-labelledby="music-title"><h2 id="music-title">A little Christmas tune.</h2><p class="hint" id="music-status" role="status">音樂素材待補。你也可以選擇本機音檔試聽，不會上傳。</p><label for="music-file">選擇音檔（重新整理後需重選）</label><input id="music-file" type="file" accept="audio/*"><label for="music-volume">音量</label><input id="music-volume" type="range" min="0" max="1" step=".05" value=".3"><button class="button small" id="music-play" disabled>播放</button></section><button class="music-toggle" id="music-toggle" aria-expanded="false" aria-controls="music-panel" aria-label="開啟音樂控制">♫<span>音樂</span></button><audio id="site-audio" loop preload="none"></audio></div>
 <dialog id="info-dialog" aria-labelledby="info-title"><button class="dialog-close" data-close-dialog aria-label="關閉說明">×</button><h2 id="info-title"></h2><p id="info-content"></p></dialog>

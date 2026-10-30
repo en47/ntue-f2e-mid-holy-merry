@@ -10,7 +10,7 @@ function layout(){
 }
 function measure(){
   const doc=frame.contentDocument;if(!doc?.querySelector('#matching-frame'))return;
-  const root=doc.documentElement,fly=doc.querySelector('#flying-game').getBoundingClientRect(),game=doc.querySelector('#matching-frame').getBoundingClientRect(),landscape=doc.querySelector('.matching-foreground').getBoundingClientRect(),footer=doc.querySelector('.site-footer').getBoundingClientRect(),section=doc.querySelector('#matching-game').getBoundingClientRect();
+  const root=doc.documentElement,fly=doc.querySelector('#flying-game').getBoundingClientRect(),game=doc.querySelector('#matching-frame').getBoundingClientRect(),landscape=doc.querySelector('.page-foreground').getBoundingClientRect(),footer=doc.querySelector('.site-footer').getBoundingClientRect(),section=doc.querySelector('#matching-game').getBoundingClientRect();
   const snap=frame.contentWindow.getComputedStyle(root).scrollSnapType;
   const gifts=[...doc.querySelectorAll('.foreground-scene')].filter(el=>frame.contentWindow.getComputedStyle(el).display!=='none').map(el=>el.getBoundingClientRect());
   const clear=gifts.every(g=>g.right<=game.left||g.left>=game.right||g.top>=game.bottom||g.bottom<=game.top);
