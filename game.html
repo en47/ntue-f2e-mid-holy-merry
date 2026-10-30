@@ -8,9 +8,12 @@
   <title>Game — Holy Merry!</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/shared.css?v=20261030-8">
-  <link rel="stylesheet" href="css/game.css?v=20261030-11">
+  <link rel="stylesheet" href="css/game.css?v=20261031-7">
+  <link rel="stylesheet" href="css/game-hero.css?v=20261031-5">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js"}}</script>
+  <script type="module" src="js/game-hero.js?v=20261031-10"></script>
   <script type="module" src="js/shared.js"></script>
-  <script type="module" src="js/game.js?v=20261030-7"></script>
+  <script type="module" src="js/game.js?v=20261031-6"></script>
 </head>
 <body class="games-body">
 <a class="skip-link" href="#main">跳至主要內容</a>
@@ -20,45 +23,60 @@
   <nav class="site-nav" id="site-nav" aria-label="主要導覽"><a href="index.html">Home</a><a href="intro.html">Intro</a><a href="game.html" aria-current="page">Game</a><a href="wish.html">Wish</a></nav>
 </div></header>
 <main class="games-page" id="main">
-<section class="shell game-section flying-section" aria-labelledby="sleigh-title">
-  <header class="games-heading"><div><span class="eyebrow" lang="en">03 / CHRISTMAS PLAYTIME</span><h1 lang="en">Christmas Playground</h1></div><p>兩場小小的聖誕冒險，等你來挑戰！</p></header>
-  <nav class="game-tags" aria-label="遊戲快速導覽">
-    <a class="game-tag" href="#sleigh-game" lang="en"><span class="game-tag-paper"><span class="game-tag-art gift-sprite sprite-cream" aria-hidden="true"><img src="assets/illustrations/games/手繪蠟筆風聖誕禮盒貼紙集-removebg-preview.png" alt="" width="612" height="408"></span><span><small>GAME 01</small><span>Santa Flying</span></span></span></a>
-    <a class="game-tag" href="#matching-game" lang="en"><span class="game-tag-paper"><span class="game-tag-art gift-sprite sprite-blue" aria-hidden="true"><img src="assets/illustrations/games/手繪蠟筆風聖誕禮盒貼紙集-removebg-preview.png" alt="" width="612" height="408"></span><span><small>GAME 02</small><span>Christmas Matching</span></span></span></a>
-  </nav>
-  <div class="flying-view" id="sleigh-game">
-  <header class="game-section-heading"><span class="eyebrow" lang="en">GAME 01</span><h2 id="sleigh-title" lang="en">Santa Flying Adventure</h2><p class="game-description">搭上聖誕雪橇，用 ↑ ↓ 閃過障礙，挑戰最遠距離！</p></header>
-  <div class="game-frame fly-frame-shell" data-reveal="up">
-    <iframe id="flying-game" class="flying-game-frame" src="vendor/game1/index.html" title="Santa Flying Dodge Game — 聖誕飛行躲避遊戲" aria-describedby="flying-help" tabindex="0" allow="fullscreen" allowfullscreen></iframe>
+<section class="games-hero" aria-labelledby="games-hero-title">
+  <img class="games-hero-clouds hero-paper" src="assets/illustrations/storybook/06_clouds.png" alt="" width="373" height="246" aria-hidden="true">
+  <img class="games-hero-clouds games-hero-clouds-left hero-paper" src="assets/illustrations/storybook/06_clouds.png" alt="" width="373" height="246" aria-hidden="true">
+  <div class="games-hero-mountains hero-paper" aria-hidden="true"><img src="assets/illustrations/storybook/mountains-clean.png" alt="" width="2134" height="737"></div>
+  <img class="games-hero-scenery hero-paper" src="assets/illustrations/games/hero/winter-scenery.png" alt="" width="2172" height="724" fetchpriority="high" aria-hidden="true">
+  <div class="games-hero-santa" role="img" aria-label="3D 聖誕老人" aria-busy="true" data-state="loading"></div>
+  <p class="games-hero-model-status" role="status">正在載入聖誕老人…</p>
+  <div class="games-hero-hill hero-paper" aria-hidden="true"><img src="assets/illustrations/games/hero/snowbanks.png" alt="" width="2172" height="724"></div>
+  <div class="games-hero-title-sign hero-paper">
+    <div class="sign-layer" data-sign="title-base"></div>
+    <div class="sign-board sign-board-title">
+      <div class="sign-layer" data-sign="title-board"></div>
+      <h1 id="games-hero-title" lang="en">Christmas<br>Games</h1>
+    </div>
   </div>
-  <div class="flying-caption"><p id="flying-help">點一下遊戲內的開始鈕，再用 ↑ ↓ 移動 · 空白鍵 / P 暫停；手機可使用遊戲內的方向鈕。</p><a class="game-fallback" href="vendor/game1/index.html" target="_blank" rel="noopener noreferrer">無法載入？另開原作 ↗</a></div>
+  <nav class="games-hero-navigation hero-paper" aria-label="遊戲快速導覽">
+    <div class="sign-layer" data-sign="nav-base"></div>
+    <div class="sign-board sign-board-top">
+      <div class="sign-layer" data-sign="nav-top"></div>
+      <button type="button" class="games-hero-link" data-game-target="sleigh-game" lang="en">Santa Flying</button>
+    </div>
+    <div class="sign-board sign-board-bottom">
+      <div class="sign-layer" data-sign="nav-bottom"></div>
+      <button type="button" class="games-hero-link" data-game-target="matching-game" lang="en">Christmas Matching</button>
+    </div>
+  </nav>
+  <div class="games-hero-front hero-paper" aria-hidden="true"><img src="assets/illustrations/games/hero/snowbanks.png" alt="" width="2172" height="724"></div>
+  <svg class="games-hero-edge" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 26C90 12 170 34 262 24S430 6 540 22s190 18 300 4 176-20 292-2 208 20 308 2V48H0Z"/></svg>
+</section>
+<section class="shell game-section flying-section" aria-labelledby="sleigh-title">
+  <div class="flying-view">
+  <header class="game-section-heading"><div class="game-illustration-slot" data-illustration-slot="santa-flying" aria-hidden="true"></div><span class="eyebrow" lang="en">GAME 01</span><h2 id="sleigh-title" lang="en">Santa Flying Adventure</h2><p class="game-description">搭上聖誕雪橇，用 ↑ ↓ 閃過障礙，挑戰最遠距離！</p></header>
+  <div class="game-frame fly-frame-shell" id="sleigh-game" data-reveal="up">
+    <iframe id="flying-game" class="flying-game-frame" src="vendor/game1-frameless/index.html" title="Santa Flying Dodge Game — 聖誕飛行躲避遊戲" aria-describedby="flying-help" tabindex="0" allow="fullscreen" allowfullscreen></iframe>
+  </div>
+  <div class="flying-caption"><p id="flying-help">點一下遊戲內的開始鈕，再用 ↑ ↓ 移動 · 空白鍵 / P 暫停；手機可使用遊戲內的方向鈕。</p><a class="game-fallback" href="vendor/game1-frameless/index.html" target="_blank" rel="noopener noreferrer">無法載入？另開原作 ↗</a></div>
   </div>
 </section>
-<section class="game-section matching-section" id="matching-game" aria-labelledby="matching-title" data-animation="game-celebration">
+<section class="game-section matching-section" aria-labelledby="matching-title" data-animation="game-celebration">
   <div class="shell matching-layout">
     <header class="game-section-heading matching-copy" data-reveal="left">
+      <div class="game-illustration-slot" data-illustration-slot="christmas-matching" aria-hidden="true"></div>
       <span class="eyebrow" lang="en">GAME 02</span>
       <h2 id="matching-title" lang="en">Christmas Matching</h2>
       <p class="game-description">翻開卡片，找出成對的聖誕禮物，完成五個關卡的挑戰！</p>
     </header>
     <div class="matching-play-area" data-reveal="right">
-      <div class="game-frame">
+      <div class="game-frame" id="matching-game">
       <iframe id="matching-frame" class="matching-game-frame" src="games/christmas-matching.html" title="Christmas Matching — 聖誕配對挑戰" tabindex="0" allow="fullscreen" allowfullscreen></iframe>
       </div>
-      <details class="matching-fallback"><summary>無法載入遊戲？</summary><a href="games/christmas-matching.html" target="_blank" rel="noopener noreferrer">另開聖誕配對挑戰 ↗</a></details>
     </div>
+      <details class="matching-fallback"><summary>無法載入遊戲？</summary><a href="games/christmas-matching.html" target="_blank" rel="noopener noreferrer">另開聖誕配對挑戰 ↗</a></details>
   </div>
-<div class="matching-foreground" aria-hidden="true">
-  <img class="landscape-snow snow-back" src="assets/illustrations/wish/snow-ground.svg" alt="" loading="lazy" decoding="async">
-  <img class="landscape-snow snow-middle" src="assets/illustrations/wish/snow-ground.svg" alt="" loading="lazy" decoding="async">
-  <div class="landscape-art" data-reveal="gifts">
-    <div class="gift-piece gift-left"><img class="gift-illustration" src="assets/illustrations/games/水彩聖誕禮物堆與小熊-removebg-preview.png" alt="" width="612" height="408" loading="lazy" decoding="async"></div>
-    <div class="gift-piece gift-right-back"><span class="gift-illustration gift-float gift-sprite sprite-blue"><img src="assets/illustrations/games/手繪蠟筆風聖誕禮盒貼紙集-removebg-preview.png" alt="" width="612" height="408" loading="lazy" decoding="async"></span></div>
-    <div class="gift-piece gift-right-front"><span class="gift-illustration gift-float gift-sprite sprite-cream"><img src="assets/illustrations/games/手繪蠟筆風聖誕禮盒貼紙集-removebg-preview.png" alt="" width="612" height="408" loading="lazy" decoding="async"></span></div>
-  </div>
-  <div class="snow-foreground"></div>
-</div>
-
+<div class="matching-foreground" data-reveal="gifts" aria-hidden="true"></div>
 </section>
 <noscript><p>請啟用 JavaScript，以使用倒數、互動地圖、遊戲與願望儲存功能。</p></noscript>
 </main>

@@ -1,3 +1,8 @@
+import { mountForeground } from './components/game-foreground.js';
+import { mountSleigh } from './components/game-sleigh.js';
+import { mountWreath } from './components/game-wreath.js';
+import { pauseOffscreen } from './components/paper-art.js';
+
 const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // Progressive enhancement: content stays visible if JS/IntersectionObserver fails.
@@ -38,8 +43,8 @@ function fitFlyingView() {
   const frameStyle = getComputedStyle(flyingView.querySelector('.fly-frame-shell'));
   const edges = parseFloat(frameStyle.paddingTop) + parseFloat(frameStyle.paddingBottom)
     + parseFloat(frameStyle.borderTopWidth) + parseFloat(frameStyle.borderBottomWidth);
-  // Original iframe: 174px HUD/controls/border plus (width - 2) * 510/1100.
-  const reserve = sticky + outerHeight(flyingHeading) + outerHeight(flyingCaption) + edges + 174 + 32;
+  // Frameless iframe: 142px HUD/controls plus width * 510/1100.
+  const reserve = sticky + outerHeight(flyingHeading) + outerHeight(flyingCaption) + edges + 142 + 32;
   flyingView.style.setProperty('--fly-sticky-offset', `${sticky}px`);
   flyingView.style.setProperty('--fly-reserved-height', `${Math.ceil(reserve)}px`);
 }
@@ -52,6 +57,25 @@ observeFlyingView();
 window.addEventListener('resize', fitFlyingView);
 window.addEventListener('pagehide', () => flyingSizeObserver.disconnect());
 window.addEventListener('pageshow', event => { if (event.persisted) observeFlyingView(); });
+// Measure only the frameless game's outer content; its CSS and gameplay stay isolated.
+const flyingFrame = document.querySelector('#flying-game');
+let flyingContentObserver;
+function fitFlyingFrame() {
+  flyingContentObserver?.disconnect();
+  const game = flyingFrame.contentDocument?.querySelector('.game');
+  if (!game) return;
+  function resize() {
+    const height = Math.ceil(game.getBoundingClientRect().height);
+    if (height > 0) flyingFrame.style.height = `${height}px`;
+  }
+  flyingContentObserver = new ResizeObserver(resize);
+  flyingContentObserver.observe(game);
+  resize();
+}
+flyingFrame.addEventListener('load', fitFlyingFrame);
+fitFlyingFrame();
+window.addEventListener('pagehide', () => flyingContentObserver?.disconnect());
+window.addEventListener('pageshow', event => { if (event.persisted) fitFlyingFrame(); });
 const matchingFrame = document.querySelector('#matching-frame');
 let sizeObserver;
 function fitMatchingFrame() {
@@ -70,3 +94,23 @@ matchingFrame.addEventListener('load', fitMatchingFrame);
 fitMatchingFrame();
 window.addEventListener('pagehide', () => sizeObserver?.disconnect());
 window.addEventListener('pageshow', event => { if (event.persisted) fitMatchingFrame(); });
+
+// Outer layout only: keep both paper panels tall enough for either game's
+// natural iframe height. Mobile CSS releases the shared minimum height.
+const gameFrames = [...page.querySelectorAll('.game-frame iframe')];
+const panelSizeObserver = new ResizeObserver(() => {
+  const height = Math.ceil(Math.max(...gameFrames.map(frame => frame.getBoundingClientRect().height)));
+  page.style.setProperty('--game-panel-content-height', `${height}px`);
+});
+function observeGamePanels() { gameFrames.forEach(frame => panelSizeObserver.observe(frame)); }
+observeGamePanels();
+window.addEventListener('pagehide', () => panelSizeObserver.disconnect());
+window.addEventListener('pageshow', event => { if (event.persisted) observeGamePanels(); });
+
+const flyingSlot = document.querySelector('[data-illustration-slot="santa-flying"]');
+const matchingSlot = document.querySelector('[data-illustration-slot="christmas-matching"]');
+const foreground = document.querySelector('.matching-foreground');
+mountSleigh(flyingSlot);
+mountWreath(matchingSlot);
+mountForeground(foreground);
+pauseOffscreen([flyingSlot, matchingSlot, foreground]);
