@@ -1,4 +1,5 @@
 import { mountHeroSigns } from './components/game-hero-signs.js';
+import { createHeadTracker } from './components/santa-head.js';
 
 // Hero navigation is independent of model loading; manual scrolling stays native.
 const hero = document.querySelector('.games-hero');
@@ -62,9 +63,10 @@ async function mountSanta() {
   slot.dataset.state = 'loading'; slot.setAttribute('aria-busy', 'true'); status.hidden = false;
   status.textContent = '正在載入聖誕老人…';
   try {
-    const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+    const [THREE, { GLTFLoader }, { MeshoptDecoder }, { RoomEnvironment }] = await Promise.all([
       import('three'),
       import('../vendor/three/examples/jsm/loaders/GLTFLoader.js'),
+      import('../vendor/three/examples/jsm/libs/meshopt_decoder.module.js'),
       import('../vendor/three/examples/jsm/environments/RoomEnvironment.js'),
     ]);
     if (run !== generation) return;
@@ -77,7 +79,7 @@ async function mountSanta() {
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 20);
     const room = new RoomEnvironment(), pmrem = new THREE.PMREMGenerator(renderer);
-    let environment, model, resizeObserver, visibleObserver, frame, lastDraw = 0, inView = true;
+    let environment, model, tracker, resizeObserver, visibleObserver, frame, lastDraw = 0, lastTick = 0, inView = true;
     const restore = () => render();
     const stop = () => { cancelAnimationFrame(frame); frame = undefined; };
     const start = () => { if (frame === undefined && inView && !document.hidden && !motion.matches) frame = requestAnimationFrame(tick); };
@@ -85,6 +87,7 @@ async function mountSanta() {
     const onMotion = () => { if (motion.matches) { stop(); settle(0); renderer.render(scene, camera); } else start(); };
     cleanup = () => {
       stop();
+      tracker?.destroy();
       document.removeEventListener('visibilitychange', onVisibility);
       motion.removeEventListener('change', onMotion);
       visibleObserver?.disconnect();
@@ -102,7 +105,7 @@ async function mountSanta() {
     light.position.set(-3, 6, 4); scene.add(light);
     const fill = new THREE.DirectionalLight(0xe2f0ff, .8);
     fill.position.set(4, 3, -2); scene.add(fill);
-    const gltf = await new GLTFLoader().loadAsync(new URL('../assets/models/santa-dance.glb', import.meta.url).href);
+    const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(new URL('../assets/models/santa-new.glb', import.meta.url).href);
     if (run !== generation) { disposeModel(gltf.scene); return; }
     model = gltf.scene;
     const bounds = new THREE.Box3().setFromObject(model);
@@ -152,9 +155,11 @@ async function mountSanta() {
     function tick(now) {
       frame = requestAnimationFrame(tick);
       if (now - lastDraw < 33) return;
-      lastDraw = now; settle(now / 1000); renderer.render(scene, camera);
+      const delta = Math.min((now - lastTick) / 1000, .1);
+      lastDraw = lastTick = now; settle(now / 1000); tracker.update(delta); renderer.render(scene, camera);
     }
     settle(0);
+    tracker = createHeadTracker(model, slot);
     resizeObserver = new ResizeObserver(render); resizeObserver.observe(slot);
     renderer.domElement.addEventListener('webglcontextrestored', restore);
     render();
@@ -168,7 +173,7 @@ async function mountSanta() {
     if (run !== generation) return;
     cleanup(); cleanup = () => {};
     slot.dataset.state = 'error'; slot.setAttribute('aria-busy', 'false');
-    status.textContent = '聖誕老人無法載入：assets/models/santa-dance.glb。請確認 WebGL 2 與本機伺服器。';
+    status.textContent = '聖誕老人無法載入：assets/models/santa-new.glb。請確認 WebGL 2 與本機伺服器。';
     console.error('Games hero Santa failed to load', error);
   }
 }

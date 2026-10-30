@@ -1,13 +1,15 @@
 import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
 import { fitViewHeight, gestureIntent, returnAngle, wrapAngle } from './character-motion.js';
 import { sliceSantaDance, createReindeerDance, softenSantaLoop } from './character-animation.js';
+import { createHeadTracker } from './santa-head.js';
 
 const instances = new WeakMap();
 const PITCH = .075;
 const MODELS = [
-  { id: 'santa', label: '聖誕老人', src: new URL('../../assets/models/santa-dance.glb', import.meta.url).href, height: 2.15, speed: 1 },
+  { id: 'santa', label: '聖誕老人', src: new URL('../../assets/models/santa-new.glb', import.meta.url).href, height: 2.15, speed: 1 },
   { id: 'reindeer', label: '麋鹿', src: new URL('../../assets/models/reindeer.glb', import.meta.url).href, height: 2.05, speed: 1 },
 ];
 
@@ -53,7 +55,7 @@ export function mountCharacters(root) {
   const cleanups = [];
   let disposed = false, frameId = null, lastTime = 0, layoutDirty = true;
   let width = 0, height = 0, contextLost = false;
-  const loader = new GLTFLoader();
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   // 兩個角色共用唯一的透明 Renderer；每個角色使用獨立 scene / mixer。
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
   renderer.setClearColor(0x000000, 0);
@@ -177,7 +179,8 @@ export function mountCharacters(root) {
         }
         else { view.elapsed += delta; view.turn.rotation.z = Math.sin(view.elapsed * .7) * .008; }
         active = true;
-      }
+      } else if (view.head) view.mixer.update(0);
+      if (view.head?.update(delta)) active = true;
       if (view.returning && !view.pointer && time >= view.returnAt) {
         view.yaw = returnAngle(view.yaw, delta, motion.matches);
         if (view.yaw === 0) view.returning = false;
@@ -234,6 +237,7 @@ export function mountCharacters(root) {
       view.turn.add(normalized); view.attached = true;
       view.radius = Math.hypot(size.x / 2, size.z / 2) * scale;
       view.model.traverse(node => { if (node.isMesh) { node.castShadow = true; if (node.isSkinnedMesh) node.frustumCulled = false; } });
+      if (view.id === 'santa') view.head = createHeadTracker(view.model, view.slot, { onMove: requestFrame });
       view.ready = true;
       view.slot.dataset.state = 'ready'; view.slot.setAttribute('aria-busy', 'false');
       view.slot.dataset.clip = view.clip?.name ?? 'whole-model-sway';
@@ -352,6 +356,7 @@ export function mountCharacters(root) {
       cleanups.forEach(cleanup => cleanup());
       resizeObserver?.disconnect(); visibilityObserver?.disconnect();
       for (const view of views) {
+        view.head?.destroy();
         view.loop?.destroy();
         view.mixer?.stopAllAction();
         if (view.model) view.mixer?.uncacheRoot(view.model);

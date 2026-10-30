@@ -275,7 +275,7 @@ await test('game2：逾時重玩當關、Restart 回第一關與延遲回呼清�
   restored.destroy();
 });
 await test('兩份 GLB、七張原畫完整性、內嵌材質與 Three.js 依賴', async () => {
-  for (const [name, clip] of [['santa-dance', 'dance_02'], ['reindeer', 'preset:quadruped:walk']]) {
+  for (const [name, clip] of [['santa-new', 'dance_02'], ['santa-dance', 'dance_02'], ['reindeer', 'preset:quadruped:walk']]) {
     const metadata = JSON.parse(await fs.readFile(path.join(project, `assets/models/${name}.json`), 'utf8'));
     const glb = await fs.readFile(path.join(project, `assets/models/${name}.glb`));
     assert.equal(createHash('sha256').update(glb).digest('hex'), metadata.sha256);
@@ -292,7 +292,7 @@ await test('兩份 GLB、七張原畫完整性、內嵌材質與 Three.js 依賴
   assert.ok(!html.includes('<model-viewer')); assert.ok(!html.includes('CHARACTER PLACEHOLDER'));
   const source = await fs.readFile(path.join(project, 'js/components/characters-scene.js'), 'utf8');
   assert.equal((source.match(/new THREE.WebGLRenderer/g) ?? []).length, 1);
-  assert.ok(source.includes('assets/models/santa-dance.glb')); assert.ok(!source.includes('assets/models/santa-claus.glb'));
+  assert.ok(source.includes('assets/models/santa-new.glb')); assert.ok(!source.includes('assets/models/santa-claus.glb')); assert.ok(!source.includes('assets/models/santa-dance.glb'));
   const art = JSON.parse(await fs.readFile(path.join(project,'docs/STORYBOOK-ASSETS.json'),'utf8'));
   assert.equal(Object.keys(art.artwork).length,7);
   for (const asset of Object.values(art.artwork)) assert.equal(createHash('sha256').update(await fs.readFile(path.join(project,asset.path))).digest('hex'),asset.sha256);
@@ -381,6 +381,7 @@ await test('雙角色目前控制器：單 Renderer、拖曳／捲動分流、�
   class PMREM { fromScene() { return {texture:new THREE.Texture(), dispose() {}}; } dispose() {} }
   let santaLoads = 0;
   class Loader {
+    setMeshoptDecoder() { return this; }
     async loadAsync(src) {
       const scene = new THREE.Group();
       const geometry = new THREE.BoxGeometry(.5,1,.5), material = new THREE.MeshStandardMaterial();
@@ -394,6 +395,7 @@ await test('雙角色目前控制器：單 Renderer、拖曳／捲動分流、�
   const env = environment({
     [path.join(project, 'vendor/three/build/three.module.js')]: {...THREE, WebGLRenderer:Renderer, PMREMGenerator:PMREM},
     [path.join(project, 'vendor/three/examples/jsm/loaders/GLTFLoader.js')]: {GLTFLoader:Loader},
+    [path.join(project, 'vendor/three/examples/jsm/libs/meshopt_decoder.module.js')]: {MeshoptDecoder:{}},
   });
   let now = 0; env.sandbox.performance.now = () => now;
   env.sandbox.setTimeout = callback => { queueMicrotask(callback); return 0; };
@@ -754,4 +756,41 @@ await test('Wish 投遞：儲存失敗、減少動態、尺寸改變及離頁取
   assert.equal(writes,0);assert.equal(f.form.inert,false);assert.equal(f.fields[1].value,'平安的聖誕節');assert.equal(f.receipt.hidden,true);assert.ok(f.observers[0].disconnected);
   const second=f.controller.run(()=>{writes++;});await f.flush();f.controller.destroy();await assert.rejects(second,e=>e.name==='AbortError');assert.equal(writes,0);
 });
+await test('Santa 新模型與頭部追蹤：頭頸骨存在、角度上限、平滑、觸控與減少動態不追蹤', async () => {
+  const glb = await fs.readFile(path.join(project, 'assets/models/santa-new.glb'));
+  const data = JSON.parse(glb.toString('utf8', 20, 20 + glb.readUInt32LE(12)).trim());
+  const joints = data.skins[0].joints.map(index => data.nodes[index].name);
+  assert.ok(joints.includes('mixamorig:Head') && joints.includes('mixamorig:Neck'));
+  assert.ok(glb.length < 2_000_000, 'compressed Santa stays under 2MB');
+  const env = environment();
+  const THREE = await env.evaluate('vendor/three/build/three.module.js');
+  const { createHeadTracker } = await env.evaluate('js/components/santa-head.js');
+  function rig(pointerFine = true, reduced = false) {
+    const listeners = {};
+    Object.assign(env.window, { innerWidth: 1200, innerHeight: 800,
+      addEventListener: (type, callback) => { listeners[type] = callback; }, removeEventListener: type => { delete listeners[type]; },
+      matchMedia: query => ({ matches: query.includes('reduced') ? reduced : pointerFine, addEventListener() {}, removeEventListener() {} }) });
+    const model = new THREE.Group(), neck = new THREE.Bone(), head = new THREE.Bone();
+    neck.name = 'mixamorigNeck'; head.name = 'mixamorigHead'; neck.add(head); model.add(neck);
+    const anchor = { getBoundingClientRect: () => ({ left: 500, top: 100, width: 200, height: 300 }) };
+    const tracker = createHeadTracker(model, anchor);
+    const frame = delta => { neck.quaternion.identity(); head.quaternion.identity(); model.updateMatrixWorld(true); return tracker.update(delta); };
+    return { listeners, neck, head, tracker, frame };
+  }
+  const mouse = rig();
+  mouse.listeners.pointermove({ pointerType: 'mouse', clientX: -5000, clientY: 5000 });
+  assert.equal(mouse.frame(1 / 60), true); const early = mouse.head.quaternion.angleTo(new THREE.Quaternion());
+  for (let i = 0; i < 240; i++) mouse.frame(1 / 60);
+  const settled = mouse.head.quaternion.angleTo(new THREE.Quaternion()) + mouse.neck.quaternion.angleTo(new THREE.Quaternion());
+  assert.ok(early < settled / 4, 'head eases toward the target'); assert.ok(settled > .3 && settled < .5, `total turn ${settled}`);
+  assert.equal(mouse.frame(1 / 60), false); mouse.tracker.destroy(); assert.equal(mouse.listeners.pointermove, undefined);
+  for (const [fine, reduced, pointerType] of [[true, false, 'touch'], [false, false, 'mouse'], [true, true, 'mouse']]) {
+    const still = rig(fine, reduced);
+    still.listeners.pointermove({ pointerType, clientX: -5000, clientY: 5000 });
+    for (let i = 0; i < 60; i++) still.frame(1 / 60);
+    assert.equal(still.head.quaternion.angleTo(new THREE.Quaternion()), 0);
+    still.tracker.destroy();
+  }
+});
+
 console.log(`\n${results.length} test groups passed.`);
