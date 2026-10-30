@@ -1,90 +1,149 @@
 <!doctype html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#dfeef3">
   <meta name="description" content="Holy Merry! 聖誕小天地：聖誕故事、節日遊戲與屬於你的願望信封。">
   <title>Home — Holy Merry!</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/shared.css">
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/shared.css?v=20261030-8">
   <link rel="stylesheet" href="css/home.css">
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js"}}</script>
   <script type="module" src="js/shared.js"></script>
   <script type="module" src="js/home.js"></script>
   <script type="module" src="js/santa-model.js"></script>
 </head>
+
 <body class="home-page">
-<a class="skip-link" href="#main">跳至主要內容</a>
-<header class="site-header"><div class="shell header-inner">
-  <a class="brand" href="index.html" aria-label="Holy Merry! 首頁"><span class="brand-mark" aria-hidden="true">h</span><span><span class="brand-name">Holy Merry!</span><span class="brand-small">A HANDMADE CHRISTMAS</span></span></a>
-  <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="site-nav">選單 ☰</button>
-  <nav class="site-nav" id="site-nav" aria-label="主要導覽"><a href="index.html" aria-current="page">Home</a><a href="intro.html">Intro</a><a href="game.html">Game</a><a href="wish.html">Wish</a></nav>
-</div></header>
-<main id="main" class="storybook" aria-label="Holy Merry! 立體聖誕繪本">
-  <div class="paper-texture" aria-hidden="true"></div>
-  <div class="countdown" aria-label="聖誕節倒數">
-    <span id="countdown-label">距離聖誕節，還有</span>
-    <div class="countdown-units" role="timer" aria-live="off">
-      <span><strong data-unit="days">--</strong><small>天</small></span>
-      <span><strong data-unit="hours">--</strong><small>時</small></span>
-      <span><strong data-unit="minutes">--</strong><small>分</small></span>
-      <span><strong data-unit="seconds">--</strong><small>秒</small></span>
+  <a class="skip-link" href="#main">跳至主要內容</a>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="index.html" aria-label="Holy Merry! 首頁"><span class="brand-mark"
+          aria-hidden="true">h</span><span><span class="brand-name">Holy Merry!</span><span class="brand-small">A
+            HANDMADE CHRISTMAS</span></span></a>
+      <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="site-nav">選單 ☰</button>
+      <nav class="site-nav" id="site-nav" aria-label="主要導覽"><a href="index.html" aria-current="page">Home</a><a
+          href="intro.html">Intro</a><a href="game.html">Game</a><a href="wish.html">Wish</a></nav>
     </div>
-  </div>
-  <h1 class="storybook-title"><span class="sr-only">Merry Christmas</span><span class="title-motion"><img src="assets/illustrations/storybook/05_merry_christmas.png" alt="" width="503" height="255" fetchpriority="high"></span></h1>
-  <div class="story-stage" id="story-stage">
-    <img class="hand-cloud" src="assets/illustrations/storybook/06_clouds.png" alt="" width="373" height="246" aria-hidden="true">
-    <div class="paper-layer mountains" aria-hidden="true"><img src="assets/illustrations/storybook/mountains-clean.png" alt="" width="2134" height="737"></div>
-    <div class="paper-layer side-scenery side-scenery-left" aria-hidden="true"><img src="assets/illustrations/storybook/04_foreground_snow.png" alt="" width="965" height="190"></div>
-    <div class="paper-layer side-scenery side-scenery-right" aria-hidden="true"><img src="assets/illustrations/storybook/04_foreground_snow.png" alt="" width="965" height="190"></div>
-    <div class="paper-layer village" aria-hidden="true"><img src="assets/illustrations/storybook/village-clean.png" alt="" width="1577" height="997"></div>
-    <section class="characters" id="characters" aria-label="和聖誕夥伴聊聊天">
-      <article id="santa-card" class="character character-santa" aria-label="聖誕老人">
-        <button type="button" class="character-stage" data-model-slot="santa" data-state="loading" data-animation="character-santa" aria-label="點擊聖誕老人，閱讀聖誕小信" aria-describedby="character-help" aria-controls="santa-letter" aria-expanded="false" aria-busy="true">
-          <span class="model-fallback"><span>聖誕老人正在趕來…</span><progress max="100" value="0" role="progressbar" aria-label="聖誕老人載入進度"></progress></span>
-          <span class="stage-key-hint">按 Enter 閱讀小信</span>
-        </button>
-        <div class="model-recovery">
-          <p class="model-status" id="santa-model-status" role="status">準備載入聖誕老人。</p>
-          <button class="asset-retry" data-model-action="retry" hidden>重試載入</button>
-        </div>
-      </article>
-      <article id="reindeer-card" class="character character-reindeer" aria-label="麋鹿">
-        <button type="button" class="character-stage" data-model-slot="reindeer" data-state="loading" data-animation="character-reindeer" aria-label="點擊麋鹿，閱讀聖誕小信" aria-describedby="character-help" aria-controls="reindeer-letter" aria-expanded="false" aria-busy="true">
-          <span class="model-fallback"><span>麋鹿正在趕來…</span><progress max="100" value="0" role="progressbar" aria-label="麋鹿載入進度"></progress></span>
-          <span class="stage-key-hint">按 Enter 閱讀小信</span>
-        </button>
-        <div class="model-recovery">
-          <p class="model-status" id="reindeer-model-status" role="status">準備載入麋鹿。</p>
-          <button class="asset-retry" data-model-action="retry" hidden>重試載入</button>
-        </div>
-      </article>
-    </section>
-    <div class="paper-layer foreground" aria-hidden="true"><img src="assets/illustrations/storybook/04_foreground_snow.png" alt="" width="965" height="190"></div>
-    <div class="scenery-trees" aria-hidden="true">
-      <div class="tree-grove tree-grove-left">
-        <div class="paper-tree tree-small tree-far-left"><img src="assets/illustrations/storybook/pine-tree-clean.png" alt="" width="1261" height="1247"></div>
-        <div class="paper-tree tree-medium tree-middle-left"><img src="assets/illustrations/storybook/pine-tree-berry.png" alt="" width="1144" height="1375"></div>
-      </div>
-      <div class="tree-grove tree-grove-front">
-        <div class="paper-tree tree-large tree-near-left"><img src="assets/illustrations/storybook/pine-tree-clean.png" alt="" width="1261" height="1247"></div>
-        <div class="paper-tree tree-large tree-near-right"><img src="assets/illustrations/storybook/pine-tree-clean.png" alt="" width="1261" height="1247"></div>
+  </header>
+  <main id="main" class="storybook" aria-label="Holy Merry! 立體聖誕繪本">
+    <div class="paper-texture" aria-hidden="true"></div>
+    <div class="countdown" aria-label="聖誕節倒數">
+      <span id="countdown-label">距離聖誕節，還有</span>
+      <div class="countdown-units" role="timer" aria-live="off">
+        <span><strong data-unit="days">--</strong><small>天</small></span>
+        <span><strong data-unit="hours">--</strong><small>時</small></span>
+        <span><strong data-unit="minutes">--</strong><small>分</small></span>
+        <span><strong data-unit="seconds">--</strong><small>秒</small></span>
       </div>
     </div>
-    <img class="snow-accent left" src="assets/illustrations/storybook/07_small_snowbanks.png" alt="" width="381" height="87" aria-hidden="true">
-    <img class="snow-accent right" src="assets/illustrations/storybook/07_small_snowbanks.png" alt="" width="381" height="87" aria-hidden="true">
+    <h1 class="storybook-title"><span class="sr-only">Merry Christmas</span><span class="title-motion"><img
+          src="assets/illustrations/storybook/05_merry_christmas.png" alt="" width="503" height="255"
+          fetchpriority="high"></span></h1>
+    <div class="story-stage" id="story-stage">
+      <img class="hand-cloud" src="assets/illustrations/storybook/06_clouds.png" alt="" width="373" height="246"
+        aria-hidden="true">
+      <div class="paper-layer mountains" aria-hidden="true"><img
+          src="assets/illustrations/storybook/mountains-clean.png" alt="" width="2134" height="737"></div>
+      <div class="paper-layer side-scenery side-scenery-left" aria-hidden="true"><img
+          src="assets/illustrations/storybook/04_foreground_snow.png" alt="" width="965" height="190"></div>
+      <div class="paper-layer side-scenery side-scenery-right" aria-hidden="true"><img
+          src="assets/illustrations/storybook/04_foreground_snow.png" alt="" width="965" height="190"></div>
+      <div class="paper-layer village" aria-hidden="true"><img src="assets/illustrations/storybook/village-clean.png"
+          alt="" width="1577" height="997"></div>
+      <section class="characters" id="characters" aria-label="和聖誕夥伴聊聊天">
+        <article id="santa-card" class="character character-santa" aria-label="聖誕老人">
+          <button type="button" class="character-stage" data-model-slot="santa" data-state="loading"
+            data-animation="character-santa" aria-label="點擊聖誕老人，閱讀聖誕小信" aria-describedby="character-help"
+            aria-controls="santa-letter" aria-expanded="false" aria-busy="true">
+            <span class="model-fallback"><span>聖誕老人正在趕來…</span><progress max="100" value="0" role="progressbar"
+                aria-label="聖誕老人載入進度"></progress></span>
+            <span class="stage-key-hint">按 Enter 閱讀小信</span>
+          </button>
+          <div class="model-recovery">
+            <p class="model-status" id="santa-model-status" role="status">準備載入聖誕老人。</p>
+            <button class="asset-retry" data-model-action="retry" hidden>重試載入</button>
+          </div>
+        </article>
+        <article id="reindeer-card" class="character character-reindeer" aria-label="麋鹿">
+          <button type="button" class="character-stage" data-model-slot="reindeer" data-state="loading"
+            data-animation="character-reindeer" aria-label="點擊麋鹿，閱讀聖誕小信" aria-describedby="character-help"
+            aria-controls="reindeer-letter" aria-expanded="false" aria-busy="true">
+            <span class="model-fallback"><span>麋鹿正在趕來…</span><progress max="100" value="0" role="progressbar"
+                aria-label="麋鹿載入進度"></progress></span>
+            <span class="stage-key-hint">按 Enter 閱讀小信</span>
+          </button>
+          <div class="model-recovery">
+            <p class="model-status" id="reindeer-model-status" role="status">準備載入麋鹿。</p>
+            <button class="asset-retry" data-model-action="retry" hidden>重試載入</button>
+          </div>
+        </article>
+      </section>
+      <div class="paper-layer foreground" aria-hidden="true"><img
+          src="assets/illustrations/storybook/04_foreground_snow.png" alt="" width="965" height="190"></div>
+      <div class="scenery-trees" aria-hidden="true">
+        <div class="tree-grove tree-grove-left">
+          <div class="paper-tree tree-small tree-far-left"><img src="assets/illustrations/storybook/pine-tree-clean.png"
+              alt="" width="1261" height="1247"></div>
+          <div class="paper-tree tree-medium tree-middle-left"><img
+              src="assets/illustrations/storybook/pine-tree-berry.png" alt="" width="1144" height="1375"></div>
+        </div>
+        <div class="tree-grove tree-grove-front">
+          <div class="paper-tree tree-large tree-near-left"><img
+              src="assets/illustrations/storybook/pine-tree-clean.png" alt="" width="1261" height="1247"></div>
+          <div class="paper-tree tree-large tree-near-right"><img
+              src="assets/illustrations/storybook/pine-tree-clean.png" alt="" width="1261" height="1247"></div>
+        </div>
+      </div>
+      <img class="snow-accent left" src="assets/illustrations/storybook/07_small_snowbanks.png" alt="" width="381"
+        height="87" aria-hidden="true">
+      <img class="snow-accent right" src="assets/illustrations/storybook/07_small_snowbanks.png" alt="" width="381"
+        height="87" aria-hidden="true">
+    </div>
+    <button type="button" class="christmas-letter left" id="santa-letter" aria-label="收起聖誕小信"
+      aria-describedby="santa-dialogue" hidden><span class="letter-body"><span class="letter-copy"
+          id="santa-dialogue"></span><small>輕點收起</small></span></button>
+    <button type="button" class="christmas-letter right" id="reindeer-letter" aria-label="收起聖誕小信"
+      aria-describedby="reindeer-dialogue" hidden><span class="letter-body"><span class="letter-copy"
+          id="reindeer-dialogue"></span><small>輕點收起</small></span></button>
+    <p class="sr-only" id="dialogue-announcer" role="status" aria-live="polite"></p>
+    <div class="story-actions"><a class="paper-button" href="intro.html">Explore the Story <span
+          aria-hidden="true">→</span></a><a class="paper-button cream" href="wish.html">Make a Wish <span
+          aria-hidden="true">↗</span></a></div>
+    <p class="story-hint" id="character-help">點點聖誕夥伴，收一封暖暖的小信。<span class="sr-only">按 Enter 或空白鍵開信，左右方向鍵旋轉，P
+        暫停或繼續動畫；Escape 收起信紙。手機上下滑動可捲動頁面。</span></p>
+    <button class="replay" id="replay-story" aria-label="重新播放紙雕展開動畫">↻ 重播開場</button>
+    <noscript>
+      <p class="no-script">請啟用 JavaScript，讓聖誕夥伴登場。你仍可使用導覽探索故事與願望。</p>
+    </noscript>
+  </main>
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div class="footer-links"><button class="text-button" data-info="accessibility">Site
+          Accessibility</button><span>/</span><button class="text-button" data-info="faq">FAQ</button></div>
+      <p>© 2026 Holy Merry! <span aria-hidden="true">✧</span></p>
+      <div><button class="text-button" data-info="contact">Contact us</button><span class="footer-note"> · 社群連結待補</span>
+      </div>
+    </div>
+  </footer>
+  <div class="music-widget">
+    <section class="music-panel" id="music-panel" hidden aria-labelledby="music-title">
+      <h2 id="music-title">A little Christmas tune.</h2>
+      <p class="hint" id="music-status" role="status">音樂素材待補。你也可以選擇本機音檔試聽，不會上傳。</p><label
+        for="music-file">選擇音檔（重新整理後需重選）</label><input id="music-file" type="file" accept="audio/*"><label
+        for="music-volume">音量</label><input id="music-volume" type="range" min="0" max="1" step=".05" value=".3"><button
+        class="button small" id="music-play" disabled>播放</button>
+    </section><button class="music-toggle" id="music-toggle" aria-expanded="false" aria-controls="music-panel"
+      aria-label="開啟音樂控制">♫<span>音樂</span></button><audio id="site-audio" loop preload="none"></audio>
   </div>
-  <button type="button" class="christmas-letter left" id="santa-letter" aria-label="收起聖誕小信" aria-describedby="santa-dialogue" hidden><span class="letter-body"><span class="letter-copy" id="santa-dialogue"></span><small>輕點收起</small></span></button>
-  <button type="button" class="christmas-letter right" id="reindeer-letter" aria-label="收起聖誕小信" aria-describedby="reindeer-dialogue" hidden><span class="letter-body"><span class="letter-copy" id="reindeer-dialogue"></span><small>輕點收起</small></span></button>
-  <p class="sr-only" id="dialogue-announcer" role="status" aria-live="polite"></p>
-  <div class="story-actions"><a class="paper-button" href="intro.html">Explore the Story <span aria-hidden="true">→</span></a><a class="paper-button cream" href="wish.html">Make a Wish <span aria-hidden="true">↗</span></a></div>
-  <p class="story-hint" id="character-help">點點聖誕夥伴，收一封暖暖的小信。<span class="sr-only">按 Enter 或空白鍵開信，左右方向鍵旋轉，P 暫停或繼續動畫；Escape 收起信紙。手機上下滑動可捲動頁面。</span></p>
-  <button class="replay" id="replay-story" aria-label="重新播放紙雕展開動畫">↻ 重播開場</button>
-  <noscript><p class="no-script">請啟用 JavaScript，讓聖誕夥伴登場。你仍可使用導覽探索故事與願望。</p></noscript>
-</main>
-<footer class="site-footer"><div class="shell footer-inner"><div class="footer-links"><button class="text-button" data-info="accessibility">Site Accessibility</button><span>/</span><button class="text-button" data-info="faq">FAQ</button></div><p>© 2026 Holy Merry! <span aria-hidden="true">✧</span></p><div><button class="text-button" data-info="contact">Contact us</button><span class="footer-note"> · 社群連結待補</span></div></div></footer>
-<div class="music-widget"><section class="music-panel" id="music-panel" hidden aria-labelledby="music-title"><h2 id="music-title">A little Christmas tune.</h2><p class="hint" id="music-status" role="status">音樂素材待補。你也可以選擇本機音檔試聽，不會上傳。</p><label for="music-file">選擇音檔（重新整理後需重選）</label><input id="music-file" type="file" accept="audio/*"><label for="music-volume">音量</label><input id="music-volume" type="range" min="0" max="1" step=".05" value=".3"><button class="button small" id="music-play" disabled>播放</button></section><button class="music-toggle" id="music-toggle" aria-expanded="false" aria-controls="music-panel" aria-label="開啟音樂控制">♫<span>音樂</span></button><audio id="site-audio" loop preload="none"></audio></div>
-<dialog id="info-dialog" aria-labelledby="info-title"><button class="dialog-close" data-close-dialog aria-label="關閉說明">×</button><h2 id="info-title"></h2><p id="info-content"></p></dialog>
+  <dialog id="info-dialog" aria-labelledby="info-title"><button class="dialog-close" data-close-dialog
+      aria-label="關閉說明">×</button>
+    <h2 id="info-title"></h2>
+    <p id="info-content"></p>
+  </dialog>
 </body>
+
 </html>

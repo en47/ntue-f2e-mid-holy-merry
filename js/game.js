@@ -22,7 +22,36 @@ window.addEventListener('pageshow', event => {
   if (event.persisted) revealAll();
 });
 // Both games load local, isolated documents. Never rewrite or reload their src.
-// Only Game 02 is measured; preserve the existing Game 01 container dimensions.
+// Game 01 measures only its outer text; its original responsive game stays isolated.
+const flyingView = document.querySelector('.flying-view');
+const flyingHeading = flyingView.querySelector('.game-section-heading');
+const flyingCaption = flyingView.querySelector('.flying-caption');
+const siteHeader = document.querySelector('.site-header');
+function fitFlyingView() {
+  const headerStyle = getComputedStyle(siteHeader);
+  const sticky = ['sticky', 'fixed'].includes(headerStyle.position) ? siteHeader.getBoundingClientRect().height : 0;
+  page.style.setProperty('--sticky-header-height', `${sticky}px`);
+  const outerHeight = element => {
+    const style = getComputedStyle(element);
+    return element.getBoundingClientRect().height + parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+  };
+  const frameStyle = getComputedStyle(flyingView.querySelector('.fly-frame-shell'));
+  const edges = parseFloat(frameStyle.paddingTop) + parseFloat(frameStyle.paddingBottom)
+    + parseFloat(frameStyle.borderTopWidth) + parseFloat(frameStyle.borderBottomWidth);
+  // Original iframe: 174px HUD/controls/border plus (width - 2) * 510/1100.
+  const reserve = sticky + outerHeight(flyingHeading) + outerHeight(flyingCaption) + edges + 174 + 32;
+  flyingView.style.setProperty('--fly-sticky-offset', `${sticky}px`);
+  flyingView.style.setProperty('--fly-reserved-height', `${Math.ceil(reserve)}px`);
+}
+const flyingSizeObserver = new ResizeObserver(fitFlyingView);
+function observeFlyingView() {
+  [flyingHeading, flyingCaption, siteHeader].forEach(element => flyingSizeObserver.observe(element));
+  fitFlyingView();
+}
+observeFlyingView();
+window.addEventListener('resize', fitFlyingView);
+window.addEventListener('pagehide', () => flyingSizeObserver.disconnect());
+window.addEventListener('pageshow', event => { if (event.persisted) observeFlyingView(); });
 const matchingFrame = document.querySelector('#matching-frame');
 let sizeObserver;
 function fitMatchingFrame() {

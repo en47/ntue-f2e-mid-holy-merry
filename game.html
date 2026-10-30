@@ -7,10 +7,10 @@
   <meta name="description" content="Holy Merry! 聖誕小天地：聖誕故事、節日遊戲與屬於你的願望信封。">
   <title>Game — Holy Merry!</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/shared.css">
-  <link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="css/shared.css?v=20261030-8">
+  <link rel="stylesheet" href="css/game.css?v=20261030-11">
   <script type="module" src="js/shared.js"></script>
-  <script type="module" src="js/game.js"></script>
+  <script type="module" src="js/game.js?v=20261030-7"></script>
 </head>
 <body class="games-body">
 <a class="skip-link" href="#main">跳至主要內容</a>
@@ -20,23 +20,31 @@
   <nav class="site-nav" id="site-nav" aria-label="主要導覽"><a href="index.html">Home</a><a href="intro.html">Intro</a><a href="game.html" aria-current="page">Game</a><a href="wish.html">Wish</a></nav>
 </div></header>
 <main class="games-page" id="main">
-<section class="shell game-section flying-section" id="sleigh-game" aria-labelledby="sleigh-title">
+<section class="shell game-section flying-section" aria-labelledby="sleigh-title">
   <header class="games-heading"><div><span class="eyebrow" lang="en">03 / CHRISTMAS PLAYTIME</span><h1 lang="en">Christmas Playground</h1></div><p>兩場小小的聖誕冒險，等你來挑戰！</p></header>
-  <header class="game-section-heading" lang="en"><span class="eyebrow">GAME 01</span><h2 id="sleigh-title">Santa Flying Adventure</h2></header>
-  <div class="fly-frame-shell" data-reveal="up">
+  <nav class="game-tags" aria-label="遊戲快速導覽">
+    <a class="game-tag" href="#sleigh-game" lang="en"><span class="game-tag-paper"><span class="game-tag-art gift-sprite sprite-cream" aria-hidden="true"><img src="assets/illustrations/games/手繪蠟筆風聖誕禮盒貼紙集-removebg-preview.png" alt="" width="612" height="408"></span><span><small>GAME 01</small><span>Santa Flying</span></span></span></a>
+    <a class="game-tag" href="#matching-game" lang="en"><span class="game-tag-paper"><span class="game-tag-art gift-sprite sprite-blue" aria-hidden="true"><img src="assets/illustrations/games/手繪蠟筆風聖誕禮盒貼紙集-removebg-preview.png" alt="" width="612" height="408"></span><span><small>GAME 02</small><span>Christmas Matching</span></span></span></a>
+  </nav>
+  <div class="flying-view" id="sleigh-game">
+  <header class="game-section-heading"><span class="eyebrow" lang="en">GAME 01</span><h2 id="sleigh-title" lang="en">Santa Flying Adventure</h2><p class="game-description">搭上聖誕雪橇，用 ↑ ↓ 閃過障礙，挑戰最遠距離！</p></header>
+  <div class="game-frame fly-frame-shell" data-reveal="up">
     <iframe id="flying-game" class="flying-game-frame" src="vendor/game1/index.html" title="Santa Flying Dodge Game — 聖誕飛行躲避遊戲" aria-describedby="flying-help" tabindex="0" allow="fullscreen" allowfullscreen></iframe>
   </div>
   <div class="flying-caption"><p id="flying-help">點一下遊戲內的開始鈕，再用 ↑ ↓ 移動 · 空白鍵 / P 暫停；手機可使用遊戲內的方向鈕。</p><a class="game-fallback" href="vendor/game1/index.html" target="_blank" rel="noopener noreferrer">無法載入？另開原作 ↗</a></div>
+  </div>
 </section>
 <section class="game-section matching-section" id="matching-game" aria-labelledby="matching-title" data-animation="game-celebration">
   <div class="shell matching-layout">
-    <div class="matching-copy" data-reveal="left">
+    <header class="game-section-heading matching-copy" data-reveal="left">
       <span class="eyebrow" lang="en">GAME 02</span>
-      <h2 id="matching-title" lang="en">Christmas <br>Matching</h2>
-      <p class="matching-intro">翻開卡片，找出成對的聖誕禮物，完成五個關卡的挑戰！</p>
-    </div>
+      <h2 id="matching-title" lang="en">Christmas Matching</h2>
+      <p class="game-description">翻開卡片，找出成對的聖誕禮物，完成五個關卡的挑戰！</p>
+    </header>
     <div class="matching-play-area" data-reveal="right">
+      <div class="game-frame">
       <iframe id="matching-frame" class="matching-game-frame" src="games/christmas-matching.html" title="Christmas Matching — 聖誕配對挑戰" tabindex="0" allow="fullscreen" allowfullscreen></iframe>
+      </div>
       <details class="matching-fallback"><summary>無法載入遊戲？</summary><a href="games/christmas-matching.html" target="_blank" rel="noopener noreferrer">另開聖誕配對挑戰 ↗</a></details>
     </div>
   </div>

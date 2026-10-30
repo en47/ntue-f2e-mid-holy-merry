@@ -1,15 +1,13 @@
 /* Intro only. The shared Header, Footer and original artwork are unchanged. */
-html.intro-document { scroll-snap-type:y proximity; scroll-padding-top:1rem;scrollbar-gutter:stable; }
-html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
+html.intro-document {  scroll-padding-top:1rem;scrollbar-gutter:stable; }
 .intro-body { background:var(--blue); }
 .intro-main { --intro-header-height:108px; --paper-warm:#fff6e3; --paper-edge:#d7c2a2; --story-ink:#665343; padding-top:0; }
-.intro-story-section,.intro-cultures { scroll-snap-align:start; scroll-snap-stop:normal; scroll-margin-top:0; }
-.intro-story-section { scroll-margin-top:var(--intro-header-height);min-height:calc(100svh - var(--intro-header-height)); padding-top:clamp(.6rem,1.5vh,1.2rem); padding-bottom:1.2rem; }
-.intro-heading { text-align:center; margin:0 0 .55rem; }
-.intro-heading>.eyebrow { font-size:.65rem;letter-spacing:.12em;margin-bottom:.25rem; }
-.intro-heading h1 { color:var(--red);font-size:clamp(1.8rem,3vw,2.35rem);letter-spacing:.04em;margin:.3rem 0; }
-.intro-heading p,.intro-culture-heading p { color:var(--muted);font-size:.9rem;margin:.35rem 0; }
-.intro-book-shell { perspective:2100px; padding:8px 10px 19px; }
+.intro-story-section,.intro-cultures {   scroll-margin-top:0; }
+.intro-story-section { scroll-margin-top:var(--intro-header-height);min-height:calc(100svh - var(--intro-header-height)); padding-bottom:1.2rem; }
+/* Reuse Game's actual heading rules and font; keep the existing shared .shell alignment. */
+.intro-heading { --game-hand: GameHand, var(--font-display); }
+.intro-culture-heading p { color:var(--muted);font-size:.9rem;margin:.35rem 0; }
+.intro-book-shell { perspective:2100px; margin-block-start:clamp(.75rem,2vw,1.25rem); padding:8px 10px 19px; }
 .intro-book { position:relative;display:grid;width:100%;min-width:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:512px;aspect-ratio:auto;transform-style:preserve-3d;box-shadow:0 12px 0 -5px #c4ac8c,0 19px 0 -9px #a88b6b,0 27px 22px -15px #56778055;border:7px solid #c2a281;border-radius:10px 14px 13px 12px;background:var(--paper-warm); }
 .intro-book::after { content:'';position:absolute;inset:7px;border:1px solid #bca38255;pointer-events:none;border-radius:6px;z-index:11; }
 .intro-copy-stack { display:grid;min-width:0; }
@@ -111,11 +109,6 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
 .intro-post-bottom-close { display:block;margin:1rem auto 0;color:var(--red-dark); }
 /* Keep the full-size book and 16px story on short laptops; compact only its introduction. */
 @media (min-width:1025px) and (max-height:800px) {
- .intro-story-section { padding-top:.35rem; }
- .intro-heading>.eyebrow { display:none; }
- .intro-heading h1 { font-size:1.85rem; }
- .intro-heading p { margin:.1rem 0; }
- .intro-heading { margin-bottom:.25rem; }
  .intro-book-shell { padding-bottom:6px; }
  .intro-book-controls { margin-top:.25rem; }
  .intro-keyboard-help { margin-top:.4rem; }
@@ -126,10 +119,7 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
  .intro-book { min-height:490px; }
 }
 @media (max-width:700px) {
- html.intro-document { scroll-snap-type:none; }
- .intro-story-section { min-height:calc(100svh - var(--intro-header-height));padding-top:.75rem; }
- .intro-heading>.eyebrow { font-size:.6rem;letter-spacing:.08em; }
- .intro-heading p { font-size:.84rem; }
+ .intro-story-section { min-height:calc(100svh - var(--intro-header-height)); }
  .intro-book-shell { padding:7px 2px 16px;perspective:1600px; }
  .intro-book { --mobile-scene-height:clamp(300px,85vw,440px);grid-template-columns:1fr;aspect-ratio:auto;min-height:0;border-width:5px;box-shadow:0 10px 0 -4px #c4ac8c,0 16px 0 -7px #a88b6b,0 25px 15px -16px #56778055; }
  .intro-copy { padding:1.3rem 1.25rem 1.1rem;background:linear-gradient(120deg,#fff8e8,#f3e6cd); }
@@ -163,7 +153,7 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
  .intro-closing { font-size:.9rem;letter-spacing:0; }
 }
 @media (prefers-reduced-motion:reduce) {
- html.intro-document { scroll-snap-type:none;scroll-behavior:auto; }
+ html.intro-document { scroll-behavior:auto; }
  .intro-post-art * { transition:none!important; }
  .intro-postcard[open] { animation:none; }
  .intro-paper-button:hover { transform:none; }

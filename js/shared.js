@@ -1,5 +1,21 @@
 // 所有頁面共用；此模組不會啟動其他頁面的遊戲或計時器。
 document.documentElement.classList.add('js-ready');
+// Animate only deliberate section-link activation; native manual scrolling stays untouched.
+document.addEventListener('click', event => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const link = event.target.closest('a[href^="#"]:not(.skip-link)');
+  if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+  const hash = link.getAttribute('href');
+  let target;
+  try { target = document.getElementById(decodeURIComponent(hash.slice(1))); } catch { return; }
+  if (!target) return;
+  event.preventDefault();
+  if (location.hash !== hash) history.pushState(null, '', hash);
+  target.scrollIntoView({
+    block: 'start',
+    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+  });
+});
 const menuToggle = document.querySelector('#menu-toggle');
 const nav = document.querySelector('#site-nav');
 menuToggle.addEventListener('click', () => {

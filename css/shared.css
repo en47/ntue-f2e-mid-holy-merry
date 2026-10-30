@@ -1,6 +1,6 @@
 @import url('./tokens.css');
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: auto; }
 body { margin: 0; color: var(--ink); background: var(--blue); font-family: var(--font-body); line-height: 1.75; overflow-wrap: anywhere; }
 body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: .28; background-image: radial-gradient(#7b9ca5 0.55px, transparent .7px); background-size: 7px 7px; }
 button, input, textarea { font: inherit; }

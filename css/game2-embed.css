@@ -8,6 +8,12 @@ html, body { margin: 0; padding: 0; min-height: 0; background: #f7f6f2; }
 .hm-matching .card-face { inset: 0; }
 .hm-matching .modal-overlay { border-radius: 0; }
 .matching-status { margin: 0; padding: 8px 12px 12px; font: 12px/1.5 'Microsoft JhengHei', sans-serif; color: #8b3936; }
+/* Initial screen only: scale the complete illustration, including its lettering. */
+.hm-matching[data-state='ready'] .card-area { min-height: 0; margin-bottom: 10px; }
+.hm-matching[data-state='ready'] .intro-container { margin: 6px auto 8px; }
+.hm-matching[data-state='ready'] .intro-img { width: 380px; max-width: 100%; height: auto; }
+.hm-matching[data-state='ready'] #start-btn { min-height: 48px; line-height: 1; }
+.hm-matching[data-state='ready'] #start-btn img { display: block; height: 52px; width: auto; max-width: 100%; }
 @media (max-width: 480px) {
   .hm-matching .game-wrapper { padding: 12px; }
   .hm-matching .game-header { flex-wrap: nowrap; gap: 6px; margin-bottom: 12px; }

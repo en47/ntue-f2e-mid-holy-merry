@@ -126,7 +126,7 @@ export function createWishDelivery(root, { savingText = '正在儲存到此瀏�
             ...item.faces.map(face=>animate(face,[{opacity:1,offset:0},{opacity:1,offset:.88},{opacity:0,offset:1}],{duration})),
           ]);
           state('flying','信封正飛往聖誕襪……');
-          if (image.getBoundingClientRect().bottom > innerHeight - 24) image.scrollIntoView({block:'nearest',behavior:'smooth'});
+          if (image.getBoundingClientRect().bottom > innerHeight - 24) image.scrollIntoView({block:'nearest',behavior:'instant'});
           await animate(item.travel,deliveryPath(start,{x:mouth.x,y:mouth.y}),{duration:1850,easing:'cubic-bezier(.35,0,.45,1)'});
           item.travel.hidden=true;
           cuff.hidden=true;
