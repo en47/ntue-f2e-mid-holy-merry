@@ -1,0 +1,71 @@
+{
+  "reference": {
+    "prototype": "christmas_pop_up_demo_v4_handdrawn.html",
+    "sha256": "386984f68c35b694a413c7d4bbf1fd2a633b205cddd95cf3df58f09c60395110",
+    "artArchive": "christmas_papercut_assets.zip",
+    "archiveSha256": "3f951dd4410ce060c7dd70dd43a869a2e99cab2428286e5c94acaaa5ddd5892c"
+  },
+  "artwork": {
+    "04_foreground_snow.png": {
+      "path": "assets/illustrations/storybook/04_foreground_snow.png",
+      "sha256": "4c3554f2ddefcf3d6b26f1dbe8174b3d0832e69db4629920c868e2dc04a36a79",
+      "bytes": 322358
+    },
+    "03_pine_trees.png": {
+      "path": "assets/illustrations/storybook/03_pine_trees.png",
+      "sha256": "a6116fec29d61280fd292829a03de88108fc085b3e0beeba757bb4d035ed21ba",
+      "bytes": 272722
+    },
+    "07_small_snowbanks.png": {
+      "path": "assets/illustrations/storybook/07_small_snowbanks.png",
+      "sha256": "9a9c8bc8ae5349d5237fa85ad398d5561c2f612a51ab3e267beed3a9bb7fa28f",
+      "bytes": 59247
+    },
+    "02_village.png": {
+      "path": "assets/illustrations/storybook/02_village.png",
+      "sha256": "27873d948b455f549df338c339fd69ac14c14e87e43a650662e8d8923b09e7f5",
+      "bytes": 726245
+    },
+    "05_merry_christmas.png": {
+      "path": "assets/illustrations/storybook/05_merry_christmas.png",
+      "sha256": "7f92173e866a87da1cc2006407249b841e4fd97f2c35f2cbda5e9aae9e37e1d8",
+      "bytes": 267621
+    },
+    "01_mountains.png": {
+      "path": "assets/illustrations/storybook/01_mountains.png",
+      "sha256": "b3341de15fcb1af3acd2620671f7d35e87623582f4324dcdc09f1ef5951c978a",
+      "bytes": 722362
+    },
+    "06_clouds.png": {
+      "path": "assets/illustrations/storybook/06_clouds.png",
+      "sha256": "286e21de1014e68a4d50dec5544bda8c182502a239fe9fed7bd96671c94c71d7",
+      "bytes": 124294
+    }
+  },
+  "models": {
+    "santa": {
+      "sourceFilename": "santa+claus+figurine+3d+model.glb",
+      "model": "santa-dance.glb",
+      "bytes": 9790216,
+      "sha256": "af6632fb53865219d8f0eb6a01a92ef33132b2386ccd31778915ac7aac0fb2dd",
+      "animations": [
+        "dance_02"
+      ],
+      "playbackRangeSeconds": [
+        1,
+        4
+      ]
+    },
+    "reindeer": {
+      "sourceFilename": "reindeer+3d+model.glb",
+      "model": "reindeer.glb",
+      "sha256": "00c40619b6490de74c43afe94aef135b9c6d8d2b6bceaa1a5b8278b7f7f2d69a",
+      "bytes": 10549224,
+      "animations": [
+        "preset:quadruped:walk"
+      ],
+      "embeddedTextures": 3,
+      "gltfVersion": "2.0"
+    }
+  }
+}

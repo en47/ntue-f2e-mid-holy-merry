@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 247">
+ <defs>
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".55" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feBlend in="SourceGraphic" mode="multiply"/></filter>
+  <clipPath id="sock"><path d="m164 67 91 2-6 93q1 18 23 23l20 5q30 11 16 34-8 16-35 16h-72q-45-1-43-37Z"/></clipPath>
+ </defs>
+ <g stroke="#886247" stroke-linejoin="round" stroke-linecap="round">
+  <path d="m61 246 4-218 13-2 5 220m214 0-4-218 13 1 6 217" fill="#bd9672" stroke-width="3"/>
+  <path d="m48 31 1-17 273 3-1 18Z" fill="#c4a17e" stroke-width="3"/>
+  <path d="m49 26 269 3M70 45l3 184m230-188 3 186M60 246h29m199 0h32" fill="none" stroke="#e3c7a3" stroke-width="2"/>
+  <path d="m70 20 75 2m31 3 85-1M68 108l3 53m232-85 1 44" fill="none" stroke-width="1"/>
+ </g>
+ <path d="M170 19q20 0 15 43" fill="none" stroke="#8e4238" stroke-width="6"/>
+ <path d="m164 67 91 2-6 93q1 18 23 23l20 5q30 11 16 34-8 16-35 16h-72q-45-1-43-37Z" fill="#b64c44" stroke="#8d3d37" stroke-width="3"/>
+ <g clip-path="url(#sock)" opacity=".14" filter="url(#grain)"><path fill="#f6d7ad" d="M148 66h174v186H148Z"/></g>
+ <path d="m172 109-7 90q-2 31 38 31h74q15-1 20-9" fill="none" stroke="#efbaa0" stroke-width="2" stroke-dasharray="3 5"/>
+ <path d="m208 132 5 9 11 1-8 8 2 11-10-5-10 5 2-11-8-8 11-1Z" fill="#e6c68b"/>
+ <path d="m153 57q45-7 110 4l-2 40q-53-10-109-3Z" fill="#fff0d4" stroke="#c4ac87" stroke-width="2"/>
+ <path d="m159 65q48-3 96 5m-95 22q50-5 95 2" fill="none" stroke="#e2d2b4" stroke-width="2"/>
+ <path d="M67 245q113 6 241 0" fill="none" stroke="#8aabb5" stroke-width="3" opacity=".24"/>
+</svg>

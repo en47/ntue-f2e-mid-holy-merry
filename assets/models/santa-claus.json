@@ -1,0 +1,13 @@
+{
+  "sourceFilename": "santa+claus+figure+3d+model.glb",
+  "model": "santa-claus.glb",
+  "bytes": 9568588,
+  "sha256": "a7e1d696db5c4f711c1c777d14072a7823fc1863548a38368dbb79086eef46b7",
+  "gltfVersion": "2.0",
+  "generator": "Tripo",
+  "animations": [
+    "idle"
+  ],
+  "embeddedTextures": 3,
+  "extensionsRequired": []
+}

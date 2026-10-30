@@ -1,0 +1,129 @@
+{
+  "date": "2026-10-29T13:45:06.640845+08:00",
+  "scope": "Game page only",
+  "modifiedExistingFiles": [
+    "TESTING.md",
+    "game.html",
+    "css/game.css",
+    "js/game.js"
+  ],
+  "deletedFiles": [],
+  "assets": [
+    {
+      "path": "assets/illustrations/games/手繪蠟筆風聖誕禮盒貼紙集-removebg-preview.png",
+      "source": "/Users/fuminjan/Downloads/手繪蠟筆風聖誕禮盒貼紙集-removebg-preview.png",
+      "sha256": "d0e6cad16ea35f708cd363014688ec8d6aae946fa718d878357206c268bfed2e",
+      "dimensions": [
+        612,
+        408
+      ],
+      "mode": "RGBA",
+      "pixelsModified": false
+    },
+    {
+      "path": "assets/illustrations/games/水彩聖誕禮物堆與小熊-removebg-preview.png",
+      "source": "/Users/fuminjan/Downloads/水彩聖誕禮物堆與小熊-removebg-preview.png",
+      "sha256": "cae0647ebdef86fee9bf1357a5240c4126a94192de83104de5105e8d27393c4f",
+      "dimensions": [
+        612,
+        408
+      ],
+      "mode": "RGBA",
+      "pixelsModified": false
+    }
+  ],
+  "unusedOriginalDecorationsRetained": true,
+  "game1PermanentUrl": "https://en47.github.io/game1-flyingsanta/",
+  "game1SourceCopied": false,
+  "game1PollingOrAutomaticReload": false,
+  "game2OriginalUrl": "https://me666good.github.io/game2/",
+  "game2CoreAndPristineCopyUnchanged": true,
+  "renderedMeasurements": [
+    {
+      "viewport": 1920,
+      "iframe": [
+        1100,
+        683
+      ],
+      "matchingWidth": 650,
+      "horizontalOverflow": 0,
+      "snowFooterGap": 0,
+      "snowWidth": 1920
+    },
+    {
+      "viewport": 1440,
+      "iframe": [
+        1100,
+        683
+      ],
+      "matchingWidth": 650,
+      "horizontalOverflow": 0,
+      "snowFooterGap": 0,
+      "snowWidth": 1440
+    },
+    {
+      "viewport": 1024,
+      "iframe": [
+        976,
+        626
+      ],
+      "matchingWidth": 586,
+      "horizontalOverflow": 0,
+      "snowFooterGap": 0,
+      "snowWidth": 1024
+    },
+    {
+      "viewport": 880,
+      "iframe": [
+        832,
+        559
+      ],
+      "matchingWidth": 524,
+      "horizontalOverflow": 0,
+      "snowFooterGap": 0,
+      "snowWidth": 880
+    },
+    {
+      "viewport": 768,
+      "iframe": [
+        720,
+        507
+      ],
+      "matchingWidth": 454,
+      "horizontalOverflow": 0,
+      "snowFooterGap": 0,
+      "snowWidth": 768
+    },
+    {
+      "viewport": 390,
+      "iframe": [
+        358,
+        492
+      ],
+      "matchingWidth": 358,
+      "horizontalOverflow": 0,
+      "snowFooterGap": 0,
+      "snowWidth": 390
+    }
+  ],
+  "visuallyInspectedWidths": [
+    1920,
+    1440,
+    768,
+    390
+  ],
+  "game1KeyboardUpDownAndSpaceVerified": true,
+  "game2StartFlipCountTimeoutRestartVerified": true,
+  "mobileCardFaceHitAreaAligned": true,
+  "game2AllFiveLevelsProgrammaticallyVerified": true,
+  "game2AllFiveLevelsManuallyCompleted": false,
+  "physicalMobileTouchVerified": false,
+  "osReducedMotionToggleVerified": false,
+  "existingSmokeGroupsPassed": 23,
+  "existingEnvelopeTestsPassed": 2,
+  "protectedFilesHashIdentical": true,
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "details": "docs/GAME-PAGE.md"
+}

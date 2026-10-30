@@ -1,0 +1,26 @@
+{
+  "pine-tree-clean.png": {
+    "sourceFilename": "手繪雪覆紅莓聖誕樹貼紙.png",
+    "path": "assets/illustrations/storybook/pine-tree-clean.png",
+    "sha256": "37d3098ce8c3ab772f5b27f5594f372b8f28a62a9398f37286a85d8929fa0508",
+    "bytes": 2026248
+  },
+  "village-clean.png": {
+    "sourceFilename": "雪夜童話村落貼紙景致.png",
+    "path": "assets/illustrations/storybook/village-clean.png",
+    "sha256": "be8e012ee6e8712ff29f9873545cc60b5c7cdd2593afa1fb94609f1a25af2ba6",
+    "bytes": 2197941
+  },
+  "mountains-clean.png": {
+    "sourceFilename": "透明背景的水彩雪山全景.png",
+    "path": "assets/illustrations/storybook/mountains-clean.png",
+    "sha256": "ec5a346f1affe4d2419b83ddce718f548bd445ff3f40f195151f9b2843614717",
+    "bytes": 2124019
+  },
+  "pine-tree-berry.png": {
+    "sourceFilename": "手繪質感紅莓聖誕樹貼紙.png",
+    "path": "assets/illustrations/storybook/pine-tree-berry.png",
+    "sha256": "af0acf5fd9b43cabc8f0552e1dd173a0b0df8fa17be212f8735468086626ad56",
+    "bytes": 2147062
+  }
+}

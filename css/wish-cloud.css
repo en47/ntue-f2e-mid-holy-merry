@@ -1,0 +1,13 @@
+.wish-letter label.wish-public-choice { display:flex;align-items:flex-start;gap:.45rem;margin:.45rem 0 0;font:.65rem/1.55 var(--font-body);color:#786a56; }
+.wish-letter .wish-public-choice input { width:16px;height:16px;flex:0 0 16px;padding:0;margin:.05rem 0 0;appearance:auto;accent-color:#9f5147; }
+.cloud-wish-info { margin-top:1.5rem;color:#627c81;font-size:.8rem; }
+.cloud-wish-info p { margin:.45rem 0; }
+.cloud-wish-info button.cloud-retry { background:#fff4df;border:1px solid #c9b08b;padding:.5rem .8rem; }
+.cloud-wish-info details { margin-top:1rem;border-top:1px dashed #aac0c5;padding-top:.75rem; }
+.tree-envelope-targets { position:absolute;inset:0;z-index:4;pointer-events:none; }
+.tree-envelope-hit { position:absolute;transform:translate(-50%,-50%);pointer-events:auto;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer;touch-action:pan-y; }
+.tree-envelope-hit:focus-visible { outline:2px dashed #a65446;outline-offset:2px; }
+.tree-envelope-hit:hover { background:#fff4df16; }
+.cloud-envelope-list { max-height:220px; }
+#wish-dialog h2 { padding-right:2.2rem;overflow-wrap:anywhere; }
+@media(prefers-reduced-motion:reduce){.tree-envelope-hit{transition:none;}}

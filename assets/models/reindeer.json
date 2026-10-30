@@ -1,0 +1,11 @@
+{
+  "sourceFilename": "reindeer+3d+model.glb",
+  "model": "reindeer.glb",
+  "sha256": "00c40619b6490de74c43afe94aef135b9c6d8d2b6bceaa1a5b8278b7f7f2d69a",
+  "bytes": 10549224,
+  "animations": [
+    "preset:quadruped:walk"
+  ],
+  "embeddedTextures": 3,
+  "gltfVersion": "2.0"
+}

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>聖誕配對挑戰 — Holy Merry!</title><link rel="icon" href="data:,">
+<link rel="stylesheet" href="../css/game2-matching.css"><link rel="stylesheet" href="../css/game2-embed.css">
+<script type="module" src="../js/games/game2-embed.js"></script></head>
+<body>
+  <div class="hm-matching" id="matching-app" data-state="ready">
+  <div class="game-wrapper">
+    <!-- 遊戲資訊列 -->
+    <header class="game-header">
+      <div class="level-badge">關卡 <span id="current-level">1</span> / 5</div>
+      
+      <!-- 花圈倒數計時容器 -->
+      <div class="wreath-timer-container">
+        <img src="../vendor/game2/images/倒數.png" alt="聖誕花圈" class="wreath-bg">
+        <div class="timer-display" id="timer-text">25</div>
+      </div>
+
+      <!-- 配對進度與翻牌次數 -->
+      <div class="stats-panel">
+        <div class="stat-item">配對：<span id="match-count">0</span> / <span id="total-pairs">4</span></div>
+        <div class="stat-item">翻牌：<span id="flip-count">0</span> 次</div>
+      </div>
+    </header>
+
+    <!-- 卡牌網格區域（未開始前顯示封面） -->
+    <div class="card-area">
+      <!-- 遊戲說明封面圖 -->
+      <div id="intro-view" class="intro-container">
+        <img src="../vendor/game2/images/intro.PNG" alt="遊戲說明" class="intro-img">
+      </div>
+      <!-- 卡牌網格 -->
+      <div class="card-grid hidden" id="card-grid" role="group" aria-label="禮物配對卡片"></div>
+    </div>
+
+    <!-- 控制按鈕區 -->
+    <footer class="game-footer">
+      <button id="start-btn" class="candy-btn">
+        <img src="../vendor/game2/images/開始.png" alt="START">
+      </button>
+      <button id="restart-btn" class="candy-btn hidden">
+        <img src="../vendor/game2/images/重來.png" alt="RESTART">
+      </button>
+    </footer>
+
+    <!-- 彈出橫幅遮罩層 (下一關、通關、時間到) -->
+    <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="false" aria-label="遊戲結果">
+      <div class="modal-box">
+        <img id="modal-banner" alt="提示訊息" class="banner-img">
+        <div class="modal-actions">
+          <button id="modal-btn" class="candy-btn">
+            <img id="modal-btn-img" src="../vendor/game2/images/開始.png" alt="按鈕">
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+      <p class="status matching-status" id="matching-announcement" role="status">按 Start 從第一關開始。每翻開兩張禮物計一次翻牌。</p>
+</body></html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local-only wish distribution</title>
+<link rel="stylesheet" href="../css/shared.css"><link rel="stylesheet" href="../css/wish.css"><link rel="stylesheet" href="../css/wish-cloud.css"><link rel="stylesheet" href="../css/wish-delivery.css">
+<script type="importmap">{"imports":{"three":"../vendor/three/build/three.module.js"}}</script></head>
+<body class="wish-page"><main id="local-stage"></main><dialog id="preview-read"><h2 id="preview-title"></h2><p>本機排版測試：不是雲端願望，沒有登入或寫入資料。</p><button id="close">關閉測試信</button></dialog>
+<script type="module">
+import { mountWishScene } from '../js/components/wish-scene.js';
+const html=await (await fetch('../wish.html',{cache:'no-store'})).text(),source=new DOMParser().parseFromString(html,'text/html');
+const room=source.querySelector('#wish-room');
+room.querySelectorAll('[src]').forEach(el=>el.setAttribute('src',new URL(el.getAttribute('src'),new URL('../',location.href)).href));
+room.querySelector('#room-title').textContent='本機 10 封信配置驗收';document.querySelector('#local-stage').append(room);
+const scene=mountWishScene(room),dialog=document.querySelector('#preview-read');let generation=0;
+let wishes=Array.from({length:10},(_,i)=>({id:`layout-check-${i}`,nickname:`本機測試 ${i+1}`,isOwn:i===0}));
+const report=text=>parent.postMessage({status:text},location.origin);
+function select(wish){document.querySelector('#preview-title').textContent=`${wish.nickname}${wish.isOwn?'（金色）':''}`;dialog.showModal();report(`已點開 ${wish.nickname}；共10封：上2／中3／下5。`);}
+scene.setWishes(wishes,select);room.addEventListener('wish:elf-ready',()=>room.querySelector('#elf-character').click(),{once:true});report('10封本機測試信：上2／中3／下5。請等待真實 GLB 載入；精靈進入互動待機，樹與舊信靜止。');
+document.querySelector('#close').onclick=()=>dialog.close();
+addEventListener('message',e=>{
+ if(e.origin!==location.origin||e.source!==parent)return;
+ if(e.data?.preview==='turn'){const gesture=room.querySelector('#tree-gesture');gesture.dispatchEvent(new KeyboardEvent('keydown',{key:'Home'}));for(let i=0;i<e.data.steps;i++)gesture.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight'}));report(`手動驗收視角 ${Math.round(e.data.steps*.2*180/Math.PI)}°；10封：上2／中3／下5。`);}
+ if(e.data?.preview==='refresh'){wishes.reverse();scene.setWishes(wishes,select);report('同一批資料刷新；保留掛點與靜止姿態。');}
+ if(e.data?.preview==='new'){wishes=wishes.filter(w=>!w.isOwn);const own={id:`new-local-${++generation}`,isOwn:true,nickname:'新金色測試信'};wishes.unshift(own);scene.setWishes(wishes,select,{newWishId:own.id});report('僅新金色測試信短暫晃動；雲端沒有寫入。');}
+});
+addEventListener('pagehide',()=>scene.destroy(),{once:true});
+</script></body></html>

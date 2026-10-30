@@ -1,0 +1,25 @@
+:root {
+  color-scheme: light;
+  --blue: #dfeef3;
+  --blue-deep: #c3dce5;
+  --cream: #fffbed;
+  --paper: #fffef8;
+  --red: #ad3c3b;
+  --red-dark: #87302f;
+  --yellow: #f4d581;
+  --green: #42675b;
+  --ink: #344d57;
+  --muted: #667d85;
+  --line: #b6ccd2;
+  --font-body: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  --font-display: 'HolyHandwriting', Georgia, 'Times New Roman', serif;
+  --space-1: .5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 5rem;
+  --radius: 1.2rem;
+  --content: 1120px;
+}
+/* 自訂字體準備好後，於此加入 @font-face，並替換 --font-display。 */

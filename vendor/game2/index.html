@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聖誕配對挑戰</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="game-wrapper">
+    <!-- 遊戲資訊列 -->
+    <header class="game-header">
+      <div class="level-badge">關卡 <span id="current-level">1</span> / 5</div>
+      
+      <!-- 花圈倒數計時容器 -->
+      <div class="wreath-timer-container">
+        <img src="images/倒數.png" alt="聖誕花圈" class="wreath-bg">
+        <div class="timer-display" id="timer-text">25</div>
+      </div>
+
+      <!-- 配對進度與翻牌次數 -->
+      <div class="stats-panel">
+        <div class="stat-item">配對：<span id="match-count">0</span> / <span id="total-pairs">4</span></div>
+        <div class="stat-item">翻牌：<span id="flip-count">0</span> 次</div>
+      </div>
+    </header>
+
+    <!-- 卡牌網格區域（未開始前顯示封面） -->
+    <main class="card-area">
+      <!-- 遊戲說明封面圖 -->
+      <div id="intro-view" class="intro-container">
+        <img src="images/intro.PNG" alt="遊戲說明" class="intro-img">
+      </div>
+      <!-- 卡牌網格 -->
+      <div class="card-grid hidden" id="card-grid"></div>
+    </main>
+
+    <!-- 控制按鈕區 -->
+    <footer class="game-footer">
+      <button id="start-btn" class="candy-btn">
+        <img src="images/開始.png" alt="START">
+      </button>
+      <button id="restart-btn" class="candy-btn hidden">
+        <img src="images/重來.png" alt="RESTART">
+      </button>
+    </footer>
+
+    <!-- 彈出橫幅遮罩層 (下一關、通關、時間到) -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div class="modal-box">
+        <img id="modal-banner" src="" alt="提示訊息" class="banner-img">
+        <div class="modal-actions">
+          <button id="modal-btn" class="candy-btn">
+            <img id="modal-btn-img" src="images/開始.png" alt="按鈕">
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

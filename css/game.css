@@ -1,0 +1,98 @@
+/* Game page only; each game keeps its own isolated document. */
+@font-face { font-family: GameHand; src: url('../assets/fonts/wish-handwritten.woff') format('woff'); font-display: swap; }
+.games-body { --game-snow-paper: #fff9eb; --games-header-height: 108px; }
+/* The document scrolls; Header stays unchanged and scrolls away normally. */
+html.games-document { scroll-snap-type: y proximity; scroll-padding-block-start: 1rem; }
+.games-page { --game-hand: GameHand, var(--font-display); padding-block: 0; overflow-x: clip; }
+.games-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem 1.5rem; margin: 0 0 .65rem; }
+.games-heading .eyebrow { font-size: .6rem; margin-bottom: .15rem; }
+.games-heading h1 { font: 400 clamp(1.3rem, 2vw, 1.65rem)/1.15 var(--game-hand); margin: 0; color: var(--red); }
+.games-heading p { margin: 0; font-size: .8rem; color: var(--muted); }
+.game-section { position: relative; min-width: 0; min-height: calc(100svh - var(--games-header-height)); scroll-snap-align: start; scroll-snap-stop: normal; }
+.flying-section { scroll-margin-block-start: var(--games-header-height); min-height: calc(100svh - var(--games-header-height)); padding-block: .75rem 1.25rem; }
+.game-section-heading { display: flex; align-items: baseline; justify-content: center; gap: .75rem; margin-bottom: .65rem; }
+.game-section-heading .eyebrow { margin: 0; }
+.game-section-heading h2 { font: 400 clamp(1.2rem, 2.2vw, 1.6rem)/1.2 var(--game-hand); margin: 0; }
+.fly-frame-shell { width: min(100%, 1100px); margin-inline: auto; container-type: inline-size; filter: drop-shadow(0 6px 4px #344d5714); }
+/* Original game: 94px HUD + (W - 2px) × 510/1100 stage + 78px controls + 2px border.
+   The iframe viewport follows its own 650px breakpoint; the game is never scaled. */
+.flying-game-frame { display: block; width: 100%; border: 0; height: calc((100cqw - 2px) * .463636364 + 174px); background: transparent; }
+@container (max-width: 650px) {
+  .flying-game-frame { height: calc((100cqw - 2px) * .909090909 + 168px); }
+}
+.flying-caption { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1.5rem; width: min(100%, 1100px); margin: .65rem auto 0; color: var(--muted); font-size: .75rem; }
+.flying-caption p { margin: 0; }
+.game-fallback { white-space: nowrap; }
+.matching-section { margin: 0; padding: 1.5rem 0; }
+.matching-layout { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 32fr) minmax(0, 65fr); column-gap: 3%; align-items: start; }
+.matching-copy { min-width: 0; position: relative; z-index: 1; }
+.matching-copy h2 { font: 400 clamp(2rem, 3vw, 2.8rem)/1.05 var(--game-hand); color: var(--red); margin: 0 0 .8rem; }
+.matching-copy .matching-intro { max-width: 24ch; font-size: .95rem; line-height: 1.8; margin: 0; }
+.matching-play-area { width: 100%; max-width: 650px; justify-self: center; position: relative; min-width: 0; z-index: 1; }
+/* Same-origin original game reports its natural content height; fallback before loading. */
+.matching-game-frame { display: block; width: 100%; height: 560px; border: 0; background: #f7f6f2; box-shadow: 2px 7px 0 #a7bcc131, 0 13px 25px #344d570b; }
+.matching-fallback { font-size: .7rem; color: var(--muted); margin-top: .5rem; }
+.matching-fallback summary { cursor: pointer; }
+/* Foreground belongs to Game 02 and occupies no independent layout row. */
+.matching-foreground { z-index: 0; position: absolute; isolation: isolate; inset: auto 0 0; height: 110px; overflow: clip; pointer-events: none; }
+.landscape-snow { position: absolute; display: block; width: 100%; height: auto; bottom: 0; filter: drop-shadow(0 -3px 2px #819ca81a); }
+.snow-back { z-index: 0; bottom: .6rem; opacity: .55; }
+.snow-middle { z-index: 1; }
+.landscape-art { position: relative; height: 100%; z-index: 2; }
+.gift-piece { position: absolute; bottom: 26px; transition: transform .8s cubic-bezier(.2,.75,.3,1), opacity .8s ease; transition-delay: var(--gift-delay, 0s); }
+.gift-illustration { display: block; width: 100%; height: auto; transform: rotate(var(--gift-angle, 0deg)); filter: drop-shadow(1px 4px 2px #344d571a); }
+/* Non-destructive sprite windows: complete artwork plus transparent gutters.
+   Original 612×408 sheet: blue (8,158,181,129), cream (172,5,153,150).
+   Keep the originals and one decoded sheet; never stretch or redraw the gifts. */
+.gift-sprite { position: relative; overflow: hidden; }
+.gift-sprite img { position: absolute; display: block; max-width: none; height: auto; }
+.sprite-blue { aspect-ratio: 181 / 129; }
+.sprite-blue img { width: 338.121547%; left: -4.41989%; top: -122.48062%; }
+.sprite-cream { aspect-ratio: 153 / 150; }
+.sprite-cream img { width: 400%; left: -112.4183%; top: -3.333333%; }
+.landscape-art.is-visible .gift-float { animation: gift-sway var(--gift-duration, 7s) ease-in-out infinite; animation-delay: calc(.85s + var(--gift-delay, 0s)); }
+.gift-left { left: 1%; width: 120px; --gift-angle: -3deg; }
+.gift-right-back { right: 6%; width: 38px; bottom: 24px; --gift-angle: -7deg; --gift-delay: .12s; --gift-duration: 7s; }
+.gift-right-front { left: 34%; width: 60px; bottom: 26px; --gift-angle: 5deg; --gift-delay: .24s; --gift-duration: 8.5s; }
+.snow-foreground { position: absolute; z-index: 3; inset: auto 0 0; height: 20px; background: var(--game-snow-paper); border-radius: 43% 57% 0 0 / 20px 28px 0 0; box-shadow: 0 -2px 0 #efdfc955; }
+.snow-foreground::after { content: ''; position: absolute; inset: 16px 0 0; opacity: .15; background-image: radial-gradient(#a2ad9a .5px, transparent .8px); background-size: 5px 5px; mask-image: linear-gradient(#000, transparent); }
+.games-body .site-footer { scroll-snap-align: end; background: var(--game-snow-paper); border-top: 0; padding-top: 1.25rem; }
+@keyframes gift-sway { 0%, 100% { transform: translateY(0) rotate(var(--gift-angle)); } 50% { transform: translateY(-2px) rotate(calc(var(--gift-angle) + 1deg)); } }
+.games-page [data-reveal] { opacity: 1; }
+.games-page.reveal-ready [data-reveal]:not(.is-visible) { opacity: 0; transform: translateY(16px); }
+.games-page.reveal-ready [data-reveal='left']:not(.is-visible) { transform: translateX(-22px); }
+.games-page.reveal-ready [data-reveal='right']:not(.is-visible) { transform: translateX(22px); }
+.games-page.reveal-ready [data-reveal='gifts']:not(.is-visible) { opacity: 1; transform: none; }
+.games-page.reveal-ready [data-reveal='gifts']:not(.is-visible) .gift-piece { opacity: 0; transform: translateY(16px) scale(.97); }
+.games-page.reveal-ready [data-reveal] { transition: opacity .65s ease, transform .65s cubic-bezier(.2,.75,.3,1); }
+@media (max-width: 1100px) {
+  .matching-foreground .gift-piece { display: none; }
+}
+@media (max-width: 880px) {
+  .matching-layout { grid-template-columns: minmax(0, 30fr) minmax(0, 67fr); }
+  .matching-copy h2 { font-size: 2rem; }
+}
+@media (max-width: 700px) {
+  html.games-document { scroll-snap-type: none; scroll-padding-block-start: 0; }
+  .games-body { --games-header-height: 86px; }
+  .fly-frame-shell { width: 100%; }
+  .games-heading { display: block; margin-bottom: .8rem; }
+  .games-heading p { margin-top: .3rem; font-size: .75rem; }
+  .game-section-heading { gap: .4rem; }
+  .game-section-heading .eyebrow { font-size: .55rem; white-space: nowrap; }
+  .matching-section { min-height: 0; padding-block: 1.5rem; }
+  .matching-layout { grid-template-columns: minmax(0, 1fr); row-gap: 1rem; }
+  .matching-copy h2 { font-size: 2rem; margin-bottom: .5rem; }
+  .matching-copy h2 br { display: none; }
+  .matching-copy .matching-intro { max-width: 100%; font-size: .9rem; }
+  .games-page.reveal-ready [data-reveal='left']:not(.is-visible) { transform: translateX(-12px); }
+  .games-page.reveal-ready [data-reveal='right']:not(.is-visible) { transform: translateX(12px); }
+  .matching-foreground { height: 35px; }
+  .games-body .music-widget { background: var(--game-snow-paper); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.games-document { scroll-snap-type: none; scroll-behavior: auto; }
+  .gift-piece, .gift-illustration { animation: none !important; transition: none !important; }
+  .games-page.reveal-ready [data-reveal='gifts']:not(.is-visible) .gift-piece { opacity: 1; transform: none; }
+  .games-page.reveal-ready [data-reveal], .games-page.reveal-ready [data-reveal]:not(.is-visible) { opacity: 1; transform: none; transition: none; }
+}

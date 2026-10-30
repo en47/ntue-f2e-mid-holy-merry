@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-29",
+  "projectId": "holymerry",
+  "databaseId": "(default)",
+  "location": "asia-east1",
+  "rules": {
+    "source": "firestore.rules",
+    "sha256": "599b09136cba4934f6d12468c959abf0d9c706bfe9324097cabcb4e22ae8b275",
+    "deployed": true,
+    "consoleRevision": "2026-10-29 08:09 Asia/Taipei",
+    "editorComparison": "Full editor text matched source, ignoring formatting whitespace",
+    "previousPolicy": "docs/FIRESTORE-PREVIOUS.rules"
+  },
+  "index": {
+    "id": "CICAgOjXh4EK",
+    "collectionGroup": "wishes",
+    "fields": [
+      "status ASC",
+      "createdAt ASC"
+    ],
+    "status": "ENABLED",
+    "observedCompleteAt": "2026-10-29 08:19:33 Asia/Taipei"
+  },
+  "tests": {
+    "existingSmokeGroups": 23,
+    "firebaseEmulatorTests": 18,
+    "envelopeTests": 2,
+    "emulatorProjectId": "demo-holy-merry"
+  },
+  "productionChecks": {
+    "anonymousSignIn": true,
+    "sameUidAfterReload": true,
+    "latestAndPublicServerQueries": true,
+    "privateWishSubmission": true,
+    "goldEnvelopeAfterServerConfirmation": true,
+    "sameWishAfterReload": true,
+    "goldEnvelopeOpensWish": true,
+    "publicTestDataPublished": false,
+    "privateTestWishRetained": "Firebase 私人驗收",
+    "adminClaimInitialized": true,
+    "adminProductionModerationVerified": true,
+    "viewportWidths": [
+      1440,
+      1024,
+      768,
+      390
+    ],
+    "adminUid": "ruJo1twnFcYZxNaYGvhrryXUCjz2",
+    "passwordProviderVerified": true,
+    "adminFreshTokenQueueVerified": true,
+    "approvedNamedTest": "47 / 你好",
+    "rejectedNamedTest": "Firebase 私人驗收",
+    "otherAnonymousCanReadApprovedCopy": true,
+    "otherAnonymousCannotReadOriginals": true,
+    "otherAnonymousCannotQueryModeration": true,
+    "ownPlusPublicAfterReload": 2,
+    "livePublicPoolCount": 1,
+    "fullTenEnvelopeProductionVisualVerified": false
+  },
+  "modifiedExistingFiles": [
+    "README.md",
+    "TESTING.md",
+    "docs/WISH-DELIVERY.md",
+    "docs/WISH-ROOM.md",
+    "js/components/wish-delivery.js",
+    "js/components/wish-scene.js",
+    "js/wish.js",
+    "wish.html"
+  ],
+  "newFiles": [
+    ".gitignore",
+    "admin.html",
+    "css/admin.css",
+    "css/wish-cloud.css",
+    "docs/FIREBASE-SETUP.md",
+    "docs/FIREBASE-VERIFICATION.json",
+    "docs/FIRESTORE-PREVIOUS.rules",
+    "firebase.json",
+    "firestore.indexes.json",
+    "firestore.rules",
+    "js/admin.js",
+    "js/components/wish-envelopes.js",
+    "js/config/firebase-config.js",
+    "js/services/firebase-client-core.js",
+    "js/services/firebase-client.js",
+    "js/services/firebase-sdk.js",
+    "js/services/wish-repository-core.js",
+    "js/services/wish-repository.js",
+    "js/services/wish-selection.js",
+    "package-lock.json",
+    "package.json",
+    "tests/firebase-connection.html",
+    "tests/firebase-connection.js",
+    "tests/firebase.integration.test.mjs",
+    "tests/firestore.rules.test.mjs",
+    "tests/wish-cloud.test.mjs",
+    "tools/firebase-admin/set-admin-claim.mjs"
+  ],
+  "deletedFiles": [],
+  "preserved": "Other three pages, shared CSS/JS, original illustrations and all GLBs hash-identical to task baseline",
+  "adminVerification": {
+    "details": "docs/FIREBASE-ADMIN-VERIFICATION.md",
+    "emulatorTestsRerun": 18,
+    "temporaryIamBindingRemoved": true,
+    "temporaryAdcFileRemoved": true,
+    "temporaryCliLoginRevoked": true,
+    "serviceAccountKeysCreated": 0,
+    "frontendVisualChanges": false
+  },
+  "adminStageFiles": {
+    "added": [
+      "admin/index.html",
+      "tools/firebase-admin/verify-wish-access.mjs",
+      "docs/FIREBASE-ADMIN-VERIFICATION.md"
+    ],
+    "updated": [
+      "README.md",
+      "TESTING.md",
+      "docs/FIREBASE-SETUP.md",
+      "docs/FIREBASE-VERIFICATION.json"
+    ]
+  }
+}

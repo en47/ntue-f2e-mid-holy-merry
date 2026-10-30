@@ -1,0 +1,17 @@
+{
+  "name": "three",
+  "version": "0.183.0",
+  "source": "https://registry.npmjs.org/three/-/three-0.183.0.tgz",
+  "integrity": "sha512-G6SH2jfefIVa2YI4JL2VbgQhrrbp1A8dRc7lr3PW827kdVyaX2RgH6M5FmjmdVFLgSHppyg3OYOZdTfWElle+g==",
+  "license": "MIT",
+  "files": {
+    "package.json": "af51840ed26d9372a1e5580da7f592bc13cebad42809feb1a22eaaba4977d692",
+    "LICENSE": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc",
+    "build/three.core.js": "6ed72f08289a29f547bb0ab96e396a1fa2e9921ecff743fd99e0fd927bc00d7c",
+    "build/three.module.js": "d8ecc4fc0852d9690085411d17307c50e25de9dabb14f4d5a942c6ae0e2bad29",
+    "examples/jsm/loaders/GLTFLoader.js": "e4e692923224a10bbc00be04365d6356b5e8c48b2bbd1f22a7fe929591646fb8",
+    "examples/jsm/utils/BufferGeometryUtils.js": "fda7e946b8e0b5ab39b779206589e7a1079a22eb24efb89d7223e03fdfb1f751",
+    "examples/jsm/environments/RoomEnvironment.js": "55f466192cc84298755a424c5e040345006b2ee1455589b3b54126c2ea4123f4",
+    "examples/jsm/utils/SkeletonUtils.js": "0761b1e003917b215d25dd81439d854b36034b5a57ce84c2cfe3b02428d7b253"
+  }
+}

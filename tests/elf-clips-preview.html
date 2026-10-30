@@ -1,0 +1,6 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Native elf clips check</title>
+<script type="importmap">{"imports":{"three":"../vendor/three/build/three.module.js"}}</script>
+<style>body{margin:0;padding:16px;background:#d5e6ec;font:14px/1.6 system-ui;color:#344d57}nav{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}button{padding:7px 12px}#stage{max-width:1000px;height:240px;margin:auto}canvas{width:100%;height:100%;display:block}output{display:block;min-height:24px}h1{font-size:20px}</style>
+<script type="module" src="elf-clips-preview.js"></script></head><body><h1>精靈原生動畫品質檢查</h1><div id="stage"></div><p>使用新提供的原始模型及同骨架的既有原生 keyframes。沒有整體彈跳／傾斜／旋轉替代動作；灰線是共用地面。此頁無 Firebase。</p>
+<nav><button data-clip="look_around" disabled>原生張望待機</button><button data-clip="walk" disabled>原生行走</button><button data-clip="dance_03" disabled>原生舞蹈 03</button><button data-clip="dance_04" disabled>原生舞蹈 04</button><button data-clip="dance_05" disabled>原生舞蹈 05</button></nav>
+<nav>定格檢查：<button data-phase="0">開始</button><button data-phase=".25">25%</button><button data-phase=".5">50%</button><button data-phase=".75">75%</button><button data-phase="1">結束</button></nav><output id="state">載入模型及原生動作……</output></body></html>

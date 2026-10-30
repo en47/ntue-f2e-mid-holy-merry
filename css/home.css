@@ -1,0 +1,167 @@
+/* 僅首頁載入：素材及鉸鏈位置沿用 V4，導覽和其他頁不受影響。 */
+.home-page { overflow-x: clip; background: #c7e3ec; color: #66564c; }
+.home-page .site-header { background: #c7e3ec; border-bottom: 0; }
+.home-page .header-inner { padding-block: 1rem; }
+.home-page .site-footer { margin-top: 1.25rem; }
+.storybook { --story-cream: #fff7e8; --story-ink: #66564c; position: relative; isolation: isolate; width: min(1440px, calc(100% - 2rem)); height: calc(100svh - 110px); min-height: 580px; max-height: 960px; margin: 0 auto; padding: 0; overflow: hidden; overflow: clip; border: 8px solid #f8f0df; border-radius: 15px 12px 14px 10px; background: linear-gradient(180deg,#75a9c5 0%,#b6d6e5 63%,#e6eef0 100%); box-shadow: 0 14px 28px #42677724, 0 3px 0 #c8b99e; }
+.paper-texture { position: absolute; inset: 0; z-index: 20; opacity: .13; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E"); }
+.countdown { position: absolute; top: 1.1rem; right: 1.4rem; z-index: 17; display: flex; gap: .8rem; align-items: center; color: #4a5660; font-size: .7rem; }
+.countdown-units { display: flex; gap: .65rem; }
+.countdown-units > span { display: flex; align-items: baseline; gap: .18rem; }
+.countdown strong { font-size: 1.1rem; font-variant-numeric: tabular-nums; color: #7b3d34; }
+.countdown small { font-size: .65rem; }
+.storybook-title { position: absolute; z-index: 13; top: clamp(3.75rem, 7%, 4.5rem); left: 50%; width: min(34%, 390px); margin: 0; transform: translateX(-50%); pointer-events: none; filter: drop-shadow(3px 7px 2px #4f5c6045); }
+.title-motion, .title-motion img { display: block; width: 100%; height: auto; }
+.title-motion { transform-origin: 50% 0; animation: title-rock 4s ease-in-out infinite alternate; animation-delay: 3.7s; }
+.story-stage { position: absolute; inset: 0; }
+.paper-layer { position: absolute; left: -2%; width: 104%; transform-origin: 50% 100%; perspective: 1000px; pointer-events: none; filter: drop-shadow(1px 2px 0 #f5ead8) drop-shadow(3px 8px 3px #536c7b55); }
+.paper-layer img { display: block; width: 100%; height: 100%; object-fit: fill; }
+.mountains { bottom: 32%; height: 44%; z-index: 1; }
+.village { left: 47%; width: 51%; bottom: 23%; height: 34%; z-index: 4; }
+.village img { object-fit: contain; object-position: right bottom; }
+/* 依第一版：左側森林／紅莓，右側完整村落。只重用已清理的完整插畫。 */
+.side-scenery { height: auto; z-index: 3; }
+.side-scenery img { height: auto; object-fit: contain; }
+.side-scenery-left, .tree-grove-left { left: 2%; width: 37%; bottom: 25%; }
+.side-scenery-right { left: auto; right: 2%; width: 25%; bottom: 20%; z-index: 10; }
+.foreground { bottom: -1%; height: 25%; left: -3%; width: 106%; z-index: 11; }
+.hand-cloud { position: absolute; z-index: 2; top: 24%; right: 2%; width: 20%; height: 22%; object-fit: contain; opacity: .8; pointer-events: none; }
+.scenery-trees { position: absolute; inset: 0; pointer-events: none; }
+/* 樹根以對應雪坡的原圖座標定位，不再各自綁定整個舞台的 bottom。 */
+.tree-grove { position: absolute; pointer-events: none; }
+.tree-grove-left { aspect-ratio: 965 / 190; z-index: 3; }
+.tree-grove-front { left: -3%; width: 106%; bottom: -1%; height: 25%; z-index: 12; }
+/* 兩張完整樹圖交錯使用；三個相對尺寸，外層保留原鉸鏈。 */
+.paper-tree { --tree-size: 1; --tree-base: clamp(120px, 18vw, 240px); --tree-tilt: 0deg; position: absolute; width: calc(var(--tree-base) * var(--tree-size)); transform-origin: 50% 100%; pointer-events: none; filter: drop-shadow(1px 2px 0 #f5ead8) drop-shadow(3px 6px 3px #47575c40); }
+.paper-tree img { display: block; width: 100%; height: auto; transform: rotate(var(--tree-tilt)); transform-origin: 50% 100%; }
+.tree-large { --tree-size: 1; z-index: 12; }
+.tree-medium { --tree-size: .72; z-index: 4; }
+.tree-small { --tree-size: .48; z-index: 3; }
+/* 前景雪圖高 190：左樹根 y≈136、右樹根 y≈116，均落在雪坡內。 */
+.tree-near-left { left: 4%; bottom: 28.4%; --tree-tilt: -2deg; }
+.tree-near-right { right: 4%; bottom: 38.9%; --tree-size: .8; --tree-tilt: 2deg; }
+/* 左側中景雪圖：樹根 y≈148／139；右側使用村落 PNG 本身的樹木。 */
+.tree-middle-left { left: 37%; bottom: 22%; --tree-tilt: 1deg; }
+.tree-far-left { left: 64%; bottom: 27%; --tree-tilt: -2.5deg; }
+/* 這兩片在 Canvas 前方，低矮雪脊略蓋住鞋尖，裝飾不攔截點擊。 */
+.snow-accent { position: absolute; z-index: 12; bottom: 17%; width: 18%; height: auto; pointer-events: none; filter: drop-shadow(2px 4px 2px #536f7744); transform-origin: 50% 100%; }
+.snow-accent.left { left: 28%; }
+.snow-accent.right { right: 25%; transform: scaleX(-1); }
+.characters { position: absolute; inset: 0; pointer-events: none; }
+.characters-canvas { position: absolute; inset: 0; z-index: 7; display: block; width: 100%; height: 100%; max-width: none; pointer-events: none; }
+.character { position: absolute; bottom: 15%; width: 28%; height: 44%; min-width: 0; }
+.character-santa { left: 22%; }
+.character-reindeer { right: 22%; }
+.character-stage { position: absolute; inset: 0; z-index: 8; appearance: none; padding: 0; font: inherit; background: transparent; border: 0; box-shadow: none; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; pointer-events: auto; }
+.character-stage.is-dragging { cursor: grabbing; }
+.character-stage:focus-visible { outline: none; }
+.stage-key-hint { position: absolute; top: 0; left: 50%; width: max-content; max-width: 95%; transform: translateX(-50%); text-align: center; color: #623b31; background: #fff7e8e8; padding: .3rem; font-size: .7rem; opacity: 0; pointer-events: none; }
+.character-stage:focus-visible .stage-key-hint { opacity: 1; }
+.model-recovery { position: absolute; top: 98%; left: -12%; z-index: 15; width: 124%; text-align: center; pointer-events: auto; }
+.asset-retry { padding: .3rem .6rem; background: #fff7e8; border: 1px dashed #aa896f; color: #614c3e; font-size: .72rem; }
+.model-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); margin: 0; }
+.character:has([data-state='error']) .model-status { position: static; width: auto; height: auto; clip-path: none; background: #fff7e8e8; padding: .3rem; font-size: .75rem; }
+.model-fallback { position: absolute; inset: 0; display: grid; place-content: center; gap: .7rem; text-align: center; font-size: .75rem; color: #4c5960; }
+.model-fallback > span { margin: 0; }
+.model-fallback progress { width: min(110px, 80%); height: 5px; margin: auto; accent-color: #a64f47; }
+.story-actions { position: absolute; bottom: 3.5%; left: 50%; transform: translate3d(-50%, 0, 0); z-index: 30; will-change: transform; display: flex; justify-content: center; gap: 1rem; white-space: nowrap; }
+.paper-button { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 1rem; min-height: 43px; padding: .55rem 1rem; background: none; border: 0; border-radius: 0; color: #634d3b; font-weight: 600; font-size: .8rem; text-decoration: none; transform: rotate(-1.4deg); transition: transform .2s; }
+.paper-button::before { content: ''; position: absolute; z-index: -1; inset: -2px -4px; background: url('../assets/illustrations/storybook/paper-tab.svg') center / 100% 100% no-repeat; filter: drop-shadow(1px 3px 2px #68513a25); }
+.paper-button.cream { transform: rotate(1.4deg); }
+.paper-button:hover { transform: translateY(-2px) rotate(0); }
+.story-hint { position: absolute; z-index: 31; bottom: .4%; left: 50%; transform: translate3d(-50%, 0, 0); margin: 0; width: max-content; max-width: 80%; text-align: center; color: #66564c; font-size: .68rem; line-height: 1.6; }
+.replay { position: absolute; z-index: 18; left: .6rem; bottom: .5rem; background: #fff9e8dc; border: 1px solid #bda590; border-radius: 4px 6px 3px 5px; padding: .35rem .55rem; color: #66564c; font-size: .7rem; }
+/* 透明按鈕承載原生 SVG 信紙，沒有通用卡片底色或圓角面板。 */
+.christmas-letter { position: fixed; z-index: 40; top: 44%; width: min(300px, 24vw); padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; color: #66564c; text-align: center; line-height: 1.65; opacity: 0; transform-origin: 0 50%; transition: transform .5s cubic-bezier(.2,1.2,.3,1), opacity .3s; }
+.christmas-letter.left { left: max(.7rem, 1.2vw); transform: perspective(800px) translateX(calc(-110% - 2vw)) rotateY(24deg) rotate(-4deg); }
+.christmas-letter.right { right: max(.7rem, 1.2vw); transform-origin: 100% 50%; transform: perspective(800px) translateX(calc(110% + 2vw)) rotateY(-24deg) rotate(4deg); }
+.christmas-letter.is-visible { opacity: 1; transform: perspective(800px) translateX(0) rotateY(0) rotate(-1.5deg); }
+.christmas-letter.right.is-visible { transform: perspective(800px) translateX(0) rotateY(0) rotate(1.5deg); }
+.letter-body { display: grid; align-content: center; position: relative; isolation: isolate; min-height: 210px; padding: 3rem 1.6rem 2.4rem; transform-origin: 50% 20%; transform: perspective(600px) rotateX(-28deg); transition: transform .55s cubic-bezier(.2,1.15,.3,1); }
+.letter-body::before { content: ''; position: absolute; inset: 0; z-index: -1; background: url('../assets/illustrations/storybook/christmas-letter.svg') center / 100% 100% no-repeat; filter: drop-shadow(2px 5px 2px #68513a30); }
+.christmas-letter.is-visible .letter-body { transform: perspective(600px) rotateX(0); }
+.letter-copy { display: block; min-width: 0; padding-inline: .4rem; font-size: .88rem; font-weight: 500; overflow-wrap: anywhere; }
+.christmas-letter small { display: block; margin-top: .8rem; font-size: .62rem; color: #9c816a; font-weight: 400; }
+.no-script { position: absolute; z-index: 30; top: 52%; width: 100%; text-align: center; background: #fff7e8; padding: 1rem; }
+/* 鉸鏈旋轉，不以單純上移取代紙雕展開。無 JS 時也可看到完整場景。 */
+.storybook.is-opening .paper-layer { animation: paper-unfold 1.05s cubic-bezier(.17,1.3,.35,1) both; }
+.storybook.is-opening .mountains { animation-delay: .15s; }
+.storybook.is-opening .village { animation-delay: .9s; }
+.storybook.is-opening .side-scenery-left { animation-delay: 1.15s; }
+.storybook.is-opening .side-scenery-right { animation-delay: 1.8s; }
+.storybook.is-opening .foreground { animation-delay: 1.65s; }
+.storybook.is-opening .paper-tree { animation: paper-unfold 1s cubic-bezier(.17,1.3,.35,1) both; animation-delay: 2.1s; }
+.storybook.is-opening .tree-small { animation-delay: .65s; }
+.storybook.is-opening .tree-medium { animation-delay: 1.1s; }
+/* 雪坡先完成展開，再從已落地的樹根豎起，避免開場途中先懸空出現。 */
+.storybook.is-opening .tree-grove-left .paper-tree { animation-delay: 2.25s; }
+.storybook.is-opening .tree-grove-left .tree-medium { animation-delay: 2.35s; }
+.storybook.is-opening .tree-near-left { animation-delay: 2.75s; }
+.storybook.is-opening .tree-near-right { animation-delay: 2.9s; }
+.storybook.is-opening .snow-accent { animation: paper-unfold 1s cubic-bezier(.17,1.3,.35,1) both; animation-delay: 1.85s; }
+.snow-accent.right { --paper-mirror: -1; }
+.storybook.is-opening .storybook-title { animation: title-arrive .9s ease-out both; animation-delay: 2.95s; }
+@keyframes paper-unfold { 0% { transform: perspective(1000px) rotateX(-87deg) scaleX(var(--paper-mirror, 1)) translateY(45px); opacity: 0; } 76% { transform: perspective(1000px) rotateX(4deg) scaleX(var(--paper-mirror, 1)); opacity: 1; } 100% { transform: perspective(1000px) rotateX(0) scaleX(var(--paper-mirror, 1)); opacity: 1; } }
+@keyframes title-arrive { from { opacity: 0; transform: translateX(-50%) rotate(-2deg) translateY(-4px); } to { opacity: 1; transform: translateX(-50%) rotate(0) translateY(0); } }
+@keyframes title-rock { from { transform: rotate(-1.7deg); } to { transform: rotate(1.7deg); } }
+@media (max-width: 900px) {
+  .storybook { width: calc(100% - 1rem); min-height: 650px; }
+  .storybook-title { width: min(46%, 370px); top: 9%; }
+  .mountains { left: -12%; width: 124%; height: 39%; bottom: 34%; }
+  .village { left: 51%; width: 47%; height: 30%; bottom: 25%; }
+  .side-scenery-left, .tree-grove-left { left: 1%; width: 38%; bottom: 26%; }
+  .side-scenery-right { right: 1%; width: 25%; bottom: 18%; }
+  .paper-tree { --tree-base: clamp(125px, 20vw, 180px); }
+  .character { width: 35%; height: 43%; bottom: 17%; }
+  .character-santa { left: 15%; } .character-reindeer { right: 15%; }
+  .snow-accent { bottom: 19%; width: 23%; }
+  .snow-accent.left { left: 20%; } .snow-accent.right { right: 19%; }
+  .christmas-letter { width: min(275px, 35vw); top: auto; bottom: 16%; }
+}
+@media (max-width: 600px) {
+  .home-page .header-inner { padding-block: .7rem; }
+  .storybook { width: 100%; height: calc(100svh - 85px); min-height: 640px; border-width: 5px; border-radius: 0; }
+  .countdown { top: .8rem; left: 0; right: 0; justify-content: center; gap: .6rem; font-size: .65rem; }
+  .countdown-units { gap: .5rem; }
+  .countdown strong { font-size: .95rem; }
+  .storybook-title { top: 10%; width: 76%; max-width: 320px; }
+  .mountains { height: 31%; bottom: 37%; left: -35%; width: 170%; }
+  .village { height: 29%; bottom: 30%; left: 47%; width: 51%; }
+  .village img { object-position: right bottom; }
+  .side-scenery-left, .tree-grove-left { left: 1%; width: 44%; bottom: 30%; }
+  .side-scenery-right { right: 1%; width: 29%; bottom: 18%; }
+  .character { height: 35%; bottom: 23%; width: 45%; }
+  .character-santa { left: 5%; } .character-reindeer { right: 5%; }
+  .model-recovery { top: 99%; left: -4%; width: 108%; }
+  .foreground { height: 22%; bottom: 0; left: -22%; width: 144%; }
+  .tree-grove-front { height: 22%; bottom: 0; left: -22%; width: 144%; }
+  .paper-tree { --tree-base: clamp(82px, 23vw, 120px); }
+  .tree-near-left { left: 15.5%; }
+  .tree-near-right { right: 16%; }
+  .tree-middle-left { left: 1%; }
+  .tree-far-left { display: none; }
+  .hand-cloud { top: 31%; width: 30%; right: -2%; }
+  .snow-accent { bottom: 25%; width: 26%; }
+  .snow-accent.left { left: 11%; } .snow-accent.right { right: 9%; }
+  .story-actions { bottom: 9%; gap: .7rem; }
+  .paper-button { min-height: 40px; padding: .5rem .75rem; font-size: .72rem; gap: .5rem; }
+  .story-hint { bottom: 3.8%; width: 90%; max-width: 95%; font-size: .62rem; }
+  .replay { bottom: .3rem; font-size: .62rem; }
+  .christmas-letter { width: min(320px, calc(100% - 2rem)); left: 50% !important; right: auto !important; bottom: 5svh; }
+  .christmas-letter.left { transform: perspective(800px) translateX(-160%) rotateY(22deg); }
+  .christmas-letter.right { transform: perspective(800px) translateX(60%) rotateY(-22deg); }
+  .christmas-letter.is-visible { transform: perspective(800px) translateX(-50%) rotateY(0) rotate(-1deg); }
+  .christmas-letter.right.is-visible { transform: perspective(800px) translateX(-50%) rotateY(0) rotate(1deg); }
+  .letter-body { min-height: 190px; padding: 2.6rem 3.2rem 2.1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .storybook.is-opening .paper-layer, .storybook.is-opening .paper-tree, .storybook.is-opening .snow-accent, .storybook.is-opening .storybook-title, .title-motion { animation: none; }
+  .christmas-letter, .letter-body, .paper-button { transition: none; }
+  .paper-button:hover { transform: none; }
+}
+
+/* V5：去除原 PNG 混入的相鄰素材，不靠前景堆疊遮掩錯誤。 */
+.paper-layer img, .hand-cloud, .snow-accent { -webkit-mask-image: var(--art-mask, none); mask-image: var(--art-mask, none); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; mask-mode: alpha; }
+.storybook img[src$="04_foreground_snow.png"] { --art-mask: url('../assets/illustrations/storybook/masks/04_foreground_snow.svg'); }
+.storybook img[src$="06_clouds.png"] { --art-mask: url('../assets/illustrations/storybook/masks/06_clouds.svg'); }
+.storybook img[src$="07_small_snowbanks.png"] { --art-mask: url('../assets/illustrations/storybook/masks/07_small_snowbanks.svg'); }

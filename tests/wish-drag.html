@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wish drag acceptance</title><link rel="stylesheet" href="../css/shared.css"><link rel="stylesheet" href="../css/wish.css"><link rel="stylesheet" href="../css/wish-cloud.css"><link rel="stylesheet" href="../css/wish-delivery.css"><script type="importmap">{"imports":{"three":"../vendor/three/build/three.module.js"}}</script><style>
+body{margin:0}#review{padding:10px;font:13px system-ui;background:#edf3f4}#review header{display:flex;gap:14px;align-items:center;flex-wrap:wrap}#review a{padding:8px}#diagnostic{display:block;white-space:pre-wrap;line-height:1.5;min-height:5em;font-size:12px}#preview{margin:auto}iframe{display:block;border:0;transform-origin:top left}#test-stage{padding:0}.wish-room{margin-top:0}
+</style></head><body><script type="module">
+const q=new URLSearchParams(location.search);
+if(!q.has('stage')){
+ document.body.innerHTML='<div id="review"><header><b>Wish 原生拖曳驗收</b><a href="?width=1440">桌面 1440</a><a href="?width=390">手機 390</a><span>使用正式 HTML／GLB／控制器；10 封本機測試信。不載入 Firebase、不寄信。</span></header><output id="diagnostic" role="status">等待場景……</output><div id="preview"><iframe title="Wish 原生拖曳測試" src="?stage=1"></iframe></div></div>';
+ const width=Number(q.get('width'))||1440,frame=document.querySelector('iframe'),box=document.querySelector('#preview');
+ function size(){const scale=Math.min(1,(innerWidth-24)/width,(innerHeight-155)/900);Object.assign(frame.style,{width:width+'px',height:'900px',transform:`scale(${scale})`});Object.assign(box.style,{width:width*scale+'px',height:900*scale+'px'});}
+ addEventListener('resize',size);addEventListener('message',e=>{if(e.source===frame.contentWindow&&e.origin===location.origin&&e.data?.wishDrag)document.querySelector('#diagnostic').textContent=e.data.wishDrag;});size();
+}else{
+ document.body.className='wish-page';document.body.innerHTML='<main id="test-stage"></main><dialog id="read"><h2 id="read-title"></h2><p>本機互動測試信，沒有讀寫雲端。</p><button id="close">關閉測試信</button></dialog>';
+ const html=await(await fetch('../wish.html',{cache:'no-store'})).text(),room=new DOMParser().parseFromString(html,'text/html').querySelector('#wish-room');
+ room.querySelectorAll('[src]').forEach(n=>n.setAttribute('src',new URL(n.getAttribute('src'),new URL('../',location.href)).href));document.querySelector('main').append(room);
+ const {mountWishScene}=await import('../js/components/wish-scene.js'),scene=mountWishScene(room),dialog=document.querySelector('#read');
+ const {mountWishInteraction}=await import('../js/components/wish-interaction.js');const currentCode=String(mountWishInteraction).includes('compatibility mousedown');
+ room.querySelector('form').addEventListener('submit',e=>e.preventDefault());document.querySelector('#close').onclick=()=>dialog.close();
+ let reads=0,downs=0,moves=0,nativeDowns=0,selections=0,dragStarts=0,cancels=0,downEvent=null,last='',captured=false;
+ scene.setWishes(Array.from({length:10},(_,i)=>({id:`drag-qa-${i}`,nickname:`本機測試 ${i+1}`,isOwn:i===0})),wish=>{reads++;document.querySelector('#read-title').textContent=wish.nickname;dialog.showModal();report();});
+ function report(){const selection=getSelection(),field=document.activeElement,text=selection?.toString()||'',elf=room.querySelector('#elf-character');parent.postMessage({wishDrag:`控制器更新 ${currentCode}；按下 ${downs}／移動 ${moves}／相容 mousedown ${nativeDowns}／selectstart ${selections}／dragstart ${dragStarts}／pointercancel ${cancels}／讀信 ${reads}\n${downEvent?`${downEvent.pointerType} 按下 defaultPrevented=${downEvent.defaultPrevented} cancelable=${downEvent.cancelable}`:''}；最近 ${last}；捕捉 ${captured}；選取鎖 ${document.documentElement.classList.contains('wish-drag-active')}\n頁面選字 ${JSON.stringify(text.slice(0,80))}；欄位 ${field?.id||'無'} ${field?.selectionStart??'-'}…${field?.selectionEnd??'-'}；精靈 ${room.dataset.elfState||'載入中'}；scrollY ${Math.round(scrollY)}`},location.origin);}
+ for(const type of ['pointerdown','pointermove','pointerup','pointercancel','gotpointercapture','lostpointercapture','mousedown','selectstart','dragstart'])document.addEventListener(type,e=>{
+  if(type==='pointerdown'){downs++;downEvent=e;}
+  if(type==='pointermove')moves++;if(type==='mousedown')nativeDowns++;if(type==='selectstart')selections++;if(type==='dragstart')dragStarts++;if(type==='pointercancel')cancels++;
+  if(type==='gotpointercapture')captured=true;if(type==='lostpointercapture')captured=false;last=`${type} trusted=${e.isTrusted} prevented=${e.defaultPrevented}`;queueMicrotask(report);
+ },{capture:true,passive:true});
+ room.addEventListener('pointerdown',e=>{downEvent=e;report();},{capture:true});
+ document.addEventListener('selectionchange',report);document.addEventListener('input',report);document.addEventListener('focusin',report);addEventListener('scroll',report,{passive:true});
+ new MutationObserver(report).observe(room,{attributes:true,attributeFilter:['data-elf-state']});new MutationObserver(report).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+ room.addEventListener('wish:elf-ready',()=>{room.querySelector('#elf-character').click();report();},{once:true});addEventListener('pagehide',()=>scene.destroy(),{once:true});report();
+}
+</script></body></html>

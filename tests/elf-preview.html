@@ -1,0 +1,13 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Elf interaction check</title>
+<style>*{box-sizing:border-box}body{margin:0;padding:12px;background:#eee;font:14px system-ui;color:#222}header{display:flex;gap:8px;flex-wrap:wrap;align-items:center}button{padding:7px 12px}#preview{margin:12px auto}iframe{display:block;border:0;transform-origin:top left}output{display:block;margin:8px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:20px}p{font-size:12px}</style></head><body>
+<header>精靈實際版面驗收 <button data-width="1440">1440px</button><button data-width="1024">1024px</button><button data-width="768">768px</button><button data-width="390">390px</button><button id="delivery">模擬成功投遞訊號（不寫雲端）</button></header>
+<p>沿用實際 Wish HTML/CSS、GLB 與控制器；不載入 Firebase、不建立願望。直接點精靈互動，再點一次恢復；手機請在 iframe 內往下捲動。</p>
+<output id="state" role="status">正在載入精靈……</output><output id="history"></output><output id="pointer">指標測試：尚未操作。</output><div id="preview"><iframe id="viewport" src="elf-stage.html" title="Elf behavior preview"></iframe></div>
+<script type="module">
+const frame=document.querySelector('#viewport'),box=document.querySelector('#preview');let width=1440;
+function layout(){const scale=Math.min(1,(document.documentElement.clientWidth-24)/width);Object.assign(frame.style,{width:width+'px',height:'900px',transform:`scale(${scale})`});Object.assign(box.style,{width:width*scale+'px',height:900*scale+'px'});}
+document.querySelectorAll('[data-width]').forEach(button=>button.onclick=()=>{width=Number(button.dataset.width);layout();});
+document.querySelector('#delivery').onclick=()=>frame.contentWindow.postMessage({elfPreview:'delivery'},location.origin);
+addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==frame.contentWindow)return;if(event.data?.state)document.querySelector('#state').textContent=event.data.state;if(event.data?.history)document.querySelector('#history').textContent=event.data.history;if(event.data?.pointer)document.querySelector('#pointer').textContent=event.data.pointer;});
+addEventListener('resize',layout);layout();
+</script></body></html>

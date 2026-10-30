@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 230" preserveAspectRatio="none">
+ <defs><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><clipPath id="snow"><path d="M0 35Q150 12 305 35T610 32 940 28 1220 35 1440 18V230H0Z"/></clipPath></defs>
+ <path d="M0 35Q150 12 305 35T610 32 940 28 1220 35 1440 18V230H0Z" fill="#fff7e7" stroke="#ede0ca" stroke-width="4"/>
+ <g clip-path="url(#snow)"><path d="M-10 69Q230 40 425 84T875 70 1450 61V230H0Z" fill="#d4e6ea" opacity=".55"/><path d="M-10 140Q180 95 470 145T1010 131 1450 140V230H0Z" fill="#fff9eb"/><rect width="1440" height="230" filter="url(#grain)" opacity=".08"/></g>
+ <path d="M37 46q160-28 260 0m697-3q196-31 392-11M111 185q183-34 328-4m454-36q170-26 277-5" stroke="#9bbcc8" stroke-width="2" fill="none" opacity=".25" stroke-linecap="round"/>
+</svg>

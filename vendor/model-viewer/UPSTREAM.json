@@ -1,0 +1,10 @@
+{
+  "name": "@google/model-viewer",
+  "version": "4.4.0",
+  "source": "https://registry.npmjs.org/@google/model-viewer/-/model-viewer-4.4.0.tgz",
+  "integrity": "sha512-8z1SB5sPlzKoak5mdx/D31brBakPYm3Qi31EfAucHAUrtrHHCbabypkKvSwReYhUpPaxyJ46oT47uWE/hrs1Zw==",
+  "repository": "https://github.com/google/model-viewer",
+  "documentation": "https://modelviewer.dev/",
+  "license": "Apache-2.0",
+  "bundleSha256": "18b2e711035aa4705ee281530a55dc2338ff05eed3d70ae16d54105282a75ed5"
+}

@@ -1,0 +1,144 @@
+{
+  "repository": "https://github.com/me666good/game2",
+  "liveUrl": "https://me666good.github.io/game2/",
+  "commit": "ea7f29156a3b250580d0a04467ba0e5b739c358e",
+  "reviewDate": "2026-10-28",
+  "pristineDirectory": "vendor/game2",
+  "adaptations": [
+    "game.html",
+    "css/game2-matching.css",
+    "js/games/game2-matching.js"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "e88b2a6fc015a75afd185a83eb3ad0918e1762680fe47efeeb785189ffaebc98",
+      "bytes": 7
+    },
+    {
+      "path": "css/style.css",
+      "sha256": "48d69d6b3e47045d6354e08d144fc0c86d2a6bb9373758814100e630e2a882be",
+      "bytes": 5596
+    },
+    {
+      "path": "images/1.png",
+      "sha256": "28c7fdd29977d97c5266e93d6c254520bc0ff90f288a343ae1f96282bf11f62d",
+      "bytes": 304724
+    },
+    {
+      "path": "images/10.png",
+      "sha256": "a9d69d09be7ced8191b454cb1b3c2e3b143b13aa8af3188ac8ab82a3fc1fdc52",
+      "bytes": 477888
+    },
+    {
+      "path": "images/11.png",
+      "sha256": "71471ab74db5ea4d187a4426d15045adc27c624270b054e8a8fb80b653e3cfdf",
+      "bytes": 371739
+    },
+    {
+      "path": "images/12.png",
+      "sha256": "7dfd8e4f19ae4f660fc24679b2ca83179f12840d4eb35618ff5fcee5bde96070",
+      "bytes": 338602
+    },
+    {
+      "path": "images/2.png",
+      "sha256": "9c78a72113d9275e9614fc1c4e81ee61e5fbbc5281c77745482b847e76b08027",
+      "bytes": 279683
+    },
+    {
+      "path": "images/3.png",
+      "sha256": "8c66e9ae838209213b5d2a73d6744d10d6e80ece84d573ee4312867dc2723f3c",
+      "bytes": 287463
+    },
+    {
+      "path": "images/4.png",
+      "sha256": "9f1612662a514a44a6007004b991648c9b7dadcb021f8236c6aefe794cd2c7f6",
+      "bytes": 251426
+    },
+    {
+      "path": "images/5.png",
+      "sha256": "7c9be15d6a748ff0051eed98e09489fe71d7d806531222abfe8d9e61ab7c3207",
+      "bytes": 296101
+    },
+    {
+      "path": "images/6.png",
+      "sha256": "283a85ac3ce139ebebbbb05bed1d05e715db305db0b3c804c8301d418d3b3368",
+      "bytes": 222390
+    },
+    {
+      "path": "images/7.png",
+      "sha256": "ea57e9e63c73894b942bb889bd4452d8dce46f68f866849b4a8da2a98f8e7697",
+      "bytes": 411440
+    },
+    {
+      "path": "images/8.png",
+      "sha256": "3bf0f4c2c9a08849d68f4202c53bdce2ea28a9e53f1dafdebd6650ec73ce5d12",
+      "bytes": 290775
+    },
+    {
+      "path": "images/9.png",
+      "sha256": "2ccf6f3e30ac53b2e5497785c2b20d8a20bf5d5a784cbfc9c0a728ab1f381b91",
+      "bytes": 170942
+    },
+    {
+      "path": "images/intro.PNG",
+      "sha256": "e8a5f0f722fe7434b6989bc57b174b30d915bf4eea5cb25a54f2a839b1d38960",
+      "bytes": 569623
+    },
+    {
+      "path": "images/next.PNG",
+      "sha256": "8c6f865b1fba1a07698d75a7af52d6ad814dc19df1de656573698cf04823a6b8",
+      "bytes": 158216
+    },
+    {
+      "path": "images/timeout.PNG",
+      "sha256": "285c0f918c19ca502d9cddc1e630189680b2a08a1b2c552df49a6c670144b84e",
+      "bytes": 157358
+    },
+    {
+      "path": "images/win.PNG",
+      "sha256": "f1658734277d4341a3afd831a9f2ec3eb3fa5cdfaddee64ad0b4d3dae48a8d81",
+      "bytes": 207862
+    },
+    {
+      "path": "images/倒數.png",
+      "sha256": "86d7a93821323a5e8da5c9b7ae78e924b91648749b3ffcddf1a006e98cea65cd",
+      "bytes": 1315887
+    },
+    {
+      "path": "images/盒子.png",
+      "sha256": "2cae900c5cb68c04a71760388d59e7352245297623d9e4e0df0e376dc931c1ca",
+      "bytes": 941467
+    },
+    {
+      "path": "images/蓋子.png",
+      "sha256": "3246964820128a0809851131486ab584b276c8dc83ebc45f8d8f400245aa1bfb",
+      "bytes": 2118269
+    },
+    {
+      "path": "images/遊戲開始.PNG",
+      "sha256": "16c635f5850ac324d20824d887a7e70b73b01f5d157b7dd3f2e90b9184cf245c",
+      "bytes": 211864
+    },
+    {
+      "path": "images/重來.png",
+      "sha256": "cef178239134c6745340d6d45e24f4f6117882cae7fd52f54469e9d45bd39fd0",
+      "bytes": 369004
+    },
+    {
+      "path": "images/開始.png",
+      "sha256": "78bdce6e996bced5d0efdb3e640c983554d38a71196389b0e2ed6c9de4349f0a",
+      "bytes": 200026
+    },
+    {
+      "path": "index.html",
+      "sha256": "502c46ce7d4638e0496c67782578b1dce3db24a4062e8cbbf386043ebcd2db8b",
+      "bytes": 2209
+    },
+    {
+      "path": "js/script.js",
+      "sha256": "1c9880ab823f74effe4d88372bc2d160a6eae4332680070573413b399fc5b56c",
+      "bytes": 6081
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#dfeef3">
+  <meta name="description" content="Holy Merry! 聖誕小天地：聖誕故事、節日遊戲與屬於你的願望信封。">
+  <title>Wish — Holy Merry!</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/wish.css">
+  <link rel="stylesheet" href="css/wish-delivery.css">
+  <link rel="stylesheet" href="css/wish-cloud.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js"}}</script>
+  <script type="module" src="js/shared.js"></script>
+  <script type="module" src="js/wish.js"></script>
+</head>
+<body class="wish-page">
+<a class="skip-link" href="#main">跳至主要內容</a>
+<header class="site-header"><div class="shell header-inner">
+  <a class="brand" href="index.html" aria-label="Holy Merry! 首頁"><span class="brand-mark" aria-hidden="true">h</span><span><span class="brand-name">Holy Merry!</span><span class="brand-small">A HANDMADE CHRISTMAS</span></span></a>
+  <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="site-nav">選單 ☰</button>
+  <nav class="site-nav" id="site-nav" aria-label="主要導覽"><a href="index.html">Home</a><a href="intro.html">Intro</a><a href="game.html">Game</a><a href="wish.html" aria-current="page">Wish</a></nav>
+</div></header>
+<main id="main">
+<section class="wish-room" id="wish-room" aria-labelledby="room-title">
+  <header class="room-heading"><span class="eyebrow">04 / A little Christmas magic</span><h1 id="room-title">The Wish Room</h1></header>
+  <div class="room-sky" aria-hidden="true"></div>
+  <div class="room-ground" aria-hidden="true"></div>
+  <form class="wish-letter" id="wish-form">
+    <div class="letter-content">
+    <h2 lang="en">Dear Santa,</h2>
+    <label for="nickname">From <span>你的暱稱</span></label>
+    <input id="nickname" name="nickname" maxlength="20" autocomplete="nickname" placeholder="聖誕老人該怎麼稱呼你？" required>
+    <label for="wish-content">My Christmas Wish</label>
+    <textarea id="wish-content" name="wish" maxlength="300" autocomplete="off" placeholder="今年，我希望……" required aria-describedby="wish-privacy wish-counter"></textarea>
+    <div class="letter-signature"><span lang="en">With love, ♡</span><span id="wish-counter">0 / 300</span></div>
+    <label class="wish-public-choice"><input id="wish-public" type="checkbox" name="publish"><span>我同意這封願望通過審核後公開。</span></label>
+    <div class="letter-actions"><button class="letter-send" type="submit" disabled>摺信並寄送 ↗</button><small id="wish-privacy">未勾選為私人信件，僅本人及管理員可讀。<br>公開願望需先通過審核。</small></div>
+    <p class="status" id="wish-status" role="status"></p>
+    </div>
+    <section class="delivery-receipt" id="delivery-receipt" hidden aria-labelledby="receipt-title">
+      <img src="assets/illustrations/wish/envelope.png" alt="紅色蠟封的聖誕信封" width="1536" height="1024">
+      <h2 id="receipt-title" tabindex="-1">A little wish, safely kept.</h2>
+      <p id="receipt-message">願望已由雲端確認收到。</p>
+      <button class="letter-send" id="wish-again" type="button">Write Another Wish</button>
+    </section>
+  </form>
+  <figure class="stocking-station" id="stocking-station">
+    <img src="assets/illustrations/wish/stocking-rack.svg" alt="奶油白襪口的紅色聖誕襪，掛在立於雪地的小木架上" width="360" height="260">
+    <span class="stocking-opening" id="stocking-opening" aria-hidden="true"></span>
+    <figcaption>Santa’s little post</figcaption>
+  </figure>
+  <div class="wish-tree-space" id="wish-tree-space">
+    <button class="tree-gesture" id="tree-gesture" type="button" aria-label="旋轉聖誕樹：橫向拖曳，或使用左右方向鍵" aria-describedby="tree-hint"></button>
+    <p class="tree-hint" id="tree-hint">Drag to explore · 左右拖曳聖誕樹</p>
+  </div>
+  <div class="elf-lane" id="elf-lane" aria-hidden="true"></div>
+  <div class="scene-loading" id="scene-loading" role="status"><span id="scene-progress">正在打開聖誕小屋……</span><button id="scene-retry" type="button" hidden>重新載入模型</button></div>
+  <button class="elf-hit" id="elf-character" type="button" hidden aria-pressed="false" aria-label="精靈：點一下停下來互動" aria-describedby="elf-interaction-hint"></button>
+  <span class="elf-instructions" id="elf-interaction-hint">點一下精靈切換動態待機，也可直接左右拖曳旋轉；放開約兩秒後慢慢回正，再點一下恢復活動。互動時也能使用方向鍵，直向手勢可捲動頁面。</span>
+  <p class="delivery-feedback" id="delivery-feedback" role="status" tabindex="-1" hidden><svg class="delivery-snowflake" id="delivery-snowflake" viewBox="0 0 40 40" aria-hidden="true" hidden><g fill="none" stroke="#86aebd" stroke-width="2" stroke-linecap="round"><path d="M20 3v34M5 11l30 18M5 29l30-18M14 7l6 6 6-6M14 33l6-6 6 6M6 17l9 1-3-9M34 23l-9-1 3 9M6 23l9-1-3 9M34 17l-9 1 3-9"/></g><circle cx="20" cy="20" r="3" fill="#d4b16a"/></svg><span id="delivery-message"></span></p>
+  <p class="room-caption">Write a little hope. Keep a little magic.</p>
+</section>
+<section class="cloud-wish-info shell" aria-label="雲端願望狀態">
+  <p id="cloud-status" role="status">正在連接聖誕信箱……</p>
+  <button class="cloud-retry" id="cloud-retry" type="button" hidden>重新連接信箱</button>
+  <details><summary>聖誕樹上的願望 <span id="cloud-wish-total">0 封</span></summary>
+    <p>金色信封是自己的最新一封；其他信封皆為已核准的公開願望。私人及待審信件不會公開。</p>
+    <ul class="envelope-list cloud-envelope-list" id="cloud-envelope-list" aria-label="樹上的願望信封"></ul>
+  </details>
+</section>
+<section class="wish-keepsakes shell" aria-labelledby="keepsakes-title">
+  <details><summary id="keepsakes-title">此瀏覽器的願望收藏 <span id="wish-total">0 封</span></summary>
+    <p class="hint">這裡是之前保存在本機的願望；不會自動上傳到 Firebase，也不會公開。</p>
+    <p class="empty-wishes" id="empty-wishes">這裡還沒有信。寫下一個小願望，留給未來的自己。</p>
+    <ul class="envelope-list" id="envelope-list" aria-label="此瀏覽器儲存的願望信封"></ul>
+  </details>
+</section>
+<dialog id="wish-dialog" aria-labelledby="wish-dialog-title"><button class="dialog-close" data-close-dialog aria-label="關閉願望">×</button><span class="eyebrow">A little wish, safely kept.</span><h2 id="wish-dialog-title"></h2><p class="wish-date" id="wish-dialog-date"></p><p class="wish-message" id="wish-dialog-content"></p><p class="hint" id="wish-dialog-privacy"></p></dialog>
+<noscript><p class="shell">請啟用 JavaScript，以載入聖誕樹、精靈及保存願望。</p></noscript>
+</main>
+<footer class="site-footer"><div class="shell footer-inner"><div class="footer-links"><button class="text-button" data-info="accessibility">Site Accessibility</button><span>/</span><button class="text-button" data-info="faq">FAQ</button></div><p>© 2026 Holy Merry! <span aria-hidden="true">✧</span></p><div><button class="text-button" data-info="contact">Contact us</button><span class="footer-note"> · 社群連結待補</span></div></div></footer>
+<div class="music-widget"><section class="music-panel" id="music-panel" hidden aria-labelledby="music-title"><h2 id="music-title">A little Christmas tune.</h2><p class="hint" id="music-status" role="status">音樂素材待補。你也可以選擇本機音檔試聽，不會上傳。</p><label for="music-file">選擇音檔（重新整理後需重選）</label><input id="music-file" type="file" accept="audio/*"><label for="music-volume">音量</label><input id="music-volume" type="range" min="0" max="1" step=".05" value=".3"><button class="button small" id="music-play" disabled>播放</button></section><button class="music-toggle" id="music-toggle" aria-expanded="false" aria-controls="music-panel" aria-label="開啟音樂控制">♫<span>音樂</span></button><audio id="site-audio" loop preload="none"></audio></div>
+<dialog id="info-dialog" aria-labelledby="info-title"><button class="dialog-close" data-close-dialog aria-label="關閉說明">×</button><h2 id="info-title"></h2><p id="info-content"></p></dialog>
+</body>
+</html>

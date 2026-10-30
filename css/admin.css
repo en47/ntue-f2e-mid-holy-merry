@@ -1,0 +1,14 @@
+.admin-shell { width: min(850px,calc(100% - 2rem)); margin: 2rem auto; }
+.admin-shell h1,.admin-shell h2 { color: #8f443e; }
+.admin-shell form { max-width: 420px; margin: 2rem 0; }
+.admin-shell label { display: block; margin: 1rem 0 .35rem; }
+.admin-shell input { width: 100%; font-size: 16px; padding: .65rem; }
+.admin-shell button { padding: .65rem .9rem; margin-top: .8rem; border: 1px solid #bda489; background: #fff5df; color: #743f38; cursor: pointer; }
+.admin-toolbar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.admin-toolbar h2 { margin-right: auto; }
+#admin-wishes { padding: 0; list-style: none; }
+#admin-wishes li { padding: 1.4rem 0; border-top: 1px dashed #acbfc3; }
+.admin-wish-content { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.9; }
+.admin-actions { display: flex; gap: .75rem; }
+.admin-shell button:disabled { opacity: .55; cursor: wait; }
+#admin-status { white-space: pre-wrap; overflow-wrap: anywhere; }

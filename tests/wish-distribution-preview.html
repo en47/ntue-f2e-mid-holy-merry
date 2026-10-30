@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wish distribution check</title>
+<style>*{box-sizing:border-box}body{margin:0;padding:12px;background:#eee;color:#222;font:14px system-ui}header{display:flex;flex-wrap:wrap;gap:8px;align-items:center}button{padding:7px 12px}#preview{margin:12px auto}iframe{display:block;border:0;transform-origin:top left}output{display:block;margin-top:10px}p{font-size:13px}</style></head><body>
+<header>真實 CSS viewport：<button data-width="1440">1440px</button><button data-width="1024">1024px</button><button data-width="768">768px</button><button data-width="390">390px</button>　視角：<button data-turn="0">正面</button><button data-turn="4">45°</button><button data-turn="8">側面</button><button data-turn="16">背面</button><button id="refresh">同一批重新整理</button><button id="new">模擬新金色信</button></header>
+<p>僅驗證配置：讀取原 Wish 版面與 GLB，展示 10 封明確標示的本機測試信。不載入 Firebase、不登入、不儲存願望。手機請在場景內往下捲動查看樹。</p>
+<output id="state" role="status">正在載入本機驗收場景……</output><div id="preview"><iframe id="viewport" src="wish-distribution-stage.html" title="10封信封配置驗收"></iframe></div>
+<script type="module">
+const frame=document.querySelector('#viewport'),box=document.querySelector('#preview');let width=1440;
+function layout(){const scale=Math.min(1,(document.documentElement.clientWidth-24)/width);Object.assign(frame.style,{width:width+'px',height:'900px',transform:`scale(${scale})`});Object.assign(box.style,{width:width*scale+'px',height:900*scale+'px'});}
+document.querySelectorAll('[data-width]').forEach(b=>b.onclick=()=>{width=Number(b.dataset.width);layout();});
+document.querySelectorAll('[data-turn]').forEach(b=>b.onclick=()=>frame.contentWindow.postMessage({preview:'turn',steps:Number(b.dataset.turn)},location.origin));
+document.querySelector('#refresh').onclick=()=>frame.contentWindow.postMessage({preview:'refresh'},location.origin);
+document.querySelector('#new').onclick=()=>frame.contentWindow.postMessage({preview:'new'},location.origin);
+addEventListener('message',e=>{if(e.origin===location.origin&&e.source===frame.contentWindow&&typeof e.data?.status==='string')document.querySelector('#state').textContent=e.data.status;});
+addEventListener('resize',layout);layout();
+</script></body></html>

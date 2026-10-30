@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 68" preserveAspectRatio="none">
+ <defs><filter id="g"><feTurbulence baseFrequency=".65" numOctaves="2" type="fractalNoise"/><feColorMatrix type="saturate" values="0"/></filter><clipPath id="p"><path d="M6 7 59 5 102 8 153 4 201 7 254 5 291 9 294 32 290 59 248 62 202 59 147 63 95 60 48 63 8 59 5 36Z"/></clipPath></defs>
+ <path d="M6 10 59 8 102 11 153 7 201 10 254 8 291 12 294 35 290 62 248 65 202 62 147 66 95 63 48 66 8 62 5 39Z" fill="#c6ae8e"/>
+ <path d="M6 7 59 5 102 8 153 4 201 7 254 5 291 9 294 32 290 59 248 62 202 59 147 63 95 60 48 63 8 59 5 36Z" fill="#fff2d6" stroke="#aa8d70" stroke-width="1.1" stroke-linejoin="round"/>
+ <g clip-path="url(#p)"><rect width="300" height="68" filter="url(#g)" opacity=".07"/></g>
+ <path d="m18 21 1-5 23-1m215 38 24-1 1-6" fill="none" stroke="#b67768" stroke-width="1" stroke-linecap="round"/>
+</svg>

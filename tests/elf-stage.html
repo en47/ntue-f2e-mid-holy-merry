@@ -1,0 +1,19 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local elf behavior</title>
+<link rel="stylesheet" href="../css/shared.css"><link rel="stylesheet" href="../css/wish.css"><link rel="stylesheet" href="../css/wish-cloud.css"><link rel="stylesheet" href="../css/wish-delivery.css"><script type="importmap">{"imports":{"three":"../vendor/three/build/three.module.js"}}</script></head><body class="wish-page"><main id="stage"></main>
+<script type="module">
+import {mountWishScene} from '../js/components/wish-scene.js';
+const html=await(await fetch('../wish.html',{cache:'no-store'})).text(),source=new DOMParser().parseFromString(html,'text/html'),room=source.querySelector('#wish-room');
+room.querySelectorAll('[src]').forEach(el=>el.setAttribute('src',new URL(el.getAttribute('src'),new URL('../',location.href)).href));
+room.querySelector('#room-title').textContent='精靈互動本機驗收';document.querySelector('#stage').append(room);
+const scene=mountWishScene(room),history=[];let previous='',delivery=0;
+let startPointer=null;
+for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])room.addEventListener(type,event=>{
+ if(type==='pointerdown')startPointer=[event.clientX,event.clientY];if(!startPointer)return;
+ parent.postMessage({pointer:`指標測試：${type} ${event.pointerType}，dx ${Math.round(event.clientX-startPointer[0])} / dy ${Math.round(event.clientY-startPointer[1])}；原生 isTrusted=${event.isTrusted}`},location.origin);
+ if(type==='pointerup'||type==='pointercancel')startPointer=null;
+},{capture:true});
+function report(){const state=room.dataset.elfState,routine=room.dataset.elfRoutine;if(!state)return;const next=`${state} / ${routine}`;if(next!==previous){previous=next;history.push(next);if(history.length>20)history.shift();parent.postMessage({state:`目前：${next}；互動：${room.querySelector('#elf-character').getAttribute('aria-pressed')}；成功投遞訊號 ${delivery} 次。`,history:'歷程：'+history.join(' → ')},location.origin);}}
+const observer=new MutationObserver(report);observer.observe(room,{attributes:true,attributeFilter:['data-elf-state','data-elf-routine']});
+addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==parent||event.data?.elfPreview!=='delivery')return;delivery++;scene.setWishes([],()=>{},{newWishId:`local-elf-delivery-${delivery}`});report();parent.postMessage({state:`已送出第${delivery}個本機成功訊號；互動模式 ${room.querySelector('#elf-character').getAttribute('aria-pressed')}，沒有儲存或發布願望。`},location.origin);});
+addEventListener('pagehide',()=>{observer.disconnect();scene.destroy();},{once:true});
+</script></body></html>

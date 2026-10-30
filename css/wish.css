@@ -1,0 +1,99 @@
+@font-face { font-family: WishHand; src: url('../assets/fonts/wish-handwritten.woff') format('woff'); font-display: swap; }
+.wish-page { background: #d5e6ec; }
+.wish-page main { padding: 1rem 0 2.5rem; }
+.wish-room { --ground: 11%; position: relative; isolation: isolate; width: min(1440px, calc(100% - 2rem)); height: clamp(790px, calc(100svh - 145px), 950px); margin: 0 auto; border: 6px solid #f7eedb; background: #bad4df; box-shadow: 0 3px 0 #c7bca7; }
+.room-sky { position: absolute; inset: 0; pointer-events: none; z-index: -2; background: radial-gradient(ellipse at 45% 22%, #e3edf08c, transparent 80%); }
+.room-sky::after { content: ''; position: absolute; inset: 0; opacity: .2; background-image: radial-gradient(#71909c .6px, transparent .8px); background-size: 5px 5px; }
+.room-heading { position: absolute; left: 3%; top: 1.8%; z-index: 2; }
+.room-heading .eyebrow { font-size: .58rem; letter-spacing: .17em; margin-bottom: .15rem; }
+.room-heading h1 { font: 1.6rem WishHand, var(--font-display); color: #754b3e; margin: 0; }
+.room-ground { position: absolute; left: 0; right: 0; top: calc(100% - var(--ground) - 24px); bottom: 0; z-index: -1; background: url('../assets/illustrations/wish/snow-ground.svg') center top / 100% 100% no-repeat; pointer-events: none; }
+.wish-letter { position: absolute; top: 9%; left: 3%; width: 34%; max-width: 455px; padding: 1.2rem 1.6rem 1rem; background: #fff4dd; border: 1px solid #bd9e7d; box-shadow: 2px 3px 0 #dfcfad, 4px 7px 12px #5e6f7720; transform: rotate(-1deg); z-index: 3; }
+.wish-letter::before { content: ''; position: absolute; inset: 7px; border: 1px dashed #c6a99a; pointer-events: none; }
+.wish-letter::after { content: ''; position: absolute; top: 18px; right: 22px; width: 38px; height: 42px; background: url('../assets/illustrations/storybook/christmas-letter.svg') -281px -29px / 360px 260px; opacity: .8; pointer-events: none; }
+.wish-letter h2 { font: 2.1rem WishHand, var(--font-display); color: #a24b42; margin: 0 0 .45rem; }
+.wish-letter label { display: block; font: 1.05rem WishHand, var(--font-body); color: #7d5748; margin-top: .65rem; }
+.wish-letter label span { font: .7rem var(--font-body); color: #8c8372; margin-left: .4rem; }
+.wish-letter input, .wish-letter textarea { width: 100%; min-width: 0; border: 0; border-radius: 0; background: transparent; color: #4b5554; padding: .45rem .2rem; font-size: .9rem; outline-offset: 2px; }
+.wish-letter input { border-bottom: 1px solid #c8bca0; }
+.wish-letter textarea { height: 112px; min-height: 100px; max-height: 140px; resize: none; line-height: 28px; background: repeating-linear-gradient(transparent 0 27px, #d8c8a9 27px 28px); }
+.wish-letter input::placeholder, .wish-letter textarea::placeholder { color: #8c8b7e; font-size: .8rem; }
+.letter-signature { display: flex; justify-content: space-between; gap: 1rem; align-items: center; color: #a35143; font: 1.1rem WishHand, var(--font-body); margin-top: .25rem; }
+#wish-counter { font: .65rem var(--font-body); color: #8c8372; }
+.letter-actions { display: flex; align-items: center; gap: .8rem; margin-top: .65rem; }
+.letter-send { min-height: 42px; flex-shrink: 0; border: 1px solid #9d5245; background: #ae5147; color: #fff5dd; padding: .45rem .9rem; border-radius: 40% 7% 8% 9% / 10% 12% 8% 10%; font-size: .8rem; box-shadow: 1px 2px 0 #e2c7a3; transition: transform .2s; }
+.letter-send:hover { transform: rotate(-2deg); }
+.letter-actions small { color: #837b69; font-size: .6rem; line-height: 1.6; }
+.wish-letter .status { font-size: .7rem; line-height: 1.6; margin: .5rem 0 0; min-height: 1.6em; }
+.stocking-station { position: absolute; width: 28%; height: 27%; left: 5%; bottom: var(--ground); margin: 0; z-index: 2; }
+.stocking-station img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; filter: drop-shadow(1px 3px 1px #796a4c30); }
+.stocking-station figcaption { position: absolute; top: 100%; left: 0; right: 0; text-align: center; color: #8a7562; font: 1rem WishHand, var(--font-display); }
+.stocking-opening { position: absolute; width: 26%; height: 3%; left: 45%; top: 25%; pointer-events: none; }
+.wish-tree-space { position: absolute; top: 1%; left: 38%; right: 1%; bottom: var(--ground); z-index: 2; }
+.tree-gesture { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: grab; touch-action: pan-y; border-radius: 0; }
+.tree-gesture:active { cursor: grabbing; }
+.tree-gesture:focus-visible { outline-offset: -8px; outline-style: dashed; }
+.tree-hint { position: absolute; bottom: -2.5rem; left: 0; right: 0; text-align: center; font-size: .65rem; color: #71858a; margin: 0; pointer-events: none; }
+.wish-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+.elf-lane { position: absolute; left: 35%; right: 4%; bottom: var(--ground); height: 16%; pointer-events: none; }
+.elf-hit { position: absolute; transform: translate(-50%,-50%); padding: 0; border: 0; border-radius: 0; background: none; touch-action: pan-y; cursor: pointer; z-index: 5; }
+.elf-hit[aria-pressed="true"] { cursor: grab; }
+.elf-hit[data-state="dragging"] { cursor: grabbing; }
+.elf-hit:focus-visible { outline: 2px dashed #a65446; outline-offset: 1px; }
+.elf-instructions { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.wish-mesh-controls { touch-action: pan-y pinch-zoom; }
+/* Keyboard targets stay accessible; pointer ownership comes from actual GLB/board raycasts. */
+.wish-mesh-controls .elf-hit,
+.wish-mesh-controls .tree-gesture,
+.wish-mesh-controls .tree-envelope-hit { pointer-events: none; }
+/* Temporary lock only after a confirmed model drag. No editable exception during that gesture. */
+html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none !important; user-select: none !important; }
+.room-caption { position: absolute; bottom: .5rem; left: 30%; right: 15%; text-align: center; color: #8d7e65; font: 1rem WishHand, var(--font-display); margin: 0; pointer-events: none; }
+.scene-loading { position: absolute; top: 40%; left: 43%; right: 7%; text-align: center; font-size: .75rem; color: #4d6671; z-index: 4; pointer-events: none; }
+.scene-loading button { display: block; margin: .8rem auto; pointer-events: auto; border: 1px solid #a77e65; padding: .4rem .9rem; background: var(--cream); }
+.wish-keepsakes { padding-top: 2rem; }
+.wish-keepsakes details { border-top: 1px solid #a9bec4; padding-top: .8rem; }
+.wish-keepsakes summary { cursor: pointer; font-size: .9rem; color: #627c81; }
+#wish-total { font-size: .7rem; margin-left: .75rem; }
+.wish-keepsakes .hint { font-size: .75rem; margin-top: .75rem; }
+.envelope-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1rem; list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
+.envelope { border: 0; width: 100%; padding: 0; background: none; }
+.envelope img { display: block; width: 100%; height: auto; }
+.envelope span { display: block; font-size: .75rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.empty-wishes { font-size: .85rem; color: var(--muted); }
+.wish-date { color: var(--muted); font-size: .75rem; }
+.wish-message { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 2; }
+@media(max-width: 1100px) and (min-width: 701px) {
+ .wish-room { height: 810px; }
+ .wish-letter { width: 36%; left: 2%; padding: 1rem 1.2rem; }
+ .wish-tree-space { left: 39%; right: 0; }
+ .stocking-station { left: 5%; width: 30%; height: 26%; }
+ .letter-actions { gap: .4rem; }
+}
+@media(max-width: 850px) and (min-width: 701px) {
+ .wish-room { height: 790px; }
+ .wish-letter { width: 39%; left: 2%; padding: 1rem; }
+ .wish-tree-space { left: 41%; right: 0; }
+ .wish-letter h2 { font-size: 1.8rem; }
+ .letter-actions { align-items: flex-start; flex-direction: column; gap: .35rem; }
+ .letter-actions small br { display: none; }
+ .elf-lane { left: 37%; right: 3%; height: 13%; }
+ .room-caption { font-size: .85rem; }
+}
+@media(max-width: 700px) {
+ .wish-page main { padding-top: 0; }
+ .wish-room { width: 100%; height: auto; min-height: 1200px; border-width: 4px; display: grid; grid-template-columns: 1fr; grid-template-rows: 85px auto 190px 520px 65px; padding: 0 1rem; --ground: 65px; }
+ .room-heading { top: 1rem; left: 1.4rem; }
+ .wish-letter { position: relative; top: auto; left: auto; width: min(100%, 410px); max-width: none; margin: 0 auto; grid-row: 2; padding: 1.2rem 1.4rem 1rem; }
+ .wish-letter textarea { height: 140px; max-height: 200px; }
+ .wish-letter input, .wish-letter textarea { font-size: 16px; }
+ .stocking-station { position: relative; grid-row: 3; width: 230px; height: 173px; left: auto; bottom: auto; justify-self: start; align-self: end; margin-left: .2rem; }
+ .stocking-station figcaption { top: 55%; left: 100%; right: auto; width: 80px; font-size: .85rem; text-align: left; }
+ .wish-tree-space { position: relative; grid-row: 4; width: 100%; height: 100%; left: auto; right: auto; top: auto; bottom: auto; }
+ .tree-hint { bottom: -2.4rem; font-size: .6rem; }
+ .elf-lane { left: 4%; right: 3%; height: 95px; bottom: var(--ground); }
+ .room-caption { display: none; }
+ .room-ground { top: var(--snow-start, 650px); bottom: 0; background-image: url('../assets/illustrations/wish/snow-ground.svg'), linear-gradient(transparent 40px, #fff7e7 40px); background-position: center top; background-size: 100% 140px, 100% 100%; background-repeat: no-repeat; }
+ .scene-loading { left: 8%; right: 8%; top: auto; bottom: 330px; }
+ .envelope-list { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}

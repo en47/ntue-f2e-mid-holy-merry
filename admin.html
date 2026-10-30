@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><title>願望審核 — Holy Merry!</title>
+  <link rel="stylesheet" href="css/shared.css"><link rel="stylesheet" href="css/admin.css">
+  <script type="module" src="js/admin.js"></script>
+</head>
+<body><main class="admin-shell">
+  <a href="wish.html">← 回到 Wish Room</a><h1>願望審核</h1>
+  <p>僅已授權的管理員可以讀取與審核。登入狀態與訪客匿名身分分開。</p>
+  <form id="admin-login">
+    <label for="admin-email">管理員 Email</label><input id="admin-email" type="email" autocomplete="username" required>
+    <label for="admin-password">密碼</label><input id="admin-password" type="password" autocomplete="current-password" required>
+    <button type="submit" disabled>登入管理員</button>
+  </form>
+  <p id="admin-status" role="status">尚未登入。</p>
+  <section id="admin-panel" hidden aria-labelledby="queue-title">
+    <div class="admin-toolbar"><h2 id="queue-title">待審核願望</h2><button id="admin-refresh">重新讀取</button><button id="admin-signout">登出</button></div>
+    <p>每次最多顯示 50 封，審核後重新讀取下一批。私人願望不能核准公開。</p>
+    <ul id="admin-wishes"></ul>
+  </section>
+  <noscript>請啟用 JavaScript。權限仍由 Firestore Security Rules 控制。</noscript>
+</main></body></html>

@@ -1,0 +1,13 @@
+{
+  "sourceFilename": "santa+claus+figurine+3d+model.glb",
+  "model": "santa-dance.glb",
+  "bytes": 9790216,
+  "sha256": "af6632fb53865219d8f0eb6a01a92ef33132b2386ccd31778915ac7aac0fb2dd",
+  "animations": [
+    "dance_02"
+  ],
+  "playbackRangeSeconds": [
+    1,
+    4
+  ]
+}

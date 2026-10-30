@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() {
+      return signedIn() && request.auth.token.admin == true
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+    function bounded(max) { return request.query.limit != null && request.query.limit <= max; }
+    function validLetter(d) {
+      return d.nickname is string && d.nickname.size() >= 1 && d.nickname.size() <= 20
+        && d.nickname.matches('.*[^\\s].*')
+        && d.content is string && d.content.size() >= 1 && d.content.size() <= 300
+        && d.content.matches('(?s).*[^\\s].*')
+        && d.visibility in ['private', 'public'];
+    }
+    function source(uid, id) {
+      return getAfter(/databases/$(database)/documents/users/$(uid)/wishes/$(id)).data;
+    }
+    function publication(id) {
+      return getAfter(/databases/$(database)/documents/publicWishes/$(id)).data;
+    }
+    function matchesSource(p, s, uid) {
+      return p.keys().hasAll(['ownerUid', 'nickname', 'content', 'createdAt', 'publishedAt', 'randomKey'])
+        && p.keys().hasOnly(['ownerUid', 'nickname', 'content', 'createdAt', 'publishedAt', 'randomKey'])
+        && p.ownerUid == uid && p.nickname == s.nickname && p.content == s.content
+        && p.createdAt == s.createdAt && s.visibility == 'public' && s.status == 'approved'
+        && p.randomKey is number && p.randomKey >= 0 && p.randomKey < 1;
+    }
+    match /users/{uid}/wishes/{id} {
+      allow get: if owner(uid) || admin();
+      allow list: if (owner(uid) && bounded(60)) || (admin() && bounded(50));
+      allow create: if owner(uid) && request.auth.token.firebase.sign_in_provider == 'anonymous'
+        && request.resource.data.keys().hasAll(['nickname', 'content', 'visibility', 'status', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['nickname', 'content', 'visibility', 'status', 'createdAt'])
+        && validLetter(request.resource.data) && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow update: if admin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reviewedAt', 'reviewedBy'])
+        && request.resource.data.status in ['approved', 'rejected']
+        && request.resource.data.reviewedAt == request.time && request.resource.data.reviewedBy == request.auth.uid
+        && ((request.resource.data.status == 'approved'
+            && matchesSource(publication(id), request.resource.data, uid))
+          || (request.resource.data.status == 'rejected'
+            && !existsAfter(/databases/$(database)/documents/publicWishes/$(id))));
+      allow delete: if false;
+    }
+    // Collection-group moderation reads require a server-verified admin claim.
+    match /{path=**}/wishes/{id} { allow list: if admin() && bounded(50); }
+    match /publicWishes/{id} {
+      allow get: if signedIn();
+      allow list: if signedIn() && bounded(30);
+      allow create, update: if admin()
+        && matchesSource(request.resource.data, source(request.resource.data.ownerUid, id), request.resource.data.ownerUid)
+        && request.resource.data.publishedAt == request.time
+        && (!exists(/databases/$(database)/documents/publicWishes/$(id))
+          || request.resource.data.ownerUid == resource.data.ownerUid);
+      allow delete: if admin()
+        && (source(resource.data.ownerUid, id).status != 'approved'
+          || source(resource.data.ownerUid, id).visibility != 'public');
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

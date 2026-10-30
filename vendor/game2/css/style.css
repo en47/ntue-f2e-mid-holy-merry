@@ -1,0 +1,271 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Comic Sans MS', 'Microsoft JhengHei', cursive, sans-serif;
+}
+
+body {
+  background-color: #f7f6f2;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.game-wrapper {
+  width: 100%;
+  max-width: 650px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 頂部資訊區 */
+.game-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.level-badge {
+  background-color: #c93b2b;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* 花圈倒數計時容器 */
+.wreath-timer-container {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wreath-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.timer-display {
+  position: relative;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #1a472a;
+  text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff;
+}
+
+.stats-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.stats-panel span {
+  color: #c93b2b;
+}
+
+/* 卡牌網格 */
+.card-area {
+  width: 100%;
+  min-height: 360px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.card-grid {
+  display: grid;
+  gap: 12px;
+  perspective: 1000px;
+}
+
+/* 使用 minmax 與動態單位，確保卡片在手機上自動縮小不破版 */
+.grid-lvl-1 { grid-template-columns: repeat(4, minmax(0, 75px)); width: 100%; max-width: 360px; }
+.grid-lvl-2 { grid-template-columns: repeat(4, minmax(0, 75px)); width: 100%; max-width: 360px; }
+.grid-lvl-3 { grid-template-columns: repeat(4, minmax(0, 70px)); width: 100%; max-width: 340px; }
+.grid-lvl-4 { grid-template-columns: repeat(5, minmax(0, 65px)); width: 100%; max-width: 380px; }
+.grid-lvl-5 { grid-template-columns: repeat(6, minmax(0, 55px)); width: 100%; max-width: 400px; }
+
+/* 卡牌 3D 翻轉結構 */
+.card {
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.card.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 卡牌背面：未開的禮物盒蓋 */
+.card-back {
+  background-image: url('../images/蓋子.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* 卡牌正面：開箱底座 + 禮物物品 */
+.card-front {
+  transform: rotateY(180deg);
+  background-image: url('../images/盒子.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.card-item-img {
+  width: 65%;
+  height: 65%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* 糖果按鈕樣式 */
+.candy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.candy-btn:active {
+  transform: scale(0.92);
+}
+
+.candy-btn img {
+  height: 60px;
+  object-fit: contain;
+}
+
+/* 遮罩彈窗 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.banner-img {
+  max-width: 85vw;
+  max-height: 220px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 遊戲開始前說明圖置中與放大 */
+.intro-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 15px auto; /* 確保水平置中並保留上下適當間距 */
+}
+
+.intro-img {
+  width: 480px;          /* 直接指定舒適的寬度放大（可依喜好微調 450px~520px） */
+  max-width: 90%;        /* 在手機或小螢幕時自動縮小防破版 */
+  height: auto;          /* 保持原圖比例 */
+  display: block;
+  margin: 0 auto;        /* 圖片本身嚴格居中 */
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* 柔和立體陰影 */
+}
+
+/* --- 手機與窄螢幕適配 (螢幕寬度 480px 以下) --- */
+@media (max-width: 480px) {
+  .game-wrapper {
+    padding: 10px;
+  }
+
+  /* 頂部資訊列微調縮小 */
+  .game-header {
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .level-badge {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+  }
+
+  .wreath-timer-container {
+    width: 85px;
+    height: 85px;
+  }
+
+  .timer-display {
+    font-size: 1.4rem;
+  }
+
+  .stats-panel {
+    font-size: 0.85rem;
+  }
+
+  /* 卡牌間距稍微縮小，避免擠出螢幕 */
+  .card-grid {
+    gap: 6px;
+  }
+
+  /* 糖果按鈕縮放 */
+  .candy-btn img {
+    height: 48px;
+  }
+
+  /* 彈窗橫幅大小調整 */
+  .banner-img {
+    max-width: 90vw;
+  }
+}
