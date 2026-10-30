@@ -21,8 +21,8 @@ window.addEventListener('pagehide', () => observer?.disconnect());
 window.addEventListener('pageshow', event => {
   if (event.persisted) revealAll();
 });
-// Game 01 keeps its permanent GitHub Pages URL. Never rewrite or reload its src.
-// Only the same-origin local Game 02 is measured; no cross-origin game access.
+// Both games load local, isolated documents. Never rewrite or reload their src.
+// Only Game 02 is measured; preserve the existing Game 01 container dimensions.
 const matchingFrame = document.querySelector('#matching-frame');
 let sizeObserver;
 function fitMatchingFrame() {
