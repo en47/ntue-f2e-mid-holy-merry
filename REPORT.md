@@ -1,0 +1,99 @@
+# 夜間工作報告（2026-10-31）
+
+三項任務都完成並各自 commit，`npm test` 全部通過（24 組 smoke、18 項 node:test）。沒有動 `firebase.json`、`firestore.rules`，沒有部署，也沒有刪 `assets` 裡的任何檔案。
+
+**最需要你親自看的：** 動畫流暢度、Santa 在真實顯示卡上的質感，以及手機實機。我這邊是軟體渲染，看不出這些（細節見「需要你在瀏覽器確認」）。
+
+## Commit
+
+| 項目 | Commit | 退回方式 |
+| --- | --- | --- |
+| 改動前備份（含昨晚所有變更） | `c21a474` | 回到這裡即為開工前狀態 |
+| 1. 四頁 Footer | `ba36207` | `git revert ba36207` |
+| 2. Santa 3D 模型 | `e5863a6` | `git revert e5863a6` |
+| 3. 紙雕 SVG 場景 | `47927ca` | `git revert 47927ca` |
+
+第 3 項建立在前兩項之上，若要單獨退回第 1、2 項，可能要處理衝突；由後往前退最乾淨。
+
+## 1. Footer
+
+- 四頁共用同一版型與尺寸，放在頁尾正上方，不再疊在其他內容上。
+- 各頁物件不同：
+  - 首頁：雪人、小屋、松樹
+  - Intro：立體書、明信片、地球儀、蠟燭
+  - Game：禮物、冬青、松樹
+  - Wish：郵筒、信封、聖誕襪
+- 檔案：`js/components/page-foreground.js`（由 game-foreground 改名）、`css/shared.css`、`css/tokens.css`、四個 HTML、`js/shared.js`。
+
+## 2. Santa 3D 模型
+
+- 首頁與 Game 頁都換成新模型，嘴巴閉合。
+- 壓縮：9.19 MB → **1.17 MB**（幾何用 meshopt，貼圖轉 WebP）。
+- 頭部追蹤：滑鼠移動時只轉 `Head` 和 `Neck` 骨骼，左右最多約 24°、上下約 9°，動作平滑。
+- 手機沒有追蹤，Game 頁保留輕微自動搖擺；開啟減少動態時靜止。
+- 載入前顯示紙雕 Santa 佔位圖。
+- 檔案：`assets/models/santa-new.glb` 與 `.json`、`scripts/build-santa-model.mjs`、`js/components/santa-head.js`、`santa-placeholder.js`、`characters-scene.js`、`js/game-hero.js`。
+- 另外新增 `vendor/three/examples/jsm/libs/meshopt_decoder.module.js`（取自同版 three，已登錄雜湊），並把 `.DS_Store` 加進 `.gitignore`。
+
+## 3. 紙雕背景
+
+- 首頁與 Game 頁的點陣紙雕全部換成 SVG，並加上立體書翻起的進場動畫。
+- **首頁：** 雪地村莊，不再有山。左右各有聚落，左側補上松林、小屋、圍欄與雪橇，右側是教堂、池塘與路燈。太陽在左上，影子都往右，建築都落在雪地上。
+- **Game 頁：** 雪地遊樂場，有彩旗、熱氣球、旋轉木馬、會旋轉的摩天輪，同樣不用山。
+- **Merry Christmas：** 改成逐字 SVG 紙片，每個字母各自輕擺，飽和度也降低了。
+- **配色：** 整體降飽和，紅、綠、金保留為重點色。
+- Game 頁總下載量約 17 MB → **3.6 MB**。
+- 檔案：`js/components/home-scene.js`、`game-scene.js`、`paper-props.js`、`paper-art.js`、`js/home-scene.js`、`js/data/title-glyphs.js`、`scripts/build-title-glyphs.mjs`、`css/home.css`、`css/game-hero.css`、`index.html`、`game.html`。
+
+## 我替你做的決定
+
+1. **模型路徑：** 你寫 `assets/santa-claus.glb`，實際檔案是 `assets/santa claus.glb`（有空格），就用它。`assets/models/santa-claus.glb` 是舊模型，不是這份。
+2. **首頁保留舞蹈：** 新模型沒有動畫，而規格要保留第 1–4 秒的舞步。兩份骨架的姿勢不同，直接套用會變形，所以我逐影格重定向後烘入新模型。頭部追蹤疊在舞蹈上，因此首頁身體仍會跳舞，只有 Game 頁的身體基本不動（僅輕微搖擺）。
+3. **Santa 的手：** Game 頁維持昨天的決定，手放下、藏在雪丘後。
+4. **主題：** 首頁選村莊、Game 選遊樂場，理由是和「遊戲」直接相關，又能完全避開山。
+5. **字體：** 標題與路牌用 Mountains of Christmas（OFL 授權，本機檔案），和路牌統一。
+6. **測試調整：** 沒有刪除或跳過測試群組，但有兩組舊測試寫死「HTML 必須載入某張 PNG」，和這次需求衝突，我把那幾行斷言換掉了：
+   - 新斷言改查：頁面不再載入點陣場景、場景中沒有山、每個圖層都有 CSS、翻起動畫存在。
+   - 素材雜湊與遮罩檢查保留。其中「遮罩必須被 home.css 引用」改成「遮罩檔必須存在」。
+   - Santa 模型路徑的斷言也改指新檔。
+   - 另外新增一組 Santa 模型與頭部追蹤測試（角度上限、平滑、觸控與減少動態不追蹤）。
+7. **SVG 取代原圖：** 沒有保留任何首頁或 Game 頁的紙雕點陣圖。代價是少了 Procreate 的粉蠟筆筆觸，畫面更乾淨、偏平面。若你比較喜歡手繪質感，退回 `47927ca` 即可。
+
+## 最終截圖
+
+都在 `screenshots/`（此資料夾不進 git）：
+
+- 整頁：`index-375.png`、`index-768.png`、`index-1440.png`，其他頁同樣命名（`game-`、`intro-`、`wish-`）
+- 第一屏：`*-fold.png`
+- 進場：`opening-*.png`、`home-opening-*.png`
+- 插畫 Hover：`sleigh-*.png`、`wreath-*.png`
+- Santa：`santa-*.png`
+
+## 看過截圖確認的
+
+- 四頁在 375／768／1440 沒有水平溢出，也沒有 console 錯誤。
+- 四頁 Footer 物件位置正確、彼此不同；只抽看了部分寬度的近拍。
+- 首頁與 Game 頁三種寬度的構圖；Game 第一屏看不到 Game 01。
+- Santa 嘴巴閉合、臉部正常、首頁舞姿沒有明顯變形。
+- Game 頁的 Santa 頭部朝左、右、上、下都轉對方向，鬍子沒有撕裂。
+- Game 頁減少動態時完全靜止（截圖逐位元比對）。
+- 兩頁進場順序：Game 用動畫時間點連拍，首頁連拍到 Santa 與麋鹿登場。
+- Game 兩個按鈕都會把面板捲到視窗正中，擺動中的木牌點得到。
+- 雪橇和花圈的 Hover、滑出視野後暫停循環動畫（僅底部區塊驗證過）。
+
+## 需要你在瀏覽器確認
+
+- **動畫流暢度：** 我的環境是軟體渲染，首頁第一屏只有約 4 fps、Game 約 10 fps，這些數字不代表真實顯示卡。
+- **Santa 質感：** 材質、光影、鬍子在追蹤與搖擺時是否自然。
+- **首頁頭部追蹤：** 我只看過小尺寸截圖，方向正確但細節要你看。
+- **手機實機：** 只用模擬寬度和模擬觸控測過，沒測過實體手機的載入速度與觸控。Santa 在手機的觸控畫面截於版面定稿之前，定稿後沒有重截這一張。
+- **首頁的減少動態：** 只在 Game 頁驗證，首頁共用同一邏輯，但沒實測。
+- **木牌擺動的切痕：** 已改成 SVG，理論上不再有，請順便看一眼。
+
+## 沒完成或做不到的
+
+- **`npm run test:firebase` 沒跑：** 這台機器沒有 Java，18 項 Firebase 測試未驗證。這次沒有改動 Wish 資料流或 Firebase 程式。
+- **首頁總下載量仍約 14 MB：** 主因是 `reindeer.glb`（10.5 MB）。這次只要求處理 Santa，我沒動麋鹿；用同一支壓縮流程應該也能大幅縮小，但要另外確認它的動畫，告訴我就做。
+- **文件仍有舊內容：** `README.md`、`docs/GAME-PAGE.md` 與 `docs/GAME-PAGE-VERIFICATION.json` 的舊描述（外部 iframe、三國地圖）還沒改。這次只更新了 `CLAUDE.md`、`TESTING.md`、`docs/GAME-HERO.md`。
+- **Game 頁標題：** 仍是「Santa Flying Adventure」，和路牌「Santa Flying」不一致，這是文案決定，我沒改。
+- **閒置素材：** `signs.png`、`winter-scenery.png`、首頁 storybook PNG、舊 `santa-dance.glb`（僅建置腳本和測試使用）、`vendor/game1/` 都還在，依你的要求沒有刪除。
