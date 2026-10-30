@@ -122,3 +122,7 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 .santa-placeholder img { object-fit: contain; object-position: 50% 100%; }
 .games-hero-santa .santa-placeholder-host { position: absolute; inset: 22% 0 -24%; transition: opacity .4s ease; }
 .games-hero-santa[data-state='ready'] .santa-placeholder-host, .games-hero-santa[data-state='error'] .santa-placeholder-host { opacity: 0; }
+/* Pop-up sheets: lie flat, then stand up from their base line with a slight overshoot. */
+.pop { inset: auto; transform-origin: 50% 100%; }
+@keyframes pop-up { 0% { transform: perspective(1100px) rotateX(-86deg); opacity: 0; } 12% { opacity: 1; } 74% { transform: perspective(1100px) rotateX(5deg); opacity: 1; } 100% { transform: perspective(1100px) rotateX(0); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .is-opening .pop { animation: none !important; opacity: 1 !important; } }

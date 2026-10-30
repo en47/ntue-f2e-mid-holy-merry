@@ -39,7 +39,7 @@ export function rasterize(svg) {
 
 let layerCount = 0;
 // `draw` receives a filtered group; `origin` is the layer's pivot in viewBox units.
-export function paperLayer(host, viewBox, className, draw, { paper = {}, origin, preserveAspectRatio } = {}) {
+export function paperLayer(host, viewBox, className, draw, { paper = {}, origin, preserveAspectRatio, eager = false } = {}) {
   const svg = shape('svg', { viewBox, ...(preserveAspectRatio ? { preserveAspectRatio } : {}) });
   draw(shape('g', paper ? { filter: paperFilter(svg, `paper-${++layerCount}`, paper) } : {}, svg));
   const layer = document.createElement('div');
@@ -49,7 +49,7 @@ export function paperLayer(host, viewBox, className, draw, { paper = {}, origin,
     layer.style.transformOrigin = `${origin[0] / width * 100}% ${origin[1] / height * 100}%`;
   }
   const image = rasterize(svg);
-  image.loading = 'lazy';
+  if (!eager) image.loading = 'lazy';
   layer.append(image);
   host.append(layer);
   return layer;
@@ -76,6 +76,13 @@ export function pine(parent, x, base, height, fill = '#5f8a70', snow = '#fbf8f1'
   shape('rect', { x: -6, y: -12, width: 12, height: 14, fill: '#94785f' }, group);
   shape('path', { d: 'M0-100C8-84 18-72 26-64L15-65C24-52 34-42 42-34L28-35C38-24 46-16 54-10-10-4-40-5-54-10-44-18-36-25-28-35L-42-34C-33-44-25-53-15-65L-26-64C-17-72-8-85 0-100Z', fill }, group);
   shape('path', { d: 'M0-100C6-88 12-80 18-72 8-70 4-76-2-70-8-76-12-70-18-72-11-81-6-89 0-100ZM-30-36C-18-46-8-44 2-38 12-46 22-46 31-36 20-30 10-34 2-30-8-34-20-30-30-36Z', fill: snow }, group);
+}
+
+// A flat-folded sheet that stands up like a pop-up book page when its stage opens.
+export function popLayer(host, viewBox, className, draw, { delay = 0, ...options } = {}) {
+  const layer = paperLayer(host, viewBox, `pop ${className}`, draw, { ...options, eager: true });
+  layer.style.setProperty('--pop-delay', `${delay}s`);
+  return layer;
 }
 
 // Decorative loops stop once their art leaves the viewport.

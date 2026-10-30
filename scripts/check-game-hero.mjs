@@ -28,7 +28,9 @@ for (const [name, target] of [['Santa Flying', '#sleigh-game'], ['Christmas Matc
   const point = [button.x + button.width / 2, button.y + button.height / 2];
   console.log(name, 'hit target', await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.textContent, point));
   await page.mouse.click(...point);
-  await page.waitForTimeout(1500);
+  // 軟體渲染下平滑捲動很慢，等捲動量連續穩定才量測。
+  let last = -1, still = 0;
+  for (let i = 0; i < 80 && still < 4; i++) { await page.waitForTimeout(250); const y = await page.evaluate(() => scrollY); still = y === last && y > 0 ? still + 1 : 0; last = y; }
   const box = await page.locator(target).boundingBox();
   console.log(name, 'panel top', Math.round(box.y), 'bottom', Math.round(box.y + box.height), 'viewport 900');
 }
@@ -53,5 +55,12 @@ console.log('foreground running loops', await page.evaluate(() => document.query
 const reduced = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' })).newPage();
 await reduced.goto(url, { waitUntil: 'networkidle' });
 await reduced.waitForTimeout(1800);
+const home = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+await home.goto('http://127.0.0.1:5500/index.html', { waitUntil: 'domcontentloaded' });
+await home.waitForFunction(() => !document.querySelector('.storybook').classList.contains('is-preparing') && document.querySelector('.storybook').classList.contains('is-opening'), null, { timeout: 60000 });
+for (const at of [100, 600, 1100, 1700, 2600]) {
+  await home.evaluate(time => document.querySelector('.storybook').getAnimations({ subtree: true }).forEach(animation => { if (animation.animationName === 'pop-up') { animation.pause(); animation.currentTime = time; } }), at);
+  await home.screenshot({ path: path.join(outDir, `home-opening-${String(at).padStart(4, '0')}.png`) });
+}
 console.log('reduced', await reduced.evaluate(() => ({ paper: getComputedStyle(document.querySelector('.games-hero-hill')).animationName, opacity: getComputedStyle(document.querySelector('.games-hero-hill')).opacity, board: getComputedStyle(document.querySelector('.sign-board-title')).animationName, wreath: getComputedStyle(document.querySelector('.wreath-swing')).animationName })));
 await browser.close();

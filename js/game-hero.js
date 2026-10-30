@@ -1,9 +1,11 @@
+import { mountGameScene } from './components/game-scene.js';
 import { mountHeroSigns } from './components/game-hero-signs.js';
 import { createHeadTracker } from './components/santa-head.js';
 
 // Hero navigation is independent of model loading; manual scrolling stays native.
 const hero = document.querySelector('.games-hero');
 mountHeroSigns(hero);
+mountGameScene(hero);
 let navigationFrame;
 hero.querySelectorAll('[data-game-target]').forEach(button => {
   button.addEventListener('click', () => {
