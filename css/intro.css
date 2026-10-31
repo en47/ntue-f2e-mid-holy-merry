@@ -89,7 +89,7 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-paper-button:hover:not(:disabled) { transform:translateY(-2px) rotate(-1deg);background:#fffdf4; }
 .intro-count { color:var(--red);font-size:.8rem;letter-spacing:.12em;min-width:63px;text-align:center; }
 .intro-replay { border:0;border-bottom:1px dashed #9fb6bc;background:none;color:var(--muted);min-height:44px;font-size:.78rem;padding:.5rem; }
-.intro-cultures { --foreground-under:calc(clamp(170px,19vw,280px) * .55);--stage-h:calc(min(1120px,100vw - 3rem) * .5787);--letter-h:calc(min(560px,(100vw - 3rem) * .52) * .7895);position:relative;isolation:isolate;padding:1.6rem 0 clamp(18px,2.4vw,36px);display:flex;flex-direction:column;justify-content:center; }
+.intro-cultures { --foreground-under:calc(clamp(170px,19vw,280px) * .55);--w:min(1120px,100vw - 3rem);--roller:46px;--x0:calc(var(--w) * .04);--map-w:calc(var(--w) * .84);--map-h:calc(var(--map-w) * .548);--roller-h:calc(var(--map-h) + 24px);--letter-w:min(600px,var(--w) * .54);--letter-h:calc(var(--letter-w) * .7895);--stage-h:max(var(--roller-h),var(--letter-h));position:relative;isolation:isolate;padding:1.6rem 0 clamp(18px,2.4vw,36px);display:flex;flex-direction:column;justify-content:center; }
 /* 海港鋪滿視窗寬，並延伸到頁尾雪丘後方，雪岸才接得上海面。 */
 .intro-harbor { position:absolute;z-index:-1;left:50%;top:0;bottom:calc(var(--foreground-under) * -1);width:100vw;translate:-50% 0;overflow:hidden;overflow:clip;pointer-events:none; }
 /* 海平線在地圖中段。位置都以舞台高度換算，展開地圖、下方多出按鈕時海面不會跳動。 */
@@ -128,23 +128,23 @@ html.intro-document { scrollbar-gutter:stable; }
 @keyframes gull-glide { from { translate:0 0;rotate:-4deg; } to { translate:64px -20px;rotate:5deg; } }
 @keyframes lantern-glow { from { opacity:.35; } to { opacity:1; } }
 /* 捲軸：地圖一開始就排好，只用裁切揭開；右軸隨之滑到最右。 */
-.intro-scroll-stage { --roller:46px;--rolled:4%;position:relative;width:100%;aspect-ratio:1728/1000;min-height:0;isolation:isolate; }
-.intro-map-sheet { position:absolute;z-index:1;inset:12px calc(var(--roller) * .7) 12px calc(var(--roller) * .7);display:flex;align-items:center;background:#f4e7cf;box-shadow:0 12px 20px -10px #4b6a7a66;clip-path:inset(-30px 93% -30px 7%);transition:clip-path 1.1s cubic-bezier(.22,.84,.21,1); }
-.intro-scroll-stage[data-state='open'] .intro-map-sheet { clip-path:inset(-30px -30px -30px -30px); }
+.intro-scroll-stage { position:relative;width:100%;height:var(--stage-h);isolation:isolate; }
+/* 開合全程只動 transform：外框往右滑、內層反向抵銷，邊緣與右軸同速，不必每幀重繪地圖。 */
+.intro-map-sheet { --reveal:1.1s cubic-bezier(.22,.84,.21,1);position:absolute;z-index:1;top:calc(50% - var(--map-h) / 2);left:calc(var(--x0) + var(--roller) * .7);width:var(--map-w);height:var(--map-h);overflow:hidden;transform:translateX(-100%);transition:transform var(--reveal);will-change:transform; }
+.intro-map-sheet .intro-map-canvas { background:#f4e7cf;transform:translateX(100%);transition:transform var(--reveal);will-change:transform; }
+.intro-scroll-stage[data-state='open'] .intro-map-sheet,.intro-scroll-stage[data-state='open'] .intro-map-sheet .intro-map-canvas { transform:none; }
 .intro-map-canvas { position:relative;width:100%;aspect-ratio:1728/947; }
-.map-route { position:absolute;inset:0;width:100%;height:100%;pointer-events:none; }
-/* 收起時捲軸與信紙同高、中線對齊；展開才拉到全高。 */
-.intro-roller { position:absolute;z-index:3;top:8px;bottom:calc(100% - var(--letter-h) + 8px);width:var(--roller);padding:0;border:0;background:none;transition:left 1.1s cubic-bezier(.22,.84,.21,1),top 1.1s cubic-bezier(.22,.84,.21,1),bottom 1.1s cubic-bezier(.22,.84,.21,1),filter .2s; }
-.intro-scroll-stage[data-state='open'] .intro-roller { top:0;bottom:0; }
+.map-route { position:absolute;inset:0;width:100%;height:100%;pointer-events:none;will-change:transform; }
+/* 捲軸高度固定配合地圖；左軸不動，右軸平移帶開地圖。信紙與捲軸只對齊中線。 */
+.intro-roller { position:absolute;z-index:3;top:calc(50% - var(--roller-h) / 2);height:var(--roller-h);width:var(--roller);padding:0;border:0;background:none;transition:transform 1.1s cubic-bezier(.22,.84,.21,1),filter .2s; }
 .intro-roller:hover { filter:brightness(1.06); }
 .intro-roller:focus-visible { outline:3px solid #e0b04f;outline-offset:2px; }
-.intro-roller-start { left:var(--rolled); }
-.intro-roller-end { left:calc(var(--rolled) + var(--roller));z-index:2; }
-.intro-scroll-stage[data-state='open'] .intro-roller-start { left:0; }
-.intro-scroll-stage[data-state='open'] .intro-roller-end { left:calc(100% - var(--roller)); }
+.intro-roller-start { left:var(--x0); }
+.intro-roller-end { left:calc(var(--x0) + var(--roller));z-index:2; }
+.intro-scroll-stage[data-state='open'] .intro-roller-end { transform:translateX(calc(var(--map-w) - var(--roller) * .6)); }
 .intro-roller-ribbon { position:absolute;z-index:2;top:50%;left:50%;translate:-50% -50%;writing-mode:vertical-rl;padding:.8rem .3rem;border-radius:6px;background:#a84a42;color:#fff9ec;font-size:.8rem;font-weight:600;letter-spacing:.14em;box-shadow:0 0 0 2px #fbf3e3,0 3px 5px #5a4a4055;transition:opacity .3s; }
 .intro-scroll-stage[data-state='open'] .intro-roller-ribbon { opacity:0; }
-.intro-letter { position:absolute;z-index:1;isolation:isolate;top:0;left:27%;width:min(560px,52%);aspect-ratio:380/300;rotate:-1.2deg;display:grid;align-content:center;justify-items:center;gap:.8rem;padding:3.4rem 3.4rem 2.8rem;text-align:center;color:#54463c;transition:opacity .4s,transform .6s; }
+.intro-letter { position:absolute;z-index:1;isolation:isolate;top:calc(50% - var(--letter-h) / 2);left:27%;width:var(--letter-w);aspect-ratio:380/300;rotate:-1.2deg;display:grid;align-content:center;justify-items:center;gap:.8rem;padding:3.4rem 3.4rem 2.8rem;text-align:center;color:#54463c;transition:opacity .4s,transform .6s; }
 .intro-letter .letter-art { z-index:-1; }
 .intro-letter h2 { margin:0;color:var(--green);font-size:clamp(1.7rem,3vw,2.3rem);letter-spacing:.04em; }
 .intro-letter p { margin:0;font-size:1rem;line-height:1.8; }
@@ -199,10 +199,9 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-book { min-height:490px; }
 }
 @media (max-width:1240px) { .intro-bg-side { display:none; } }
-/* 內容欄貼近視窗時，捲軸讓開燈塔。 */
+/* 內容欄貼近視窗時，捲軸讓開燈塔，地圖跟著縮小。 */
 @media (min-width:701px) and (max-width:1240px) {
- .intro-scroll-stage { --rolled:13%; }
- .intro-map-sheet { clip-path:inset(-30px 84% -30px 16%); }
+ .intro-cultures { --x0:calc(var(--w) * .13);--map-w:calc(var(--w) * .87 - 92px); }
  .intro-letter { left:32%; }
 }
 @media (max-width:700px) {
@@ -239,17 +238,15 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-tag { min-width:104px;min-height:44px;padding:.2rem .6rem;font-size:.8rem; }
  .intro-paper-button { padding:.55rem .85rem;font-size:.82rem; }
  .intro-replay { min-height:36px;padding:.2rem .4rem; }
- .intro-cultures { --stage-h:360px;padding-bottom:128px; }
+ .intro-cultures { --w:calc(100vw - 2rem);--roller:26px;--x0:0px;--map-w:calc(var(--w) - 40px);--letter-h:330px;--stage-h:360px;padding-bottom:128px; }
  .harbor-sea { --boat:66px;--floe:112px;--land:138px;--sea:300px;inset:calc(1.6rem + 310px) 0 0; }
  .harbor-boat { left:44vw; }
- .intro-roller { top:6%;bottom:6%; }
  .harbor-cloud,.harbor-gull { display:none; }
- .intro-map-sheet { clip-path:inset(-30px 100% -30px 0); }
- .intro-scroll-stage { --roller:26px;--rolled:0%;aspect-ratio:auto;height:calc((100vw - 3rem - 36px) * .548 + 24px);transition:height .7s ease; }
- .intro-scroll-stage[data-state='rolled'] { height:360px; }
  .intro-letter { width:calc(100% - var(--roller) * 2 - 1rem);aspect-ratio:auto;height:330px;top:15px;left:calc(var(--roller) * 2 + 1rem);padding:2.8rem 1.8rem 2.2rem; }
  .intro-roller-ribbon { font-size:.66rem;padding:.6rem .15rem; }
  .intro-letter { gap:.55rem; }
+ /* 手機地圖比舞台矮，按鈕貼到地圖下方，才不會壓到燈塔。 */
+ .intro-scroll-stage[data-state='open'] + .intro-map-actions { margin-top:-92px; }
  .intro-letter h2 { font-size:1.35rem;letter-spacing:.02em;white-space:nowrap; }
  .intro-letter p { font-size:.92rem; }
  .intro-map-pin::after { display:none; }
@@ -265,7 +262,7 @@ html.intro-document { scrollbar-gutter:stable; }
 @media (prefers-reduced-motion:reduce) {
  .title-letter,.is-opening .intro-book,.is-opening .intro-hanger { animation:none; }
  .is-opening .intro-hanger { opacity:1; }
- .intro-map-sheet,.intro-roller,.intro-letter,.intro-scroll-stage { transition:none; }
+ .intro-map-sheet,.intro-map-sheet .intro-map-canvas,.intro-roller,.intro-letter { transition:none; }
  .harbor-glow { animation:none;opacity:.7; }
  .intro-cultures .pop { animation:none!important;opacity:1!important; }
  html.intro-document { scroll-behavior:auto; }
