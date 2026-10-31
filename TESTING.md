@@ -261,3 +261,7 @@ node --experimental-vm-modules tests/smoke.mjs
 ## 2026-10-31：首頁標語緞帶
 
 - 重疊檢查：`node scripts/check-home-overlap.mjs`（需本機伺服器，不在 `npm test` 內），九種視窗含 1440×684 皆不重疊。
+
+## 2026-10-31：Intro 海港
+
+- 檢查指令可用 `BASE=http://127.0.0.1:5511` 指定埠，避開 Live Server 的自動重新整理。

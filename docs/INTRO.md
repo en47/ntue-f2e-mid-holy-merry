@@ -11,6 +11,7 @@
 - `js/components/intro-art.js`：書封、書板、內頁角落、按鈕底圖、雪地背景。
 - `js/components/intro-scenes.js`：三章紙雕卡片；`js/data/intro-stories.js` 只放配置座標。
 - `js/components/intro-map.js`、`intro-scroll.js`：地圖、雪橇航線、捲軸。
+- `js/components/intro-harbor.js`：地圖後方的紙雕海港，快捲到才生成圖層，離開畫面暫停。風由左向右、光源在左上；船與浮冰的吃水線對齊前一層浪。
 - `js/components/intro-postcard-art.js`：六張明信片的互動紙雕；文案與抽獎內容在 `js/data/intro-cultures.js`。
 - `js/data/intro-map-shapes.js`：由 `scripts/build-intro-map.py` 描 `christmas_map.jpg` 產生，需要 opencv，不要手改。
 
