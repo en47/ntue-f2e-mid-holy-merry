@@ -126,12 +126,14 @@ html.intro-document {  scroll-padding-top:1rem;scrollbar-gutter:stable; }
  .intro-copy h2 { font-size:1.55rem; }
  .intro-story { font-size:1rem;line-height:1.9; }
  .intro-subtitle { margin-bottom:.8rem; }
- .intro-picture { height:var(--mobile-scene-height);border-top:1px solid #c8b69b; }
+ .intro-book { scroll-margin-top:.75rem; }
+ .intro-copy-stack { order:2; }
+ .intro-picture { order:1;height:var(--mobile-scene-height);border-bottom:1px solid #c8b69b; }
  .intro-scene { inset:5% 3% 9%; }
  .intro-spine { display:none; }
  .intro-turn { left:0;width:100%; }
  .intro-leaf-desktop { display:none; }
- .intro-leaf-mobile { display:grid;grid-template-rows:1fr var(--mobile-scene-height);height:100%; }
+ .intro-leaf-mobile { display:grid;grid-template-rows:var(--mobile-scene-height) 1fr;height:100%; }
  .intro-leaf-mobile>.intro-copy { min-height:0; }
  .intro-book-controls { gap:.5rem;margin-top:.8rem; }
  .intro-paper-button { padding:.55rem .85rem;font-size:.82rem; }
@@ -141,6 +143,9 @@ html.intro-document {  scroll-padding-top:1rem;scrollbar-gutter:stable; }
  .intro-culture-heading p { font-size:.85rem;max-width:28ch;margin-inline:auto; }
  .intro-map-paper { padding:6px 6px 0; }
  .intro-map-pin { width:36px;height:36px; }
+ /* 台灣與日本在手機上只隔 18px，往外推開才點得準。 */
+ .intro-map-pin[data-country='taiwan'] { translate:-11px 9px; }
+ .intro-map-pin[data-country='japan'] { translate:11px -9px; }
  .intro-map-pin::before { width:14px;height:14px;border-width:2px; }
  .intro-map-legend { font-size:.68rem;padding:.7rem .2rem; }
  .intro-country-shortcuts { gap:.3rem;margin-top:1rem; }
