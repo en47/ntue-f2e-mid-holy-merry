@@ -89,26 +89,27 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-paper-button:hover:not(:disabled) { transform:translateY(-2px) rotate(-1deg);background:#fffdf4; }
 .intro-count { color:var(--red);font-size:.8rem;letter-spacing:.12em;min-width:63px;text-align:center; }
 .intro-replay { border:0;border-bottom:1px dashed #9fb6bc;background:none;color:var(--muted);min-height:44px;font-size:.78rem;padding:.5rem; }
-.intro-cultures { --foreground-under:calc(clamp(170px,19vw,280px) * .55);position:relative;isolation:isolate;padding:1.6rem 0 clamp(64px,7vw,104px);display:flex;flex-direction:column;justify-content:center; }
+.intro-cultures { --foreground-under:calc(clamp(170px,19vw,280px) * .55);--stage-h:calc(min(1120px,100vw - 3rem) * .5787);position:relative;isolation:isolate;padding:1.6rem 0 clamp(18px,2.4vw,36px);display:flex;flex-direction:column;justify-content:center; }
 /* 海港鋪滿視窗寬，並延伸到頁尾雪丘後方，雪岸才接得上海面。 */
 .intro-harbor { position:absolute;z-index:-1;left:50%;top:0;bottom:calc(var(--foreground-under) * -1);width:100vw;translate:-50% 0;overflow:hidden;overflow:clip;pointer-events:none; }
-.harbor-sea { --boat:clamp(92px,9.5vw,150px);--floe:clamp(130px,17vw,260px);--land:clamp(170px,23vw,340px);--sag:6%;position:absolute;inset:auto 0 0;height:clamp(300px,50%,460px); }
-.harbor-far { inset:0; }
-.harbor-wave { left:-6%;width:112%;top:var(--wave-top);bottom:-4%;transform-origin:50% 100%; }
-.harbor-wave-back { --wave-top:12%; }
-.harbor-wave-mid { --wave-top:27%; }
-.harbor-wave-front { --wave-top:50%; }
+/* 海平線在地圖中段。位置都以舞台高度換算，展開地圖、下方多出按鈕時海面不會跳動。 */
+.harbor-sea { --boat:clamp(92px,9.5vw,150px);--floe:clamp(130px,17vw,260px);--land:clamp(170px,23vw,340px);--sea:calc(var(--stage-h) * .8);--sag:calc(var(--sea) * .09);position:absolute;inset:calc(1.6rem + var(--stage-h) * .5) 0 0; }
+.harbor-far { inset:calc(var(--sea) * -.12) 0 auto;height:calc(var(--sea) * 1.8); }
+.harbor-wave { left:-6%;width:112%;top:calc(var(--sea) * var(--wave-top));height:calc(var(--sea) * 1.8);transform-origin:50% 100%; }
+.harbor-wave-back { --wave-top:.12; }
+.harbor-wave-mid { --wave-top:.27; }
+.harbor-wave-front { --wave-top:.5; }
 /* --sag 是浪頂到波谷的距離。船與浮冰的吃水線對齊前一層浪，船身其餘部分藏在浪後，晃動時不會露出空隙；岩岸則整片高出水面。 */
-.harbor-boat { left:19vw;width:var(--boat);aspect-ratio:300/340;top:calc(27% + var(--sag) - var(--boat) * .8); }
-.harbor-floe { right:3vw;width:var(--floe);aspect-ratio:360/300;top:calc(50% + var(--sag) - var(--floe) * .5); }
-.harbor-land { left:0;width:var(--land);aspect-ratio:520/560;top:calc(50% + var(--sag) - var(--land) * .9); }
+.harbor-boat { left:21vw;width:var(--boat);aspect-ratio:300/340;top:calc(var(--sea) * .27 + var(--sag) - var(--boat) * .92); }
+.harbor-floe { right:3vw;width:var(--floe);aspect-ratio:360/300;top:calc(var(--sea) * .5 + var(--sag) - var(--floe) * .5); }
+.harbor-land { left:0;width:var(--land);aspect-ratio:520/560;top:calc(var(--sea) * .5 + var(--sag) - var(--land) * .9); }
 .harbor-glow { z-index:-1; }
 .harbor-cloud { inset:auto;aspect-ratio:270/116;width:clamp(100px,12vw,180px); }
-.harbor-cloud-a { top:9%;left:24vw; }
+.harbor-cloud-a { top:6%;left:7vw; }
 .harbor-cloud-b { top:16%;right:5vw; }
 .harbor-gull { inset:auto;aspect-ratio:90/46;width:clamp(26px,3vw,44px); }
-.harbor-gull-a { top:30%;left:15vw; }
-.harbor-gull-b { top:24%;left:20vw;scale:.75; }
+.harbor-gull-a { top:24%;left:21vw; }
+.harbor-gull-b { top:17%;left:26vw;scale:.75; }
 .intro-cultures:not(.is-opening) .pop { opacity:0; }
 .intro-cultures.is-opening .pop { animation:pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay,0s) both; }
 .intro-cultures.is-opening .harbor-wave-back { animation:pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay,0s) both,wave-drift 11s ease-in-out 1.6s infinite alternate; }
@@ -127,12 +128,14 @@ html.intro-document { scrollbar-gutter:stable; }
 @keyframes gull-glide { from { translate:0 0;rotate:-4deg; } to { translate:64px -20px;rotate:5deg; } }
 @keyframes lantern-glow { from { opacity:.35; } to { opacity:1; } }
 /* 捲軸：地圖一開始就排好，只用裁切揭開；右軸隨之滑到最右。 */
-.intro-scroll-stage { --roller:46px;--rolled:26%;position:relative;width:100%;aspect-ratio:1728/1000;min-height:0;isolation:isolate; }
-.intro-map-sheet { position:absolute;z-index:1;inset:12px calc(var(--roller) * .7) 12px calc(var(--roller) * .7);display:flex;align-items:center;background:#f4e7cf;box-shadow:0 12px 20px -10px #4b6a7a66;clip-path:inset(-30px 70.5% -30px 29.5%);transition:clip-path 1.1s cubic-bezier(.22,.84,.21,1); }
+.intro-scroll-stage { --roller:46px;--rolled:4%;position:relative;width:100%;aspect-ratio:1728/1000;min-height:0;isolation:isolate; }
+.intro-map-sheet { position:absolute;z-index:1;inset:12px calc(var(--roller) * .7) 12px calc(var(--roller) * .7);display:flex;align-items:center;background:#f4e7cf;box-shadow:0 12px 20px -10px #4b6a7a66;clip-path:inset(-30px 93% -30px 7%);transition:clip-path 1.1s cubic-bezier(.22,.84,.21,1); }
 .intro-scroll-stage[data-state='open'] .intro-map-sheet { clip-path:inset(-30px -30px -30px -30px); }
 .intro-map-canvas { position:relative;width:100%;aspect-ratio:1728/947; }
 .map-route { position:absolute;inset:0;width:100%;height:100%;pointer-events:none; }
-.intro-roller { position:absolute;z-index:3;top:0;bottom:0;width:var(--roller);padding:0;border:0;background:none;transition:left 1.1s cubic-bezier(.22,.84,.21,1),filter .2s; }
+/* 收起時捲軸比信紙矮，往下滑會先看到信紙；展開才拉到全高。 */
+.intro-roller { position:absolute;z-index:3;top:11%;bottom:3%;width:var(--roller);padding:0;border:0;background:none;transition:left 1.1s cubic-bezier(.22,.84,.21,1),top 1.1s cubic-bezier(.22,.84,.21,1),bottom 1.1s cubic-bezier(.22,.84,.21,1),filter .2s; }
+.intro-scroll-stage[data-state='open'] .intro-roller { top:0;bottom:0; }
 .intro-roller:hover { filter:brightness(1.06); }
 .intro-roller:focus-visible { outline:3px solid #e0b04f;outline-offset:2px; }
 .intro-roller-start { left:var(--rolled); }
@@ -141,7 +144,7 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-scroll-stage[data-state='open'] .intro-roller-end { left:calc(100% - var(--roller)); }
 .intro-roller-ribbon { position:absolute;z-index:2;top:50%;left:50%;translate:-50% -50%;writing-mode:vertical-rl;padding:.8rem .3rem;border-radius:6px;background:#a84a42;color:#fff9ec;font-size:.8rem;font-weight:600;letter-spacing:.14em;box-shadow:0 0 0 2px #fbf3e3,0 3px 5px #5a4a4055;transition:opacity .3s; }
 .intro-scroll-stage[data-state='open'] .intro-roller-ribbon { opacity:0; }
-.intro-letter { position:absolute;z-index:1;isolation:isolate;top:50%;left:calc(var(--rolled) + var(--roller) * 2 + .5rem);width:min(560px,52%);aspect-ratio:380/300;translate:0 -50%;rotate:-1.2deg;display:grid;align-content:center;justify-items:center;gap:.8rem;padding:3.4rem 3.4rem 2.8rem;text-align:center;color:#54463c;transition:opacity .4s,transform .6s; }
+.intro-letter { position:absolute;z-index:1;isolation:isolate;top:0;left:27%;width:min(560px,52%);aspect-ratio:380/300;rotate:-1.2deg;display:grid;align-content:center;justify-items:center;gap:.8rem;padding:3.4rem 3.4rem 2.8rem;text-align:center;color:#54463c;transition:opacity .4s,transform .6s; }
 .intro-letter .letter-art { z-index:-1; }
 .intro-letter h2 { margin:0;color:var(--green);font-size:clamp(1.7rem,3vw,2.3rem);letter-spacing:.04em; }
 .intro-letter p { margin:0;font-size:1rem;line-height:1.8; }
@@ -196,6 +199,12 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-book { min-height:490px; }
 }
 @media (max-width:1240px) { .intro-bg-side { display:none; } }
+/* 內容欄貼近視窗時，捲軸讓開燈塔。 */
+@media (min-width:701px) and (max-width:1240px) {
+ .intro-scroll-stage { --rolled:13%; }
+ .intro-map-sheet { clip-path:inset(-30px 84% -30px 16%); }
+ .intro-letter { left:32%; }
+}
 @media (max-width:700px) {
  .intro-story-section { min-height:calc(100svh - var(--intro-header-height));justify-content:flex-start; }
  /* 手機書本翻開會變長，背景固定一屏高，雪地才不會被推走。 */
@@ -230,14 +239,15 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-tag { min-width:104px;min-height:44px;padding:.2rem .6rem;font-size:.8rem; }
  .intro-paper-button { padding:.55rem .85rem;font-size:.82rem; }
  .intro-replay { min-height:36px;padding:.2rem .4rem; }
- .intro-cultures { padding-bottom:150px; }
- .harbor-sea { height:270px;--boat:66px;--floe:112px;--land:138px; }
+ .intro-cultures { --stage-h:360px;padding-bottom:128px; }
+ .harbor-sea { --boat:66px;--floe:112px;--land:138px;--sea:300px;inset:calc(1.6rem + 310px) 0 0; }
  .harbor-boat { left:44vw; }
+ .intro-roller { top:6%;bottom:6%; }
  .harbor-cloud,.harbor-gull { display:none; }
  .intro-map-sheet { clip-path:inset(-30px 100% -30px 0); }
  .intro-scroll-stage { --roller:26px;--rolled:0%;aspect-ratio:auto;height:calc((100vw - 3rem - 36px) * .548 + 24px);transition:height .7s ease; }
  .intro-scroll-stage[data-state='rolled'] { height:360px; }
- .intro-letter { width:calc(100% - var(--roller) * 2 - .6rem);aspect-ratio:auto;height:330px;left:calc(var(--roller) * 2 + .4rem);padding:2.8rem 1.8rem 2.2rem; }
+ .intro-letter { width:calc(100% - var(--roller) * 2 - 1rem);aspect-ratio:auto;height:330px;top:15px;left:calc(var(--roller) * 2 + 1rem);padding:2.8rem 1.8rem 2.2rem; }
  .intro-roller-ribbon { font-size:.66rem;padding:.6rem .15rem; }
  .intro-letter { gap:.55rem; }
  .intro-letter h2 { font-size:1.35rem;letter-spacing:.02em;white-space:nowrap; }
