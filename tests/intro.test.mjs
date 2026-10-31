@@ -6,7 +6,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {introStories} from '../js/data/intro-stories.js';
 import {introCultures,cultureOutcome} from '../js/data/intro-cultures.js';
-import {introImageBounds} from '../js/data/intro-image-bounds.js';
+import {sceneArt} from '../js/components/intro-scenes.js';
 const pendingAnimations = new Set();
 class El {
  constructor(){this.children=[];this.dataset={};this.attrs={};this.listeners={};this.textContent='';this.hidden=false;this.disabled=false;this.open=false;const set=new Set();this.classList={add:(...a)=>a.forEach(x=>set.add(x)),remove:(...a)=>a.forEach(x=>set.delete(x)),contains:x=>set.has(x)};this.style={setProperty:(k,v)=>this.style[k]=v};this.map=new Map();}
@@ -26,10 +26,10 @@ async function fixture(file){const document=new El();document.body=new El();docu
  async function load(file){file=path.resolve(file);if(modules.has(file))return modules.get(file);const m=new vm.SourceTextModule(await fs.readFile(file,'utf8'),{context});modules.set(file,m);await m.link(spec=>load(path.resolve(path.dirname(file),spec)));return m;}
  const mod=await load(file);await mod.evaluate();return {api:mod.namespace,root:new El(),document};
 }
-test('three chapters: common architecture datum, offset backgrounds, original assets and alpha-bounds',async()=>{
+test('three chapters: common architecture datum, offset backgrounds, original assets and SVG cards',async()=>{
  const manifest=JSON.parse(await fs.readFile('docs/INTRO-ASSETS.json','utf8'));
  for(const [name,digest]of Object.entries(manifest.assets))assert.equal(createHash('sha256').update(await fs.readFile('assets/illustrations/intro/'+name)).digest('hex'),digest);
- assert.equal(introStories.length,3);for(const story of introStories){assert.equal(story.story.split(/\n\s*\n/).length,3);assert.ok(story.story.length>180);assert.ok(!/[a-z]{4}/i.test(story.story));for(const p of story.pieces){const b=introImageBounds[p.src.split('/').pop().slice(0,-4)];assert.ok(b);assert.ok(b.viewBox[0]+b.viewBox[2]<=b.width);assert.ok(b.viewBox[1]+b.viewBox[3]<=b.height);}}
+ assert.equal(introStories.length,3);for(const story of introStories){assert.equal(story.story.split(/\n\s*\n/).length,3);assert.ok(story.story.length>180);assert.ok(!/[a-z]{4}/i.test(story.story));for(const p of story.pieces)assert.ok(sceneArt[p.art],p.art);assert.equal(story.pieces[0].id,'sky','each chapter opens from its own backdrop');}
  const find=(n,id)=>introStories[n].pieces.find(p=>p.id===id);
  for(const[n,a,b]of[[0,'bethlehem','stable'],[1,'village','cottage']]){assert.equal(find(n,a).y,18);assert.equal(find(n,b).y,18);assert.ok(Math.abs(find(n,a).x-find(n,b).x)>20);assert.ok(find(n,a).z<find(n,b).z);}
  assert.ok(find(0,'mary').x<find(0,'manger').x&&find(0,'manger').x<find(0,'joseph').x);

@@ -1,11 +1,10 @@
-import { introImageBounds } from '../data/intro-image-bounds.js';
 import { introStories } from '../data/intro-stories.js';
 
 // One coordinator owns every hinge and the leaf. No halfway content swap or timers.
 export function mountIntroBook(root, {
  stories = introStories,
  motion = matchMedia('(prefers-reduced-motion: reduce)'),
- decoratePage = () => {},
+ art = {},
 } = {}) {
  const $ = id => root.querySelector(`[data-book="${id}"]`);
  const scene = $('scene'), turn = $('turn'), copies = $('copies');
@@ -32,31 +31,22 @@ export function mountIntroBook(root, {
   const story = element('div', 'intro-story');
   for (const paragraph of item.story.split(/\n\s*\n/)) story.append(element('p', '', paragraph));
   copy.append(story, element('blockquote', '', item.quote));
-  decoratePage(copy);
+  art.page?.(copy);
   const view = element('div', 'intro-scene-page');
-  const ground = element('div', 'intro-ground'); ground.setAttribute('aria-hidden', 'true');
-  view.append(ground);
   const panels = item.pieces.map(p => {
    const node = element('div', `intro-piece piece-${p.id}`);
    for (const key of ['x', 'y', 'w', 'h']) node.style.setProperty(`--${key}`, `${p[key]}%`);
    node.style.setProperty('--layer', p.z); node.style.setProperty('--depth', `${p.depth}px`);
-   const bounds = introImageBounds[p.src.split('/').pop().replace('.png', '')];
-   const ns = 'http://www.w3.org/2000/svg';
-   const svg = document.createElementNS(ns, 'svg'), image = document.createElementNS(ns, 'image');
-   // Tight alpha bounds put the painted base on the panel's bottom hinge without altering PNGs.
-   svg.setAttribute('viewBox', bounds.viewBox.join(' '));
-   svg.setAttribute('preserveAspectRatio', 'xMidYMax meet');
-   svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', p.alt);
-   image.setAttribute('href', p.src); image.setAttribute('width', bounds.width); image.setAttribute('height', bounds.height);
-   svg.append(image); node.append(svg); view.append(node);
+   node.setAttribute('role', 'img'); node.setAttribute('aria-label', p.alt);
+   art.piece?.(node, p); view.append(node);
    const folded = `translateZ(${p.depth}px) rotateX(-84deg)`;
-   const raised = `translateZ(${p.depth}px) rotateX(${/^(bethlehem|village)$/.test(p.id) ? -9 : -3}deg)`;
+   // Backdrops lean less than the depth gap between layers, so no plane slices through another.
+   const raised = `translateZ(${p.depth}px) rotateX(${p.id === 'sky' ? 1 : -2}deg)`;
    node.style.transform = folded;
    return { node, folded, raised, delay: p.delay };
   });
   const coin = element('div', 'intro-coin'); coin.setAttribute('aria-hidden', 'true');
-  const img = element('img', ''); img.src = 'assets/illustrations/intro/coinbag.png'; img.alt = '';
-  coin.append(img); view.append(coin); copies.append(copy); scene.append(view);
+  art.coin?.(coin); view.append(coin); copies.append(copy); scene.append(view);
   return { copy, view, panels, coin };
  });
  function controls() {
@@ -182,11 +172,11 @@ export function mountIntroBook(root, {
   stopGift(); const coin = views[page].coin;
   if (!coin.animate || motion.matches) { $('caption').textContent = '金幣送進長襪，善意為一家人帶來希望。'; return; }
   const animation = coin.animate([
-   { opacity: 0, transform: 'translate(0,0) scale(.8)' },
+   { opacity: 0, transform: 'translateZ(70px) translate(0,0) scale(.8)' },
    { opacity: 1, offset: .15 },
-   { opacity: 1, transform: 'translate(300%,-140%) rotate(15deg) scale(.7)', offset: .45 },
-   { opacity: 1, transform: 'translate(630%,60%) scale(.35)', offset: .85 },
-   { opacity: 0, transform: 'translate(650%,100%) scale(.1)' },
+   { opacity: 1, transform: 'translateZ(70px) translate(300%,-140%) rotate(15deg) scale(.7)', offset: .45 },
+   { opacity: 1, transform: 'translateZ(70px) translate(640%,40%) scale(.35)', offset: .85 },
+   { opacity: 0, transform: 'translateZ(70px) translate(660%,80%) scale(.1)' },
   ], { duration: 1200, easing: 'ease-in-out' });
   giftAnimation = animation;
   try { await animation.finished; } catch { /* A new chapter cancels this temporary prop. */ }
