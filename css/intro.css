@@ -45,11 +45,10 @@ html.intro-document {  scroll-padding-top:1rem;scrollbar-gutter:stable; }
 .intro-picture { background:radial-gradient(ellipse at 52% 35%,#fffbed 20%,#f4e6cb 80%,#e5d4b6);border-radius:0 5px 5px 0; }
 /* Each page contains its own perspective stage. The leaf remains a separate 3D layer. */
 .intro-scene,.intro-scene-page { transform-style:preserve-3d; }
-.intro-scene { position:absolute;inset:6% 3% 9%;perspective:1100px;--building-ground:18%;--character-ground:8%; }
+.intro-scene { position:absolute;inset:3% 3% 3%;perspective:1100px;--building-ground:18%;--character-ground:8%; }
 .intro-scene-page { position:absolute;inset:0; }
-.intro-ground { position:absolute;left:1%;width:98%;bottom:0;height:25%;border-radius:50%;background:radial-gradient(ellipse,#fff8e7 20%,#e5d4b8 64%,transparent 72%);transform:translateZ(-25px) rotateX(12deg); }
 .intro-piece { position:absolute;left:var(--x);bottom:var(--y);width:var(--w);height:var(--h);z-index:var(--layer);transform-origin:50% 100%;transform-style:preserve-3d;transform:translateZ(var(--depth)) rotateX(-84deg); }
-.intro-piece svg { display:block;width:100%;height:100%;overflow:hidden;filter:drop-shadow(1px 3px 1px #79604435);pointer-events:none; }
+.intro-piece img { object-fit:contain;object-position:50% 100%; }
 .intro-piece::after { content:'';position:absolute;left:30%;width:40%;bottom:-2px;height:2px;border-radius:50%;background:#aa8d6240; }
 .intro-spine { position:absolute;inset:0 auto 0 calc(50% - 9px);width:18px;background:linear-gradient(90deg,transparent,#9e846455 30%,#fff7dc 49%,#9e846466 63%,transparent);z-index:12;pointer-events:none; }
 .intro-turn { position:absolute;left:50%;width:50%;top:0;height:100%;transform-origin:left center;transform-style:preserve-3d;visibility:hidden;z-index:20;pointer-events:none; }
@@ -59,7 +58,6 @@ html.intro-document {  scroll-padding-top:1rem;scrollbar-gutter:stable; }
 .intro-leaf-desktop,.intro-leaf-desktop>.intro-page { height:100%; }
 .intro-leaf-mobile { display:none; }
 .intro-coin { position:absolute;left:19%;bottom:34%;width:9%;height:13%;z-index:15;opacity:0;pointer-events:none; }
-.intro-coin img { width:100%;height:100%;object-fit:contain; }
 .intro-book-controls { display:flex;justify-content:center;align-items:center;gap:.55rem .9rem;flex-wrap:wrap;margin-top:.6rem; }
 .tag-art { z-index:-1; }
 .intro-tag { position:relative;isolation:isolate;min-width:128px;min-height:48px;border:0;padding:.3rem 1.1rem;background:none;box-shadow:none;color:#fff9ec;font-weight:600;font-size:.88rem;transition:transform .15s; }
@@ -156,9 +154,11 @@ html.intro-document {  scroll-padding-top:1rem;scrollbar-gutter:stable; }
  .intro-book-shell:has(.intro-book[data-state='closed']) { transform:none; }
  .intro-cover { left:calc(var(--book-edge) * -1);bottom:auto;height:min(120vw,480px); }
  .intro-cover-back { display:none!important; }
+ .intro-book[data-state='moving'] .intro-copy-stack { visibility:visible; }
+ .intro-page-art { display:none; }
  .intro-copy-stack { order:2; }
  .intro-picture { order:1;height:var(--mobile-scene-height);border-bottom:1px solid #c8b69b; }
- .intro-scene { inset:5% 3% 9%; }
+ .intro-scene { inset:3%; }
  .intro-spine { display:none; }
  .intro-turn { left:0;width:100%; }
  .intro-leaf-desktop { display:none; }
