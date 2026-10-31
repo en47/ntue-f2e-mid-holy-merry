@@ -1,5 +1,7 @@
 export const ELF_RETURN_DELAY = 2;
 export const ELF_RETURN_DURATION = 1.05;
+export const ELF_DOUBLE_TAP = 320; // ms between taps
+export const ELF_DANCE_SECONDS = 6;
 export const elfWrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 const ease = value => value < .5 ? 4 * value ** 3 : 1 - (-2 * value + 2) ** 3 / 2;
 const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
@@ -12,13 +14,12 @@ export function createElfBehavior({ random = Math.random, durations = {}, reduce
   const cooldowns = new Map();
   const range = (a, b) => a + random() * (b - a);
   const routines = [
-    { id: 'walk', weight: 7, cooldown: 0 },
-    { id: 'look', weight: 2.4, cooldown: 8 },
-    { id: 'rest', weight: 1.2, cooldown: 10 },
-    ...Object.keys(durations).filter(name => /^dance_/.test(name)).map(id => ({ id, weight: 1.1, cooldown: 75 })),
+    // Walking is the default life of the elf; a dance is the occasional surprise.
+    { id: 'walk', weight: 1, cooldown: 0 },
+    ...Object.keys(durations).filter(name => /^dance_/.test(name)).map(id => ({ id, weight: 1.4, cooldown: 0 })),
   ];
   const dances = routines.filter(value => /^dance_/.test(value.id));
-  let nextDanceAt = range(45, 75);
+  let nextDanceAt = range(25, 50), lastTap = -Infinity;
   function start(id, reaction = false) {
     const previousTravel = travel;
     routine = id; elapsed = 0; travel = null; returning = null; version++;
@@ -26,7 +27,8 @@ export function createElfBehavior({ random = Math.random, durations = {}, reduce
     duration = durations[clip] || 1;
     state = reaction ? 'wishReaction' : id === 'walk' ? 'walking' : id === 'rest' ? 'wandering' : 'performing';
     if (id === 'rest' && random() < .25) duration *= 2; // Complete native idle cycles, not a truncated gesture.
-    if (/^dance_/.test(id)) { lastDance = id; nextDanceAt = clock + duration + 75; }
+    if (/^dance_/.test(id) && !reaction) duration = ELF_DANCE_SECONDS; // Long clips are cut, short ones loop.
+    if (/^dance_/.test(id)) { lastDance = id; nextDanceAt = clock + duration + range(25, 50); }
     if (id === 'walk') {
       const options = route?.points.filter(point => Math.abs(point - x) >= route.height * .3) || [];
       if (!options.length) { start('rest'); return; }
@@ -46,6 +48,7 @@ export function createElfBehavior({ random = Math.random, durations = {}, reduce
     cooldowns.set(id, clock + duration + cooldown);
   }
   function schedule() {
+    if (/^dance_/.test(lastRoutine)) { start('walk'); return; }
     const options = routines.filter(option => (option.id === 'walk' || option.id !== lastRoutine) && (cooldowns.get(option.id) || 0) <= clock
       && (option.id !== 'walk' || (route && route.right - route.left > route.height * .3 && durations.walk))
       && (!/^dance_/.test(option.id) || (clock >= nextDanceAt && (dances.length < 2 || option.id !== lastDance))));
@@ -76,6 +79,20 @@ export function createElfBehavior({ random = Math.random, durations = {}, reduce
     else { start('rest'); duration = .55; }
     return interactive;
   }
+  function dance() {
+    if (reduced || !route) return false;
+    const pool = dances.filter(option => dances.length < 2 || option.id !== lastDance);
+    if (!pool.length) return false;
+    interactive = false; pressed = false; returning = null;
+    start(pool[Math.floor(random() * pool.length)].id);
+    return true;
+  }
+  // One tap rests at once; a second tap in time turns that into a dance, with no wait on single taps.
+  function tap(now) {
+    if (now - lastTap < ELF_DOUBLE_TAP) { lastTap = -Infinity; if (dance()) return 'dance'; }
+    else lastTap = now;
+    toggle(); return interactive ? 'rest' : 'resume';
+  }
   function beginPointer() { pressed = true; returning = null; if (interactive) state = 'idleInteractive'; }
   function beginDrag() {
     if (!interactive) { interactive = true; start('rest'); routine = 'idle'; clip = 'look_around'; }
@@ -101,7 +118,7 @@ export function createElfBehavior({ random = Math.random, durations = {}, reduce
   }
   function snapshot() {
     return { state, interactive, held: pressed, x, yaw, clip, routine, version, elapsed, duration,
-      loop: routine === 'walk' || interactive || routine === 'rest', needsFrame: !!route && (!reduced || !!returning) };
+      loop: routine === 'walk' || interactive || routine === 'rest' || (/^dance_/.test(routine) && state !== 'wishReaction'), needsFrame: !!route && (!reduced || !!returning) };
   }
   function tick(dt) {
     dt = Math.max(0, dt);
@@ -127,7 +144,7 @@ export function createElfBehavior({ random = Math.random, durations = {}, reduce
     if (elapsed >= duration) { lastRoutine = routine; schedule(); }
     return snapshot();
   }
-  return { tick, snapshot, setRoute, toggle, beginPointer, beginDrag, dragTo, endPointer, rotateBy, setReduced, wishDelivered };
+  return { tick, snapshot, setRoute, toggle, tap, dance, beginPointer, beginDrag, dragTo, endPointer, rotateBy, setReduced, wishDelivered };
 }
 
 // Keep one connected lane on the shared ground, clear of low UI.
