@@ -1,35 +1,14 @@
 // Home pop-up book: a village under faceted snow peaks. Sun at upper left; every building meets the snow.
 import { paperLayer, popLayer, shape } from './paper-art.js';
-import { SHADE, SNOW, airmailLetter, berryBush, church, cloud, fence, holly, lamp, pine, roofHouse, star } from './paper-props.js';
+import { SHADE, SNOW, airmailLetter, berryBush, facetedPeak, church, cloud, fence, holly, lamp, pine, roofHouse, star } from './paper-props.js';
 import { TITLE_BOX, titleGlyphs } from '../data/title-glyphs.js';
 import { taglinePath } from '../data/tagline-glyphs.js';
 
-const GREEN = '#5f8a70', DEEP = '#4f7a65', ICE = '#c7dbe6', SKY = '#92b6d0', DUSK = '#6b95b6', CREAM = '#f7f0e3';
+const GREEN = '#5f8a70', DEEP = '#4f7a65', ICE = '#c7dbe6', CREAM = '#f7f0e3';
 
 function sun(parent) {
   for (let index = 0; index < 12; index++) shape('path', { d: 'M110 16L120 46H100Z', fill: '#f3dca6', transform: `rotate(${index * 30} 110 110)` }, parent);
   shape('circle', { cx: 110, cy: 110, r: 54, fill: '#f2cf86' }, parent);
-}
-
-const poly = (parent, fill, points) => shape('path', { d: `M${points.map(point => point.join(' ')).join('L')}Z`, fill }, parent);
-
-// Facets as [fill, [across, down]…]: across runs -1 (left foot) to 1 (right foot), down 0 (summit) to 1 (base).
-const FACETS = [
-  [SKY, [-.84, 1], [-.64, .66], [-.46, 1]], [ICE, [-.62, 1], [-.44, .52], [-.26, 1]],
-  [DUSK, [-.52, 1], [-.4, .76], [-.3, 1]], [SKY, [-.36, 1], [-.2, .44], [-.05, .84], [.02, 1]],
-  [ICE, [-.27, .64], [-.13, .28], [-.03, .58]], [DUSK, [-.18, 1], [-.08, .68], [.02, 1]],
-  [SKY, [.02, 0], [.1, .2], [-.05, .42], [.14, .66], [.04, 1], [1, 1], [.72, .68], [.46, .36], [.34, .3]],
-  [DUSK, [.1, .2], [.34, .62], [.14, .66], [-.05, .42]], [DUSK, [.14, .66], [.4, .46], [.62, 1], [.04, 1]],
-  [DUSK, [.5, .62], [.6, .52], [.84, 1], [.62, 1]], [ICE, [.46, 1], [.66, .72], [.88, 1]],
-  [ICE, [.2, 1], [.3, .8], [.42, 1]], [CREAM, [.16, .44], [.3, .4], [.22, .74]], [CREAM, [.5, .46], [.6, .52], [.55, .8]],
-  [CREAM, [0, 0], [.34, .3], [.2, .25], [.15, .37], [.05, .24], [-.04, .35], [-.13, .26], [-.22, .2]],
-];
-
-// One faceted peak: sunlit left face, blue shaded right face, snow cap on top.
-function peak(parent, x, top, base, left, right) {
-  const at = ([across, down]) => [x + across * (across < 0 ? left : right), top + (base - top) * down];
-  poly(parent, CREAM, [[-1, 1], [-.66, .55], [-.5, .5], [-.22, .2], [0, 0], [.34, .3], [.46, .36], [.72, .68], [1, 1]].map(at));
-  for (const [fill, ...points] of FACETS) poly(parent, fill, points.map(at));
 }
 
 function wisp(parent, x, y, width) {
@@ -37,11 +16,11 @@ function wisp(parent, x, y, width) {
 }
 
 function mountains(parent) {
-  peak(parent, 470, 120, 420, 230, 250);
-  peak(parent, 1180, 110, 420, 250, 240);
-  peak(parent, 150, 200, 420, 190, 210);
-  peak(parent, 1460, 190, 420, 200, 180);
-  peak(parent, 810, 30, 420, 330, 320);
+  facetedPeak(parent, 470, 120, 420, 230, 250);
+  facetedPeak(parent, 1180, 110, 420, 250, 240);
+  facetedPeak(parent, 150, 200, 420, 190, 210);
+  facetedPeak(parent, 1460, 190, 420, 200, 180);
+  facetedPeak(parent, 810, 30, 420, 330, 320);
   wisp(parent, 196, 214, 250); wisp(parent, 604, 136, 300); wisp(parent, 1010, 176, 230); wisp(parent, 1300, 250, 210);
 }
 

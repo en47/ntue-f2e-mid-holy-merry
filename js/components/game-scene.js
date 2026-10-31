@@ -1,6 +1,6 @@
 // Game hero stage: a snowy funfair instead of Home's village. Same paper, same light direction.
 import { popLayer, shape } from './paper-art.js';
-import { SHADE, SNOW, cloud, fence, pine, star } from './paper-props.js';
+import { SHADE, SNOW, cloud, facetedPeak, fence, pine, star } from './paper-props.js';
 
 const GREEN = '#5f8a70', DEEP = '#4f7a65', RED = '#b5544c', CREAM = '#f6ecda', GOLD = '#dcae55', TEAL = '#7fa3a8';
 
@@ -14,10 +14,15 @@ function bunting(parent) {
   }
 }
 
-function farDunes(parent) {
-  shape('path', { d: 'M0 120C240 70 420 150 700 110S1200 60 1600 120V300H0Z', fill: '#c3d8e0' }, parent);
-  for (let x = 30; x < 1600; x += 74) pine(parent, x, 130 + Math.sin(x / 150) * 18, 36 + (x % 4) * 9, '#a0bcbc', '#eef3f3');
-  shape('path', { d: 'M0 196C320 150 620 214 960 176S1400 168 1600 196V300H0Z', fill: '#e0ebec' }, parent);
+// Same cut as Home's peaks, in cooler tones: a twin summit that frames Santa, with low shoulders.
+const PEAK_TONES = { cream: '#f4f2ea', ice: '#cfe0df', sky: '#9fbfc0', dusk: '#7fa3a8' };
+function mountains(parent) {
+  shape('path', { d: 'M0 430V330C200 300 420 320 640 300S1140 290 1600 330V430Z', fill: '#d9e6e6' }, parent);
+  facetedPeak(parent, 150, 210, 430, 230, 250, PEAK_TONES);
+  facetedPeak(parent, 1460, 190, 430, 250, 220, PEAK_TONES);
+  facetedPeak(parent, 1120, 120, 430, 300, 290, PEAK_TONES);
+  facetedPeak(parent, 500, 90, 430, 310, 320, PEAK_TONES);
+  facetedPeak(parent, 810, 170, 430, 240, 250, PEAK_TONES);
 }
 
 function carousel(parent) {
@@ -96,7 +101,7 @@ export function mountGameScene(hero) {
   popLayer(hero, '-20 0 270 116', 'games-cloud games-cloud-b', parent => cloud(parent, 120, 62, 1.15), { delay: .3, paper });
   const flight = popLayer(hero, '0 0 200 270', 'games-balloon', balloon, { delay: .4, paper });
   flight.dataset.float = '';
-  popLayer(hero, '0 0 1600 300', 'games-far', farDunes, { delay: .2, paper: wide, ...none });
+  popLayer(hero, '0 0 1600 430', 'games-far', mountains, { delay: .2, paper: wide });
   popLayer(hero, '0 -14 460 434', 'games-carousel', carousel, { delay: .55, paper });
   const ride = popLayer(hero, '0 0 520 540', 'games-ferris', ferrisStand, { delay: .7, paper });
   const spin = document.createElement('div');

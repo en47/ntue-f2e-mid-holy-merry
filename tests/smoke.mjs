@@ -650,9 +650,11 @@ await test('最終紙雕清理：新素材完整性、單一村落、三種樹�
   const gameScene=await fs.readFile(path.join(project,'js/components/game-scene.js'),'utf8');
   for (const page of [html,gameHtml]) assert.ok(!/assets\/illustrations\/(storybook|games\/hero)\//.test(page),'Paper scenes must not load raster art');
   assert.ok(html.includes('data-title-art')); assert.ok(html.includes('js/home-scene.js'));
-  // 只有首頁有雪山且山上無樹，Game 頁維持遊樂場，兩頁背景不重複。
+  // 兩頁都是無樹的切面雪山，但 Game 用自己的配色與排列，背景不重複。
   const peaks=homeScene.match(/function mountains\(parent\) \{[\s\S]*?\n\}/)?.[0];
-  assert.ok(peaks?.includes('peak(parent')); assert.ok(!peaks.includes('pine(')); assert.ok(!/mountain/i.test(gameScene));
+  const gamePeaks=gameScene.match(/function mountains\(parent\) \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(peaks?.includes('facetedPeak(parent')&&gamePeaks?.includes('PEAK_TONES')); assert.ok(!peaks.includes('pine(')&&!gamePeaks.includes('pine('));
+  const peakAt=source=>[...source.matchAll(/facetedPeak\(parent, (\d+)/g)].map(match=>match[1]).join(); assert.notEqual(peakAt(peaks),peakAt(gamePeaks));
   // 按鈕與信紙的紙雕只是底圖：連結與文字仍是真實 HTML，底圖不可攔截點擊所需的語意。
   assert.ok(/<a class="paper-button" href="intro\.html">Explore the Story/.test(html)); assert.ok(/<a class="paper-button cream" href="wish\.html">Make a Wish/.test(html));
   assert.ok(html.includes('聖誕老人的小信')&&html.includes('麋鹿的小信')); assert.ok(homeScene.includes('buttonArt(')&&homeScene.includes('airmailLetter('));
