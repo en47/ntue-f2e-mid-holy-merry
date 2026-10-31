@@ -104,8 +104,8 @@ function nearRight(parent) {
 const BANK = 'M10 196C44 160 74 104 134 88 194 72 232 118 272 114 322 108 362 52 424 46 486 44 536 136 562 196 390 206 186 206 10 196Z';
 function stageBank(parent) {
   shape('path', { d: BANK, fill: SNOW }, parent);
-  hollow(parent, 170, 164, 100, 42); hollow(parent, 410, 150, 112, 58); hollow(parent, 300, 186, 74, 24);
-  hollow(parent, 176, 170, 58, 20, '#afcbdd'); hollow(parent, 424, 160, 62, 28, '#afcbdd');
+  hollow(parent, 170, 168, 104, 52, '#bcd5e4'); hollow(parent, 412, 156, 118, 72, '#bcd5e4'); hollow(parent, 298, 190, 78, 26, '#bcd5e4');
+  hollow(parent, 176, 176, 62, 26, '#9fc0d6'); hollow(parent, 426, 168, 68, 38, '#9fc0d6');
 }
 const mirrored = draw => parent => draw(shape('g', { transform: 'translate(572 0) scale(-1 1)' }, parent));
 
@@ -117,12 +117,25 @@ function frontBank(parent) {
   for (const [x, y, width, height] of [[230, 186, 92, 34], [1076, 170, 88, 32], [1510, 186, 66, 28]]) hollow(parent, x, y, width, height, '#afcbdd');
 }
 
-function buttonArt(fill, edge) {
+function bookIcon(parent) {
+  shape('path', { d: 'M38 52C50 44 62 46 68 52 74 46 86 44 98 52V84C86 76 74 78 68 84 62 78 50 76 38 84Z', fill: '#fbf3e3' }, parent);
+  shape('path', { d: 'M68 52V84', stroke: '#b98a55', 'stroke-width': 3, fill: 'none' }, parent);
+  shape('path', { d: 'M46 58C52 55 58 56 62 59M46 66C52 63 58 64 62 67M74 59C78 56 84 55 90 58M74 67C78 64 84 63 90 66', stroke: '#c9b18c', 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none' }, parent);
+}
+
+function envelopeIcon(parent) {
+  shape('rect', { x: 38, y: 50, width: 60, height: 40, rx: 4, fill: '#fbf3e3' }, parent);
+  shape('path', { d: 'M38 53L68 74 98 53', stroke: '#c9b18c', 'stroke-width': 3, 'stroke-linejoin': 'round', fill: 'none' }, parent);
+  shape('path', { d: 'M68 84C56 74 58 66 63 66 66 66 68 69 68 69S70 66 73 66C78 66 80 74 68 84Z', fill: '#c0574d' }, parent);
+}
+
+function buttonArt(fill, edge, icon) {
   const body = 'M34 28C110 22 250 22 326 28 338 29 344 36 343 46 341 58 341 68 343 78 344 88 338 95 326 96 250 100 110 100 34 96 22 95 16 88 17 78 19 68 19 58 17 46 16 36 22 29 34 28Z';
   return parent => {
     shape('path', { d: body, fill: edge, transform: 'translate(0 6)' }, parent);
     shape('path', { d: body, fill }, parent);
-    shape('rect', { x: 30, y: 38, width: 300, height: 50, rx: 16, fill: 'none', stroke: '#fff3dc', 'stroke-opacity': .6, 'stroke-width': 2, 'stroke-dasharray': '9 7' }, parent);
+    shape('rect', { x: 28, y: 37, width: 304, height: 52, rx: 15, fill: 'none', stroke: '#fff3dc', 'stroke-opacity': .6, 'stroke-width': 2, 'stroke-dasharray': '9 7' }, parent);
+    icon(parent);
     shape('path', { d: 'M24 34C60 20 120 20 176 25 172 34 158 37 150 32 142 42 124 42 118 33 106 41 90 40 84 33 70 41 44 42 24 34Z', fill: SNOW }, parent);
     holly(parent, 322, 30, .44);
   };
@@ -132,20 +145,40 @@ function letterArt(first, second) {
   return parent => {
     shape('path', { d: 'M20 20C120 15 260 16 360 20 365 110 364 200 360 280 260 285 120 284 20 280 15 200 16 110 20 20Z', fill: '#fdf6e6' }, parent);
     for (const [stroke, offset] of [[first, 0], [second, 16]]) shape('rect', { x: 34, y: 34, width: 312, height: 232, rx: 6, fill: 'none', stroke, 'stroke-width': 5, 'stroke-dasharray': '16 16', 'stroke-dashoffset': offset }, parent);
-    holly(parent, 66, 66, .62);
-    shape('rect', { x: 296, y: 50, width: 36, height: 44, rx: 2, fill: '#f6e4bd', stroke: '#fffdf6', 'stroke-width': 3, 'stroke-dasharray': '3 3' }, parent);
-    star(parent, 314, 72, 11);
+    shape('path', { d: 'M18 22C90 14 190 14 262 20 258 32 240 36 230 30 222 42 200 42 192 32 180 44 158 42 150 32 138 42 116 40 110 30 96 44 66 38 58 32 44 46 26 40 18 22Z', fill: SNOW, transform: 'translate(0 8)' }, parent);
+    shape('path', { d: 'M56 262C70 244 92 236 116 232', stroke: '#8a6a55', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, parent);
+    for (const [x, y, angle] of [[74, 240, -40], [90, 232, -60], [104, 228, -74], [80, 256, 50], [98, 246, 34], [114, 240, 20]]) shape('path', { d: 'M0 0C4-6 4-14 0-20-4-14-4-6 0 0Z', fill: second === '#c08a3e' ? '#5f8a70' : first === '#a84a42' ? '#5f8a70' : '#4f7a65', transform: `translate(${x} ${y}) rotate(${angle})` }, parent);
+    shape('circle', { cx: 120, cy: 232, r: 5, fill: '#b4544c' }, parent);
+    holly(parent, 66, 62, .66);
+    shape('rect', { x: 292, y: 48, width: 40, height: 50, rx: 2, fill: '#f6e4bd', stroke: '#fffdf6', 'stroke-width': 3, 'stroke-dasharray': '3 3' }, parent);
+    star(parent, 312, 73, 12);
     shape('path', { d: 'M318 216C332 208 350 216 352 232 356 246 342 262 326 258 308 260 294 244 298 230 300 222 310 218 318 216Z', fill: '#a84a42' }, parent);
     shape('circle', { cx: 325, cy: 236, r: 14, fill: 'none', stroke: '#c9756b', 'stroke-width': 2 }, parent);
     star(parent, 325, 236, 8, '#e3b7a4');
   };
 }
 
+// A little wooden board hung from the top of the stage on two ribbons, capped with snow.
+function calendarArt(parent) {
+  shape('path', { d: 'M108 0V44M268 0V44', stroke: '#a84a42', 'stroke-width': 4, fill: 'none' }, parent);
+  const board = 'M20 40C120 35 260 35 360 40 368 41 372 47 372 54 370 90 370 130 372 164 372 172 366 177 358 177 260 181 120 181 22 177 12 177 8 171 8 164 10 130 10 90 8 54 8 47 12 41 20 40Z';
+  shape('path', { d: board, fill: '#856a50', transform: 'translate(0 5)' }, parent);
+  shape('path', { d: board, fill: '#b08f6c' }, parent);
+  shape('rect', { x: 19, y: 50, width: 342, height: 118, rx: 8, fill: '#fbf3e3' }, parent);
+  shape('rect', { x: 23, y: 54, width: 334, height: 110, rx: 6, fill: 'none', stroke: '#d9c5a2', 'stroke-width': 1.6, 'stroke-dasharray': '7 6' }, parent);
+  shape('path', { d: 'M8 46C100 28 280 28 372 46 372 56 356 60 346 54 334 66 312 62 304 52 288 62 262 60 252 50 232 58 208 56 198 48 176 58 150 58 138 50 122 62 96 60 86 50 72 62 48 60 40 52 28 60 10 58 8 46Z', fill: SNOW }, parent);
+  shape('path', { d: 'M188 40C170 22 146 26 150 42 152 54 174 50 188 42 202 50 224 54 226 42 230 26 206 22 188 40Z', fill: '#a84a42' }, parent);
+  shape('path', { d: 'M184 46L170 70 182 66 188 74 192 66 206 70 192 46Z', fill: '#8f3e37' }, parent);
+  shape('circle', { cx: 188, cy: 42, r: 8, fill: '#c0574d' }, parent);
+  holly(parent, 42, 44, .52); holly(parent, 338, 44, .46);
+}
+
 function mountDecor(root) {
   const flat = { scale: .8, grain: .5, shadow: .28 };
   const [explore, wish] = root.querySelectorAll('.paper-button');
-  paperLayer(explore, '0 0 360 116', 'button-art', buttonArt('#4a7560', '#3a5e4d'), { paper: flat, eager: true, preserveAspectRatio: 'none' });
-  paperLayer(wish, '0 0 360 116', 'button-art', buttonArt('#a84a42', '#853a34'), { paper: flat, eager: true, preserveAspectRatio: 'none' });
+  paperLayer(explore, '0 0 360 116', 'button-art', buttonArt('#4a7560', '#3a5e4d', bookIcon), { paper: flat, eager: true, preserveAspectRatio: 'none' });
+  paperLayer(wish, '0 0 360 116', 'button-art', buttonArt('#a84a42', '#853a34', envelopeIcon), { paper: flat, eager: true, preserveAspectRatio: 'none' });
+  paperLayer(root.querySelector('.countdown'), '0 0 380 206', 'calendar-art', calendarArt, { paper: { scale: .8, grain: .5, shadow: .26 }, eager: true, preserveAspectRatio: 'none' });
   const letter = { paper: { scale: .8, grain: .35, shadow: .24 }, eager: true, preserveAspectRatio: 'none' };
   paperLayer(root.querySelector('#santa-letter .letter-body'), '0 0 380 300', 'letter-art', letterArt('#a84a42', '#4f7d68'), letter);
   paperLayer(root.querySelector('#reindeer-letter .letter-body'), '0 0 380 300', 'letter-art', letterArt('#4f7d68', '#c08a3e'), letter);
