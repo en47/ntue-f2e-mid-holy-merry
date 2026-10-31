@@ -4,7 +4,7 @@ import { SHADE, SNOW, cloud, fence, pine, star } from './paper-props.js';
 
 const GREEN = '#5f8a70', DEEP = '#4f7a65', RED = '#b5544c', CREAM = '#f6ecda', GOLD = '#dcae55', TEAL = '#7fa3a8';
 
-export function bunting(parent) {
+function bunting(parent) {
   const flags = [RED, CREAM, GREEN, GOLD, TEAL];
   shape('path', { d: 'M-10 18C260 92 520 92 800 40S1340 16 1610 70', stroke: '#a9845b', 'stroke-width': 4, fill: 'none' }, parent);
   for (let index = 0; index < 22; index++) {

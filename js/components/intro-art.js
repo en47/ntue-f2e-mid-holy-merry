@@ -1,7 +1,6 @@
 // Intro's paper-cut book. Same rough-cut paper as Home and Game; every sheet is one image.
-import { paperLayer, shape } from './paper-art.js';
+import { paperLayer, popLayer, shape } from './paper-art.js';
 import { SNOW, cloud, holly, pine, roofHouse, star } from './paper-props.js';
-import { bunting } from './game-scene.js';
 import { STORY_BOX, storyGlyphs } from '../data/story-glyphs.js';
 
 const BOARD = '#3f6655', BOARD_EDGE = '#2f5244', CREAM = '#fbf3e3';
@@ -46,13 +45,42 @@ function sideTrees(parent) {
   star(parent, 200, 60, 10);
 }
 
+// Ornaments hung from the top of the page on long strings; each swings on its own.
+const HANGERS = {
+  star: (parent, y) => star(parent, 60, y + 26, 30),
+  bell(parent, y) {
+    shape('path', { d: `M60 ${y}C40 ${y + 2} 36 ${y + 22} 34 ${y + 38} 32 ${y + 46} 26 ${y + 50} 24 ${y + 56}H96C94 ${y + 50} 88 ${y + 46} 86 ${y + 38} 84 ${y + 22} 80 ${y + 2} 60 ${y}Z`, fill: '#d9b36a' }, parent);
+    shape('circle', { cx: 60, cy: y + 62, r: 8, fill: '#a84a42' }, parent);
+  },
+  flake(parent, y) {
+    for (let angle = 0; angle < 180; angle += 60) shape('path', { d: 'M0-34V34M-10-24L0-14 10-24M-10 24L0 14 10 24', stroke: '#fbf8f1', 'stroke-width': 5, 'stroke-linecap': 'round', fill: 'none', transform: `translate(60 ${y + 34}) rotate(${angle})` }, parent);
+  },
+  moon: (parent, y) => shape('path', { d: `M72 ${y}A32 32 0 1 0 88 ${y + 50} 26 26 0 1 1 72 ${y}Z`, fill: '#efcf7e' }, parent),
+  bauble(parent, y) {
+    shape('rect', { x: 52, y, width: 16, height: 10, fill: '#d9b36a' }, parent);
+    shape('circle', { cx: 60, cy: y + 36, r: 27, fill: '#a84a42' }, parent);
+    shape('path', { d: `M34 ${y + 32}C48 ${y + 42} 72 ${y + 42} 86 ${y + 32}`, stroke: '#fbf3e3', 'stroke-width': 4, fill: 'none' }, parent);
+  },
+};
+
+function hanger(kind, length) {
+  return parent => {
+    shape('path', { d: `M60 0V${length}`, stroke: '#a9845b', 'stroke-width': 3, fill: 'none' }, parent);
+    HANGERS[kind](parent, length);
+  };
+}
+
 export function mountBackdrop(host) {
-  const paper = { scale: 1.2, grain: .4, shadow: .14 };
-  paperLayer(host, '0 0 1600 170', 'intro-bg-bunting', bunting, { paper: { scale: 1.1, grain: .5, shadow: .2 }, eager: true });
-  for (const name of ['intro-bg-cloud-a', 'intro-bg-cloud-b']) paperLayer(host, '-20 0 270 116', `intro-bg-cloud ${name}`, parent => cloud(parent, 120, 62, 1.15), { paper, eager: true });
-  paperLayer(host, '0 0 1920 352', 'intro-bg-hills', snowHills, { paper, eager: true, preserveAspectRatio: 'none' });
-  const side = (name, mirror) => paperLayer(host, '-80 0 380 320', `intro-bg-side ${name}`, mirror ? parent => sideTrees(shape('g', { transform: 'translate(220 0) scale(-1 1)' }, parent)) : sideTrees, { paper: { ...paper, scale: 1 }, eager: true });
-  side('intro-bg-left', false); side('intro-bg-right', true);
+  const paper = { scale: 1.2, grain: .4, shadow: .14 }, small = { scale: .8, grain: .45, shadow: .2 };
+  popLayer(host, '0 0 1920 352', 'intro-bg-hills', snowHills, { delay: .1, paper, preserveAspectRatio: 'none' });
+  const side = (name, delay, mirror) => popLayer(host, '-80 0 380 320', `intro-bg-side ${name}`, mirror ? parent => sideTrees(shape('g', { transform: 'translate(220 0) scale(-1 1)' }, parent)) : sideTrees, { delay, paper: { ...paper, scale: 1 } });
+  side('intro-bg-left', .3, false); side('intro-bg-right', .4, true);
+  for (const [name, delay] of [['intro-bg-cloud-a', .35], ['intro-bg-cloud-b', .45]]) popLayer(host, '-20 0 270 116', `intro-bg-cloud ${name}`, parent => cloud(parent, 120, 62, 1.15), { delay, paper });
+  const strings = [['flake', 150, 3], ['star', 76, 10], ['bell', 210, 16], ['moon', 40, 25], ['star', 24, 72], ['bauble', 180, 79], ['flake', 90, 86], ['moon', 236, 92]];
+  strings.forEach(([kind, length, left], index) => {
+    const piece = popLayer(host, '0 0 120 340', 'intro-hanger', hanger(kind, length), { delay: .55 + index * .07, paper: small });
+    piece.style.left = `${left}%`; piece.style.setProperty('--swing', `${3.4 + index % 3 * .6}s`);
+  });
 }
 
 export function tagArt(fill, edge) {

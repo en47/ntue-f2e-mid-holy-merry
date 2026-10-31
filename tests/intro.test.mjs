@@ -41,7 +41,8 @@ test('page text and paper art: raster chapters are gone and the map keeps its si
  assert.ok(!/assets\/illustrations\/intro\//.test(html+css),'Intro no longer loads the raster originals');
  for(const id of ['cover','close','controls'])assert.ok(html.includes(`data-book="${id}"`),id);
  for(const id of ['stage','sheet','letter','fold'])assert.ok(html.includes(`data-scroll="${id}"`),id);
- assert.ok(css.includes('scroll-snap-type:y proximity')&&css.includes('scroll-snap-align:start'));
+ assert.ok(!css.includes('scroll-snap'),'scrolling stays free so the book controls can always be reached');
+ assert.ok(css.includes('.is-opening .intro-hanger')&&css.includes('book-arrive'));
  for(const copy of ['把希望與善意','選取故事書後','願每一點善意'])assert.ok(!html.includes(copy),copy);
 });
 test('book waits for every hinge, populated leaf, forward/back, rapid-click guard and cancellation',async()=>{
