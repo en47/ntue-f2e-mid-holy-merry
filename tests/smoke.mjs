@@ -112,6 +112,8 @@ await test('快取版本：每頁的 CSS、入口與內部模組版本都對應�
   const home = await fs.readFile(path.join(project, 'index.html'), 'utf8');
   const { imports } = JSON.parse(home.match(/<script type="importmap">(.*)<\/script>/)[1]);
   for (const file of ['home-scene', 'paper-art', 'flip-counter', 'characters-scene']) assert.match(imports[`./js/components/${file}.js`], /\?v=[0-9a-f]{10}$/);
+  const adminMap = JSON.parse((await fs.readFile(path.join(project, 'admin.html'), 'utf8')).match(/<script type="importmap">(.*)<\/script>/)[1]).imports;
+  for (const file of ['firebase-client', 'firebase-client-core', 'wish-repository-core']) assert.match(adminMap[`./js/services/${file}.js`], /\?v=[0-9a-f]{10}$/);
 });
 await test('Firebase 模擬器：只有本機主機名稱啟用，且一定換成 demo 專案', async () => {
   const { localEmulatorTarget, createFirebaseClients } = await import(pathToFileURL(path.join(project, 'js/services/firebase-client-core.js')).href);

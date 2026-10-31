@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow"><title>願望審核 — Holy Merry!</title>
-  <link rel="stylesheet" href="css/shared.css"><link rel="stylesheet" href="css/admin.css">
-  <script type="module" src="js/admin.js"></script>
+  <link rel="stylesheet" href="css/shared.css?v=1fa05281b5"><link rel="stylesheet" href="css/admin.css?v=6be099de9d">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/config/firebase-config.js":"./js/config/firebase-config.js?v=d34d0dd681","./js/services/firebase-client-core.js":"./js/services/firebase-client-core.js?v=e2b8ebe187","./js/services/firebase-client.js":"./js/services/firebase-client.js?v=849d6e1ee3","./js/services/firebase-sdk.js":"./js/services/firebase-sdk.js?v=6f4cb3d439","./js/services/wish-repository-core.js":"./js/services/wish-repository-core.js?v=f7a84137bb"}}</script>
+  <script type="module" src="js/admin.js?v=cb7a5e8a83"></script>
 </head>
 <body><main class="admin-shell">
   <a href="wish.html">← 回到 Wish Room</a><h1>願望審核</h1>
@@ -19,6 +20,9 @@
     <div class="admin-toolbar"><h2 id="queue-title">待審核願望</h2><button id="admin-refresh">重新讀取</button><button id="admin-signout">登出</button></div>
     <p>每次最多顯示 50 封，審核後重新讀取下一批。私人願望不能核准公開。</p>
     <ul id="admin-wishes"></ul>
+    <h2 id="published-title">已公開願望</h2>
+    <p>顯示最新 30 封。撤回後信件會從聖誕樹上移除，原信保留，狀態改為未通過。</p>
+    <ul id="admin-published" aria-labelledby="published-title"></ul>
   </section>
   <noscript>請啟用 JavaScript。權限仍由 Firestore Security Rules 控制。</noscript>
 </main></body></html>
