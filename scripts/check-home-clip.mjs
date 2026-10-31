@@ -18,7 +18,7 @@ for (const name of pages) for (const [width, height] of [[375, 812], [768, 1024]
       await Promise.race([image.decode().catch(() => {}), new Promise(resolve => setTimeout(resolve, 1500))]);
       const rect = image.getBoundingClientRect(), { naturalWidth: w, naturalHeight: h } = image;
       // 海洋底紙與封面內襯鋪滿到邊；海港的水與岩岸、Game 的雪山與帳篷下緣都埋在前景後方。
-      if (!w || !rect.width || image.closest('.night-stars, .night-forest, .night-snow, .games-far, .games-carousel, .map-sea, .intro-cover-inside-art, .harbor-far, .harbor-wave, .harbor-boat, .harbor-floe, .harbor-glow, .harbor-land') || getComputedStyle(image.parentElement).display === 'none') continue;
+      if (!w || !rect.width || image.closest('.night-stars, .night-forest, .night-snow, .night-cottage, .games-far, .games-carousel, .map-sea, .intro-cover-inside-art, .harbor-far, .harbor-wave, .harbor-boat, .harbor-floe, .harbor-glow, .harbor-land') || getComputedStyle(image.parentElement).display === 'none') continue;
       const inPage = Boolean(image.closest('.page-foreground'));
       const bound = inPage ? image.closest('.page-foreground').getBoundingClientRect() : stage;
       const canvas = Object.assign(document.createElement('canvas'), { width: w, height: h });
