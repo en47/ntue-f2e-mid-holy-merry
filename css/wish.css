@@ -1,7 +1,14 @@
 @font-face { font-family: WishHand; src: url('../assets/fonts/wish-handwritten.woff') format('woff'); font-display: swap; }
-.wish-page { background: #d5e6ec; }
+.wish-page { background: #1c2f43; }
+.wish-page .site-footer { padding: .4rem 0 1rem; background: #1c2f43; color: #dfe7ee; }
+/* 頁尾沿用其他頁的紙雕地面，換成夜色，壓低高度後接上場景的撕紙邊。 */
+.wish-page .page-foreground { height: clamp(120px, 13vw, 190px); margin-top: 0; background: #22384f; }
+.room-edge { position: absolute; z-index: 6; left: 0; bottom: -1px; width: 100%; height: clamp(18px, 2.6vw, 34px); fill: #22384f; pointer-events: none; }
+.wish-page .site-footer .text-button { color: #fbecc4; }
+.wish-page .site-footer .footer-note { color: #aebccb; }
+.wish-page .music-widget { position: fixed; right: .9rem; bottom: .9rem; padding: 0; background: none; }
 @font-face { font-family: StorySign; src: url('../assets/fonts/mountains-of-christmas-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
-.wish-page main { padding: 0 0 1.5rem; }
+.wish-page main { padding: 0; }
 .wish-room { --ground: 12%; position: relative; isolation: isolate; overflow: hidden; overflow: clip; width: 100%; height: clamp(600px, calc(100svh - 108px), 950px); margin: 0; background: linear-gradient(#22384f 0%, #33526f 52%, #5c7c97 78%); }
 .room-sky { position: absolute; inset: 0; pointer-events: none; z-index: -2; }
 .wish-room .pop { position: absolute; }
@@ -13,7 +20,7 @@
 .night-cloud-a { top: 22%; left: 33%; width: 11%; }
 .night-cloud-b { top: 14%; right: 4%; width: 12%; }
 .night-forest { left: -1%; right: -1%; bottom: 17%; height: 34%; }
-.night-cottage { right: -1%; bottom: calc(var(--ground) + 3%); width: clamp(190px, 20vw, 300px); aspect-ratio: 520 / 440; }
+.night-cottage { right: -1%; bottom: calc(var(--ground) + 7%); width: clamp(190px, 20vw, 300px); aspect-ratio: 520 / 440; }
 .night-snow { left: -1%; right: -1%; bottom: -1%; height: 26%; }
 .night-pines { left: 40%; bottom: calc(var(--ground) + 1%); width: clamp(100px, 15vw, 218px); aspect-ratio: 480 / 436; }
 /* 聖誕燈：平時只有微光，滑鼠經過才漸漸亮起，離開後慢慢暗回去。 */
@@ -39,6 +46,16 @@
 .wish-letter input::placeholder, .wish-letter textarea::placeholder { color: #8c8b7e; font-size: .8rem; }
 .letter-signature { display: flex; justify-content: space-between; gap: 1rem; align-items: center; color: #a35143; font: 1.1rem WishHand, var(--font-body); margin-top: .25rem; }
 #wish-counter { font: .76rem var(--font-body); color: #6f6757; }
+.letter-stamp { position: absolute; top: 2.6rem; right: 2.6rem; width: 54px; height: auto; rotate: 4deg; }
+.letter-signature { flex-wrap: wrap; }
+.stamp-picker { display: flex; gap: .2rem; margin: 0; padding: 0; border: 0; min-width: 0; }
+.wish-letter .stamp-picker label { position: relative; margin: 0; cursor: pointer; transition: transform .15s; }
+.stamp-picker input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.stamp-picker img { display: block; width: 28px; height: auto; opacity: .62; }
+.wish-letter .stamp-picker label:hover { transform: translateY(-3px) rotate(-4deg); }
+.stamp-picker input:checked + img { opacity: 1; outline: 2px solid #a84a42; outline-offset: 1px; }
+.stamp-picker input:focus-visible + img { outline: 3px solid #e0b04f; }
+.dialog-stamp { float: right; width: 64px; height: auto; margin: 0 0 .5rem .8rem; rotate: 4deg; }
 .letter-actions { display: flex; align-items: center; gap: .8rem; margin-top: .65rem; }
 .letter-send { position: relative; isolation: isolate; min-width: 132px; min-height: 52px; flex-shrink: 0; border: 0; background: none; color: #fff9ec; padding: .3rem 1rem .6rem; font-size: .88rem; font-weight: 600; transition: transform .15s; }
 .letter-send .tag-art { z-index: -1; }
@@ -55,11 +72,26 @@
 .stocking-station.is-catching .stocking-swing { animation: sock-catch 2.2s linear; }
 @keyframes sock-catch { 0% { rotate: 0deg; } 12% { rotate: 9deg; } 34% { rotate: -6.4deg; } 56% { rotate: 4deg; } 78% { rotate: -2.2deg; } 100% { rotate: 0deg; } }
 .wish-room[data-delivery-state='flying'] .stocking-swing { animation: none; }
+.stocking-station { cursor: pointer; }
+.stocking-station:hover:not(.is-catching) .stocking-swing, .stocking-station:active:not(.is-catching) .stocking-swing { animation: sock-hover 1.05s ease-in-out infinite alternate; }
+@keyframes sock-hover { from { rotate: -11deg; } to { rotate: 11deg; } }
+/* 小屋：白煙順著風往右飄；門是真的鉸鏈，人物從門口走出來再退回去。 */
+.cottage-smoke { position: absolute; left: 60%; top: 5%; width: 18%; aspect-ratio: 100 / 70; pointer-events: none; }
+.smoke-puff { opacity: 0; animation: smoke-rise 5.1s ease-out infinite; }
+@keyframes smoke-rise { 0% { opacity: 0; transform: translate(0, 30%) scale(.4); } 14% { opacity: 1; } 70% { opacity: .75; } 100% { opacity: 0; transform: translate(70%, -260%) scale(1.7); } }
+.cottage-door { position: absolute; left: 44.2%; top: 59%; width: 11.6%; height: 32.4%; padding: 0; border: 0; background: none; perspective: 240px; pointer-events: auto; cursor: pointer; }
+.cottage-door::after { content: ''; position: absolute; inset: -10px -14px 0; }
+.cottage-door:focus-visible { outline: 3px solid #e0b04f; outline-offset: 3px; }
+.door-leaf { transform-origin: 0 50%; transition: transform .28s ease-in-out; }
+.door-open .door-leaf { transform: rotateY(-112deg); }
+.cottage-door:hover .door-leaf { filter: brightness(1.18); }
+.cottage-guest { position: absolute; z-index: 1; left: 50%; bottom: 8%; width: 25%; aspect-ratio: 136 / 170; opacity: 0; transform: translateX(-50%) scale(.3); transform-origin: 50% 100%; pointer-events: none; transition: transform .28s ease-out, opacity .2s; }
+.cottage-guest.is-out { opacity: 1; transform: translateX(-50%) translateY(10%) scale(1); }
 .wish-tree-space { position: absolute; top: 2%; left: 46%; right: 15%; bottom: var(--ground); z-index: 2; }
 .tree-gesture { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: grab; touch-action: pan-y; border-radius: 0; }
 .tree-gesture:active { cursor: grabbing; }
 .tree-gesture:focus-visible { outline-offset: -8px; outline-style: dashed; }
-.tree-hint { position: absolute; bottom: -2.6rem; left: 0; right: 0; text-align: center; font-size: .82rem; color: #4d6478; margin: 0; pointer-events: none; }
+.tree-hint { position: absolute; bottom: -2.2rem; left: 0; right: 0; text-align: center; font-size: .82rem; color: #4d6478; margin: 0; pointer-events: none; }
 .wish-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
 .elf-lane { position: absolute; left: 47%; right: 3%; bottom: var(--ground); height: 16%; pointer-events: none; }
 .elf-hit { position: absolute; transform: translate(-50%,-50%); padding: 0; border: 0; border-radius: 0; background: none; touch-action: pan-y; cursor: pointer; z-index: 5; }
@@ -69,6 +101,7 @@
 .elf-instructions { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .wish-mesh-controls { touch-action: pan-y pinch-zoom; }
 /* Keyboard targets stay accessible; pointer ownership comes from actual GLB/board raycasts. */
+.wish-mesh-controls .wish-tree-space,
 .wish-mesh-controls .elf-hit,
 .wish-mesh-controls .tree-gesture,
 .wish-mesh-controls .tree-envelope-hit { pointer-events: none; }
@@ -76,7 +109,6 @@
 html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none !important; user-select: none !important; }
 .scene-loading { position: absolute; top: 40%; left: 46%; right: 15%; text-align: center; font-size: .85rem; color: #fbecc4; z-index: 4; pointer-events: none; }
 .scene-loading button { display: block; margin: .8rem auto; pointer-events: auto; border: 1px solid #a77e65; padding: .4rem .9rem; background: var(--cream); }
-.envelope-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1rem; list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
 .envelope { border: 0; width: 100%; padding: 0; background: none; }
 .envelope img { display: block; width: 100%; height: auto; }
 .envelope span { display: block; font-size: .75rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -87,7 +119,7 @@ html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none 
  .wish-letter { width: 39%; left: 2%; }
  .stocking-station { left: 41.5%; height: 30%; }
  .wish-tree-space { left: 52%; right: 1%; }
- .night-cottage { display: none; }
+ .night-cottage { width: clamp(130px, 17vw, 190px); }
  .night-pines { left: 42%; }
  .elf-lane { left: 53%; right: 2%; height: 13%; }
  .letter-actions { align-items: flex-start; flex-direction: column; gap: .35rem; }
@@ -103,17 +135,18 @@ html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none 
  .stocking-station { position: relative; grid-row: 3; grid-column: 1; z-index: 3; width: 134px; height: 190px; left: auto; bottom: auto; justify-self: start; align-self: end; }
  .wish-tree-space { position: relative; grid-row: 3; grid-column: 1; width: 100%; height: 100%; left: auto; right: auto; top: auto; bottom: auto; }
  .tree-hint { bottom: -2rem; font-size: .78rem; }
- .night-cottage, .night-pines, .night-cloud-a { display: none; }
+ .night-pines, .night-cloud-a { display: none; }
+ .night-cottage { right: -3%; bottom: calc(var(--ground) + 6px); width: 128px; }
  .night-moon { left: auto; right: 6%; top: 1%; }
  .night-stars { height: 38%; }
  .night-forest { bottom: auto; top: 58%; height: 15%; }
  .night-snow { height: 30%; }
  .elf-lane { left: 4%; right: 3%; height: 95px; bottom: var(--ground); }
  .scene-loading { left: 8%; right: 8%; top: auto; bottom: 260px; }
- .envelope-list { grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
 @media(prefers-reduced-motion: reduce) {
- .stocking-swing, .stocking-station.is-catching .stocking-swing { animation: none; }
+ .stocking-swing, .stocking-station.is-catching .stocking-swing, .stocking-station:hover .stocking-swing, .stocking-station:active .stocking-swing, .smoke-puff { animation: none; }
+ .door-leaf, .cottage-guest { transition: none; }
  .wish-lights i, .wish-lights i::after { transition: none; }
  .wish-room .pop { animation: none !important; opacity: 1 !important; }
 }

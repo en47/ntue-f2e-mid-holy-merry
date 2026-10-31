@@ -28,7 +28,7 @@ async function settle(page) {
   }, null, { timeout: 30000 }).catch(() => {});
   // 量測前逐一帶入視野，否則未 reveal 的區塊仍帶著進場位移，量到的會是動畫中繼值。
   for (const el of await page.$$('[data-reveal], .page-foreground')) { await el.scrollIntoViewIfNeeded().catch(() => {}); await page.waitForTimeout(250); }
-  await page.waitForFunction(() => document.querySelector('.page-foreground')?.classList.contains('is-visible'), null, { timeout: 20000 }).catch(() => console.error('page-foreground never revealed'));
+  await page.waitForFunction(() => { const f = document.querySelector('.page-foreground'); return !f || f.classList.contains('is-visible'); }, null, { timeout: 20000 }).catch(() => console.error('page-foreground never revealed'));
   await page.waitForTimeout(1000);
   await page.evaluate(() => scrollTo(0, 0));
   await page.waitForTimeout(900);

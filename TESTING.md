@@ -277,3 +277,7 @@ node --experimental-vm-modules tests/smoke.mjs
 - `npm test`：29 組 smoke 與 24 項 node:test 通過；`check-firebase-e2e.mjs` 73 項通過。
 - 舊斷言「轉樹時信封完全不動」與需求相反，改為檢查單擺落後、逐次衰減、回到靜止，且不脫離樹枝、不轉向鏡頭。
 - 信封厚度斷言由 1–2% 改為 3–7%；折信改三折，側邊摺的斷言換成上方摺。枝葉不穿插與十封皆可點的測試保留。
+
+## 2026-11-01：Admin 全部願望與 Wish 小屋
+
+- `check-firebase-e2e.mjs` 涵蓋拒絕、重新同意、撤回、再同意的循環，以及斷線後自動重連。

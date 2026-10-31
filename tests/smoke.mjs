@@ -145,6 +145,14 @@ await test('Admin：三種狀態分頁、撤回與重新同意都有入口，規
   assert.ok(/wishesByStatus[\s\S]*?sdk\.limit\(50\)/.test(repo), 'Every page stays within the rules limit');
   assert.ok(js.includes('textContent=wish.content') && !js.includes('innerHTML'), 'Visitor text is never parsed as HTML');
 });
+await test('Wish 小屋與郵票：白煙、開門人物、郵票只留本機、訪客不用管連線', async () => {
+  const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), js = await fs.readFile(path.join(project, 'js/wish.js'), 'utf8'), cottage = await fs.readFile(path.join(project, 'js/components/wish-cottage.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8'), repo = await fs.readFile(path.join(project, 'js/services/wish-repository-core.js'), 'utf8');
+  assert.ok(!html.includes('cloud-retry') && html.includes('data-tone="night"') && html.includes('name="stamp"'));
+  assert.ok(cottage.includes("'cottage-door'") && (cottage.match(/^  \['/gm) ?? []).length === 5 && cottage.includes('guest.classList.remove') && cottage.includes("classList.remove('door-open')"));
+  assert.ok(css.includes('@keyframes smoke-rise') && css.includes('@keyframes sock-hover'));
+  assert.ok(js.includes('setTimeout(connectCloud,retryDelay)'));
+  assert.ok(!/\bstamp\b/.test(repo), 'Stored letter fields must stay exactly what the rules allow');
+});
 await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {
   const env = environment();
   const { mountFlipCounter } = await env.evaluate('js/components/flip-counter.js');

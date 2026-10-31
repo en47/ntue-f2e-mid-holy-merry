@@ -79,9 +79,9 @@ export function airmailLetter(first, second, { writing = false } = {}) {
     shape('circle', { cx: 120, cy: 232, r: 5, fill: '#b4544c' }, parent);
     holly(parent, 66, 62, .66);
     }
+    if (writing) return;
     shape('rect', { x: 292, y: 48, width: 40, height: 50, rx: 2, fill: '#f6e4bd', stroke: '#fffdf6', 'stroke-width': 3, 'stroke-dasharray': '3 3' }, parent);
     star(parent, 312, 73, 12);
-    if (writing) return;
     shape('path', { d: 'M318 216C332 208 350 216 352 232 356 246 342 262 326 258 308 260 294 244 298 230 300 222 310 218 318 216Z', fill: '#a84a42' }, parent);
     shape('circle', { cx: 325, cy: 236, r: 14, fill: 'none', stroke: '#c9756b', 'stroke-width': 2 }, parent);
     star(parent, 325, 236, 8, '#e3b7a4');
