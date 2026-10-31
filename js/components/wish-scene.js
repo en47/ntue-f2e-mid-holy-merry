@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
 import { treeFit, WORLD_PIXEL as PX } from './wish-layout.js';
 import { createWishEnvelopes } from './wish-envelopes.js';
@@ -83,7 +84,7 @@ export function mountWishScene(root) {
   const letter = root.querySelector('#wish-form'), rack = root.querySelector('#stocking-station');
   const gesture = root.querySelector('#tree-gesture'), elfTarget = root.querySelector('#elf-character');
   const loading = root.querySelector('#scene-loading'), progress = root.querySelector('#scene-progress'), retry = root.querySelector('#scene-retry');
-  const motion = window.matchMedia('(prefers-reduced-motion: reduce)'), loader = new GLTFLoader();
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)'), loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const cleanups = [], loaded = {}, failed = new Set();
   let destroyed = false, frame = null, last = 0, visible = true, contextLost = false;
   let dirty = true, width = 0, height = 0, geometry = null;
@@ -170,7 +171,7 @@ export function mountWishScene(root) {
   }
   async function load(id) {
     try {
-      const file = id === 'elf' ? 'wish-elf-original.glb' : `wish-${id}.glb`;
+      const file = `wish-${id}-web.glb`;
       const gltf = await loader.loadAsync(new URL(`../../assets/models/${file}`, import.meta.url).href);
       if (destroyed) { disposeObject(gltf.scene); return; }
       const model = gltf.scene;
@@ -203,7 +204,7 @@ export function mountWishScene(root) {
   }
   async function loadMissing() {
     if (busy || destroyed) return; busy = true; loading.hidden = false; retry.hidden = true;
-    progress.textContent = '正在打開聖誕小屋……樹與精靈首次載入約 40 MB。';
+    progress.textContent = '正在打開聖誕小屋……';
     await Promise.all(['tree', 'elf'].filter(id => !loaded[id]).map(load));
     busy = false;
     if (destroyed) return;
