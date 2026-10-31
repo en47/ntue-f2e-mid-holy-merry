@@ -103,6 +103,16 @@ await test('全部模組語法、HTML 本機資源及四頁導覽', async () => 
     assert.equal(new Set(ids).size, ids.length, `${page}: duplicate IDs`);
   }
 });
+await test('快取版本：每頁的 CSS、入口與內部模組版本都對應目前檔案內容', async () => {
+  const { PAGES, stamp } = await import(pathToFileURL(path.join(project, 'scripts/stamp-modules.mjs')).href);
+  for (const page of PAGES) {
+    const html = await fs.readFile(path.join(project, page), 'utf8');
+    assert.equal(html, await stamp(html), `${page} 的版本過期，請執行 node scripts/stamp-modules.mjs`);
+  }
+  const home = await fs.readFile(path.join(project, 'index.html'), 'utf8');
+  const { imports } = JSON.parse(home.match(/<script type="importmap">(.*)<\/script>/)[1]);
+  for (const file of ['home-scene', 'paper-art', 'flip-counter', 'characters-scene']) assert.match(imports[`./js/components/${file}.js`], /\?v=[0-9a-f]{10}$/);
+});
 await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {
   const env = environment();
   const { mountFlipCounter } = await env.evaluate('js/components/flip-counter.js');
