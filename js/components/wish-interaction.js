@@ -32,7 +32,7 @@ export function mountWishInteraction(root, { pick, behavior, tree, wake }) {
     try { if (root.hasPointerCapture?.(old.id)) root.releasePointerCapture(old.id); } catch { /* Already released by the browser. */ }
     if (old.hit.kind === 'elf') {
       const elf = behavior(); elf?.endPointer(old.intent === 'rotate');
-      if (!cancelled && old.intent === 'pending') elf?.toggle();
+      if (!cancelled && old.intent === 'pending') elf?.tap(performance.now());
     } else if (!cancelled && old.intent === 'pending' && old.hit.kind === 'envelope') old.hit.activate();
     wake();
   }

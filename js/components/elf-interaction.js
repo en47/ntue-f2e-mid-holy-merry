@@ -41,7 +41,7 @@ export function mountElfInteraction(target, behavior, wake, { pointerEvents = tr
   listen('click', event => {
     event.stopPropagation();
     if (suppressClick && event.detail !== 0) { suppressClick = false; return; }
-    suppressClick = false; behavior.toggle(); wake();
+    suppressClick = false; behavior.tap(performance.now()); wake();
   });
   listen('keydown', event => {
     if (!behavior.snapshot().interactive || !['ArrowLeft', 'ArrowRight', 'Home'].includes(event.key)) return;

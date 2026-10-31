@@ -4,7 +4,7 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-main { padding-bottom:0;--intro-header-height:108px; --paper-warm:#fff6e3; --paper-edge:#d7c2a2; --story-ink:#665343; padding-top:0; }
 .intro-story-section { position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:center;scroll-margin-top:var(--intro-header-height);min-height:calc(100svh - var(--intro-header-height));padding-block:1.4rem 1rem; }
 /* 書放在雪地上：背景超出內容欄，鋪滿整個視窗寬。 */
-.intro-story-bg { position:absolute;z-index:-1;left:50%;top:0;bottom:0;width:100vw;translate:-50% 0;pointer-events:none; }
+.intro-story-bg { position:absolute;z-index:-1;left:50%;top:0;bottom:0;width:100vw;translate:-50% 0;overflow:hidden;overflow:clip;pointer-events:none; }
 .intro-bg-hills { inset:auto 0 0;height:clamp(180px,34%,320px); }
 .intro-hanger { top:0;width:clamp(58px,6.4vw,100px);aspect-ratio:120/340;transform-origin:50% 0;rotate:-1.6deg; }
 .is-opening .intro-hanger { animation:pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay,0s) both,hanger-swing var(--swing,3.8s) ease-in-out 2s infinite alternate; }

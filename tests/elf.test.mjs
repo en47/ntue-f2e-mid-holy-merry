@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { createElfBehavior, safeElfRoute, ELF_RETURN_DELAY, ELF_RETURN_DURATION } from '../js/components/elf-behavior.js';
+import { createElfBehavior, safeElfRoute, ELF_RETURN_DELAY, ELF_RETURN_DURATION , ELF_DANCE_SECONDS, ELF_DOUBLE_TAP } from '../js/components/elf-behavior.js';
 import { mountElfInteraction } from '../js/components/elf-interaction.js';
 import { elfGroundSource, elfGroundProfiles } from '../js/data/elf-ground.js';
 import { elfTestModules } from './helpers/elf-model.mjs';
@@ -28,8 +28,8 @@ class Target {
 }
 const advance = (value, seconds) => { while (seconds > 0) { const dt = Math.min(seconds, .025); value.tick(dt); seconds -= dt; } };
 
-test('weighted autonomous scheduling: varied whole clips, cooldowns, bounded waypoints and no fixed walk/dance pattern', () => {
-  const elf = behavior(), seen = new Set(), sequence = []; let previous = elf.snapshot(), walks = 0, lastDance = -100, lastDanceClip = null;
+test('autonomous life: keeps walking, dances occasionally for a few seconds, then walks on', () => {
+  const elf = behavior(), seen = new Set(), sequence = []; let previous = elf.snapshot(), walks = 0, dances = 0, lastDance = -100, lastDanceClip = null;
   assert.equal(previous.state, 'walking', 'Start strolling as soon as a safe route is available');
   const stroll = behavior({ random: () => 0 });
   advance(stroll, stroll.snapshot().duration + .025);
@@ -42,9 +42,9 @@ test('weighted autonomous scheduling: varied whole clips, cooldowns, bounded way
       assert.ok(previous.elapsed + .025 >= previous.duration - .00001, 'Finish a full clip before choosing another activity');
       seen.add(next.routine); sequence.push(next.routine);
       if (next.clip.startsWith('dance_')) {
-        assert.equal(next.duration, durations[next.clip]);
-        assert.ok(i * .025 >= 45, 'No dance immediately after loading');
-        assert.ok(i * .025 - lastDance >= 75, 'Dances must remain occasional'); lastDance = i * .025;
+        assert.equal(next.duration, ELF_DANCE_SECONDS);
+        assert.ok(i * .025 >= 25, 'No dance immediately after loading');
+        assert.ok(i * .025 - lastDance >= 25, 'Dances must remain occasional'); lastDance = i * .025; dances++;
         assert.notEqual(next.clip, lastDanceClip, 'Use a different native dance when alternatives exist');lastDanceClip = next.clip;
       }
       if (next.routine === 'walk') { assert.ok(Math.abs(next.duration / durations.walk - Math.round(next.duration / durations.walk)) < .00001); walks++; }
@@ -52,8 +52,19 @@ test('weighted autonomous scheduling: varied whole clips, cooldowns, bounded way
     }
     previous = next;
   }
-  for (const routine of ['walk', 'rest', 'look', 'dance_03', 'dance_04', 'dance_05']) assert.ok(seen.has(routine), routine);
-  assert.ok(walks > 3); assert.ok(sequence.some((id, i) => i && id !== 'walk' && sequence[i - 1] !== 'walk'));
+  for (const routine of ['walk', 'dance_03', 'dance_04', 'dance_05']) assert.ok(seen.has(routine), routine);
+  assert.ok(!seen.has('look') && !seen.has('rest'), 'It never stops to idle on its own');
+  assert.ok(walks > dances * 3 && dances > 10); assert.ok(sequence.every((id, i) => i === 0 || id === 'walk' || sequence[i - 1] === 'walk'), 'Every dance leads back to walking');
+});
+
+test('one tap rests at once, two quick taps dance a few seconds and walk on, slow taps never dance',()=>{
+  const elf=behavior();
+  assert.equal(elf.tap(1000),'rest');assert.equal(elf.snapshot().interactive,true);
+  assert.equal(elf.tap(1200),'dance');let state=elf.snapshot();assert.equal(state.interactive,false);assert.ok(state.clip.startsWith('dance_'));assert.equal(state.duration,ELF_DANCE_SECONDS);assert.equal(state.loop,true);
+  const first=state.clip;advance(elf,ELF_DANCE_SECONDS+.05);assert.equal(elf.snapshot().routine,'walk','Back to walking without another tap');
+  assert.equal(elf.tap(5000),'rest');assert.equal(elf.tap(5000+ELF_DOUBLE_TAP),'resume','A slow second tap only resumes');assert.equal(elf.snapshot().interactive,false);
+  const third=elf.tap(9000);assert.equal(third,'rest');elf.tap(9100);assert.notEqual(elf.snapshot().clip,first,'Consecutive dances differ');
+  const calm=behavior({reduced:true});assert.equal(calm.tap(0),'rest');assert.notEqual(calm.tap(100),'dance');
 });
 
 test('interaction freezes location, permits yaw only, holds after release, eases to exact front and resumes in place', () => {
