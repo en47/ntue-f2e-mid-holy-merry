@@ -91,13 +91,13 @@ function front(parent) {
 
 export function mountGameScene(hero) {
   const paper = { scale: 1.3, grain: .6 }, wide = { ...paper, grain: .4, shadow: .16 }, none = { preserveAspectRatio: 'none' };
-  popLayer(hero, '0 0 1600 150', 'games-bunting', bunting, { delay: .15, paper });
-  popLayer(hero, '0 0 240 110', 'games-cloud games-cloud-a', parent => cloud(parent, 120, 62, 1.15), { delay: .1, paper });
-  popLayer(hero, '0 0 240 110', 'games-cloud games-cloud-b', parent => cloud(parent, 120, 62, 1.15), { delay: .3, paper });
+  popLayer(hero, '0 0 1600 170', 'games-bunting', bunting, { delay: .15, paper });
+  popLayer(hero, '-20 0 270 116', 'games-cloud games-cloud-a', parent => cloud(parent, 120, 62, 1.15), { delay: .1, paper });
+  popLayer(hero, '-20 0 270 116', 'games-cloud games-cloud-b', parent => cloud(parent, 120, 62, 1.15), { delay: .3, paper });
   const flight = popLayer(hero, '0 0 200 270', 'games-balloon', balloon, { delay: .4, paper });
   flight.dataset.float = '';
   popLayer(hero, '0 0 1600 300', 'games-far', farDunes, { delay: .2, paper: wide, ...none });
-  popLayer(hero, '0 0 460 420', 'games-carousel', carousel, { delay: .55, paper });
+  popLayer(hero, '0 -14 460 434', 'games-carousel', carousel, { delay: .55, paper });
   const ride = popLayer(hero, '0 0 520 540', 'games-ferris', ferrisStand, { delay: .7, paper });
   const spin = document.createElement('div');
   spin.className = 'games-wheel';

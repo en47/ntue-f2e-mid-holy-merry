@@ -3,14 +3,14 @@
    Back to front: clouds, mountains, scenery, Santa, snow hill, signs, snowbank, torn edge. */
 .games-hero { position: relative; isolation: isolate; width: 100%; height: calc(100svh - var(--games-header-height)); min-height: 600px; margin: 0; padding: 0; overflow: hidden; overflow: clip; background: linear-gradient(180deg, #c7e3ec 0%, #dcedf1 42%, #f4efe4 74%, #fbf6ea 100%); }
 .hero-paper { transform-origin: 50% 100%; }
-.games-bunting { z-index: 1; top: -1%; left: 0; width: 100%; aspect-ratio: 1600 / 150; transform-origin: 50% 0; }
-.games-cloud { z-index: 1; aspect-ratio: 240 / 110; }
+.games-bunting { z-index: 1; top: -1%; left: 0; width: 100%; aspect-ratio: 1600 / 170; transform-origin: 50% 0; }
+.games-cloud { z-index: 1; aspect-ratio: 270 / 116; }
 .games-cloud-a { top: 22%; left: 28%; width: 12%; }
 .games-cloud-b { top: 15%; right: 30%; width: 14%; }
 .games-balloon { z-index: 2; top: 15%; left: 9%; width: 8.5%; aspect-ratio: 200 / 270; }
 .games-balloon img { animation: balloon-float 6s ease-in-out infinite alternate; }
 .games-far { z-index: 2; left: -1%; width: 102%; bottom: 20%; height: 34%; }
-.games-carousel { z-index: 3; left: 15%; width: 21%; aspect-ratio: 460 / 420; bottom: 38%; }
+.games-carousel { z-index: 3; left: 15%; width: 21%; aspect-ratio: 460 / 434; bottom: 38%; }
 .games-ferris { z-index: 3; right: 15%; width: 25%; aspect-ratio: 520 / 540; bottom: 33%; }
 .games-wheel { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 1; animation: wheel-spin 48s linear infinite; }
 .games-wheel-art { inset: 0; position: absolute; }

@@ -1,9 +1,9 @@
 // Paper-cut ground shared by all four pages: same hills and layout, different objects per page.
 import { holly, paperLayer, pauseOffscreen, pine, shape } from './paper-art.js';
 
-const SNOW = '#fff9eb', LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 300 220';
-const LEFT_GROUND = 'M0 250V224C70 210 150 216 220 228S360 224 420 250Z';
-const RIGHT_GROUND = 'M0 220C40 196 120 192 170 200S260 190 300 204V220Z';
+const SNOW = '#fff9eb', LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220';
+const LEFT_GROUND = 'M0 250C20 232 70 210 150 216 170 218 200 224 220 228S360 224 420 250Z';
+const RIGHT_GROUND = 'M0 220C40 196 120 192 170 200S260 190 300 204 330 214 340 220Z';
 
 function hills(root) {
   paperLayer(root, '0 0 1440 240', 'foreground-hills', parent => {
