@@ -26,7 +26,7 @@ function mountains(parent) {
 }
 
 function carousel(parent) {
-  shape('path', { d: 'M56 380V204H404V380Z', fill: '#efe0c4' }, parent);
+  shape('path', { d: 'M56 450V204H404V450Z', fill: '#efe0c4' }, parent);
   for (let index = 0; index < 6; index++) {
     const x = 56 + index * 58;
     shape('path', { d: `M${x} 204L230 40L${x + 58} 204Z`, fill: index % 2 ? CREAM : RED }, parent);
@@ -34,8 +34,8 @@ function carousel(parent) {
   }
   shape('path', { d: 'M230 40V8', stroke: '#8a6a55', 'stroke-width': 6, fill: 'none' }, parent);
   star(parent, 230, 12, 18, GOLD);
-  for (const x of [120, 230, 340]) shape('path', { d: `M${x} 232V380`, stroke: GOLD, 'stroke-width': 7, fill: 'none' }, parent);
-  shape('rect', { x: 34, y: 372, width: 392, height: 26, rx: 6, fill: '#a98c6f' }, parent);
+  for (const x of [120, 230, 340]) shape('path', { d: `M${x} 232V450`, stroke: GOLD, 'stroke-width': 7, fill: 'none' }, parent);
+  // The walls run down behind the snow ridge, so the tent stands in the snow instead of on a floating base.
 }
 
 function ferrisStand(parent) {
@@ -102,7 +102,7 @@ export function mountGameScene(hero) {
   const flight = popLayer(hero, '0 0 200 270', 'games-balloon', balloon, { delay: .4, paper });
   flight.dataset.float = '';
   popLayer(hero, '0 0 1600 430', 'games-far', mountains, { delay: .2, paper: wide });
-  popLayer(hero, '0 -14 460 434', 'games-carousel', carousel, { delay: .55, paper });
+  popLayer(hero, '0 -14 460 464', 'games-carousel', carousel, { delay: .55, paper });
   const ride = popLayer(hero, '0 0 520 540', 'games-ferris', ferrisStand, { delay: .7, paper });
   const spin = document.createElement('div');
   spin.className = 'games-wheel';

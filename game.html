@@ -8,12 +8,12 @@
   <title>Game — Holy Merry!</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/shared.css?v=1fa05281b5">
-  <link rel="stylesheet" href="css/game.css?v=463cab7cbc">
-  <link rel="stylesheet" href="css/game-hero.css?v=fae1d63091">
-  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/components/game-hero-signs.js":"./js/components/game-hero-signs.js?v=bc4ae6caba","./js/components/game-scene.js":"./js/components/game-scene.js?v=57fddd171d","./js/components/game-sleigh.js":"./js/components/game-sleigh.js?v=65115a56b5","./js/components/game-wreath.js":"./js/components/game-wreath.js?v=f8f8e31833","./js/components/page-foreground.js":"./js/components/page-foreground.js?v=5791c7c917","./js/components/paper-art.js":"./js/components/paper-art.js?v=f0722c5277","./js/components/paper-props.js":"./js/components/paper-props.js?v=f8da47e481","./js/components/santa-head.js":"./js/components/santa-head.js?v=0e41d973be","./js/components/santa-placeholder.js":"./js/components/santa-placeholder.js?v=8c938caad4"}}</script>
+  <link rel="stylesheet" href="css/game.css?v=9f54a448d5">
+  <link rel="stylesheet" href="css/game-hero.css?v=9878f1e868">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/components/game-frames.js":"./js/components/game-frames.js?v=4b41b02e42","./js/components/game-hero-signs.js":"./js/components/game-hero-signs.js?v=bc4ae6caba","./js/components/game-scene.js":"./js/components/game-scene.js?v=e7f917aa50","./js/components/game-sleigh.js":"./js/components/game-sleigh.js?v=a00785de1d","./js/components/game-wreath.js":"./js/components/game-wreath.js?v=f8f8e31833","./js/components/page-foreground.js":"./js/components/page-foreground.js?v=5791c7c917","./js/components/paper-art.js":"./js/components/paper-art.js?v=f0722c5277","./js/components/paper-props.js":"./js/components/paper-props.js?v=f8da47e481","./js/components/santa-head.js":"./js/components/santa-head.js?v=0e41d973be","./js/components/santa-placeholder.js":"./js/components/santa-placeholder.js?v=8c938caad4"}}</script>
   <script type="module" src="js/game-hero.js?v=88ac0fdd89"></script>
   <script type="module" src="js/shared.js?v=b7eea60482"></script>
-  <script type="module" src="js/game.js?v=456ee13fbe"></script>
+  <script type="module" src="js/game.js?v=8638b7923c"></script>
 </head>
 <body class="games-body">
 <a class="skip-link" href="#main">跳至主要內容</a>
@@ -52,7 +52,7 @@
   <div class="game-frame fly-frame-shell" id="sleigh-game" data-reveal="up">
     <iframe id="flying-game" class="flying-game-frame" src="vendor/game1-frameless/index.html" title="Santa Flying Dodge Game — 聖誕飛行躲避遊戲" aria-describedby="flying-help" tabindex="0" allow="fullscreen" allowfullscreen></iframe>
   </div>
-  <div class="flying-caption"><p id="flying-help">點一下遊戲內的開始鈕，再用 ↑ ↓ 移動 · 空白鍵 / P 暫停；手機可使用遊戲內的方向鈕。</p><a class="game-fallback" href="vendor/game1-frameless/index.html" target="_blank" rel="noopener noreferrer">無法載入？另開原作 ↗</a></div>
+  <div class="flying-caption"><p id="flying-help">點一下遊戲內的開始鈕，再用 ↑ ↓ 移動 · 空白鍵 / P 暫停；手機可使用遊戲內的方向鈕。</p></div>
   </div>
 </section>
 <section class="game-section matching-section" aria-labelledby="matching-title" data-animation="game-celebration">
@@ -68,7 +68,6 @@
       <iframe id="matching-frame" class="matching-game-frame" src="games/christmas-matching.html" title="Christmas Matching — 聖誕配對挑戰" tabindex="0" allow="fullscreen" allowfullscreen></iframe>
       </div>
     </div>
-      <details class="matching-fallback"><summary>無法載入遊戲？</summary><a href="games/christmas-matching.html" target="_blank" rel="noopener noreferrer">另開聖誕配對挑戰 ↗</a></details>
   </div>
 </section>
 <noscript><p>請啟用 JavaScript，以使用倒數、互動地圖、遊戲與願望儲存功能。</p></noscript>

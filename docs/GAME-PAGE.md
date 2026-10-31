@@ -81,7 +81,7 @@ Live Server 開啟 `tests/game-viewport.html`，或附加 `?viewport=tablet&stag
 - iframe 自身寬度不超過 650px 時，原作切為 1.1:1 場景、88px HUD；完整高度為 `((W − 2) / 1.1) + 168`。
 - 容器採 CSS container query，依 iframe 真正寬度切換，不將遊戲當成一張圖縮放或裁切。計分列、場景與底部控制鈕都保留。
 - 點進遊戲後，方向鍵及空白鍵交給 iframe 自己處理；主站沒有全域鍵盤攔截。原作也支援 P、Enter 與畫面方向鈕。
-- 右下「無法載入？另開原作」連結一直可用。跨網域限制使主站無法可靠從 iframe 的 load 事件判斷內頁是否真的成功；沒有做假的成功／失敗判定。
+- （已於 2026-10-31 移除）右下「無法載入？另開原作」連結。跨網域限制使主站無法可靠從 iframe 的 load 事件判斷內頁是否真的成功；沒有做假的成功／失敗判定。
 
 外站更新並完成 GitHub Pages 部署後，重新整理主網站就會重新導覽 iframe 的同一永久入口，依一般瀏覽器／GitHub Pages 快取載入內容；只更新外站的遊戲功能或素材時，不需要主網站重新部署。沒有觀察到實際快取故障，因此沒有加 cache-busting、輪詢、排程 reload、Service Worker 或 gameplay 中 src 重寫。若遇舊版，先檢查外站部署與實際快取；不要預先用隨機 query 破壞快取。
 
