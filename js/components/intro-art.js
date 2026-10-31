@@ -1,6 +1,7 @@
 // Intro's paper-cut book. Same rough-cut paper as Home and Game; every sheet is one image.
 import { paperLayer, shape } from './paper-art.js';
-import { SNOW, holly, pine, roofHouse, star } from './paper-props.js';
+import { SNOW, cloud, holly, pine, roofHouse, star } from './paper-props.js';
+import { bunting } from './game-scene.js';
 import { STORY_BOX, storyGlyphs } from '../data/story-glyphs.js';
 
 const BOARD = '#3f6655', BOARD_EDGE = '#2f5244', CREAM = '#fbf3e3';
@@ -47,6 +48,8 @@ function sideTrees(parent) {
 
 export function mountBackdrop(host) {
   const paper = { scale: 1.2, grain: .4, shadow: .14 };
+  paperLayer(host, '0 0 1600 170', 'intro-bg-bunting', bunting, { paper: { scale: 1.1, grain: .5, shadow: .2 }, eager: true });
+  for (const name of ['intro-bg-cloud-a', 'intro-bg-cloud-b']) paperLayer(host, '-20 0 270 116', `intro-bg-cloud ${name}`, parent => cloud(parent, 120, 62, 1.15), { paper, eager: true });
   paperLayer(host, '0 0 1920 352', 'intro-bg-hills', snowHills, { paper, eager: true, preserveAspectRatio: 'none' });
   const side = (name, mirror) => paperLayer(host, '-80 0 380 320', `intro-bg-side ${name}`, mirror ? parent => sideTrees(shape('g', { transform: 'translate(220 0) scale(-1 1)' }, parent)) : sideTrees, { paper: { ...paper, scale: 1 }, eager: true });
   side('intro-bg-left', false); side('intro-bg-right', true);

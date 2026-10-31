@@ -3,11 +3,17 @@ html.intro-document { scrollbar-gutter:stable; }
 @media (min-width:701px) { html.intro-document { scroll-snap-type:y proximity; } }
 html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
 .intro-body { background:var(--blue);overflow-x:clip; }
-.intro-main { --intro-header-height:108px; --paper-warm:#fff6e3; --paper-edge:#d7c2a2; --story-ink:#665343; padding-top:0; }
-.intro-story-section,.intro-cultures { scroll-snap-align:start; }
+.intro-main { padding-bottom:0;--intro-header-height:108px; --paper-warm:#fff6e3; --paper-edge:#d7c2a2; --story-ink:#665343; padding-top:0; }
+/* 第一個停靠點是頁首，故事書才不會把 Header 捲走。 */
+.intro-document .site-header,.intro-cultures { scroll-snap-align:start; }
 .intro-story-section { position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:center;scroll-margin-top:var(--intro-header-height);min-height:calc(100svh - var(--intro-header-height));padding-block:1.4rem 1rem; }
 /* 書放在雪地上：背景超出內容欄，鋪滿整個視窗寬。 */
-.intro-story-bg { position:absolute;z-index:-1;left:50%;bottom:0;width:100vw;height:clamp(180px,34%,320px);translate:-50% 0; }
+.intro-story-bg { position:absolute;z-index:-1;left:50%;top:0;bottom:0;width:100vw;translate:-50% 0;pointer-events:none; }
+.intro-bg-hills { inset:auto 0 0;height:clamp(180px,34%,320px); }
+.intro-bg-bunting { inset:0 0 auto;aspect-ratio:1600/170; }
+.intro-bg-cloud { inset:auto;aspect-ratio:270/116;width:clamp(100px,11vw,170px); }
+.intro-bg-cloud-a { top:30%;left:6%; }
+.intro-bg-cloud-b { top:22%;right:6%; }
 .intro-bg-side { inset:auto auto 16% auto;width:clamp(150px,16vw,280px);aspect-ratio:380/320; }
 .intro-bg-left { left:1%; }
 .intro-bg-right { right:1%; }
@@ -51,12 +57,11 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
 .intro-story p { margin:0 0 .75em; }
 .intro-story p:last-child { margin-bottom:0; }
 .intro-copy blockquote { margin:.9rem 0 0;padding-left:.7rem;border-left:2px solid #c7a36d;color:#987446;font-size:.78rem;line-height:1.8; }
-.intro-picture { background:radial-gradient(ellipse at 52% 35%,#fffbed 20%,#f4e6cb 80%,#e5d4b6);border-radius:0 5px 5px 0; }
+.intro-picture { overflow:hidden;background:radial-gradient(ellipse at 52% 35%,#fffbed 20%,#f4e6cb 80%,#e5d4b6);border-radius:0 5px 5px 0; }
 /* Each page contains its own perspective stage. The leaf remains a separate 3D layer. */
-.intro-scene,.intro-scene-page { transform-style:preserve-3d; }
-.intro-scene { position:absolute;left:3%;bottom:3%;width:94%;max-height:94%;aspect-ratio:560/530;perspective:1100px;--building-ground:18%;--character-ground:8%; }
+.intro-scene { position:absolute;left:3%;bottom:3%;width:94%;max-height:94%;aspect-ratio:560/530;--building-ground:18%;--character-ground:8%; }
 .intro-scene-page { position:absolute;inset:0; }
-.intro-piece { position:absolute;left:var(--x);bottom:var(--y);width:var(--w);height:var(--h);z-index:var(--layer);transform-origin:50% 100%;transform-style:preserve-3d;transform:translateZ(var(--depth)) rotateX(-84deg); }
+.intro-piece { position:absolute;left:var(--x);bottom:var(--y);width:var(--w);height:var(--h);z-index:var(--layer);transform-origin:50% 100%;transform:translateZ(var(--depth)) rotateX(-84deg); }
 .intro-piece img { object-fit:contain;object-position:50% 100%; }
 .intro-piece::after { content:'';position:absolute;left:30%;width:40%;bottom:-2px;height:2px;border-radius:50%;background:#aa8d6240; }
 .intro-spine { position:absolute;inset:0 auto 0 calc(50% - 9px);width:18px;background:linear-gradient(90deg,transparent,#9e846455 30%,#fff7dc 49%,#9e846466 63%,transparent);z-index:12;pointer-events:none; }
@@ -73,12 +78,13 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
 .intro-tag:hover:not(:disabled) { transform:translateY(-2px); }
 .intro-tag:active:not(:disabled) { transform:translateY(2px); }
 .intro-tag:disabled { opacity:.45; }
-.intro-book-controls[hidden] { display:none; }
+/* 闔書時也保留控制列的位置，翻開書才不會把版面往上推。 */
+.intro-book-controls[hidden] { display:flex!important;visibility:hidden; }
 .intro-paper-button { min-height:44px;border:1px solid #b6a080;border-radius:4% 7% 5% 4% / 12% 8% 14% 11%;padding:.55rem 1rem;background:var(--cream);color:var(--red-dark);box-shadow:1px 3px 0 #b7a08055;font-size:.85rem;transition:transform .18s,background .18s; }
 .intro-paper-button:hover:not(:disabled) { transform:translateY(-2px) rotate(-1deg);background:#fffdf4; }
 .intro-count { color:var(--red);font-size:.8rem;letter-spacing:.12em;min-width:63px;text-align:center; }
 .intro-replay { border:0;border-bottom:1px dashed #9fb6bc;background:none;color:var(--muted);min-height:44px;font-size:.78rem;padding:.5rem; }
-.intro-cultures { min-height:calc(100svh - 2rem);padding:1.6rem 0;display:flex;flex-direction:column;justify-content:center; }
+.intro-cultures { padding:1.6rem 0 0;display:flex;flex-direction:column;justify-content:center; }
 /* 捲軸：地圖一開始就排好，只用裁切揭開；右軸隨之滑到最右。 */
 .intro-scroll-stage { --roller:46px;position:relative;width:100%;aspect-ratio:1728/1000;min-height:0;isolation:isolate; }
 .intro-map-sheet { position:absolute;z-index:1;inset:12px calc(var(--roller) * .7) 12px calc(var(--roller) * .7);display:flex;align-items:center;background:#f4e7cf;box-shadow:0 12px 20px -10px #4b6a7a66;clip-path:inset(-30px 100% -30px 0);transition:clip-path 1.1s cubic-bezier(.22,.84,.21,1); }
@@ -98,7 +104,8 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
 .intro-letter h2 { margin:0;color:var(--green);font-size:clamp(1.7rem,3vw,2.3rem);letter-spacing:.04em; }
 .intro-letter p { margin:0;font-size:1rem;line-height:1.8; }
 .intro-scroll-stage[data-state='open'] .intro-letter { opacity:0;transform:scale(.96);pointer-events:none; }
-.intro-map-actions { display:flex;flex-direction:column;align-items:center;gap:.2rem;margin-top:1rem;min-height:92px; }
+.intro-map-actions { display:flex;flex-direction:column;align-items:center;gap:.2rem;margin-top:.8rem; }
+.intro-body .page-foreground { margin-top:0; }
 .intro-map-actions [hidden] { display:none; }
 /* 定位點是一顆掛在地圖上的聖誕球，名字用小紙牌標在旁邊。 */
 .intro-map-pin { position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;background:transparent;border:0;padding:0;z-index:2; }
@@ -164,6 +171,10 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
 @media (max-width:1240px) { .intro-bg-side { display:none; } }
 @media (max-width:700px) {
  .intro-story-section { min-height:calc(100svh - var(--intro-header-height));justify-content:flex-start; }
+ /* 手機書本翻開會變長，背景固定一屏高，雪地才不會被推走。 */
+ .intro-story-bg { bottom:auto;height:calc(100svh - var(--intro-header-height)); }
+ .intro-bg-cloud { display:none; }
+ .intro-bg-bunting { width:220%;left:-60%;right:auto; }
  .intro-book-shell { padding:7px 2px 16px;perspective:1600px; }
  .intro-book { --mobile-scene-height:clamp(300px,85vw,440px);--book-edge:8px;grid-template-columns:1fr;aspect-ratio:auto;min-height:0; }
  .intro-copy { padding:1.3rem 1.25rem 1.1rem;background:linear-gradient(120deg,#fff8e8,#f3e6cd); }
@@ -189,7 +200,6 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
  .intro-book-controls { gap:.5rem;margin-top:.8rem; }
  .intro-paper-button { padding:.55rem .85rem;font-size:.82rem; }
  .intro-replay { flex-basis:100%; }
- .intro-cultures { min-height:0; }
  .intro-scroll-stage { --roller:26px;aspect-ratio:auto;height:calc((100vw - 3rem - 36px) * .548 + 24px);transition:height .7s ease; }
  .intro-scroll-stage[data-state='rolled'] { height:360px; }
  .intro-letter { width:calc(100% - var(--roller) * 2 - .6rem);aspect-ratio:auto;height:330px;left:calc(50% + var(--roller) * .9);padding:2.8rem 1.8rem 2.2rem; }
