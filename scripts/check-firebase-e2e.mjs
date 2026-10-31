@@ -79,8 +79,7 @@ note('模擬器：公開願望寫入 users/{uid}/wishes，狀態 pending', publi
 note('模擬器：審核前不會出現在 publicWishes', (await publicInStore()).length === 0);
 const count = await first.page.locator('#cloud-wish-total').textContent();
 note('Wish：自己的信封出現（1 封）', count === '1 封', count);
-await first.page.locator('details:has(#cloud-envelope-list) summary').click();
-await first.page.locator('#cloud-envelope-list button').first().click();
+await first.page.evaluate(() => document.querySelector('#cloud-envelope-list button').click());
 await first.page.waitForTimeout(400);
 note('Wish：可開啟自己的信', (await first.page.locator('#wish-dialog-content').textContent()) === '希望今年下雪');
 await snap(first.page, 'wish-own-letter');
@@ -118,12 +117,11 @@ const offline = await open('離線訪客', { reducedMotion: 'reduce' });
 await offline.context.route(/127\.0\.0\.1:(9099|8080)/, route => route.abort());
 await openWish(offline.page);
 const offlineText = await cloudText(offline.page);
-note('Wish：連不上時顯示提示，不假裝成功', offlineText.includes('尚未連接') && await offline.page.locator('#cloud-retry').isVisible(), offlineText);
+note('Wish：連不上時顯示提示，不假裝成功', offlineText.includes('尚未連接') && (await offline.page.locator('#wish-status').textContent()).includes('自動重試'), offlineText);
 await snap(offline.page, 'wish-offline');
 await offline.context.unroute(/127\.0\.0\.1:(9099|8080)/);
-await offline.page.locator('#cloud-retry').click({ force: true });
-await offline.page.waitForFunction(() => (document.querySelector('#cloud-status')?.textContent ?? '').startsWith('已連接'), null, { timeout: 30000 }).catch(() => {});
-note('Wish：恢復連線後按重試可連上', (await cloudText(offline.page)).startsWith('已連接'), await cloudText(offline.page));
+await offline.page.waitForFunction(() => (document.querySelector('#cloud-status')?.textContent ?? '').startsWith('已連接'), null, { timeout: 45000 }).catch(() => {});
+note('Wish：恢復連線後自動重連，不用按任何按鈕', (await cloudText(offline.page)).startsWith('已連接'), await cloudText(offline.page));
 await offline.context.close();
 
 // 4b. 完整動畫的寄信流程（不開減少動態）
@@ -233,8 +231,7 @@ stored = await wishesInStore();
 note('模擬器：撤回後公開副本刪除、原信保留並改為 rejected', (await publicInStore()).length === 0 && str(byName('小明'), 'status') === 'rejected' && str(byName('小明'), 'content') === '希望今年下雪');
 note('Wish：撤回後訪客看不到那封信', (await freshLabels()).length === 0);
 await openWish(first.page);
-await first.page.locator('details:has(#cloud-envelope-list) summary').click();
-await first.page.locator('#cloud-envelope-list button').first().click();
+await first.page.evaluate(() => document.querySelector('#cloud-envelope-list button').click());
 await first.page.waitForTimeout(300);
 const ownerNotice = await first.page.locator('#wish-dialog-privacy').textContent();
 note('Wish：本人仍看得到自己的信，並被告知未公開', ownerNotice.includes('未通過'), ownerNotice);

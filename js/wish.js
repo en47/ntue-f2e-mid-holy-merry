@@ -2,6 +2,7 @@ import { createWishDelivery } from './components/wish-delivery.js';
 import { selectTreeWishes } from './services/wish-selection.js';
 import { mountNightScene } from './components/wish-night.js';
 import { mountWishLights } from './components/wish-lights.js';
+import { mountCottage } from './components/wish-cottage.js';
 import { paperLayer } from './components/paper-art.js';
 import { airmailLetter, tagArt } from './components/paper-props.js';
 const form = document.querySelector('#wish-form');
@@ -11,7 +12,8 @@ const status = document.querySelector('#wish-status');
 const dialog = document.querySelector('#wish-dialog');
 const delivery = createWishDelivery(document.querySelector('#wish-room'),{savingText:'正在將願望寄到聖誕信箱……'});
 const send=form.querySelector('button[type="submit"]'),publish=document.querySelector('#wish-public');
-const cloudStatus=document.querySelector('#cloud-status'),cloudRetry=document.querySelector('#cloud-retry');
+const cloudStatus=document.querySelector('#cloud-status');
+let retryTimer=0,retryDelay=4000;
 let repository=null,connecting=false,ownWish=null,publicWishes=[],treeWishes=[],draft=null,refreshVersion=0;
 let pendingEnvelopeEntrance = null;
 function showWish(wish){
@@ -19,6 +21,8 @@ function showWish(wish){
   document.querySelector('#wish-dialog-date').textContent=wish.createdAt?new Intl.DateTimeFormat('zh-TW',{dateStyle:'medium',timeStyle:'short'}).format(new Date(wish.createdAt)):'';
   document.querySelector('#wish-dialog-content').textContent=wish.content;
   document.querySelector('#wish-dialog-privacy').textContent=!wish.isOwn?'這是已核准的公開願望。':wish.visibility==='private'?'這是你的私人願望，僅本人及管理員可讀。':wish.status==='approved'?'你的願望已核准公開。':wish.status==='rejected'?'這封願望未通過公開審核，其他訪客無法查看。':'你的願望仍待審核，其他訪客無法查看。';
+  const stamp=wish.isOwn?readStamps()[wish.id]:null,stampImage=document.querySelector('#wish-dialog-stamp');
+  stampImage.hidden=!stamp;if(stamp)stampImage.src=stampOf(stamp);
   dialog.showModal();
 }
 function updateTree({ newWishId = null } = {}){
@@ -48,21 +52,31 @@ async function refreshPublic(){
   }catch(error){
     // Drop stale public copies if we cannot verify they are still published.
     if(version!==refreshVersion)return;publicWishes=[];updateTree();
-    cloudStatus.textContent='公開願望暫時無法讀取，已收起舊的公開信封。你仍可寄信及查看自己的願望。';cloudRetry.hidden=false;
+    cloudStatus.textContent='公開願望暫時無法讀取，已收起舊的公開信封。你仍可寄信及查看自己的願望。';
   }
 }
 async function connectCloud(){
-  if(connecting||delivery.busy)return;connecting=true;send.disabled=true;cloudRetry.hidden=true;cloudStatus.textContent='正在連接聖誕信箱……';
+  if(connecting||delivery.busy)return;connecting=true;send.disabled=true;clearTimeout(retryTimer);cloudStatus.textContent='正在連接聖誕信箱……';
   try{
     const {visitorRepository}=await import('./services/wish-repository.js');
-    repository=await visitorRepository();ownWish=await repository.latestWish();updateTree();await refreshPublic();send.disabled=false;
+    repository=await visitorRepository();ownWish=await repository.latestWish();updateTree();await refreshPublic();send.disabled=false;retryDelay=4000;
+    if(status.dataset.offline){status.textContent='';delete status.dataset.offline;}
   }catch(error){
     repository=null;ownWish=null;publicWishes=[];treeWishes=[];sceneController?.setWishes([],showWish);
     document.querySelector('#cloud-envelope-list').replaceChildren();document.querySelector('#cloud-wish-total').textContent='0 封';
-    cloudStatus.textContent='雲端信箱尚未連接，請確認網路後重試。';cloudRetry.hidden=false;
+    // Visitors never manage a connection: it quietly tries again, and only the letter says why it waits.
+    cloudStatus.textContent='雲端信箱尚未連接，正在自動重試。';status.textContent='暫時連不上聖誕信箱，正在自動重試……';status.dataset.offline='true';
+    retryTimer=setTimeout(connectCloud,retryDelay);retryDelay=Math.min(retryDelay*2,30000);
   }finally{connecting=false;}
 }
-cloudRetry.addEventListener('click',connectCloud);
+// The stamp stays on this device: the letter's stored fields are fixed by the security rules.
+const STAMPS='holy-merry:stamps:v1',stampOf=value=>`assets/illustrations/wish/stamp-${value}.svg`;
+const chosenStamp=()=>form.querySelector('input[name="stamp"]:checked')?.value??'star';
+const showStamp=()=>{document.querySelector('#letter-stamp').src=stampOf(chosenStamp());};
+const readStamps=()=>{try{return JSON.parse(localStorage.getItem(STAMPS))??{};}catch{return {};}};
+function keepStamp(id,value){try{localStorage.setItem(STAMPS,JSON.stringify({...readStamps(),[id]:value}));}catch{/* Only a keepsake; the wish itself is already saved. */}}
+form.addEventListener('change',event=>{if(event.target.name==='stamp')showStamp();});
+form.addEventListener('reset',()=>queueMicrotask(showStamp));
 content.addEventListener('input', () => {
   content.setCustomValidity('');
   document.querySelector('#wish-counter').textContent = `${content.value.length} / 300`;
@@ -80,10 +94,11 @@ form.addEventListener('submit', async event => {
   const input={nickname:name,content:text,visibility:publish.checked?'public':'private'};
   let confirmed=null;
   try {
+    const stamp=chosenStamp();
     if(!draft || !['nickname','content','visibility'].every(key=>draft[key]===input[key]))draft=repository.draft(input);
     confirmed=await delivery.run(()=>repository.submitWish(draft));
     if(!confirmed)return;
-    ownWish=confirmed;draft=null;
+    ownWish=confirmed;draft=null;keepStamp(confirmed.id,stamp);
     document.querySelector('#receipt-message').textContent=confirmed.visibility==='private'?'雲端已確認收到你的私人願望。只有本人與管理員可讀；可點樹上的金色信封查看。':'雲端已確認收到，正在等待公開審核。目前只有本人與管理員可讀；可點金色信封查看。';
     updateTree({newWishId:confirmed.id});await refreshPublic();
   } catch (error) {
@@ -102,6 +117,7 @@ function mountWishPaper(root) {
 // The scene and Firebase load independently; WebGL failure must not disable letters.
 const room = document.querySelector('#wish-room');
 mountNightScene(room);
+const cottage = mountCottage(room);
 mountWishPaper(room);
 const lights = mountWishLights(room);
 let sceneController = null, sceneVersion = 0;
@@ -123,7 +139,7 @@ async function startScene() {
     retry.onclick = () => { retry.hidden = true; startScene(); };
   }
 }
-window.addEventListener('pagehide', event => { if (!event.persisted) lights.destroy(); delivery.cancel(); sceneVersion++; sceneController?.destroy(); sceneController = null; });
+window.addEventListener('pagehide', event => { if (!event.persisted) { lights.destroy(); cottage.destroy(); clearTimeout(retryTimer); } delivery.cancel(); sceneVersion++; sceneController?.destroy(); sceneController = null; });
 window.addEventListener('pageshow', () => { if (!sceneController) startScene(); });
 startScene();
 connectCloud();

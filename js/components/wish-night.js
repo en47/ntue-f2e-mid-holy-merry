@@ -31,8 +31,8 @@ function cottage(parent) {
   for (const y of [240, 276, 312, 348, 384]) shape('path', { d: `M116 ${y}H400`, stroke: '#6b574b', 'stroke-width': 2, fill: 'none' }, parent);
   shape('path', { d: 'M62 214L258 66 454 214Z', fill: '#54403a' }, parent);
   shape('path', { d: 'M50 224C60 194 96 176 124 150 160 124 214 72 258 52 304 72 358 124 394 150 424 176 460 194 468 224 440 236 416 216 394 204 372 226 344 210 322 186 300 204 268 204 252 182 226 208 196 208 176 188 150 214 120 228 96 208 80 222 62 234 50 224Z', fill: SNOW }, parent);
-  shape('path', { d: 'M232 400V300C232 262 288 262 288 300V400Z', fill: '#54403a' }, parent);
-  shape('circle', { cx: 276, cy: 348, r: 5, fill: LIT }, parent);
+  // The doorway glows; the door itself is a separate sheet so it can swing open.
+  shape('path', { d: 'M232 400V300C232 262 288 262 288 300V400Z', fill: '#f7d98c' }, parent);
   for (const x of [146, 322]) {
     glow(x + 29, 300, 62, 62);
     shape('rect', { x, y: 262, width: 58, height: 70, rx: 8, fill: LIT }, parent);

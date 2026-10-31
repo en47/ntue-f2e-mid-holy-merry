@@ -40,6 +40,17 @@ const sock = svg(SW, SH, `<path d="M104 88H198V110H104Z" fill="#6f2f2a"/><path d
 <path d="M114 148H190M114 176H190" stroke="#4f7d68" stroke-width="10"/><path d="${starPath(150, 222, 22)}" fill="#e6c068"/><circle cx="104" cy="272" r="4" fill="#d9c5a2"/><circle cx="178" cy="264" r="4" fill="#d9c5a2"/>`, soft);
 const cuff = svg(SW, SH, `<path d="M96 84C126 74 176 74 206 84 212 96 212 112 206 122 176 132 126 132 96 122 90 112 90 96 96 84Z" fill="#f6ecda"/><path d="M104 104C136 112 168 112 198 104" stroke="#d9c5a2" stroke-width="3" fill="none"/>`, soft);
 
+// Stamps: perforated paper with one Christmas mark. The chosen one sits on the letter.
+const stamp = mark => svg(120, 144, `<path d="M8 8H112V136H8Z" fill="#f8ead0" stroke="#fffdf6" stroke-width="6" stroke-dasharray="7 6"/><path d="M18 18H102V126H18Z" fill="none" stroke="#c9a877" stroke-width="3"/>${mark}`, grain(.5));
+const stamps = {
+  star: `<path d="${starPath(60, 72, 32)}" fill="#d9a441"/>`,
+  tree: `<path d="M60 26L88 66H74L96 102H24L46 66H32Z" fill="#4f7d68"/><path d="M52 102H68V116H52Z" fill="#8c6a4e"/><path d="${starPath(60, 28, 10)}" fill="#d9a441"/>`,
+  snow: Array.from({ length: 3 }, (_, i) => `<path d="M60 34V110M50 46L60 56 70 46M50 98L60 88 70 98" stroke="#5f93b5" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(${i * 60} 60 72)"/>`).join(''),
+  bell: `<path d="M60 30C40 32 38 54 36 72 34 84 28 90 26 96H94C92 90 86 84 84 72 82 54 80 32 60 30Z" fill="#d9a441"/><circle cx="60" cy="106" r="9" fill="#a84a42"/>`,
+  gift: `<path d="M28 58H92V112H28Z" fill="#a84a42"/><path d="M52 58H68V112H52ZM24 46H96V62H24Z" fill="#e6c068"/><path d="M60 46C40 22 26 42 60 46C94 42 80 22 60 46Z" fill="#a84a42"/>`,
+};
+for (const [name, mark] of Object.entries(stamps)) await fs.writeFile(`${DIR}/stamp-${name}.svg`, stamp(mark));
+
 const shapes = {
   normal: { file: 'envelope-paper.svg', sourceSize: [W, H], bounds: [L, T, R, B], anchor: [512, T + 8], outline: round, holes: [], flap, seal, paperPatch: [110, 430, 240, 130] },
   gold: { file: 'envelope-paper-star.svg', sourceSize: [W, H], bounds: [L, T, R, B], anchor: [512, T + 8], outline: round, holes: [], flap, seal, paperPatch: [340, 440, 340, 100] },

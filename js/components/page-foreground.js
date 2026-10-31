@@ -1,17 +1,21 @@
 // Paper-cut ground shared by all four pages: same hills and layout, different objects per page.
 import { holly, paperLayer, pauseOffscreen, pine, shape } from './paper-art.js';
 
-const SNOW = '#fff9eb', LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220';
+const LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220';
 const LEFT_GROUND = 'M0 250C20 232 70 210 150 216 170 218 200 224 220 228S360 224 420 250Z';
 const RIGHT_GROUND = 'M0 220C40 196 120 192 170 200S260 190 300 204 330 214 340 220Z';
 
+// Wish sits at night, so its ground and hills take the night tones.
+const TONES = { day: { far: '#cfe1e7', near: '#e6eeee', snow: '#fff9eb', rim: '#fbf3e3' }, night: { far: '#2f4c68', near: '#274059', snow: '#1c2f43', rim: '#46637f' } };
+let tones = TONES.day;
+
 function hills(root) {
   paperLayer(root, '0 0 1440 240', 'foreground-hills', parent => {
-    shape('path', { d: 'M0 96C170 56 300 118 480 92S760 44 960 88 1260 118 1440 70V240H0Z', fill: '#cfe1e7' }, parent);
-    shape('path', { d: 'M0 150C220 110 360 160 590 136S940 92 1150 136 1340 150 1440 118V240H0Z', fill: '#e6eeee' }, parent);
-  }, { preserveAspectRatio: 'none', paper: { scale: 1.2, grain: .45, shadow: .16, rim: '#fbf3e3' } });
+    shape('path', { d: 'M0 96C170 56 300 118 480 92S760 44 960 88 1260 118 1440 70V240H0Z', fill: tones.far }, parent);
+    shape('path', { d: 'M0 150C220 110 360 160 590 136S940 92 1150 136 1340 150 1440 118V240H0Z', fill: tones.near }, parent);
+  }, { preserveAspectRatio: 'none', paper: { scale: 1.2, grain: .45, shadow: .16, rim: tones.rim } });
   paperLayer(root, '0 0 1440 240', 'foreground-hills', parent => {
-    shape('path', { d: 'M0 196C200 162 420 204 660 182S1120 160 1440 188V240H0Z', fill: SNOW }, parent);
+    shape('path', { d: 'M0 196C200 162 420 204 660 182S1120 160 1440 188V240H0Z', fill: tones.snow }, parent);
   }, { preserveAspectRatio: 'none', paper: null });
 }
 
@@ -147,7 +151,7 @@ function scene(root, side, viewBox, ground, build) {
     bob: (delay, draw) => delayed(paperLayer(host, viewBox, 'foreground-bob', draw, { paper }), delay),
     still: draw => paperLayer(host, viewBox, '', draw, { paper }),
   });
-  paperLayer(host, viewBox, '', parent => shape('path', { d: ground, fill: SNOW }, parent), { paper: null });
+  paperLayer(host, viewBox, '', parent => shape('path', { d: ground, fill: tones.snow }, parent), { paper: null });
 }
 
 function flakes(root) {
@@ -163,6 +167,7 @@ function flakes(root) {
 export function mountForeground(root) {
   const theme = THEMES[root?.dataset.foreground];
   if (!theme) return;
+  tones = TONES[root.dataset.tone] ?? TONES.day;
   hills(root);
   flakes(root);
   scene(root, 'left', LEFT_BOX, LEFT_GROUND, theme.left);

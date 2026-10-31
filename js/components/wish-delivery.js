@@ -80,6 +80,7 @@ export function createWishDelivery(root, { savingText = '正在儲存到此瀏�
     state('idle',''); root.querySelector('#nickname').focus({preventScroll:true});
   }
   again.addEventListener('click',reset);
+  station.addEventListener('animationend',()=>station.classList.remove('is-catching'));
   const visibility = () => { if (document.hidden) cancel(); };
   document.addEventListener('visibilitychange',visibility);
   return {
