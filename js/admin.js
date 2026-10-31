@@ -10,6 +10,11 @@ const VIEWS={
 let sdk,client,repository,busy=false,version=0,view='pending',cursor=null,shown=0;
 function showError(error){
   const code=error.code || '';
+  // Local previews use the emulator, whose accounts are separate from the real project.
+  if(client?.app.options.projectId.startsWith('demo-')&&code.startsWith('auth/')){
+    status.textContent=code.includes('network-request')?'本機預覽要連模擬器，但它沒有開。請先執行 npx firebase emulators:start --only auth,firestore --project demo-holy-merry，再執行 npm run admin:local。':'本機模擬器裡沒有這個帳號，正式帳號不能在這裡登入。請執行 npm run admin:local，用它顯示的測試帳號登入。';
+    return;
+  }
   status.textContent=code.includes('permission-denied')?'資料庫拒絕存取。請確認正式 Rules 已部署、管理員 claim 已設定，且審核索引已建立。'
     :code.includes('failed-precondition')?'審核查詢尚缺索引，請依 FIREBASE-SETUP.md 部署 indexes。'
     :code.startsWith('auth/')?'登入失敗，請確認帳號、密碼或稍後重試。'

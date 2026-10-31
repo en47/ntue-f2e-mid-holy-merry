@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "node --experimental-vm-modules tests/smoke.mjs && node --experimental-vm-modules --test tests/wish-cloud.test.mjs tests/elf.test.mjs tests/wish-interaction.test.mjs tests/intro.test.mjs",
+    "admin:local": "node scripts/seed-local-admin.mjs",
     "test:firebase": "firebase emulators:exec --only firestore,auth --project demo-holy-merry \"node --test --test-concurrency=1 tests/firestore.rules.test.mjs tests/firebase.integration.test.mjs\""
   },
   "devDependencies": {
