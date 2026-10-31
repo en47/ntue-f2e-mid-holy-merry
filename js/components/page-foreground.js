@@ -1,8 +1,8 @@
-// Paper-cut ground shared by all four pages: same hills and layout, different objects per page.
+// Paper-cut ground shared by all four pages: same hills and layout, different objects and one toy per page.
 import { holly, paperLayer, pauseOffscreen, pine, shape } from './paper-art.js';
-import { berryBush, fence, lamp, star } from './paper-props.js';
+import { mountToy } from './foreground-toys.js';
 
-const LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220', CENTER_BOX = '0 0 760 220';
+const LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220';
 const LEFT_GROUND = 'M0 250C20 232 70 210 150 216 170 218 200 224 220 228S360 224 420 250Z';
 const RIGHT_GROUND = 'M0 220C40 196 120 192 170 200S260 190 300 204 330 214 340 220Z';
 
@@ -73,13 +73,6 @@ function flame(parent, x, base) {
   shape('path', { d: `M${x} ${base - 90}C${x + 6} ${base - 82} ${x + 6} ${base - 74} ${x} ${base - 71} ${x - 6} ${base - 74} ${x - 6} ${base - 82} ${x} ${base - 90}Z`, fill: '#f8e3a4' }, parent);
 }
 
-function globe(parent, x, base) {
-  shape('path', { d: `M${x - 34} ${base}H${x + 34}L${x + 20} ${base - 16}H${x - 20}Z`, fill: '#94785f' }, parent);
-  shape('path', { d: `M${x} ${base - 14}V${base - 34}`, stroke: '#94785f', 'stroke-width': 9, fill: 'none' }, parent);
-  shape('circle', { cx: x, cy: base - 88, r: 56, fill: '#a8c6cc' }, parent);
-  shape('path', { d: `M${x - 44} ${base - 118}C${x - 20} ${base - 134} ${x - 2} ${base - 124} ${x + 2} ${base - 104} ${x - 12} ${base - 92} ${x - 34} ${base - 94} ${x - 44} ${base - 118}ZM${x + 8} ${base - 84}C${x + 30} ${base - 96} ${x + 50} ${base - 84} ${x + 46} ${base - 64} ${x + 30} ${base - 48} ${x + 12} ${base - 54} ${x + 8} ${base - 84}ZM${x - 34} ${base - 72}C${x - 22} ${base - 70} ${x - 16} ${base - 56} ${x - 26} ${base - 46} ${x - 38} ${base - 50} ${x - 40} ${base - 62} ${x - 34} ${base - 72}Z`, fill: '#6f9676' }, parent);
-}
-
 function postcard(parent, x, y, angle) {
   const card = shape('g', { transform: `rotate(${angle} ${x} ${y})` }, parent);
   shape('rect', { x: x - 44, y: y - 30, width: 88, height: 60, rx: 4, fill: '#fbf4e6' }, card);
@@ -111,31 +104,8 @@ function line(parent, d) {
 }
 
 // Each theme fills the same two corner canvases.
-// A snowy lane that ties the snowman to the cottage: the sled's tracks run all the way across.
-function sled(parent, x, base) {
-  shape('path', { d: `M${x - 74} ${base}H${x + 62}C${x + 82} ${base} ${x + 94} ${base - 12} ${x + 100} ${base - 26}`, stroke: '#a9845b', 'stroke-width': 7, 'stroke-linecap': 'round', fill: 'none' }, parent);
-  shape('path', { d: `M${x - 48} ${base}V${base - 20}M${x + 48} ${base}V${base - 20}`, stroke: '#a9845b', 'stroke-width': 6, fill: 'none' }, parent);
-  shape('path', { d: `M${x - 72} ${base - 38}H${x + 76}L${x + 62} ${base - 16}H${x - 60}Z`, fill: '#a8564c' }, parent);
-  shape('rect', { x: x - 54, y: base - 86, width: 54, height: 50, rx: 4, fill: '#e9d9b8' }, parent);
-  shape('rect', { x: x - 34, y: base - 86, width: 13, height: 50, fill: '#b5625a' }, parent);
-  shape('rect', { x: x + 4, y: base - 70, width: 48, height: 34, rx: 4, fill: '#8aa9ad' }, parent);
-  shape('rect', { x: x + 22, y: base - 70, width: 11, height: 34, fill: '#f3e7cf' }, parent);
-  star(parent, x - 27, base - 98, 13);
-}
-
-function laneTracks(parent) {
-  for (const y of [196, 208]) shape('path', { d: `M0 ${y + 6}C150 ${y - 8} 420 ${y + 8} 760 ${y - 4}`, stroke: '#e3d3b6', 'stroke-width': 4, 'stroke-dasharray': '26 12', 'stroke-linecap': 'round', fill: 'none' }, parent);
-}
-
 const THEMES = {
   home: {
-    center: ({ tree, still, sway }) => {
-      still(laneTracks);
-      still(parent => { fence(parent, 60, 186, 6, 30); berryBush(parent, 262, 190); });
-      sway([620, 188], -1.2, parent => lamp(parent, 620, 188));
-      tree(708, 192, 92, -.8);
-      still(parent => sled(parent, 430, 192));
-    },
     left: ({ tree, sway }) => { tree(82, 216, 150, 0); tree(160, 224, 96, -1.6); sway([300, 226], -1, parent => snowman(parent, 300, 226)); },
     right: ({ tree, still }) => { tree(232, 190, 130, -2.4); still(parent => cottage(parent, 106, 196)); },
   },
@@ -146,7 +116,7 @@ const THEMES = {
       bob(-1.4, parent => postcard(parent, 64, 196, -9));
     },
     right: ({ still, sway }) => {
-      still(parent => { globe(parent, 96, 200); candle(parent, 226, 200); });
+      still(parent => candle(parent, 226, 200));
       sway([226, 132], -.5, parent => flame(parent, 226, 200));
     },
   },
@@ -175,7 +145,7 @@ function scene(root, side, viewBox, ground, build) {
     bob: (delay, draw) => delayed(paperLayer(host, viewBox, 'foreground-bob', draw, { paper }), delay),
     still: draw => paperLayer(host, viewBox, '', draw, { paper }),
   });
-  if (ground) paperLayer(host, viewBox, '', parent => shape('path', { d: ground, fill: tones.snow }, parent), { paper: null });
+  paperLayer(host, viewBox, '', parent => shape('path', { d: ground, fill: tones.snow }, parent), { paper: null });
 }
 
 function flakes(root) {
@@ -194,9 +164,9 @@ export function mountForeground(root) {
   tones = TONES[root.dataset.tone] ?? TONES.day;
   hills(root);
   flakes(root);
-  if (theme.center) scene(root, 'center', CENTER_BOX, null, theme.center);
   scene(root, 'left', LEFT_BOX, LEFT_GROUND, theme.left);
   scene(root, 'right', RIGHT_BOX, RIGHT_GROUND, theme.right);
+  mountToy(root, root.dataset.foreground);
   pauseOffscreen([root]);
   if (!('IntersectionObserver' in window)) { root.classList.add('is-visible'); return; }
   const reveal = new IntersectionObserver(([entry]) => {

@@ -105,9 +105,40 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 .js-ready .page-foreground:not(.is-visible) .foreground-scene { opacity: 0; translate: 0 28px; }
 .foreground-left { left: max(0px, calc(50% - 720px)); width: clamp(190px, 27vw, 390px); aspect-ratio: 420 / 250; }
 .foreground-right { right: max(0px, calc(50% - 680px)); width: clamp(147px, 21.5vw, 306px); aspect-ratio: 340 / 220; }
-.foreground-center { --lane: clamp(300px, 46vw, 660px); left: calc(50% - var(--lane) / 2 + 1vw); width: var(--lane); aspect-ratio: 760 / 220; }
 .home-page .page-foreground { height: clamp(165px, 17vw, 240px); margin-top: clamp(1rem, 2vw, 1.75rem); }
-@media (max-width: 760px) { .foreground-center { display: none; } }
+.foreground-toy { position: absolute; z-index: 2; bottom: 8%; left: 50%; width: var(--toy); height: 0; margin-left: calc(var(--toy) / -2); pointer-events: none; }
+.toy-button { position: absolute; left: 0; bottom: 0; width: 100%; aspect-ratio: var(--toy-ratio); padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; transition: transform .18s; }
+.toy-button:hover { transform: translateY(-3px) scale(1.04); }
+.toy-button:active { transform: translateY(1px) scale(.98); }
+.toy-button:focus-visible { outline: 3px solid #e0b04f; outline-offset: 3px; border-radius: 10px; }
+.toy-button .art-layer { pointer-events: none; }
+.toy-home { --toy: clamp(130px, 17vw, 240px); --toy-ratio: 260 / 160; }
+.toy-sled { animation: foreground-bob 2.6s ease-in-out infinite alternate; }
+.toy-intro { --toy: clamp(92px, 11vw, 158px); --toy-ratio: 200 / 230; bottom: 6%; }
+.toy-globe-window { position: absolute; left: 21.5%; top: 8.5%; width: 69%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; }
+.toy-globe-lands { position: absolute; top: 0; left: 0; display: block; height: 100%; aspect-ratio: 480 / 160; }
+.toy-postcard { inset: auto; left: 50%; bottom: 40px; width: 110%; aspect-ratio: 110 / 80; opacity: 0; pointer-events: none; }
+.toy-game { --toy: min(760px, 56vw); bottom: 0; }
+.toy-score { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: .3rem .9rem; border-radius: 8px 10px 7px 9px; background: #fbf3e3; box-shadow: 0 0 0 2px #fff9ec, 0 2px 0 3px #cdbb9e; color: #54463c; font-size: .9rem; font-weight: 600; white-space: nowrap; }
+.toy-flake { position: absolute; bottom: 150px; width: 40px; height: 40px; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; animation: toy-fall 7s linear infinite; }
+.toy-flake img { display: block; width: 100%; height: 100%; transition: transform .25s, opacity .25s; }
+.toy-flake.is-caught { pointer-events: none; }
+.toy-flake.is-caught img { opacity: 0; transform: scale(1.8) rotate(50deg); }
+@keyframes toy-fall { from { translate: 0 -60px; rotate: 0deg; } to { translate: 26px 130px; rotate: 200deg; } }
+.toy-wish { --toy: clamp(240px, 30vw, 420px); bottom: 34%; }
+.toy-sky { position: absolute; left: 0; bottom: -40px; width: 100%; aspect-ratio: 300 / 120; }
+.toy-sky .art-layer { animation: toy-twinkle 2.6s ease-in-out infinite alternate; }
+.toy-wish.is-wishing .toy-sky .art-layer { animation: toy-burst .9s ease-out 2; }
+@keyframes toy-twinkle { from { opacity: .55; } to { opacity: 1; } }
+@keyframes toy-burst { 50% { opacity: 1; filter: brightness(1.5); } }
+.toy-wish .toy-button { --toy-ratio: 1; left: 50%; bottom: -14px; width: clamp(46px, 5.4vw, 72px); margin-left: calc(clamp(46px, 5.4vw, 72px) / -2); }
+.toy-star { animation: foreground-bob 2.4s ease-in-out infinite alternate; }
+.toy-meteor { inset: auto; left: 20%; bottom: 10px; width: 60%; aspect-ratio: 220 / 70; opacity: 0; pointer-events: none; }
+@media (max-width: 600px) {
+  .foreground-left { left: -16%; }
+  .foreground-right { right: -12%; }
+  .toy-game { --toy: 88vw; }
+}
 .foreground-sway { animation: foreground-sway 5.2s ease-in-out infinite alternate; }
 .foreground-bob { animation: foreground-bob 4.6s ease-in-out infinite alternate; }
 .foreground-flake { position: absolute; top: 0; width: 8px; height: 8px; border: 1px solid #c9dbe2; border-radius: 50%; background: #fffdf6; animation: foreground-flake 10s linear infinite; }
@@ -115,7 +146,8 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 @keyframes foreground-bob { from { translate: 0 0; } to { translate: 0 -3px; } }
 @keyframes foreground-flake { 0% { translate: 0 -10px; opacity: 0; } 12% { opacity: .9; } 80% { opacity: .9; } 100% { translate: 34px 170px; opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .foreground-sway, .foreground-bob { animation: none; }
+  .foreground-sway, .foreground-bob, .toy-sled, .toy-star, .toy-sky .art-layer, .toy-flake { animation: none; }
+  .toy-flake { translate: 0 20px; }
   .foreground-flake { display: none; }
   .foreground-scene { transition: none; }
 }
