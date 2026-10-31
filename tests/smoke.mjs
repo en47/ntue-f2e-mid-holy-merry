@@ -103,6 +103,25 @@ await test('全部模組語法、HTML 本機資源及四頁導覽', async () => 
     assert.equal(new Set(ids).size, ids.length, `${page}: duplicate IDs`);
   }
 });
+await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {
+  const env = environment();
+  const { mountFlipCounter } = await env.evaluate('js/components/flip-counter.js');
+  const faces = card => card.children.map(face => face.children[0].textContent);
+  const host = new (env.element('x').constructor)();
+  const counter = mountFlipCounter(host);
+  counter.set('54'); assert.equal(host.children.length, 2); assert.deepEqual(faces(host.children[1]), ['4', '4', '4', '4']);
+  const [tens, ones] = host.children;
+  counter.set('53');
+  assert.equal(host.children[0], tens); assert.equal(tens.classList.contains('is-flipping'), false);
+  assert.equal(ones.classList.contains('is-flipping'), true); assert.deepEqual(faces(ones), ['3', '4', '4', '3']);
+  ones.children[3].dispatch('animationend');
+  assert.equal(ones.classList.contains('is-flipping'), false); assert.equal(faces(ones)[1], '3');
+  counter.set('100'); assert.equal(host.children.length, 3); assert.notEqual(host.children[0], tens);
+  env.window.matchMedia = () => ({ matches: true });
+  const still = new (env.element('x').constructor)(), calm = mountFlipCounter(still);
+  calm.set('10'); calm.set('09');
+  assert.equal(still.children[1].classList.contains('is-flipping'), false); assert.deepEqual(faces(still.children[1]), ['9', '9', '9', '9']);
+});
 await test('倒數：跨日、台灣時區、聖誕日與下一年度', async () => {
   const env = environment();
   const { getChristmasCountdown: countdown } = await env.evaluate('js/home.js');

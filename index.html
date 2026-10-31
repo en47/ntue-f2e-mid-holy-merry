@@ -10,11 +10,12 @@
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/shared.css?v=20261031-12">
-  <link rel="stylesheet" href="css/home.css?v=20261031-3">
+  <link rel="stylesheet" href="css/home.css?v=20261031-4">
+  <link rel="preload" href="assets/fonts/fredoka-600-digits.woff2" as="font" type="font/woff2" crossorigin>
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js"}}</script>
   <script type="module" src="js/shared.js?v=20261031-5"></script>
   <script type="module" src="js/home-scene.js?v=20261031-3"></script>
-  <script type="module" src="js/home.js"></script>
+  <script type="module" src="js/home.js?v=20261031-2"></script>
   <script type="module" src="js/santa-model.js"></script>
 </head>
 
@@ -35,10 +36,10 @@
     <div class="countdown" aria-label="聖誕節倒數">
       <span id="countdown-label">距離聖誕節，還有</span>
       <div class="countdown-units" role="timer" aria-live="off">
-        <span><strong data-unit="days">--</strong><small>天</small></span>
-        <span><strong data-unit="hours">--</strong><small>時</small></span>
-        <span><strong data-unit="minutes">--</strong><small>分</small></span>
-        <span><strong data-unit="seconds">--</strong><small>秒</small></span>
+        <span class="flip-unit"><strong data-unit="days" aria-hidden="true">--</strong><small>天</small></span>
+        <span class="flip-unit" data-tone="green"><strong data-unit="hours" aria-hidden="true">--</strong><small>時</small></span>
+        <span class="flip-unit"><strong data-unit="minutes" aria-hidden="true">--</strong><small>分</small></span>
+        <span class="flip-unit" data-tone="green"><strong data-unit="seconds" aria-hidden="true">--</strong><small>秒</small></span>
       </div>
     </div>
     <h1 class="storybook-title"><span class="sr-only">Merry Christmas</span><span class="title-motion" data-title-art></span></h1>
