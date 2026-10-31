@@ -5,6 +5,7 @@ import { drawCoin, drawPiece } from './components/intro-scenes.js';
 import { mountMapArt, mountScrollArt } from './components/intro-map.js';
 import { paperLayer } from './components/paper-art.js';
 import { mountIntroScroll } from './components/intro-scroll.js';
+import { postcardScenes } from './components/intro-postcard-art.js';
 // The Header is static: include its measured height in the first snap target only.
 const main=document.querySelector('.intro-main');
 const measureHeader=()=>main.style.setProperty('--intro-header-height',`${document.querySelector('.site-header').getBoundingClientRect().height}px`);
@@ -14,7 +15,8 @@ const storybook=document.querySelector('#intro-storybook');
 mountBackdrop(storybook.querySelector('.intro-story-bg'));
 mountBookArt(storybook);
 const book=mountIntroBook(storybook,{art:{page:decoratePage,piece:drawPiece,coin:drawCoin}});
-const postcards=mountIntroPostcards(document.querySelector('.intro-main'));
+const postcards=mountIntroPostcards(document.querySelector('.intro-main'),{scenes:postcardScenes});
+paperLayer(document.querySelector('.intro-post-action'),'0 0 240 106','tag-art',tagArt('#a84a42','#853a34'),{paper:{scale:.7,grain:.45,shadow:.24},eager:true,preserveAspectRatio:'none'});
 const cultures=document.querySelector('#christmas-cultures');
 mountScrollArt(cultures);
 paperLayer(cultures.querySelector('.intro-letter-open'),'0 0 240 106','tag-art',tagArt('#a84a42','#853a34'),{paper:{scale:.7,grain:.45,shadow:.24},eager:true,preserveAspectRatio:'none'});

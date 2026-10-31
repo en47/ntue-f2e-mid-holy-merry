@@ -11,9 +11,10 @@
 - `js/components/intro-art.js`：書封、書板、內頁角落、按鈕底圖、雪地背景。
 - `js/components/intro-scenes.js`：三章紙雕卡片；`js/data/intro-stories.js` 只放配置座標。
 - `js/components/intro-map.js`、`intro-scroll.js`：地圖、雪橇航線、捲軸。
+- `js/components/intro-postcard-art.js`：六張明信片的互動紙雕；文案與抽獎內容在 `js/data/intro-cultures.js`。
 - `js/data/intro-map-shapes.js`：由 `scripts/build-intro-map.py` 描 `christmas_map.jpg` 產生，需要 opencv，不要手改。
 
-每片紙只轉成圖片一次；天空背板的傾斜要小於前後層的距離，否則 3D 平面會互相穿過、把前景削平。
+每片紙只轉成圖片一次。紙片各自帶 `perspective()` 往後倒下，不共用 3D 空間：往後倒只會縮小，不會超出書頁，也不會互相穿過；前後順序交給 z-index。
 
 `assets/illustrations/intro/` 的原始 PNG 全部保留，頁面已不載入，`docs/INTRO-ASSETS.json` 的雜湊檢查照舊。
 
