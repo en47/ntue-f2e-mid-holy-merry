@@ -117,6 +117,40 @@ function frontBank(parent) {
   for (const [x, y, width, height] of [[230, 186, 92, 34], [1076, 170, 88, 32], [1510, 186, 66, 28]]) hollow(parent, x, y, width, height, '#afcbdd');
 }
 
+function buttonArt(fill, edge) {
+  const body = 'M34 28C110 22 250 22 326 28 338 29 344 36 343 46 341 58 341 68 343 78 344 88 338 95 326 96 250 100 110 100 34 96 22 95 16 88 17 78 19 68 19 58 17 46 16 36 22 29 34 28Z';
+  return parent => {
+    shape('path', { d: body, fill: edge, transform: 'translate(0 6)' }, parent);
+    shape('path', { d: body, fill }, parent);
+    shape('rect', { x: 30, y: 38, width: 300, height: 50, rx: 16, fill: 'none', stroke: '#fff3dc', 'stroke-opacity': .6, 'stroke-width': 2, 'stroke-dasharray': '9 7' }, parent);
+    shape('path', { d: 'M24 34C60 20 120 20 176 25 172 34 158 37 150 32 142 42 124 42 118 33 106 41 90 40 84 33 70 41 44 42 24 34Z', fill: SNOW }, parent);
+    holly(parent, 322, 30, .44);
+  };
+}
+
+function letterArt(first, second) {
+  return parent => {
+    shape('path', { d: 'M20 20C120 15 260 16 360 20 365 110 364 200 360 280 260 285 120 284 20 280 15 200 16 110 20 20Z', fill: '#fdf6e6' }, parent);
+    for (const [stroke, offset] of [[first, 0], [second, 16]]) shape('rect', { x: 34, y: 34, width: 312, height: 232, rx: 6, fill: 'none', stroke, 'stroke-width': 5, 'stroke-dasharray': '16 16', 'stroke-dashoffset': offset }, parent);
+    holly(parent, 66, 66, .62);
+    shape('rect', { x: 296, y: 50, width: 36, height: 44, rx: 2, fill: '#f6e4bd', stroke: '#fffdf6', 'stroke-width': 3, 'stroke-dasharray': '3 3' }, parent);
+    star(parent, 314, 72, 11);
+    shape('path', { d: 'M318 216C332 208 350 216 352 232 356 246 342 262 326 258 308 260 294 244 298 230 300 222 310 218 318 216Z', fill: '#a84a42' }, parent);
+    shape('circle', { cx: 325, cy: 236, r: 14, fill: 'none', stroke: '#c9756b', 'stroke-width': 2 }, parent);
+    star(parent, 325, 236, 8, '#e3b7a4');
+  };
+}
+
+function mountDecor(root) {
+  const flat = { scale: .8, grain: .5, shadow: .28 };
+  const [explore, wish] = root.querySelectorAll('.paper-button');
+  paperLayer(explore, '0 0 360 116', 'button-art', buttonArt('#4a7560', '#3a5e4d'), { paper: flat, eager: true, preserveAspectRatio: 'none' });
+  paperLayer(wish, '0 0 360 116', 'button-art', buttonArt('#a84a42', '#853a34'), { paper: flat, eager: true, preserveAspectRatio: 'none' });
+  const letter = { paper: { scale: .8, grain: .35, shadow: .24 }, eager: true, preserveAspectRatio: 'none' };
+  paperLayer(root.querySelector('#santa-letter .letter-body'), '0 0 380 300', 'letter-art', letterArt('#a84a42', '#4f7d68'), letter);
+  paperLayer(root.querySelector('#reindeer-letter .letter-body'), '0 0 380 300', 'letter-art', letterArt('#4f7d68', '#c08a3e'), letter);
+}
+
 function mountTitle(host) {
   const paper = { scale: 2.3, rim: '#fbf3e3', shadow: .24, grain: .5 };
   const palette = ['#a84a42', '#b5604a', '#4f7d68', '#a84a42', '#c08a3e'];
@@ -130,6 +164,7 @@ function mountTitle(host) {
 export function mountHomeScene(root) {
   const stage = root.querySelector('#story-stage');
   mountTitle(root.querySelector('[data-title-art]'));
+  mountDecor(root);
   const paper = { scale: 1.3, grain: .6 }, wide = { ...paper, grain: .4, shadow: .16 }, none = { preserveAspectRatio: 'none' };
   popLayer(stage, '-6 -6 232 232', 'home-sun', sun, { delay: 0, paper });
   popLayer(stage, '-20 0 270 116', 'home-cloud home-cloud-a', parent => cloud(parent, 120, 62, 1.15), { delay: .1, paper });
