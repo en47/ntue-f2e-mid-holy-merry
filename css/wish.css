@@ -51,16 +51,10 @@ html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none 
 .room-caption { position: absolute; bottom: .5rem; left: 30%; right: 15%; text-align: center; color: #8d7e65; font: 1rem WishHand, var(--font-display); margin: 0; pointer-events: none; }
 .scene-loading { position: absolute; top: 40%; left: 43%; right: 7%; text-align: center; font-size: .75rem; color: #4d6671; z-index: 4; pointer-events: none; }
 .scene-loading button { display: block; margin: .8rem auto; pointer-events: auto; border: 1px solid #a77e65; padding: .4rem .9rem; background: var(--cream); }
-.wish-keepsakes { padding-top: 2rem; }
-.wish-keepsakes details { border-top: 1px solid #a9bec4; padding-top: .8rem; }
-.wish-keepsakes summary { cursor: pointer; font-size: .9rem; color: #627c81; }
-#wish-total { font-size: .7rem; margin-left: .75rem; }
-.wish-keepsakes .hint { font-size: .75rem; margin-top: .75rem; }
 .envelope-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1rem; list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
 .envelope { border: 0; width: 100%; padding: 0; background: none; }
 .envelope img { display: block; width: 100%; height: auto; }
 .envelope span { display: block; font-size: .75rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.empty-wishes { font-size: .85rem; color: var(--muted); }
 .wish-date { color: var(--muted); font-size: .75rem; }
 .wish-message { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 2; }
 @media(max-width: 1100px) and (min-width: 701px) {

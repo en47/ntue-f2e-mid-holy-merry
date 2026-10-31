@@ -1,49 +1,22 @@
-import { readWishes } from './services/wish-storage.js';
 import { createWishDelivery } from './components/wish-delivery.js';
 import { selectTreeWishes } from './services/wish-selection.js';
 const form = document.querySelector('#wish-form');
 const nickname = document.querySelector('#nickname');
 const content = document.querySelector('#wish-content');
 const status = document.querySelector('#wish-status');
-const list = document.querySelector('#envelope-list');
 const dialog = document.querySelector('#wish-dialog');
 const delivery = createWishDelivery(document.querySelector('#wish-room'),{savingText:'正在將願望寄到聖誕信箱……'});
 const send=form.querySelector('button[type="submit"]'),publish=document.querySelector('#wish-public');
 const cloudStatus=document.querySelector('#cloud-status'),cloudRetry=document.querySelector('#cloud-retry');
 let repository=null,connecting=false,ownWish=null,publicWishes=[],treeWishes=[],draft=null,refreshVersion=0;
 let pendingEnvelopeEntrance = null;
-let wishes = [];
-try { wishes = readWishes(); } catch {
-  status.textContent = '舊的本機願望無法讀取，資料仍保留，沒有上傳或覆寫。';
-}
 function showWish(wish){
   document.querySelector('#wish-dialog-title').textContent=`${wish.nickname} 的聖誕願望`;
   document.querySelector('#wish-dialog-date').textContent=wish.createdAt?new Intl.DateTimeFormat('zh-TW',{dateStyle:'medium',timeStyle:'short'}).format(new Date(wish.createdAt)):'';
   document.querySelector('#wish-dialog-content').textContent=wish.content;
-  document.querySelector('#wish-dialog-privacy').textContent=wish.legacy?'這封信僅保存在此瀏覽器，未上傳。':!wish.isOwn?'這是已核准的公開願望。':wish.visibility==='private'?'這是你的私人願望，僅本人及管理員可讀。':wish.status==='approved'?'你的願望已核准公開。':wish.status==='rejected'?'這封願望未通過公開審核，其他訪客無法查看。':'你的願望仍待審核，其他訪客無法查看。';
+  document.querySelector('#wish-dialog-privacy').textContent=!wish.isOwn?'這是已核准的公開願望。':wish.visibility==='private'?'這是你的私人願望，僅本人及管理員可讀。':wish.status==='approved'?'你的願望已核准公開。':wish.status==='rejected'?'這封願望未通過公開審核，其他訪客無法查看。':'你的願望仍待審核，其他訪客無法查看。';
   dialog.showModal();
 }
-function renderWishes() {
-  list.replaceChildren();
-  document.querySelector('#wish-total').textContent = `${wishes.length} 封`;
-  document.querySelector('#empty-wishes').hidden = wishes.length > 0;
-  for (const wish of [...wishes].reverse()) {
-    const item = document.createElement('li');
-    const button = document.createElement('button');
-    button.className = 'envelope';
-    button.setAttribute('aria-label', `查看 ${wish.nickname} 的願望`);
-    const label = document.createElement('span');
-    label.textContent = `給 ${wish.nickname}`;
-    const artwork = document.createElement('img');
-    artwork.src = 'assets/illustrations/wish/envelope.png';
-    artwork.alt = ''; artwork.width = 1536; artwork.height = 1024; artwork.loading = 'lazy';
-    button.append(artwork, label);
-    button.addEventListener('click', () => showWish({...wish,legacy:true}));
-    item.append(button);
-    list.append(item);
-  }
-}
-renderWishes();
 function updateTree({ newWishId = null } = {}){
   if(!repository)return;
   treeWishes=selectTreeWishes(ownWish,publicWishes,repository.uid);
@@ -82,7 +55,7 @@ async function connectCloud(){
   }catch(error){
     repository=null;ownWish=null;publicWishes=[];treeWishes=[];sceneController?.setWishes([],showWish);
     document.querySelector('#cloud-envelope-list').replaceChildren();document.querySelector('#cloud-wish-total').textContent='0 封';
-    cloudStatus.textContent='雲端信箱尚未連接，請確認網路與資料庫權限後重試。既有本機願望仍保留。';cloudRetry.hidden=false;
+    cloudStatus.textContent='雲端信箱尚未連接，請確認網路後重試。';cloudRetry.hidden=false;
   }finally{connecting=false;}
 }
 cloudRetry.addEventListener('click',connectCloud);
@@ -141,10 +114,3 @@ window.addEventListener('pagehide', () => { delivery.cancel(); sceneVersion++; s
 window.addEventListener('pageshow', () => { if (!sceneController) startScene(); });
 startScene();
 connectCloud();
-window.addEventListener('storage', event => {
-  if (event.key && event.key !== 'holy-merry:wishes:v1') return;
-  try {
-    wishes = readWishes();
-    renderWishes();
-  } catch { status.textContent = '其他分頁的儲存資料無法讀取，請確認資料狀態。'; }
-});
