@@ -11,13 +11,13 @@ function swell(fill, top, height, length, foam = []) {
   return parent => {
     let d = `M0 ${top}`;
     for (let x = 0; x < 2000; x += length) d += `q${length / 2} ${-height} ${length} 0`;
-    shape('path', { d: `${d}V400H0Z`, fill }, parent);
+    shape('path', { d: `${d}V800H0Z`, fill }, parent);
     for (const [x, y, width] of foam) shape('path', { d: `M${x} ${y}q${width / 4} -14 ${width / 2} 0t${width / 2} 0`, stroke: '#a9cbd9', 'stroke-width': 5, 'stroke-linecap': 'round', fill: 'none' }, parent);
   };
 }
 
 function farSea(parent) {
-  shape('rect', { x: 0, y: 60, width: 2000, height: 340, fill: '#bcd6e0' }, parent);
+  shape('rect', { x: 0, y: 60, width: 2000, height: 740, fill: '#bcd6e0' }, parent);
   // A pale far shore: the distance fades it toward the sky, and it rests level on the horizon.
   shape('path', { d: 'M1240 60C1300 30 1370 44 1430 28S1560 8 1640 34 1800 30 1880 60Z', fill: '#d3e2e8' }, parent);
   for (const [x, y, width] of [[300, 96, 120], [820, 84, 90], [1320, 110, 140], [1680, 90, 80]]) shape('path', { d: `M${x} ${y}h${width}`, stroke: '#dcebf0', 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none' }, parent);
@@ -93,15 +93,15 @@ export function mountHarbor(section) {
     popLayer(host, '-20 0 270 116', 'harbor-cloud harbor-cloud-a', parent => cloud(parent, 120, 62, 1.15), { delay: .1, paper: { scale: 1.2, grain: .4, shadow: .14 } });
     popLayer(host, '-20 0 270 116', 'harbor-cloud harbor-cloud-b', parent => cloud(parent, 120, 62, 1.15), { delay: .2, paper: { scale: 1.2, grain: .4, shadow: .14 } });
     for (const [name, delay] of [['harbor-gull-a', .7], ['harbor-gull-b', .8]]) popLayer(host, '0 0 90 46', `harbor-gull ${name}`, gull, { delay, paper: { scale: .6, grain: .3, shadow: .1 } });
-    popLayer(sea, '0 0 2000 400', 'harbor-far', farSea, { delay: 0, ...WATER });
-    popLayer(sea, '0 0 2000 400', 'harbor-wave harbor-wave-back', swell('#9fc3d3', 40, 12, 170), { delay: .15, ...WATER });
+    popLayer(sea, '0 0 2000 800', 'harbor-far', farSea, { delay: 0, ...WATER });
+    popLayer(sea, '0 0 2000 800', 'harbor-wave harbor-wave-back', swell('#9fc3d3', 40, 12, 170), { delay: .15, ...WATER });
     const ship = popLayer(sea, '0 0 300 340', 'harbor-boat', boat, { delay: .55, ...PAPER });
     ship.style.transformOrigin = '50% 70%';
-    popLayer(sea, '0 0 2000 400', 'harbor-wave harbor-wave-mid', swell('#7fadc3', 40, 20, 240), { delay: .3, ...WATER });
+    popLayer(sea, '0 0 2000 800', 'harbor-wave harbor-wave-mid', swell('#7fadc3', 40, 20, 240), { delay: .3, ...WATER });
     popLayer(sea, '0 0 520 560', 'harbor-land', headland, { delay: .4, ...PAPER });
     paperLayer(sea.querySelector('.harbor-land'), '0 0 520 560', 'harbor-glow', lanternGlow, { paper: null, eager: true });
     popLayer(sea, '0 0 360 300', 'harbor-floe', iceFloe, { delay: .65, ...PAPER });
-    popLayer(sea, '0 0 2000 400', 'harbor-wave harbor-wave-front', swell('#6795b0', 40, 30, 330, [[150, 150, 210], [620, 110, 170], [1010, 190, 240], [1460, 120, 190], [1760, 210, 170], [360, 280, 200], [1280, 300, 220]]), { delay: .45, ...WATER });
+    popLayer(sea, '0 0 2000 800', 'harbor-wave harbor-wave-front', swell('#6795b0', 40, 30, 330, [[150, 150, 210], [620, 110, 170], [1010, 190, 240], [1460, 120, 190], [1760, 210, 170], [360, 280, 200], [1280, 300, 220]]), { delay: .45, ...WATER });
     const art = [...host.querySelectorAll('img')].map(image => image.decode().catch(() => {}));
     return Promise.race([Promise.all(art), new Promise(resolve => setTimeout(resolve, 1500))]);
   };
