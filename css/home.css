@@ -66,7 +66,7 @@
 .character-stage.is-dragging { cursor: grabbing; }
 .character-stage:focus-visible { outline: none; }
 .stage-key-hint { position: absolute; top: 0; left: 50%; width: max-content; max-width: 95%; transform: translateX(-50%); text-align: center; color: #623b31; background: #fff7e8e8; padding: .3rem; font-size: .7rem; opacity: 0; pointer-events: none; }
-.character-stage:focus-visible:not([aria-expanded='true']) .stage-key-hint { opacity: 1; }
+.uses-keyboard .character-stage:focus-visible:not([aria-expanded='true']) .stage-key-hint { opacity: 1; }
 .model-recovery { position: absolute; top: 98%; left: -12%; z-index: 15; width: 124%; text-align: center; pointer-events: auto; }
 .asset-retry { padding: .3rem .6rem; background: #fff7e8; border: 1px dashed #aa896f; color: #614c3e; font-size: .72rem; }
 .model-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); margin: 0; }
@@ -103,7 +103,7 @@
 .letter-body:not(:has(.letter-art)) { background: #fdf6e6; box-shadow: 0 0 0 3px #e8d9ba; }
 .christmas-letter.is-visible .letter-body { transform: perspective(600px) rotateX(0); }
 .letter-from { font: 700 1.25rem / 1.2 var(--font-body); color: #8a3f35; }
-.letter-copy { display: block; min-width: 0; font-size: .98rem; font-weight: 500; overflow-wrap: anywhere; }
+.letter-copy { display: block; min-width: 0; font-size: .98rem; font-weight: 500; overflow-wrap: anywhere; text-wrap: balance; }
 .christmas-letter small { display: block; font-size: .72rem; color: #7d6552; font-weight: 400; }
 .christmas-letter:focus-visible { outline: 3px solid #e0b04f; outline-offset: 2px; }
 .no-script { position: absolute; z-index: 30; top: 52%; width: 100%; text-align: center; background: #fff7e8; padding: 1rem; }
