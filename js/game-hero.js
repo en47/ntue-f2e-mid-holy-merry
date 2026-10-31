@@ -46,7 +46,8 @@ Promise.race([Promise.all(artwork), new Promise(resolve => setTimeout(resolve, 1
 const slot = hero.querySelector('.games-hero-santa');
 const status = hero.querySelector('.games-hero-model-status');
 let cleanup = () => {}, generation = 0;
-const VIEW_HEIGHT = .54, VIEW_CENTER = .75;
+// The view keeps the old scale in a taller slot, so Santa sits higher without growing.
+const VIEW_HEIGHT = .6686, VIEW_CENTER = .6857;
 function disposeModel(model) {
   const textures = new Set();
   model.traverse(node => {

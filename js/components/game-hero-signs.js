@@ -64,7 +64,27 @@ const PARTS = {
   'nav-bottom': [NAV_BOX, svg => arrowBoard(svg, 'sign-nav-bottom', 'translate(10 296) scale(.97 .82)', [846, 112, 1.9])],
 };
 
+// Cut the title into individually coloured letters; screen readers keep the whole words.
+function colourTitle(title) {
+  const palette = ['#a84a42', '#4f7d68', '#a8742c'];
+  let index = 0;
+  title.setAttribute('aria-label', title.textContent.replace(/\s+/g, ' ').trim());
+  for (const node of [...title.childNodes]) {
+    if (node.nodeType !== Node.TEXT_NODE) continue;
+    const word = document.createElement('span');
+    word.className = 'sign-word';
+    for (const letter of node.textContent) {
+      const span = document.createElement('span');
+      span.className = 'sign-letter'; span.textContent = letter; span.setAttribute('aria-hidden', 'true');
+      span.style.color = palette[index++ % palette.length];
+      word.append(span);
+    }
+    node.replaceWith(word);
+  }
+}
+
 export function mountHeroSigns(root) {
+  colourTitle(root.querySelector('.games-hero-title-sign h1'));
   for (const slot of root.querySelectorAll('[data-sign]')) {
     const [viewBox, draw] = PARTS[slot.dataset.sign];
     const svg = shape('svg', { viewBox });

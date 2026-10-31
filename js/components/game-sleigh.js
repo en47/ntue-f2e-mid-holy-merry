@@ -48,8 +48,8 @@ function sack(parent) {
 function santaFigure(parent) {
   const santa = shape('g', { transform: 'translate(0 -14)' }, parent);
   shape('path', { d: 'M128 196C124 150 140 124 176 122 212 122 228 150 226 196Z', fill: RED }, santa);
-  shape('path', { d: 'M136 98C138 66 168 48 196 60 214 66 222 76 226 90L136 104Z', fill: RED }, santa);
-  shape('path', { d: 'M140 76C128 74 116 80 110 92', stroke: RED, 'stroke-width': 18, 'stroke-linecap': 'round', fill: 'none' }, santa);
+  // One unbroken hat: crown and drooping tip share an outline, so no seam shows between them.
+  shape('path', { d: 'M136 108C128 98 118 96 110 104 100 100 98 90 104 84 112 66 132 54 152 52 182 42 216 56 228 96Z', fill: RED }, santa);
   shape('circle', { cx: 106, cy: 100, r: 12, fill: CREAM }, santa);
   shape('circle', { cx: 182, cy: 106, r: 27, fill: SKIN }, santa);
   shape('path', { d: 'M148 112C150 150 172 168 188 170 206 168 220 146 218 112 208 124 200 122 192 118 182 124 172 122 164 118 158 122 152 120 148 112Z', fill: CREAM }, santa);

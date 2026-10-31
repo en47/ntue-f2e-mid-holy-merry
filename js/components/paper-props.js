@@ -84,4 +84,25 @@ export function airmailLetter(first, second) {
   };
 }
 
+// Facets as [tone, [across, down]…]: across runs -1 (left foot) to 1 (right foot), down 0 (summit) to 1 (base).
+const FACETS = [
+  ['sky', [-.84, 1], [-.64, .66], [-.46, 1]], ['ice', [-.62, 1], [-.44, .52], [-.26, 1]],
+  ['dusk', [-.52, 1], [-.4, .76], [-.3, 1]], ['sky', [-.36, 1], [-.2, .44], [-.05, .84], [.02, 1]],
+  ['ice', [-.27, .64], [-.13, .28], [-.03, .58]], ['dusk', [-.18, 1], [-.08, .68], [.02, 1]],
+  ['sky', [.02, 0], [.1, .2], [-.05, .42], [.14, .66], [.04, 1], [1, 1], [.72, .68], [.46, .36], [.34, .3]],
+  ['dusk', [.1, .2], [.34, .62], [.14, .66], [-.05, .42]], ['dusk', [.14, .66], [.4, .46], [.62, 1], [.04, 1]],
+  ['dusk', [.5, .62], [.6, .52], [.84, 1], [.62, 1]], ['ice', [.46, 1], [.66, .72], [.88, 1]],
+  ['ice', [.2, 1], [.3, .8], [.42, 1]], ['cream', [.16, .44], [.3, .4], [.22, .74]], ['cream', [.5, .46], [.6, .52], [.55, .8]],
+  ['cream', [0, 0], [.34, .3], [.2, .25], [.15, .37], [.05, .24], [-.04, .35], [-.13, .26], [-.22, .2]],
+];
+const OUTLINE = [[-1, 1], [-.66, .55], [-.5, .5], [-.22, .2], [0, 0], [.34, .3], [.46, .36], [.72, .68], [1, 1]];
+
+// One faceted peak: sunlit left face, shaded right face, snow cap on top. Home and Game pass their own tones.
+export function facetedPeak(parent, x, top, base, left, right, tones = { cream: '#f7f0e3', ice: '#c7dbe6', sky: '#92b6d0', dusk: '#6b95b6' }) {
+  const at = ([across, down]) => `${x + across * (across < 0 ? left : right)} ${top + (base - top) * down}`;
+  const facet = (fill, points) => shape('path', { d: `M${points.map(at).join('L')}Z`, fill }, parent);
+  facet(tones.cream, OUTLINE);
+  for (const [tone, ...points] of FACETS) facet(tones[tone], points);
+}
+
 export { holly, pine };
