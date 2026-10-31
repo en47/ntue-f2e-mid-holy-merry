@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url';
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(project, 'screenshots');
-const base = 'http://127.0.0.1:5500';
+// Live Server 佔用 5500 時，存檔會觸發重新整理打斷截圖；請另開一個埠並用 BASE 指定。
+const base = process.env.BASE ?? 'http://127.0.0.1:5500';
 const viewports = [{ name: '375', width: 375, height: 812 }, { name: '768', width: 768, height: 1024 }, { name: '1440', width: 1440, height: 900 }];
 const pages = ['index.html', 'intro.html', 'game.html', 'wish.html'];
 const probe = process.argv.includes('--probe');

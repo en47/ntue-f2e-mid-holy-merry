@@ -2,6 +2,7 @@
 import { paperLayer, popLayer, shape } from './paper-art.js';
 import { SHADE, SNOW, airmailLetter, berryBush, church, cloud, fence, holly, lamp, pine, roofHouse, star } from './paper-props.js';
 import { TITLE_BOX, titleGlyphs } from '../data/title-glyphs.js';
+import { taglinePath } from '../data/tagline-glyphs.js';
 
 const GREEN = '#5f8a70', DEEP = '#4f7a65', ICE = '#c7dbe6', SKY = '#92b6d0', DUSK = '#6b95b6', CREAM = '#f7f0e3';
 
@@ -161,6 +162,19 @@ function calendarArt(parent) {
   holly(parent, 42, 44, .52); holly(parent, 338, 44, .46);
 }
 
+// A paper ribbon under the title: folded tails behind, stitched band in front, words cut from cream paper.
+function ribbon(parent) {
+  for (const flip of [1, -1]) {
+    const tail = shape('g', { transform: flip < 0 ? 'translate(820 0) scale(-1 1)' : '' }, parent);
+    shape('path', { d: 'M86 58H22L44 92 18 126H112V94Z', fill: '#853a34' }, tail);
+    shape('path', { d: 'M86 94H112V112Z', fill: '#5f2a26' }, tail);
+  }
+  shape('path', { d: 'M82 24C220 14 600 14 738 24 744 46 744 78 738 100 600 110 220 110 82 100 76 78 76 46 82 24Z', fill: '#a84a42' }, parent);
+  shape('path', { d: 'M92 34C230 25 590 25 728 34M92 90C230 99 590 99 728 90', stroke: '#fff3dc', 'stroke-opacity': .6, 'stroke-width': 2.5, 'stroke-dasharray': '10 8', fill: 'none' }, parent);
+  shape('path', { d: 'M54 24C100 12 150 14 196 19 192 28 178 31 170 26 160 36 142 34 136 27 124 35 108 33 102 27 88 34 66 34 54 24Z', fill: SNOW }, parent);
+  holly(parent, 738, 28, .5); star(parent, 96, 62, 11); star(parent, 724, 62, 11);
+}
+
 function mountDecor(root) {
   const flat = { scale: .8, grain: .5, shadow: .28 };
   const [explore, wish] = root.querySelectorAll('.paper-button');
@@ -170,6 +184,11 @@ function mountDecor(root) {
   const letter = { paper: { scale: .8, grain: .35, shadow: .24 }, eager: true, preserveAspectRatio: 'none' };
   paperLayer(root.querySelector('#santa-letter .letter-body'), '0 0 380 300', 'letter-art', airmailLetter('#a84a42', '#4f7d68'), letter);
   paperLayer(root.querySelector('#reindeer-letter .letter-body'), '0 0 380 300', 'letter-art', airmailLetter('#4f7d68', '#c08a3e'), letter);
+}
+
+function mountTagline(host) {
+  paperLayer(host, '0 0 820 150', '', ribbon, { paper: { scale: .9, grain: .45, shadow: .24 }, eager: true });
+  paperLayer(host, '0 0 820 150', 'tagline-words', parent => shape('path', { d: taglinePath, fill: '#fff9ec', transform: 'translate(50 -4)' }, parent), { paper: null, eager: true });
 }
 
 function mountTitle(host) {
@@ -185,6 +204,7 @@ function mountTitle(host) {
 export function mountHomeScene(root) {
   const stage = root.querySelector('#story-stage');
   mountTitle(root.querySelector('[data-title-art]'));
+  mountTagline(root.querySelector('[data-tagline-art]'));
   mountDecor(root);
   const paper = { scale: 1.3, grain: .6 }, wide = { ...paper, grain: .4, shadow: .16 }, none = { preserveAspectRatio: 'none' };
   popLayer(stage, '-6 -6 232 232', 'home-sun', sun, { delay: 0, paper });

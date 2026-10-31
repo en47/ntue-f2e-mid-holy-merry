@@ -257,3 +257,7 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - `npm test`：26 組 smoke 與 23 項 node:test 通過；`npm run test:firebase` 未執行（缺 Java）。
 - 抽獎與流程測試改為檢查 13 夜循環、9 種禮物與各卡步驟；頁面測試改為確認沒有 scroll-snap。
+
+## 2026-10-31：首頁標語緞帶
+
+- 重疊檢查：`node scripts/check-home-overlap.mjs`（需本機伺服器，不在 `npm test` 內），九種視窗含 1440×684 皆不重疊。
