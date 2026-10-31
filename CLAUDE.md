@@ -15,12 +15,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 python3 -m http.server 5500 --bind 127.0.0.1    # 或 VS Code Live Server 開 index.html
 
 npm ci                      # 僅測試需要（Node.js 22+）
-npm test                    # tests/smoke.mjs ＋ node:test（wish-cloud / elf / wish-interaction）
+npm test                    # tests/smoke.mjs ＋ node:test（wish-cloud / elf / wish-interaction / intro）
 npm run test:firebase       # Firestore 規則與整合測試，需 Java 21 與 firebase-tools emulator
 
 # 單獨執行
 node --experimental-vm-modules tests/smoke.mjs                 # 全部通過才結束；本身無法篩選單一組
-node --test tests/intro.test.mjs                               # 注意：intro.test.mjs 未列入 npm test
+node --experimental-vm-modules --test tests/intro.test.mjs     # 需要這個旗標，否則會出現 SourceTextModule 錯誤
 node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔可依名稱過濾（名稱為英文）
 ```
 

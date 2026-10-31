@@ -105,7 +105,7 @@ export function mountIntroBook(root, {
  function face(target, desktop, index) {
   const desktopFace = element('div', 'intro-leaf-desktop'); desktopFace.append(desktop);
   // A stacked spread on narrow screens still turns as one populated paper leaf.
-  const mobileFace = element('div', 'intro-leaf-mobile'); mobileFace.append(clone(views[index].copy), picture(index));
+  const mobileFace = element('div', 'intro-leaf-mobile'); mobileFace.append(picture(index), clone(views[index].copy));
   target.replaceChildren(desktopFace, mobileFace);
  }
  function leaf(target) {
@@ -120,9 +120,14 @@ export function mountIntroBook(root, {
   turn.style.visibility = 'hidden'; turn.hidden = true;
   $('front').replaceChildren(); $('back').replaceChildren();
  }
+ // The stacked phone layout puts the scene first, so a new chapter always starts from it.
+ function showBookTop() {
+  if (!globalThis.matchMedia?.('(max-width: 700px)').matches) return;
+  root.querySelector('.intro-book')?.scrollIntoView?.({ block: 'start', behavior: motion.matches ? 'auto' : 'smooth' });
+ }
  async function changePage(target) {
   if (disposed || busy || target < 0 || target >= stories.length || target === page) return false;
-  busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
+  showBookTop(); busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
   await fold(page, false); if (disposed || token !== revision) return false;
   phase('turning'); const forward = leaf(target);
   // The leaf covers the underlay. Only reveal its matching static page after it lands.
