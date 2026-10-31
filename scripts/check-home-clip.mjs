@@ -7,7 +7,7 @@ const browser = await chromium.launch();
 let failures = 0;
 for (const name of pages) for (const [width, height] of [[375, 812], [768, 1024], [1440, 900]]) {
   const page = await browser.newPage({ viewport: { width, height } });
-  await page.goto(`http://127.0.0.1:5500/${name}`, { waitUntil: 'load' });
+  await page.goto(`${process.env.BASE ?? 'http://127.0.0.1:5500'}/${name}`, { waitUntil: 'load' });
   await page.waitForTimeout(5000);
   const clipped = await page.evaluate(async () => {
     const stage = (document.querySelector('.storybook') ?? document.querySelector('.games-hero') ?? document.body).getBoundingClientRect();
@@ -15,8 +15,8 @@ for (const name of pages) for (const [width, height] of [[375, 812], [768, 1024]
     for (const image of document.querySelectorAll('.art-layer img, .foreground-scene img')) {
       await image.decode().catch(() => {});
       const rect = image.getBoundingClientRect(), { naturalWidth: w, naturalHeight: h } = image;
-      // 海洋底紙與封面內襯本來就鋪滿到邊。
-      if (!w || !rect.width || image.closest('.map-sea, .intro-cover-inside-art') || getComputedStyle(image.parentElement).display === 'none') continue;
+      // 海洋底紙與封面內襯鋪滿到邊；海港的水與岩岸下緣埋在近浪後方。
+      if (!w || !rect.width || image.closest('.map-sea, .intro-cover-inside-art, .harbor-far, .harbor-wave, .harbor-boat, .harbor-floe, .harbor-glow, .harbor-land') || getComputedStyle(image.parentElement).display === 'none') continue;
       const inPage = Boolean(image.closest('.page-foreground'));
       const bound = inPage ? image.closest('.page-foreground').getBoundingClientRect() : stage;
       const canvas = Object.assign(document.createElement('canvas'), { width: w, height: h });
