@@ -153,7 +153,7 @@ export function mountIntroBook(root, {
  }
  async function closeBook() {
   if (disposed || busy || shut) return false;
-  busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
+  showBookTop(); busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
   await fold(page, false); if (disposed || token !== revision) return false;
   coverPage.replaceChildren(clone(views[page].copy));
   shut = true; cover.hidden = false; phase('covering');
