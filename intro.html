@@ -9,10 +9,10 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/shared.css?v=94a6d1d7cc">
   <link rel="stylesheet" href="css/game.css?v=463cab7cbc">
-  <link rel="stylesheet" href="css/intro.css?v=27d4668d4c">
-  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/components/intro-book.js":"./js/components/intro-book.js?v=0119b645fe","./js/components/intro-postcards.js":"./js/components/intro-postcards.js?v=cf0f20a072","./js/components/page-foreground.js":"./js/components/page-foreground.js?v=5791c7c917","./js/components/paper-art.js":"./js/components/paper-art.js?v=f0722c5277","./js/components/santa-placeholder.js":"./js/components/santa-placeholder.js?v=8c938caad4","./js/data/intro-cultures.js":"./js/data/intro-cultures.js?v=1132d55bb5","./js/data/intro-image-bounds.js":"./js/data/intro-image-bounds.js?v=4896a7eeb6","./js/data/intro-stories.js":"./js/data/intro-stories.js?v=0922948172"}}</script>
+  <link rel="stylesheet" href="css/intro.css?v=880e3d17b2">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/components/intro-art.js":"./js/components/intro-art.js?v=808ecae09f","./js/components/intro-book.js":"./js/components/intro-book.js?v=787de4bdce","./js/components/intro-postcards.js":"./js/components/intro-postcards.js?v=cf0f20a072","./js/components/page-foreground.js":"./js/components/page-foreground.js?v=5791c7c917","./js/components/paper-art.js":"./js/components/paper-art.js?v=f0722c5277","./js/components/paper-props.js":"./js/components/paper-props.js?v=f9df246754","./js/components/santa-placeholder.js":"./js/components/santa-placeholder.js?v=8c938caad4","./js/data/intro-cultures.js":"./js/data/intro-cultures.js?v=1132d55bb5","./js/data/intro-image-bounds.js":"./js/data/intro-image-bounds.js?v=4896a7eeb6","./js/data/intro-stories.js":"./js/data/intro-stories.js?v=0922948172","./js/data/story-glyphs.js":"./js/data/story-glyphs.js?v=293eeb5dbe"}}</script>
   <script type="module" src="js/shared.js?v=b7eea60482"></script>
-  <script type="module" src="js/intro.js?v=097a4e3024"></script>
+  <script type="module" src="js/intro.js?v=23a539f000"></script>
 </head>
 <body class="intro-body">
 <a class="skip-link" href="#main">跳至主要內容</a>
@@ -23,15 +23,15 @@
 </div></header>
 <main class="shell intro-main" id="main">
 <section class="intro-story-section" aria-label="三章聖誕立體故事書" id="intro-storybook" tabindex="0">
-<header class="games-heading intro-heading"><div><span class="eyebrow" lang="en">02 / CHRISTMAS STORY</span><h1 lang="en">Christmas Story</h1></div></header>
- <div class="intro-book-shell"><div class="intro-book">
+<h1 class="sr-only" lang="en">Christmas Story</h1>
+ <div class="intro-book-shell" data-book="shell"><div class="intro-book" data-book="book" data-state="closed">
   <div class="intro-copy-stack" data-book="copies"></div>
-  <div class="intro-page intro-picture"><div class="intro-scene" data-book="scene" role="group" aria-label="第一章的立體紙雕場景"></div><span class="intro-picture-note" aria-hidden="true">把希望與善意，一層一層打開</span></div>
+  <div class="intro-page intro-picture"><div class="intro-scene" data-book="scene" role="group" aria-label="第一章的立體紙雕場景"></div></div>
   <div class="intro-spine" aria-hidden="true"></div><div class="intro-turn" data-book="turn" aria-hidden="true"><div class="intro-turn-front" data-book="front"></div><div class="intro-turn-back" data-book="back"></div></div>
+  <button class="intro-cover" data-book="cover" type="button" aria-label="翻開聖誕故事書"><span class="intro-cover-front" data-book="cover-front"><span class="intro-cover-hint" aria-hidden="true">點一下，翻開故事</span></span><span class="intro-cover-back" data-book="cover-back"><span class="intro-cover-inside" data-book="cover-inside"></span><span class="intro-cover-page" data-book="cover-page"></span></span></button>
  </div></div>
- <nav class="intro-book-controls" aria-label="故事書翻頁"><button class="intro-paper-button" data-book="prev" type="button" disabled>← 上一章</button><span class="intro-count" data-book="count" role="status" aria-live="polite" aria-atomic="true">01 / 03</span><button class="intro-paper-button" data-book="next" type="button">下一章 →</button><button class="intro-replay" data-book="replay" type="button">再看一次紙雕 ↻</button><button class="intro-paper-button" data-book="gift" type="button" hidden>送出神祕金幣禮物 ✧</button></nav>
- <p class="intro-scene-caption sr-only" data-book="caption"></p><p class="intro-keyboard-help">選取故事書後，可用左右方向鍵翻頁。</p>
-</section>
+ <nav class="intro-book-controls" data-book="controls" aria-label="故事書翻頁" hidden><button class="intro-tag" data-book="prev" type="button" disabled>← 上一章</button><span class="intro-count" data-book="count" role="status" aria-live="polite" aria-atomic="true">01 / 03</span><button class="intro-tag" data-book="next" type="button">下一章 →</button><button class="intro-replay" data-book="replay" type="button">再看一次紙雕 ↻</button><button class="intro-replay" data-book="close" type="button">合上書 ↶</button><button class="intro-tag" data-book="gift" type="button" hidden>送出神祕金幣禮物 ✧</button></nav>
+ <p class="intro-scene-caption sr-only" data-book="caption"></p></section>
 <section class="intro-cultures section" id="christmas-cultures" aria-labelledby="culture-title">
  <header class="intro-culture-heading"><span class="eyebrow">六個地方，六種聖誕心意</span><h2 id="culture-title">把聖誕寄向世界</h2><p>點一下地圖上的紅點，打開一張能動起來的文化明信片。</p></header>
  <div class="intro-map-paper"><div class="intro-map-canvas"><img src="assets/illustrations/intro/christmas_map.jpg" alt="原創粉蠟筆世界地圖，亞洲位於左側、美洲位於右側" width="1728" height="947" loading="lazy"><div id="intro-map-points" aria-label="六國文化標記"></div></div><p class="intro-map-legend"><span aria-hidden="true">●</span> 點選紅點收集祝福，也可以使用下方的國家名稱。</p></div>

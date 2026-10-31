@@ -38,8 +38,10 @@ test('three chapters: common architecture datum, offset backgrounds, original as
 });
 test('book waits for every hinge, populated leaf, forward/back, rapid-click guard and cancellation',async()=>{
  const f=await fixture('js/components/intro-book.js'),book=f.api.mountIntroBook(f.root,{motion:{matches:false}}),el=id=>f.root.querySelector(`[data-book="${id}"]`);
- assert.equal(book.snapshot().phase,'opening');assert.equal(el('copies').children.length,3);
- await settle();await book.ready;assert.equal(book.snapshot().phase,'open');
+ assert.equal(book.snapshot().phase,'closed');assert.equal(el('copies').children.length,3);assert.equal(el('controls').hidden,true);
+ assert.equal(await book.changePage(1),false,'a closed book cannot turn a page');
+ const opening=book.open();assert.equal(book.snapshot().phase,'sliding');assert.equal(await book.open(),false);await settle();assert.equal(await opening,true);
+ assert.equal(book.snapshot().phase,'open');assert.equal(el('cover').hidden,true);assert.equal(el('controls').hidden,false);
  const changing=book.changePage(1);assert.equal(book.snapshot().phase,'closing');assert.equal(await book.changePage(2),false);
  const hinges=[...pendingAnimations];assert.equal(hinges.length,introStories[0].pieces.length);
  for(const a of hinges.slice(1))a.finish();await flush();assert.equal(book.snapshot().phase,'closing','the last hinge must finish before turning');
@@ -53,13 +55,16 @@ test('book waits for every hinge, populated leaf, forward/back, rapid-click guar
  const backward=book.changePage(1);for(const a of [...pendingAnimations])a.finish();await flush();assert.equal(el('turn').dataset.direction,'backward');await settle();await backward;
  const first=book.changePage(0);await settle();await first;assert.equal(el('prev').disabled,true);
  const replay=book.replay();assert.equal(book.snapshot().phase,'closing');await settle();await replay;assert.equal(book.snapshot().phase,'open');
+ const closing=book.close();assert.equal(book.snapshot().phase,'closing');await settle();assert.equal(await closing,true);
+ assert.equal(book.snapshot().phase,'closed');assert.equal(el('cover').hidden,false);assert.equal(el('controls').hidden,true);
+ const again=book.open();await settle();await again;
  const pending=book.changePage(1);book.destroy();assert.equal(await pending,false);assert.equal(pendingAnimations.size,0);
 });
 test('reduced motion and interrupted/background animations keep chapters usable',async()=>{
- const f=await fixture('js/components/intro-book.js'),book=f.api.mountIntroBook(f.root,{motion:{matches:true}});await book.ready;
+ const f=await fixture('js/components/intro-book.js'),book=f.api.mountIntroBook(f.root,{motion:{matches:true}});await book.open();
  f.root.emit('keydown',{key:'ArrowRight'});await flush();assert.equal(book.snapshot().page,1);assert.equal(book.snapshot().phase,'open');
  f.root.emit('keydown',{key:'ArrowLeft'});await flush();assert.equal(book.snapshot().page,0);assert.equal(pendingAnimations.size,0);book.destroy();
- const bg=await fixture('js/components/intro-book.js'),other=bg.api.mountIntroBook(bg.root,{motion:{matches:false}});await settle();await other.ready;
+ const bg=await fixture('js/components/intro-book.js'),other=bg.api.mountIntroBook(bg.root,{motion:{matches:false}});const opened=other.open();await settle();await opened;
  const changing=other.changePage(1);bg.document.hidden=true;bg.document.emit('visibilitychange');await changing;
  assert.equal(other.snapshot().page,1);assert.equal(other.snapshot().busy,false);assert.equal(pendingAnimations.size,0);other.destroy();
 });
