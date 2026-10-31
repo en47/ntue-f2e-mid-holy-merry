@@ -13,9 +13,9 @@
 .night-cloud-a { top: 22%; left: 33%; width: 11%; }
 .night-cloud-b { top: 14%; right: 4%; width: 12%; }
 .night-forest { left: -1%; right: -1%; bottom: 17%; height: 34%; }
-.night-cottage { right: -1%; bottom: calc(var(--ground) + 3%); width: clamp(190px, 20vw, 300px); aspect-ratio: 500 / 420; }
+.night-cottage { right: -1%; bottom: calc(var(--ground) + 3%); width: clamp(190px, 20vw, 300px); aspect-ratio: 520 / 440; }
 .night-snow { left: -1%; right: -1%; bottom: -1%; height: 26%; }
-.night-pines { left: 37%; bottom: calc(var(--ground) + 1%); width: clamp(90px, 13vw, 190px); aspect-ratio: 1; }
+.night-pines { left: 40%; bottom: calc(var(--ground) + 1%); width: clamp(100px, 15vw, 218px); aspect-ratio: 480 / 436; }
 /* 聖誕燈：平時只有微光，滑鼠經過才漸漸亮起，離開後慢慢暗回去。 */
 .wish-lights { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 .wish-lights svg { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -27,26 +27,34 @@
 .room-heading { position: absolute; left: 3%; top: 2%; z-index: 3; }
 .room-heading .eyebrow { font-size: .58rem; letter-spacing: .17em; margin-bottom: .15rem; }
 .room-heading h1 { font: 700 clamp(1.9rem, 3.4vw, 2.9rem)/1.05 StorySign, var(--font-display); color: #fbecc4; margin: 0; text-shadow: 0 2px 0 #1b2c3e; }
-.wish-letter { position: absolute; top: clamp(4rem, 11%, 6rem); left: 3%; width: 30%; max-width: 430px; padding: 1.2rem 1.6rem 1rem; background: #fff4dd; border: 1px solid #bd9e7d; box-shadow: 2px 3px 0 #dfcfad, 4px 7px 12px #5e6f7720; transform: rotate(-1deg); z-index: 3; }
-.wish-letter::before { content: ''; position: absolute; inset: 7px; border: 1px dashed #c6a99a; pointer-events: none; }
-.wish-letter::after { content: ''; position: absolute; top: 18px; right: 22px; width: 38px; height: 42px; background: url('../assets/illustrations/storybook/christmas-letter.svg') -281px -29px / 360px 260px; opacity: .8; pointer-events: none; }
+.wish-letter { position: absolute; top: clamp(3.6rem, 10%, 6rem); left: 3%; width: 31%; max-width: 450px; isolation: isolate; padding: clamp(2.6rem, 5.6vw, 3.3rem) clamp(2.4rem, 3.5vw, 3rem) clamp(2.2rem, 4.6vw, 2.8rem); transform: rotate(-1deg); z-index: 3; }
+.letter-art { z-index: -1; pointer-events: none; }
+.wish-letter:not(:has(.letter-art)) { background: #fdf6e6; }
 .wish-letter h2 { font: 700 2.1rem/1.1 StorySign, var(--font-display); color: #a24b42; margin: 0 0 .3rem; }
 .wish-letter label { display: block; font: 1.05rem WishHand, var(--font-body); color: #7d5748; margin-top: .65rem; }
-.wish-letter label span { font: .7rem var(--font-body); color: #8c8372; margin-left: .4rem; }
+.wish-letter label span { font: .76rem var(--font-body); color: #6f6757; margin-left: .4rem; }
 .wish-letter input, .wish-letter textarea { width: 100%; min-width: 0; border: 0; border-radius: 0; background: transparent; color: #4b5554; padding: .45rem .2rem; font-size: .9rem; outline-offset: 2px; }
 .wish-letter input { border-bottom: 1px solid #c8bca0; }
-.wish-letter textarea { height: 112px; min-height: 100px; max-height: 140px; resize: none; line-height: 28px; background: repeating-linear-gradient(transparent 0 27px, #d8c8a9 27px 28px); }
+.wish-letter textarea { height: clamp(56px, calc(100svh - 610px), 112px); min-height: 56px; max-height: 140px; resize: none; line-height: 28px; background: repeating-linear-gradient(transparent 0 27px, #d8c8a9 27px 28px); }
 .wish-letter input::placeholder, .wish-letter textarea::placeholder { color: #8c8b7e; font-size: .8rem; }
 .letter-signature { display: flex; justify-content: space-between; gap: 1rem; align-items: center; color: #a35143; font: 1.1rem WishHand, var(--font-body); margin-top: .25rem; }
-#wish-counter { font: .65rem var(--font-body); color: #8c8372; }
+#wish-counter { font: .76rem var(--font-body); color: #6f6757; }
 .letter-actions { display: flex; align-items: center; gap: .8rem; margin-top: .65rem; }
-.letter-send { min-height: 42px; flex-shrink: 0; border: 1px solid #9d5245; background: #ae5147; color: #fff5dd; padding: .45rem .9rem; border-radius: 40% 7% 8% 9% / 10% 12% 8% 10%; font-size: .8rem; box-shadow: 1px 2px 0 #e2c7a3; transition: transform .2s; }
-.letter-send:hover { transform: rotate(-2deg); }
-.letter-actions small { color: #837b69; font-size: .6rem; line-height: 1.6; }
+.letter-send { position: relative; isolation: isolate; min-width: 132px; min-height: 52px; flex-shrink: 0; border: 0; background: none; color: #fff9ec; padding: .3rem 1rem .6rem; font-size: .88rem; font-weight: 600; transition: transform .15s; }
+.letter-send .tag-art { z-index: -1; }
+.letter-send:disabled { opacity: .55; }
+.letter-send:active:not(:disabled) { transform: translateY(2px); }
+.letter-send:hover:not(:disabled) { transform: translateY(-2px); }
+.letter-actions small { color: #6f6757; font-size: .72rem; line-height: 1.5; }
 .wish-letter .status { font-size: .7rem; line-height: 1.6; margin: .5rem 0 0; min-height: 1.6em; }
-.stocking-station { position: absolute; width: 13%; height: 38%; left: 34%; bottom: calc(var(--ground) - 1%); margin: 0; z-index: 2; }
-.stocking-station img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; filter: drop-shadow(1px 3px 1px #796a4c30); }
-.stocking-opening { position: absolute; width: 26%; height: 3%; left: 45%; top: 25%; pointer-events: none; }
+.stocking-station { position: absolute; height: 40%; aspect-ratio: 240 / 340; left: 35.5%; bottom: calc(var(--ground) - 2%); margin: 0; z-index: 2; }
+.stocking-station img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+/* 聖誕襪掛在勾上：平時隨風微晃，信掉進去時再做一次逐漸停下的擺動。 */
+.stocking-swing { position: absolute; inset: 0; transform-origin: 62% 18%; animation: sock-idle 3.6s ease-in-out infinite alternate; }
+@keyframes sock-idle { from { rotate: -1.4deg; } to { rotate: 1.4deg; } }
+.stocking-station.is-catching .stocking-swing { animation: sock-catch 2.2s linear; }
+@keyframes sock-catch { 0% { rotate: 0deg; } 12% { rotate: 9deg; } 34% { rotate: -6.4deg; } 56% { rotate: 4deg; } 78% { rotate: -2.2deg; } 100% { rotate: 0deg; } }
+.wish-room[data-delivery-state='flying'] .stocking-swing { animation: none; }
 .wish-tree-space { position: absolute; top: 2%; left: 46%; right: 15%; bottom: var(--ground); z-index: 2; }
 .tree-gesture { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: grab; touch-action: pan-y; border-radius: 0; }
 .tree-gesture:active { cursor: grabbing; }
@@ -76,8 +84,8 @@ html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none 
 .wish-message { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 2; }
 @media(max-width: 1100px) and (min-width: 701px) {
  .wish-room { height: clamp(640px, calc(100svh - 108px), 860px); }
- .wish-letter { width: 37%; left: 2%; padding: 1rem 1.2rem; }
- .stocking-station { left: 39%; width: 15%; height: 30%; }
+ .wish-letter { width: 39%; left: 2%; }
+ .stocking-station { left: 41.5%; height: 30%; }
  .wish-tree-space { left: 52%; right: 1%; }
  .night-cottage { display: none; }
  .night-pines { left: 42%; }
@@ -89,10 +97,10 @@ html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none 
  .wish-page main { padding-top: 0; }
  .wish-room { height: auto; min-height: 1040px; display: grid; grid-template-columns: 1fr; grid-template-rows: 76px auto 460px 56px; padding: 0 1rem; --ground: 56px; }
  .room-heading { top: 1rem; left: 1.4rem; }
- .wish-letter { position: relative; top: auto; left: auto; width: min(100%, 410px); max-width: none; margin: 0 auto; grid-row: 2; padding: 1.2rem 1.4rem 1rem; }
- .wish-letter textarea { height: 140px; max-height: 200px; }
+ .wish-letter { position: relative; top: auto; left: auto; width: min(100%, 410px); max-width: none; margin: 0 auto; grid-row: 2; padding: 2.7rem 2.2rem 2.4rem; }
+ .wish-letter textarea { height: 120px; max-height: 200px; }
  .wish-letter input, .wish-letter textarea { font-size: 16px; }
- .stocking-station { position: relative; grid-row: 3; grid-column: 1; z-index: 3; width: 104px; height: 190px; left: auto; bottom: auto; justify-self: start; align-self: end; }
+ .stocking-station { position: relative; grid-row: 3; grid-column: 1; z-index: 3; width: 134px; height: 190px; left: auto; bottom: auto; justify-self: start; align-self: end; }
  .wish-tree-space { position: relative; grid-row: 3; grid-column: 1; width: 100%; height: 100%; left: auto; right: auto; top: auto; bottom: auto; }
  .tree-hint { bottom: -2rem; font-size: .78rem; }
  .night-cottage, .night-pines, .night-cloud-a { display: none; }
@@ -103,4 +111,9 @@ html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none 
  .elf-lane { left: 4%; right: 3%; height: 95px; bottom: var(--ground); }
  .scene-loading { left: 8%; right: 8%; top: auto; bottom: 260px; }
  .envelope-list { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+@media(prefers-reduced-motion: reduce) {
+ .stocking-swing, .stocking-station.is-catching .stocking-swing { animation: none; }
+ .wish-lights i, .wish-lights i::after { transition: none; }
+ .wish-room .pop { animation: none !important; opacity: 1 !important; }
 }

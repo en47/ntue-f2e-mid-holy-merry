@@ -3,14 +3,14 @@ import { envelopeShapes } from '../data/envelope-shapes.js';
 import { PAPER_DEPTH, HANGING_DROP, HANGING_OUTSET } from '../data/paper-envelope-style.js';
 export { PAPER_DEPTH, paperSwing, SWING_DURATION } from '../data/paper-envelope-style.js';
 
-// Static, shared geometry. Contours come from the original alpha, including bow holes.
+// Static, shared geometry: a thick paper packet with a raised flap and wax seal.
 export function createPaperEnvelopeLibrary({ onLoad = () => {}, onError = () => {} } = {}) {
   const geometries = new Set(), materials = new Set(), textures = new Set(), variants = {};
   const loader = new THREE.TextureLoader(); let disposed = false;
   const geometry = value => { value.computeBoundingBox(); geometries.add(value); return value; };
   const material = value => { materials.add(value); return value; };
   const paper = color => material(new THREE.MeshStandardMaterial({ color, roughness: 1, metalness: 0, envMapIntensity: 0 }));
-  const ivory = paper(0xf3e3c7), edge = paper(0xd7bea0), threadMaterial = paper(0xbca480);
+  const ivory = paper(0xb5a78f), edge = paper(0xa8926f), threadMaterial = paper(0xbca480);
   const creaseMaterial = material(new THREE.LineBasicMaterial({ color: 0x9c8063, transparent: true, opacity: .26 }));
   const shadeMaterial = material(new THREE.MeshBasicMaterial({ color: 0x66482e, transparent: true, opacity: .11, depthWrite: false }));
   const threadEnd = new THREE.Vector3(0, -HANGING_DROP, HANGING_OUTSET);
@@ -25,8 +25,9 @@ export function createPaperEnvelopeLibrary({ onLoad = () => {}, onError = () => 
       () => { if (!disposed) { variant.ready = true; onLoad(); } },
       undefined, error => { if (!disposed) { variant.failed = true; onError(kind, error); } });
     texture.colorSpace = THREE.SRGBColorSpace; textures.add(texture);
-    const printed = material(new THREE.MeshStandardMaterial({ map: texture, roughness: 1, metalness: 0, envMapIntensity: 0, alphaTest: .35 }));
-    const rear = material(new THREE.MeshStandardMaterial({ map: texture, color: 0xf6e7d1, roughness: 1, metalness: 0, envMapIntensity: 0, side: THREE.BackSide }));
+    // The night key light is bright; dimming the print keeps the reds and stripes from washing out.
+    const printed = material(new THREE.MeshStandardMaterial({ map: texture, color: 0x8f8a84, roughness: 1, metalness: 0, envMapIntensity: 0, alphaTest: .35 }));
+    const rear = material(new THREE.MeshStandardMaterial({ map: texture, color: 0x8f8a84, roughness: 1, metalness: 0, envMapIntensity: 0, side: THREE.BackSide }));
     const width = data.bounds[2] - data.bounds[0];
     const point = ([x, y]) => new THREE.Vector2((x - data.anchor[0]) / width, (data.anchor[1] - y) / width);
     function shape(points, holes = []) {
@@ -46,7 +47,7 @@ export function createPaperEnvelopeLibrary({ onLoad = () => {}, onError = () => 
       return geometry(value);
     }
     const outline = shape(data.outline, data.holes);
-    variant.board = geometry(new THREE.ExtrudeGeometry(outline, { depth: PAPER_DEPTH, steps: 1, bevelEnabled: true, bevelThickness: .0006, bevelSize: .001, bevelSegments: 1, curveSegments: 1 }).translate(0, 0, -PAPER_DEPTH / 2));
+    variant.board = geometry(new THREE.ExtrudeGeometry(outline, { depth: PAPER_DEPTH, steps: 1, bevelEnabled: true, bevelThickness: .004, bevelSize: .003, bevelSegments: 1, curveSegments: 1 }).translate(0, 0, -PAPER_DEPTH / 2));
     variant.front = printedGeometry(data.outline, data.holes);
     variant.rear = printedGeometry(data.outline, data.holes, true);
     variant.frontMaterial = printed; variant.rearMaterial = rear;
@@ -57,8 +58,8 @@ export function createPaperEnvelopeLibrary({ onLoad = () => {}, onError = () => 
       return [data.seal.center[0] + Math.cos(angle) * radius, data.seal.center[1] + Math.sin(angle) * radius];
     });
     variant.layers = [
-      { outline: data.flap, z: PAPER_DEPTH / 2 + .0007, depth: .0012, side: edge },
-      { outline: seal, z: PAPER_DEPTH / 2 + .0021, depth: .0022, side: paper(kind === 'gold' ? 0xb88845 : 0x8c4737) },
+      { outline: data.flap, z: PAPER_DEPTH / 2 + .0007, depth: .007, side: edge },
+      { outline: seal, z: PAPER_DEPTH / 2 + .0078, depth: .009, side: paper(kind === 'gold' ? 0xb88845 : 0x8c4737) },
     ].map(layer => ({ ...layer,
       sides: geometry(new THREE.ExtrudeGeometry(shape(layer.outline), { depth: layer.depth, bevelEnabled: false, curveSegments: 1, steps: 1 })),
       front: printedGeometry(layer.outline),

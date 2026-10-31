@@ -1,9 +1,9 @@
 export function stockingMouth(rect) {
-  // SVG viewBox 360×247; object-fit:contain, object-position:center bottom.
-  const scale = Math.min(rect.width / 360, rect.height / 247);
-  const left = rect.left + (rect.width - 360 * scale) / 2;
-  const top = rect.top + rect.height - 247 * scale;
-  return { x: left + 208 * scale, y: top + 80 * scale, left, top, width: 360 * scale, height: 247 * scale };
+  // SVG viewBox 240×340; object-fit:contain, object-position:center bottom.
+  const scale = Math.min(rect.width / 240, rect.height / 340);
+  const left = rect.left + (rect.width - 240 * scale) / 2;
+  const top = rect.top + rect.height - 340 * scale;
+  return { x: left + 151 * scale, y: top + 100 * scale, left, top, width: 240 * scale, height: 340 * scale };
 }
 export function deliveryPath(start, end, steps = 60) {
   const dx = end.x - start.x, dy = end.y - start.y;

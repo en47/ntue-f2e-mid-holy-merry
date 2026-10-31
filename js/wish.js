@@ -2,6 +2,8 @@ import { createWishDelivery } from './components/wish-delivery.js';
 import { selectTreeWishes } from './services/wish-selection.js';
 import { mountNightScene } from './components/wish-night.js';
 import { mountWishLights } from './components/wish-lights.js';
+import { paperLayer } from './components/paper-art.js';
+import { airmailLetter, tagArt } from './components/paper-props.js';
 const form = document.querySelector('#wish-form');
 const nickname = document.querySelector('#nickname');
 const content = document.querySelector('#wish-content');
@@ -27,7 +29,7 @@ function updateTree({ newWishId = null } = {}){
   for(const wish of treeWishes){
     const item=document.createElement('li'),button=document.createElement('button'),image=document.createElement('img'),label=document.createElement('span');
     button.type='button';button.className='envelope';button.setAttribute('aria-label',wish.isOwn?'查看自己的最新願望（金色信封）':`查看 ${wish.nickname} 的已核准願望`);
-    image.src=`assets/illustrations/wish/${wish.isOwn?'envelope-star.png':'envelope.png'}`;image.alt='';image.width=1536;image.height=1024;image.loading='lazy';
+    image.src=`assets/illustrations/wish/${wish.isOwn?'envelope-paper-star.svg':'envelope-paper.svg'}`;image.alt='';image.width=1024;image.height=680;image.loading='lazy';
     label.textContent=wish.isOwn?'自己的最新願望':wish.nickname;button.append(image,label);button.addEventListener('click',()=>showWish(wish));item.append(button);list.append(item);
   }
   if (newWishId) pendingEnvelopeEntrance = newWishId;
@@ -91,9 +93,16 @@ form.addEventListener('submit', async event => {
   }
 });
 
+function mountWishPaper(root) {
+  const stretch = { eager: true, preserveAspectRatio: 'none' };
+  paperLayer(root.querySelector('#wish-form'), '0 0 380 300', 'letter-art', airmailLetter('#a84a42', '#4f7d68', { writing: true }), { ...stretch, paper: { scale: .8, grain: .35, shadow: .24 } });
+  for (const button of root.querySelectorAll('.letter-send')) paperLayer(button, '0 0 240 106', 'tag-art', tagArt('#a84a42', '#853a34'), { ...stretch, paper: { scale: .7, grain: .45, shadow: .24 } });
+}
+
 // The scene and Firebase load independently; WebGL failure must not disable letters.
 const room = document.querySelector('#wish-room');
 mountNightScene(room);
+mountWishPaper(room);
 const lights = mountWishLights(room);
 let sceneController = null, sceneVersion = 0;
 async function startScene() {

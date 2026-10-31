@@ -1,6 +1,6 @@
 .wish-letter label.wish-public-choice { display:flex;align-items:flex-start;gap:.45rem;margin:.45rem 0 0;font:.65rem/1.55 var(--font-body);color:#786a56; }
 .wish-letter .wish-public-choice input { width:16px;height:16px;flex:0 0 16px;padding:0;margin:.05rem 0 0;appearance:auto;accent-color:#9f5147; }
-.cloud-wish-info { margin-top:1.5rem;color:#627c81;font-size:.8rem; }
+.cloud-wish-info { margin-top:1.5rem;padding:1rem 1.4rem;border-radius:10px;background:#fbf3e3;box-shadow:0 0 0 2px #fff9ec,0 2px 0 3px #cdbb9e;color:#54463c;font-size:.92rem; }
 .cloud-wish-info p { margin:.45rem 0; }
 .cloud-wish-info button.cloud-retry { background:#fff4df;border:1px solid #c9b08b;padding:.5rem .8rem; }
 .cloud-wish-info details { margin-top:1rem;border-top:1px dashed #aac0c5;padding-top:.75rem; }

@@ -1,3 +1,5 @@
+> 2026-11-01 更新：信封改為 `scripts/build-wish-art.mjs` 產生的 SVG 紙信封，厚度 5%，並以阻尼單擺（`pendulumStep`）回應聖誕樹旋轉。原 PNG 保留但不再載入。下方為舊紀錄。
+
 # Wish 紙雕信封（2026-10-29）
 
 更新：掛點已改成全圓周、上2／中3／下5的分層配置，掛線也略增粗以保持手機可見度。最新檔案及驗收以 `WISH-ENVELOPE-DISTRIBUTION.md` 為準；以下保留紙雕建立時的實作紀錄，舊的正面五列掛點描述已被取代。
@@ -8,7 +10,7 @@
 
 - `js/components/paper-envelope.js`：共用紙板幾何、正反材質、封口／蠟封、掛線與有限晃動函式。
 - `js/data/envelope-shapes.js`：從兩張原圖 alpha 產生的輪廓、金色蝴蝶結孔洞、原圖 UV 與裝飾座標。
-- `scripts/build-envelope-shapes.py`：可重現輪廓資料的開發工具（需要 Pillow）；不修改圖片，網頁執行時不需要 Python。
+- `scripts/build-wish-art.mjs`：可重現輪廓資料的開發工具（需要 Pillow）；不修改圖片，網頁執行時不需要 Python。
 - `js/components/wish-envelopes.js`：替換 Sprite；保留閱讀回呼、原生可及性按鈕、拖曳與點選，加入實體輪廓 raycast。
 - `js/components/wish-scene.js`：在原有樹頂點掃描中量測掛點，沿用同一 Renderer／動畫循環。
 - `js/wish.js`：原有寄信流程成功回傳後，額外傳入 `newWishId` 視覺訊號；不改寫入或抽選規則。

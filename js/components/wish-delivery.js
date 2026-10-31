@@ -3,6 +3,7 @@ import { deliveryPath, stockingMouth } from './wish-delivery-path.js';
 // A single visual object folds and flies. The caller supplies the real persistence operation.
 export function createWishDelivery(root, { savingText = '正在儲存到此瀏覽器……' } = {}) {
   const form = root.querySelector('#wish-form'), image = root.querySelector('.stocking-station img');
+  const station = root.querySelector('.stocking-station');
   const receipt = root.querySelector('#delivery-receipt'), again = root.querySelector('#wish-again');
   const feedback = root.querySelector('#delivery-feedback'), message = root.querySelector('#delivery-message');
   const snowflake = root.querySelector('#delivery-snowflake');
@@ -39,12 +40,10 @@ export function createWishDelivery(root, { savingText = '正在儲存到此瀏�
     const travel = document.createElement('div'); travel.className = 'delivery-travel';
     travel.style.width = `${width}px`; travel.style.height = `${height}px`;
     const paper = document.createElement('div'); paper.className = 'delivery-paper'; travel.append(paper);
-    const side = width * .1, centerHeight = Math.max(width * .8 / 1.5, height / 3), top = (height - centerHeight) / 2;
-    const padding = getComputedStyle(form).padding;
-    // Full-width horizontal flaps carry the corners; side flaps occupy only the
-    // middle belt. This reconstructs the sheet without long dangling side strips.
-    const regions = [['center',side,top,width*.8,centerHeight], ['bottom',0,top+centerHeight,width,top], ['left',0,top,side,centerHeight], ['right',width-side,top,side,centerHeight], ['top',0,0,width,top]];
-    const panels = {}, faces = [], cornerFaces = [];
+    const padding = getComputedStyle(form).padding, third = height / 3;
+    // A real letter fold: three equal bands hinged on the two creases.
+    const regions = [['center',0,third,width,third], ['bottom',0,third*2,width,third], ['top',0,0,width,third]];
+    const panels = {}, faces = [];
     for (const [name,x,y,w,h] of regions) {
       const panel = document.createElement('div'); panel.className = `fold-panel fold-${name}`;
       Object.assign(panel.style, {left:`${x}px`,top:`${y}px`,width:`${w}px`,height:`${h}px`});
@@ -52,11 +51,11 @@ export function createWishDelivery(root, { savingText = '正在儲存到此瀏�
       const copy = snapshot(width,height,padding); copy.style.setProperty('--copy-left',`${-x}px`); copy.style.setProperty('--copy-top',`${-y}px`);
       front.append(copy); const back = document.createElement('div'); back.className = 'fold-face back';
       panel.append(front,back); paper.append(panel); panels[name]=panel;
-      faces.push(front,back); if(name==='top'||name==='bottom')cornerFaces.push(front,back);
+      faces.push(front,back);
     }
-    const art = document.createElement('img'); art.src = 'assets/illustrations/wish/envelope.png'; art.className = 'fold-envelope'; art.alt = ''; paper.append(art);
+    const art = document.createElement('img'); art.src = 'assets/illustrations/wish/letter-folded.svg'; art.className = 'fold-envelope'; art.alt = ''; paper.append(art);
     const seal = document.createElement('span'); seal.className = 'fold-wax'; seal.textContent = '♥'; paper.append(seal);
-    return { travel, paper, panels, faces, cornerFaces, art, seal, envelopeWidth: width*.8 };
+    return { travel, paper, panels, faces, art, seal };
   }
   const relative = rect => {
     const base = root.getBoundingClientRect();
@@ -98,7 +97,7 @@ export function createWishDelivery(root, { savingText = '正在儲存到此瀏�
           const item=createPaper(width,height); layer.append(item.travel); root.append(layer); operation.layer=layer;
           const start={x:r.left+r.width/2,y:r.top+r.height/2};
           item.travel.style.left=`${start.x-width/2}px`;item.travel.style.top=`${start.y-height/2}px`;
-          const cuff=document.createElement('img');cuff.src=image.getAttribute('src');cuff.alt='';cuff.className='delivery-cuff';
+          const cuff=document.createElement('img');cuff.src='assets/illustrations/wish/stocking-cuff.svg';cuff.alt='';cuff.className='delivery-cuff';
           Object.assign(cuff.style,{left:`${mouth.left}px`,top:`${mouth.top}px`,width:`${mouth.width}px`,height:`${mouth.height}px`});layer.append(cuff);
           operation.resize=new ResizeObserver(()=>{
             const next=geometry();
@@ -111,25 +110,26 @@ export function createWishDelivery(root, { savingText = '正在儲存到此瀏�
           // Freeze the measured letter dimensions, but leave it in layout for the rack/scene.
           layer.hidden=false;feedback.focus({preventScroll:true});form.setAttribute('aria-hidden','true');form.classList.add('is-delivering');
           state('folding','正在摺好你的聖誕信紙……');
-          const duration=1500, scale=Math.min(100,item.envelopeWidth*.4)/item.envelopeWidth;
+          // The flight shrinks to .2, so this size lands the packet just inside the stocking's mouth.
+          const duration=1700, scale=Math.min(.62,mouth.width*.34/(.2*width));
+          const hold=(from,to,start,end,extra={})=>[{...from,offset:0},{...from,offset:start},{...to,offset:end},{...to,offset:1}].map(frame=>({...frame,...extra}));
           await Promise.all([
-            animate(item.paper,[{transform:'rotate(-1deg) scale(1)',offset:0},{transform:'rotate(-1deg) scale(1)',offset:.2},{transform:'rotate(0) scale(.94)',offset:.55},{transform:`rotate(0) scale(${scale})`,offset:1}],{duration,easing:'cubic-bezier(.35,0,.2,1)'}),
-            animate(item.panels.bottom,[{transform:'rotateX(0)',offset:0},{transform:'rotateX(0)',offset:.12},{transform:'rotateX(180deg)',offset:.48},{transform:'rotateX(180deg)',offset:1}],{duration,easing:'ease-in-out'}),
-            animate(item.panels.left,[{transform:'rotateY(0)',offset:0},{transform:'rotateY(0)',offset:.35},{transform:'rotateY(180deg)',offset:.7},{transform:'rotateY(180deg)',offset:1}],{duration,easing:'ease-in-out'}),
-            animate(item.panels.right,[{transform:'rotateY(0)',offset:0},{transform:'rotateY(0)',offset:.4},{transform:'rotateY(-180deg)',offset:.74},{transform:'rotateY(-180deg)',offset:1}],{duration,easing:'ease-in-out'}),
-            animate(item.panels.top,[{transform:'rotateX(0)',offset:0},{transform:'rotateX(0)',offset:.57},{transform:'rotateX(-180deg)',offset:.88},{transform:'rotateX(-180deg)',offset:1}],{duration,easing:'ease-in-out'}),
-            ...item.cornerFaces.map(face=>animate(face,[{clipPath:'inset(0)',offset:0},{clipPath:'inset(0)',offset:.48},{clipPath:'inset(0 10%)',offset:.77},{clipPath:'inset(0 10%)',offset:1}],{duration,easing:'ease-in-out'})),
-            animate(item.seal,[{opacity:0,transform:'translate(-50%,-50%) scale(0)',offset:0},{opacity:0,transform:'translate(-50%,-50%) scale(0)',offset:.78},{opacity:1,transform:'translate(-50%,-50%) scale(1.1)',offset:.92},{opacity:0,transform:'translate(-50%,-50%) scale(1)',offset:1}],{duration}),
-            animate(item.art,[{opacity:0,offset:0},{opacity:0,offset:.86},{opacity:1,offset:1}],{duration}),
+            animate(item.paper,[{transform:'rotate(-1deg) scale(1)',offset:0},{transform:'rotate(-1deg) scale(1)',offset:.62},{transform:`rotate(0) scale(${scale})`,offset:.96},{transform:`rotate(0) scale(${scale})`,offset:1}],{duration,easing:'ease-in-out'}),
+            animate(item.panels.bottom,hold({transform:'rotateX(0)'},{transform:'rotateX(180deg)'},.08,.38),{duration,easing:'ease-in-out'}),
+            animate(item.panels.top,hold({transform:'rotateX(0)'},{transform:'rotateX(-180deg)'},.36,.66),{duration,easing:'ease-in-out'}),
+            animate(item.seal,[{opacity:0,transform:'translate(-50%,-50%) scale(0)',offset:0},{opacity:0,transform:'translate(-50%,-50%) scale(0)',offset:.72},{opacity:1,transform:'translate(-50%,-50%) scale(1.15)',offset:.84},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:1}],{duration}),
+            animate(item.art,[{opacity:0,offset:0},{opacity:0,offset:.64},{opacity:1,offset:.7},{opacity:1,offset:1}],{duration}),
             // Fade faces, not their preserve-3d parent (which would flatten the
             // back faces and show mirrored writing in Safari).
-            ...item.faces.map(face=>animate(face,[{opacity:1,offset:0},{opacity:1,offset:.88},{opacity:0,offset:1}],{duration})),
+            ...item.faces.map(face=>animate(face,[{opacity:1,offset:0},{opacity:1,offset:.68},{opacity:0,offset:.72},{opacity:0,offset:1}],{duration})),
           ]);
-          state('flying','信封正飛往聖誕襪……');
+          state('flying','信正飛往聖誕襪……');
           if (image.getBoundingClientRect().bottom > innerHeight - 24) image.scrollIntoView({block:'nearest',behavior:'instant'});
           await animate(item.travel,deliveryPath(start,{x:mouth.x,y:mouth.y}),{duration:1850,easing:'cubic-bezier(.35,0,.45,1)'});
           item.travel.hidden=true;
           cuff.hidden=true;
+          // The weight landing in the stocking sets it swinging; CSS plays one damped swing.
+          station.classList.remove('is-catching');void station.offsetWidth;station.classList.add('is-catching');
         }
         if (operation.cancelled || destroyed) throw abortError();
         controls.forEach(node=>{node.disabled=true;});

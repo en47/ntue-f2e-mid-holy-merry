@@ -1,16 +1,17 @@
 /* V5 motion rhythm; all delivery art is scoped to the existing Wish room. */
 .wish-letter.is-delivering { visibility: hidden; }
 .wish-letter.is-sent .letter-content { visibility: hidden; }
-.delivery-receipt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 2rem; text-align: center; }
-.delivery-receipt img { width: 105px; height: auto; margin-bottom: 1rem; }
+.delivery-receipt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 3.2rem 12% 2.6rem; text-align: center; }
+.delivery-receipt img { width: 130px; height: auto; margin-bottom: 1rem; }
 .delivery-receipt h2 { font-size: 1.8rem; }
-.delivery-receipt p { font-size: .8rem; line-height: 1.8; color: #7e7565; }
+.delivery-receipt p { font-size: .9rem; line-height: 1.8; color: #6f6757; }
+.delivery-receipt h2 { font-family: StorySign, var(--font-body); }
 .wish-delivery { position: absolute; inset: 0; z-index: 12; pointer-events: none; overflow: visible; }
 .delivery-travel { position: absolute; transform-origin: 50% 50%; filter: drop-shadow(3px 6px 5px #62727735); }
 .delivery-paper { position: absolute; inset: 0; transform-origin: 50% 50%; transform-style: preserve-3d; perspective: 850px; }
 .fold-panel { position: absolute; transform-style: preserve-3d; }
-.fold-face { position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; overflow: hidden; border: .5px solid #d7bea0; }
-.fold-face.back { transform: rotateY(180deg); background: #f7e7c9; box-shadow: inset 0 0 0 2px #fff1d9; }
+.fold-face { position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; overflow: hidden; }
+.fold-face.back { transform: rotateY(180deg); background: #fbf1dd; box-shadow: inset 0 0 0 2px #fff1d9; }
 .fold-bottom .fold-face.back, .fold-top .fold-face.back { transform: rotateX(180deg); }
 .fold-copy.wish-letter { position: absolute; width: var(--sheet-width); height: var(--sheet-height); max-width: none; padding: var(--sheet-padding); left: var(--copy-left); top: var(--copy-top); transform: none; box-shadow: none; border-width: 1px; margin: 0; visibility: visible; }
 .fold-copy .delivery-receipt { display: none; }
@@ -18,12 +19,10 @@
 .fold-copy .letter-signature span:last-child { font: .65rem var(--font-body); color: #8c8372; }
 .fold-center { z-index: 1; }
 .fold-bottom { z-index: 2; transform-origin: 50% 0; }
-.fold-left { z-index: 3; transform-origin: 100% 50%; }
-.fold-right { z-index: 4; transform-origin: 0 50%; }
 .fold-top { z-index: 5; transform-origin: 50% 100%; }
-.fold-envelope { position: absolute; z-index: 7; opacity: 0; width: 80%; height: auto; left: 10%; top: 50%; transform: translateY(-50%); }
-.fold-wax { position: absolute; z-index: 8; left: 50%; top: 53%; width: 12%; aspect-ratio: 1; border-radius: 46% 53% 47% 52%; background: #ac4d42; border: 2px solid #d59b77; color: #f5d7b7; display: grid; place-items: center; font-size: 1.5rem; transform: translate(-50%,-50%) scale(0); opacity: 0; }
-.delivery-cuff { position: absolute; z-index: 2; clip-path: polygon(42% 22%,74% 23%,74% 42%,42% 42%); }
+.fold-envelope { position: absolute; z-index: 7; opacity: 0; width: 100%; height: 33.34%; left: 0; top: 33.33%; }
+.fold-wax { position: absolute; z-index: 8; left: 50%; top: 50%; width: 12%; aspect-ratio: 1; border-radius: 46% 53% 47% 52%; background: #ac4d42; border: 2px solid #d59b77; color: #f5d7b7; display: grid; place-items: center; font-size: 1.5rem; transform: translate(-50%,-50%) scale(0); opacity: 0; }
+.delivery-cuff { position: absolute; z-index: 2; }
 .delivery-feedback { position: fixed; z-index: 35; bottom: 1rem; left: 50%; transform: translateX(-50%); margin: 0; max-width: calc(100% - 2rem); padding: .5rem 1rem; background: #fff4df; border: 1px solid #cab18a; box-shadow: 1px 3px 0 #d7c4a0; color: #7a5f47; font-size: .8rem; pointer-events: none; display: flex; align-items: center; gap: .65rem; }
 .delivery-snowflake { width: 30px; height: 30px; flex-shrink: 0; animation: delivery-spin 2.7s linear infinite; }
 @keyframes delivery-spin { to { transform: rotate(360deg); } }

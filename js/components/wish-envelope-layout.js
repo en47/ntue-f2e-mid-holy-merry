@@ -25,7 +25,7 @@ export function envelopeZoneCounts(count) {
 
 function placement(wish, anchor, seed) {
   const key = `${seed}:${wish.id}`, variation = label => randomFor(`${key}:${label}`);
-  const size = (wish.isOwn ? .092 : .085) * (.96 + variation('size') * .08);
+  const size = (wish.isOwn ? .106 : .098) * (.96 + variation('size') * .08);
   // Branch-facing yaw is static. Only a separate hanging pivot has a small local roll.
   const tilt = (3 + variation('tilt') * 3) * Math.PI / 180 * (variation('tilt-side') < .5 ? -1 : 1);
   const rotation = [0, anchor.angle, tilt];

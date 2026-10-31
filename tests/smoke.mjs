@@ -757,8 +757,8 @@ await test('Wish：精靈真實走路與舞蹈、原地化保留垂直運動、�
 await test('Wish 投遞：真實襪口 contain 座標與連續弧線端點',async()=>{
   const env=environment();const {stockingMouth,deliveryPath}=await env.evaluate('js/components/wish-delivery-path.js');
   for(const rect of [{left:60,top:500,width:400,height:200},{left:20,top:610,width:230,height:173},{left:100,top:600,width:180,height:250}]){
-    const m=stockingMouth(rect),s=Math.min(rect.width/360,rect.height/247);
-    assert.equal(m.x,m.left+208*s);assert.equal(m.y,m.top+80*s);
+    const m=stockingMouth(rect),s=Math.min(rect.width/240,rect.height/340);
+    assert.equal(m.x,m.left+151*s);assert.equal(m.y,m.top+100*s);
     assert.ok(m.x>=rect.left&&m.x<=rect.left+rect.width);assert.ok(m.y>=rect.top&&m.y<=rect.top+rect.height);
     const start={x:rect.left+120,y:rect.top-240},frames=deliveryPath(start,m);
     assert.equal(frames[0].transform,'translate3d(0px,0px,0) rotate(0deg) scale(1)');
@@ -802,9 +802,9 @@ await test('Wish 投遞：折信→飛行→真實儲存順序、重複送出鎖
   assert.equal(f.root.dataset.deliveryState,'folding');assert.ok(f.form.inert);assert.equal(commits,0);
   assert.equal(await f.controller.run(()=>{throw Error('duplicate');}),null);
   assert.ok(f.queue.some(a=>a.frames.some(k=>/rotateX\(180deg\)/.test(k.transform??''))),'Bottom has a real hinge');
-  assert.ok(f.queue.some(a=>a.frames.some(k=>/rotateY/.test(k.transform??''))),'Sides have real hinges');
+  assert.ok(f.queue.some(a=>a.frames.some(k=>/rotateX\(-180deg\)/.test(k.transform??''))),'Top third folds down over it');
   f.finish();await f.flush();assert.equal(f.root.dataset.deliveryState,'flying');assert.equal(commits,0);
-  f.finish();await f.flush();assert.equal(f.root.dataset.deliveryState,'saving');assert.equal(commits,1);assert.equal(f.receipt.hidden,true);
+  f.finish();await f.flush();assert.equal(f.root.dataset.deliveryState,'saving');assert.equal(commits,1);assert.ok(f.get('.stocking-station').classList.contains('is-catching'),'The stocking swings as the letter lands');assert.equal(f.receipt.hidden,true);
   assert.equal(f.get('#delivery-snowflake').hidden,false);assert.equal(f.button.disabled,true);
   confirm({id:'real-save'});assert.equal((await pending).id,'real-save');
   assert.equal(f.root.dataset.deliveryState,'success');assert.equal(f.receipt.hidden,false);assert.equal(f.form.inert,false);assert.equal(f.button.disabled,false);
