@@ -28,7 +28,7 @@ for (const name of pages) for (const [width, height] of [[375, 812], [768, 1024]
       const buried = cover && parseInt(getComputedStyle(image.parentElement).zIndex) < parseInt(getComputedStyle(document.querySelector('.home-ground, .games-hero-hill')).zIndex) && rect.bottom > cover.top + 2;
       const visible = { left: rect.left > bound.left + 1, right: rect.right < bound.right - 1, top: rect.top > bound.top + 1, bottom: rect.bottom < bound.bottom - 1 && !buried };
       for (const [edge, box] of Object.entries(edges)) {
-        if (!visible[edge] || (edge === 'top' && image.closest('.wreath-swing'))) continue; // 花圈吊繩本來就從面板頂端垂下。
+        if (!visible[edge] || (edge === 'top' && image.closest('.wreath-swing, .intro-hanger'))) continue; // 花圈與吊飾的繩子本來就從頂端垂下。
         const data = context.getImageData(...box).data;
         let solid = 0;
         for (let i = 3; i < data.length; i += 4) if (data[i] > 24) solid++;

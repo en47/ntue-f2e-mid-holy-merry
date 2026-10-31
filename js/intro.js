@@ -6,7 +6,7 @@ import { mountMapArt, mountScrollArt } from './components/intro-map.js';
 import { paperLayer } from './components/paper-art.js';
 import { mountIntroScroll } from './components/intro-scroll.js';
 import { postcardScenes } from './components/intro-postcard-art.js';
-// The Header is static: include its measured height in the first snap target only.
+// The Header is static: the first screen's height excludes its measured height.
 const main=document.querySelector('.intro-main');
 const measureHeader=()=>main.style.setProperty('--intro-header-height',`${document.querySelector('.site-header').getBoundingClientRect().height}px`);
 measureHeader();
@@ -14,6 +14,9 @@ const headerSize=new ResizeObserver(measureHeader);headerSize.observe(document.q
 const storybook=document.querySelector('#intro-storybook');
 mountBackdrop(storybook.querySelector('.intro-story-bg'));
 mountBookArt(storybook);
+// The page sets its scene once the paper is decoded, like Home and Game.
+const artwork=[...storybook.querySelectorAll('.pop img')].map(image=>image.decode().catch(()=>{}));
+Promise.race([Promise.all(artwork),new Promise(resolve=>setTimeout(resolve,1500))]).then(()=>storybook.classList.add('is-opening'));
 const book=mountIntroBook(storybook,{art:{page:decoratePage,piece:drawPiece,coin:drawCoin}});
 const postcards=mountIntroPostcards(document.querySelector('.intro-main'),{scenes:postcardScenes});
 paperLayer(document.querySelector('.intro-post-action'),'0 0 240 106','tag-art',tagArt('#a84a42','#853a34'),{paper:{scale:.7,grain:.45,shadow:.24},eager:true,preserveAspectRatio:'none'});

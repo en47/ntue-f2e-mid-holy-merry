@@ -252,3 +252,8 @@ node --experimental-vm-modules tests/smoke.mjs
 - `npm test`：26 組 smoke 與 23 項 node:test 通過，`tests/intro.test.mjs` 已納入；`npm run test:firebase` 未執行（缺 Java）。
 - `intro.test.mjs` 改為檢查 SVG 卡片、書封開合與頁面文字；原始素材雜湊檢查保留，移除已無用途的 `intro-image-bounds.js`。
 - `node scripts/check-home-clip.mjs index.html game.html intro.html wish.html`：三種寬度皆無硬切邊。
+
+## 2026-10-31：Intro 明信片與背景
+
+- `npm test`：26 組 smoke 與 23 項 node:test 通過；`npm run test:firebase` 未執行（缺 Java）。
+- 抽獎與流程測試改為檢查 13 夜循環、9 種禮物與各卡步驟；頁面測試改為確認沒有 scroll-snap。

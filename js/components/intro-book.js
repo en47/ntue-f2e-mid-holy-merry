@@ -142,9 +142,17 @@ export function mountIntroBook(root, {
  const stacked = () => Boolean(globalThis.matchMedia?.('(max-width: 700px)').matches);
  const slide = (from, to) => stacked() ? Promise.resolve(true) : animate(shell, [{ transform: `translateX(${from}%)` }, { transform: `translateX(${to}%)` }], { duration: 560, easing: 'cubic-bezier(.3,.7,.3,1)' });
  const swing = (from, to, duration) => animate(cover, [{ transform: `rotateY(${from}deg)` }, { transform: `rotateY(${to}deg)` }], { duration, easing: 'cubic-bezier(.42,.03,.2,1)' });
+ // One smooth scroll that frames the book with its buttons; scrolling stays free afterwards.
+ function frameBook() {
+  const top = shell.getBoundingClientRect?.().top, bottom = controlBar.getBoundingClientRect?.().bottom;
+  if (top === undefined || !globalThis.scrollTo || stacked()) { showBookTop(); return; }
+  const span = bottom - top, height = globalThis.innerHeight;
+  const offset = span < height ? top - (height - span) / 2 : top - 12;
+  globalThis.scrollTo({ top: Math.max(0, globalThis.scrollY + offset), behavior: motion.matches ? 'auto' : 'smooth' });
+ }
  async function openBook() {
   if (disposed || busy || !shut) return false;
-  busy = true; const token = ++revision; controls(); phase('sliding');
+  frameBook(); busy = true; const token = ++revision; controls(); phase('sliding');
   coverPage.replaceChildren(clone(views[page].copy));
   await slide(-25, 0); if (disposed || token !== revision) return false;
   phase('covering'); await swing(0, stacked() ? -105 : -180, 1000); if (disposed || token !== revision) return false;

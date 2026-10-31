@@ -1,16 +1,21 @@
 /* Intro only: SVG paper book, pop-up chapters and rolled map. */
 html.intro-document { scrollbar-gutter:stable; }
-@media (min-width:701px) { html.intro-document { scroll-snap-type:y proximity; } }
-html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
 .intro-body { background:var(--blue);overflow-x:clip; }
 .intro-main { padding-bottom:0;--intro-header-height:108px; --paper-warm:#fff6e3; --paper-edge:#d7c2a2; --story-ink:#665343; padding-top:0; }
-/* 第一個停靠點是頁首，故事書才不會把 Header 捲走。 */
-.intro-document .site-header,.intro-cultures { scroll-snap-align:start; }
 .intro-story-section { position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:center;scroll-margin-top:var(--intro-header-height);min-height:calc(100svh - var(--intro-header-height));padding-block:1.4rem 1rem; }
 /* 書放在雪地上：背景超出內容欄，鋪滿整個視窗寬。 */
 .intro-story-bg { position:absolute;z-index:-1;left:50%;top:0;bottom:0;width:100vw;translate:-50% 0;pointer-events:none; }
 .intro-bg-hills { inset:auto 0 0;height:clamp(180px,34%,320px); }
-.intro-bg-bunting { inset:0 0 auto;aspect-ratio:1600/170; }
+.intro-hanger { top:0;width:clamp(58px,6.4vw,100px);aspect-ratio:120/340;transform-origin:50% 0;rotate:-1.6deg; }
+.is-opening .intro-hanger { animation:pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay,0s) both,hanger-swing var(--swing,3.8s) ease-in-out 2s infinite alternate; }
+@keyframes hanger-swing { from { rotate:-1.6deg; } to { rotate:1.6deg; } }
+/* 紙雕背景依序立起，書本最後登場；圖沒解碼完也會在 4 秒後自己出現。 */
+.intro-story-section:not(.is-opening) .pop { opacity:0;animation:intro-failsafe .3s 4s forwards; }
+.intro-story-section.is-opening .pop:not(.intro-hanger) { animation:pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay,0s) both; }
+@keyframes intro-failsafe { to { opacity:1; } }
+.intro-story-section:not(.is-opening) .intro-book,.intro-story-section:not(.is-opening) .intro-book-controls { opacity:0; }
+.intro-story-section.is-opening .intro-book { animation:book-arrive .7s cubic-bezier(.2,.8,.3,1.1) 1.15s backwards; }
+@keyframes book-arrive { from { opacity:0;transform:translateY(34px) scale(.97); } }
 .intro-bg-cloud { inset:auto;aspect-ratio:270/116;width:clamp(100px,11vw,170px); }
 .intro-bg-cloud-a { top:30%;left:6%; }
 .intro-bg-cloud-b { top:22%;right:6%; }
@@ -159,7 +164,7 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
  .intro-story-bg { bottom:auto;height:calc(100svh - var(--intro-header-height)); }
  .intro-bg-cloud { display:none; }
  .intro-story-bg { overflow:hidden; }
- .intro-bg-bunting { width:220%;left:-60%;right:auto; }
+ .intro-hanger { width:48px; }
  .intro-book-shell { padding:7px 2px 16px;perspective:1600px; }
  .intro-book { --mobile-scene-height:clamp(300px,85vw,440px);--book-edge:8px;grid-template-columns:1fr;aspect-ratio:auto;min-height:0; }
  .intro-copy { padding:1.3rem 1.25rem 1.1rem;background:linear-gradient(120deg,#fff8e8,#f3e6cd); }
@@ -182,9 +187,11 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
  .intro-leaf-desktop { display:none; }
  .intro-leaf-mobile { display:grid;grid-template-rows:var(--mobile-scene-height) 1fr;height:100%; }
  .intro-leaf-mobile>.intro-copy { min-height:0; }
- .intro-book-controls { gap:.5rem;margin-top:.8rem; }
+ /* 手機的書比螢幕長，按鈕貼在畫面底部，讀到哪都按得到。 */
+ .intro-book-controls { position:sticky;bottom:.4rem;z-index:40;gap:.3rem .4rem;margin-top:.8rem;padding:.3rem;border-radius:12px;background:#fff9ecee;box-shadow:0 3px 10px #4b6a7a44; }
+ .intro-tag { min-width:104px;min-height:44px;padding:.2rem .6rem;font-size:.8rem; }
  .intro-paper-button { padding:.55rem .85rem;font-size:.82rem; }
- .intro-replay { flex-basis:100%; }
+ .intro-replay { min-height:36px;padding:.2rem .4rem; }
  .intro-scroll-stage { --roller:26px;aspect-ratio:auto;height:calc((100vw - 3rem - 36px) * .548 + 24px);transition:height .7s ease; }
  .intro-scroll-stage[data-state='rolled'] { height:360px; }
  .intro-letter { width:calc(100% - var(--roller) * 2 - .6rem);aspect-ratio:auto;height:330px;left:calc(50% + var(--roller) * .9);padding:2.8rem 1.8rem 2.2rem; }
@@ -203,7 +210,8 @@ html.intro-document:has(.intro-modal-open) { scroll-snap-type:none; }
  .intro-postcard { padding:1rem .9rem;border-width:8px; }
  }
 @media (prefers-reduced-motion:reduce) {
- .title-letter { animation:none; }
+ .title-letter,.is-opening .intro-book,.is-opening .intro-hanger { animation:none; }
+ .is-opening .intro-hanger { opacity:1; }
  .intro-map-sheet,.intro-roller,.intro-letter,.intro-scroll-stage { transition:none; }
  html.intro-document { scroll-behavior:auto; }
  .post-petals { display:none; }
