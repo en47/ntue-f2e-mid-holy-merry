@@ -1,4 +1,5 @@
 import { dialogues } from './data/dialogues.js';
+import { mountFlipCounter } from './components/flip-counter.js';
 
 // 固定以台灣時間的 12/25 00:00 為目標；聖誕節當天顯示祝福。
 export function getChristmasCountdown(now = new Date()) {
@@ -16,11 +17,12 @@ export function getChristmasCountdown(now = new Date()) {
   total %= 3600;
   return { days, hours, minutes: Math.floor(total / 60), seconds: total % 60, isChristmas, year };
 }
+const counters = Object.fromEntries(['days', 'hours', 'minutes', 'seconds'].map(unit => [unit, mountFlipCounter(document.querySelector(`[data-unit="${unit}"]`))]));
 function updateCountdown() {
   const result = getChristmasCountdown();
-  for (const unit of ['days', 'hours', 'minutes', 'seconds']) {
-    document.querySelector(`[data-unit="${unit}"]`).textContent = String(result[unit]).padStart(2, '0');
-  }
+  for (const [unit, counter] of Object.entries(counters)) counter.set(String(result[unit]).padStart(2, '0'));
+  // The cards are hidden from screen readers; this reads as one sentence and changes once a minute.
+  document.querySelector('.countdown-units').setAttribute('aria-label', `${result.days} 天 ${result.hours} 時 ${result.minutes} 分`);
   document.querySelector('#countdown-label').textContent = result.isChristmas ? '聖誕快樂！今天就是聖誕節。' : `距離 ${result.year} 聖誕節，還有`;
 }
 updateCountdown();
