@@ -12,7 +12,7 @@
 
 ## Santa
 
-模型為 `assets/models/santa-new.glb`，由 `scripts/build-santa-model.mjs` 從 `assets/santa claus.glb` 壓縮並烘入重定向後的舞步。`js/game-hero.js` 於執行時姿勢化骨架：手臂轉成向下，`Spine1`／`Neck`／`Head` 以小幅正弦擺動；`js/components/santa-head.js` 再讓頭頸跟隨滑鼠（首頁共用），觸控與減少動態不追蹤。離開視野、分頁隱藏或減少動態時停止繪製。升起是畫布在 `.games-hero-santa` 裁切範圍內的 CSS 位移。可調常數：`VIEW_HEIGHT`（越大角色越小）、`VIEW_CENTER`。
+模型為 `assets/models/santa-new.glb`（僅 Game 頁使用，首頁用 `santa-dance.glb`），由 `scripts/build-santa-model.mjs` 從 `assets/santa claus.glb` 壓縮並烘入重定向後的舞步。`js/game-hero.js` 於執行時姿勢化骨架：手臂轉成向下，`Spine1`／`Neck`／`Head` 以小幅正弦擺動；`js/components/santa-head.js` 再讓頭頸跟隨滑鼠（首頁共用），觸控與減少動態不追蹤。離開視野、分頁隱藏或減少動態時停止繪製。升起是畫布在 `.games-hero-santa` 裁切範圍內的 CSS 位移。可調常數：`VIEW_HEIGHT`（越大角色越小）、`VIEW_CENTER`。
 
 ## SVG 紙雕
 

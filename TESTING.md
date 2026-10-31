@@ -240,3 +240,9 @@ node --experimental-vm-modules tests/smoke.mjs
 - `npm test`：24 組 smoke 與 18 項 node:test 通過；`npm run test:firebase` 未執行（缺 Java）。
 - 舊測試中「HTML 必須載入指定 PNG」的斷言改為檢查 SVG 場景，素材雜湊與遮罩檢查保留；新增 Santa 模型與頭部追蹤測試。
 - 動態檢查：`node scripts/check-game-hero.mjs`、`node scripts/check-santa.mjs`（需本機伺服器，不在 `npm test` 內）。
+
+## 2026-10-31：首頁第二輪（分頁 Santa、雪山、翻頁日曆、紙雕按鈕）
+
+- `npm test`：25 組 smoke 與 18 項 node:test 通過；`npm run test:firebase` 未執行（缺 Java）。
+- 「首頁不能有山」的斷言改為「首頁雪山無樹、Game 無山」；模型路徑斷言改為分頁檢查；新增翻頁倒數測試。
+- 裁切檢查：`node scripts/check-home-clip.mjs [頁面…]`（需本機伺服器，不在 `npm test` 內），四頁三種寬度皆無硬切邊。
