@@ -1,7 +1,8 @@
 // Paper-cut ground shared by all four pages: same hills and layout, different objects per page.
 import { holly, paperLayer, pauseOffscreen, pine, shape } from './paper-art.js';
+import { berryBush, fence, lamp, star } from './paper-props.js';
 
-const LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220';
+const LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220', CENTER_BOX = '0 0 760 220';
 const LEFT_GROUND = 'M0 250C20 232 70 210 150 216 170 218 200 224 220 228S360 224 420 250Z';
 const RIGHT_GROUND = 'M0 220C40 196 120 192 170 200S260 190 300 204 330 214 340 220Z';
 
@@ -110,8 +111,31 @@ function line(parent, d) {
 }
 
 // Each theme fills the same two corner canvases.
+// A snowy lane that ties the snowman to the cottage: the sled's tracks run all the way across.
+function sled(parent, x, base) {
+  shape('path', { d: `M${x - 74} ${base}H${x + 62}C${x + 82} ${base} ${x + 94} ${base - 12} ${x + 100} ${base - 26}`, stroke: '#a9845b', 'stroke-width': 7, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  shape('path', { d: `M${x - 48} ${base}V${base - 20}M${x + 48} ${base}V${base - 20}`, stroke: '#a9845b', 'stroke-width': 6, fill: 'none' }, parent);
+  shape('path', { d: `M${x - 72} ${base - 38}H${x + 76}L${x + 62} ${base - 16}H${x - 60}Z`, fill: '#a8564c' }, parent);
+  shape('rect', { x: x - 54, y: base - 86, width: 54, height: 50, rx: 4, fill: '#e9d9b8' }, parent);
+  shape('rect', { x: x - 34, y: base - 86, width: 13, height: 50, fill: '#b5625a' }, parent);
+  shape('rect', { x: x + 4, y: base - 70, width: 48, height: 34, rx: 4, fill: '#8aa9ad' }, parent);
+  shape('rect', { x: x + 22, y: base - 70, width: 11, height: 34, fill: '#f3e7cf' }, parent);
+  star(parent, x - 27, base - 98, 13);
+}
+
+function laneTracks(parent) {
+  for (const y of [196, 208]) shape('path', { d: `M0 ${y + 6}C150 ${y - 8} 420 ${y + 8} 760 ${y - 4}`, stroke: '#e3d3b6', 'stroke-width': 4, 'stroke-dasharray': '26 12', 'stroke-linecap': 'round', fill: 'none' }, parent);
+}
+
 const THEMES = {
   home: {
+    center: ({ tree, still, sway }) => {
+      still(laneTracks);
+      still(parent => { fence(parent, 60, 186, 6, 30); berryBush(parent, 262, 190); });
+      sway([620, 188], -1.2, parent => lamp(parent, 620, 188));
+      tree(708, 192, 92, -.8);
+      still(parent => sled(parent, 430, 192));
+    },
     left: ({ tree, sway }) => { tree(82, 216, 150, 0); tree(160, 224, 96, -1.6); sway([300, 226], -1, parent => snowman(parent, 300, 226)); },
     right: ({ tree, still }) => { tree(232, 190, 130, -2.4); still(parent => cottage(parent, 106, 196)); },
   },
@@ -151,7 +175,7 @@ function scene(root, side, viewBox, ground, build) {
     bob: (delay, draw) => delayed(paperLayer(host, viewBox, 'foreground-bob', draw, { paper }), delay),
     still: draw => paperLayer(host, viewBox, '', draw, { paper }),
   });
-  paperLayer(host, viewBox, '', parent => shape('path', { d: ground, fill: tones.snow }, parent), { paper: null });
+  if (ground) paperLayer(host, viewBox, '', parent => shape('path', { d: ground, fill: tones.snow }, parent), { paper: null });
 }
 
 function flakes(root) {
@@ -170,6 +194,7 @@ export function mountForeground(root) {
   tones = TONES[root.dataset.tone] ?? TONES.day;
   hills(root);
   flakes(root);
+  if (theme.center) scene(root, 'center', CENTER_BOX, null, theme.center);
   scene(root, 'left', LEFT_BOX, LEFT_GROUND, theme.left);
   scene(root, 'right', RIGHT_BOX, RIGHT_GROUND, theme.right);
   pauseOffscreen([root]);

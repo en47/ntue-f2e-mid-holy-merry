@@ -105,6 +105,9 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 .js-ready .page-foreground:not(.is-visible) .foreground-scene { opacity: 0; translate: 0 28px; }
 .foreground-left { left: max(0px, calc(50% - 720px)); width: clamp(190px, 27vw, 390px); aspect-ratio: 420 / 250; }
 .foreground-right { right: max(0px, calc(50% - 680px)); width: clamp(147px, 21.5vw, 306px); aspect-ratio: 340 / 220; }
+.foreground-center { --lane: clamp(300px, 46vw, 660px); left: calc(50% - var(--lane) / 2 + 1vw); width: var(--lane); aspect-ratio: 760 / 220; }
+.home-page .page-foreground { height: clamp(165px, 17vw, 240px); margin-top: clamp(1rem, 2vw, 1.75rem); }
+@media (max-width: 760px) { .foreground-center { display: none; } }
 .foreground-sway { animation: foreground-sway 5.2s ease-in-out infinite alternate; }
 .foreground-bob { animation: foreground-bob 4.6s ease-in-out infinite alternate; }
 .foreground-flake { position: absolute; top: 0; width: 8px; height: 8px; border: 1px solid #c9dbe2; border-radius: 50%; background: #fffdf6; animation: foreground-flake 10s linear infinite; }
