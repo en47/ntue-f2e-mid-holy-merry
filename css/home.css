@@ -1,4 +1,5 @@
 /* 僅首頁載入：素材及鉸鏈位置沿用 V4，導覽和其他頁不受影響。 */
+@font-face { font-family: StorySign; src: url('../assets/fonts/mountains-of-christmas-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
 @font-face { font-family: FlipDigits; src: url('../assets/fonts/fredoka-600-digits.woff2') format('woff2'); font-weight: 600; font-display: swap; }
 .home-page { overflow-x: clip; background: #c7e3ec; color: #66564c; }
 .home-page .site-header { background: #c7e3ec; border-bottom: 0; }
@@ -70,24 +71,37 @@
 .model-fallback { position: absolute; inset: 0; display: grid; place-content: center; gap: .7rem; text-align: center; font-size: .75rem; color: #4c5960; }
 .model-fallback > span { margin: 0; }
 .model-fallback progress { width: min(110px, 80%); height: 5px; margin: auto; accent-color: #a64f47; }
-.story-actions { position: absolute; bottom: 3.5%; left: 50%; transform: translate3d(-50%, 0, 0); z-index: 30; will-change: transform; display: flex; justify-content: center; gap: 1rem; white-space: nowrap; }
-.paper-button { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 1rem; min-height: 43px; padding: .55rem 1rem; background: none; border: 0; border-radius: 0; color: #634d3b; font-weight: 600; font-size: .8rem; text-decoration: none; transform: rotate(-1.4deg); transition: transform .2s; }
-.paper-button::before { content: ''; position: absolute; z-index: -1; inset: -2px -4px; background: url('../assets/illustrations/storybook/paper-tab.svg') center / 100% 100% no-repeat; filter: drop-shadow(1px 3px 2px #68513a25); }
-.paper-button.cream { transform: rotate(1.4deg); }
-.paper-button:hover { transform: translateY(-2px) rotate(0); }
-.story-hint { position: absolute; z-index: 31; bottom: .4%; left: 50%; transform: translate3d(-50%, 0, 0); margin: 0; width: max-content; max-width: 80%; text-align: center; color: #66564c; font-size: .68rem; line-height: 1.6; }
-.replay { position: absolute; z-index: 18; left: .6rem; bottom: .5rem; background: #fff9e8dc; border: 1px solid #bda590; border-radius: 4px 6px 3px 5px; padding: .35rem .55rem; color: #66564c; font-size: .7rem; }
-/* 透明按鈕承載原生 SVG 信紙，沒有通用卡片底色或圓角面板。 */
-.christmas-letter { position: fixed; z-index: 40; top: 44%; width: min(300px, 24vw); padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; color: #66564c; text-align: center; line-height: 1.65; opacity: 0; transform-origin: 0 50%; transition: transform .5s cubic-bezier(.2,1.2,.3,1), opacity .3s; }
+.story-actions { position: absolute; bottom: 5.5%; left: 50%; transform: translate3d(-50%, 0, 0); z-index: 30; will-change: transform; display: flex; justify-content: center; gap: 1.1rem; white-space: nowrap; }
+/* 文字是真實連結，紙雕只是底圖；底圖未生成或無 JS 時退回純色按鈕。 */
+.paper-button { --button-tilt: -1.2deg; position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: .55rem; width: 226px; height: 72px; padding: .15rem 1.4rem 0; color: #fff9ec; font: 700 1.32rem / 1 StorySign, Georgia, serif; letter-spacing: .01em; text-decoration: none; text-shadow: 0 1px 0 #2f4a3d66; transform: rotate(var(--button-tilt)); transition: transform .18s cubic-bezier(.2,1.3,.4,1); }
+.paper-button.cream { --button-tilt: 1.2deg; }
+.paper-button:not(:has(.art-layer)) { border-radius: 12px; background: #4a7560; }
+.paper-button.cream:not(:has(.art-layer)) { background: #a84a42; }
+.paper-button > span { font-family: var(--font-body); font-size: 1.05rem; transition: translate .18s ease; }
+.button-art { z-index: -1; transition: filter .18s ease; }
+.paper-button:hover { color: #fff; transform: translateY(-4px) rotate(0) scale(1.03); }
+.paper-button:hover .button-art { filter: brightness(1.08) drop-shadow(0 6px 5px #4f5c6040); }
+.paper-button:hover > span { translate: 3px 0; }
+.paper-button:active { transform: translateY(3px) rotate(0) scale(.98); transition-duration: .06s; }
+.paper-button:active .button-art { filter: brightness(.95); }
+.paper-button:focus-visible { outline: 3px solid #e0b04f; outline-offset: 2px; border-radius: 14px; }
+.story-hint { position: absolute; z-index: 31; bottom: .7%; left: 50%; transform: translate3d(-50%, 0, 0); margin: 0; width: max-content; max-width: 80%; text-align: center; color: #5a4a40; font-size: .74rem; line-height: 1.6; }
+.replay { position: absolute; z-index: 18; left: .7rem; bottom: .6rem; background: #fbf3e3; border: 0; border-radius: 6px 8px 5px 7px; box-shadow: 0 0 0 2px #fff9ec, 0 2px 0 3px #cdbb9e; padding: .3rem .6rem; color: #5a4a40; font-size: .72rem; transition: transform .15s; }
+.replay:hover { transform: translateY(-2px); }
+.replay:active { transform: translateY(1px); }
+/* 透明按鈕承載紙雕信紙，沒有通用卡片底色或圓角面板。 */
+.christmas-letter { position: fixed; z-index: 40; top: 38%; width: min(360px, 27vw); padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; color: #54463c; text-align: center; line-height: 1.8; opacity: 0; transform-origin: 0 50%; transition: transform .5s cubic-bezier(.2,1.2,.3,1), opacity .3s; }
 .christmas-letter.left { left: max(.7rem, 1.2vw); transform: perspective(800px) translateX(calc(-110% - 2vw)) rotateY(24deg) rotate(-4deg); }
 .christmas-letter.right { right: max(.7rem, 1.2vw); transform-origin: 100% 50%; transform: perspective(800px) translateX(calc(110% + 2vw)) rotateY(-24deg) rotate(4deg); }
 .christmas-letter.is-visible { opacity: 1; transform: perspective(800px) translateX(0) rotateY(0) rotate(-1.5deg); }
 .christmas-letter.right.is-visible { transform: perspective(800px) translateX(0) rotateY(0) rotate(1.5deg); }
-.letter-body { display: grid; align-content: center; position: relative; isolation: isolate; min-height: 210px; padding: 3rem 1.6rem 2.4rem; transform-origin: 50% 20%; transform: perspective(600px) rotateX(-28deg); transition: transform .55s cubic-bezier(.2,1.15,.3,1); }
-.letter-body::before { content: ''; position: absolute; inset: 0; z-index: -1; background: url('../assets/illustrations/storybook/christmas-letter.svg') center / 100% 100% no-repeat; filter: drop-shadow(2px 5px 2px #68513a30); }
+.letter-body { display: grid; align-content: center; justify-items: center; gap: .45rem; position: relative; isolation: isolate; aspect-ratio: 380 / 300; min-height: 240px; padding: 3.3rem 2.7rem 2.5rem; transform-origin: 50% 20%; transform: perspective(600px) rotateX(-28deg); transition: transform .55s cubic-bezier(.2,1.15,.3,1); }
+.letter-art { z-index: -1; }
 .christmas-letter.is-visible .letter-body { transform: perspective(600px) rotateX(0); }
-.letter-copy { display: block; min-width: 0; padding-inline: .4rem; font-size: .88rem; font-weight: 500; overflow-wrap: anywhere; }
-.christmas-letter small { display: block; margin-top: .8rem; font-size: .62rem; color: #9c816a; font-weight: 400; }
+.letter-from { font: 700 1.25rem / 1.2 var(--font-body); color: #8a3f35; }
+.letter-copy { display: block; min-width: 0; font-size: .98rem; font-weight: 500; overflow-wrap: anywhere; }
+.christmas-letter small { display: block; font-size: .72rem; color: #7d6552; font-weight: 400; }
+.christmas-letter:focus-visible { outline: 3px solid #e0b04f; outline-offset: 2px; }
 .no-script { position: absolute; z-index: 30; top: 52%; width: 100%; text-align: center; background: #fff7e8; padding: 1rem; }
 /* 鉸鏈旋轉，不以單純上移取代紙雕展開。無 JS 時也可看到完整場景。 */
 .storybook.is-opening .storybook-title { animation: title-arrive .9s ease-out both; animation-delay: 2.95s; }
@@ -116,7 +130,7 @@
   .home-pond { right: 3%; width: 38%; bottom: 23%; }
   .character { width: 35%; height: 43%; bottom: 17%; }
   .character-santa { left: 15%; } .character-reindeer { right: 15%; }
-  .christmas-letter { width: min(275px, 35vw); top: auto; bottom: 16%; }
+  .christmas-letter { width: min(330px, 44vw); top: auto; bottom: 16%; }
 }
 @media (max-width: 600px) {
   .home-page .header-inner { padding-block: .7rem; }
@@ -140,21 +154,21 @@
   .character { height: 35%; bottom: 23%; width: 45%; }
   .character-santa { left: 5%; } .character-reindeer { right: 5%; }
   .model-recovery { top: 99%; left: -4%; width: 108%; }
-  .story-actions { bottom: 9%; gap: .7rem; }
-  .paper-button { min-height: 40px; padding: .5rem .75rem; font-size: .72rem; gap: .5rem; }
-  .story-hint { bottom: 3.8%; width: 90%; max-width: 95%; font-size: .62rem; }
-  .replay { bottom: .3rem; font-size: .62rem; }
-  .christmas-letter { width: min(320px, calc(100% - 2rem)); left: 50% !important; right: auto !important; bottom: 5svh; }
+  .story-actions { bottom: 7.5%; gap: .3rem; }
+  .paper-button { width: 174px; height: 60px; padding-inline: .9rem; font-size: 1.08rem; gap: .35rem; }
+  .story-hint { bottom: 3.4%; width: 90%; max-width: 95%; font-size: .7rem; }
+  .replay { bottom: .35rem; left: .5rem; font-size: .66rem; }
+  .christmas-letter { width: min(340px, calc(100% - 1.5rem)); left: 50% !important; right: auto !important; bottom: 5svh; }
   .christmas-letter.left { transform: perspective(800px) translateX(-160%) rotateY(22deg); }
   .christmas-letter.right { transform: perspective(800px) translateX(60%) rotateY(-22deg); }
   .christmas-letter.is-visible { transform: perspective(800px) translateX(-50%) rotateY(0) rotate(-1deg); }
   .christmas-letter.right.is-visible { transform: perspective(800px) translateX(-50%) rotateY(0) rotate(1deg); }
-  .letter-body { min-height: 190px; padding: 2.6rem 3.2rem 2.1rem; }
+  .letter-body { min-height: 230px; padding: 3rem 2.5rem 2.3rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .storybook.is-opening .storybook-title, .title-motion, .title-letter { animation: none; }
-  .christmas-letter, .letter-body, .paper-button { transition: none; }
+  .christmas-letter, .letter-body, .paper-button, .button-art, .paper-button > span, .replay { transition: none; }
   .is-flipping > .flip-leaf { animation: none; visibility: hidden; }
-  .paper-button:hover { transform: none; }
+  .paper-button:hover, .paper-button:active { transform: rotate(var(--button-tilt)); }
 }
 
