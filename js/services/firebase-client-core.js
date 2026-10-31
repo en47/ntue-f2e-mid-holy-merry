@@ -1,3 +1,9 @@
+// Local previews talk to the emulators with a demo project, so they can never reach production.
+// Exact hostnames only: a production domain or a look-alike such as localhost.example.com never matches.
+export function localEmulatorTarget(hostname) {
+  if (!['localhost', '127.0.0.1'].includes(hostname)) return null;
+  return { config: { apiKey: 'emulator-only-key', projectId: 'demo-holy-merry' }, emulator: { host: '127.0.0.1', authPort: 9099, firestorePort: 8080 } };
+}
 // SDK injection keeps the real client usable in both browser and emulator tests.
 export function createFirebaseClients(sdk, config, databaseId = '(default)', emulator = null) {
   if (emulator && !config.projectId.startsWith('demo-')) throw new Error('Emulators require a demo project');

@@ -113,6 +113,12 @@ await test('快取版本：每頁的 CSS、入口與內部模組版本都對應�
   const { imports } = JSON.parse(home.match(/<script type="importmap">(.*)<\/script>/)[1]);
   for (const file of ['home-scene', 'paper-art', 'flip-counter', 'characters-scene']) assert.match(imports[`./js/components/${file}.js`], /\?v=[0-9a-f]{10}$/);
 });
+await test('Firebase 模擬器：只有本機主機名稱啟用，且一定換成 demo 專案', async () => {
+  const { localEmulatorTarget, createFirebaseClients } = await import(pathToFileURL(path.join(project, 'js/services/firebase-client-core.js')).href);
+  for (const host of ['localhost', '127.0.0.1']) { const target = localEmulatorTarget(host); assert.match(target.config.projectId, /^demo-/); assert.equal(target.emulator.firestorePort, 8080); assert.equal(target.emulator.authPort, 9099); assert.doesNotThrow(() => createFirebaseClients({}, target.config, '(default)', target.emulator)); }
+  for (const host of ['holymerry.web.app', 'holymerry.firebaseapp.com', 'me666good.github.io', 'localhost.example.com', '127.0.0.1.example.com', '', undefined]) assert.equal(localEmulatorTarget(host), null, String(host));
+  assert.throws(() => createFirebaseClients({}, { projectId: 'holymerry' }, '(default)', { host: '127.0.0.1' }), /demo project/);
+});
 await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {
   const env = environment();
   const { mountFlipCounter } = await env.evaluate('js/components/flip-counter.js');

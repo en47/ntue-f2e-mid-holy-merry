@@ -1,5 +1,16 @@
 # 夜間工作報告（2026-10-31）
 
+## 第十三輪：Firebase 模擬器實測
+
+全部在本機模擬器上進行，專案 `demo-holy-merry`。沒有動 `firestore.rules`、`firebase.json`，沒有部署。
+
+- **程式改動：** `localEmulatorTarget` 只在主機名稱完全等於 `localhost` 或 `127.0.0.1` 時，改連模擬器並換成 demo 專案。
+- **結果：** 瀏覽器實測 68 項通過、`npm run test:firebase` 18 項通過，正式 Firebase 請求 0 個。
+- **未測：** 正式索引、正式規則部署狀態、`tools/firebase-admin` 管理員工具、實體手機。
+- 詳見 `TESTING.md` 與 `screenshots/firebase/report.json`。
+
+---
+
 ## 第十二輪：展開地圖時平滑定位
 
 點「展開聖誕地圖」或捲軸本身時，會平滑捲到地圖和下方按鈕都入鏡的位置，只捲一次，之後可自由滑動；收起時不捲動。
