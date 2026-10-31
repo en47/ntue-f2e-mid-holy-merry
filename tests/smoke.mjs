@@ -647,7 +647,7 @@ await test('最終紙雕清理：新素材完整性、單一村落、三種樹�
   assert.ok(peaks?.includes('peak(parent')); assert.ok(!peaks.includes('pine(')); assert.ok(!/mountain/i.test(gameScene));
   // 按鈕與信紙的紙雕只是底圖：連結與文字仍是真實 HTML，底圖不可攔截點擊所需的語意。
   assert.ok(/<a class="paper-button" href="intro\.html">Explore the Story/.test(html)); assert.ok(/<a class="paper-button cream" href="wish\.html">Make a Wish/.test(html));
-  assert.ok(html.includes('聖誕老人的小信')&&html.includes('麋鹿的小信')); assert.ok(homeScene.includes('buttonArt(')&&homeScene.includes('letterArt('));
+  assert.ok(html.includes('聖誕老人的小信')&&html.includes('麋鹿的小信')); assert.ok(homeScene.includes('buttonArt(')&&homeScene.includes('airmailLetter('));
   assert.ok(css.includes('.paper-button:hover')&&css.includes('.paper-button:active')&&css.includes('.paper-button:focus-visible'));
   // 舞台雪堆要蓋在 3D 畫布前方，才有角色站在雪堆後的層次。
   assert.ok(+css.match(/\.home-bank \{ z-index: (\d+)/)[1]>+css.match(/\.characters-canvas \{[^}]*?z-index: (\d+)/)[1]);
