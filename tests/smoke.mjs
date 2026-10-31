@@ -121,6 +121,17 @@ await test('Firebase 模擬器：只有本機主機名稱啟用，且一定換�
   for (const host of ['holymerry.web.app', 'holymerry.firebaseapp.com', 'me666good.github.io', 'localhost.example.com', '127.0.0.1.example.com', '', undefined]) assert.equal(localEmulatorTarget(host), null, String(host));
   assert.throws(() => createFirebaseClients({}, { projectId: 'holymerry' }, '(default)', { host: '127.0.0.1' }), /demo project/);
 });
+await test('Wish 壓縮模型：網頁載入壓縮檔、雜湊正確、原始 GLB 保留', async () => {
+  const scene = await fs.readFile(path.join(project, 'js/components/wish-scene.js'), 'utf8');
+  assert.ok(scene.includes('`wish-${id}-web.glb`') && scene.includes('setMeshoptDecoder'));
+  for (const [name, limit] of [['wish-tree-web', 3e6], ['wish-elf-web', 2e6]]) {
+    const bytes = await fs.readFile(path.join(project, `assets/models/${name}.glb`)), meta = JSON.parse(await fs.readFile(path.join(project, `assets/models/${name}.json`), 'utf8'));
+    assert.equal(createHash('sha256').update(bytes).digest('hex'), meta.sha256); assert.ok(bytes.length < limit, name);
+  }
+  for (const name of ['wish-tree', 'wish-elf-original']) await fs.access(path.join(project, `assets/models/${name}.glb`));
+  const elf = await fs.readFile(path.join(project, 'assets/models/wish-elf-web.glb')), data = JSON.parse(elf.toString('utf8', 20, 20 + elf.readUInt32LE(12)).trim());
+  assert.equal(data.skins[0].joints.length, 65); assert.equal(data.animations.length, 1);
+});
 await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {
   const env = environment();
   const { mountFlipCounter } = await env.evaluate('js/components/flip-counter.js');
