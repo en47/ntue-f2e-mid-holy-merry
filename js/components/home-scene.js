@@ -205,6 +205,9 @@ export function mountHomeScene(root) {
   const stage = root.querySelector('#story-stage');
   mountTitle(root.querySelector('[data-title-art]'));
   mountTagline(root.querySelector('[data-tagline-art]'));
+  // The title leads: it appears as soon as its own letters are ready, before the scenery unfolds.
+  const lettering = [...root.querySelectorAll('.storybook-title img')].map(image => image.decode().catch(() => {}));
+  Promise.race([Promise.all(lettering), new Promise(resolve => setTimeout(resolve, 700))]).then(() => root.classList.add('title-ready'));
   mountDecor(root);
   const paper = { scale: 1.3, grain: .6 }, wide = { ...paper, grain: .4, shadow: .16 }, none = { preserveAspectRatio: 'none' };
   popLayer(stage, '-6 -6 232 232', 'home-sun', sun, { delay: 0, paper });
