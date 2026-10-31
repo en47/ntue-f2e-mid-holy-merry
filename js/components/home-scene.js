@@ -44,6 +44,11 @@ function mountains(parent) {
   wisp(parent, 196, 214, 250); wisp(parent, 604, 136, 300); wisp(parent, 1010, 176, 230); wisp(parent, 1300, 250, 210);
 }
 
+// One unbroken snowfield behind the villages, so no peak shows through under a building.
+function snowfield(parent) {
+  shape('path', { d: 'M0 34C180 14 340 40 560 28S980 12 1200 30 1460 40 1600 22V400H0Z', fill: '#f8f3e8' }, parent);
+}
+
 function leftVillage(parent) {
   pine(parent, 116, 306, 214, DEEP); pine(parent, 226, 300, 150, GREEN);
   roofHouse(parent, 350, 306, 136, 88, { roof: '#8f6a55' });
@@ -204,6 +209,7 @@ export function mountHomeScene(root) {
   popLayer(stage, '-20 0 270 116', 'home-cloud home-cloud-b', parent => cloud(parent, 120, 62, 1.15), { delay: .3, paper });
   popLayer(stage, '-20 0 270 116', 'home-cloud home-cloud-c', parent => cloud(parent, 120, 62, 1.15), { delay: .45, paper });
   popLayer(stage, '0 0 1600 420', 'home-far', mountains, { delay: .25, paper: wide });
+  popLayer(stage, '0 0 1600 400', 'home-snowfield', snowfield, { delay: .4, paper: wide, ...none });
   popLayer(stage, '0 0 680 366', 'home-village-left', leftVillage, { delay: .75, paper });
   popLayer(stage, '0 0 840 386', 'home-village-right', rightVillage, { delay: .95, paper });
   popLayer(stage, '0 0 1600 460', 'home-ground', ground, { delay: .5, paper: wide, ...none });

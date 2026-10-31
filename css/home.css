@@ -45,6 +45,7 @@
 .home-cloud-b { top: 22%; right: 19%; width: 12%; }
 .home-cloud-c { top: 30%; right: 4%; width: 10%; }
 .home-far { z-index: 2; left: -2%; width: 104%; aspect-ratio: 1600 / 420; bottom: 35%; }
+.home-snowfield { z-index: 3; left: -2%; width: 104%; bottom: -1%; height: 49%; }
 .home-village-left { z-index: 3; left: -2%; width: 37%; aspect-ratio: 680 / 366; bottom: 38%; }
 .home-village-right { z-index: 3; right: -1%; width: 42%; aspect-ratio: 840 / 386; bottom: 36%; }
 .home-ground { z-index: 4; left: -2%; width: 104%; bottom: -1%; height: 46%; }
@@ -122,6 +123,7 @@
   .home-cloud-b { top: 14%; right: 4%; width: 17%; }
   .home-cloud-c { top: 26%; right: 4%; width: 16%; }
   .home-far { left: -25%; width: 150%; bottom: 38%; }
+  .home-snowfield { height: 45%; }
   .home-village-left { left: -7%; width: 56%; bottom: 36%; }
   .home-village-right { right: -8%; width: 62%; bottom: 34%; }
   .home-ground { left: -10%; width: 120%; height: 44%; }
@@ -145,6 +147,7 @@
   .home-sun { top: 33%; left: 3%; width: 13%; }
   .home-cloud-b, .home-cloud-c { display: none; }
   .home-far { left: -70%; width: 240%; bottom: 44%; }
+  .home-snowfield { height: 53%; }
   .home-village-left { left: -22%; width: 86%; bottom: 44%; }
   .home-village-right { right: -26%; width: 92%; bottom: 42%; }
   .home-ground { height: 50%; }
