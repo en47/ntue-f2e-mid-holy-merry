@@ -292,7 +292,9 @@ await test('兩份 GLB、七張原畫完整性、內嵌材質與 Three.js 依賴
   assert.ok(!html.includes('<model-viewer')); assert.ok(!html.includes('CHARACTER PLACEHOLDER'));
   const source = await fs.readFile(path.join(project, 'js/components/characters-scene.js'), 'utf8');
   assert.equal((source.match(/new THREE.WebGLRenderer/g) ?? []).length, 1);
-  assert.ok(source.includes('assets/models/santa-new.glb')); assert.ok(!source.includes('assets/models/santa-claus.glb')); assert.ok(!source.includes('assets/models/santa-dance.glb'));
+  assert.ok(source.includes('assets/models/santa-dance.glb')); assert.ok(!source.includes('assets/models/santa-claus.glb')); assert.ok(!source.includes('assets/models/santa-new.glb'));
+  const heroSource = await fs.readFile(path.join(project, 'js/game-hero.js'), 'utf8');
+  assert.ok(heroSource.includes('assets/models/santa-new.glb')); assert.ok(!heroSource.includes('assets/models/santa-dance.glb'));
   const art = JSON.parse(await fs.readFile(path.join(project,'docs/STORYBOOK-ASSETS.json'),'utf8'));
   assert.equal(Object.keys(art.artwork).length,7);
   for (const asset of Object.values(art.artwork)) assert.equal(createHash('sha256').update(await fs.readFile(path.join(project,asset.path))).digest('hex'),asset.sha256);
@@ -381,7 +383,6 @@ await test('雙角色目前控制器：單 Renderer、拖曳／捲動分流、�
   class PMREM { fromScene() { return {texture:new THREE.Texture(), dispose() {}}; } dispose() {} }
   let santaLoads = 0;
   class Loader {
-    setMeshoptDecoder() { return this; }
     async loadAsync(src) {
       const scene = new THREE.Group();
       const geometry = new THREE.BoxGeometry(.5,1,.5), material = new THREE.MeshStandardMaterial();
@@ -395,7 +396,6 @@ await test('雙角色目前控制器：單 Renderer、拖曳／捲動分流、�
   const env = environment({
     [path.join(project, 'vendor/three/build/three.module.js')]: {...THREE, WebGLRenderer:Renderer, PMREMGenerator:PMREM},
     [path.join(project, 'vendor/three/examples/jsm/loaders/GLTFLoader.js')]: {GLTFLoader:Loader},
-    [path.join(project, 'vendor/three/examples/jsm/libs/meshopt_decoder.module.js')]: {MeshoptDecoder:{}},
   });
   let now = 0; env.sandbox.performance.now = () => now;
   env.sandbox.setTimeout = callback => { queueMicrotask(callback); return 0; };
@@ -757,12 +757,14 @@ await test('Wish 投遞：儲存失敗、減少動態、尺寸改變及離頁取
   assert.equal(writes,0);assert.equal(f.form.inert,false);assert.equal(f.fields[1].value,'平安的聖誕節');assert.equal(f.receipt.hidden,true);assert.ok(f.observers[0].disconnected);
   const second=f.controller.run(()=>{writes++;});await f.flush();f.controller.destroy();await assert.rejects(second,e=>e.name==='AbortError');assert.equal(writes,0);
 });
-await test('Santa 新模型與頭部追蹤：頭頸骨存在、角度上限、平滑、觸控與減少動態不追蹤', async () => {
-  const glb = await fs.readFile(path.join(project, 'assets/models/santa-new.glb'));
-  const data = JSON.parse(glb.toString('utf8', 20, 20 + glb.readUInt32LE(12)).trim());
-  const joints = data.skins[0].joints.map(index => data.nodes[index].name);
-  assert.ok(joints.includes('mixamorig:Head') && joints.includes('mixamorig:Neck'));
-  assert.ok(glb.length < 2_000_000, 'compressed Santa stays under 2MB');
+await test('Santa 分頁模型與頭部追蹤：兩份模型頭頸骨都存在、角度上限、平滑、觸控與減少動態不追蹤', async () => {
+  for (const name of ['santa-new', 'santa-dance']) {
+    const glb = await fs.readFile(path.join(project, `assets/models/${name}.glb`));
+    const data = JSON.parse(glb.toString('utf8', 20, 20 + glb.readUInt32LE(12)).trim());
+    const joints = data.skins[0].joints.map(index => data.nodes[index].name);
+    assert.ok(joints.includes('mixamorig:Head') && joints.includes('mixamorig:Neck'), name);
+    if (name === 'santa-new') assert.ok(glb.length < 2_000_000, 'compressed Santa stays under 2MB');
+  }
   const env = environment();
   const THREE = await env.evaluate('vendor/three/build/three.module.js');
   const { createHeadTracker } = await env.evaluate('js/components/santa-head.js');

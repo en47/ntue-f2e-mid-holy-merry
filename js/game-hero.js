@@ -42,7 +42,7 @@ const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const artwork = [...hero.querySelectorAll('img')].map(image => image.decode().catch(() => {}));
 Promise.race([Promise.all(artwork), new Promise(resolve => setTimeout(resolve, 1500))]).then(() => hero.classList.add('is-opening'));
 
-// The Home Santa GLB in bind pose: arms lowered, then a gentle procedural sway.
+// Game's own compressed Santa GLB in bind pose: arms lowered, then a gentle procedural sway.
 const slot = hero.querySelector('.games-hero-santa');
 const status = hero.querySelector('.games-hero-model-status');
 let cleanup = () => {}, generation = 0;
