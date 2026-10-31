@@ -23,10 +23,14 @@ function sled(host) {
   let run = null;
   button.addEventListener('click', async () => {
     if (run) return;
-    const distance = innerWidth * .62 + 160, sheet = button.firstElementChild;
     if (motion().matches) return;
-    // It leaves on the right and comes home from the left, like a lap around the page.
-    run = sheet.animate([{ transform: 'none' }, { transform: `translateX(${distance}px)`, offset: .46 }, { transform: `translateX(${-distance}px)`, offset: .47 }, { transform: 'none' }], { duration: 3600, easing: 'cubic-bezier(.45,0,.55,1)' });
+    const box = button.getBoundingClientRect(), sheet = button.firstElementChild;
+    // Two separate trips: it never crosses the page backwards while changing sides.
+    const out = innerWidth - box.left + 30, back = box.right + 30;
+    run = sheet.animate([{ transform: 'none' }, { transform: `translateX(${out}px)` }], { duration: 1600, easing: 'cubic-bezier(.5,0,.9,.6)', fill: 'forwards' });
+    await run.finished.catch(() => {});
+    const trip = run; run = sheet.animate([{ transform: `translateX(${-back}px)` }, { transform: 'none' }], { duration: 1800, easing: 'cubic-bezier(.15,.5,.3,1)' });
+    trip.cancel();
     await run.finished.catch(() => {}); run = null;
   });
 }
