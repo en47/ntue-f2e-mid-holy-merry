@@ -4,5 +4,5 @@ export { getAuth, setPersistence, browserLocalPersistence, browserSessionPersist
   signInAnonymously, signInWithEmailAndPassword, signOut, getIdTokenResult,
   connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 export { getFirestore, collection, collectionGroup, doc, query, where, orderBy,
-  limit, startAt, endBefore, getDocsFromServer, getDocFromServer, runTransaction,
+  limit, startAt, startAfter, endBefore, getDocsFromServer, getDocFromServer, runTransaction,
   serverTimestamp, deleteField, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';

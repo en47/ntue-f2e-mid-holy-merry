@@ -138,6 +138,13 @@ await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移
   assert.ok(lights.includes('pointermove') && lights.includes('LINGER') && css.includes('.wish-lights i.is-lit'));
   assert.ok((await fs.readFile(path.join(project, 'js/wish.js'), 'utf8')).includes('mountNightScene(room)'));
 });
+await test('Admin：三種狀態分頁、撤回與重新同意都有入口，規則沒有放寬', async () => {
+  const js = await fs.readFile(path.join(project, 'js/admin.js'), 'utf8'), repo = await fs.readFile(path.join(project, 'js/services/wish-repository-core.js'), 'utf8'), html = await fs.readFile(path.join(project, 'admin.html'), 'utf8');
+  for (const status of ['pending', 'approved', 'rejected']) assert.ok(html.includes(`data-status="${status}"`), status);
+  assert.ok(js.includes('撤回公開') && js.includes('重新同意') && js.includes('confirm('));
+  assert.ok(/wishesByStatus[\s\S]*?sdk\.limit\(50\)/.test(repo), 'Every page stays within the rules limit');
+  assert.ok(js.includes('textContent=wish.content') && !js.includes('innerHTML'), 'Visitor text is never parsed as HTML');
+});
 await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {
   const env = environment();
   const { mountFlipCounter } = await env.evaluate('js/components/flip-counter.js');

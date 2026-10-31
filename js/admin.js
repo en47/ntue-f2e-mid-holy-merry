@@ -1,7 +1,13 @@
 const form=document.querySelector('#admin-login'),panel=document.querySelector('#admin-panel');
-const status=document.querySelector('#admin-status'),list=document.querySelector('#admin-wishes'),published=document.querySelector('#admin-published');
+const status=document.querySelector('#admin-status'),list=document.querySelector('#admin-wishes');
+const more=document.querySelector('#admin-more'),hint=document.querySelector('#admin-tab-hint'),tabs=[...document.querySelectorAll('.admin-tabs button')];
 const refresh=document.querySelector('#admin-refresh'),logout=document.querySelector('#admin-signout');
-let sdk,client,repository,busy=false,version=0;
+const VIEWS={
+  pending:{hint:'新寄來的信。私人信件只能拒絕，不會公開。',found:n=>`已讀取 ${n} 封待審信件。`,empty:'目前沒有待審信件。'},
+  approved:{hint:'這些信都在聖誕樹的隨機庫裡。撤回後會立刻離開，原信保留。',found:n=>`已讀取 ${n} 封已公開願望。`,empty:'目前沒有已公開願望。'},
+  rejected:{hint:'未公開的信。同意公開過的信可以重新同意，放回隨機庫。',found:n=>`已讀取 ${n} 封已拒絕願望。`,empty:'目前沒有已拒絕願望。'},
+};
+let sdk,client,repository,busy=false,version=0,view='pending',cursor=null,shown=0;
 function showError(error){
   const code=error.code || '';
   status.textContent=code.includes('permission-denied')?'資料庫拒絕存取。請確認正式 Rules 已部署、管理員 claim 已設定，且審核索引已建立。'
@@ -17,38 +23,45 @@ async function authorize(){
 // Every action locks all buttons, and only the server's confirmation counts as done.
 async function decide(wish,decision){
   if(busy)return;busy=true;refresh.disabled=true;logout.disabled=true;
-  const buttons=[...panel.querySelectorAll('li button')],disabled=buttons.map(b=>b.disabled);let saved=false;
+  const buttons=[...list.querySelectorAll('button')],disabled=buttons.map(b=>b.disabled);let saved=false;
   buttons.forEach(b=>b.disabled=true);status.textContent='正在提交審核……';
   try{await repository.reviewWish(wish.ownerUid,wish.id,decision);saved=true;status.textContent='審核已由伺服器確認。';}
   catch(error){showError(error);}
   finally{busy=false;refresh.disabled=false;logout.disabled=false;buttons.forEach((b,i)=>b.disabled=disabled[i]);if(saved)await loadQueue();}
 }
-function wishItem(wish,detail,actions){
+function actionButton(label,handler,{disabled=false,quiet=false}={}){
+  const button=document.createElement('button');button.textContent=label;button.disabled=disabled;button.classList.toggle('is-quiet',quiet);button.addEventListener('click',handler);return button;
+}
+function wishItem(wish){
   const item=document.createElement('li'),title=document.createElement('h3'),body=document.createElement('p'),meta=document.createElement('p'),row=document.createElement('div');
-  title.textContent=wish.nickname;body.className='admin-wish-content';body.textContent=wish.content;meta.textContent=detail;
-  row.className='admin-actions';row.append(...actions);item.append(title,meta,body,row);return item;
+  const open=wish.visibility==='public';
+  title.textContent=wish.nickname;body.className='admin-wish-content';body.textContent=wish.content;
+  meta.className='admin-wish-meta';meta.textContent=`${open?'同意公開':'私人信件'} · ${new Date(wish.createdAt).toLocaleString('zh-TW')}`;
+  row.className='admin-actions';
+  if(wish.status==='pending')row.append(actionButton('核准公開',()=>decide(wish,'approved'),{disabled:!open}),actionButton('拒絕',()=>decide(wish,'rejected'),{quiet:true}));
+  if(wish.status==='approved')row.append(actionButton('撤回公開',()=>{if(confirm(`確定要撤回「${wish.nickname}」的願望嗎？它會立刻從聖誕樹上移除。`))decide(wish,'rejected');},{quiet:true}));
+  if(wish.status==='rejected')row.append(actionButton('重新同意',()=>decide(wish,'approved'),{disabled:!open}));
+  item.className=`is-${wish.status}`;item.append(title,meta,body,row);return item;
 }
-function actionButton(label,handler,disabled=false){
-  const button=document.createElement('button');button.textContent=label;button.disabled=disabled;button.addEventListener('click',handler);return button;
-}
-async function loadQueue(){
-  if(busy)return;busy=true;refresh.disabled=true;logout.disabled=true;const current=++version;
-  list.replaceChildren();published.replaceChildren();status.textContent='正在讀取待審核信件……';
+async function loadQueue(append=false){
+  if(busy)return;busy=true;refresh.disabled=true;logout.disabled=true;more.disabled=true;const current=++version;
+  if(!append){list.replaceChildren();cursor=null;shown=0;more.hidden=true;}
+  hint.textContent=VIEWS[view].hint;status.textContent='正在讀取信件……';
   try{
     if(!await authorize()){
       await sdk.signOut(client.auth);panel.hidden=true;form.hidden=false;status.textContent='管理員授權已失效，請重新登入。';return;
     }
-    const [wishes,live]=await Promise.all([repository.pendingWishes(),repository.publishedWishes()]);if(current!==version)return;
-    for(const wish of wishes)list.append(wishItem(wish,`${wish.visibility==='public'?'同意審核後公開':'私人信件'} · ${new Date(wish.createdAt).toLocaleString('zh-TW')}`,[
-      actionButton('核准公開',()=>decide(wish,'approved'),wish.visibility!=='public'),
-      actionButton('拒絕',()=>decide(wish,'rejected')),
-    ]));
-    for(const wish of live)published.append(wishItem(wish,`寄出於 ${new Date(wish.createdAt).toLocaleString('zh-TW')}`,[
-      actionButton('撤回公開',()=>{if(confirm(`確定要撤回「${wish.nickname}」的願望嗎？它會立刻從聖誕樹上移除。`))decide(wish,'rejected');}),
-    ]));
-    status.textContent=wishes.length?`已讀取 ${wishes.length} 封待審信件。`:'目前沒有待審信件。';
-  }catch(error){showError(error);}finally{busy=false;refresh.disabled=false;logout.disabled=false;}
+    const page=await repository.wishesByStatus(view,cursor);if(current!==version)return;
+    list.append(...page.wishes.map(wishItem));
+    cursor=page.cursor;shown+=page.wishes.length;more.hidden=!cursor;
+    status.textContent=shown?VIEWS[view].found(shown):VIEWS[view].empty;
+  }catch(error){showError(error);}finally{busy=false;refresh.disabled=false;logout.disabled=false;more.disabled=false;}
 }
+for(const tab of tabs)tab.addEventListener('click',()=>{
+  if(busy||tab.dataset.status===view)return;view=tab.dataset.status;
+  tabs.forEach(item=>item.setAttribute('aria-pressed',String(item===tab)));loadQueue();
+});
+more.addEventListener('click',()=>loadQueue(true));
 form.addEventListener('submit',async event=>{
   event.preventDefault();if(busy||!client)return;busy=true;form.querySelector('button').disabled=true;
   try{
@@ -63,9 +76,19 @@ form.addEventListener('submit',async event=>{
   finally{busy=false;form.querySelector('button').disabled=false;}
   if(!panel.hidden)await loadQueue();
 });
-refresh.addEventListener('click',loadQueue);
-logout.addEventListener('click',async()=>{if(busy)return;++version;list.replaceChildren();published.replaceChildren();panel.hidden=true;form.hidden=false;await sdk.signOut(client.auth);status.textContent='已登出。';});
+refresh.addEventListener('click',()=>loadQueue());
+logout.addEventListener('click',async()=>{if(busy)return;++version;list.replaceChildren();panel.hidden=true;form.hidden=false;await sdk.signOut(client.auth);status.textContent='已登出。';});
+// Only three sheets of paper, cut once; the cards themselves stay plain CSS so 50 of them scroll lightly.
+async function dress(){
+  const [{paperLayer,shape},{airmailLetter}]=await Promise.all([import('./components/paper-art.js'),import('./components/paper-props.js')]);
+  paperLayer(document.querySelector('.admin-hills'),'0 0 1440 240','',parent=>{
+    shape('path',{d:'M0 96C170 56 300 118 480 92S760 44 960 88 1260 118 1440 70V240H0Z',fill:'#cfe1e7'},parent);
+    shape('path',{d:'M0 150C220 110 360 160 590 136S940 92 1150 136 1340 150 1440 118V240H0Z',fill:'#fbf8f1'},parent);
+  },{paper:{scale:1.2,grain:.4,shadow:.14},preserveAspectRatio:'none'});
+  paperLayer(form,'0 0 380 300','letter-art',airmailLetter('#a84a42','#4f7d68',{writing:true}),{paper:{scale:.8,grain:.35,shadow:.24},eager:true,preserveAspectRatio:'none'});
+}
 async function start(){
+  dress();
   form.querySelector('button').disabled=true;
   try{
     sdk=await import('./services/firebase-sdk.js');
