@@ -13,10 +13,12 @@ for (const name of pages) for (const [width, height] of [[375, 812], [768, 1024]
     const stage = (document.querySelector('.storybook') ?? document.querySelector('.games-hero') ?? document.body).getBoundingClientRect();
     const found = [];
     for (const image of document.querySelectorAll('.art-layer img, .foreground-scene img')) {
-      await image.decode().catch(() => {});
+      // 畫面外的延遲載入圖片可能永遠不解碼，不能無限等。
+      image.loading = 'eager';
+      await Promise.race([image.decode().catch(() => {}), new Promise(resolve => setTimeout(resolve, 1500))]);
       const rect = image.getBoundingClientRect(), { naturalWidth: w, naturalHeight: h } = image;
-      // 海洋底紙與封面內襯鋪滿到邊；海港的水與岩岸下緣埋在近浪後方。
-      if (!w || !rect.width || image.closest('.games-far, .map-sea, .intro-cover-inside-art, .harbor-far, .harbor-wave, .harbor-boat, .harbor-floe, .harbor-glow, .harbor-land') || getComputedStyle(image.parentElement).display === 'none') continue;
+      // 海洋底紙與封面內襯鋪滿到邊；海港的水與岩岸、Game 的雪山與帳篷下緣都埋在前景後方。
+      if (!w || !rect.width || image.closest('.games-far, .games-carousel, .map-sea, .intro-cover-inside-art, .harbor-far, .harbor-wave, .harbor-boat, .harbor-floe, .harbor-glow, .harbor-land') || getComputedStyle(image.parentElement).display === 'none') continue;
       const inPage = Boolean(image.closest('.page-foreground'));
       const bound = inPage ? image.closest('.page-foreground').getBoundingClientRect() : stage;
       const canvas = Object.assign(document.createElement('canvas'), { width: w, height: h });
@@ -28,7 +30,7 @@ for (const name of pages) for (const [width, height] of [[375, 812], [768, 1024]
       const buried = cover && parseInt(getComputedStyle(image.parentElement).zIndex) < parseInt(getComputedStyle(document.querySelector('.home-ground, .games-hero-hill')).zIndex) && rect.bottom > cover.top + 2;
       const visible = { left: rect.left > bound.left + 1, right: rect.right < bound.right - 1, top: rect.top > bound.top + 1, bottom: rect.bottom < bound.bottom - 1 && !buried };
       for (const [edge, box] of Object.entries(edges)) {
-        if (!visible[edge] || (edge === 'top' && image.closest('.wreath-swing, .intro-hanger'))) continue; // 花圈與吊飾的繩子本來就從頂端垂下。
+        if (!visible[edge] || (edge === 'top' && image.closest('.wreath-swing, .intro-hanger, .frame-charm'))) continue; // 花圈與吊飾的繩子本來就從頂端垂下。
         const data = context.getImageData(...box).data;
         let solid = 0;
         for (let i = 3; i < data.length; i += 4) if (data[i] > 24) solid++;

@@ -31,7 +31,7 @@ html.games-document {  scroll-padding-block-start: 1rem; }
 .flying-view > .game-frame, .flying-view > .flying-caption { grid-column: 2; }
 .game-section-heading { width: min(100%, 1100px); margin: 0 auto 1rem; }
 .game-section-heading .eyebrow { font-size: .875rem; margin: 0; }
-.game-section-heading h2 { font: 400 clamp(1.5rem, 2.5vw, 2.25rem)/1.2 var(--game-hand); color: var(--red); margin: .25rem 0 .5rem; }
+.game-section-heading h2 { font: 700 clamp(1.9rem, 3.2vw, 2.9rem)/1.08 StorySign, var(--game-hand); color: var(--red); margin: .3rem 0 .6rem; }
 .game-description { color: var(--muted); font-size: 1rem; line-height: 1.75; margin: 0; }
 /* Empty, unpainted slots remain available for the future Procreate illustrations. */
 .game-illustration-slot { width: min(100%, 280px); aspect-ratio: 4 / 3; margin: 0 auto 1rem; }
@@ -72,6 +72,15 @@ html.games-document {  scroll-padding-block-start: 1rem; }
    Keep each game centered at its original proportions, with 16px total edges. */
 .game-frame { display: grid; align-content: center; width: 100%; min-width: 0; min-height: calc(max(504px, var(--game-panel-content-height, 504px)) + 16px); margin-inline: auto; padding: 6px; border: 2px solid var(--game-snow-paper); border-radius: 20px; background: #f7f6f2; box-shadow: 0 5px 14px #344d5712; scroll-margin-block-start: max(0px, calc((100svh - max(504px, var(--game-panel-content-height, 504px)) - 16px) / 2 - 1rem)); }
 .game-frame iframe { border-radius: 12px; }
+/* 紙雕遊戲框：紙邊用陰影、裝飾全在外圍，不佔版面、不擋點擊，遊戲區大小不變。 */
+.game-frame { --frame-stitch: #a84a42;position: relative; box-shadow: 0 0 0 9px #fbf3e3, 0 0 0 11px #d9c5a2, 0 16px 26px -12px #4b6a7a66; }
+#matching-game { --frame-stitch: #4f7d68; }
+.game-frame::after { content: ''; position: absolute; inset: -6px; border: 2px dashed var(--frame-stitch); border-radius: inherit; opacity: .55; pointer-events: none; }
+.game-frame > .art-layer { inset: auto; pointer-events: none; z-index: 2; }
+.game-frame > .frame-cap { bottom: calc(100% - 6px); left: -22px; right: -22px; aspect-ratio: 1048 / 110; }
+.game-frame > .frame-drift { top: calc(100% - 4px); left: -34px; right: -34px; aspect-ratio: 1048 / 100; }
+.game-frame > .frame-charm { top: -14px; right: -34px; width: 34px; aspect-ratio: 80 / 104; animation: charm-swing 2.8s ease-in-out infinite alternate; }
+@keyframes charm-swing { from { rotate: -7deg; } to { rotate: 7deg; } }
 .fly-frame-shell { container-type: inline-size; }
 /* Frameless game: 64px HUD + W × 510/1100 stage + 78px controls.
    Reserve its natural height before load; JS measures the isolated content after load. */
@@ -79,17 +88,14 @@ html.games-document {  scroll-padding-block-start: 1rem; }
 @container (max-width: 650px) {
   .flying-game-frame { height: calc(100cqw * .909090909 + 136px); }
 }
-.flying-caption { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1.5rem; width: min(100%, 1100px); margin: .65rem auto 0; color: var(--muted); font-size: .75rem; }
+.flying-caption { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1.5rem; width: min(100%, 1100px); margin: clamp(3rem, 8vw, 5.4rem) auto 0; color: var(--muted); font-size: .75rem; }
 .flying-caption p { margin: 0; }
-.game-fallback { white-space: nowrap; }
 .matching-section { margin: 0; padding: 0; scroll-margin-block-start: var(--sticky-header-height, 0px); }
 .matching-layout { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 35fr) minmax(0, 65fr); column-gap: clamp(1.5rem, 3vw, 3rem); row-gap: 0; align-items: center; }
 .matching-copy { grid-column: 1; grid-row: 1; min-width: 0; position: relative; z-index: 1; margin: 0; }
 .matching-play-area { grid-column: 2; grid-row: 1; width: min(100%, 1100px); margin-inline: auto; position: relative; min-width: 0; z-index: 1; }
 /* Same-origin original game reports its natural content height; fallback before loading. */
 .matching-game-frame { display: block; width: 100%; height: 560px; border: 0; background: #f7f6f2; }
-.matching-fallback { grid-column: 2; grid-row: 2; font-size: .7rem; color: var(--muted); margin-top: .65rem; }
-.matching-fallback summary { cursor: pointer; }
 /* Foreground belongs to Game 02 and occupies no independent layout row. */
 .games-page [data-reveal] { opacity: 1; }
 .games-page.reveal-ready [data-reveal]:not(.is-visible) { opacity: 0; transform: translateY(16px); }
@@ -103,15 +109,19 @@ html.games-document {  scroll-padding-block-start: 1rem; }
 @media (max-width: 880px) {
   .games-page { --hero-game-gap: clamp(3rem, 7vw, 5rem); --game-section-gap: clamp(4rem, 9vw, 6rem); }
   .flying-view, .matching-layout { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
-  .flying-view > .game-section-heading, .matching-copy, .matching-play-area, .matching-fallback { grid-column: 1; grid-row: auto; }
+  /* 上下排列時，留出頂飾的高度，才不會蓋到標題文字。 */
+  .game-frame { margin-top: clamp(2.2rem, 10vw, 5rem); }
+  .flying-view > .game-section-heading, .matching-copy, .matching-play-area { grid-column: 1; grid-row: auto; }
   .flying-view > .game-frame, .flying-view > .flying-caption { grid-column: 1; }
-  .flying-view > .flying-caption { margin-top: 0; }
-  .matching-fallback { margin-top: 0; }
   .game-illustration-slot { width: min(40%, 180px); margin-bottom: .75rem; }
 }
 @media (max-width: 700px) {
   /* Phones keep each game's natural height, including its touch controls. */
-  .game-frame { min-height: 0; scroll-margin-block-start: 0; }
+  .game-frame { min-height: 0; scroll-margin-block-start: 0; box-shadow: 0 0 0 5px #fbf3e3, 0 0 0 6px #d9c5a2, 0 12px 20px -12px #4b6a7a66; }
+  .game-frame::after { inset: -4px; }
+  .game-frame > .frame-cap { left: -10px; right: -10px; }
+  .game-frame > .frame-drift { left: -14px; right: -14px; }
+  .game-frame > .frame-charm { display: none; }
   .game-tags { gap: .6rem; margin-block: .6rem .85rem; }
   .game-tag { width: min(210px, calc((100% - .6rem) / 2)); }
   .game-tag-paper { height: 66px; gap: .35rem; font-size: .95rem; }
@@ -125,6 +135,7 @@ html.games-document {  scroll-padding-block-start: 1rem; }
   .games-page.reveal-ready [data-reveal='right']:not(.is-visible) { transform: translateX(12px); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .game-frame > .frame-charm { animation: none; }
   .game-tag, .game-tag .game-tag-paper { animation: none !important; transform: none; }
   html.games-document {  scroll-behavior: auto; }
   .games-page.reveal-ready [data-reveal], .games-page.reveal-ready [data-reveal]:not(.is-visible) { opacity: 1; transform: none; transition: none; }

@@ -1,3 +1,4 @@
+import { mountGameFrames } from './components/game-frames.js';
 import { mountSleigh } from './components/game-sleigh.js';
 import { mountWreath } from './components/game-wreath.js';
 import { pauseOffscreen } from './components/paper-art.js';
@@ -110,4 +111,6 @@ const flyingSlot = document.querySelector('[data-illustration-slot="santa-flying
 const matchingSlot = document.querySelector('[data-illustration-slot="christmas-matching"]');
 mountSleigh(flyingSlot);
 mountWreath(matchingSlot);
-pauseOffscreen([flyingSlot, matchingSlot]);
+const frames = [document.querySelector('#sleigh-game'), document.querySelector('#matching-game')];
+mountGameFrames(...frames);
+pauseOffscreen([flyingSlot, matchingSlot, ...frames]);

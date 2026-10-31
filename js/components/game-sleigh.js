@@ -51,9 +51,12 @@ function santaFigure(parent) {
   // One unbroken hat: crown and drooping tip share an outline, so no seam shows between them.
   shape('path', { d: 'M136 108C128 98 118 96 110 104 100 100 98 90 104 84 112 66 132 54 152 52 182 42 216 56 228 96Z', fill: RED }, santa);
   shape('circle', { cx: 106, cy: 100, r: 12, fill: CREAM }, santa);
+  // White hair behind the head, closing the gap from the hat down to the shoulders.
+  shape('path', { d: 'M136 100C126 116 126 140 140 156 152 164 170 164 182 158L196 100Z', fill: CREAM }, santa);
+  shape('path', { d: 'M196 100L232 96C236 112 232 132 222 146L200 150Z', fill: CREAM }, santa);
   shape('circle', { cx: 182, cy: 106, r: 27, fill: SKIN }, santa);
   shape('path', { d: 'M148 112C150 150 172 168 188 170 206 168 220 146 218 112 208 124 200 122 192 118 182 124 172 122 164 118 158 122 152 120 148 112Z', fill: CREAM }, santa);
-  shape('path', { d: 'M132 102C160 86 200 84 228 96 232 106 226 112 218 110 190 102 164 104 142 114 132 116 128 108 132 102Z', fill: CREAM }, santa);
+  shape('path', { d: 'M130 100C154 70 206 66 232 90 238 102 228 106 220 103 192 94 164 96 142 108 132 110 126 106 130 100Z', fill: CREAM }, santa);
   shape('circle', { cx: 190, cy: 106, r: 2.8, fill: '#3b2a22' }, santa);
   shape('circle', { cx: 212, cy: 106, r: 2.8, fill: '#3b2a22' }, santa);
   shape('circle', { cx: 204, cy: 116, r: 6, fill: '#e29a84' }, santa);
