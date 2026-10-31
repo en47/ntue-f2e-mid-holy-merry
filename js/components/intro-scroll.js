@@ -5,6 +5,12 @@ export function mountIntroScroll(root, { sleigh } = {}) {
   const shortcuts = root.querySelector('#intro-country-shortcuts');
   let open = false, onScreen = true, settle;
   const run = () => { if (open && onScreen) sleigh?.unpauseAnimations?.(); else sleigh?.pauseAnimations?.(); };
+  // One smooth scroll that frames the map and its buttons, like opening the book; scrolling stays free.
+  function frameMap() {
+    const top = sheet.getBoundingClientRect().top, bottom = root.querySelector('.intro-map-actions').getBoundingClientRect().bottom;
+    const span = bottom - top, offset = span < innerHeight ? top - (innerHeight - span) / 2 : top - 12;
+    scrollTo({ top: Math.max(0, scrollY + offset), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
   function set(next) {
     open = next;
     stage.dataset.state = next ? 'open' : 'rolled';
@@ -13,6 +19,7 @@ export function mountIntroScroll(root, { sleigh } = {}) {
     // The sleigh waits until the sheet has landed, so the map is not repainted while it slides.
     clearTimeout(settle); sleigh?.pauseAnimations?.();
     settle = setTimeout(run, 1150);
+    if (next) frameMap();
   }
   const handlers = [[root.querySelector('[data-scroll="open"]'), () => set(true)], [fold, () => set(false)], ...toggles.map(button => [button, () => set(!open)])];
   handlers.forEach(([element, handler]) => element.addEventListener('click', handler));
