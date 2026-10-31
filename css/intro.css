@@ -89,7 +89,7 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-paper-button:hover:not(:disabled) { transform:translateY(-2px) rotate(-1deg);background:#fffdf4; }
 .intro-count { color:var(--red);font-size:.8rem;letter-spacing:.12em;min-width:63px;text-align:center; }
 .intro-replay { border:0;border-bottom:1px dashed #9fb6bc;background:none;color:var(--muted);min-height:44px;font-size:.78rem;padding:.5rem; }
-.intro-cultures { --foreground-under:calc(clamp(170px,19vw,280px) * .55);--stage-h:calc(min(1120px,100vw - 3rem) * .5787);position:relative;isolation:isolate;padding:1.6rem 0 clamp(18px,2.4vw,36px);display:flex;flex-direction:column;justify-content:center; }
+.intro-cultures { --foreground-under:calc(clamp(170px,19vw,280px) * .55);--stage-h:calc(min(1120px,100vw - 3rem) * .5787);--letter-h:calc(min(560px,(100vw - 3rem) * .52) * .7895);position:relative;isolation:isolate;padding:1.6rem 0 clamp(18px,2.4vw,36px);display:flex;flex-direction:column;justify-content:center; }
 /* 海港鋪滿視窗寬，並延伸到頁尾雪丘後方，雪岸才接得上海面。 */
 .intro-harbor { position:absolute;z-index:-1;left:50%;top:0;bottom:calc(var(--foreground-under) * -1);width:100vw;translate:-50% 0;overflow:hidden;overflow:clip;pointer-events:none; }
 /* 海平線在地圖中段。位置都以舞台高度換算，展開地圖、下方多出按鈕時海面不會跳動。 */
@@ -133,8 +133,8 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-scroll-stage[data-state='open'] .intro-map-sheet { clip-path:inset(-30px -30px -30px -30px); }
 .intro-map-canvas { position:relative;width:100%;aspect-ratio:1728/947; }
 .map-route { position:absolute;inset:0;width:100%;height:100%;pointer-events:none; }
-/* 收起時捲軸比信紙矮，往下滑會先看到信紙；展開才拉到全高。 */
-.intro-roller { position:absolute;z-index:3;top:11%;bottom:3%;width:var(--roller);padding:0;border:0;background:none;transition:left 1.1s cubic-bezier(.22,.84,.21,1),top 1.1s cubic-bezier(.22,.84,.21,1),bottom 1.1s cubic-bezier(.22,.84,.21,1),filter .2s; }
+/* 收起時捲軸與信紙同高、中線對齊；展開才拉到全高。 */
+.intro-roller { position:absolute;z-index:3;top:8px;bottom:calc(100% - var(--letter-h) + 8px);width:var(--roller);padding:0;border:0;background:none;transition:left 1.1s cubic-bezier(.22,.84,.21,1),top 1.1s cubic-bezier(.22,.84,.21,1),bottom 1.1s cubic-bezier(.22,.84,.21,1),filter .2s; }
 .intro-scroll-stage[data-state='open'] .intro-roller { top:0;bottom:0; }
 .intro-roller:hover { filter:brightness(1.06); }
 .intro-roller:focus-visible { outline:3px solid #e0b04f;outline-offset:2px; }
