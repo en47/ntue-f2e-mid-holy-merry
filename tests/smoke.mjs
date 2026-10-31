@@ -613,7 +613,11 @@ await test('最終紙雕清理：新素材完整性、單一村落、三種樹�
   const gameScene=await fs.readFile(path.join(project,'js/components/game-scene.js'),'utf8');
   for (const page of [html,gameHtml]) assert.ok(!/assets\/illustrations\/(storybook|games\/hero)\//.test(page),'Paper scenes must not load raster art');
   assert.ok(html.includes('data-title-art')); assert.ok(html.includes('js/home-scene.js'));
-  assert.ok(!/mountain/i.test(homeScene)); assert.ok(!/mountain/i.test(gameScene));
+  // 只有首頁有雪山且山上無樹，Game 頁維持遊樂場，兩頁背景不重複。
+  const peaks=homeScene.match(/function mountains\(parent\) \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(peaks?.includes('peak(parent')); assert.ok(!peaks.includes('pine(')); assert.ok(!/mountain/i.test(gameScene));
+  // 舞台雪堆要蓋在 3D 畫布前方，才有角色站在雪堆後的層次。
+  assert.ok(+css.match(/\.home-bank \{ z-index: (\d+)/)[1]>+css.match(/\.characters-canvas \{[^}]*?z-index: (\d+)/)[1]);
   const homeLayers=[...homeScene.matchAll(/popLayer\(stage, '[^']+', '([^']+)'/g)].map(match=>match[1].split(' ')[0]);
   const gameLayers=[...gameScene.matchAll(/popLayer\(hero, '[^']+', '([^']+)'/g)].map(match=>match[1].split(' ')[0]);
   assert.ok(homeLayers.length>=9); assert.ok(gameLayers.length>=8);
