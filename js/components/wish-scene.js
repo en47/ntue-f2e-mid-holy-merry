@@ -62,8 +62,8 @@ export function mountWishScene(root) {
   catch (error) { renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); throw error; }
   finally { pmrem.dispose(); room.dispose(); }
   scene.environment = environment.texture; scene.environmentIntensity = .5;
-  scene.add(new THREE.HemisphereLight(0xfff6de, 0xa6c3d0, 2));
-  const key = new THREE.DirectionalLight(0xfff3de, 2.1); key.position.set(-3, 8, 7); scene.add(key);
+  scene.add(new THREE.HemisphereLight(0xdfe8f5, 0x6d86a0, 1.5));
+  const key = new THREE.DirectionalLight(0xfbeed8, 1.7); key.position.set(-3, 8, 7); scene.add(key);
   const fill = new THREE.DirectionalLight(0xdceeff, .8); fill.position.set(5, 3, 5); scene.add(fill);
   // Transparent contact patches, shared with the same measured ground, without opaque platforms.
   const shadowCanvas = document.createElement('canvas'); shadowCanvas.width = shadowCanvas.height = 64;
@@ -104,12 +104,7 @@ export function mountWishScene(root) {
     // Canvas begins at the padding edge, while boundingClientRect includes the stage border.
     const origin = { left: base.left + root.clientLeft, top: base.top + root.clientTop };
     const zone = rect(treeSlot, origin), path = rect(lane, origin);
-    if (width > 700) {
-      const available = zone.bottom - rect(letter, origin).bottom - 24;
-      rack.style.height = `${Math.max(90, Math.min(height * .27, available))}px`;
-    } else rack.style.height = '';
     const rackRect = rect(rack, origin);
-    root.style.setProperty('--snow-start', `${rackRect.bottom - 30}px`);
     camera.right = width / PX; camera.top = height / PX; camera.updateProjectionMatrix();
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5)); renderer.setSize(width, height, false);
     ground = (height - zone.bottom) / PX;

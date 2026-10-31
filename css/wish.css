@@ -1,17 +1,36 @@
 @font-face { font-family: WishHand; src: url('../assets/fonts/wish-handwritten.woff') format('woff'); font-display: swap; }
 .wish-page { background: #d5e6ec; }
-.wish-page main { padding: 1rem 0 2.5rem; }
-.wish-room { --ground: 11%; position: relative; isolation: isolate; width: min(1440px, calc(100% - 2rem)); height: clamp(790px, calc(100svh - 145px), 950px); margin: 0 auto; border: 6px solid #f7eedb; background: #bad4df; box-shadow: 0 3px 0 #c7bca7; }
-.room-sky { position: absolute; inset: 0; pointer-events: none; z-index: -2; background: radial-gradient(ellipse at 45% 22%, #e3edf08c, transparent 80%); }
-.room-sky::after { content: ''; position: absolute; inset: 0; opacity: .2; background-image: radial-gradient(#71909c .6px, transparent .8px); background-size: 5px 5px; }
-.room-heading { position: absolute; left: 3%; top: 1.8%; z-index: 2; }
+@font-face { font-family: StorySign; src: url('../assets/fonts/mountains-of-christmas-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+.wish-page main { padding: 0 0 1.5rem; }
+.wish-room { --ground: 12%; position: relative; isolation: isolate; overflow: hidden; overflow: clip; width: 100%; height: clamp(600px, calc(100svh - 108px), 950px); margin: 0; background: linear-gradient(#22384f 0%, #33526f 52%, #5c7c97 78%); }
+.room-sky { position: absolute; inset: 0; pointer-events: none; z-index: -2; }
+.wish-room .pop { position: absolute; }
+.wish-room.is-opening .pop { animation: pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay, 0s) both; }
+.wish-room:not(.is-opening) .pop { opacity: 0; }
+.night-stars { left: 0; right: 0; top: 0; height: 52%; }
+.night-moon { top: 7%; left: 37%; width: clamp(70px, 9vw, 130px); aspect-ratio: 1; }
+.night-cloud { aspect-ratio: 270 / 116; }
+.night-cloud-a { top: 22%; left: 33%; width: 11%; }
+.night-cloud-b { top: 14%; right: 4%; width: 12%; }
+.night-forest { left: -1%; right: -1%; bottom: 17%; height: 34%; }
+.night-cottage { right: -1%; bottom: calc(var(--ground) + 3%); width: clamp(190px, 20vw, 300px); aspect-ratio: 500 / 420; }
+.night-snow { left: -1%; right: -1%; bottom: -1%; height: 26%; }
+.night-pines { left: 37%; bottom: calc(var(--ground) + 1%); width: clamp(90px, 13vw, 190px); aspect-ratio: 1; }
+/* 聖誕燈：平時只有微光，滑鼠經過才漸漸亮起，離開後慢慢暗回去。 */
+.wish-lights { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.wish-lights svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wish-lights i { position: absolute; width: 11px; height: 16px; margin: -1px 0 0 -5.5px; border-radius: 50% 50% 46% 46%; background: var(--bulb); filter: brightness(.55) saturate(.8); transition: filter 2.2s ease; }
+.wish-lights i::before { content: ''; position: absolute; left: 3px; top: -5px; width: 5px; height: 6px; border-radius: 1px; background: #2b3a44; }
+.wish-lights i::after { content: ''; position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--bulb) 72%, transparent), transparent 66%); opacity: 0; transition: opacity 2.2s ease; }
+.wish-lights i.is-lit { filter: brightness(1.15); transition-duration: .9s; }
+.wish-lights i.is-lit::after { opacity: .9; transition-duration: .9s; }
+.room-heading { position: absolute; left: 3%; top: 2%; z-index: 3; }
 .room-heading .eyebrow { font-size: .58rem; letter-spacing: .17em; margin-bottom: .15rem; }
-.room-heading h1 { font: 1.6rem WishHand, var(--font-display); color: #754b3e; margin: 0; }
-.room-ground { position: absolute; left: 0; right: 0; top: calc(100% - var(--ground) - 24px); bottom: 0; z-index: -1; background: url('../assets/illustrations/wish/snow-ground.svg') center top / 100% 100% no-repeat; pointer-events: none; }
-.wish-letter { position: absolute; top: 9%; left: 3%; width: 34%; max-width: 455px; padding: 1.2rem 1.6rem 1rem; background: #fff4dd; border: 1px solid #bd9e7d; box-shadow: 2px 3px 0 #dfcfad, 4px 7px 12px #5e6f7720; transform: rotate(-1deg); z-index: 3; }
+.room-heading h1 { font: 700 clamp(1.9rem, 3.4vw, 2.9rem)/1.05 StorySign, var(--font-display); color: #fbecc4; margin: 0; text-shadow: 0 2px 0 #1b2c3e; }
+.wish-letter { position: absolute; top: clamp(4rem, 11%, 6rem); left: 3%; width: 30%; max-width: 430px; padding: 1.2rem 1.6rem 1rem; background: #fff4dd; border: 1px solid #bd9e7d; box-shadow: 2px 3px 0 #dfcfad, 4px 7px 12px #5e6f7720; transform: rotate(-1deg); z-index: 3; }
 .wish-letter::before { content: ''; position: absolute; inset: 7px; border: 1px dashed #c6a99a; pointer-events: none; }
 .wish-letter::after { content: ''; position: absolute; top: 18px; right: 22px; width: 38px; height: 42px; background: url('../assets/illustrations/storybook/christmas-letter.svg') -281px -29px / 360px 260px; opacity: .8; pointer-events: none; }
-.wish-letter h2 { font: 2.1rem WishHand, var(--font-display); color: #a24b42; margin: 0 0 .45rem; }
+.wish-letter h2 { font: 700 2.1rem/1.1 StorySign, var(--font-display); color: #a24b42; margin: 0 0 .3rem; }
 .wish-letter label { display: block; font: 1.05rem WishHand, var(--font-body); color: #7d5748; margin-top: .65rem; }
 .wish-letter label span { font: .7rem var(--font-body); color: #8c8372; margin-left: .4rem; }
 .wish-letter input, .wish-letter textarea { width: 100%; min-width: 0; border: 0; border-radius: 0; background: transparent; color: #4b5554; padding: .45rem .2rem; font-size: .9rem; outline-offset: 2px; }
@@ -25,17 +44,16 @@
 .letter-send:hover { transform: rotate(-2deg); }
 .letter-actions small { color: #837b69; font-size: .6rem; line-height: 1.6; }
 .wish-letter .status { font-size: .7rem; line-height: 1.6; margin: .5rem 0 0; min-height: 1.6em; }
-.stocking-station { position: absolute; width: 28%; height: 27%; left: 5%; bottom: var(--ground); margin: 0; z-index: 2; }
+.stocking-station { position: absolute; width: 13%; height: 38%; left: 34%; bottom: calc(var(--ground) - 1%); margin: 0; z-index: 2; }
 .stocking-station img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; filter: drop-shadow(1px 3px 1px #796a4c30); }
-.stocking-station figcaption { position: absolute; top: 100%; left: 0; right: 0; text-align: center; color: #8a7562; font: 1rem WishHand, var(--font-display); }
 .stocking-opening { position: absolute; width: 26%; height: 3%; left: 45%; top: 25%; pointer-events: none; }
-.wish-tree-space { position: absolute; top: 1%; left: 38%; right: 1%; bottom: var(--ground); z-index: 2; }
+.wish-tree-space { position: absolute; top: 2%; left: 46%; right: 15%; bottom: var(--ground); z-index: 2; }
 .tree-gesture { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: grab; touch-action: pan-y; border-radius: 0; }
 .tree-gesture:active { cursor: grabbing; }
 .tree-gesture:focus-visible { outline-offset: -8px; outline-style: dashed; }
-.tree-hint { position: absolute; bottom: -2.5rem; left: 0; right: 0; text-align: center; font-size: .65rem; color: #71858a; margin: 0; pointer-events: none; }
+.tree-hint { position: absolute; bottom: -2.6rem; left: 0; right: 0; text-align: center; font-size: .82rem; color: #4d6478; margin: 0; pointer-events: none; }
 .wish-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
-.elf-lane { position: absolute; left: 35%; right: 4%; bottom: var(--ground); height: 16%; pointer-events: none; }
+.elf-lane { position: absolute; left: 47%; right: 3%; bottom: var(--ground); height: 16%; pointer-events: none; }
 .elf-hit { position: absolute; transform: translate(-50%,-50%); padding: 0; border: 0; border-radius: 0; background: none; touch-action: pan-y; cursor: pointer; z-index: 5; }
 .elf-hit[aria-pressed="true"] { cursor: grab; }
 .elf-hit[data-state="dragging"] { cursor: grabbing; }
@@ -48,8 +66,7 @@
 .wish-mesh-controls .tree-envelope-hit { pointer-events: none; }
 /* Temporary lock only after a confirmed model drag. No editable exception during that gesture. */
 html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none !important; user-select: none !important; }
-.room-caption { position: absolute; bottom: .5rem; left: 30%; right: 15%; text-align: center; color: #8d7e65; font: 1rem WishHand, var(--font-display); margin: 0; pointer-events: none; }
-.scene-loading { position: absolute; top: 40%; left: 43%; right: 7%; text-align: center; font-size: .75rem; color: #4d6671; z-index: 4; pointer-events: none; }
+.scene-loading { position: absolute; top: 40%; left: 46%; right: 15%; text-align: center; font-size: .85rem; color: #fbecc4; z-index: 4; pointer-events: none; }
 .scene-loading button { display: block; margin: .8rem auto; pointer-events: auto; border: 1px solid #a77e65; padding: .4rem .9rem; background: var(--cream); }
 .envelope-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1rem; list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
 .envelope { border: 0; width: 100%; padding: 0; background: none; }
@@ -58,36 +75,32 @@ html.wish-drag-active, html.wish-drag-active body * { -webkit-user-select: none 
 .wish-date { color: var(--muted); font-size: .75rem; }
 .wish-message { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 2; }
 @media(max-width: 1100px) and (min-width: 701px) {
- .wish-room { height: 810px; }
- .wish-letter { width: 36%; left: 2%; padding: 1rem 1.2rem; }
- .wish-tree-space { left: 39%; right: 0; }
- .stocking-station { left: 5%; width: 30%; height: 26%; }
- .letter-actions { gap: .4rem; }
-}
-@media(max-width: 850px) and (min-width: 701px) {
- .wish-room { height: 790px; }
- .wish-letter { width: 39%; left: 2%; padding: 1rem; }
- .wish-tree-space { left: 41%; right: 0; }
- .wish-letter h2 { font-size: 1.8rem; }
+ .wish-room { height: clamp(640px, calc(100svh - 108px), 860px); }
+ .wish-letter { width: 37%; left: 2%; padding: 1rem 1.2rem; }
+ .stocking-station { left: 39%; width: 15%; height: 30%; }
+ .wish-tree-space { left: 52%; right: 1%; }
+ .night-cottage { display: none; }
+ .night-pines { left: 42%; }
+ .elf-lane { left: 53%; right: 2%; height: 13%; }
  .letter-actions { align-items: flex-start; flex-direction: column; gap: .35rem; }
  .letter-actions small br { display: none; }
- .elf-lane { left: 37%; right: 3%; height: 13%; }
- .room-caption { font-size: .85rem; }
 }
 @media(max-width: 700px) {
  .wish-page main { padding-top: 0; }
- .wish-room { width: 100%; height: auto; min-height: 1200px; border-width: 4px; display: grid; grid-template-columns: 1fr; grid-template-rows: 85px auto 190px 520px 65px; padding: 0 1rem; --ground: 65px; }
+ .wish-room { height: auto; min-height: 1040px; display: grid; grid-template-columns: 1fr; grid-template-rows: 76px auto 460px 56px; padding: 0 1rem; --ground: 56px; }
  .room-heading { top: 1rem; left: 1.4rem; }
  .wish-letter { position: relative; top: auto; left: auto; width: min(100%, 410px); max-width: none; margin: 0 auto; grid-row: 2; padding: 1.2rem 1.4rem 1rem; }
  .wish-letter textarea { height: 140px; max-height: 200px; }
  .wish-letter input, .wish-letter textarea { font-size: 16px; }
- .stocking-station { position: relative; grid-row: 3; width: 230px; height: 173px; left: auto; bottom: auto; justify-self: start; align-self: end; margin-left: .2rem; }
- .stocking-station figcaption { top: 55%; left: 100%; right: auto; width: 80px; font-size: .85rem; text-align: left; }
- .wish-tree-space { position: relative; grid-row: 4; width: 100%; height: 100%; left: auto; right: auto; top: auto; bottom: auto; }
- .tree-hint { bottom: -2.4rem; font-size: .6rem; }
+ .stocking-station { position: relative; grid-row: 3; grid-column: 1; z-index: 3; width: 104px; height: 190px; left: auto; bottom: auto; justify-self: start; align-self: end; }
+ .wish-tree-space { position: relative; grid-row: 3; grid-column: 1; width: 100%; height: 100%; left: auto; right: auto; top: auto; bottom: auto; }
+ .tree-hint { bottom: -2rem; font-size: .78rem; }
+ .night-cottage, .night-pines, .night-cloud-a { display: none; }
+ .night-moon { left: auto; right: 6%; top: 1%; }
+ .night-stars { height: 38%; }
+ .night-forest { bottom: auto; top: 58%; height: 15%; }
+ .night-snow { height: 30%; }
  .elf-lane { left: 4%; right: 3%; height: 95px; bottom: var(--ground); }
- .room-caption { display: none; }
- .room-ground { top: var(--snow-start, 650px); bottom: 0; background-image: url('../assets/illustrations/wish/snow-ground.svg'), linear-gradient(transparent 40px, #fff7e7 40px); background-position: center top; background-size: 100% 140px, 100% 100%; background-repeat: no-repeat; }
- .scene-loading { left: 8%; right: 8%; top: auto; bottom: 330px; }
+ .scene-loading { left: 8%; right: 8%; top: auto; bottom: 260px; }
  .envelope-list { grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
