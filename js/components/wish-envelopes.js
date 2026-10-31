@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { horizontalIntent } from './wish-layout.js';
 import { createPaperEnvelopeLibrary, paperSwing, SWING_DURATION } from './paper-envelope.js';
+import { outwardLean, pendulumStep } from '../data/paper-envelope-style.js';
 import { assignEnvelopeAnchors } from './wish-envelope-layout.js';
 
 export function createWishEnvelopes({ root, tree, camera, wake, motion, managedInteraction = false }) {
   const group = new THREE.Group(); group.name = 'hanging-paper-wishes'; tree.add(group);
   const targets = document.createElement('div'); targets.className = 'tree-envelope-targets'; root.append(targets);
   let disposed = false, geometry = null, entries = [], onSelect = () => {}, revision = 0, lastProjection = null, width = 0, height = 0;
-  let proxy = null;
+  let proxy = null, lastAngle = tree.rotation.y, spin = 0;
   const seedValue = new Uint32Array(1);
   if (globalThis.crypto?.getRandomValues) globalThis.crypto.getRandomValues(seedValue);
   else seedValue[0] = Math.floor(Math.random() * 4294967296);
@@ -19,6 +20,10 @@ export function createWishEnvelopes({ root, tree, camera, wake, motion, managedI
   });
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2(), projected = new THREE.Vector3();
   const box = new THREE.Box3(), corner = new THREE.Vector3(), normal = new THREE.Vector3(), viewDirection = new THREE.Vector3();
+  // The delivery wobble and the pendulum add up, so a turn during the wobble still reads naturally.
+  function pose(entry) {
+    entry.pivot.rotation.set(entry.lean, 0, entry.rest + entry.sway.angle + (entry.swing === null ? 0 : paperSwing(entry.swing)));
+  }
   function layout(next = geometry) {
     if (next !== geometry || !proxy) {
       proxy?.geometry.dispose(); geometry = next;
@@ -36,7 +41,7 @@ export function createWishEnvelopes({ root, tree, camera, wake, motion, managedI
       entry.anchor.scale.setScalar(geometry.height * placement.size);
       entry.anchor.rotation.set(0, placement.rotation[1], 0);
       entry.rest = placement.rotation[2];
-      entry.pivot.rotation.set(0, 0, entry.rest + (entry.swing === null ? 0 : paperSwing(entry.swing)));
+      pose(entry);
       entry.anchor.userData.wishAnchor = placement.anchorId;
       entry.anchor.userData.wishZone = placement.zone;
     }
@@ -73,7 +78,7 @@ export function createWishEnvelopes({ root, tree, camera, wake, motion, managedI
   function createEntry(wish) {
     const kind = wish.isOwn ? 'gold' : 'normal', ornament = library.create(kind), button = document.createElement('button');
     group.add(ornament.anchor); ornament.anchor.visible = false;
-    const entry = { ...ornament, wish, kind, button, rest: 0, swing: null, worldCenter: new THREE.Vector3(), screenWidth: 0 };
+    const entry = { ...ornament, wish, kind, button, rest: 0, swing: null, sway: { angle: 0, velocity: 0 }, lean: 0, worldCenter: new THREE.Vector3(), screenWidth: 0 };
     button.type = 'button'; button.className = 'tree-envelope-hit'; button.hidden = true;
     let drag = null, moved = false;
     if (!managedInteraction) {
@@ -117,16 +122,37 @@ export function createWishEnvelopes({ root, tree, camera, wake, motion, managedI
   }
   function update(dt) {
     let moving = false;
-    for (const entry of entries) {
-      if (entry.swing === null) continue;
-      if (motion?.matches) { entry.swing = null; entry.pivot.rotation.z = entry.rest; revision++; continue; }
-      if (!geometry || !entry.variant.ready) continue;
-      entry.swing = Math.min(SWING_DURATION, entry.swing + dt);
-      entry.pivot.rotation.z = entry.rest + paperSwing(entry.swing); revision++;
-      if (entry.swing >= SWING_DURATION) { entry.swing = null; entry.pivot.rotation.z = entry.rest; }
-      else moving = true;
+    // Smooth the pointer's steps into a spin rate; its change is what the envelopes feel.
+    const step = Math.min(dt, .05);
+    let acceleration = 0;
+    if (step > 0) {
+      const previous = spin;
+      spin += ((tree.rotation.y - lastAngle) / step - spin) * (1 - Math.exp(-step * 18));
+      if (Math.abs(spin) < .002) spin = 0;
+      acceleration = (spin - previous) / step; lastAngle = tree.rotation.y;
     }
-    return moving;
+    const lean = outwardLean(spin);
+    for (const entry of entries) {
+      if (motion?.matches) {
+        entry.sway.angle = entry.sway.velocity = entry.lean = 0;
+        if (entry.swing !== null) { entry.swing = null; revision++; }
+        pose(entry); continue;
+      }
+      if (!geometry || !entry.variant.ready) continue;
+      if (entry.swing !== null) {
+        entry.swing = Math.min(SWING_DURATION, entry.swing + dt);
+        if (entry.swing >= SWING_DURATION) entry.swing = null; else moving = true;
+        revision++;
+      }
+      if (step > 0 && (acceleration || entry.sway.angle || entry.sway.velocity)) {
+        pendulumStep(entry.sway, acceleration, step);
+        entry.lean += (lean - entry.lean) * (1 - Math.exp(-step * 6));
+        if (Math.abs(entry.sway.angle) + Math.abs(entry.sway.velocity) + Math.abs(entry.lean) < .002) { entry.sway.angle = entry.sway.velocity = entry.lean = 0; } else moving = true;
+        revision++;
+      }
+      pose(entry);
+    }
+    return moving || spin !== 0;
   }
   function project(nextWidth, nextHeight) {
     width = nextWidth; height = nextHeight;

@@ -271,3 +271,9 @@ node --experimental-vm-modules tests/smoke.mjs
 - Java：Temurin 25.0.5。`npm test`：27 組 smoke 與 23 項 node:test 通過；`npm run test:firebase`：18 項通過。
 - `node scripts/check-firebase-e2e.mjs`：68 項通過，正式 Firebase 網域請求 0 個。截圖與 `report.json` 在 `screenshots/firebase/`。
 - console 共 7 筆，皆為刻意觸發：6 筆是模擬斷線，1 筆是測試密碼錯誤的 HTTP 400。
+
+## 2026-11-01：Wish 改版
+
+- `npm test`：29 組 smoke 與 24 項 node:test 通過；`check-firebase-e2e.mjs` 73 項通過。
+- 舊斷言「轉樹時信封完全不動」與需求相反，改為檢查單擺落後、逐次衰減、回到靜止，且不脫離樹枝、不轉向鏡頭。
+- 信封厚度斷言由 1–2% 改為 3–7%；折信改三折，側邊摺的斷言換成上方摺。枝葉不穿插與十封皆可點的測試保留。

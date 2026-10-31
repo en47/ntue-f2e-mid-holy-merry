@@ -49,7 +49,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 ### 目錄分工
 - `js/components/` — DOM 與 Three.js 行為單元（角色場景、精靈、信封、世界地圖、Intro 故事書）。
 - `js/components/paper-art.js`、`paper-props.js` — SVG 紙雕工法與道具。每片紙只轉成圖片一次，會動的部位拆成獨立圖層以 CSS 移動，不要動畫 SVG 內部（濾鏡重算成本很高）。
-- `js/data/` — 純資料表。多數由 `scripts/` 的 `.mjs` / `.py` 產生（`title-glyphs.js`、`elf-actions.json`、`elf-ground.js`、`envelope-shapes.js`、`wish-tree-anchors.js`、`storybook-masks`）；**不要手改產出檔**，改腳本後重新產生。
+- `js/data/` — 純資料表。多數由 `scripts/` 的 `.mjs` / `.py` 產生（`envelope-shapes.js` 由 `build-wish-art.mjs`、`title-glyphs.js`、`elf-actions.json`、`elf-ground.js`、`wish-tree-anchors.js`、`storybook-masks`）；**不要手改產出檔**，改腳本後重新產生。
 - `js/services/` — 儲存與 Firebase。
 - `js/games/` — 配對遊戲適配層；`js/games/matching.js` 是保留的舊單關原型，已不載入。
 - `css/tokens.css` 設計變數 → `css/shared.css` 導覽／按鈕／Footer／音樂 → 各頁 CSS。
@@ -61,7 +61,8 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 - 訪客＝匿名登入；`users/{uid}/wishes/{id}` 存私人原件，核准後的公開副本在 `publicWishes/{id}`。管理員＝Email/Password ＋ `admin: true` custom claim（session persistence）。
 - `firestore.rules` 會強制查詢上限（`bounded()`）與公開副本必須對應私人原件（`matchesSource()`）；改資料形狀時規則與 `tests/firestore.rules.test.mjs` 要同步。
 - `js/services/wish-selection.js` 決定樹上顯示哪 10 封（自己最新一封＋9 封他人已核准）。
-- `js/services/wish-storage.js` 的 `holy-merry:wishes:v1` 是**舊版本機收藏**，僅讀取顯示，不自動上傳。
+- `js/services/wish-storage.js` 的 `holy-merry:wishes:v1` 是**舊版本機收藏**，頁面已不顯示，也不刪除瀏覽器內的資料。
+- Wish 載入 `wish-tree-web.glb`、`wish-elf-web.glb`（`scripts/build-wish-models.mjs` 產生）；測試的錨點驗證仍比對原始 `wish-tree.glb`。
 - 主機名稱完全等於 `localhost` 或 `127.0.0.1` 時，網站自動改連本機模擬器與 `demo-holy-merry` 專案（`localEmulatorTarget`），所以本機預覽 Wish／Admin 要先啟動模擬器：`npx firebase emulators:start --only auth,firestore --project demo-holy-merry`。
 - `js/config/firebase-config.js` 是公開的 Web App 設定；`tools/firebase-admin/*.mjs` 只用 ADC，拒絕 emulator 環境變數，絕不可被網頁 import。
 

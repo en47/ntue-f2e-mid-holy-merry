@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { assignEnvelopeAnchors, envelopeZoneCounts, envelopesSeparated } from '../js/components/wish-envelope-layout.js';
 import { wishTreeAnchors, wishTreeAnchorSource } from '../js/data/wish-tree-anchors.js';
 import { envelopeShapes } from '../js/data/envelope-shapes.js';
-import { HANGING_DROP, HANGING_OUTSET, MAX_SWING, SWING_DURATION, paperSwing } from '../js/data/paper-envelope-style.js';
+import { HANGING_DROP, HANGING_OUTSET, MAX_SWING, PENDULUM, SWING_DURATION, outwardLean, paperSwing, pendulumStep } from '../js/data/paper-envelope-style.js';
 test('tree selection: 10 approved others, or 9 others plus own latest private/pending; no duplicate or own older letters',()=>{
   const others=Array.from({length:14},(_,i)=>({id:`public-${i}`,ownerUid:'other',nickname:'公開願望'}));
   const mine={id:'my-latest',ownerUid:'me',visibility:'private',status:'pending'};
@@ -45,13 +45,13 @@ async function envelopeEnvironment() {
   return {controller,root,tree,camera,motion,textures,get selected(){return selected;},get wakes(){return wakes;},select:w=>selected=w,load:async relative=>{const m=await load(new URL(relative,import.meta.url));await m.evaluate();return m.namespace;}};
 }
 
-test('real paper geometry: alpha outline and bow holes, 1–2% board depth, original textures, matte rear, low polygon budget',async()=>{
+test('real paper geometry: rounded outline, thick 3–7% packet, shared paper texture, matte rear, low polygon budget',async()=>{
   const env=await envelopeEnvironment(),{createPaperEnvelopeLibrary,PAPER_DEPTH}=await env.load('../js/components/paper-envelope.js');
   const library=createPaperEnvelopeLibrary(),normal=library.create('normal'),gold=library.create('gold');
-  assert.ok(PAPER_DEPTH>=.01&&PAPER_DEPTH<=.02);
+  assert.ok(PAPER_DEPTH>=.03&&PAPER_DEPTH<=.07);
   for(const paper of [normal,gold]){
     const box=paper.board.geometry.boundingBox,depth=box.max.z-box.min.z;
-    assert.ok(depth>=.01&&depth<=.02);
+    assert.ok(depth>=.03&&depth<=.08);
     assert.equal(paper.pivot.parent,paper.anchor);assert.equal(paper.body.parent,paper.pivot);
     assert.deepEqual(paper.pivot.position.toArray(),[0,0,0],'The swinging hinge stays exactly on the branch anchor');
     const string=paper.pivot.getObjectByName('short-hanging-thread');assert.ok(string);
@@ -148,7 +148,7 @@ test('validated branch anchors match actual GLB vertices and remain below the st
       const center=new THREE.Vector3(((data.bounds[0]+data.bounds[2])/2-data.anchor[0])/sourceWidth,
         -HANGING_DROP+(data.anchor[1]-(data.bounds[1]+data.bounds[3])/2)/sourceWidth,HANGING_OUTSET)
         .applyAxisAngle(new THREE.Vector3(0,0,1),tilt).applyAxisAngle(new THREE.Vector3(0,1,0),anchor.angle)
-        .multiplyScalar((kind==='gold'?.092:.085)*.96).add(new THREE.Vector3(...anchor.point)).multiplyScalar(height);
+        .multiplyScalar((kind==='gold'?.106:.098)*.96).add(new THREE.Vector3(...anchor.point)).multiplyScalar(height);
       const ray=new THREE.Raycaster(center.clone().addScaledVector(outward,2),outward.negate());
       const surface=ray.intersectObject(mesh)[0];
       assert.ok(!surface||surface.distance>=1.998,`${anchor.id} ${kind}: keep the short-hung body outside actual foliage`);
@@ -187,7 +187,7 @@ test('stable stratified assignments: 2 upper, 3 middle, 5 lower; all quadrants, 
     assert.deepEqual(plan.reduce((n,p)=>(n[p.zone]++,n),{upper:0,middle:0,lower:0}),{upper:2,middle:3,lower:5});
     assert.equal(new Set(plan.map(p=>quadrant(p.angle))).size,4);
     assert.equal(new Set(plan.map(p=>p.anchorId)).size,10);
-    for(const p of plan){assert.ok(wishTreeAnchors.some(a=>a.id===p.anchorId));assert.ok(p.size>=(p.isOwn?.092:.085)*.96&&p.size<=(p.isOwn?.092:.085)*1.04);}
+    for(const p of plan){assert.ok(wishTreeAnchors.some(a=>a.id===p.anchorId));assert.ok(p.size>=(p.isOwn?.106:.098)*.96&&p.size<=(p.isOwn?.106:.098)*1.04);}
     for(let i=0;i<10;i++)for(let j=i+1;j<10;j++)assert.ok(envelopesSeparated(plan[i],plan[j]));
     const refresh=assignEnvelopeAnchors([...wishes].reverse(),plan,seed);
     for(const p of plan)assert.equal(refresh.find(q=>q.id===p.id),p,'Same collection preserves existing objects and positions');
@@ -203,6 +203,19 @@ test('stable stratified assignments: 2 upper, 3 middle, 5 lower; all quadrants, 
   const overfull=[...wishes.slice(1),{id:'extra'},{id:'last-own',isOwn:true}];
   assert.ok(assignEnvelopeAnchors(overfull).some(p=>p.id==='last-own'),'Own latest remains even if caller supplies more than ten');
   assert.notDeepEqual(assignEnvelopeAnchors(wishes,[],1),assignEnvelopeAnchors(wishes,[],2),'Session seeds produce subtle natural variation');
+});
+
+test('hanging envelopes follow a damped pendulum: lag behind the turn, swing on after it stops, and come to rest',()=>{
+  const state={angle:0,velocity:0},dt=1/60;
+  for(let i=0;i<20;i++)pendulumStep(state,3,dt);
+  assert.ok(state.angle<0,'A tree speeding up leaves the envelope behind');
+  const amplitude=[];let peak=0,last=state.velocity;
+  for(let i=0;i<60*12;i++){pendulumStep(state,0,dt);peak=Math.max(peak,Math.abs(state.angle));if(Math.sign(last)!==Math.sign(state.velocity)){amplitude.push(peak);peak=0;}last=state.velocity;}
+  assert.ok(amplitude.length>4,'It keeps swinging after the push');
+  for(let i=1;i<amplitude.length;i++)assert.ok(amplitude[i]<amplitude[i-1]+1e-9,'Every swing is smaller than the one before');
+  assert.ok(Math.abs(state.angle)<.002,'Friction brings it to rest');
+  const huge={angle:0,velocity:0};for(let i=0;i<120;i++)pendulumStep(huge,400,dt);assert.ok(Math.abs(huge.angle)<=PENDULUM.limit);
+  assert.equal(outwardLean(0)+0,0);assert.ok(outwardLean(3)<outwardLean(1),'Faster spin flings it further out');assert.ok(outwardLean(100)>=-PENDULUM.leanLimit);
 });
 
 test('new gold swings once, survives public refresh, waits for assets, stops exactly, and honors reduced motion',async()=>{
@@ -233,7 +246,7 @@ test('delivery swing waits for the real model and textures, and cancels immediat
   controller.destroy();
 });
 
-test('calm branch hierarchy: 360 degree tree rotation never changes local ornament poses or billboards toward the camera',async()=>{
+test('branch hierarchy: turning the tree swings envelopes on their hinge, never detaches or billboards them, then they settle',async()=>{
   const env=await envelopeEnvironment(),{tree,controller,camera}=env;
   controller.setWishes(Array.from({length:10},(_,i)=>({id:`calm-${i}`,isOwn:i===0})),env.select);
   controller.layout({height:1,radius:.33});env.textures.forEach(t=>t.loaded());
@@ -243,19 +256,19 @@ test('calm branch hierarchy: 360 degree tree rotation never changes local orname
     pivot:anchor.getObjectByName('hanging-pivot'),body:anchor.getObjectByName('printed-paper-body'),
     rest:anchor.getObjectByName('hanging-pivot').quaternion.clone(),
   }));
-  const expected=new THREE.Quaternion(),actual=new THREE.Quaternion();
-  for(let frame=0;frame<=360;frame++){
-    tree.rotation.y=frame*Math.PI/180;assert.equal(controller.update(1/60),false);controller.project(1400,800);
-    anchors.forEach((anchor,i)=>{
-      const pose=poses[i];assert.ok(anchor.position.equals(pose.position));assert.ok(anchor.scale.equals(pose.scale));
-      assert.ok(anchor.quaternion.equals(pose.rotation));assert.ok(pose.pivot.quaternion.equals(pose.rest));
-      assert.equal(pose.pivot.rotation.x,0);assert.equal(pose.pivot.rotation.y,0);
-      assert.ok(Math.abs(pose.pivot.rotation.z)>=Math.PI/60&&Math.abs(pose.pivot.rotation.z)<=Math.PI/30,'Rest tilt stays at 3–6 degrees');
-      expected.copy(tree.quaternion).multiply(pose.rotation).multiply(pose.rest);
-      pose.body.getWorldQuaternion(actual);assert.ok(actual.angleTo(expected)<1e-7,'Only parent tree rotation changes world orientation');
+  let swung=0,lean=0;
+  for(let frame=0;frame<=240;frame++){
+    tree.rotation.y=frame*Math.PI/60;controller.update(1/60);controller.project(1400,800);
+    poses.forEach((pose,i)=>{
+      const anchor=anchors[i];assert.ok(anchor.position.equals(pose.position));assert.ok(anchor.quaternion.equals(pose.rotation),'Anchors stay fixed to the branch, no billboarding');assert.ok(anchor.scale.equals(pose.scale));
       assert.ok(pose.pivot.getWorldPosition(new THREE.Vector3()).distanceTo(anchor.getWorldPosition(new THREE.Vector3()))<1e-10,'Thread hinge never detaches');
+      swung=Math.max(swung,pose.pivot.quaternion.angleTo(pose.rest));lean=Math.min(lean,pose.pivot.rotation.x);
     });
   }
+  assert.ok(swung>.05,'A turning tree visibly moves the envelopes');assert.ok(swung<1.1,'Swing stays limited');assert.ok(lean<0,'Spinning leans them outward');
+  for(let frame=0;frame<60*20;frame++)controller.update(1/60);
+  assert.equal(controller.update(1/60),false,'They come to rest and stop asking for frames');
+  poses.forEach(pose=>assert.ok(pose.pivot.quaternion.angleTo(pose.rest)<.01));
   camera.position.x=2;camera.lookAt(8,4,0);controller.project(1390,800);
   anchors.forEach((anchor,i)=>{assert.ok(anchor.quaternion.equals(poses[i].rotation));assert.ok(poses[i].pivot.quaternion.equals(poses[i].rest));});
   for(let i=0;i<=140;i++)assert.ok(Math.abs(paperSwing(i/100))<=MAX_SWING);

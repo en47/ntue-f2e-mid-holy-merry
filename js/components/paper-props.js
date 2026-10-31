@@ -67,17 +67,21 @@ export function star(parent, x, y, size, fill = '#e0b04f') {
 }
 
 // A deckled airmail sheet: striped edge, holly, stamp and wax seal.
-export function airmailLetter(first, second) {
+// `writing` leaves the corners clear for a form: border, snow and stamp only.
+export function airmailLetter(first, second, { writing = false } = {}) {
   return parent => {
     shape('path', { d: 'M20 20C120 15 260 16 360 20 365 110 364 200 360 280 260 285 120 284 20 280 15 200 16 110 20 20Z', fill: '#fdf6e6' }, parent);
     for (const [stroke, offset] of [[first, 0], [second, 16]]) shape('rect', { x: 34, y: 34, width: 312, height: 232, rx: 6, fill: 'none', stroke, 'stroke-width': 5, 'stroke-dasharray': '16 16', 'stroke-dashoffset': offset }, parent);
     shape('path', { d: 'M18 22C90 14 190 14 262 20 258 32 240 36 230 30 222 42 200 42 192 32 180 44 158 42 150 32 138 42 116 40 110 30 96 44 66 38 58 32 44 46 26 40 18 22Z', fill: SNOW, transform: 'translate(0 8)' }, parent);
+    if (!writing) {
     shape('path', { d: 'M56 262C70 244 92 236 116 232', stroke: '#8a6a55', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, parent);
     for (const [x, y, angle] of [[74, 240, -40], [90, 232, -60], [104, 228, -74], [80, 256, 50], [98, 246, 34], [114, 240, 20]]) shape('path', { d: 'M0 0C4-6 4-14 0-20-4-14-4-6 0 0Z', fill: second === '#c08a3e' ? '#5f8a70' : first === '#a84a42' ? '#5f8a70' : '#4f7a65', transform: `translate(${x} ${y}) rotate(${angle})` }, parent);
     shape('circle', { cx: 120, cy: 232, r: 5, fill: '#b4544c' }, parent);
     holly(parent, 66, 62, .66);
+    }
     shape('rect', { x: 292, y: 48, width: 40, height: 50, rx: 2, fill: '#f6e4bd', stroke: '#fffdf6', 'stroke-width': 3, 'stroke-dasharray': '3 3' }, parent);
     star(parent, 312, 73, 12);
+    if (writing) return;
     shape('path', { d: 'M318 216C332 208 350 216 352 232 356 246 342 262 326 258 308 260 294 244 298 230 300 222 310 218 318 216Z', fill: '#a84a42' }, parent);
     shape('circle', { cx: 325, cy: 236, r: 14, fill: 'none', stroke: '#c9756b', 'stroke-width': 2 }, parent);
     star(parent, 325, 236, 8, '#e3b7a4');
@@ -103,6 +107,15 @@ export function facetedPeak(parent, x, top, base, left, right, tones = { cream: 
   const facet = (fill, points) => shape('path', { d: `M${points.map(at).join('L')}Z`, fill }, parent);
   facet(tones.cream, OUTLINE);
   for (const [tone, ...points] of FACETS) facet(tones[tone], points);
+}
+
+export function tagArt(fill, edge) {
+  const body = 'M18 12C70 8 170 8 222 12 232 13 236 18 235 28 233 40 233 50 235 62 236 72 232 77 222 78 170 82 70 82 18 78 8 77 4 72 5 62 7 50 7 40 5 28 4 18 8 13 18 12Z';
+  return parent => {
+    shape('path', { d: body, fill: edge, transform: 'translate(0 5)' }, parent);
+    shape('path', { d: body, fill }, parent);
+    shape('rect', { x: 14, y: 19, width: 212, height: 52, rx: 12, fill: 'none', stroke: '#fff3dc', 'stroke-opacity': .55, 'stroke-width': 2, 'stroke-dasharray': '7 6' }, parent);
+  };
 }
 
 export { holly, pine };

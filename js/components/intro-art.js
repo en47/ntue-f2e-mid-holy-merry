@@ -1,6 +1,8 @@
 // Intro's paper-cut book. Same rough-cut paper as Home and Game; every sheet is one image.
 import { paperLayer, popLayer, shape } from './paper-art.js';
-import { SNOW, cloud, holly, pine, roofHouse, star } from './paper-props.js';
+import { SNOW, cloud, holly, pine, roofHouse, star, tagArt } from './paper-props.js';
+
+export { tagArt };
 import { STORY_BOX, storyGlyphs } from '../data/story-glyphs.js';
 
 const BOARD = '#3f6655', BOARD_EDGE = '#2f5244', CREAM = '#fbf3e3';
@@ -81,15 +83,6 @@ export function mountBackdrop(host) {
     const piece = popLayer(host, '0 0 120 340', 'intro-hanger', hanger(kind, length), { delay: .55 + index * .07, paper: small });
     piece.style.left = `${left}%`; piece.style.setProperty('--swing', `${3.4 + index % 3 * .6}s`);
   });
-}
-
-export function tagArt(fill, edge) {
-  const body = 'M18 12C70 8 170 8 222 12 232 13 236 18 235 28 233 40 233 50 235 62 236 72 232 77 222 78 170 82 70 82 18 78 8 77 4 72 5 62 7 50 7 40 5 28 4 18 8 13 18 12Z';
-  return parent => {
-    shape('path', { d: body, fill: edge, transform: 'translate(0 5)' }, parent);
-    shape('path', { d: body, fill }, parent);
-    shape('rect', { x: 14, y: 19, width: 212, height: 52, rx: 12, fill: 'none', stroke: '#fff3dc', 'stroke-opacity': .55, 'stroke-width': 2, 'stroke-dasharray': '7 6' }, parent);
-  };
 }
 
 export function mountBookArt(root) {

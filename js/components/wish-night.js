@@ -58,9 +58,9 @@ export function mountNightScene(room) {
   popLayer(sky, '0 0 220 220', 'night-moon', moon, { delay: .1, paper: SOFT });
   for (const [name, delay] of [['night-cloud-a', .2], ['night-cloud-b', .3]]) popLayer(sky, '-20 0 270 116', `night-cloud ${name}`, parent => cloud(parent, 120, 62, 1.15, '#7f97ad'), { delay, paper: SOFT });
   popLayer(sky, '0 0 1600 300', 'night-forest', farForest, { delay: .25, paper: SOFT, ...none });
-  popLayer(sky, '0 0 500 420', 'night-cottage', cottage, { delay: .55, paper: PAPER });
+  popLayer(sky, '0 0 520 440', 'night-cottage', cottage, { delay: .55, paper: PAPER });
   popLayer(sky, '0 0 1600 300', 'night-snow', snowfield, { delay: .4, paper: SOFT, ...none });
-  popLayer(sky, '0 0 420 420', 'night-pines', sidePines, { delay: .75, paper: PAPER });
+  popLayer(sky, '-60 0 480 436', 'night-pines', sidePines, { delay: .75, paper: PAPER });
   const art = [...sky.querySelectorAll('img')].map(image => image.decode().catch(() => {}));
   Promise.race([Promise.all(art), new Promise(resolve => setTimeout(resolve, 1500))]).then(() => room.classList.add('is-opening'));
 }
