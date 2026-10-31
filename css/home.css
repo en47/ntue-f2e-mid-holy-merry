@@ -31,11 +31,17 @@
 .is-flipping > .flip-leaf-bottom { animation: flip-bottom-land .24s ease-out .22s both; }
 @keyframes flip-top-fall { from { transform: rotateX(0); } to { transform: rotateX(-90deg); } }
 @keyframes flip-bottom-land { from { transform: rotateX(90deg); } to { transform: rotateX(0); } }
-.storybook-title { position: absolute; z-index: 13; top: clamp(2.5rem, 5%, 3.5rem); left: 50%; width: min(38%, 470px); margin: 0; transform: translateX(-50%); pointer-events: none; filter: none; }
+/* 標題加緞帶的總高約為寬度的 .705 倍；寬度依舞台高度算，矮螢幕才不會壓到角色。 */
+.storybook { --stage-h: clamp(580px, calc(100svh - 110px), 960px); --title-top: 2.75rem; --title-floor: .435; }
+.storybook-title { position: absolute; z-index: 13; top: var(--title-top); left: 50%; width: min(38%, 470px, calc((var(--stage-h) * var(--title-floor) - var(--title-top)) / .705)); margin: 0; transform: translateX(-50%); pointer-events: none; filter: none; }
 .title-motion { position: relative; display: block; width: 100%; aspect-ratio: 760 / 380; }
 .title-motion { transform-origin: 50% 0; animation: title-rock 4s ease-in-out infinite alternate; animation-delay: 3.7s; }
 .title-letter { animation: letter-wobble 3.4s ease-in-out infinite alternate; }
 @keyframes letter-wobble { from { rotate: -2.2deg; } to { rotate: 2.2deg; } }
+.story-tagline { position: relative; display: block; width: 112%; margin: -.4rem 0 0 -6%; aspect-ratio: 820 / 150; transform-origin: 50% 0; animation: ribbon-swing 4.4s ease-in-out infinite alternate; }
+.storybook.is-opening .story-tagline { animation: ribbon-unfurl .7s cubic-bezier(.2,.8,.3,1.15) 3.5s backwards, ribbon-swing 4.4s ease-in-out 4.2s infinite alternate; }
+@keyframes ribbon-unfurl { from { opacity: 0; transform: scaleX(.15); } }
+@keyframes ribbon-swing { from { rotate: -.8deg; } to { rotate: .8deg; } }
 .story-stage { position: absolute; inset: 0; }
 .storybook.is-preparing .pop, .storybook.is-preparing .storybook-title { opacity: 0; }
 .storybook.is-opening .pop { animation: pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay, 0s) both; }
@@ -113,11 +119,19 @@
 @keyframes title-rock { from { transform: rotate(-1.7deg); } to { transform: rotate(1.7deg); } }
 @media (max-width: 1100px) {
   .countdown { left: 50%; right: auto; translate: -50% 0; }
-  .storybook-title { top: 164px; }
+  .storybook { --title-top: 164px; }
+}
+/* 中等寬度又矮的視窗放不下上下排列，日曆回到右上角、標題靠左。 */
+@media (min-width: 701px) and (max-width: 1100px) and (max-height: 860px) {
+  .countdown { left: auto; right: 1rem; translate: 0 0; }
+  .storybook { --title-top: 2.75rem; }
+  .storybook-title { left: 30%; }
+  .home-sun { display: none; }
 }
 @media (max-width: 900px) {
   .storybook { width: calc(100% - 1rem); min-height: 650px; }
-  .storybook-title { width: min(52%, 400px); }
+  .storybook { --stage-h: clamp(650px, calc(100svh - 110px), 960px); --title-floor: .5; }
+  .storybook-title { width: min(52%, 400px, calc((var(--stage-h) * var(--title-floor) - var(--title-top)) / .705)); }
   .home-sun { top: 13%; left: 5%; width: 13%; }
   .home-cloud-a { display: none; }
   .home-cloud-b { top: 14%; right: 4%; width: 17%; }
@@ -143,7 +157,8 @@
   .countdown { --flip-w: 24px; --flip-h: 34px; --flip-size: 25px; top: 1.6rem; padding: 1.4rem 1.15rem .95rem; font-size: .68rem; }
   .calendar-art { inset: -2rem 0 -.8rem; }
   .countdown-units { gap: .4rem; }
-  .storybook-title { top: 138px; width: 72%; max-width: 300px; }
+  .storybook { --stage-h: clamp(640px, calc(100svh - 85px), 960px); --title-top: 138px; --title-floor: .46; }
+  .storybook-title { width: min(72%, 300px, calc((var(--stage-h) * var(--title-floor) - var(--title-top)) / .705)); }
   .home-sun { top: 33%; left: 3%; width: 13%; }
   .home-cloud-b, .home-cloud-c { display: none; }
   .home-far { left: -70%; width: 240%; bottom: 44%; }
@@ -174,7 +189,7 @@
   .letter-body { min-height: 230px; padding: 3rem 2.5rem 2.3rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .storybook.is-opening .storybook-title, .title-motion, .title-letter, .countdown { animation: none; }
+  .storybook.is-opening .storybook-title, .title-motion, .title-letter, .countdown, .story-tagline, .storybook.is-opening .story-tagline { animation: none; }
   .christmas-letter, .letter-body, .paper-button, .button-art, .paper-button > span, .replay { transition: none; }
   .is-flipping > .flip-leaf { animation: none; visibility: hidden; }
   .paper-button:hover, .paper-button:active { transform: rotate(var(--button-tilt)); }
