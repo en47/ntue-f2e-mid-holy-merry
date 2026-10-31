@@ -145,4 +145,6 @@ npx firebase emulators:start --only auth,firestore --project demo-holy-merry
 BASE=http://127.0.0.1:5511 node scripts/check-firebase-e2e.mjs
 ```
 
+本機審核頁不能用正式帳號登入；執行 `npm run admin:local` 建立模擬器專用的測試管理員，模擬器重開後要重跑。
+
 模擬器不檢查複合索引，所以審核查詢的索引只能在正式專案確認。

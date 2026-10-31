@@ -63,7 +63,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 - `js/services/wish-selection.js` 決定樹上顯示哪 10 封（自己最新一封＋9 封他人已核准）。
 - `js/services/wish-storage.js` 的 `holy-merry:wishes:v1` 是**舊版本機收藏**，頁面已不顯示，也不刪除瀏覽器內的資料。
 - Wish 載入 `wish-tree-web.glb`、`wish-elf-web.glb`（`scripts/build-wish-models.mjs` 產生）；測試的錨點驗證仍比對原始 `wish-tree.glb`。
-- 主機名稱完全等於 `localhost` 或 `127.0.0.1` 時，網站自動改連本機模擬器與 `demo-holy-merry` 專案（`localEmulatorTarget`），所以本機預覽 Wish／Admin 要先啟動模擬器：`npx firebase emulators:start --only auth,firestore --project demo-holy-merry`。
+- 主機名稱完全等於 `localhost` 或 `127.0.0.1` 時，網站自動改連本機模擬器與 `demo-holy-merry` 專案（`localEmulatorTarget`），所以本機預覽 Wish／Admin 要先啟動模擬器：`npx firebase emulators:start --only auth,firestore --project demo-holy-merry`；正式帳號不能在本機登入，用 `npm run admin:local` 建立測試管理員（模擬器重開後要重跑）。
 - `js/config/firebase-config.js` 是公開的 Web App 設定；`tools/firebase-admin/*.mjs` 只用 ADC，拒絕 emulator 環境變數，絕不可被網頁 import。
 
 ### 遊戲整合（iframe 隔離）
