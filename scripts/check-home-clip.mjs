@@ -15,7 +15,8 @@ for (const name of pages) for (const [width, height] of [[375, 812], [768, 1024]
     for (const image of document.querySelectorAll('.art-layer img, .foreground-scene img')) {
       await image.decode().catch(() => {});
       const rect = image.getBoundingClientRect(), { naturalWidth: w, naturalHeight: h } = image;
-      if (!w || !rect.width || getComputedStyle(image.parentElement).display === 'none') continue;
+      // 海洋底紙與封面內襯本來就鋪滿到邊。
+      if (!w || !rect.width || image.closest('.map-sea, .intro-cover-inside-art') || getComputedStyle(image.parentElement).display === 'none') continue;
       const inPage = Boolean(image.closest('.page-foreground'));
       const bound = inPage ? image.closest('.page-foreground').getBoundingClientRect() : stage;
       const canvas = Object.assign(document.createElement('canvas'), { width: w, height: h });

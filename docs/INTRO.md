@@ -1,4 +1,26 @@
-# Intro — 三章紙雕故事與六國文化
+# Intro — 紙雕故事書與聖誕地圖
+
+頁面由兩段組成，桌機以 `scroll-snap-type: y proximity` 分段停靠：
+
+1. **故事書：** 書封置中放在雪地上。點擊後書滑到中線、封面以書脊為軸翻開，封面背面就是左頁；可合上。
+2. **聖誕地圖：** 信紙與捲軸先出現，展開後才看得到地圖、雪橇航線與國家捷徑。
+
+## 檔案分工
+
+- `js/components/intro-book.js`：翻開、翻頁、合上與紙雕收合的流程，不含任何圖。
+- `js/components/intro-art.js`：書封、書板、內頁角落、按鈕底圖、雪地背景。
+- `js/components/intro-scenes.js`：三章紙雕卡片；`js/data/intro-stories.js` 只放配置座標。
+- `js/components/intro-map.js`、`intro-scroll.js`：地圖、雪橇航線、捲軸。
+- `js/data/intro-map-shapes.js`：由 `scripts/build-intro-map.py` 描 `christmas_map.jpg` 產生，需要 opencv，不要手改。
+
+每片紙只轉成圖片一次；天空背板的傾斜要小於前後層的距離，否則 3D 平面會互相穿過、把前景削平。
+
+`assets/illustrations/intro/` 的原始 PNG 全部保留，頁面已不載入，`docs/INTRO-ASSETS.json` 的雜湊檢查照舊。
+
+---
+
+以下是改版前的紀錄。
+
 
 本次只修正既有 Intro。入口仍為 `intro.html`，沒有增加框架、改用 Demo iframe、發布或更動其他三頁。Header、Footer、共用 CSS、遊戲、Firebase、模型與原創圖檔保持原樣。
 

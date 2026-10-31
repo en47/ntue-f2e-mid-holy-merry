@@ -3,13 +3,9 @@ import { paperLayer, shape } from './paper-art.js';
 import { SNOW, holly, pine, roofHouse, star } from './paper-props.js';
 import { STORY_BOX, storyGlyphs } from '../data/story-glyphs.js';
 
-const BOARD = '#3f6655', BOARD_EDGE = '#2f5244', GOLD = '#d9b36a', CREAM = '#fbf3e3';
-const stitched = (parent, x, y, width, height, rx = 12) => shape('rect', { x, y, width, height, rx, fill: 'none', stroke: GOLD, 'stroke-width': 3, 'stroke-dasharray': '11 8' }, parent);
+const BOARD = '#3f6655', BOARD_EDGE = '#2f5244', CREAM = '#fbf3e3';
 
 function coverFace(parent) {
-  shape('rect', { x: 8, y: 8, width: 584, height: 584, rx: 18, fill: BOARD }, parent);
-  shape('rect', { x: 8, y: 8, width: 26, height: 584, rx: 10, fill: BOARD_EDGE }, parent);
-  stitched(parent, 46, 28, 526, 544);
   // A snowy night through a paper window, under the title plaque.
   shape('path', { d: 'M78 560V360C78 330 100 320 130 320H470C500 320 522 330 522 360V560Z', fill: '#34506c' }, parent);
   for (const [x, y, size] of [[140, 372, 8], [468, 366, 10], [300, 352, 6], [214, 400, 5], [398, 402, 6]]) star(parent, x, y, size, '#efd08a');
@@ -39,6 +35,23 @@ function pageCorners(parent) {
   shape('path', { d: 'M62 562H150', stroke: '#d9c5a2', 'stroke-width': 2, 'stroke-dasharray': '7 6', fill: 'none' }, parent);
 }
 
+function snowHills(parent) {
+  shape('path', { d: 'M0 150C220 90 420 140 640 110S1160 60 1400 110 1760 150 1920 90V280H0Z', fill: '#d6e3e9' }, parent);
+  shape('path', { d: 'M0 214C260 150 520 206 800 176S1320 140 1560 180 1800 210 1920 160V300C1600 330 1300 306 960 318S300 330 0 302Z', fill: SNOW }, parent);
+}
+
+function sideTrees(parent) {
+  pine(parent, 74, 300, 250, '#4f7a65'); pine(parent, 176, 304, 170, '#5f8a70');
+  star(parent, 200, 60, 10);
+}
+
+export function mountBackdrop(host) {
+  const paper = { scale: 1.2, grain: .4, shadow: .14 };
+  paperLayer(host, '0 0 1920 352', 'intro-bg-hills', snowHills, { paper, eager: true, preserveAspectRatio: 'none' });
+  const side = (name, mirror) => paperLayer(host, '-80 0 380 320', `intro-bg-side ${name}`, mirror ? parent => sideTrees(shape('g', { transform: 'translate(220 0) scale(-1 1)' }, parent)) : sideTrees, { paper: { ...paper, scale: 1 }, eager: true });
+  side('intro-bg-left', false); side('intro-bg-right', true);
+}
+
 export function tagArt(fill, edge) {
   const body = 'M18 12C70 8 170 8 222 12 232 13 236 18 235 28 233 40 233 50 235 62 236 72 232 77 222 78 170 82 70 82 18 78 8 77 4 72 5 62 7 50 7 40 5 28 4 18 8 13 18 12Z';
   return parent => {
@@ -51,13 +64,16 @@ export function tagArt(fill, edge) {
 export function mountBookArt(root) {
   const flat = { paper: { scale: .9, grain: .5, shadow: .24 }, eager: true };
   const bookEl = root.querySelector('.intro-book');
-  const boardLayer = paperLayer(bookEl, '0 0 1200 600', 'intro-book-board', board, { ...flat, preserveAspectRatio: 'none' });
+  const boardLayer = paperLayer(bookEl, '0 0 1200 626', 'intro-book-board', board, { ...flat, preserveAspectRatio: 'none' });
   bookEl.prepend(boardLayer);
   const front = root.querySelector('[data-book="cover-front"]');
-  paperLayer(front, '0 0 600 600', 'intro-cover-art', coverFace, { ...flat, preserveAspectRatio: 'xMidYMid slice' });
+  const face = document.createElement('span');
+  face.className = 'intro-cover-face';
+  front.append(face);
+  paperLayer(face, '0 0 600 620', 'intro-cover-art', coverFace, flat);
   const title = document.createElement('span');
   title.className = 'intro-cover-title';
-  front.append(title);
+  face.append(title);
   const paper = { scale: 1.8, grain: .4, shadow: .18, rim: '#fff7e8' }, palette = ['#a84a42', '#b5604a', '#4f7d68', '#a84a42', '#c08a3e'];
   storyGlyphs.forEach(({ d, pivot }, index) => {
     const letter = paperLayer(title, STORY_BOX, 'title-letter', parent => shape('path', { d, fill: palette[index % 5] }, parent), { paper, origin: pivot, eager: true });
@@ -65,7 +81,7 @@ export function mountBookArt(root) {
   });
   paperLayer(root.querySelector('[data-book="cover-inside"]'), '0 0 600 600', 'intro-cover-inside-art', coverInside, { ...flat, preserveAspectRatio: 'none' });
   const tags = [['prev', '#a84a42', '#853a34'], ['next', '#4a7560', '#3a5e4d'], ['gift', '#b98a45', '#8f6a33']];
-  for (const [id, fill, edge] of tags) paperLayer(root.querySelector(`[data-book="${id}"]`), '0 0 240 90', 'tag-art', tagArt(fill, edge), { paper: { scale: .7, grain: .45, shadow: .24 }, eager: true, preserveAspectRatio: 'none' });
+  for (const [id, fill, edge] of tags) paperLayer(root.querySelector(`[data-book="${id}"]`), '0 0 240 106', 'tag-art', tagArt(fill, edge), { paper: { scale: .7, grain: .45, shadow: .24 }, eager: true, preserveAspectRatio: 'none' });
 }
 
 // Pages carry their own corner art so the turning leaf, a clone, looks the same.

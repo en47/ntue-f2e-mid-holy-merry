@@ -267,10 +267,10 @@ function gifts(parent) {
 // Key: [viewBox, draw]. Backdrops are larger sheets and take softer paper.
 export const sceneArt = {
   nightSky: ['0 0 560 530', nightSky], duskSky: ['0 0 560 530', duskSky], winterSky: ['0 0 560 530', winterSky],
-  bethlehem: ['0 0 420 300', bethlehem], star: ['0 0 310 170', shootingStar], stable: ['0 0 560 404', stable],
+  bethlehem: ['-30 0 480 310', bethlehem], star: ['0 0 310 170', shootingStar], stable: ['0 0 560 420', stable],
   mary: ['0 0 200 310', mary], joseph: ['0 0 200 310', joseph], manger: ['0 0 300 204', manger], sheep: ['0 0 260 170', sheep], cowDonkey: ['0 0 346 204', cowDonkey],
-  night: ['0 0 280 150', nightCloud], chapel: ['0 0 440 310', chapel], cottage: ['0 0 520 394', cottage], nicholas: ['0 0 260 310', nicholas], family: ['0 0 410 232', family], fireplace: ['0 0 280 310', fireplace],
-  tree: ['0 0 220 316', decoratedTree], snowPine: ['0 0 160 230', snowPine], lamp: ['0 0 84 216', streetLamp], sign: ['0 0 146 244', signpost], fence: ['0 0 350 146', gardenFence], snowFront: ['0 0 700 140', snowFront], gifts: ['0 0 310 168', gifts],
+  night: ['0 0 280 150', nightCloud], chapel: ['-30 -24 500 340', chapel], cottage: ['0 0 520 394', cottage], nicholas: ['0 0 260 322', nicholas], family: ['0 0 410 232', family], fireplace: ['0 0 280 310', fireplace],
+  tree: ['-52 0 324 320', decoratedTree], snowPine: ['-44 0 248 234', snowPine], lamp: ['0 0 84 216', streetLamp], sign: ['0 0 146 244', signpost], fence: ['0 0 350 146', gardenFence], snowFront: ['0 0 700 140', snowFront], gifts: ['0 0 310 168', gifts],
 };
 
 const PAPER = { scale: 1, grain: .55, shadow: .26 }, SHEET = { scale: 1.2, grain: .4, shadow: .12 };

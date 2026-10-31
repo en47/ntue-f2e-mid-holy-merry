@@ -36,6 +36,14 @@ test('three chapters: common architecture datum, offset backgrounds, original as
  assert.ok(find(1,'family').x+find(1,'family').w<find(1,'fireplace').x);
  assert.ok(!introStories[2].pieces.some(p=>/village|bethlehem/.test(p.id)));
 });
+test('page text and paper art: raster chapters are gone and the map keeps its six pins',async()=>{
+ const html=await fs.readFile('intro.html','utf8'),css=await fs.readFile('css/intro.css','utf8');
+ assert.ok(!/assets\/illustrations\/intro\//.test(html+css),'Intro no longer loads the raster originals');
+ for(const id of ['cover','close','controls'])assert.ok(html.includes(`data-book="${id}"`),id);
+ for(const id of ['stage','sheet','letter','fold'])assert.ok(html.includes(`data-scroll="${id}"`),id);
+ assert.ok(css.includes('scroll-snap-type:y proximity')&&css.includes('scroll-snap-align:start'));
+ for(const copy of ['把希望與善意','選取故事書後','願每一點善意'])assert.ok(!html.includes(copy),copy);
+});
 test('book waits for every hinge, populated leaf, forward/back, rapid-click guard and cancellation',async()=>{
  const f=await fixture('js/components/intro-book.js'),book=f.api.mountIntroBook(f.root,{motion:{matches:false}}),el=id=>f.root.querySelector(`[data-book="${id}"]`);
  assert.equal(book.snapshot().phase,'closed');assert.equal(el('copies').children.length,3);assert.equal(el('controls').hidden,true);
