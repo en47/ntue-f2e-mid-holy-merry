@@ -206,34 +206,32 @@ await snap(admin.page, 'admin-signed-out');
 await admin.page.reload(); await admin.page.waitForTimeout(1500);
 note('Admin：登出後重新整理不會自動登入', await admin.page.locator('#admin-panel').isHidden());
 
-// 5b. 撤回已公開的信
+// 5b. 全部願望：已公開／已拒絕分頁，撤回與重新同意都要真的進出隨機庫
 await login('moderator@example.test', 'admin-pass-123');
-await admin.page.waitForFunction(() => document.querySelector('#admin-published li'), null, { timeout: 15000 }).catch(() => {});
-note('Admin：已公開區列出 1 封', (await admin.page.locator('#admin-published li').count()) === 1);
+await admin.page.waitForFunction(() => document.querySelector('#admin-status').textContent === '目前沒有待審信件。', null, { timeout: 15000 }).catch(() => {});
+const tab = async (name, text) => { await admin.page.locator('.admin-tabs').getByRole('button', { name }).click(); await admin.page.waitForFunction(text => document.querySelector('#admin-status').textContent === text, text, { timeout: 15000 }).catch(() => {}); };
+await tab('已公開', '已讀取 1 封已公開願望。');
+note('Admin：已公開分頁列出 1 封', (await admin.page.locator('#admin-wishes li').count()) === 1, await adminStatus());
 await snap(admin.page, 'admin-published');
 admin.page.once('dialog', dialog => dialog.dismiss());
 await admin.page.getByRole('button', { name: '撤回公開' }).click();
 await admin.page.waitForTimeout(400);
 note('Admin：取消確認就不會撤回', (await publicInStore()).length === 1);
-// 先確認訪客看得到，再撤回，才能驗證信真的從樹上消失。
 await openWish(second.page);
 const beforeWithdraw = await second.page.locator('#cloud-envelope-list button').allTextContents();
 note('Wish：其他訪客看得到核准信，自己的私人信也在', beforeWithdraw.includes('小明') && beforeWithdraw.includes('自己的最新願望'), JSON.stringify(beforeWithdraw));
 await snap(second.page, 'wish-approved-visible');
-await openWish(third.page);
-note('Wish：被拒絕的信不會公開給別人', !beforeWithdraw.includes('小美'), JSON.stringify(await third.page.locator('#cloud-envelope-list button').allTextContents()));
+note('Wish：被拒絕的信不會公開給別人', !beforeWithdraw.includes('小美'));
 const fresh = await open('訪客E', { reducedMotion: 'reduce' });
 await openWish(fresh.page);
-note('Wish：新訪客只看到已核准的 1 封', JSON.stringify(await fresh.page.locator('#cloud-envelope-list button').allTextContents()) === '["小明"]');
+const freshLabels = async () => { await openWish(fresh.page); return (await fresh.page.locator('#cloud-envelope-list button').allTextContents()).sort(); };
+note('Wish：新訪客只看到已核准的 1 封', JSON.stringify(await freshLabels()) === '["小明"]');
 admin.page.once('dialog', dialog => dialog.accept());
 await admin.page.getByRole('button', { name: '撤回公開' }).click();
-await admin.page.waitForFunction(() => !document.querySelector('#admin-published li'), null, { timeout: 15000 }).catch(() => {});
+await admin.page.waitForFunction(() => document.querySelector('#admin-status').textContent === '目前沒有已公開願望。', null, { timeout: 15000 }).catch(() => {});
 stored = await wishesInStore();
 note('模擬器：撤回後公開副本刪除、原信保留並改為 rejected', (await publicInStore()).length === 0 && str(byName('小明'), 'status') === 'rejected' && str(byName('小明'), 'content') === '希望今年下雪');
-await snap(admin.page, 'admin-withdrawn');
-await openWish(fresh.page);
-note('Wish：撤回後訪客看不到那封信', (await fresh.page.locator('#cloud-envelope-list button').count()) === 0);
-await fresh.context.close();
+note('Wish：撤回後訪客看不到那封信', (await freshLabels()).length === 0);
 await openWish(first.page);
 await first.page.locator('details:has(#cloud-envelope-list) summary').click();
 await first.page.locator('#cloud-envelope-list button').first().click();
@@ -241,12 +239,28 @@ await first.page.waitForTimeout(300);
 const ownerNotice = await first.page.locator('#wish-dialog-privacy').textContent();
 note('Wish：本人仍看得到自己的信，並被告知未公開', ownerNotice.includes('未通過'), ownerNotice);
 await first.page.keyboard.press('Escape');
+await tab('已拒絕', '已讀取 3 封已拒絕願望。');
+note('Admin：已拒絕分頁列出全部 3 封', (await admin.page.locator('#admin-wishes li').count()) === 3, await adminStatus());
+await snap(admin.page, 'admin-rejected');
+note('Admin：私人信不能重新同意', await item('小華').getByRole('button', { name: '重新同意' }).isDisabled());
+await item('小美').getByRole('button', { name: '重新同意' }).click();
+await admin.page.waitForFunction(() => document.querySelector('#admin-status').textContent === '已讀取 2 封已拒絕願望。', null, { timeout: 15000 }).catch(() => {});
+await item('小明').getByRole('button', { name: '重新同意' }).click();
+await admin.page.waitForFunction(() => document.querySelector('#admin-status').textContent === '已讀取 1 封已拒絕願望。', null, { timeout: 15000 }).catch(() => {});
+stored = await wishesInStore();
+note('模擬器：重新同意後回到 approved 並進入隨機庫', (await publicInStore()).length === 2 && str(byName('小美'), 'status') === 'approved' && str(byName('小明'), 'status') === 'approved', `${(await publicInStore()).length} 封`);
+note('Wish：重新同意的信回到樹上（撤回過也可以）', JSON.stringify(await freshLabels()) === '["小明","小美"]');
+await tab('已公開', '已讀取 2 封已公開願望。');
+await snap(admin.page, 'admin-republished');
+await fresh.context.close();
 await admin.page.click('#admin-signout'); await admin.page.waitForTimeout(400);
+stored = await wishesInStore();
 
 // 7. 權限規則：實際嘗試，並確認該通過的確實通過
 const visitor = await account(), stranger = await account();
 const plainToken = await signIn('someone@example.test', 'plain-pass-123'), adminToken = await signIn('moderator@example.test', 'admin-pass-123');
 // 先授權再換發，token 才帶得到 admin claim。
+// 分頁讀取用的查詢形狀也要受 limit 50 保護。
 const anonymousSignUp = (await json(`${AUTH}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=x`, { method: 'POST', body: '{"returnSecureToken":true}' })).body;
 await grantAdmin(anonymousSignUp.localId);
 const anonymousAdminToken = (await json(`${AUTH}/securetoken.googleapis.com/v1/token?key=x`, { method: 'POST', body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: anonymousSignUp.refreshToken }) })).body.id_token;

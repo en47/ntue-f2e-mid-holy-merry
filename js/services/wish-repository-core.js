@@ -53,9 +53,12 @@ export function createWishRepository(sdk, client) {
     const result = await sdk.getDocsFromServer(sdk.query(sdk.collectionGroup(db,'wishes'),sdk.where('status','==','pending'),sdk.orderBy('createdAt','asc'),sdk.limit(50)));
     return result.docs.map(snapshot=>plain(snapshot,snapshot.ref.parent.parent.id));
   }
-  async function publishedWishes() {
-    const result = await sdk.getDocsFromServer(sdk.query(sdk.collection(db,'publicWishes'),sdk.orderBy('publishedAt','desc'),sdk.limit(30)));
-    return result.docs.map(snapshot=>plain(snapshot,snapshot.data().ownerUid));
+  // Reuses the status + createdAt index, one page per request; the cursor continues the same status.
+  async function wishesByStatus(status,after=null) {
+    if(!['pending','approved','rejected'].includes(status))throw new Error('Invalid status');
+    const page=[sdk.where('status','==',status),sdk.orderBy('createdAt','asc'),...(after?[sdk.startAfter(after)]:[]),sdk.limit(50)];
+    const result=await sdk.getDocsFromServer(sdk.query(sdk.collectionGroup(db,'wishes'),...page));
+    return { wishes:result.docs.map(snapshot=>plain(snapshot,snapshot.ref.parent.parent.id)), cursor:result.docs.length===50?result.docs.at(-1):null };
   }
   async function reviewWish(uid,id,decision) {
     if(!['approved','rejected'].includes(decision))throw new Error('Invalid decision');
@@ -74,5 +77,5 @@ export function createWishRepository(sdk, client) {
       else if(copy.exists())transaction.delete(published);
     });
   }
-  return { get uid(){return user().uid;}, draft, submitWish, latestWish, publicWishes, pendingWishes, publishedWishes, reviewWish };
+  return { get uid(){return user().uid;}, draft, submitWish, latestWish, publicWishes, pendingWishes, wishesByStatus, reviewWish };
 }

@@ -1,15 +1,40 @@
-.admin-shell { width: min(850px,calc(100% - 2rem)); margin: 2rem auto; }
-.admin-shell h1,.admin-shell h2 { color: #8f443e; }
-.admin-shell form { max-width: 420px; margin: 2rem 0; }
-.admin-shell label { display: block; margin: 1rem 0 .35rem; }
-.admin-shell input { width: 100%; font-size: 16px; padding: .65rem; }
-.admin-shell button { padding: .65rem .9rem; margin-top: .8rem; border: 1px solid #bda489; background: #fff5df; color: #743f38; cursor: pointer; }
-.admin-toolbar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+@font-face { font-family: StorySign; src: url('../assets/fonts/mountains-of-christmas-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+.admin-page { min-height: 100svh; background: #dfeef3 radial-gradient(#b9d3dc 1px, transparent 1.4px) 0 0 / 14px 14px; }
+.admin-hills { position: fixed; inset: auto 0 0; height: 22vh; z-index: 0; pointer-events: none; }
+.admin-shell { position: relative; z-index: 1; width: min(860px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 26vh; color: #54463c; }
+.admin-back { color: #8f443e; font-size: .9rem; }
+.admin-shell h1 { margin: .4rem 0 .1rem; color: #a84a42; font: 700 clamp(2.4rem, 6vw, 3.4rem)/1.1 StorySign, var(--font-display); }
+.admin-shell h2 { margin: 0; color: #4f7d68; font: 700 2rem/1.1 StorySign, var(--font-display); }
+.admin-lede { margin: 0 0 1rem; }
+.admin-shell form { position: relative; isolation: isolate; max-width: 460px; margin: 1.6rem 0 1rem; padding: 3.2rem 3rem 2.8rem; }
+.admin-shell form:not(:has(.letter-art)) { background: #fdf6e6; }
+.letter-art { z-index: -1; pointer-events: none; }
+.admin-shell label { display: block; margin: .9rem 0 .3rem; font-weight: 500; }
+.admin-shell input { width: 100%; font-size: 16px; padding: .55rem .2rem; border: 0; border-bottom: 2px solid #c9b18c; border-radius: 0; background: transparent; }
+.admin-shell input:focus-visible { outline: 3px solid #e0b04f; outline-offset: 2px; }
+.admin-shell button { min-height: 44px; padding: .5rem 1.1rem; margin-top: .8rem; border: 0; border-radius: 9px 11px 8px 10px; background: #a84a42; color: #fff9ec; font-weight: 600; box-shadow: 0 3px 0 #853a34; cursor: pointer; transition: transform .15s; }
+.admin-shell button:hover:not(:disabled) { transform: translateY(-2px); }
+.admin-shell button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #853a34; }
+.admin-shell button:focus-visible { outline: 3px solid #e0b04f; outline-offset: 2px; }
+.admin-shell button.is-quiet, .admin-toolbar button, #admin-more { background: #fbf3e3; color: #7a4238; box-shadow: 0 3px 0 #cdbb9e; }
+.admin-shell button:disabled { opacity: .5; cursor: not-allowed; }
+.admin-toolbar { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin-top: .6rem; }
 .admin-toolbar h2 { margin-right: auto; }
-#admin-wishes, #admin-published { padding: 0; list-style: none; }
-#admin-wishes li, #admin-published li { padding: 1.4rem 0; border-top: 1px dashed #acbfc3; }
-.admin-wish-content { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.9; }
-.admin-actions { display: flex; gap: .75rem; }
-.admin-shell button:disabled { opacity: .55; cursor: wait; }
-#admin-status { white-space: pre-wrap; overflow-wrap: anywhere; }
-#published-title { margin-top: 2.5rem; }
+.admin-tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .6rem; }
+.admin-shell .admin-tabs button { background: #fbf3e3; color: #54463c; box-shadow: 0 3px 0 #cdbb9e; }
+.admin-shell .admin-tabs button[aria-pressed='true'] { background: #4f7d68; color: #fff9ec; box-shadow: 0 3px 0 #3a5e4d; }
+#admin-tab-hint { margin: .8rem 0 0; font-size: .92rem; }
+#admin-wishes { display: grid; gap: 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+#admin-wishes li { position: relative; padding: 1.2rem 1.4rem 1rem; border-radius: 8px 10px 7px 9px; background: #fdf6e6; box-shadow: 0 0 0 3px #fff9ec, 0 0 0 4px #d9c5a2, 0 8px 14px -8px #4b6a7a66; }
+#admin-wishes li::before { content: ''; position: absolute; inset: 6px; border: 2px dashed #a84a4266; border-radius: 6px; pointer-events: none; }
+#admin-wishes li.is-approved::before { border-color: #4f7d6888; }
+#admin-wishes li.is-rejected::before { border-color: #9a8c7a88; }
+#admin-wishes h3 { margin: 0; color: #8f443e; font-size: 1.15rem; }
+.admin-wish-meta { margin: .1rem 0 .4rem; font-size: .85rem; color: #6f6757; }
+.admin-wish-content { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.85; }
+.admin-actions { position: relative; display: flex; gap: .7rem; flex-wrap: wrap; }
+#admin-status { min-height: 1.6em; white-space: pre-wrap; overflow-wrap: anywhere; font-weight: 500; }
+#admin-more { display: block; margin: 1.2rem auto 0; }
+#admin-more[hidden] { display: none; }
+@media (max-width: 600px) { .admin-shell form { padding: 2.8rem 2.2rem 2.4rem; } }
+@media (prefers-reduced-motion: reduce) { .admin-shell button { transition: none; } }
