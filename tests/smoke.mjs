@@ -132,6 +132,12 @@ await test('Wish 壓縮模型：網頁載入壓縮檔、雜湊正確、原始 GL
   const elf = await fs.readFile(path.join(project, 'assets/models/wish-elf-web.glb')), data = JSON.parse(elf.toString('utf8', 20, 20 + elf.readUInt32LE(12)).trim());
   assert.equal(data.skins[0].joints.length, 65); assert.equal(data.animations.length, 1);
 });
+await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
+  const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
+  assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));
+  assert.ok(lights.includes('pointermove') && lights.includes('LINGER') && css.includes('.wish-lights i.is-lit'));
+  assert.ok((await fs.readFile(path.join(project, 'js/wish.js'), 'utf8')).includes('mountNightScene(room)'));
+});
 await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {
   const env = environment();
   const { mountFlipCounter } = await env.evaluate('js/components/flip-counter.js');

@@ -1,5 +1,7 @@
 import { createWishDelivery } from './components/wish-delivery.js';
 import { selectTreeWishes } from './services/wish-selection.js';
+import { mountNightScene } from './components/wish-night.js';
+import { mountWishLights } from './components/wish-lights.js';
 const form = document.querySelector('#wish-form');
 const nickname = document.querySelector('#nickname');
 const content = document.querySelector('#wish-content');
@@ -91,6 +93,8 @@ form.addEventListener('submit', async event => {
 
 // The scene and Firebase load independently; WebGL failure must not disable letters.
 const room = document.querySelector('#wish-room');
+mountNightScene(room);
+const lights = mountWishLights(room);
 let sceneController = null, sceneVersion = 0;
 async function startScene() {
   if (sceneController) return;
@@ -110,7 +114,7 @@ async function startScene() {
     retry.onclick = () => { retry.hidden = true; startScene(); };
   }
 }
-window.addEventListener('pagehide', () => { delivery.cancel(); sceneVersion++; sceneController?.destroy(); sceneController = null; });
+window.addEventListener('pagehide', event => { if (!event.persisted) lights.destroy(); delivery.cancel(); sceneVersion++; sceneController?.destroy(); sceneController = null; });
 window.addEventListener('pageshow', () => { if (!sceneController) startScene(); });
 startScene();
 connectCloud();
