@@ -7,9 +7,11 @@
 .storybook { --story-cream: #fff7e8; --story-ink: #66564c; position: relative; isolation: isolate; width: min(1440px, calc(100% - 2rem)); height: calc(100svh - 110px); min-height: 580px; max-height: 960px; margin: 0 auto; padding: 0; overflow: hidden; overflow: clip; border: 8px solid #f8f0df; border-radius: 15px 12px 14px 10px; background: linear-gradient(180deg,#9cc0d2 0%,#c6dde3 44%,#f3e8d4 66%); box-shadow: 0 14px 28px #42677724, 0 3px 0 #c8b99e; }
 .paper-texture { position: absolute; inset: 0; z-index: 20; opacity: .13; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E"); }
 /* 翻頁日曆：只有數字下載 Fredoka 子集，中文沿用系統字體。 */
-.countdown { --flip-w: 30px; --flip-h: 42px; --flip-size: 31px; position: absolute; top: 1.1rem; right: 1.3rem; z-index: 17; display: grid; justify-items: center; gap: .3rem; padding: .7rem .8rem .35rem; border-radius: 7px 9px 6px 8px; background: #fbf3e3; box-shadow: 0 0 0 2px #fff9ec, 0 2px 0 3px #cdbb9e, 0 8px 14px #42677730; color: #5a4a40; font-size: .74rem; font-weight: 500; line-height: 1.3; rotate: .7deg; }
-.countdown::before, .countdown::after { content: ''; position: absolute; top: -7px; width: 9px; height: 15px; border-radius: 5px; background: linear-gradient(90deg, #a98a62, #d9c196 45%, #a98a62); box-shadow: 0 1px 1px #5a4a4044; }
-.countdown::before { left: 22%; } .countdown::after { right: 22%; }
+.countdown { --flip-w: 30px; --flip-h: 42px; --flip-size: 31px; position: absolute; top: 2.1rem; right: 1.6rem; z-index: 17; display: grid; justify-items: center; gap: .25rem; padding: 1.75rem 1.75rem 1.2rem; color: #5a4a40; font-size: .74rem; font-weight: 500; line-height: 1.3; transform-origin: 50% -2.5rem; animation: calendar-sway 4.6s ease-in-out infinite alternate; }
+@keyframes calendar-sway { from { rotate: -.9deg; } to { rotate: .9deg; } }
+/* 紙雕底圖連同兩條緞帶往上超出舞台頂端，看起來是吊著的。 */
+.calendar-art { z-index: -1; inset: -2.6rem 0 -.9rem; }
+.countdown:not(:has(.calendar-art)) { border-radius: 8px; background: #fbf3e3; box-shadow: 0 0 0 3px #b08f6c; }
 .countdown-units { display: flex; gap: .6rem; }
 .flip-unit { --flip-card: #a84a42; --flip-low: #974139; display: grid; justify-items: center; }
 .flip-unit[data-tone='green'] { --flip-card: #4f7d68; --flip-low: #46705d; }
@@ -50,7 +52,7 @@
 .home-mid { z-index: 5; left: 7%; width: 18%; aspect-ratio: 440 / 230; bottom: 27%; }
 .home-near-left { z-index: 10; left: -3%; width: 27%; aspect-ratio: 572 / 452; bottom: 7%; }
 .home-near-right { z-index: 10; right: -2%; width: 24%; aspect-ratio: 520 / 452; bottom: 7%; }
-.home-bank { z-index: 12; width: 25%; aspect-ratio: 572 / 224; bottom: 9%; }
+.home-bank { z-index: 12; width: 26%; aspect-ratio: 572 / 224; bottom: 10%; }
 .home-bank-left { left: 22%; }
 .home-bank-right { right: 22%; }
 .home-front { z-index: 13; left: -2%; width: 104%; bottom: -1%; height: 19%; }
@@ -63,7 +65,7 @@
 .character-stage.is-dragging { cursor: grabbing; }
 .character-stage:focus-visible { outline: none; }
 .stage-key-hint { position: absolute; top: 0; left: 50%; width: max-content; max-width: 95%; transform: translateX(-50%); text-align: center; color: #623b31; background: #fff7e8e8; padding: .3rem; font-size: .7rem; opacity: 0; pointer-events: none; }
-.character-stage:focus-visible .stage-key-hint { opacity: 1; }
+.character-stage:focus-visible:not([aria-expanded='true']) .stage-key-hint { opacity: 1; }
 .model-recovery { position: absolute; top: 98%; left: -12%; z-index: 15; width: 124%; text-align: center; pointer-events: auto; }
 .asset-retry { padding: .3rem .6rem; background: #fff7e8; border: 1px dashed #aa896f; color: #614c3e; font-size: .72rem; }
 .model-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); margin: 0; }
@@ -73,7 +75,7 @@
 .model-fallback progress { width: min(110px, 80%); height: 5px; margin: auto; accent-color: #a64f47; }
 .story-actions { position: absolute; bottom: 5.5%; left: 50%; transform: translate3d(-50%, 0, 0); z-index: 30; will-change: transform; display: flex; justify-content: center; gap: 1.1rem; white-space: nowrap; }
 /* 文字是真實連結，紙雕只是底圖；底圖未生成或無 JS 時退回純色按鈕。 */
-.paper-button { --button-tilt: -1.2deg; position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: .55rem; width: 226px; height: 72px; padding: .15rem 1.4rem 0; color: #fff9ec; font: 700 1.32rem / 1 StorySign, Georgia, serif; letter-spacing: .01em; text-decoration: none; text-shadow: 0 1px 0 #2f4a3d66; transform: rotate(var(--button-tilt)); transition: transform .18s cubic-bezier(.2,1.3,.4,1); }
+.paper-button { --button-tilt: -1.2deg; position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: .5rem; width: 274px; height: 80px; padding: .15rem 1.2rem 0 4.7rem; color: #fff9ec; font: 700 1.26rem / 1 StorySign, Georgia, serif; letter-spacing: .01em; text-decoration: none; text-shadow: 0 1px 0 #2f4a3d66; transform: rotate(var(--button-tilt)); transition: transform .18s cubic-bezier(.2,1.3,.4,1); }
 .paper-button.cream { --button-tilt: 1.2deg; }
 .paper-button:not(:has(.art-layer)) { border-radius: 12px; background: #4a7560; }
 .paper-button.cream:not(:has(.art-layer)) { background: #a84a42; }
@@ -97,6 +99,7 @@
 .christmas-letter.right.is-visible { transform: perspective(800px) translateX(0) rotateY(0) rotate(1.5deg); }
 .letter-body { display: grid; align-content: center; justify-items: center; gap: .45rem; position: relative; isolation: isolate; aspect-ratio: 380 / 300; min-height: 240px; padding: 3.3rem 2.7rem 2.5rem; transform-origin: 50% 20%; transform: perspective(600px) rotateX(-28deg); transition: transform .55s cubic-bezier(.2,1.15,.3,1); }
 .letter-art { z-index: -1; }
+.letter-body:not(:has(.letter-art)) { background: #fdf6e6; box-shadow: 0 0 0 3px #e8d9ba; }
 .christmas-letter.is-visible .letter-body { transform: perspective(600px) rotateX(0); }
 .letter-from { font: 700 1.25rem / 1.2 var(--font-body); color: #8a3f35; }
 .letter-copy { display: block; min-width: 0; font-size: .98rem; font-weight: 500; overflow-wrap: anywhere; }
@@ -109,7 +112,7 @@
 @keyframes title-rock { from { transform: rotate(-1.7deg); } to { transform: rotate(1.7deg); } }
 @media (max-width: 1100px) {
   .countdown { left: 50%; right: auto; translate: -50% 0; }
-  .storybook-title { top: 112px; }
+  .storybook-title { top: 164px; }
 }
 @media (max-width: 900px) {
   .storybook { width: calc(100% - 1rem); min-height: 650px; }
@@ -135,9 +138,10 @@
 @media (max-width: 600px) {
   .home-page .header-inner { padding-block: .7rem; }
   .storybook { width: 100%; height: calc(100svh - 85px); min-height: 640px; border-width: 5px; border-radius: 0; }
-  .countdown { --flip-w: 24px; --flip-h: 34px; --flip-size: 25px; top: .85rem; padding: .55rem .6rem .25rem; font-size: .68rem; }
+  .countdown { --flip-w: 24px; --flip-h: 34px; --flip-size: 25px; top: 1.6rem; padding: 1.4rem 1.15rem .95rem; font-size: .68rem; }
+  .calendar-art { inset: -2rem 0 -.8rem; }
   .countdown-units { gap: .4rem; }
-  .storybook-title { top: 96px; width: 80%; max-width: 330px; }
+  .storybook-title { top: 138px; width: 72%; max-width: 300px; }
   .home-sun { top: 33%; left: 3%; width: 13%; }
   .home-cloud-b, .home-cloud-c { display: none; }
   .home-far { left: -70%; width: 240%; bottom: 44%; }
@@ -155,7 +159,8 @@
   .character-santa { left: 5%; } .character-reindeer { right: 5%; }
   .model-recovery { top: 99%; left: -4%; width: 108%; }
   .story-actions { bottom: 7.5%; gap: .3rem; }
-  .paper-button { width: 174px; height: 60px; padding-inline: .9rem; font-size: 1.08rem; gap: .35rem; }
+  .paper-button { width: 178px; height: 62px; padding: .1rem .4rem 0 3.05rem; font-size: .96rem; }
+  .paper-button > span { display: none; }
   .story-hint { bottom: 3.4%; width: 90%; max-width: 95%; font-size: .7rem; }
   .replay { bottom: .35rem; left: .5rem; font-size: .66rem; }
   .christmas-letter { width: min(340px, calc(100% - 1.5rem)); left: 50% !important; right: auto !important; bottom: 5svh; }
@@ -166,7 +171,7 @@
   .letter-body { min-height: 230px; padding: 3rem 2.5rem 2.3rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .storybook.is-opening .storybook-title, .title-motion, .title-letter { animation: none; }
+  .storybook.is-opening .storybook-title, .title-motion, .title-letter, .countdown { animation: none; }
   .christmas-letter, .letter-body, .paper-button, .button-art, .paper-button > span, .replay { transition: none; }
   .is-flipping > .flip-leaf { animation: none; visibility: hidden; }
   .paper-button:hover, .paper-button:active { transform: rotate(var(--button-tilt)); }
