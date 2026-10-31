@@ -67,27 +67,57 @@ function globe(host) {
   });
 }
 
-function flakeArt(parent) {
-  for (let angle = 0; angle < 180; angle += 60) shape('path', { d: 'M40 8V72M30 18L40 28 50 18M30 62L40 52 50 62', stroke: '#6f9bb8', 'stroke-width': 6, 'stroke-linecap': 'round', fill: 'none', transform: `rotate(${angle} 40 40)` }, parent);
+const PRIZES = [
+  parent => star(parent, 100, 60, 34),
+  parent => {
+    shape('path', { d: 'M100 26C80 28 76 48 74 64 72 74 66 80 64 86H136C134 80 128 74 126 64 124 48 120 28 100 26Z', fill: '#d9a441' }, parent);
+    shape('circle', { cx: 100, cy: 94, r: 9, fill: '#a84a42' }, parent);
+  },
+  parent => {
+    shape('circle', { cx: 100, cy: 74, r: 26, fill: '#fbf8f1' }, parent);
+    shape('circle', { cx: 100, cy: 38, r: 18, fill: '#fbf8f1' }, parent);
+    for (const x of [93, 107]) shape('circle', { cx: x, cy: 34, r: 2.8, fill: '#3b2a22' }, parent);
+    shape('path', { d: 'M100 40L116 44 100 46Z', fill: '#d9823f' }, parent);
+  },
+];
+const CONFETTI = ['#a84a42', '#4f7d68', '#d9a441', '#7fa3a8', '#efdcae'];
+
+// Each scrap keeps its sideways speed while gravity bends its path into a parabola.
+function throwScrap(host, index) {
+  const scrap = element('i', 'toy-scrap', host);
+  scrap.style.background = CONFETTI[index % CONFETTI.length];
+  const side = (index - 7.5) / 7.5, speed = 90 + Math.random() * 70, spin = 360 + Math.random() * 500;
+  const frames = Array.from({ length: 9 }, (_, step) => {
+    const t = step / 8, x = side * 150 * t, y = -speed * 2 * t + speed * 2.5 * t * t;
+    return { transform: `translate(${x}px, ${y}px) rotate(${spin * t}deg)`, opacity: t > .85 ? 0 : 1 };
+  });
+  scrap.animate(frames, { duration: 1500, easing: 'linear' }).finished.catch(() => {}).finally(() => scrap.remove());
 }
 
-function snowCatch(host) {
-  const sign = element('span', 'toy-score', host);
-  sign.textContent = '接到 0 片雪花'; sign.setAttribute('role', 'status');
-  const first = paperLayer(document.createElement('div'), '0 0 80 80', '', flakeArt, { paper: { ...PAPER, shadow: .1 }, eager: true }).querySelector('img');
-  let score = 0;
-  // CSS owns the falling, so the loop stops with the page and needs no timer of its own.
-  [8, 26, 46, 66, 84].forEach((left, index) => {
-    const flake = element('button', 'toy-flake', host);
-    flake.type = 'button'; flake.tabIndex = -1; flake.setAttribute('aria-hidden', 'true');
-    flake.style.left = `${left}%`; flake.style.animationDelay = `${-index * 1.5}s`; flake.style.animationDuration = `${6 + index % 3}s`;
-    flake.append(first.cloneNode());
-    flake.addEventListener('pointerdown', () => {
-      if (flake.classList.contains('is-caught')) return;
-      flake.classList.add('is-caught'); sign.textContent = `接到 ${++score} 片雪花`;
-      sign.animate([{ transform: 'translateX(-50%) scale(1)' }, { transform: 'translateX(-50%) scale(1.12)' }, { transform: 'translateX(-50%) scale(1)' }], { duration: 260 });
-      setTimeout(() => flake.classList.remove('is-caught'), 2200);
-    });
+function surpriseBox(host) {
+  const button = toyButton(host, '打開驚喜禮物盒'), paper = { paper: PAPER, eager: true };
+  const prizes = PRIZES.map(draw => paperLayer(button, '0 0 200 190', 'toy-prize', draw, paper));
+  paperLayer(button, '0 0 200 190', 'toy-box', parent => {
+    shape('rect', { x: 34, y: 92, width: 132, height: 92, rx: 5, fill: '#a84a42' }, parent);
+    shape('rect', { x: 88, y: 92, width: 24, height: 92, fill: '#efdcae' }, parent);
+  }, paper);
+  const lid = paperLayer(button, '0 0 200 190', 'toy-lid', parent => {
+    shape('rect', { x: 24, y: 68, width: 152, height: 30, rx: 5, fill: '#b5604a' }, parent);
+    shape('rect', { x: 88, y: 68, width: 24, height: 30, fill: '#efdcae' }, parent);
+    shape('path', { d: 'M100 68C66 36 48 62 100 68C152 62 134 36 100 68Z', fill: '#efdcae' }, parent);
+  }, paper);
+  let busy = false, last = -1;
+  button.addEventListener('click', async () => {
+    if (busy || motion().matches) return;
+    busy = true; host.classList.add('is-open');
+    let index = Math.floor(Math.random() * prizes.length);
+    if (index === last) index = (index + 1) % prizes.length;
+    last = index;
+    for (let scrap = 0; scrap < 16; scrap++) throwScrap(host, scrap);
+    const up = lid.animate([{ transform: 'none' }, { transform: 'translate(24%, -62%) rotate(26deg)', offset: .22 }, { transform: 'translate(24%, -62%) rotate(26deg)', offset: .8 }, { transform: 'none' }], { duration: 1900, easing: 'ease-in-out' });
+    prizes[index].animate([{ opacity: 0, transform: 'translateY(40%)' }, { opacity: 1, transform: 'translateY(-44%) scale(1.08)', offset: .22 }, { opacity: 1, transform: 'translateY(-36%)', offset: .34 }, { opacity: 1, transform: 'translateY(-36%)', offset: .72 }, { opacity: 0, transform: 'translateY(40%)' }], { duration: 1900, easing: 'ease-out' });
+    await up.finished.catch(() => {});
+    host.classList.remove('is-open'); busy = false;
   });
 }
 
@@ -109,7 +139,7 @@ function wishingStar(host) {
   });
 }
 
-const TOYS = { home: sled, intro: globe, game: snowCatch, wish: wishingStar };
+const TOYS = { home: sled, intro: globe, game: surpriseBox, wish: wishingStar };
 export function mountToy(root, kind) {
   const draw = TOYS[kind]; if (!draw) return;
   const host = element('div', `foreground-scene foreground-toy toy-${kind}`, root);

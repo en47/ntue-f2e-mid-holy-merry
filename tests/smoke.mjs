@@ -155,7 +155,7 @@ await test('Wish 小屋與郵票：白煙、開門人物、郵票只留本機、
 });
 await test('頁尾互動主角：四頁各一個，遵守減少動態，全頁只留一個重點', async () => {
   const toys = await fs.readFile(path.join(project, 'js/components/foreground-toys.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/shared.css'), 'utf8');
-  assert.ok(/const TOYS = \{ home: sled, intro: globe, game: snowCatch, wish: wishingStar \}/.test(toys));
+  assert.ok(/const TOYS = \{ home: sled, intro: globe, game: surpriseBox, wish: wishingStar \}/.test(toys));
   assert.ok((toys.match(/motion\(\)\.matches/g) ?? []).length >= 3); assert.ok(css.includes('.toy-button:focus-visible'));
   for (const page of ['index', 'intro', 'game', 'wish']) assert.ok((await fs.readFile(path.join(project, `${page}.html`), 'utf8')).includes('data-foreground='), page);
 });
