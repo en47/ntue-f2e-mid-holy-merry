@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const PAGES = ['index.html', 'intro.html', 'game.html', 'wish.html'];
+export const PAGES = ['index.html', 'intro.html', 'game.html', 'wish.html', 'admin.html'];
 const THREE = './vendor/three/build/three.module.js';
 const version = async file => createHash('sha256').update(await fs.readFile(path.join(project, file))).digest('hex').slice(0, 10);
 

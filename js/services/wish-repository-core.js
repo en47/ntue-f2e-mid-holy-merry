@@ -53,6 +53,10 @@ export function createWishRepository(sdk, client) {
     const result = await sdk.getDocsFromServer(sdk.query(sdk.collectionGroup(db,'wishes'),sdk.where('status','==','pending'),sdk.orderBy('createdAt','asc'),sdk.limit(50)));
     return result.docs.map(snapshot=>plain(snapshot,snapshot.ref.parent.parent.id));
   }
+  async function publishedWishes() {
+    const result = await sdk.getDocsFromServer(sdk.query(sdk.collection(db,'publicWishes'),sdk.orderBy('publishedAt','desc'),sdk.limit(30)));
+    return result.docs.map(snapshot=>plain(snapshot,snapshot.data().ownerUid));
+  }
   async function reviewWish(uid,id,decision) {
     if(!['approved','rejected'].includes(decision))throw new Error('Invalid decision');
     const moderator = user(), ref = privateRef(uid,id), published = publicRef(id);
@@ -70,5 +74,5 @@ export function createWishRepository(sdk, client) {
       else if(copy.exists())transaction.delete(published);
     });
   }
-  return { get uid(){return user().uid;}, draft, submitWish, latestWish, publicWishes, pendingWishes, reviewWish };
+  return { get uid(){return user().uid;}, draft, submitWish, latestWish, publicWishes, pendingWishes, publishedWishes, reviewWish };
 }

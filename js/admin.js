@@ -1,5 +1,5 @@
 const form=document.querySelector('#admin-login'),panel=document.querySelector('#admin-panel');
-const status=document.querySelector('#admin-status'),list=document.querySelector('#admin-wishes');
+const status=document.querySelector('#admin-status'),list=document.querySelector('#admin-wishes'),published=document.querySelector('#admin-published');
 const refresh=document.querySelector('#admin-refresh'),logout=document.querySelector('#admin-signout');
 let sdk,client,repository,busy=false,version=0;
 function showError(error){
@@ -14,32 +14,38 @@ async function authorize(){
   const token=await sdk.getIdTokenResult(client.auth.currentUser,true);
   return token.claims.admin===true && token.signInProvider==='password';
 }
+// Every action locks all buttons, and only the server's confirmation counts as done.
+async function decide(wish,decision){
+  if(busy)return;busy=true;refresh.disabled=true;logout.disabled=true;
+  const buttons=[...panel.querySelectorAll('li button')],disabled=buttons.map(b=>b.disabled);let saved=false;
+  buttons.forEach(b=>b.disabled=true);status.textContent='正在提交審核……';
+  try{await repository.reviewWish(wish.ownerUid,wish.id,decision);saved=true;status.textContent='審核已由伺服器確認。';}
+  catch(error){showError(error);}
+  finally{busy=false;refresh.disabled=false;logout.disabled=false;buttons.forEach((b,i)=>b.disabled=disabled[i]);if(saved)await loadQueue();}
+}
+function wishItem(wish,detail,actions){
+  const item=document.createElement('li'),title=document.createElement('h3'),body=document.createElement('p'),meta=document.createElement('p'),row=document.createElement('div');
+  title.textContent=wish.nickname;body.className='admin-wish-content';body.textContent=wish.content;meta.textContent=detail;
+  row.className='admin-actions';row.append(...actions);item.append(title,meta,body,row);return item;
+}
+function actionButton(label,handler,disabled=false){
+  const button=document.createElement('button');button.textContent=label;button.disabled=disabled;button.addEventListener('click',handler);return button;
+}
 async function loadQueue(){
   if(busy)return;busy=true;refresh.disabled=true;logout.disabled=true;const current=++version;
-  list.replaceChildren();status.textContent='正在讀取待審核信件……';
+  list.replaceChildren();published.replaceChildren();status.textContent='正在讀取待審核信件……';
   try{
     if(!await authorize()){
       await sdk.signOut(client.auth);panel.hidden=true;form.hidden=false;status.textContent='管理員授權已失效，請重新登入。';return;
     }
-    const wishes=await repository.pendingWishes();if(current!==version)return;
-    for(const wish of wishes){
-      const item=document.createElement('li'),title=document.createElement('h3'),body=document.createElement('p'),meta=document.createElement('p'),actions=document.createElement('div');
-      title.textContent=wish.nickname;body.className='admin-wish-content';body.textContent=wish.content;
-      meta.textContent=`${wish.visibility==='public'?'同意審核後公開':'私人信件'} · ${new Date(wish.createdAt).toLocaleString('zh-TW')}`;
-      actions.className='admin-actions';
-      for(const [decision,label]of [['approved','核准公開'],['rejected','拒絕']]){
-        const button=document.createElement('button');button.textContent=label;button.disabled=decision==='approved'&&wish.visibility!=='public';
-        button.addEventListener('click',async()=>{
-          if(busy)return;busy=true;refresh.disabled=true;logout.disabled=true;
-          const buttons=[...list.querySelectorAll('button')],disabled=buttons.map(b=>b.disabled);let saved=false;
-          buttons.forEach(b=>b.disabled=true);status.textContent='正在提交審核……';
-          try{await repository.reviewWish(wish.ownerUid,wish.id,decision);saved=true;status.textContent='審核已由伺服器確認。';}
-          catch(error){showError(error);}
-          finally{busy=false;refresh.disabled=false;logout.disabled=false;buttons.forEach((b,i)=>b.disabled=disabled[i]);if(saved)await loadQueue();}
-        });actions.append(button);
-      }
-      item.append(title,meta,body,actions);list.append(item);
-    }
+    const [wishes,live]=await Promise.all([repository.pendingWishes(),repository.publishedWishes()]);if(current!==version)return;
+    for(const wish of wishes)list.append(wishItem(wish,`${wish.visibility==='public'?'同意審核後公開':'私人信件'} · ${new Date(wish.createdAt).toLocaleString('zh-TW')}`,[
+      actionButton('核准公開',()=>decide(wish,'approved'),wish.visibility!=='public'),
+      actionButton('拒絕',()=>decide(wish,'rejected')),
+    ]));
+    for(const wish of live)published.append(wishItem(wish,`寄出於 ${new Date(wish.createdAt).toLocaleString('zh-TW')}`,[
+      actionButton('撤回公開',()=>{if(confirm(`確定要撤回「${wish.nickname}」的願望嗎？它會立刻從聖誕樹上移除。`))decide(wish,'rejected');}),
+    ]));
     status.textContent=wishes.length?`已讀取 ${wishes.length} 封待審信件。`:'目前沒有待審信件。';
   }catch(error){showError(error);}finally{busy=false;refresh.disabled=false;logout.disabled=false;}
 }
@@ -58,7 +64,7 @@ form.addEventListener('submit',async event=>{
   if(!panel.hidden)await loadQueue();
 });
 refresh.addEventListener('click',loadQueue);
-logout.addEventListener('click',async()=>{if(busy)return;++version;list.replaceChildren();panel.hidden=true;form.hidden=false;await sdk.signOut(client.auth);status.textContent='已登出。';});
+logout.addEventListener('click',async()=>{if(busy)return;++version;list.replaceChildren();published.replaceChildren();panel.hidden=true;form.hidden=false;await sdk.signOut(client.auth);status.textContent='已登出。';});
 async function start(){
   form.querySelector('button').disabled=true;
   try{
