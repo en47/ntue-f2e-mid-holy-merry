@@ -265,3 +265,9 @@ node --experimental-vm-modules tests/smoke.mjs
 ## 2026-10-31：Intro 海港
 
 - 檢查指令可用 `BASE=http://127.0.0.1:5511` 指定埠，避開 Live Server 的自動重新整理。
+
+## 2026-10-31：Firebase 模擬器實測
+
+- Java：Temurin 25.0.5。`npm test`：27 組 smoke 與 23 項 node:test 通過；`npm run test:firebase`：18 項通過。
+- `node scripts/check-firebase-e2e.mjs`：68 項通過，正式 Firebase 網域請求 0 個。截圖與 `report.json` 在 `screenshots/firebase/`。
+- console 共 7 筆，皆為刻意觸發：6 筆是模擬斷線，1 筆是測試密碼錯誤的 HTTP 400。

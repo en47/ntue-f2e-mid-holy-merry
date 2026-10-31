@@ -135,3 +135,14 @@ node tools/firebase-admin/set-admin-claim.mjs --project holymerry --uid YOUR_ADM
 - Sprite 為面向相機的紙片，採前半球顯示，並非逐葉片的精密遮擋。後續可在不改資料服務的情況下調整正式樹枝掛點與慶祝效果。
 
 管理員登入頁已在 Safari 實際開啟，SDK 初始化後登入按鈕可用，尚未輸入或讀取管理員密碼。本機沒有 Application Default Credentials，因此沒有執行正式 claim 授權。
+
+## 本機模擬器
+
+在 `localhost` 或 `127.0.0.1` 開網站時，會自動改連模擬器與 `demo-holy-merry` 專案，不會碰到正式資料；模擬器沒開時，Wish 頁會顯示「雲端信箱尚未連接」。正式網域不受影響，也不能用網址參數切換。
+
+```sh
+npx firebase emulators:start --only auth,firestore --project demo-holy-merry
+BASE=http://127.0.0.1:5511 node scripts/check-firebase-e2e.mjs
+```
+
+模擬器不檢查複合索引，所以審核查詢的索引只能在正式專案確認。

@@ -21,6 +21,7 @@ npm run test:firebase       # Firestore 規則與整合測試，需 Java 21 與 
 # 單獨執行
 node --experimental-vm-modules tests/smoke.mjs                 # 全部通過才結束；本身無法篩選單一組
 node --experimental-vm-modules --test tests/intro.test.mjs     # 需要這個旗標，否則會出現 SourceTextModule 錯誤
+BASE=http://127.0.0.1:5511 node scripts/check-firebase-e2e.mjs # 瀏覽器實測 Firebase，需先啟動模擬器與網站；會清空模擬器資料
 node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔可依名稱過濾（名稱為英文）
 ```
 
@@ -61,6 +62,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 - `firestore.rules` 會強制查詢上限（`bounded()`）與公開副本必須對應私人原件（`matchesSource()`）；改資料形狀時規則與 `tests/firestore.rules.test.mjs` 要同步。
 - `js/services/wish-selection.js` 決定樹上顯示哪 10 封（自己最新一封＋9 封他人已核准）。
 - `js/services/wish-storage.js` 的 `holy-merry:wishes:v1` 是**舊版本機收藏**，僅讀取顯示，不自動上傳。
+- 主機名稱完全等於 `localhost` 或 `127.0.0.1` 時，網站自動改連本機模擬器與 `demo-holy-merry` 專案（`localEmulatorTarget`），所以本機預覽 Wish／Admin 要先啟動模擬器：`npx firebase emulators:start --only auth,firestore --project demo-holy-merry`。
 - `js/config/firebase-config.js` 是公開的 Web App 設定；`tools/firebase-admin/*.mjs` 只用 ADC，拒絕 emulator 環境變數，絕不可被網頁 import。
 
 ### 遊戲整合（iframe 隔離）
