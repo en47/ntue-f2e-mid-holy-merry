@@ -39,9 +39,10 @@ export function mountIntroBook(root, {
    node.style.setProperty('--layer', p.z); node.style.setProperty('--depth', `${p.depth}px`);
    node.setAttribute('role', 'img'); node.setAttribute('aria-label', p.alt);
    art.piece?.(node, p); view.append(node);
-   const folded = `translateZ(${p.depth}px) rotateX(-84deg)`;
-   // Backdrops lean less than the depth gap between layers, so no plane slices through another.
-   const raised = `translateZ(${p.depth}px) rotateX(${p.id === 'sky' ? 1 : -2}deg)`;
+   // Cards fall backward, so perspective only ever shrinks them inside the page. Paint order is
+   // plain z-index: no shared 3D space means no card can slice through another.
+   const tilt = angle => `perspective(1000px) translateZ(${p.depth}px) rotateX(${angle}deg)`;
+   const folded = tilt(86), raised = tilt(0);
    node.style.transform = folded;
    return { node, folded, raised, delay: p.delay };
   });
