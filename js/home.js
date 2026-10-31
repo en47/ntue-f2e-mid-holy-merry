@@ -77,7 +77,7 @@ export function mountStorybook(root) {
     // 先提交離屏狀態，再滑入；減少動態設定不產生過場。
     void letter.offsetWidth;
     pendingFrame = requestAnimationFrame(() => { pendingFrame = null; if (active === letter) letter.classList.add('is-visible'); });
-    later(dismiss, 5000);
+    later(dismiss, Math.max(5000, line.length * 200)); // 長句多留一點閱讀時間。
   }
   for (const id of ['santa','reindeer']) {
     listen(root.querySelector(`#${id}-letter`), 'click', dismiss);
@@ -88,6 +88,9 @@ export function mountStorybook(root) {
   listen(document, 'keydown', event => { if (event.key === 'Escape' && active) { event.preventDefault(); dismiss(); } });
   const replay = () => { clear(); root.classList.remove('is-opening'); void root.offsetWidth; root.classList.add('is-opening'); };
   listen(root.querySelector('#replay-story'), 'click', replay);
+  // 鍵盤提示只給鍵盤使用者；滑鼠點角色後焦點留在按鈕上，不該跳出提示。
+  listen(document, 'keydown', event => { if (event.key === 'Tab') root.classList.add('uses-keyboard'); });
+  listen(document, 'pointerdown', () => root.classList.remove('uses-keyboard'));
   listen(document, 'visibilitychange', () => { if (document.hidden) clear(); });
   replay();
   return { destroy() { clear(); cleanups.forEach(cleanup => cleanup()); root.classList.remove('is-opening'); } };
