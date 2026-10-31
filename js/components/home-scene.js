@@ -1,6 +1,6 @@
 // Home pop-up book: a village under faceted snow peaks. Sun at upper left; every building meets the snow.
 import { paperLayer, popLayer, shape } from './paper-art.js';
-import { SHADE, SNOW, berryBush, church, cloud, fence, holly, lamp, pine, roofHouse, star } from './paper-props.js';
+import { SHADE, SNOW, airmailLetter, berryBush, church, cloud, fence, holly, lamp, pine, roofHouse, star } from './paper-props.js';
 import { TITLE_BOX, titleGlyphs } from '../data/title-glyphs.js';
 
 const GREEN = '#5f8a70', DEEP = '#4f7a65', ICE = '#c7dbe6', SKY = '#92b6d0', DUSK = '#6b95b6', CREAM = '#f7f0e3';
@@ -146,23 +146,6 @@ function buttonArt(fill, edge, icon) {
   };
 }
 
-function letterArt(first, second) {
-  return parent => {
-    shape('path', { d: 'M20 20C120 15 260 16 360 20 365 110 364 200 360 280 260 285 120 284 20 280 15 200 16 110 20 20Z', fill: '#fdf6e6' }, parent);
-    for (const [stroke, offset] of [[first, 0], [second, 16]]) shape('rect', { x: 34, y: 34, width: 312, height: 232, rx: 6, fill: 'none', stroke, 'stroke-width': 5, 'stroke-dasharray': '16 16', 'stroke-dashoffset': offset }, parent);
-    shape('path', { d: 'M18 22C90 14 190 14 262 20 258 32 240 36 230 30 222 42 200 42 192 32 180 44 158 42 150 32 138 42 116 40 110 30 96 44 66 38 58 32 44 46 26 40 18 22Z', fill: SNOW, transform: 'translate(0 8)' }, parent);
-    shape('path', { d: 'M56 262C70 244 92 236 116 232', stroke: '#8a6a55', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, parent);
-    for (const [x, y, angle] of [[74, 240, -40], [90, 232, -60], [104, 228, -74], [80, 256, 50], [98, 246, 34], [114, 240, 20]]) shape('path', { d: 'M0 0C4-6 4-14 0-20-4-14-4-6 0 0Z', fill: second === '#c08a3e' ? '#5f8a70' : first === '#a84a42' ? '#5f8a70' : '#4f7a65', transform: `translate(${x} ${y}) rotate(${angle})` }, parent);
-    shape('circle', { cx: 120, cy: 232, r: 5, fill: '#b4544c' }, parent);
-    holly(parent, 66, 62, .66);
-    shape('rect', { x: 292, y: 48, width: 40, height: 50, rx: 2, fill: '#f6e4bd', stroke: '#fffdf6', 'stroke-width': 3, 'stroke-dasharray': '3 3' }, parent);
-    star(parent, 312, 73, 12);
-    shape('path', { d: 'M318 216C332 208 350 216 352 232 356 246 342 262 326 258 308 260 294 244 298 230 300 222 310 218 318 216Z', fill: '#a84a42' }, parent);
-    shape('circle', { cx: 325, cy: 236, r: 14, fill: 'none', stroke: '#c9756b', 'stroke-width': 2 }, parent);
-    star(parent, 325, 236, 8, '#e3b7a4');
-  };
-}
-
 // A little wooden board hung from the top of the stage on two ribbons, capped with snow.
 function calendarArt(parent) {
   shape('path', { d: 'M108 0V44M268 0V44', stroke: '#a84a42', 'stroke-width': 4, fill: 'none' }, parent);
@@ -185,8 +168,8 @@ function mountDecor(root) {
   paperLayer(wish, '0 0 360 116', 'button-art', buttonArt('#a84a42', '#853a34', envelopeIcon), { paper: flat, eager: true, preserveAspectRatio: 'none' });
   paperLayer(root.querySelector('.countdown'), '0 0 380 206', 'calendar-art', calendarArt, { paper: { scale: .8, grain: .5, shadow: .26 }, eager: true, preserveAspectRatio: 'none' });
   const letter = { paper: { scale: .8, grain: .35, shadow: .24 }, eager: true, preserveAspectRatio: 'none' };
-  paperLayer(root.querySelector('#santa-letter .letter-body'), '0 0 380 300', 'letter-art', letterArt('#a84a42', '#4f7d68'), letter);
-  paperLayer(root.querySelector('#reindeer-letter .letter-body'), '0 0 380 300', 'letter-art', letterArt('#4f7d68', '#c08a3e'), letter);
+  paperLayer(root.querySelector('#santa-letter .letter-body'), '0 0 380 300', 'letter-art', airmailLetter('#a84a42', '#4f7d68'), letter);
+  paperLayer(root.querySelector('#reindeer-letter .letter-body'), '0 0 380 300', 'letter-art', airmailLetter('#4f7d68', '#c08a3e'), letter);
 }
 
 function mountTitle(host) {
