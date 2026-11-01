@@ -42,10 +42,10 @@ function updateTree({ newWishId = null } = {}){
     pendingEnvelopeEntrance = null;
   }
 }
-async function refreshPublic(){
+async function refreshPublic(pending=repository.publicWishes(ownWish?9:10)){
   const version=++refreshVersion;
   try{
-    const result=await repository.publicWishes(ownWish?9:10);
+    const result=await pending;
     if(version!==refreshVersion)return;
     publicWishes=result;updateTree();
     cloudStatus.textContent=ownWish?'已連接聖誕信箱。金色信封是你的最新願望；私人及待審內容不會公開。':'已連接聖誕信箱。寄信後會出現自己的金色信封；目前僅展示已核准的公開願望。';
@@ -59,10 +59,13 @@ async function connectCloud(){
   if(connecting||delivery.busy)return;connecting=true;send.disabled=true;clearTimeout(retryTimer);cloudStatus.textContent='正在連接聖誕信箱……';
   try{
     const {visitorRepository}=await import('./services/wish-repository.js');
-    repository=await visitorRepository();ownWish=await repository.latestWish();updateTree();await refreshPublic();send.disabled=false;retryDelay=4000;
+    repository=await visitorRepository();
+    // Both reads leave together; asking for 10 covers either case, because the tree keeps 9 once the visitor has their own letter.
+    const everyone=repository.publicWishes(10);everyone.catch(()=>{});
+    ownWish=await repository.latestWish();updateTree();await refreshPublic(everyone);send.disabled=false;retryDelay=4000;room.dataset.cloud=String(treeWishes.length);
     if(status.dataset.offline){status.textContent='';delete status.dataset.offline;}
   }catch(error){
-    repository=null;ownWish=null;publicWishes=[];treeWishes=[];sceneController?.setWishes([],showWish);
+    repository=null;ownWish=null;publicWishes=[];treeWishes=[];sceneController?.setWishes([],showWish);room.dataset.cloud='0';
     document.querySelector('#cloud-envelope-list').replaceChildren();document.querySelector('#cloud-wish-total').textContent='0 封';
     // Visitors never manage a connection: it quietly tries again, and only the letter says why it waits.
     cloudStatus.textContent='雲端信箱尚未連接，正在自動重試。';status.textContent='暫時連不上聖誕信箱，正在自動重試……';status.dataset.offline='true';
@@ -141,5 +144,6 @@ async function startScene() {
 }
 window.addEventListener('pagehide', event => { if (!event.persisted) { lights.destroy(); cottage.destroy(); clearTimeout(retryTimer); } delivery.cancel(); sceneVersion++; sceneController?.destroy(); sceneController = null; });
 window.addEventListener('pageshow', () => { if (!sceneController) startScene(); });
-startScene();
+// Connect first: building the 3D scene holds the main thread, and the letters should not queue behind it.
 connectCloud();
+startScene();

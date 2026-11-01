@@ -301,3 +301,8 @@ node --experimental-vm-modules tests/smoke.mjs
 - `tests/smoke.mjs` 驗證四頁標記相同、無 autoplay、音檔雜湊與大小、原檔仍在、`shared.js` 各啟動呼叫都在。
 - 瀏覽器實測（Chromium，`document-user-activation-required`，375 / 1440）：首訪靜音無錯誤；選歌後播放；換頁記得同一首，等點擊後從上次進度接續；關閉後換頁維持關閉；減少動態時動畫為 none。
 - 需要支援 Range 的伺服器才能接續進度；`python3 -m http.server` 不支援，會從頭播放。
+
+## 2026-11-01：Wish 信封載入
+
+- 線上量測：不載 3D 時無長任務；載入 3D 時主執行緒有數秒長任務（軟體繪圖環境），Firebase 請求被延後。
+- `tests/smoke.mjs` 驗證 Loading 等信封、斷線也會放行、連線先於場景、SDK 預載版本一致。

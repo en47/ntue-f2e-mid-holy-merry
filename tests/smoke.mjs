@@ -203,6 +203,10 @@ await test('Loading：四頁各自主題、有時間上限、頁面動畫等它�
     assert.ok(new RegExp(`\\b${kind}: (function|')`).test(js), kind);
   }
   assert.ok(js.includes('MAX_WAIT') && css.includes('animation-play-state: paused') && css.includes('prefers-reduced-motion'));
+  assert.ok(js.includes('room.cloud !== undefined') && js.includes('room.envelopes'), 'Wish waits for the letters as well as the tree');
+  const wishHtml = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), sdk = await fs.readFile(path.join(project, 'js/services/firebase-sdk.js'), 'utf8');
+  const sdkVersion = sdk.match(/firebasejs\/([\d.]+)\//)[1]; assert.equal(wishHtml.match(/rel="modulepreload" href="[^"]*firebasejs\/[\d.]+/g).length, 3); assert.ok(!wishHtml.match(/firebasejs\/[\d.]+/g).some(item => !item.endsWith(sdkVersion)), 'Preloads must match the SDK version');
+  const wishJs = await fs.readFile(path.join(project, 'js/wish.js'), 'utf8'); assert.ok(wishJs.indexOf('\nconnectCloud();') < wishJs.indexOf('\nstartScene();') && (wishJs.match(/room\.dataset\.cloud=/g) ?? []).length === 2, 'A failed mailbox must still release the loader');
   assert.ok(!(await fs.readFile(path.join(project, 'admin.html'), 'utf8')).includes('site-loader'));
   for (const name of ['red', 'green', 'yellow', 'loading']) await fs.access(path.join(project, `assets/illustrations/loading/${name}.png`));
 });

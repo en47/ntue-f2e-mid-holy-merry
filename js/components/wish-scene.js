@@ -161,6 +161,7 @@ export function mountWishScene(root) {
     elf.visible = !!elfModel && !!route;
     const envelopesMoving = envelopes.update(dt);
     envelopes.project(width,height);
+    root.dataset.envelopes = envelopes.shown();
     renderer.render(scene, camera);
     if (elfMoving || envelopesMoving) wake(); else last = 0;
   }

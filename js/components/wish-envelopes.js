@@ -199,7 +199,8 @@ export function createWishEnvelopes({ root, tree, camera, wake, motion, managedI
     }
     return closest;
   }
-  return { setWishes, layout, update, project, pick, destroy() {
+  const shown = () => entries.filter(entry => entry.anchor.visible).length;
+  return { setWishes, layout, update, project, pick, shown, destroy() {
     if (disposed) return; disposed = true;
     targets.remove(); tree.remove(group); group.clear(); entries.forEach(e => library.release(e)); entries = [];
     proxy?.geometry.dispose(); proxyMaterial.dispose(); library.destroy();

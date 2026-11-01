@@ -30,7 +30,8 @@
     home: function () { var slots = document.querySelectorAll('[data-model-slot]'); if (!slots.length) return false; for (var i = 0; i < slots.length; i++) if (slots[i].dataset.state === 'loading') return false; return true; },
     intro: function () { return document.querySelector('#intro-storybook.is-opening'); },
     game: function () { var slot = document.querySelector('.games-hero-santa'); return slot && slot.dataset.state !== 'loading'; },
-    wish: function () { var scene = document.querySelector('#scene-loading'); return scene && scene.hidden; },
+    // The room opens once the letters hang on the tree, so nobody sees it bare; the time cap covers a slow mailbox.
+    wish: function () { var scene = document.querySelector('#scene-loading'); if (!scene || !scene.hidden) return false; var room = scene.parentElement.dataset; return room.cloud !== undefined && Number(room.envelopes || 0) >= Number(room.cloud); },
   };
   function finish() {
     if (done) return; done = true; clearTimeout(timer);
