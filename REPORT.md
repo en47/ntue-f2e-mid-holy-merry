@@ -1,5 +1,9 @@
 # 夜間工作報告（2026-10-31）
 
+## 第二十九輪：Game 標題統一
+
+- Game 頁第一個遊戲標題由「Santa Flying Adventure」改為「Santa Flying」，與路牌一致。
+
 ## 第二十八輪：背景音樂選單
 
 - **選單：** 右下角按鈕展開「聖誕點歌單」，可選五首或關閉音樂，目前歌曲有紅底與律動條，另有音量。
@@ -493,5 +497,5 @@
 - **`npm run test:firebase` 沒跑：** 這台機器沒有 Java，18 項 Firebase 測試未驗證。這次沒有改動 Wish 資料流或 Firebase 程式。
 - **首頁總下載量仍約 14 MB：** 主因是 `reindeer.glb`（10.5 MB）。這次只要求處理 Santa，我沒動麋鹿；用同一支壓縮流程應該也能大幅縮小，但要另外確認它的動畫，告訴我就做。
 - **文件仍有舊內容：** `README.md`、`docs/GAME-PAGE.md` 與 `docs/GAME-PAGE-VERIFICATION.json` 的舊描述（外部 iframe、三國地圖）還沒改。這次只更新了 `CLAUDE.md`、`TESTING.md`、`docs/GAME-HERO.md`。
-- **Game 頁標題：** 仍是「Santa Flying Adventure」，和路牌「Santa Flying」不一致，這是文案決定，我沒改。
+- **Game 頁標題（第二十九輪已統一）：** 原為「Santa Flying Adventure」，和路牌「Santa Flying」不一致，這是文案決定，我沒改。
 - **閒置素材：** `signs.png`、`winter-scenery.png`、首頁 storybook PNG、舊 `santa-dance.glb`（僅建置腳本和測試使用）、`vendor/game1/` 都還在，依你的要求沒有刪除。
