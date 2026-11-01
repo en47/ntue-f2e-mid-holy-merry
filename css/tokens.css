@@ -13,8 +13,9 @@
   --muted: #667d85;
   --line: #b6ccd2;
   --font-body: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-  --font-display: StorySign, 'Noto Sans TC', serif;
-  --font-hand: WishHand, 'Noto Sans TC', sans-serif;
+  /* 標題與手寫字沒有中文字，中文一律退回內文字型，避免出現系統明體。 */
+  --font-display: StorySign, 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  --font-hand: WishHand, 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
   /* 全站只用三級字級：標題、內文、小字。 */
   --fs-title: 2rem;
   --fs-body: 1rem;

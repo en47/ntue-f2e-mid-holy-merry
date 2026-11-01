@@ -26,7 +26,7 @@ Holy Moly! It's Christmas! 一個紙雕繪本風格的聖誕主題網站，有 3
 
 ## 設計規格
 
-- **字型 3 種：** Noto Sans TC（內文）、Mountains of Christmas（標題）、手寫字（信紙）。
+- **字型 3 種：** 系統黑體（內文，Mac 為 PingFang TC、Windows 為微軟正黑體）、Mountains of Christmas（英文標題）、霞鶩文楷 TC（信紙手寫字）。
 - **字級 3 級：** 標題 32px、內文 16px、小字 13px，定義在 `css/tokens.css`。
 - **色彩：** 主色為紅、綠、金，天空藍與奶油白作為背景。
 

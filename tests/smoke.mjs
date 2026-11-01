@@ -204,6 +204,7 @@ await test('設計規格：三種字型、三級字級，全部走設計變數',
     for (const [, name] of css.matchAll(/@font-face\s*\{\s*font-family:\s*([^;]+);/g)) families.add(name);
   }
   assert.ok(families.size <= 2, 'Only the title and handwriting faces are downloaded; body text uses the system font');
+  assert.ok(!/--font-(display|hand):[^;]*\bserif\b(?<!sans-serif)/.test(tokens), 'Chinese must not fall back to a serif face');
 });
 await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、畫面不依賴下載', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
