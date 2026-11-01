@@ -209,6 +209,7 @@ await test('Loading：四頁各自主題、有時間上限、頁面動畫等它�
   const wishJs = await fs.readFile(path.join(project, 'js/wish.js'), 'utf8'); assert.ok(wishJs.indexOf('\nconnectCloud();') < wishJs.indexOf('\nstartScene();') && (wishJs.match(/room\.dataset\.cloud=/g) ?? []).length === 2, 'A failed mailbox must still release the loader');
   assert.ok(!(await fs.readFile(path.join(project, 'admin.html'), 'utf8')).includes('site-loader'));
   for (const name of ['red', 'green', 'yellow', 'loading']) await fs.access(path.join(project, `assets/illustrations/loading/${name}.png`));
+  assert.ok(!js.includes('.png') && !js.includes('<img') && !css.includes('url('), 'The loader must paint without waiting for any download');
 });
 await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {
   const env = environment();

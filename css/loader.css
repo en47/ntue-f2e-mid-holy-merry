@@ -18,15 +18,15 @@ html.is-loading body > :not(.site-loader), html.is-loading body > :not(.site-loa
 .bar { position: absolute; top: -66px; left: -38px; width: 328px; height: 96px; z-index: 10; overflow: visible; }
 .egg-item { position: absolute; top: 0; left: calc(50% + var(--pivot)); width: 0; height: 0; transform-origin: 0 0; }
 .egg-item::before { content: ''; position: absolute; top: 0; left: -1px; width: 2px; height: calc(var(--reach) - 40px); background: repeating-linear-gradient(#8a6f50 0 3px, #c9ad84 3px 5px); }
-.egg-item img { position: absolute; height: 90px; width: auto; max-width: none; left: calc(var(--cx) * -1); top: calc(var(--reach) - var(--bottom)); }
-.egg-1 { --pivot: -101.6px; --cx: 42.15px; --bottom: 72.4px; animation: swingLeft var(--period) linear infinite; }
-.egg-2 { --pivot: -50.2px; --cx: 39.75px; --bottom: 77.1px; }
-.egg-3 { --pivot: 0px; --cx: 35.9px; --bottom: 78.1px; }
-.egg-4 { --pivot: 50.2px; --cx: 39.75px; --bottom: 77.1px; }
-.egg-5 { --pivot: 101.6px; --cx: 42.15px; --bottom: 72.4px; animation: swingRight var(--period) linear infinite; }
+.egg-art { position: absolute; left: -32px; top: calc(var(--reach) - 80px); width: 64px; height: 84px; overflow: visible; }
+.egg-1 { --pivot: -101.6px; animation: swingLeft var(--period) linear infinite; }
+.egg-2 { --pivot: -50.2px; }
+.egg-3 { --pivot: 0px; }
+.egg-4 { --pivot: 50.2px; }
+.egg-5 { --pivot: 101.6px; animation: swingRight var(--period) linear infinite; }
 @keyframes swingLeft { 0% { transform: rotate(var(--swing)); animation-timing-function: cubic-bezier(.12, 0, .39, 0); } 25% { transform: rotate(0deg); animation-timing-function: linear; } 75% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.61, 1, .88, 1); } 100% { transform: rotate(var(--swing)); } }
 @keyframes swingRight { 0% { transform: rotate(0deg); animation-timing-function: linear; } 25% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.61, 1, .88, 1); } 50% { transform: rotate(calc(var(--swing) * -1)); animation-timing-function: cubic-bezier(.12, 0, .39, 0); } 75% { transform: rotate(0deg); animation-timing-function: linear; } 100% { transform: rotate(0deg); } }
-.loader-word { width: 160px; height: auto; animation: loader-breathe 1.5s ease-in-out infinite alternate; }
+.loader-word { width: 190px; height: auto; overflow: visible; animation: loader-breathe 1.5s ease-in-out infinite alternate; }
 @keyframes loader-breathe { from { opacity: .3; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
 /* Intro：書頁以書脊為軸一頁頁翻過去。 */
 .loader-leaf { transform-origin: 160px 110px; transform-box: view-box; animation: loader-page 2s ease-in-out infinite; }

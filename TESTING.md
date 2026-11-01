@@ -306,3 +306,8 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - 線上量測：不載 3D 時無長任務；載入 3D 時主執行緒有數秒長任務（軟體繪圖環境），Firebase 請求被延後。
 - `tests/smoke.mjs` 驗證 Loading 等信封、斷線也會放行、連線先於場景、SDK 預載版本一致。
+
+## 2026-11-01：牛頓擺 SVG
+
+- `tests/smoke.mjs` 新增：`site-loader.js` 與 `loader.css` 不得引用 PNG、`<img>` 或 `url()`，確保 Loading 不必等下載。
+- 瀏覽器實測：模型延遲時 Loading 期間未請求 `assets/illustrations/loading/*.png`，375 / 768 / 1440 動畫完整。
