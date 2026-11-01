@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-01",
+  "ruleTests": "tests/flying-rules.test.mjs 6/6",
+  "viewports": [1440, 768, 375],
+  "botRuns": { "note": "Chromium 內由機器人依畫面障礙閃避並追禮物，每次 20 秒", "total": 12, "survived": 11, "peakGifts": "1–7", "singleLoss": "手機最高速（距離 8000）需連跨兩條跑道時，機器人的「旁邊有障礙就等」策略未移動；非死局" },
+  "hudOverflowPx": { "320": 0, "375": 0, "430": 0 },
+  "hudOverflowSample": "距離 12345、最遠 12345、禮物 88/188",
+  "playedByHuman": false
+}

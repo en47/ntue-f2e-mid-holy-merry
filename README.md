@@ -12,7 +12,7 @@ Holy Moly! It's Christmas! 一個紙雕繪本風格的聖誕主題網站，有 3
 | --- | --- |
 | Home（`index.html`） | 聖誕倒數翻頁日曆、可互動的 3D 聖誕老人與麋鹿，點角色會收到一封小信 |
 | Intro（`intro.html`） | 會翻開的立體故事書、世界地圖、捲軸、明信片與海港 |
-| Game（`game.html`） | Santa Flying 雪橇閃避遊戲、Christmas Matching 五關配對遊戲 |
+| Game（`game.html`） | Santa Flying 雪橇閃避與收集禮物遊戲、Christmas Matching 五關配對遊戲 |
 | Wish（`wish.html`） | 在夜晚雪地小屋寫信，摺信投進聖誕襪，信封會掛上 3D 聖誕樹 |
 | Admin（`admin.html`） | 管理員審核願望 |
 

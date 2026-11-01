@@ -72,7 +72,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 - `js/config/firebase-config.js` 是公開的 Web App 設定；`tools/firebase-admin/*.mjs` 只用 ADC，拒絕 emulator 環境變數，絕不可被網頁 import。
 
 ### 遊戲整合（iframe 隔離）
-`game.html` 以兩個 iframe 載入**本機獨立文件**：`vendor/game1-frameless/index.html` 與 `games/christmas-matching.html`。`js/game.js` 只量測外層文字與高度、設定 CSS 變數（例如 `--fly-reserved-height`，依 `vendor/game1-frameless/README.txt` 的 `寬度 × 510/1100 + 142px`），**不要改寫或重新載入 iframe 的 `src`**。配對遊戲的 DOM 寫在 `games/christmas-matching.html`、圖片直接引用 `vendor/game2/images/`，邏輯在 `js/games/game2-matching.js`，對外發出 `matching:level-start` / `pair-match` / `level-complete` / `timeout` / `complete` 事件供擴充，不要改動原作副本或配對判定。
+`game.html` 以兩個 iframe 載入**本機獨立文件**：`vendor/game1-frameless/index.html` 與 `games/christmas-matching.html`。`js/game.js` 只量測外層文字與高度、設定 CSS 變數（例如 `--fly-reserved-height`，依 `vendor/game1-frameless/README.txt` 的 `寬度 × 510/1100 + 142px`），**不要改寫或重新載入 iframe 的 `src`**。配對遊戲的 DOM 寫在 `games/christmas-matching.html`、圖片直接引用 `vendor/game2/images/`，邏輯在 `js/games/game2-matching.js`，對外發出 `matching:level-start` / `pair-match` / `level-complete` / `timeout` / `complete` 事件供擴充，不要改動原作副本或配對判定。飛行遊戲的難度與禮物規則在 `vendor/game1-frameless/rules.js`（純函式，`tests/flying-rules.test.mjs` 以 `vm` 載入），這份副本已刻意與線上原版不同。
 
 ### 素材完整性清單
 `docs/GAME2-UPSTREAM.json`、`docs/STORYBOOK-ASSETS.json`、`docs/STORYBOOK-CLEAN-ASSETS.json`、`docs/WISH-ASSETS.json`、`docs/AUDIO-ASSETS.json`、`vendor/three/UPSTREAM.json`、`assets/models/*.json` 都記錄逐檔 SHA-256，`tests/smoke.mjs` 會逐一比對。動到任何 `vendor/` 副本、PNG 或 GLB 都會讓測試失敗；若是刻意更換素材，必須同時更新對應清單的雜湊。測試也會用 `vendor/three` 的 GLTFLoader 真的解析 GLB（見 `tests/helpers/elf-model.mjs`）。
