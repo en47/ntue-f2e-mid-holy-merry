@@ -1,5 +1,6 @@
 // 所有頁面共用；此模組不會啟動其他頁面的遊戲或計時器。
 import { mountForeground } from './components/page-foreground.js';
+import { mountNavLights } from './components/nav-lights.js';
 import { mountSantaPlaceholders } from './components/santa-placeholder.js';
 
 document.documentElement.classList.add('js-ready');
@@ -26,6 +27,9 @@ menuToggle.addEventListener('click', () => {
   menuToggle.setAttribute('aria-expanded', String(open));
   nav.classList.toggle('is-open', open);
 });
+let navLights = mountNavLights(nav);
+window.addEventListener('pagehide', () => navLights.destroy());
+window.addEventListener('pageshow', event => { if (event.persisted) navLights = mountNavLights(nav); });
 
 const info = {
   accessibility: ['無障礙與操作', '本網站支援鍵盤 Tab 導覽、Enter 操作按鈕，以及系統的減少動態效果設定。雪橇遊戲開始後可使用上下方向鍵移動、Escape 暫停，也提供畫面按鈕。若有閱讀需求，可透過瀏覽器調整文字大小。'],

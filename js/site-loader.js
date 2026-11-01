@@ -35,6 +35,7 @@
   function finish() {
     if (done) return; done = true; clearTimeout(timer);
     root.classList.remove('is-loading');
+    window.dispatchEvent(new Event('site-loader:done'));
     loader.classList.add('is-done');
     setTimeout(function () { loader.remove(); }, 450);
   }

@@ -281,3 +281,10 @@ node --experimental-vm-modules tests/smoke.mjs
 ## 2026-11-01：Admin 全部願望與 Wish 小屋
 
 - `check-firebase-e2e.mjs` 涵蓋拒絕、重新同意、撤回、再同意的循環，以及斷線後自動重連。
+
+## 2026-11-01：導覽燈串吊牌
+
+- `tests/nav-lights.test.mjs` 驗證燈串幾何與亮光行進方向；`tests/smoke.mjs` 驗證四頁共用、等 Loading、JS 失效時的退路。
+- 375 / 768 / 1440 截圖：吊牌與燈串不碰品牌標題，header 高度維持 108 / 86px，沒有橫向溢出。
+- 溢出修正：右緣燈泡的光暈曾造成 375 寬度多出 10px，`.nav-string` 改為裁切。
+- 瀏覽器實測 Intro → Wish：Loading 結束後亮光開始，抵達後 `is-arriving`，600ms 後恢復。

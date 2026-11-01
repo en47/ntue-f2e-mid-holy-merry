@@ -159,6 +159,14 @@ await test('頁尾互動主角：四頁各一個，遵守減少動態，全頁�
   assert.ok((toys.match(/motion\(\)\.matches/g) ?? []).length >= 3); assert.ok(css.includes('.toy-button:focus-visible'));
   for (const page of ['index', 'intro', 'game', 'wish']) assert.ok((await fs.readFile(path.join(project, `${page}.html`), 'utf8')).includes('data-foreground='), page);
 });
+await test('導覽燈串：四頁共用、等 Loading 結束才跑光、沒有 JS 時仍是一般連結', async () => {
+  const shared = await fs.readFile(path.join(project, 'js/shared.js'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/nav-lights.js'), 'utf8');
+  const loader = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/shared.css'), 'utf8');
+  assert.ok(shared.includes('mountNavLights(nav)') && shared.includes("'pagehide'") && shared.includes('event.persisted'));
+  assert.ok(loader.includes('site-loader:done') && lights.includes('site-loader:done') && lights.includes('prefers-reduced-motion'));
+  assert.ok(css.includes('.site-nav.is-strung a') && !lights.includes('innerHTML'), 'The pills stay until JS builds the tags');
+  assert.ok(!(await fs.readFile(path.join(project, 'index.html'), 'utf8')).includes('nav-tag'), 'Tags are decoration added by JS, not markup');
+});
 await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、牛頓擺圖片不變', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
   for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish']]) {
