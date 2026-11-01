@@ -28,7 +28,7 @@ async function fixture(file){const document=new El();document.body=new El();docu
 }
 test('three chapters: common architecture datum, offset backgrounds, original assets and SVG cards',async()=>{
  const manifest=JSON.parse(await fs.readFile('docs/INTRO-ASSETS.json','utf8'));
- for(const [name,digest]of Object.entries(manifest.assets))assert.equal(createHash('sha256').update(await fs.readFile('assets/illustrations/intro/'+name)).digest('hex'),digest);
+ for(const [name,digest]of Object.entries(manifest.assets))assert.equal(createHash('sha256').update(await fs.readFile('images/intro/'+name)).digest('hex'),digest);
  assert.equal(introStories.length,3);for(const story of introStories){assert.equal(story.story.split(/\n\s*\n/).length,3);assert.ok(story.story.length>180);assert.ok(!/[a-z]{4}/i.test(story.story));for(const p of story.pieces)assert.ok(sceneArt[p.art],p.art);assert.equal(story.pieces[0].id,'sky','each chapter opens from its own backdrop');}
  const find=(n,id)=>introStories[n].pieces.find(p=>p.id===id);
  for(const[n,a,b]of[[0,'bethlehem','stable'],[1,'village','cottage']]){assert.equal(find(n,a).y,18);assert.equal(find(n,b).y,18);assert.ok(Math.abs(find(n,a).x-find(n,b).x)>20);assert.ok(find(n,a).z<find(n,b).z);}
@@ -38,7 +38,7 @@ test('three chapters: common architecture datum, offset backgrounds, original as
 });
 test('page text and paper art: raster chapters are gone and the map keeps its six pins',async()=>{
  const html=await fs.readFile('intro.html','utf8'),css=await fs.readFile('css/intro.css','utf8');
- assert.ok(!/assets\/illustrations\/intro\//.test(html+css),'Intro no longer loads the raster originals');
+ assert.ok(!/images\/intro\//.test(html+css),'Intro no longer loads the raster originals');
  for(const id of ['cover','close','controls'])assert.ok(html.includes(`data-book="${id}"`),id);
  for(const id of ['stage','sheet','letter','fold'])assert.ok(html.includes(`data-scroll="${id}"`),id);
  assert.ok(!css.includes('scroll-snap'),'scrolling stays free so the book controls can always be reached');

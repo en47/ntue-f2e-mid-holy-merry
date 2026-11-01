@@ -11,9 +11,9 @@
 | `js/home.js` | 接收直接角色點擊、隨機對話、五秒收起、互斥、Escape／焦點恢復及清理 |
 | `js/components/characters-scene.js` | 原生 click／鍵盤操作，移除舊控制事件；保留拖曳與直向捲動分流、單 Renderer 與資源釋放 |
 | `js/components/character-animation.js` | 只調整麋鹿擺幅、點頭與前腳支撐補償；Santa 邏輯未改 |
-| `assets/illustrations/storybook/masks/*.svg` | 新增六份對位 alpha 遮罩 |
-| `assets/illustrations/storybook/christmas-letter.svg` | 新增輕量原生 SVG 信紙，奶油紙面、紙紋、冬青、小信封與手切邊 |
-| `assets/illustrations/storybook/paper-tab.svg` | 新增小型紙標籤 CTA 背景 |
+| `images/storybook/masks/*.svg` | 新增六份對位 alpha 遮罩 |
+| `images/storybook/christmas-letter.svg` | 新增輕量原生 SVG 信紙，奶油紙面、紙紋、冬青、小信封與手切邊 |
+| `images/storybook/paper-tab.svg` | 新增小型紙標籤 CTA 背景 |
 | `docs/STORYBOOK-MASKS.json` | 遮罩座標、來源尺寸與 fitting 資料 |
 | `scripts/build-storybook-masks.py` | 可重建 SVG 遮罩，不讀寫原 PNG 像素 |
 | `tests/smoke.mjs` | 更新現行互動、骨架支撐及遮罩資源驗證，共 17 組 |

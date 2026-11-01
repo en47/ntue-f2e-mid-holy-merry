@@ -40,7 +40,7 @@
         ]
       ]
     ],
-    "mask": "assets/illustrations/storybook/masks/01_mountains.svg",
+    "mask": "images/storybook/masks/01_mountains.svg",
     "holes": [
       [
         [
@@ -120,7 +120,7 @@
         ]
       ]
     ],
-    "mask": "assets/illustrations/storybook/masks/02_village.svg",
+    "mask": "images/storybook/masks/02_village.svg",
     "preserveAspectRatio": "none"
   },
   "03_pine_trees": {
@@ -180,7 +180,7 @@
         ]
       ]
     ],
-    "mask": "assets/illustrations/storybook/masks/03_pine_trees.svg",
+    "mask": "images/storybook/masks/03_pine_trees.svg",
     "preserveAspectRatio": "xMidYMax meet"
   },
   "04_foreground_snow": {
@@ -308,7 +308,7 @@
         ]
       ]
     ],
-    "mask": "assets/illustrations/storybook/masks/04_foreground_snow.svg",
+    "mask": "images/storybook/masks/04_foreground_snow.svg",
     "preserveAspectRatio": "none"
   },
   "06_clouds": {
@@ -344,7 +344,7 @@
         ]
       ]
     ],
-    "mask": "assets/illustrations/storybook/masks/06_clouds.svg",
+    "mask": "images/storybook/masks/06_clouds.svg",
     "preserveAspectRatio": "xMidYMid meet"
   },
   "07_small_snowbanks": {
@@ -428,7 +428,7 @@
         ]
       ]
     ],
-    "mask": "assets/illustrations/storybook/masks/07_small_snowbanks.svg",
+    "mask": "images/storybook/masks/07_small_snowbanks.svg",
     "preserveAspectRatio": "none"
   }
 }

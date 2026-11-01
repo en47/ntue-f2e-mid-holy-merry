@@ -53,7 +53,7 @@ export function createWishDelivery(root, { savingText = '正在儲存到此瀏�
       panel.append(front,back); paper.append(panel); panels[name]=panel;
       faces.push(front,back);
     }
-    const art = document.createElement('img'); art.src = 'assets/illustrations/wish/letter-folded.svg'; art.className = 'fold-envelope'; art.alt = ''; paper.append(art);
+    const art = document.createElement('img'); art.src = 'images/wish/letter-folded.svg'; art.className = 'fold-envelope'; art.alt = ''; paper.append(art);
     const seal = document.createElement('span'); seal.className = 'fold-wax'; seal.textContent = '♥'; paper.append(seal);
     return { travel, paper, panels, faces, art, seal };
   }
@@ -98,7 +98,7 @@ export function createWishDelivery(root, { savingText = '正在儲存到此瀏�
           const item=createPaper(width,height); layer.append(item.travel); root.append(layer); operation.layer=layer;
           const start={x:r.left+r.width/2,y:r.top+r.height/2};
           item.travel.style.left=`${start.x-width/2}px`;item.travel.style.top=`${start.y-height/2}px`;
-          const cuff=document.createElement('img');cuff.src='assets/illustrations/wish/stocking-cuff.svg';cuff.alt='';cuff.className='delivery-cuff';
+          const cuff=document.createElement('img');cuff.src='images/wish/stocking-cuff.svg';cuff.alt='';cuff.className='delivery-cuff';
           Object.assign(cuff.style,{left:`${mouth.left}px`,top:`${mouth.top}px`,width:`${mouth.width}px`,height:`${mouth.height}px`});layer.append(cuff);
           operation.resize=new ResizeObserver(()=>{
             const next=geometry();

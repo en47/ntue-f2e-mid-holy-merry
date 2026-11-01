@@ -21,7 +21,7 @@ export function createPaperEnvelopeLibrary({ onLoad = () => {}, onError = () => 
 
   for (const [kind, data] of Object.entries(envelopeShapes)) {
     const variant = variants[kind] = { ready: false, failed: false, instances: new Set(), data };
-    const texture = loader.load(new URL(`../../assets/illustrations/wish/${data.file}`, import.meta.url).href,
+    const texture = loader.load(new URL(`../../images/wish/${data.file}`, import.meta.url).href,
       () => { if (!disposed) { variant.ready = true; onLoad(); } },
       undefined, error => { if (!disposed) { variant.failed = true; onError(kind, error); } });
     texture.colorSpace = THREE.SRGBColorSpace; textures.add(texture);

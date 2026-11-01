@@ -1,10 +1,10 @@
-# 描 assets/illustrations/intro/christmas_map.jpg 的陸地輪廓，產生 js/data/intro-map-shapes.js。
+# 描 images/intro/christmas_map.jpg 的陸地輪廓，產生 js/data/intro-map-shapes.js。
 # 座標沿用原圖 1728×947，六個國家紅點不必換算。需要 opencv-python-headless 與 numpy。
 import json, sys
 import cv2
 import numpy as np
 
-image = cv2.imread('assets/illustrations/intro/christmas_map.jpg')
+image = cv2.imread('images/intro/christmas_map.jpg')
 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 land = cv2.inRange(hsv, (20, 35, 90), (55, 255, 255))
 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))

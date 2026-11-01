@@ -316,3 +316,9 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - 刪除前逐檔確認檔名與主檔名未被網站、腳本、測試或素材清單引用；Loading 四張 PNG 比對雜湊後確認桌面有副本。
 - `tests/smoke.mjs` 移除「Loading PNG 存在」的檢查，由「Loading 不得引用 PNG」取代。
+
+## 2026-11-01：設計規格與 images 資料夾
+
+- 瀏覽器實測四頁 375 / 768 / 1440：字級都只有 13、16、32px，字型最多三種。
+- `tests/smoke.mjs` 新增設計規格測試，所有 `font-size` 必須使用 `--fs-*`。
+- 修改前後：端對端 77/77（改為 `images/` 後）、裁切檢查通過、無橫向溢出。

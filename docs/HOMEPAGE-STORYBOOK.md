@@ -8,7 +8,7 @@
 
 修改 `index.html`、`css/home.css`、`js/home.js`、`js/components/characters-scene.js`、`tests/smoke.mjs`、`README.md`、`TESTING.md`。
 
-新增 `js/components/character-animation.js`、`assets/models/santa-dance.glb` 及 `.json`、`assets/illustrations/storybook/` 七張原畫、`docs/STORYBOOK-ASSETS.json` 與本文。`js/santa-model.js` 沿用既有延遲載入入口，補強初始化失敗重試與離頁取消。沒有刪除任何既有檔案。
+新增 `js/components/character-animation.js`、`assets/models/santa-dance.glb` 及 `.json`、`images/storybook/` 七張原畫、`docs/STORYBOOK-ASSETS.json` 與本文。`js/santa-model.js` 沿用既有延遲載入入口，補強初始化失敗重試與離頁取消。沒有刪除任何既有檔案。
 
 ## 設計及分層
 

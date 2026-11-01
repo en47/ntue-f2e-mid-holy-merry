@@ -11,14 +11,14 @@
 | --- | --- | --- |
 | christmas tree 3d model.glb | assets/models/wish-tree.glb | 31,086,392 bytes；GLB 2.0；無骨架／動畫；三張內嵌貼圖。 |
 | elf+toy+3d+model.glb | assets/models/wish-elf.glb | 10,955,168 bytes；GLB 2.0；一組骨架、65 個關節；三張內嵌貼圖。 |
-| 手繪蠟封節慶信封.png | assets/illustrations/wish/envelope.png | 1536×1024 RGBA，保留原透明度及光暈；用於原有本機收藏。 |
-| 魔法聖誕金色星星信封.png | assets/illustrations/wish/envelope-star.png | 1536×1024 RGBA；已保存原檔，尚未掛到樹上。 |
+| 手繪蠟封節慶信封.png | images/wish/envelope.png | 1536×1024 RGBA，保留原透明度及光暈；用於原有本機收藏。 |
+| 魔法聖誕金色星星信封.png | images/wish/envelope-star.png | 1536×1024 RGBA；已保存原檔，尚未掛到樹上。 |
 
 四份副本與 Downloads 原檔逐位元組一致，詳見 `WISH-ASSETS.json`。沒有修改或複製多套模型。字體沿用使用者已提供的 christmas-3d-complete.zip 內 handwritten-ui.woff，授權副本位於 assets/fonts/WISH-FONT-LICENSE.txt。
 
 修改檔案：`wish.html`、`css/wish.css`、`js/wish.js`、`tests/smoke.mjs`、`TESTING.md`。
 
-新增檔案：`js/components/wish-scene.js`、`js/components/wish-layout.js`、上述四份 GLB／PNG 副本、`assets/illustrations/wish/stocking-rack.svg`、`snow-ground.svg`、`assets/fonts/wish-handwritten.woff`、`WISH-FONT-LICENSE.txt`、`docs/WISH-ASSETS.json` 與本說明。其他三頁、共用 CSS／JS、Home 角色與所有既有素材 SHA-256 均與本次開始前一致，沒有刪除原有檔案。
+新增檔案：`js/components/wish-scene.js`、`js/components/wish-layout.js`、上述四份 GLB／PNG 副本、`images/wish/stocking-rack.svg`、`snow-ground.svg`、`assets/fonts/wish-handwritten.woff`、`WISH-FONT-LICENSE.txt`、`docs/WISH-ASSETS.json` 與本說明。其他三頁、共用 CSS／JS、Home 角色與所有既有素材 SHA-256 均與本次開始前一致，沒有刪除原有檔案。
 
 木架聖誕襪與連續雪地是本階段新增、可替換的 SVG，沒有使用網路圖或替代 3D 模型。後續已取得 `holy_merry_wish_room_v5_smooth_delivery.html`，參考副本及來源雜湊見 `WISH-DELIVERY-REFERENCE.json`。
 

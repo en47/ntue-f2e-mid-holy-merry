@@ -195,6 +195,16 @@ await test('背景音樂：四頁選單一致、不寫死 autoplay、壓縮音�
   assert.ok(player.includes('NotAllowedError') && player.includes('waitForGesture') && !player.includes('innerHTML'));
   assert.ok((await fs.readFile(path.join(project, 'css/shared.css'), 'utf8')).includes('prefers-reduced-motion'));
 });
+await test('設計規格：三種字型、三級字級，全部走設計變數', async () => {
+  const tokens = await fs.readFile(path.join(project, 'css/tokens.css'), 'utf8'), families = new Set();
+  for (const name of ['--fs-title', '--fs-body', '--fs-small', '--font-body', '--font-display', '--font-hand']) assert.ok(tokens.includes(name), name);
+  for (const file of (await fs.readdir(path.join(project, 'css'))).filter(name => !name.startsWith('game2-') && name !== 'loader.css')) {
+    const css = await fs.readFile(path.join(project, 'css', file), 'utf8');
+    for (const [, value] of css.matchAll(/font-size:\s*([^;}]+)/g)) assert.match(value.trim(), /^(var\(--fs-(title|body|small)\)|inherit)$/, `${file}: ${value}`);
+    for (const [, name] of css.matchAll(/@font-face\s*\{\s*font-family:\s*([^;]+);/g)) families.add(name);
+  }
+  assert.ok(families.size <= 2, 'Only the title and handwriting faces are downloaded; body text uses the system font');
+});
 await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、畫面不依賴下載', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
   for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish']]) {
@@ -716,7 +726,7 @@ await test('V5：遮罩對位與本機 SVG 資源、原生角色按鈕、移除�
   const masks=JSON.parse(await fs.readFile(path.join(project,'docs/STORYBOOK-MASKS.json'),'utf8'));
   assert.equal(Object.keys(masks).length,6);
   for(const [name,item] of Object.entries(masks)) {
-    const png=await fs.readFile(path.join(project,'assets/illustrations/storybook',`${name}.png`));
+    const png=await fs.readFile(path.join(project,'images/storybook',`${name}.png`));
     assert.equal(png.readUInt32BE(16),item.size[0]); assert.equal(png.readUInt32BE(20),item.size[1]);
     const svg=await fs.readFile(path.join(project,item.mask),'utf8');
     assert.ok(svg.includes(`viewBox="0 0 ${item.size[0]} ${item.size[1]}"`));
@@ -739,7 +749,7 @@ await test('最終紙雕清理：新素材完整性、單一村落、三種樹�
   const gameHtml=await fs.readFile(path.join(project,'game.html'),'utf8');
   const homeScene=await fs.readFile(path.join(project,'js/components/home-scene.js'),'utf8');
   const gameScene=await fs.readFile(path.join(project,'js/components/game-scene.js'),'utf8');
-  for (const page of [html,gameHtml]) assert.ok(!/assets\/illustrations\/(storybook|games\/hero)\//.test(page),'Paper scenes must not load raster art');
+  for (const page of [html,gameHtml]) assert.ok(!/images\/(storybook|games\/hero)\//.test(page),'Paper scenes must not load raster art');
   assert.ok(html.includes('data-title-art')); assert.ok(html.includes('js/home-scene.js'));
   // 兩頁都是無樹的切面雪山，但 Game 用自己的配色與排列，背景不重複。
   const peaks=homeScene.match(/function mountains\(parent\) \{[\s\S]*?\n\}/)?.[0];

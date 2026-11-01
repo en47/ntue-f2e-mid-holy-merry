@@ -50,14 +50,14 @@ Live Server 開啟 `tests/game-viewport.html`，或附加 `?viewport=tablet&stag
 3. 左側 START GAME 觸發既有 `#start-btn`，不是新遊戲或第二個計時器。開始後隱藏快捷鈕，保留原作 Restart；手機開始時捲動到遊戲。原模組的 pagehide／pageshow 清理與重建保留。
 4. 手機實際檢查發現原 `.card-face` 未設定絕對定位原點，使圖案偏離按鈕。只在 `css/game.css` 的第三頁樣式補上 `inset: 0`；原 Game 02 CSS、JS 與圖片沒有修改。實測卡面與點擊區的 left／top／width／height 差距均小於 1px。
 5. 原雪景位於固定最大寬的 `.shell` 中，並以負 bottom 偏移，頁尾又是不同藍色，造成矩形邊界及斷層。現在遊戲內容保留 `.shell`，雪景移到外層全寬 `.game-landscape`，以正常文件流接到頁尾，不用大負 margin。
-6. 後、中層沿用既有 `assets/illustrations/wish/snow-ground.svg`，保持比例；前層用 CSS 奶油色弧面與細粒紋理，銜接相同 `#fff9eb` 頁尾。只用 `.games-body` 限定此頁的 footer／手機音樂區背景，保留所有原頁尾內容與功能。
+6. 後、中層沿用既有 `images/wish/snow-ground.svg`，保持比例；前層用 CSS 奶油色弧面與細粒紋理，銜接相同 `#fff9eb` 頁尾。只用 `.games-body` 限定此頁的 footer／手機音樂區背景，保留所有原頁尾內容與功能。
 7. 初次三個較寫實禮盒的頁面實例已移除，檔案保留。新素材使用真正 RGBA 的 `-removebg-preview.png`；最初 RGB 版本的棋盤格已烙在像素裡，沒有直接上站。
 8. 左邊是較大的禮物堆與小熊，右邊兩個較小禮盒錯落重疊，局部受前景雪遮住底邊。裝飾在遊戲區下方，`pointer-events: none`，不會攔住操作或頁尾連結。
 9. 遊戲入場只用淡入及小幅平移；禮物依序上升／淡入 800ms，只有右側兩件有不同週期的 2px 微幅擺動；雪地不持續移動。CSS 與 JS 均處理 `prefers-reduced-motion`，內容在 JS／IntersectionObserver 不支援時仍顯示。主區 `overflow-x: clip` 只限制進場動畫超出 viewport 的行程，不縮放遊戲或裁切遊戲內部。
 
 ## 素材來源與非破壞性取圖
 
-實際新增於 `assets/illustrations/games/` 的透明原圖：
+實際新增於 `images/games/` 的透明原圖：
 
 - `水彩聖誕禮物堆與小熊-removebg-preview.png`，612×408 RGBA。
 - `手繪蠟筆風聖誕禮盒貼紙集-removebg-preview.png`，612×408 RGBA。

@@ -52,6 +52,8 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 - `js/data/` — 純資料表。多數由 `scripts/` 的 `.mjs` / `.py` 產生（`envelope-shapes.js` 由 `build-wish-art.mjs`、`title-glyphs.js`、`elf-actions.json`、`elf-ground.js`、`wish-tree-anchors.js`、`storybook-masks`）；**不要手改產出檔**，改腳本後重新產生。
 - `js/services/` — 儲存與 Firebase。
 - `js/games/` — 配對遊戲適配層；`js/games/matching.js` 是保留的舊單關原型，已不載入。
+- 全站只用三種字型（`--font-body`、`--font-display`、`--font-hand`）與三級字級（`--fs-title`、`--fs-body`、`--fs-small`），新樣式不可寫死字級；`css/game2-*.css` 是遊戲原作樣式，不在此限。
+- 圖片放根目錄 `images/`，模型、音樂、字型放 `assets/`。
 - `css/tokens.css` 設計變數 → `css/shared.css` 導覽／按鈕／Footer／音樂 → 各頁 CSS。
 
 ### core 注入模式
