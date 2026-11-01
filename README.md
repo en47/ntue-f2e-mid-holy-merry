@@ -86,6 +86,7 @@ GitHub Pages 從 `main` 分支根目錄發布，push 後約 1 分鐘生效。Fir
 
 ## 素材授權
 
+- **插畫：** 作者手繪與 AI 生成。
 - **3D 模型：** 作者使用 Tripo 製作。
 - **音樂：** 來自 Pixabay，採 Pixabay Content License。
 - **字型：** 授權檔在 `assets/fonts/`。
