@@ -1,4 +1,4 @@
-.wish-letter label.wish-public-choice { display:flex;align-items:flex-start;gap:.45rem;margin:.45rem 0 0;font:.65rem/1.55 var(--font-body);color:#786a56; }
+.wish-letter label.wish-public-choice { display:flex;align-items:flex-start;gap:.45rem;margin:.45rem 0 0;font: var(--fs-small)/1.55 var(--font-body);color:#786a56; }
 .wish-letter .wish-public-choice input { width:16px;height:16px;flex:0 0 16px;padding:0;margin:.05rem 0 0;appearance:auto;accent-color:#9f5147; }
 .tree-envelope-targets { position:absolute;inset:0;z-index:4;pointer-events:none; }
 .tree-envelope-hit { position:absolute;transform:translate(-50%,-50%);pointer-events:auto;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer;touch-action:pan-y; }

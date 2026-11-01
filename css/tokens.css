@@ -13,7 +13,12 @@
   --muted: #667d85;
   --line: #b6ccd2;
   --font-body: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-  --font-display: 'HolyHandwriting', Georgia, 'Times New Roman', serif;
+  --font-display: StorySign, 'Noto Sans TC', serif;
+  --font-hand: WishHand, 'Noto Sans TC', sans-serif;
+  /* 全站只用三級字級：標題、內文、小字。 */
+  --fs-title: 2rem;
+  --fs-body: 1rem;
+  --fs-small: .8125rem;
   --space-1: .5rem;
   --space-2: 1rem;
   --space-3: 1.5rem;
@@ -23,4 +28,3 @@
   --radius: 1.2rem;
   --content: 1120px;
 }
-/* 自訂字體準備好後，於此加入 @font-face，並替換 --font-display。 */

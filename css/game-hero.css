@@ -1,4 +1,3 @@
-@font-face { font-family: StorySign; src: url('../assets/fonts/mountains-of-christmas-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
 /* Games hero only: a frameless first screen of layered paper, not Home's framed stage.
    Back to front: clouds, mountains, scenery, Santa, snow hill, signs, snowbank, torn edge. */
 .games-hero { position: relative; isolation: isolate; width: 100%; height: calc(100svh - var(--games-header-height)); min-height: 600px; margin: 0; padding: 0; overflow: hidden; overflow: clip; background: linear-gradient(180deg, #c7e3ec 0%, #dcedf1 42%, #f4efe4 74%, #fbf6ea 100%); }
@@ -21,7 +20,7 @@
 /* Clipped at the hill line, so Santa rises from behind it rather than from the page edge. */
 .games-hero-santa { position: absolute; pointer-events: none; z-index: 5; left: 30%; width: 40%; bottom: 17%; height: 52%; overflow: hidden; overflow: clip; }
 .games-hero-santa canvas { display: block; width: 100%; height: 100%; }
-.games-hero-model-status { position: absolute; z-index: 9; left: 0; bottom: 38%; width: 100%; margin: 0; padding: .5rem; text-align: center; color: #634d3b; font-size: .8rem; }
+.games-hero-model-status { position: absolute; z-index: 9; left: 0; bottom: 38%; width: 100%; margin: 0; padding: .5rem; text-align: center; color: #634d3b; font-size: var(--fs-small); }
 .games-hero-hill { z-index: 6; left: -1%; width: 102%; bottom: 0; height: 25%; }
 .games-hero-front { z-index: 8; left: -1%; width: 102%; bottom: -1%; height: 13%; }
 .games-hero-edge { position: absolute; pointer-events: none; z-index: 9; left: 0; bottom: -1px; width: 100%; height: clamp(24px, 3.4vw, 48px); fill: var(--blue); filter: drop-shadow(0 -2px 2px #5d7f9133); }
@@ -41,8 +40,8 @@
 .games-hero.is-opening .sign-board { animation: sign-swing 3.4s ease-in-out 2.1s infinite alternate; }
 .games-hero.is-opening .sign-board-top { animation-duration: 2.9s; }
 .games-hero.is-opening .sign-board-bottom { animation-duration: 3.7s; animation-delay: 2.4s; }
-.games-hero-title-sign h1 { position: absolute; left: 17%; top: 22%; width: 72%; height: 42%; display: grid; align-content: center; margin: 0; color: #74473a; font: 700 clamp(1.6rem, 3.5vw, 3.3rem)/1.08 StorySign, var(--game-hand); letter-spacing: 0; text-align: center; overflow-wrap: normal; }
-.games-hero-link { position: absolute; z-index: 2; left: 16%; width: 66%; height: 22%; display: flex; align-items: center; justify-content: center; padding: 0 .5rem; border: 0; border-radius: 12px; background: transparent; box-shadow: none; color: #74473a; font: 700 clamp(1.05rem, 2.05vw, 1.9rem)/1.1 StorySign, var(--game-hand); text-align: center; overflow-wrap: normal; pointer-events: auto; cursor: pointer; }
+.games-hero-title-sign h1 { position: absolute; left: 17%; top: 22%; width: 72%; height: 42%; display: grid; align-content: center; margin: 0; color: #74473a; font: 700 var(--fs-title)/1.08 var(--font-display); letter-spacing: 0; text-align: center; overflow-wrap: normal; }
+.games-hero-link { position: absolute; z-index: 2; left: 16%; width: 66%; height: 22%; display: flex; align-items: center; justify-content: center; padding: 0 .5rem; border: 0; border-radius: 12px; background: transparent; box-shadow: none; color: #74473a; font: 700 var(--fs-title)/1.1 var(--font-display); text-align: center; overflow-wrap: normal; pointer-events: auto; cursor: pointer; }
 .sign-board-top .games-hero-link { top: 20%; }
 .sign-board-bottom .games-hero-link { top: 58%; height: 19%; }
 .games-hero-link:hover { color: #4e2f25; text-decoration: underline; text-underline-offset: .2em; }
@@ -98,6 +97,6 @@
   .games-hero-front { left: -30%; width: 160%; height: 9%; }
   .games-hero-title-sign { left: 50%; bottom: auto; top: 5%; width: 74%; margin-left: -37%; }
   .games-hero-navigation { right: 50%; bottom: 3%; width: 76%; margin-right: -38%; }
-  .games-hero-title-sign h1 { font-size: clamp(1.5rem, 7.2vw, 2.3rem); }
-  .games-hero-link { font-size: clamp(.95rem, 4.6vw, 1.4rem); }
+  .games-hero-title-sign h1 { font-size: var(--fs-title); }
+  .games-hero-link { font-size: var(--fs-body); }
 }

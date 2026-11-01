@@ -33,7 +33,7 @@ function updateTree({ newWishId = null } = {}){
   for(const wish of treeWishes){
     const item=document.createElement('li'),button=document.createElement('button'),image=document.createElement('img'),label=document.createElement('span');
     button.type='button';button.className='envelope';button.setAttribute('aria-label',wish.isOwn?'查看自己的最新願望（金色信封）':`查看 ${wish.nickname} 的已核准願望`);
-    image.src=`assets/illustrations/wish/${wish.isOwn?'envelope-paper-star.svg':'envelope-paper.svg'}`;image.alt='';image.width=1024;image.height=680;image.loading='lazy';
+    image.src=`images/wish/${wish.isOwn?'envelope-paper-star.svg':'envelope-paper.svg'}`;image.alt='';image.width=1024;image.height=680;image.loading='lazy';
     label.textContent=wish.isOwn?'自己的最新願望':wish.nickname;button.append(image,label);button.addEventListener('click',()=>showWish(wish));item.append(button);list.append(item);
   }
   if (newWishId) pendingEnvelopeEntrance = newWishId;
@@ -73,7 +73,7 @@ async function connectCloud(){
   }finally{connecting=false;}
 }
 // The stamp stays on this device: the letter's stored fields are fixed by the security rules.
-const STAMPS='holy-merry:stamps:v1',stampOf=value=>`assets/illustrations/wish/stamp-${value}.svg`;
+const STAMPS='holy-merry:stamps:v1',stampOf=value=>`images/wish/stamp-${value}.svg`;
 const chosenStamp=()=>form.querySelector('input[name="stamp"]:checked')?.value??'star';
 const showStamp=()=>{document.querySelector('#letter-stamp').src=stampOf(chosenStamp());};
 const readStamps=()=>{try{return JSON.parse(localStorage.getItem(STAMPS))??{};}catch{return {};}};

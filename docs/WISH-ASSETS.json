@@ -14,13 +14,13 @@
     },
     {
       "source": "/Users/fuminjan/Downloads/手繪蠟封節慶信封.png",
-      "file": "assets/illustrations/wish/envelope.png",
+      "file": "images/wish/envelope.png",
       "sha256": "7494cac72e0de2c899174a316ee3eb769e506c15f1dee87715df73e7007710e8",
       "bytes": 2472275
     },
     {
       "source": "/Users/fuminjan/Downloads/魔法聖誕金色星星信封.png",
-      "file": "assets/illustrations/wish/envelope-star.png",
+      "file": "images/wish/envelope-star.png",
       "sha256": "17135ec10ef07c4d44592844c69731dd69192da54074ce70e814cac3e832c002",
       "bytes": 2796902
     }

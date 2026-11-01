@@ -23,7 +23,7 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-bg-left { left:1%; }
 .intro-bg-right { right:1%; }
 /* Reuse Game's actual heading rules and font; keep the existing shared .shell alignment. */
-.intro-heading { --game-hand: GameHand, var(--font-display); }
+.intro-heading { --game-hand: var(--font-hand); }
 .intro-book-shell { perspective:2100px; margin-block-start:clamp(.75rem,2vw,1.25rem); padding:8px 10px 19px; }
 /* 版面：闔上時書封置中，翻開後書脊回到頁面中線。 */
 .intro-book { --book-edge:14px;position:relative;display:grid;width:100%;min-width:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:540px;transform-style:preserve-3d; }
@@ -46,7 +46,7 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-cover-front::after { content:'';position:absolute;inset:14px 14px 14px 34px;border:2px dashed #d9b36a;border-radius:12px;pointer-events:none; }
 .intro-cover-face { position:absolute;left:50%;top:50%;translate:-50% -50%;width:min(100cqw,calc(100cqh * .968));aspect-ratio:600/620; }
 .intro-cover-title { position:absolute;left:15%;right:15%;top:11%;aspect-ratio:660/360; }
-.intro-cover-hint { position:absolute;z-index:2;left:50%;bottom:3.4%;translate:-50% 0;padding:.15rem .8rem;border-radius:999px;background:#fbf3e3;color:#54463c;font-size:.8rem;font-weight:500;white-space:nowrap;box-shadow:0 2px 0 #cdbb9e; }
+.intro-cover-hint { position:absolute;z-index:2;left:50%;bottom:3.4%;translate:-50% 0;padding:.15rem .8rem;border-radius:999px;background:#fbf3e3;color:#54463c;font-size: var(--fs-small);font-weight:500;white-space:nowrap;box-shadow:0 2px 0 #cdbb9e; }
 .title-letter { animation:letter-wobble 3.4s ease-in-out infinite alternate; }
 @keyframes letter-wobble { from { rotate:-2.2deg; } to { rotate:2.2deg; } }
 .intro-page-art { z-index:-1;pointer-events:none; }
@@ -55,13 +55,13 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-page { position:relative;min-width:0; }
 .intro-copy { position:relative;isolation:isolate;padding:1.6rem 1.9rem 1.6rem;color:var(--story-ink);background:linear-gradient(90deg,#eadbc0 0%,#fff6e3 7%,#fff9eb 86%,#e9d9bc 100%);border-radius:3px 0 0 3px; }
 .intro-copy[data-active='false'],.intro-scene-page[data-active='false'] { visibility:hidden;pointer-events:none; }
-.intro-chapter { display:block;font-size:.7rem;letter-spacing:.12em;color:var(--red);font-weight:700; }
-.intro-copy h2 { margin:.65rem 0 .4rem;font-size:clamp(1.45rem,2.4vw,1.8rem);letter-spacing:.03em; }
-.intro-subtitle { color:#96764d;font-size:.85rem;margin:0 0 .85rem; }
-.intro-story { font-size:1rem;line-height:1.85; }
+.intro-chapter { display:block;font-size: var(--fs-small);letter-spacing:.12em;color:var(--red);font-weight:700; }
+.intro-copy h2 { margin:.65rem 0 .4rem;font-size: var(--fs-title);letter-spacing:.03em; }
+.intro-subtitle { color:#96764d;font-size: var(--fs-small);margin:0 0 .85rem; }
+.intro-story { font-size: var(--fs-body);line-height:1.85; }
 .intro-story p { margin:0 0 .75em; }
 .intro-story p:last-child { margin-bottom:0; }
-.intro-copy blockquote { margin:.9rem 0 0;padding-left:.7rem;border-left:2px solid #c7a36d;color:#987446;font-size:.78rem;line-height:1.8; }
+.intro-copy blockquote { margin:.9rem 0 0;padding-left:.7rem;border-left:2px solid #c7a36d;color:#987446;font-size: var(--fs-small);line-height:1.8; }
 .intro-picture { overflow:hidden;background:radial-gradient(ellipse at 52% 35%,#fffbed 20%,#f4e6cb 80%,#e5d4b6);border-radius:0 5px 5px 0; }
 /* Each page contains its own perspective stage. The leaf remains a separate 3D layer. */
 .intro-scene { position:absolute;left:3%;bottom:3%;width:94%;max-height:94%;aspect-ratio:560/530;--building-ground:18%;--character-ground:8%; }
@@ -79,16 +79,16 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-coin { position:absolute;left:19%;bottom:34%;width:9%;height:13%;z-index:15;opacity:0;pointer-events:none; }
 .intro-book-controls { display:flex;justify-content:center;align-items:center;gap:.55rem .9rem;flex-wrap:wrap;margin-top:.6rem; }
 .tag-art { z-index:-1; }
-.intro-tag { position:relative;isolation:isolate;min-width:128px;min-height:48px;border:0;padding:.3rem 1.1rem;background:none;box-shadow:none;color:#fff9ec;font-weight:600;font-size:.88rem;transition:transform .15s; }
+.intro-tag { position:relative;isolation:isolate;min-width:128px;min-height:48px;border:0;padding:.3rem 1.1rem;background:none;box-shadow:none;color:#fff9ec;font-weight:600;font-size: var(--fs-body);transition:transform .15s; }
 .intro-tag:hover:not(:disabled) { transform:translateY(-2px); }
 .intro-tag:active:not(:disabled) { transform:translateY(2px); }
 .intro-tag:disabled { opacity:.45; }
 /* 闔書時也保留控制列的位置，翻開書才不會把版面往上推。 */
 .intro-book-controls[hidden] { display:flex!important;visibility:hidden; }
-.intro-paper-button { min-height:44px;border:1px solid #b6a080;border-radius:4% 7% 5% 4% / 12% 8% 14% 11%;padding:.55rem 1rem;background:var(--cream);color:var(--red-dark);box-shadow:1px 3px 0 #b7a08055;font-size:.85rem;transition:transform .18s,background .18s; }
+.intro-paper-button { min-height:44px;border:1px solid #b6a080;border-radius:4% 7% 5% 4% / 12% 8% 14% 11%;padding:.55rem 1rem;background:var(--cream);color:var(--red-dark);box-shadow:1px 3px 0 #b7a08055;font-size: var(--fs-small);transition:transform .18s,background .18s; }
 .intro-paper-button:hover:not(:disabled) { transform:translateY(-2px) rotate(-1deg);background:#fffdf4; }
-.intro-count { color:var(--red);font-size:.8rem;letter-spacing:.12em;min-width:63px;text-align:center; }
-.intro-replay { border:0;border-bottom:1px dashed #9fb6bc;background:none;color:var(--muted);min-height:44px;font-size:.78rem;padding:.5rem; }
+.intro-count { color:var(--red);font-size: var(--fs-small);letter-spacing:.12em;min-width:63px;text-align:center; }
+.intro-replay { border:0;border-bottom:1px dashed #9fb6bc;background:none;color:var(--muted);min-height:44px;font-size: var(--fs-small);padding:.5rem; }
 .intro-cultures { --foreground-under:calc(clamp(170px,19vw,280px) * .55);--w:min(1120px,100vw - 3rem);--roller:46px;--x0:calc(var(--w) * .04);--map-w:calc(var(--w) * .84);--map-h:calc(var(--map-w) * .548);--roller-h:calc(var(--map-h) + 24px);--letter-w:min(600px,var(--w) * .54);--letter-h:calc(var(--letter-w) * .7895);--stage-h:max(var(--roller-h),var(--letter-h));position:relative;isolation:isolate;padding:1.6rem 0 clamp(18px,2.4vw,36px);display:flex;flex-direction:column;justify-content:center; }
 /* 海港鋪滿視窗寬，並延伸到頁尾雪丘後方，雪岸才接得上海面。 */
 .intro-harbor { position:absolute;z-index:-1;left:50%;top:0;bottom:calc(var(--foreground-under) * -1);width:100vw;translate:-50% 0;overflow:hidden;overflow:clip;pointer-events:none; }
@@ -142,24 +142,24 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-roller-start { left:var(--x0); }
 .intro-roller-end { left:calc(var(--x0) + var(--roller));z-index:2; }
 .intro-scroll-stage[data-state='open'] .intro-roller-end { transform:translateX(calc(var(--map-w) - var(--roller) * .6)); }
-.intro-roller-ribbon { position:absolute;z-index:2;top:50%;left:50%;translate:-50% -50%;writing-mode:vertical-rl;padding:.8rem .3rem;border-radius:6px;background:#a84a42;color:#fff9ec;font-size:.8rem;font-weight:600;letter-spacing:.14em;box-shadow:0 0 0 2px #fbf3e3,0 3px 5px #5a4a4055;transition:opacity .3s; }
+.intro-roller-ribbon { position:absolute;z-index:2;top:50%;left:50%;translate:-50% -50%;writing-mode:vertical-rl;padding:.8rem .3rem;border-radius:6px;background:#a84a42;color:#fff9ec;font-size: var(--fs-small);font-weight:600;letter-spacing:.14em;box-shadow:0 0 0 2px #fbf3e3,0 3px 5px #5a4a4055;transition:opacity .3s; }
 .intro-scroll-stage[data-state='open'] .intro-roller-ribbon { opacity:0; }
 .intro-letter { position:absolute;z-index:1;isolation:isolate;top:calc(50% - var(--letter-h) / 2);left:27%;width:var(--letter-w);aspect-ratio:380/300;rotate:-1.2deg;display:grid;align-content:center;justify-items:center;gap:.8rem;padding:3.4rem 3.4rem 2.8rem;text-align:center;color:#54463c;transition:opacity .4s,transform .6s; }
 .intro-letter .letter-art { z-index:-1; }
-.intro-letter h2 { margin:0;color:var(--green);font-size:clamp(1.7rem,3vw,2.3rem);letter-spacing:.04em; }
-.intro-letter p { margin:0;font-size:1rem;line-height:1.8; }
+.intro-letter h2 { margin:0;color:var(--green);font-size: var(--fs-title);letter-spacing:.04em; }
+.intro-letter p { margin:0;font-size: var(--fs-body);line-height:1.8; }
 .intro-scroll-stage[data-state='open'] .intro-letter { opacity:0;transform:scale(.96);pointer-events:none; }
 .intro-map-actions { position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.2rem;margin-top:.8rem; }
 .intro-body .page-foreground { margin-top:0; }
 .intro-map-actions [hidden] { display:none; }
 /* 定位點是一顆掛在地圖上的聖誕球，名字用小紙牌標在旁邊。 */
 .intro-map-pin { position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;background:transparent;border:0;padding:0;z-index:2; }
-.intro-map-pin::after { content:attr(data-label);position:absolute;left:50%;top:calc(100% - 4px);translate:-50% 0;padding:.05rem .45rem;border-radius:5px;background:#fbf3e3;color:#54463c;font-size:.74rem;font-weight:600;white-space:nowrap;box-shadow:0 2px 0 #cdbb9e;pointer-events:none; }
+.intro-map-pin::after { content:attr(data-label);position:absolute;left:50%;top:calc(100% - 4px);translate:-50% 0;padding:.05rem .45rem;border-radius:5px;background:#fbf3e3;color:#54463c;font-size: var(--fs-small);font-weight:600;white-space:nowrap;box-shadow:0 2px 0 #cdbb9e;pointer-events:none; }
 .intro-map-pin::before { content:'';display:block;width:22px;height:22px;margin:auto;background:radial-gradient(circle at 35% 30%,#d98a7c,#a84a42 62%);border:3px solid #fff4da;border-radius:50%;box-shadow:0 0 0 2px #d9b36a,1px 3px 4px #50453a66;transition:transform .2s; }
 .intro-map-pin:hover::before,.intro-map-pin[aria-expanded='true']::before { transform:scale(1.25) rotate(7deg); }
 .intro-map-pin:focus-visible { outline-offset:0; border-radius:50%; }
 .intro-country-shortcuts { display:flex;flex-wrap:wrap;gap:.4rem .8rem;justify-content:center; }
-.intro-country-link { background:#fbf3e3;border:0;border-radius:8px 10px 7px 9px;box-shadow:0 2px 0 #cdbb9e;color:var(--green);min-height:44px;padding:.4rem .9rem;font-size:.85rem;font-weight:600; }
+.intro-country-link { background:#fbf3e3;border:0;border-radius:8px 10px 7px 9px;box-shadow:0 2px 0 #cdbb9e;color:var(--green);min-height:44px;padding:.4rem .9rem;font-size: var(--fs-small);font-weight:600; }
 .intro-country-link:hover { color:var(--red); }
 .intro-map-actions .intro-replay { margin-top:.3rem;padding-inline:.9rem;border:0;border-radius:8px;background:#fbf3e3;color:var(--red-dark);box-shadow:0 2px 0 #cdbb9e; }
 .intro-modal-open { overflow:hidden; }
@@ -167,11 +167,11 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-postcard::backdrop { background:#304b5a88;backdrop-filter:none; }
 .intro-postcard[open] { animation:intro-post-open .35s ease-out; }
 @keyframes intro-post-open { from{opacity:0;transform:translateY(16px) rotate(-1deg)}to{opacity:1;transform:none} }
-.intro-post-close { position:absolute;top:.3rem;right:.3rem;z-index:4;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--red-dark);font-size:1.5rem;line-height:1; }
+.intro-post-close { position:absolute;top:.3rem;right:.3rem;z-index:4;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--red-dark);font-size: var(--fs-title);line-height:1; }
 .intro-post-close:hover { background:#f1e3c8; }
 .intro-post-head { margin-right:2.4rem; }
-.intro-post-country { color:var(--green);font-size:.82rem;font-weight:700;letter-spacing:.08em; }
-.intro-postcard h2 { margin:.1rem 0 .7rem;color:var(--red-dark);font-size:1.5rem; }
+.intro-post-country { color:var(--green);font-size: var(--fs-small);font-weight:700;letter-spacing:.08em; }
+.intro-postcard h2 { margin:.1rem 0 .7rem;color:var(--red-dark);font-size: var(--fs-title); }
 /* 畫面是整張可點的紙雕；所有動作都只動合成層。 */
 .intro-post-art { position:relative;display:block;width:100%;padding:0;border:0;background:#f1e3c8;overflow:hidden;aspect-ratio:640/360;border-radius:6px;box-shadow:0 0 0 3px #fff9ec,0 0 0 4px #d9c5a2;cursor:pointer; }
 .intro-post-art:focus-visible { outline:3px solid #e0b04f;outline-offset:3px; }
@@ -183,8 +183,8 @@ html.intro-document { scrollbar-gutter:stable; }
 .post-petals { position:absolute;inset:0;overflow:hidden;pointer-events:none; }
 .post-petals i { position:absolute;top:30%;width:9px;height:6px;border-radius:50%;background:#b5443c;animation:petal-fall 2.4s ease-in forwards; }
 @keyframes petal-fall { from { opacity:1;transform:translateY(0) rotate(0); } to { opacity:.2;transform:translateY(190px) translateX(26px) rotate(260deg); } }
-.intro-post-result { min-height:1.7em;margin:.7rem 0 .15rem;color:var(--red-dark);font-size:1rem;font-weight:600;text-align:center; }
-.intro-post-description { margin:0 0 .7rem;font-size:.92rem;line-height:1.8;text-align:center;text-wrap:balance; }
+.intro-post-result { min-height:1.7em;margin:.7rem 0 .15rem;color:var(--red-dark);font-size: var(--fs-body);font-weight:600;text-align:center; }
+.intro-post-description { margin:0 0 .7rem;font-size: var(--fs-body);line-height:1.8;text-align:center;text-wrap:balance; }
 .intro-post-action { display:block;margin-inline:auto;min-width:200px;min-height:54px; }
 
 /* Keep the full-size book and 16px story on short laptops; compact only its introduction. */
@@ -214,8 +214,8 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-book-shell { padding:7px 2px 16px;perspective:1600px; }
  .intro-book { --mobile-scene-height:clamp(300px,85vw,440px);--book-edge:8px;grid-template-columns:1fr;aspect-ratio:auto;min-height:0; }
  .intro-copy { padding:1.3rem 1.25rem 1.1rem;background:linear-gradient(120deg,#fff8e8,#f3e6cd); }
- .intro-copy h2 { font-size:1.55rem; }
- .intro-story { font-size:1rem;line-height:1.9; }
+ .intro-copy h2 { font-size: var(--fs-title); }
+ .intro-story { font-size: var(--fs-body);line-height:1.9; }
  .intro-subtitle { margin-bottom:.8rem; }
  .intro-book { scroll-margin-top:.75rem; }
  .intro-book[data-state='closed'] { min-height:min(120vw,480px); }
@@ -235,20 +235,20 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-leaf-mobile>.intro-copy { min-height:0; }
  /* 手機的書比螢幕長，按鈕貼在畫面底部，讀到哪都按得到。 */
  .intro-book-controls { position:sticky;bottom:.4rem;z-index:40;gap:.3rem .4rem;margin-top:.8rem;padding:.3rem;border-radius:12px;background:#fff9ecee;box-shadow:0 3px 10px #4b6a7a44; }
- .intro-tag { min-width:104px;min-height:44px;padding:.2rem .6rem;font-size:.8rem; }
- .intro-paper-button { padding:.55rem .85rem;font-size:.82rem; }
+ .intro-tag { min-width:104px;min-height:44px;padding:.2rem .6rem;font-size: var(--fs-small); }
+ .intro-paper-button { padding:.55rem .85rem;font-size: var(--fs-small); }
  .intro-replay { min-height:36px;padding:.2rem .4rem; }
  .intro-cultures { --w:calc(100vw - 2rem);--roller:26px;--x0:0px;--map-w:calc(var(--w) - 40px);--letter-h:330px;--stage-h:360px;padding-bottom:128px; }
  .harbor-sea { --boat:66px;--floe:112px;--land:138px;--sea:300px;inset:calc(1.6rem + 310px) 0 0; }
  .harbor-boat { left:44vw; }
  .harbor-cloud,.harbor-gull { display:none; }
  .intro-letter { width:calc(100% - var(--roller) * 2 - 1rem);aspect-ratio:auto;height:330px;top:15px;left:calc(var(--roller) * 2 + 1rem);padding:2.8rem 1.8rem 2.2rem; }
- .intro-roller-ribbon { font-size:.66rem;padding:.6rem .15rem; }
+ .intro-roller-ribbon { font-size: var(--fs-small);padding:.6rem .15rem; }
  .intro-letter { gap:.55rem; }
  /* 手機地圖比舞台矮，按鈕貼到地圖下方，才不會壓到燈塔。 */
  .intro-scroll-stage[data-state='open'] + .intro-map-actions { margin-top:-92px; }
- .intro-letter h2 { font-size:1.35rem;letter-spacing:.02em;white-space:nowrap; }
- .intro-letter p { font-size:.92rem; }
+ .intro-letter h2 { font-size: var(--fs-body);letter-spacing:.02em;white-space:nowrap; }
+ .intro-letter p { font-size: var(--fs-body); }
  .intro-map-pin::after { display:none; }
  .intro-map-pin { width:36px;height:36px; }
  /* 台灣與日本在手機上只隔 18px，往外推開才點得準。 */
@@ -256,7 +256,7 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-map-pin[data-country='japan'] { translate:11px -9px; }
  .intro-map-pin::before { width:14px;height:14px;border-width:2px;box-shadow:0 0 0 1px #d9b36a; }
  .intro-country-shortcuts { gap:.3rem;margin-top:1rem; }
- .intro-country-link { padding:.4rem .65rem;font-size:.8rem; }
+ .intro-country-link { padding:.4rem .65rem;font-size: var(--fs-small); }
  .intro-postcard { padding:1rem .9rem;border-width:8px; }
  }
 @media (prefers-reduced-motion:reduce) {

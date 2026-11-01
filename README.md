@@ -24,6 +24,12 @@ Holy Moly! It's Christmas! 一個紙雕繪本風格的聖誕主題網站，有 3
 - **頁尾：** 每頁一個互動主角：雪橇、地球儀、驚喜禮物盒、許願流星。
 - **無障礙：** 支援鍵盤操作與 `prefers-reduced-motion`；JavaScript 失效時內容與導覽仍可使用。
 
+## 設計規格
+
+- **字型 3 種：** Noto Sans TC（內文）、Mountains of Christmas（標題）、手寫字（信紙）。
+- **字級 3 級：** 標題 32px、內文 16px、小字 13px，定義在 `css/tokens.css`。
+- **色彩：** 主色為紅、綠、金，天空藍與奶油白作為背景。
+
 ## 願望如何運作
 
 1. 訪客以匿名身分登入，不需要帳號。
@@ -76,7 +82,8 @@ GitHub Pages 從 `main` 分支根目錄發布，push 後約 1 分鐘生效。Fir
 | `js/data/` | 純資料表，多數由 `scripts/` 產生 |
 | `js/services/` | Firebase 與儲存 |
 | `css/` | `tokens.css` 設計變數、`shared.css` 共用樣式、各頁樣式 |
-| `assets/` | 模型、音樂、字型與插畫 |
+| `images/` | 插畫與 SVG |
+| `assets/` | 模型、音樂與字型 |
 | `vendor/` | Three.js 與兩款遊戲原作的原樣副本 |
 | `scripts/` | 素材產生與檢查工具 |
 | `tests/` | 自動測試與人工預覽頁 |

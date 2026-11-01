@@ -17,7 +17,7 @@
 
 每片紙只轉成圖片一次。紙片各自帶 `perspective()` 往後倒下，不共用 3D 空間：往後倒只會縮小，不會超出書頁，也不會互相穿過；前後順序交給 z-index。
 
-`assets/illustrations/intro/` 的原始 PNG 全部保留，頁面已不載入，`docs/INTRO-ASSETS.json` 的雜湊檢查照舊。
+`images/intro/` 的原始 PNG 全部保留，頁面已不載入，`docs/INTRO-ASSETS.json` 的雜湊檢查照舊。
 
 ---
 
@@ -44,7 +44,7 @@
 
 Intro 的根捲軸使用 y proximity，故事書及地圖各為一個 start 目標。Header 是非固定 Header：以 ResizeObserver 讀取其實際高度，套入第一節的高度及 scroll-margin，避免載入即把 Header 捲走。沒有新增 wheel／touch 攔截。內容較長時自然增加高度；700px 以下及減少動態設定停用吸附。
 
-原地圖仍使用 `assets/illustrations/intro/christmas_map.jpg`，六點座標不變：
+原地圖仍使用 `images/intro/christmas_map.jpg`，六點座標不變：
 
 | 國家 | 原圖 1728×947 座標 | 互動 |
 | --- | --- | --- |

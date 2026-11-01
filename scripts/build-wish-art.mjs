@@ -1,7 +1,7 @@
 // 產生 Wish 頁的 SVG 素材（信封、折好的信、聖誕襪）與 js/data/envelope-shapes.js。執行：node scripts/build-wish-art.mjs
 import fs from 'node:fs/promises';
 
-const DIR = 'assets/illustrations/wish', W = 1024, H = 680;
+const DIR = 'images/wish', W = 1024, H = 680;
 const grain = (scale = 1) => `<filter id="p" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="${.035 / scale}" numOctaves="2" seed="4" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="${4 * scale}" result="c"/><feMorphology in="c" operator="dilate" radius="${2 * scale}" result="e"/><feFlood flood-color="#f6ecda"/><feComposite in2="e" operator="in" result="r"/><feTurbulence type="fractalNoise" baseFrequency="${.85 / scale} ${.55 / scale}" numOctaves="3" seed="9"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 .96 0 0 0 0 .86 0 0 0 .6 -.3"/><feComposite in2="c" operator="in" result="g"/><feMerge><feMergeNode in="r"/><feMergeNode in="c"/><feMergeNode in="g"/></feMerge></filter>`;
 const svg = (w, h, body, filter = grain()) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs>${filter}</defs><g filter="url(#p)">${body}</g></svg>\n`;
 const starPath = (x, y, size) => `M${Array.from({ length: 10 }, (_, i) => { const a = Math.PI * i / 5 - Math.PI / 2, r = i % 2 ? size * .45 : size; return `${(x + Math.cos(a) * r).toFixed(1)} ${(y + Math.sin(a) * r).toFixed(1)}`; }).join('L')}Z`;
