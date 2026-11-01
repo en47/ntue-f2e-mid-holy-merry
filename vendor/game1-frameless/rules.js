@@ -15,5 +15,8 @@ const reachable=(from,to)=>from.every(a=>to.some(b=>Math.abs(a-b)<=REACH));
 function nextWave(previousOpen,distance,rand=Math.random){const pairs=rand()<Math.max(0,progress(distance)-.25)*.5,pool=WAVES.filter(w=>(w.length===2)===pairs&&reachable(previousOpen,open(w)));return pool[Math.floor(rand()*pool.length)]}
 // Gifts sit in front of the coming obstacle, always one lane away from a clear path.
 function giftLane(wave,rand=Math.random){const clear=open(wave),pool=blocked(wave).filter(l=>clear.some(c=>Math.abs(c-l)===1));return pool[Math.floor(rand()*pool.length)]}
-root.FlightRules={LANES,REACH,WAVES,progress,speed,interval,blocked,open,nextWave,giftLane};
+const giftMilestone=count=>count>0&&count%5===0;
+// A record only counts once there is one to beat, and only on the moment it is passed.
+const passedRecord=(before,now,record)=>record>0&&before<=record&&now>record;
+root.FlightRules={LANES,REACH,WAVES,progress,speed,interval,blocked,open,nextWave,giftLane,giftMilestone,passedRecord};
 })(globalThis);

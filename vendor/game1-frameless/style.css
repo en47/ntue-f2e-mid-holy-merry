@@ -7,3 +7,6 @@
 @media(prefers-reduced-motion:no-preference){button{transition:transform .15s ease,filter .15s ease}}
 /* The handwriting sheet was drawn for cream paper; darken it to read on kraft. */
 button .word{filter:brightness(.58)}
+/* In-flight toast for gift milestones and new records. */
+#toast{position:absolute;left:50%;top:7%;translate:-50% 0;gap:3px;padding:8px 16px;background:#fff8edf2;border-radius:14px;box-shadow:0 2px 0 #d4b9a8;pointer-events:none}#toast[hidden]{display:none}#toast .toast-word{width:66px;height:26px}#toast .gift-icon{margin-right:6px}#toast .unit{margin-left:4px}
+#toast.pop{animation:toast-pop .3s cubic-bezier(.2,1.5,.4,1)}@keyframes toast-pop{from{opacity:0;transform:translateY(10px) scale(.8)}}

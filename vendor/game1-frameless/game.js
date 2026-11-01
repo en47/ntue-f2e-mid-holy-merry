@@ -7,8 +7,8 @@ document.querySelectorAll('[data-word]').forEach(e=>e.innerHTML=word(e.dataset.w
 function scoreInto(id,value){const e=$(id);value=String(Math.max(0,Math.floor(value)));if(e.dataset.value===value)return;e.dataset.value=value;e.innerHTML=[...value].map(n=>word(n,'digit')).join('')+word('unit','unit');e.setAttribute('aria-label',value+' 公尺')}
 function giftsInto(id,count,top){const e=$(id),digits=value=>[...String(value)].map(n=>word(n,'digit')).join('');e.innerHTML='<img class="gift-icon" src="assets/gift.svg" alt="">'+digits(count)+'<i class="gift-slash"></i>'+digits(top);e.setAttribute('aria-label','禮物 '+count+' 個，最高紀錄 '+top+' 個')}
 function setButton(id,key,label){const e=$(id);e.innerHTML=word(key);e.dataset.state=key;e.setAttribute('aria-label',label)}
-const HEIGHT=510,lanes=[80,160,240,320,400];
-let width=1100,lane=2,y=240,mode='loading',distance=0,best=0,elapsed=0,scroll=0,obstacles=[],spawn=2,last=0,ready=false,gifts=[],sparkles=[],collected=0,mostGifts=0,clearLanes=FlightRules.LANES,coming=[2],giftIn=Infinity;
+const HEIGHT=510,lanes=[80,160,240,320,400],SHAKE=.4,paperColors=['#b64f32','#6f8a63','#e2b24f','#fff4d8','#9dbfd0'];
+let width=1100,lane=2,y=240,mode='loading',distance=0,best=0,elapsed=0,scroll=0,obstacles=[],spawn=2,last=0,ready=false,gifts=[],sparkles=[],collected=0,mostGifts=0,clearLanes=FlightRules.LANES,coming=[2],giftIn=Infinity,shake=0,confetti=[],toastLeft=0;
 const assets={},reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 try{const saved=Number(localStorage.getItem('santa-crayon-best'));if(Number.isFinite(saved)&&saved>0)best=Math.floor(saved)}catch{}
 try{const saved=Number(localStorage.getItem('santa-crayon-gifts'));if(Number.isFinite(saved)&&saved>0)mostGifts=Math.floor(saved)}catch{}
@@ -18,9 +18,9 @@ function resize(){const box=canvas.getBoundingClientRect();width=Math.max(510,Ma
 new ResizeObserver(resize).observe(canvas);
 function indicate(){document.querySelectorAll('.laneIndicator i').forEach((e,i)=>e.classList.toggle('active',i===lane))}
 function move(d){if(mode!=='playing')return;lane=Math.max(0,Math.min(4,lane+d));indicate()}
-function start(){if(!ready)return;mode='playing';lane=2;y=240;distance=0;elapsed=0;obstacles=[];spawn=2;gifts=[];sparkles=[];collected=0;clearLanes=FlightRules.LANES;coming=FlightRules.nextWave(clearLanes,0);giftIn=Infinity;giftsInto('#gifts',0,mostGifts);$('#overlay').classList.add('hidden');$('#result-card').hidden=true;$('#pause').disabled=false;setButton('#pause','pause','暫停');scoreInto('#score',0);indicate();announce('開始飛行');$('#start').blur()}
+function start(){if(!ready)return;mode='playing';lane=2;y=240;distance=0;elapsed=0;obstacles=[];spawn=2;gifts=[];sparkles=[];collected=0;clearLanes=FlightRules.LANES;coming=FlightRules.nextWave(clearLanes,0);giftIn=Infinity;shake=0;confetti=[];hideToast();giftsInto('#gifts',0,mostGifts);$('#overlay').classList.add('hidden');$('#result-card').hidden=true;$('#pause').disabled=false;setButton('#pause','pause','暫停');scoreInto('#score',0);indicate();announce('開始飛行');$('#start').blur()}
 function pause(){if(mode==='playing'){mode='paused';setButton('#pause','continue','繼續');setButton('#start','continue','繼續');$('#result-card').hidden=true;$('#overlay').classList.remove('hidden');announce('遊戲暫停')}else if(mode==='paused'){mode='playing';$('#overlay').classList.add('hidden');setButton('#pause','pause','暫停');announce('繼續飛行')}}
-function end(){mode='over';const score=Math.floor(distance);if(score>best){best=score;try{localStorage.setItem('santa-crayon-best',best)}catch{}}if(collected>mostGifts){mostGifts=collected;try{localStorage.setItem('santa-crayon-gifts',mostGifts)}catch{}}scoreInto('#best',best);scoreInto('#score',score);scoreInto('#result',score);giftsInto('#gifts',collected,mostGifts);giftsInto('#result-gifts',collected,mostGifts);$('#result-card').hidden=false;$('#pause').disabled=true;setButton('#start','again','再玩一次');$('#overlay').classList.remove('hidden');announce('遊戲結束，飛行距離 '+score+' 公尺，收集 '+collected+' 個禮物')}
+function end(){mode='over';if(!reducedMotion)shake=SHAKE;hideToast();const score=Math.floor(distance);if(score>best){best=score;try{localStorage.setItem('santa-crayon-best',best)}catch{}}if(collected>mostGifts){mostGifts=collected;try{localStorage.setItem('santa-crayon-gifts',mostGifts)}catch{}}scoreInto('#best',best);scoreInto('#score',score);scoreInto('#result',score);giftsInto('#gifts',collected,mostGifts);giftsInto('#result-gifts',collected,mostGifts);$('#result-card').hidden=false;$('#pause').disabled=true;setButton('#start','again','再玩一次');$('#overlay').classList.remove('hidden');announce('遊戲結束，飛行距離 '+score+' 公尺，收集 '+collected+' 個禮物')}
 $('#start').onclick=()=>mode==='error'?loadAssets():mode==='paused'?pause():start();$('#pause').onclick=pause;$('#up').onclick=()=>move(-1);$('#down').onclick=()=>move(1);
 window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();if(e.repeat)return;if(e.key==='ArrowUp')move(-1);if(e.key==='ArrowDown')move(1);if(e.key===' '||e.key.toLowerCase()==='p')pause();if(e.key==='Enter'&&!['BUTTON','A'].includes(document.activeElement.tagName)){if(mode==='ready'||mode==='over')start();else if(mode==='paused')pause()}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&mode==='playing')pause()});
@@ -29,7 +29,7 @@ function line(points,c,w=2){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.lineCap='round
 // All illustrated subjects use generated assets based on the supplied drawing.
 function village(scale,speed,baseline,opacity){const tile=assets.village.width*scale,h=assets.village.height*scale;ctx.save();ctx.globalAlpha=opacity;const offset=scroll*speed%tile;for(let i=-1;i*tile-offset<width;i++)ctx.drawImage(assets.village,i*tile-offset,baseline-h,tile,h);ctx.restore()}
 function playerGeometry(){const w=width<800?194:260;return {x:width<800?53:88,w,h:w*793/1983}}
-function santa(){const p=playerGeometry();ctx.save();const bob=reducedMotion?0:Math.sin(elapsed*3.6)*2;ctx.translate(p.x+p.w/2,y+bob);ctx.rotate(reducedMotion?0:Math.max(-.08,Math.min(.08,(lanes[lane]-y)*.0015)));ctx.drawImage(assets.player,-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}
+function santa(){const p=playerGeometry();ctx.save();const bob=reducedMotion?0:Math.sin(elapsed*3.6)*2;ctx.translate(p.x+p.w/2,y+bob);ctx.rotate((reducedMotion?0:Math.max(-.08,Math.min(.08,(lanes[lane]-y)*.0015)))+Math.sin(elapsed*44)*.09*shake/SHAKE);ctx.drawImage(assets.player,-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}
 // Source rectangles include every painted pixel plus transparent padding.
 const obstacleSprites={chimney:[185,45,340,620],cloud:[690,140,695,410],balloon:[1515,105,375,545]};
 function obstacleGeometry(o){const r=obstacleSprites[o.type];const w=o.type==='cloud'?108:o.type==='balloon'?54:72;let h=w*r[3]/r[2];const top=o.y-30;if(o.type==='chimney')h=HEIGHT-top;return {r,x:o.x-w/2,y:top,w,h}}
@@ -42,7 +42,13 @@ const giftSize=()=>width<800?40:46;
 function giftBox(g){const r=giftSize()/2;return {left:g.x-r,right:g.x+r,top:g.y-r,bottom:g.y+r}}
 function gift(g){const s=giftSize(),bob=reducedMotion?0:Math.sin(elapsed*4+g.x*.02)*3;ctx.drawImage(assets.gift,g.x-s/2,g.y-s/2+bob,s,s)}
 function sparkle(s){const t=s.age/.35;ctx.save();ctx.globalAlpha=1-t;for(let i=0;i<6;i++){const a=i*Math.PI/3+.3,r=14+t*30;ellipse(s.x+Math.cos(a)*r,s.y+Math.sin(a)*r,3,3,i%2?'#fff4d8':'#b64f32')}ctx.restore()}
-function collect(g){collected++;giftsInto('#gifts',collected,Math.max(collected,mostGifts));announce('收集 '+collected+' 個禮物');if(!reducedMotion)sparkles.push({x:g.x,y:g.y,age:0})}
+function collect(g){const recordGifts=FlightRules.passedRecord(collected,collected+1,mostGifts);collected++;giftsInto('#gifts',collected,Math.max(collected,mostGifts));announce('收集 '+collected+' 個禮物');if(!reducedMotion)sparkles.push({x:g.x,y:g.y,age:0});const count='<img class="gift-icon" src="assets/gift.svg" alt="">'+[...String(collected)].map(n=>word(n,'digit')).join('');if(recordGifts)celebrate(count,'禮物新紀錄 '+collected+' 個');else if(FlightRules.giftMilestone(collected))showToast(count,'已收集 '+collected+' 個禮物')}
+function showToast(html,label){const e=$('#toast');e.innerHTML=html;e.hidden=false;e.classList.remove('pop');void e.offsetWidth;if(!reducedMotion)e.classList.add('pop');toastLeft=1.5;announce(label)}
+function hideToast(){toastLeft=0;$('#toast').hidden=true}
+function celebrate(html,label){showToast(html,label);if(reducedMotion)return;for(let i=0;i<46;i++){const a=-Math.PI*(.15+Math.random()*.7),v=170+Math.random()*260;confetti.push({x:width/2,y:150,vx:Math.cos(a)*v,vy:Math.sin(a)*v,spin:Math.random()*6,turn:(Math.random()-.5)*12,size:6+Math.random()*6,color:paperColors[i%paperColors.length],age:0})}}
+function paperBit(c){ctx.save();ctx.globalAlpha=Math.min(1,(1.5-c.age)*2);ctx.translate(c.x,c.y);ctx.rotate(c.spin);ctx.fillStyle=c.color;ctx.fillRect(-c.size/2,-c.size/3,c.size,c.size*.66);ctx.restore()}
+// Runs through game over too, so the crash and the last scraps finish on screen.
+function effects(dt){shake=Math.max(0,shake-dt);sparkles=sparkles.filter(s=>(s.age+=dt)<.35);confetti=confetti.filter(c=>{c.age+=dt;c.vy+=520*dt;c.x+=c.vx*dt;c.y+=c.vy*dt;c.spin+=c.turn*dt;return c.age<1.5});if(toastLeft>0&&(toastLeft-=dt)<=0)hideToast()}
 function overlaps(a,b){return a.right>b.left&&a.left<b.right&&a.bottom>b.top&&a.top<b.bottom}
 function draw(){ctx.clearRect(0,0,width,HEIGHT);ctx.fillStyle='#e6d4d1';ctx.fillRect(0,0,width,HEIGHT);
 // Small fixed speckles supply paper grain without flickering during movement.
@@ -50,15 +56,16 @@ ctx.fillStyle='#a88f7e12';for(let i=0;i<1700;i++){const x=(i*137.39)%width,yy=(i
 ellipse(width-95,75,27,27,'#fff4d8');ellipse(width-83,65,25,25,'#e6d4d1');
 village(.29,.12,455,.24);ctx.fillStyle='#f7eee2';ctx.fillRect(0,478,width,32);village(.40,.38,520,.65);
 for(let i=0;i<34;i++){const x=((i*197-scroll*.18)%(width+20)+width+20)%(width+20),yy=(i*81+scroll*.045)%HEIGHT;ellipse(x,yy,i%4===0?2.3:1.4,i%4===0?2.3:1.4,'#fff9edcc')}
+const jolt=shake/SHAKE*7;ctx.save();ctx.translate(Math.sin(elapsed*61)*jolt,Math.cos(elapsed*53)*jolt);
 if(mode==='playing'){ctx.setLineDash([2,14]);lanes.forEach(l=>line([[42,l],[width-20,l]],'#fffaf238',1));ctx.setLineDash([])}
-obstacles.forEach(obstacle);gifts.forEach(gift);santa();sparkles.forEach(sparkle);
+obstacles.forEach(obstacle);gifts.forEach(gift);santa();sparkles.forEach(sparkle);ctx.restore();confetti.forEach(paperBit);
 }
 
-function update(dt){elapsed+=dt;if(!reducedMotion||mode==='playing')scroll+=dt*(mode==='playing'?150+FlightRules.speed(distance,false)-215:14);y+=(lanes[lane]-y)*Math.min(1,dt*16);if(mode!=='playing')return;distance+=dt*12;scoreInto('#score',distance);const compact=width<800,speed=FlightRules.speed(distance,compact);spawn-=dt;giftIn-=dt;
+function update(dt){elapsed+=dt;if(!reducedMotion||mode==='playing')scroll+=dt*(mode==='playing'?150+FlightRules.speed(distance,false)-215:14);y+=(lanes[lane]-y)*Math.min(1,dt*16);if(mode!=='playing')return;const before=distance;distance+=dt*12;scoreInto('#score',distance);if(FlightRules.passedRecord(before,distance,best))celebrate(word('best','toast-word')+[...String(Math.ceil(distance))].map(n=>word(n,'digit')).join('')+word('unit','unit'),'距離新紀錄 '+Math.ceil(distance)+' 公尺');const compact=width<800,speed=FlightRules.speed(distance,compact);spawn-=dt;giftIn-=dt;
 if(giftIn<=0){giftIn=Infinity;gifts.push({x:width+65,y:lanes[FlightRules.giftLane(coming)]})}
 if(spawn<=0){for(const l of coming)obstacles.push({x:width+65,y:lanes[l],type:l>=3?'chimney':Math.random()<.5?'cloud':'balloon'});clearLanes=FlightRules.open(coming);coming=FlightRules.nextWave(clearLanes,distance);spawn=FlightRules.interval(distance,compact,playerGeometry().w*.88);giftIn=Math.random()<.6?spawn/2:Infinity}
 for(const o of obstacles){o.x-=speed*dt;if(playerBoxes().some(p=>overlaps(p,obstacleBox(o)))){end();return}}
-const sleigh=collectBox();gifts=gifts.filter(g=>{g.x-=speed*dt;if(overlaps(sleigh,giftBox(g))){collect(g);return false}return g.x>-100});sparkles=sparkles.filter(s=>(s.age+=dt)<.35);obstacles=obstacles.filter(o=>o.x>-100)}
-function frame(t){const dt=Math.min((t-last)/1000||0,.035);last=t;if(ready){if(mode!=='paused'&&mode!=='over')update(dt);draw()}requestAnimationFrame(frame)}
+const sleigh=collectBox();gifts=gifts.filter(g=>{g.x-=speed*dt;if(overlaps(sleigh,giftBox(g))){collect(g);return false}return g.x>-100});obstacles=obstacles.filter(o=>o.x>-100)}
+function frame(t){const dt=Math.min((t-last)/1000||0,.035);last=t;if(ready){if(mode!=='paused'&&mode!=='over')update(dt);if(mode!=='paused')effects(dt);draw()}requestAnimationFrame(frame)}
 async function loadAssets(){ready=false;mode='loading';$('#start').disabled=true;try{await Promise.all(Object.entries({player:'santa-reindeer.png',village:'winter-village.png',obstacles:'obstacles.png',handwriting:'handwriting.png',gift:'gift.svg'}).map(([key,file])=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{assets[key]=img;resolve()};img.onerror=reject;img.src='assets/'+file})));ready=true;mode='ready';$('#start').disabled=false;setButton('#start','start','開始');resize();announce('準備完成，按 Enter 或開始按鈕遊玩')}catch{mode='error';$('#start').disabled=false;$('#start').title='素材載入失敗，請確認 assets 資料夾完整，點按重試';announce($('#start').title)}}
 indicate();loadAssets();requestAnimationFrame(frame);
