@@ -2,6 +2,7 @@ import { createWishDelivery } from './components/wish-delivery.js';
 import { selectTreeWishes } from './services/wish-selection.js';
 import { mountNightScene } from './components/wish-night.js';
 import { mountWishLights } from './components/wish-lights.js';
+import { mountTitleArt } from './components/title-art.js';
 import { mountCottage } from './components/wish-cottage.js';
 import { paperLayer } from './components/paper-art.js';
 import { airmailLetter, tagArt } from './components/paper-props.js';
@@ -119,6 +120,7 @@ function mountWishPaper(root) {
 
 // The scene and Firebase load independently; WebGL failure must not disable letters.
 const room = document.querySelector('#wish-room');
+mountTitleArt(room.querySelector('#room-title'), 'the-wish-room', { palette: ['#fbecc4', '#f4d581', '#fbecc4', '#e8b84f'], rim: '#33526f' });
 mountNightScene(room);
 const cottage = mountCottage(room);
 mountWishPaper(room);

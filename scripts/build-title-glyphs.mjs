@@ -19,10 +19,18 @@ function layout(lines, width, size) {
 const header = '// 由 scripts/build-title-glyphs.mjs 產生，請勿手改。';
 const title = layout([['Merry', 158], ['Christmas', 316]], 760, 168);
 const story = layout([['Christmas', 150], ['Story', 290]], 660, 150);
-const games = layout([['Christmas', 150], ['Games', 290]], 660, 150);
+// 頁面大標題：寬度跟著字串長度，四周留白給紙邊與晃動。
+const heading = (lines, height) => {
+  const width = Math.ceil(Math.max(...lines.map(([text]) => font.getAdvanceWidth(text, 150))) + 60);
+  return { box: `0 0 ${width} ${height}`, ratio: +(width / height).toFixed(4), glyphs: layout(lines, width, 150) };
+};
+const headings = {
+  'christmas-games': heading([['Christmas', 150], ['Games', 290]], 360),
+  'the-wish-room': heading([['The Wish Room', 150]], 220),
+};
 const tagline = layout([["Holy Moly! It's Christmas!", 76]], 720, 50).map(glyph => glyph.d).join('');
 await fs.writeFile('js/data/tagline-glyphs.js', `${header}\nexport const TAGLINE_TEXT = "Holy Moly! It's Christmas!";\nexport const taglinePath = ${JSON.stringify(tagline)};\n`);
 await fs.writeFile('js/data/title-glyphs.js', `${header}\nexport const TITLE_BOX = '0 0 760 380';\nexport const titleGlyphs = ${JSON.stringify(title)};\n`);
 await fs.writeFile('js/data/story-glyphs.js', `${header}\nexport const STORY_BOX = '0 0 660 360';\nexport const storyGlyphs = ${JSON.stringify(story)};\n`);
-await fs.writeFile('js/data/games-glyphs.js', `${header}\nexport const GAMES_BOX = '0 0 660 360';\nexport const gamesGlyphs = ${JSON.stringify(games)};\n`);
+await fs.writeFile('js/data/heading-glyphs.js', `${header}\nexport const headingGlyphs = ${JSON.stringify(headings)};\n`);
 console.log(title.length, story.length, 'glyphs');

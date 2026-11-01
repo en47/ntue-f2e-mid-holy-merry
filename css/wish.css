@@ -30,6 +30,7 @@
 .wish-lights i.is-lit::after { opacity: .9; transition-duration: .9s; }
 .room-heading { position: absolute; left: 3%; top: 2%; z-index: 3; }
 .room-heading .eyebrow { font-size: var(--fs-small); letter-spacing: .17em; margin-bottom: .15rem; }
+.room-heading .title-art { width: clamp(250px, 27vw, 380px); margin-left: -6px; }
 .room-heading h1 { font: 700 var(--fs-title)/1.05 var(--font-display); color: #fbecc4; margin: 0; text-shadow: 0 2px 0 #1b2c3e; }
 .wish-letter { position: absolute; top: clamp(3.6rem, 10%, 6rem); left: 3%; width: 31%; max-width: 450px; isolation: isolate; padding: clamp(2.6rem, 5.6vw, 3.3rem) clamp(2.4rem, 3.5vw, 3rem) clamp(2.2rem, 4.6vw, 2.8rem); transform: rotate(-1deg); z-index: 3; }
 .letter-art { z-index: -1; pointer-events: none; }

@@ -206,6 +206,13 @@ await test('設計規格：三種字型、三級字級，全部走設計變數',
   assert.ok(families.size <= 2, 'Only the title and handwriting faces are downloaded; body text uses the system font');
   assert.ok(!/--font-(display|hand):[^;]*\bserif\b(?<!sans-serif)/.test(tokens), 'Chinese must not fall back to a serif face');
 });
+await test('頁面大標題：SVG 逐字紙片、共用晃動動畫、HTML 保留文字', async () => {
+  const shared = await fs.readFile(path.join(project, 'css/shared.css'), 'utf8'), art = await fs.readFile(path.join(project, 'js/components/title-art.js'), 'utf8');
+  assert.ok(shared.includes('@keyframes letter-wobble') && art.includes("'title-letter'") && art.includes('sr-only') && !art.includes('innerHTML'));
+  const wish = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), glyphs = await fs.readFile(path.join(project, 'js/data/heading-glyphs.js'), 'utf8');
+  assert.ok(wish.includes('>The Wish Room</h1>'), 'Titles stay readable without JavaScript');
+  assert.ok(glyphs.includes('christmas-games') && glyphs.includes('the-wish-room') && !glyphs.includes('santa-flying'), 'Only page titles are drawn; section headings stay text');
+});
 await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、畫面不依賴下載', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
   for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish']]) {

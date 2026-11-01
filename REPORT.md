@@ -2,7 +2,8 @@
 
 ## 第三十六輪：Game 招牌標題
 
-- 收斂字級後招牌標題只剩 32px 偏小，改成 SVG 圖形隨招牌縮放，比照首頁 Merry Christmas，不增加字級種類；螢幕閱讀器仍讀到 Christmas Games。
+- 收斂字級後大標題只剩 32px 偏小，Christmas Games 與 The Wish Room 改成逐字 SVG 紙片，和首頁、Intro 共用晃動動畫，不增加字級種類；螢幕閱讀器仍讀到完整文字。
+- 區塊小標（Santa Flying、Christmas Matching、Dear Santa）維持 32px 文字。
 
 ## 第三十五輪：中文標題退回內文字型
 
