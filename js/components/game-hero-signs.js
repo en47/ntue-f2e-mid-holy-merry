@@ -1,6 +1,6 @@
 // Muted paper-cut signposts for the Games hero. Link text stays in HTML above the boards.
 import { holly, paperFilter, rasterize, shape } from './paper-art.js';
-import { GAMES_BOX, gamesGlyphs } from '../data/games-glyphs.js';
+import { mountTitleArt } from './title-art.js';
 
 const WOOD = '#bb9c7d', GRAIN = '#9a7c61', PLATE = '#f6eddc', SNOW = '#fbf8f1', SHADE = '#d9e5ea';
 const TITLE_BOX = '0 0 1120 724', NAV_BOX = '0 0 1052 724';
@@ -65,17 +65,8 @@ const PARTS = {
   'nav-bottom': [NAV_BOX, svg => arrowBoard(svg, 'sign-nav-bottom', 'translate(10 296) scale(.97 .82)', [846, 112, 1.9])],
 };
 
-// The title is part of the sign's artwork, so it scales with the board; screen readers keep the words.
-function drawTitle(title) {
-  const palette = ['#a84a42', '#4f7d68', '#a8742c'], words = document.createElement('span');
-  words.className = 'sr-only'; words.textContent = title.textContent.replace(/\s+/g, ' ').trim();
-  const art = shape('svg', { viewBox: GAMES_BOX, class: 'sign-title-art', 'aria-hidden': 'true' });
-  gamesGlyphs.forEach((glyph, index) => shape('path', { d: glyph.d, fill: palette[index % palette.length] }, art));
-  title.replaceChildren(words, art);
-}
-
 export function mountHeroSigns(root) {
-  drawTitle(root.querySelector('.games-hero-title-sign h1'));
+  mountTitleArt(root.querySelector('.games-hero-title-sign h1'), 'christmas-games');
   for (const slot of root.querySelectorAll('[data-sign]')) {
     const [viewBox, draw] = PARTS[slot.dataset.sign];
     const svg = shape('svg', { viewBox });

@@ -47,8 +47,6 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-cover-face { position:absolute;left:50%;top:50%;translate:-50% -50%;width:min(100cqw,calc(100cqh * .968));aspect-ratio:600/620; }
 .intro-cover-title { position:absolute;left:15%;right:15%;top:11%;aspect-ratio:660/360; }
 .intro-cover-hint { position:absolute;z-index:2;left:50%;bottom:3.4%;translate:-50% 0;padding:.15rem .8rem;border-radius:999px;background:#fbf3e3;color:#54463c;font-size: var(--fs-small);font-weight:500;white-space:nowrap;box-shadow:0 2px 0 #cdbb9e; }
-.title-letter { animation:letter-wobble 3.4s ease-in-out infinite alternate; }
-@keyframes letter-wobble { from { rotate:-2.2deg; } to { rotate:2.2deg; } }
 .intro-page-art { z-index:-1;pointer-events:none; }
 .intro-copy-stack { display:grid;min-width:0; }
 .intro-copy-stack>.intro-copy { grid-area:1/1; }

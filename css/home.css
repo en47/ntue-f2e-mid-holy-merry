@@ -34,8 +34,6 @@
 .storybook-title { position: absolute; z-index: 13; top: var(--title-top); left: 50%; width: min(38%, 470px, calc((var(--stage-h) * var(--title-floor) - var(--title-top)) / .705)); margin: 0; transform: translateX(-50%); pointer-events: none; filter: none; }
 .title-motion { position: relative; display: block; width: 100%; aspect-ratio: 760 / 380; }
 .title-motion { transform-origin: 50% 0; animation: title-rock 4s ease-in-out infinite alternate; animation-delay: .6s; }
-.title-letter { animation: letter-wobble 3.4s ease-in-out infinite alternate; }
-@keyframes letter-wobble { from { rotate: -2.2deg; } to { rotate: 2.2deg; } }
 .story-tagline { position: relative; display: block; width: 112%; margin: -.4rem 0 0 -6%; aspect-ratio: 820 / 150; transform-origin: 50% 0; animation: ribbon-swing 4.4s ease-in-out infinite alternate; }
 .storybook.title-ready .story-tagline { animation: ribbon-unfurl .5s cubic-bezier(.2,.8,.3,1.15) .3s backwards, ribbon-swing 4.4s ease-in-out .8s infinite alternate; }
 @keyframes ribbon-unfurl { from { opacity: 0; transform: scaleX(.15); } }

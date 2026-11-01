@@ -53,6 +53,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 - `js/services/` — 儲存與 Firebase。
 - `js/games/` — 配對遊戲適配層；`js/games/matching.js` 是保留的舊單關原型，已不載入。
 - 全站只用三種字型（`--font-body`、`--font-display`、`--font-hand`）與三級字級（`--fs-title`、`--fs-body`、`--fs-small`），新樣式不可寫死字級；`css/game2-*.css` 是遊戲原作樣式，不在此限。
+- 只有每頁的大標題用 `js/components/title-art.js` 畫成逐字紙片，區塊小標維持文字（字形由 `scripts/build-title-glyphs.mjs` 產生），HTML 保留文字；新增標題要加進該腳本。
 - 圖片放根目錄 `images/`，模型、音樂、字型放 `assets/`。
 - `css/tokens.css` 設計變數 → `css/shared.css` 導覽／按鈕／Footer／音樂 → 各頁 CSS。
 

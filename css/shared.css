@@ -152,6 +152,11 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 @keyframes pop-up { 0% { transform: perspective(1100px) rotateX(-86deg); opacity: 0; } 12% { opacity: 1; } 74% { transform: perspective(1100px) rotateX(5deg); opacity: 1; } 100% { transform: perspective(1100px) rotateX(0); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .is-opening .pop { animation: none !important; opacity: 1 !important; } }
 
+/* Paper titles: every letter is a layer that wobbles on its own pivot. */
+.title-art { position: relative; display: block; width: 100%; }
+.title-letter { animation: letter-wobble 3.4s ease-in-out infinite alternate; }
+@keyframes letter-wobble { from { rotate: -2.2deg; } to { rotate: 2.2deg; } }
+
 /* Navigation light string: the tags replace the pills only once JS has built them. */
 .site-header { position: relative; }
 .header-inner { position: relative; z-index: 1; }
