@@ -955,6 +955,19 @@ await test('Santa 分頁模型與頭部追蹤：兩份模型頭頸骨都存在�
     assert.equal(still.head.quaternion.angleTo(new THREE.Quaternion()), 0);
     still.tracker.destroy();
   }
+  const deerScene = await fs.readFile(path.join(project, 'js/components/characters-scene.js'), 'utf8');
+  const deerData = JSON.parse((await fs.readFile(path.join(project, 'assets/models/reindeer-web.glb'))).toString('utf8', 20, 20 + (await fs.readFile(path.join(project, 'assets/models/reindeer-web.glb'))).readUInt32LE(12)).trim());
+  assert.ok(deerScene.includes("neckBone: 'tripoHead_1'") && deerScene.includes("headBone: 'tripoHead_2'"), 'The reindeer follows the mouse too');
+  for (const bone of ['tripo::Head_1', 'tripo::Head_2']) assert.ok(deerData.nodes.some(node => node.name === bone), bone);
+  const deerRig = new THREE.Group(), deerNeck = new THREE.Bone(), deerHead = new THREE.Bone(); deerNeck.name = 'tripoHead_1'; deerHead.name = 'tripoHead_2'; deerNeck.add(deerHead); deerRig.add(deerNeck);
+  env.window.addEventListener = (type, callback) => { if (type === 'pointermove') env.window.deerMove = callback; };
+  env.window.matchMedia = query => ({ matches: !query.includes('reduced'), addEventListener() {}, removeEventListener() {} });
+  const deerTracker = createHeadTracker(deerRig, { getBoundingClientRect: () => ({ left: 0, top: 0, width: 100, height: 100 }) }, { neckBone: 'tripoHead_1', headBone: 'tripoHead_2', maxYaw: .34, maxPitch: .12, unanimated: true });
+  env.window.deerMove({ pointerType: 'mouse', clientX: -5000, clientY: 0 });
+  for (let i = 0; i < 600; i++) deerTracker.update(1 / 60);
+  const deerTurn = deerHead.quaternion.angleTo(new THREE.Quaternion()) + deerNeck.quaternion.angleTo(new THREE.Quaternion());
+  assert.ok(deerTurn > .25 && deerTurn < .4, `Bones without animation must not pile up the turn: ${deerTurn}`);
+  deerTracker.destroy();
 });
 
 console.log(`\n${results.length} test groups passed.`);

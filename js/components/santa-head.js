@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-// Only Head and Neck move; both limits are well inside what the beard and collar can follow.
+// Only two bones move; the default limits are well inside what Santa's beard and collar can follow.
 const MAX_YAW = .42, MAX_PITCH = .16, HEAD_SHARE = .65, RESPONSE = 7;
 const UP = new THREE.Vector3(0, 1, 0), SIDE = new THREE.Vector3(1, 0, 0);
 const clamp = value => Math.max(-1, Math.min(1, value));
@@ -12,16 +12,18 @@ function turnInWorld(bone, yaw, pitch) {
 }
 
 // Follows a real mouse only. Touch devices and reduced motion keep the head on its own pose.
-export function createHeadTracker(model, anchor, { onMove = () => {} } = {}) {
-  const head = model.getObjectByName('mixamorigHead'), neck = model.getObjectByName('mixamorigNeck');
+export function createHeadTracker(model, anchor, { onMove = () => {}, headBone = 'mixamorigHead', neckBone = 'mixamorigNeck', maxYaw = MAX_YAW, maxPitch = MAX_PITCH, unanimated = false } = {}) {
+  const head = model.getObjectByName(headBone), neck = model.getObjectByName(neckBone);
+  // Bones no clip touches keep last frame's turn, so they start each frame from this rest pose instead.
+  const rest = unanimated && head && neck ? [neck.quaternion.clone(), head.quaternion.clone()] : null;
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)'), motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let targetYaw = 0, targetPitch = 0, yaw = 0, pitch = 0;
   const enabled = () => Boolean(head && neck) && fine.matches && !motion.matches;
   function aim(event) {
     if (event.pointerType !== 'mouse' || !enabled()) return;
     const rect = anchor.getBoundingClientRect();
-    targetYaw = clamp((event.clientX - (rect.left + rect.width / 2)) / (window.innerWidth * .4)) * MAX_YAW;
-    targetPitch = clamp((event.clientY - (rect.top + rect.height * .3)) / (window.innerHeight * .5)) * MAX_PITCH;
+    targetYaw = clamp((event.clientX - (rect.left + rect.width / 2)) / (window.innerWidth * .4)) * maxYaw;
+    targetPitch = clamp((event.clientY - (rect.top + rect.height * .3)) / (window.innerHeight * .5)) * maxPitch;
     onMove();
   }
   function center() { targetYaw = targetPitch = 0; onMove(); }
@@ -32,6 +34,7 @@ export function createHeadTracker(model, anchor, { onMove = () => {} } = {}) {
     // Call after the pose is set for this frame. Returns true while the head is still moving.
     update(delta) {
       if (!head || !neck) return false;
+      if (rest) { neck.quaternion.copy(rest[0]); head.quaternion.copy(rest[1]); model.updateMatrixWorld(true); }
       const ease = 1 - Math.exp(-RESPONSE * delta);
       yaw += (targetYaw - yaw) * ease; pitch += (targetPitch - pitch) * ease;
       if (Math.abs(yaw) + Math.abs(pitch) > .0005) {

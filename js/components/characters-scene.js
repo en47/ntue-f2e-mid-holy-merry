@@ -10,7 +10,7 @@ const instances = new WeakMap();
 const PITCH = .075;
 const MODELS = [
   { id: 'santa', label: '聖誕老人', src: new URL('../../assets/models/santa-dance-web.glb', import.meta.url).href, height: 2.15, speed: 1 },
-  { id: 'reindeer', label: '麋鹿', src: new URL('../../assets/models/reindeer-web.glb', import.meta.url).href, height: 2.05, speed: 1 },
+  { id: 'reindeer', label: '麋鹿', src: new URL('../../assets/models/reindeer-web.glb', import.meta.url).href, height: 2.05, speed: 1, headTracking: { neckBone: 'tripoHead_1', headBone: 'tripoHead_2', maxYaw: .34, maxPitch: .12, unanimated: true } },
 ];
 
 export function disposeModel(model) {
@@ -237,7 +237,7 @@ export function mountCharacters(root) {
       view.turn.add(normalized); view.attached = true;
       view.radius = Math.hypot(size.x / 2, size.z / 2) * scale;
       view.model.traverse(node => { if (node.isMesh) { node.castShadow = true; if (node.isSkinnedMesh) node.frustumCulled = false; } });
-      if (view.id === 'santa') view.head = createHeadTracker(view.model, view.slot, { onMove: requestFrame });
+      view.head = createHeadTracker(view.model, view.slot, { onMove: requestFrame, ...view.headTracking });
       view.ready = true;
       view.slot.dataset.state = 'ready'; view.slot.setAttribute('aria-busy', 'false');
       view.slot.dataset.clip = view.clip?.name ?? 'whole-model-sway';
