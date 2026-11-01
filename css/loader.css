@@ -1,0 +1,45 @@
+/* 全站 loading：蓋住頁面到準備好為止；頁面動畫先暫停，淡出後才開始，進場不會在背後播完。 */
+html.is-loading { overflow: hidden; }
+html.is-loading body > :not(.site-loader), html.is-loading body > :not(.site-loader) *, html.is-loading body > :not(.site-loader) *::before, html.is-loading body > :not(.site-loader) *::after { animation-play-state: paused !important; }
+.site-loader { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; overflow: hidden; background: #dfeef3 radial-gradient(#b9d3dc 1px, transparent 1.4px) 0 0 / 14px 14px; color: #54463c; transition: opacity .4s ease; }
+.site-loader.is-done { opacity: 0; pointer-events: none; }
+.site-loader-wish { background: linear-gradient(#22384f, #33526f 70%, #4c6c88); color: #fbecc4; }
+.loader-snow { position: absolute; left: 0; bottom: 0; width: 100%; height: 26vh; }
+.loader-hill { fill: #cfe1e7; stroke: #fbf3e3; stroke-width: 4; }
+.loader-ground { fill: #fbf8f1; stroke: #fbf3e3; stroke-width: 4; }
+.site-loader-wish .loader-hill { fill: #2f4c68; stroke: #46637f; }
+.site-loader-wish .loader-ground { fill: #e6edf3; stroke: #d7dee4; }
+.loader-stage { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 1.6rem; }
+.loader-art { display: block; width: min(300px, 70vw); height: auto; overflow: visible; }
+.loader-wheel-art { width: min(240px, 58vw); }
+.loader-caption { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: .08em; }
+/* Home：牛頓擺，所有蛋都是等質量單擺，支點在橫桿上。 */
+.cradle { --period: 1.4s; --swing: 24deg; --reach: 190px; position: relative; width: 252px; height: var(--reach); }
+.bar { position: absolute; top: -32px; left: -38px; width: 328px; height: 62px; z-index: 10; overflow: visible; }
+.egg-item { position: absolute; top: 0; left: calc(50% + var(--pivot)); width: 0; height: 0; transform-origin: 0 0; }
+.egg-item::before { content: ''; position: absolute; top: 0; left: -1px; width: 2px; height: calc(var(--reach) - 40px); background: #7b6348; }
+.egg-item img { position: absolute; height: 90px; width: auto; max-width: none; left: calc(var(--cx) * -1); top: calc(var(--reach) - var(--bottom)); }
+.egg-1 { --pivot: -101.6px; --cx: 42.15px; --bottom: 72.4px; animation: swingLeft var(--period) linear infinite; }
+.egg-2 { --pivot: -50.2px; --cx: 39.75px; --bottom: 77.1px; }
+.egg-3 { --pivot: 0px; --cx: 35.9px; --bottom: 78.1px; }
+.egg-4 { --pivot: 50.2px; --cx: 39.75px; --bottom: 77.1px; }
+.egg-5 { --pivot: 101.6px; --cx: 42.15px; --bottom: 72.4px; animation: swingRight var(--period) linear infinite; }
+@keyframes swingLeft { 0% { transform: rotate(var(--swing)); animation-timing-function: cubic-bezier(.12, 0, .39, 0); } 25% { transform: rotate(0deg); animation-timing-function: linear; } 75% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.61, 1, .88, 1); } 100% { transform: rotate(var(--swing)); } }
+@keyframes swingRight { 0% { transform: rotate(0deg); animation-timing-function: linear; } 25% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.61, 1, .88, 1); } 50% { transform: rotate(calc(var(--swing) * -1)); animation-timing-function: cubic-bezier(.12, 0, .39, 0); } 75% { transform: rotate(0deg); animation-timing-function: linear; } 100% { transform: rotate(0deg); } }
+.loader-word { width: 160px; height: auto; animation: loader-breathe 1.5s ease-in-out infinite alternate; }
+@keyframes loader-breathe { from { opacity: .3; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+/* Intro：書頁以書脊為軸一頁頁翻過去。 */
+.loader-leaf { transform-origin: 160px 110px; transform-box: view-box; animation: loader-page 2s ease-in-out infinite; }
+.loader-leaf-b { animation-delay: 1s; }
+@keyframes loader-page { 0% { transform: scaleX(1); } 50%, 100% { transform: scaleX(-1); } }
+/* Game：摩天輪轉動，車廂反向轉，永遠保持直立。 */
+.loader-wheel { transform-origin: 120px 120px; transform-box: view-box; animation: loader-spin 5s linear infinite; }
+.loader-seat { animation: loader-spin 5s linear infinite reverse; transform-origin: 0 0; }
+@keyframes loader-spin { to { rotate: 360deg; } }
+/* Wish：信封沿虛線飛向星星，途中隨風輕晃。 */
+.loader-envelope { offset-path: path('M20 180C90 90 230 90 300 34'); offset-rotate: 0deg; animation: loader-fly 2.8s ease-in-out infinite alternate; }
+@keyframes loader-fly { from { offset-distance: 0%; rotate: -8deg; } to { offset-distance: 100%; rotate: 8deg; } }
+.loader-stars path { animation: loader-breathe 1.3s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+.loader-stars path:nth-child(2n) { animation-delay: .6s; }
+@media (max-width: 480px) { .cradle, .loader-word { scale: .78; } }
+@media (prefers-reduced-motion: reduce) { .site-loader * { animation: none !important; } .loader-envelope { offset-distance: 50%; } }

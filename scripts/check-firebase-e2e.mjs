@@ -46,6 +46,7 @@ const snap = (page, name) => page.screenshot({ path: `${OUT}/${String(++shot).pa
 const cloudText = page => page.locator('#cloud-status').textContent();
 async function openWish(page) {
   await page.goto(`${BASE}/wish.html`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => !document.querySelector('.site-loader'), null, { timeout: 30000 });
   await page.waitForFunction(() => { const t = document.querySelector('#cloud-status')?.textContent ?? ''; return t.startsWith('已連接') || t.includes('尚未連接') || t.includes('暫時無法'); }, null, { timeout: 40000 });
 }
 async function sendWish(page, nickname, content, makePublic) {

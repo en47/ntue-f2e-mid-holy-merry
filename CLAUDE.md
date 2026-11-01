@@ -40,7 +40,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 | `wish.html` | `js/shared.js`、`js/wish.js` |
 | `games/christmas-matching.html` | `js/games/game2-embed.js`（iframe 內獨立文件） |
 
-`js/shared.js` 在四頁都載入（導覽選單、資訊對話框、音樂面板），不得啟動任何單頁的遊戲或計時器。需要 3D 的頁面在 HTML 內放 `<script type="importmap">` 把 `three` 指向 `./vendor/three/build/three.module.js`。
+`js/site-loader.js` 是 body 開頭的傳統 script，各頁主題由 `data-loader` 決定，頁面就緒才淡出，動畫由 `css/loader.css` 暫停到結束。`js/shared.js` 在四頁都載入（導覽選單、資訊對話框、音樂面板），不得啟動任何單頁的遊戲或計時器。需要 3D 的頁面在 HTML 內放 `<script type="importmap">` 把 `three` 指向 `./vendor/three/build/three.module.js`。
 
 導覽與 Footer 標記在四個 HTML 各有一份；修改時必須同步四頁，`tests/smoke.mjs` 第一組會檢查四個互連連結、唯一一個 `aria-current="page"`、所有本機 `src`/`href` 真的存在、以及頁內 ID 不重複。
 

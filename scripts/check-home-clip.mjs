@@ -8,7 +8,9 @@ let failures = 0;
 for (const name of pages) for (const [width, height] of [[375, 812], [768, 1024], [1440, 900]]) {
   const page = await browser.newPage({ viewport: { width, height } });
   await page.goto(`${process.env.BASE ?? 'http://127.0.0.1:5500'}/${name}`, { waitUntil: 'load' });
-  await page.waitForTimeout(5000);
+  // 紙片在 loading 期間停在倒下的姿勢，要等進場播完才量得準。
+  await page.waitForFunction(() => !document.querySelector('.site-loader'), null, { timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(4500);
   const clipped = await page.evaluate(async () => {
     const stage = (document.querySelector('.storybook') ?? document.querySelector('.games-hero') ?? document.body).getBoundingClientRect();
     const found = [];

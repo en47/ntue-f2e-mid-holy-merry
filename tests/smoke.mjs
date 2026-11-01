@@ -159,6 +159,17 @@ await test('頁尾互動主角：四頁各一個，遵守減少動態，全頁�
   assert.ok((toys.match(/motion\(\)\.matches/g) ?? []).length >= 3); assert.ok(css.includes('.toy-button:focus-visible'));
   for (const page of ['index', 'intro', 'game', 'wish']) assert.ok((await fs.readFile(path.join(project, `${page}.html`), 'utf8')).includes('data-foreground='), page);
 });
+await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、牛頓擺圖片不變', async () => {
+  const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
+  for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish']]) {
+    const html = await fs.readFile(path.join(project, `${page}.html`), 'utf8');
+    assert.ok(html.includes(`data-loader="${kind}"`), page); assert.match(html, /<body[^>]*>\s*<script src="js\/site-loader\.js/, 'Runs before the page paints');
+    assert.ok(new RegExp(`\\b${kind}: (function|')`).test(js), kind);
+  }
+  assert.ok(js.includes('MAX_WAIT') && css.includes('animation-play-state: paused') && css.includes('prefers-reduced-motion'));
+  assert.ok(!(await fs.readFile(path.join(project, 'admin.html'), 'utf8')).includes('site-loader'));
+  for (const name of ['red', 'green', 'yellow', 'loading']) await fs.access(path.join(project, `assets/illustrations/loading/${name}.png`));
+});
 await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {
   const env = environment();
   const { mountFlipCounter } = await env.evaluate('js/components/flip-counter.js');
