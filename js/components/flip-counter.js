@@ -13,18 +13,22 @@ function createCard(digit, motion) {
   let current = digit;
   const settle = () => { bottom.text.textContent = current; root.classList.remove('is-flipping'); };
   leafBottom.face.addEventListener('animationend', settle);
+  const swing = (previous, next) => {
+    top.text.textContent = next; bottom.text.textContent = previous;
+    leafTop.text.textContent = previous; leafBottom.text.textContent = next;
+    root.classList.remove('is-flipping');
+    void root.offsetWidth; // Restart the leaves if the last flip has not landed yet.
+    root.classList.add('is-flipping');
+  };
   return {
     root,
+    flip() { if (!motion.matches) swing(current, current); },
     show(next) {
       if (next === current) return;
       const previous = current;
       current = next;
       if (motion.matches) { [top, bottom, leafTop, leafBottom].forEach(part => { part.text.textContent = next; }); return; }
-      top.text.textContent = next; bottom.text.textContent = previous;
-      leafTop.text.textContent = previous; leafBottom.text.textContent = next;
-      root.classList.remove('is-flipping');
-      void root.offsetWidth; // Restart the leaves if the last flip has not landed yet.
-      root.classList.add('is-flipping');
+      swing(previous, next);
     },
   };
 }
@@ -33,6 +37,7 @@ export function mountFlipCounter(element) {
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let cards = [];
   return {
+    flip() { cards.forEach(card => card.flip()); },
     set(value) {
       const digits = [...value];
       // Days drop from three digits to two; a new width has nothing to flip from.

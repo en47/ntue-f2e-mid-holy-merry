@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { panFor, easePan } from '../js/components/home-parallax.js';
+import { burstPieces } from '../js/components/paper-burst.js';
 
 test('the page leans away from the pointer and stays inside the overhang', () => {
   assert.deepEqual(panFor(720, 450, 1440, 900), { x: -0, y: -0 });
@@ -20,4 +21,11 @@ test('parallax never moves the characters wrapper, which would bury the models',
   assert.ok(!/\['\.characters'/.test(script));
   assert.ok(!/\.characters\s*[,{][^}]*will-change/.test(css));
   for (const selector of ['.characters-canvas', '.character-stage']) assert.match(css, new RegExp(`\\${selector} \\{[^}]*z-index: \\d`));
+});
+
+test('paper scraps spread on both sides, rise, then fall', () => {
+  const pieces = burstPieces(18, () => .5);
+  assert.equal(pieces.length, 18);
+  assert.ok(pieces.some(piece => piece.x > 0) && pieces.some(piece => piece.x < 0));
+  assert.ok(pieces.every(piece => piece.rise < 0 && piece.fall > 0));
 });
