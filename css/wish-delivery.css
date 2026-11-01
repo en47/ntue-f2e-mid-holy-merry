@@ -26,3 +26,55 @@
 .delivery-feedback { position: fixed; z-index: 35; bottom: 1rem; left: 50%; transform: translateX(-50%); margin: 0; max-width: calc(100% - 2rem); padding: .5rem 1rem; background: #fff4df; border: 1px solid #cab18a; box-shadow: 1px 3px 0 #d7c4a0; color: #7a5f47; font-size: var(--fs-small); pointer-events: none; display: flex; align-items: center; gap: .65rem; }
 .delivery-snowflake { width: 30px; height: 30px; flex-shrink: 0; animation: delivery-spin 2.7s linear infinite; }
 @keyframes delivery-spin { to { transform: rotate(360deg); } }
+
+/* Reading a wish: the letter is the resting state, so nothing is lost if the animation never runs. */
+#wish-dialog { width: min(560px, calc(100% - 1.5rem)); max-width: none; max-height: none; padding: 0; overflow: visible; border: 0; border-radius: 0; background: none; box-shadow: none; }
+#wish-dialog::backdrop { background: #101d2bb3; backdrop-filter: blur(2px); }
+.reader-stage { position: relative; display: grid; place-items: center; perspective: 900px; }
+.reader-letter { position: relative; isolation: isolate; width: 100%; padding: 4.4rem 15% 3.6rem; color: #4b5554; outline: none; }
+.reader-paper { z-index: -1; pointer-events: none; }
+.reader-greeting { margin: 0 0 1rem; color: #a24b42; font: 700 var(--fs-title)/1.1 var(--font-display); }
+.reader-stamp { position: absolute; top: 3.4rem; right: 15%; width: 62px; height: auto; rotate: 4deg; }
+.reader-postmark { position: absolute; top: 3.6rem; right: calc(15% + 50px); display: grid; place-content: center; width: 84px; height: 84px; margin: 0; border: 2px solid #a84a4280; border-radius: 50%; color: #a84a42b3; font-size: var(--fs-small); line-height: 1.3; text-align: center; rotate: -9deg; }
+.reader-message { min-height: 84px; max-height: min(40dvh, 224px); overflow-y: auto; margin: 2.2rem 0 .4rem; padding-right: .4rem; font-size: var(--fs-body); line-height: 28px; white-space: pre-wrap; overflow-wrap: anywhere; background: repeating-linear-gradient(transparent 0 27px, #d8c8a8 27px 28px) local; scrollbar-width: thin; }
+.reader-sign { margin: 0; color: #a24b42; font: var(--fs-body)/1.6 var(--font-hand); text-align: right; overflow-wrap: anywhere; }
+.reader-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .9rem; }
+.reader-note { margin: 0; color: #6f6757; font-size: var(--fs-small); line-height: 1.5; }
+.reader-close { position: relative; isolation: isolate; flex-shrink: 0; width: 108px; height: 46px; border: 0; background: none; color: #fff7e8; font-size: var(--fs-small); font-weight: 600; cursor: pointer; transition: transform .18s ease; }
+.reader-close:not(:has(.art-layer)) { background: #a84a42; border-radius: 10px; }
+.reader-close .art-layer { z-index: -1; }
+.reader-close:hover { transform: translateY(-2px); }
+.reader-close:focus-visible { outline: 2px solid #f4d581; outline-offset: 2px; border-radius: 12px; }
+.reader-envelope { position: absolute; left: 50%; top: 50%; z-index: 2; width: min(400px, 76vw); aspect-ratio: 432 / 302; margin: 0; translate: -50% -50%; opacity: 0; pointer-events: none; transform-style: preserve-3d; }
+.reader-set { position: absolute; inset: 0; display: none; }
+[data-envelope='normal'] .reader-normal, [data-envelope='gold'] .reader-gold { display: block; }
+.reader-back { z-index: 1; } .reader-sheet { z-index: 2; } .reader-front { z-index: 3; } .reader-flap { z-index: 4; transform-origin: 50% 5.3%; } .reader-seal { z-index: 5; }
+@media (max-width: 600px) {
+  .reader-letter { padding: 3.6rem 14% 4rem; }
+  .reader-greeting { max-width: 62%; }
+  .reader-stamp { top: 2.9rem; right: 14%; width: 46px; }
+  .reader-postmark { top: 5.6rem; right: calc(14% - 6px); width: 76px; height: 76px; }
+  .reader-message { margin-top: 5rem; max-height: min(36dvh, 196px); }
+  .reader-footer { flex-direction: column; align-items: stretch; }
+  .reader-close { align-self: flex-end; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .is-opening .reader-envelope { animation: reader-arrive 1.25s both; }
+  .is-opening .reader-flap { animation: reader-flap .42s .42s ease-in-out both; }
+  .is-opening .reader-seal { animation: reader-seal .32s .3s ease-in both; }
+  .is-opening .reader-sheet { animation: reader-sheet .42s .78s cubic-bezier(.3, .9, .4, 1) both; }
+  .is-opening .reader-letter { animation: reader-unfold .5s .95s cubic-bezier(.2, .9, .3, 1.08) both; }
+  .is-closing .reader-letter { animation: reader-unfold .3s ease-in reverse both; }
+  .is-closing .reader-envelope { animation: reader-leave .52s both; }
+  .is-closing .reader-sheet { translate: 0 -30%; opacity: 0; }
+  .is-closing .reader-flap { animation: reader-flap .24s .16s ease-in-out reverse both; }
+  .is-closing .reader-seal { animation: reader-seal .16s .3s ease-out reverse both; }
+  #wish-dialog.is-opening::backdrop { animation: reader-dim .4s both; }
+}
+@keyframes reader-arrive { 0% { opacity: 0; transform: translateY(26%) scale(.55) rotate(-5deg); } 26%, 74% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(46%) scale(.92); } }
+@keyframes reader-leave { 0% { opacity: 0; transform: translateY(20%); } 30%, 70% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-30%) scale(.5); } }
+@keyframes reader-flap { 0% { transform: rotateX(0); z-index: 4; } 50% { z-index: 4; } 51% { z-index: 1; } 100% { transform: rotateX(-172deg); z-index: 1; } }
+@keyframes reader-seal { 0% { transform: scale(1); opacity: 1; } 40% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(.4); opacity: 0; } }
+@keyframes reader-sheet { to { transform: translateY(-48%); } }
+@keyframes reader-unfold { from { opacity: 0; transform: translateY(10%) scale(.72); } to { opacity: 1; transform: none; } }
+@keyframes reader-dim { from { opacity: 0; } }
