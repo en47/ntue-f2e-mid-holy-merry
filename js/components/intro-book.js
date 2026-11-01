@@ -30,7 +30,7 @@ export function mountIntroBook(root, {
    element('p', 'intro-subtitle', item.subtitle));
   const story = element('div', 'intro-story');
   for (const paragraph of item.story.split(/\n\s*\n/)) story.append(element('p', '', paragraph));
-  copy.append(story, element('blockquote', '', item.quote));
+  copy.append(story);
   art.page?.(copy);
   const view = element('div', 'intro-scene-page');
   const panels = item.pieces.map(p => {

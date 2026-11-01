@@ -59,7 +59,6 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-story { font-size: var(--fs-body);line-height:1.85; }
 .intro-story p { margin:0 0 .75em; }
 .intro-story p:last-child { margin-bottom:0; }
-.intro-copy blockquote { margin:.9rem 0 0;padding-left:.7rem;border-left:2px solid #c7a36d;color:#987446;font-size: var(--fs-small);line-height:1.8; }
 .intro-picture { overflow:hidden;background:radial-gradient(ellipse at 52% 35%,#fffbed 20%,#f4e6cb 80%,#e5d4b6);border-radius:0 5px 5px 0; }
 /* Each page contains its own perspective stage. The leaf remains a separate 3D layer. */
 .intro-scene { position:absolute;left:3%;bottom:3%;width:94%;max-height:94%;aspect-ratio:560/530;--building-ground:18%;--character-ground:8%; }
