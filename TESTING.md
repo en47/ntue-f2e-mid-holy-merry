@@ -288,3 +288,9 @@ node --experimental-vm-modules tests/smoke.mjs
 - 375 / 768 / 1440 截圖：吊牌與燈串不碰品牌標題，header 高度維持 108 / 86px，沒有橫向溢出。
 - 溢出修正：右緣燈泡的光暈曾造成 375 寬度多出 10px，`.nav-string` 改為裁切。
 - 瀏覽器實測 Intro → Wish：Loading 結束後亮光開始，抵達後 `is-arriving`，600ms 後恢復。
+
+## 2026-11-01：首頁模型壓縮
+
+- `tests/smoke.mjs` 新增比對：壓縮版與原檔的節點、骨架、動畫通道一致，每個小於 2 MB。
+- 既有「首頁使用 `santa-dance.glb`」斷言改為檢查 `santa-dance-web.glb`，原檔完整性比對保留。
+- 瀏覽器實測：首頁下載 23.77 MB → 6.68 MB，兩角色 `ready`，無 console 錯誤。

@@ -167,6 +167,18 @@ await test('導覽燈串：四頁共用、等 Loading 結束才跑光、沒有 J
   assert.ok(css.includes('.site-nav.is-strung a') && !lights.includes('innerHTML'), 'The pills stay until JS builds the tags');
   assert.ok(!(await fs.readFile(path.join(project, 'index.html'), 'utf8')).includes('nav-tag'), 'Tags are decoration added by JS, not markup');
 });
+await test('首頁壓縮模型：骨架與動畫和原檔一致，體積明顯較小，頁面載入的是壓縮版', async () => {
+  const gltf = async name => { const glb = await fs.readFile(path.join(project, `assets/models/${name}.glb`)); return { bytes: glb.length, data: JSON.parse(glb.toString('utf8', 20, 20 + glb.readUInt32LE(12)).trim()) }; };
+  for (const name of ['santa-dance', 'reindeer']) {
+    const source = await gltf(name), web = await gltf(`${name}-web`);
+    assert.ok(web.bytes < 2e6 && web.bytes < source.bytes / 5, name);
+    assert.deepEqual(web.data.nodes.map(node => node.name), source.data.nodes.map(node => node.name));
+    assert.equal(web.data.skins[0].joints.length, source.data.skins[0].joints.length);
+    assert.deepEqual(web.data.animations.map(clip => [clip.name, clip.channels.length]), source.data.animations.map(clip => [clip.name, clip.channels.length]));
+  }
+  const scene = await fs.readFile(path.join(project, 'js/components/characters-scene.js'), 'utf8');
+  assert.ok(scene.includes('santa-dance-web.glb') && scene.includes('reindeer-web.glb') && scene.includes('setMeshoptDecoder'));
+});
 await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、牛頓擺圖片不變', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
   for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish']]) {
@@ -369,7 +381,7 @@ await test('game2：逾時重玩當關、Restart 回第一關與延遲回呼清�
   restored.destroy();
 });
 await test('兩份 GLB、七張原畫完整性、內嵌材質與 Three.js 依賴', async () => {
-  for (const [name, clip] of [['santa-new', 'dance_02'], ['santa-dance', 'dance_02'], ['reindeer', 'preset:quadruped:walk']]) {
+  for (const [name, clip] of [['santa-new', 'dance_02'], ['santa-dance', 'dance_02'], ['reindeer', 'preset:quadruped:walk'], ['santa-dance-web', 'dance_02'], ['reindeer-web', 'preset:quadruped:walk']]) {
     const metadata = JSON.parse(await fs.readFile(path.join(project, `assets/models/${name}.json`), 'utf8'));
     const glb = await fs.readFile(path.join(project, `assets/models/${name}.glb`));
     assert.equal(createHash('sha256').update(glb).digest('hex'), metadata.sha256);
@@ -386,7 +398,7 @@ await test('兩份 GLB、七張原畫完整性、內嵌材質與 Three.js 依賴
   assert.ok(!html.includes('<model-viewer')); assert.ok(!html.includes('CHARACTER PLACEHOLDER'));
   const source = await fs.readFile(path.join(project, 'js/components/characters-scene.js'), 'utf8');
   assert.equal((source.match(/new THREE.WebGLRenderer/g) ?? []).length, 1);
-  assert.ok(source.includes('assets/models/santa-dance.glb')); assert.ok(!source.includes('assets/models/santa-claus.glb')); assert.ok(!source.includes('assets/models/santa-new.glb'));
+  assert.ok(source.includes('assets/models/santa-dance-web.glb')); assert.ok(!source.includes('assets/models/santa-dance.glb')); assert.ok(!source.includes('assets/models/santa-claus.glb')); assert.ok(!source.includes('assets/models/santa-new.glb'));
   const heroSource = await fs.readFile(path.join(project, 'js/game-hero.js'), 'utf8');
   assert.ok(heroSource.includes('assets/models/santa-new.glb')); assert.ok(!heroSource.includes('assets/models/santa-dance.glb'));
   const art = JSON.parse(await fs.readFile(path.join(project,'docs/STORYBOOK-ASSETS.json'),'utf8'));
@@ -477,6 +489,7 @@ await test('雙角色目前控制器：單 Renderer、拖曳／捲動分流、�
   class PMREM { fromScene() { return {texture:new THREE.Texture(), dispose() {}}; } dispose() {} }
   let santaLoads = 0;
   class Loader {
+    setMeshoptDecoder() { return this; }
     async loadAsync(src) {
       const scene = new THREE.Group();
       const geometry = new THREE.BoxGeometry(.5,1,.5), material = new THREE.MeshStandardMaterial();
@@ -490,6 +503,7 @@ await test('雙角色目前控制器：單 Renderer、拖曳／捲動分流、�
   const env = environment({
     [path.join(project, 'vendor/three/build/three.module.js')]: {...THREE, WebGLRenderer:Renderer, PMREMGenerator:PMREM},
     [path.join(project, 'vendor/three/examples/jsm/loaders/GLTFLoader.js')]: {GLTFLoader:Loader},
+    [path.join(project, 'vendor/three/examples/jsm/libs/meshopt_decoder.module.js')]: {MeshoptDecoder:{}},
   });
   let now = 0; env.sandbox.performance.now = () => now;
   env.sandbox.setTimeout = callback => { queueMicrotask(callback); return 0; };
