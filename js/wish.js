@@ -3,6 +3,7 @@ import { selectTreeWishes } from './services/wish-selection.js';
 import { mountNightScene } from './components/wish-night.js';
 import { mountWishLights } from './components/wish-lights.js';
 import { mountTitleArt } from './components/title-art.js';
+import { mountWishReader } from './components/wish-reader.js';
 import { mountCottage } from './components/wish-cottage.js';
 import { paperLayer } from './components/paper-art.js';
 import { airmailLetter, tagArt } from './components/paper-props.js';
@@ -10,7 +11,7 @@ const form = document.querySelector('#wish-form');
 const nickname = document.querySelector('#nickname');
 const content = document.querySelector('#wish-content');
 const status = document.querySelector('#wish-status');
-const dialog = document.querySelector('#wish-dialog');
+const reader = mountWishReader(document.querySelector('#wish-dialog'));
 const delivery = createWishDelivery(document.querySelector('#wish-room'),{savingText:'正在將願望寄到聖誕信箱……'});
 const send=form.querySelector('button[type="submit"]'),publish=document.querySelector('#wish-public');
 const cloudStatus=document.querySelector('#cloud-status');
@@ -19,12 +20,12 @@ let repository=null,connecting=false,ownWish=null,publicWishes=[],treeWishes=[],
 let pendingEnvelopeEntrance = null;
 function showWish(wish){
   document.querySelector('#wish-dialog-title').textContent=`${wish.nickname} 的聖誕願望`;
-  document.querySelector('#wish-dialog-date').textContent=wish.createdAt?new Intl.DateTimeFormat('zh-TW',{dateStyle:'medium',timeStyle:'short'}).format(new Date(wish.createdAt)):'';
+  document.querySelector('#wish-dialog-date').textContent=wish.createdAt?new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(wish.createdAt)):'';
+  document.querySelector('#wish-dialog-sign').textContent=wish.nickname;
   document.querySelector('#wish-dialog-content').textContent=wish.content;
   document.querySelector('#wish-dialog-privacy').textContent=!wish.isOwn?'這是已核准的公開願望。':wish.visibility==='private'?'這是你的私人願望，僅本人及管理員可讀。':wish.status==='approved'?'你的願望已核准公開。':wish.status==='rejected'?'這封願望未通過公開審核，其他訪客無法查看。':'你的願望仍待審核，其他訪客無法查看。';
-  const stamp=wish.isOwn?readStamps()[wish.id]:null,stampImage=document.querySelector('#wish-dialog-stamp');
-  stampImage.hidden=!stamp;if(stamp)stampImage.src=stampOf(stamp);
-  dialog.showModal();
+  document.querySelector('#wish-dialog-stamp').src=stampOf((wish.isOwn&&readStamps()[wish.id])||'star');
+  reader.open({own:wish.isOwn});
 }
 function updateTree({ newWishId = null } = {}){
   if(!repository)return;

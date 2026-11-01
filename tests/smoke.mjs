@@ -213,6 +213,13 @@ await test('頁面大標題：SVG 逐字紙片、共用晃動動畫、HTML 保�
   assert.ok(wish.includes('>The Wish Room</h1>'), 'Titles stay readable without JavaScript');
   assert.ok(glyphs.includes('christmas-games') && glyphs.includes('the-wish-room') && !glyphs.includes('santa-flying'), 'Only page titles are drawn; section headings stay text');
 });
+await test('讀信：信封開啟動畫、同款信紙、保留原生對話框與文字欄位', async () => {
+  const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), reader = await fs.readFile(path.join(project, 'js/components/wish-reader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish-delivery.css'), 'utf8');
+  assert.ok(html.includes('<dialog id="wish-dialog"') && !/id="wish-dialog"[\s\S]*?data-close-dialog[\s\S]*?<\/dialog>/.test(html.match(/<dialog id="wish-dialog"[\s\S]*?<\/dialog>/)[0]), 'Closing goes through the folding animation');
+  for (const id of ['wish-dialog-title', 'wish-dialog-date', 'wish-dialog-content', 'wish-dialog-privacy', 'wish-dialog-stamp']) assert.ok(html.includes(`id="${id}"`), id);
+  assert.ok(reader.includes("'cancel'") && reader.includes('prefers-reduced-motion') && reader.includes('airmailLetter') && !reader.includes('innerHTML'));
+  assert.ok(/@media \(prefers-reduced-motion: no-preference\)[\s\S]*\.is-opening/.test(css), 'The letter must stay readable without animation');
+});
 await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、畫面不依賴下載', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
   for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish']]) {

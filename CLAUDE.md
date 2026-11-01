@@ -63,6 +63,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 ### Wish 資料流
 - 訪客＝匿名登入；`users/{uid}/wishes/{id}` 存私人原件，核准後的公開副本在 `publicWishes/{id}`。管理員＝Email/Password ＋ `admin: true` custom claim（session persistence）。
 - `firestore.rules` 會強制查詢上限（`bounded()`）與公開副本必須對應私人原件（`matchesSource()`）；改資料形狀時規則與 `tests/firestore.rules.test.mjs` 要同步。
+- 讀信介面在 `js/components/wish-reader.js`，基本狀態就是完整信紙，動畫只寫在 `prefers-reduced-motion: no-preference` 內。
 - `js/services/wish-selection.js` 決定樹上顯示哪 10 封（自己最新一封＋9 封他人已核准）。
 - `js/services/wish-storage.js` 的 `holy-merry:wishes:v1` 是**舊版本機收藏**，頁面已不顯示，也不刪除瀏覽器內的資料。
 - Wish 載入 `wish-tree-web.glb`、`wish-elf-web.glb`（`scripts/build-wish-models.mjs` 產生）；測試的錨點驗證仍比對原始 `wish-tree.glb`。

@@ -4,5 +4,4 @@
 .tree-envelope-hit { position:absolute;transform:translate(-50%,-50%);pointer-events:auto;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer;touch-action:pan-y; }
 .tree-envelope-hit:focus-visible { outline:2px dashed #a65446;outline-offset:2px; }
 .tree-envelope-hit:hover { background:#fff4df16; }
-#wish-dialog h2 { padding-right:2.2rem;overflow-wrap:anywhere; }
 @media(prefers-reduced-motion:reduce){.tree-envelope-hit{transition:none;}}
