@@ -1,0 +1,51 @@
+{
+  "license": "Pixabay Content License",
+  "bitrateKbps": 128,
+  "tracks": [
+    {
+      "file": "track-1.mp3",
+      "title": "聖誕頌歌",
+      "source": "music1：聖誕頌歌.mp3",
+      "sourceBytes": 3296862,
+      "bytes": 1648849,
+      "seconds": 103.03,
+      "sha256": "9e64c3695fcdd9b2d68218cee69f3acc39c53815e9b85a4b5cc42ff7e02507b6"
+    },
+    {
+      "file": "track-2.mp3",
+      "title": "平安夜",
+      "source": "music2：平安夜.mp3",
+      "sourceBytes": 3166458,
+      "bytes": 1583647,
+      "seconds": 98.95,
+      "sha256": "84adfd7d9fdc3dfd3959893d4dd2acf5092829f35ddfb0bc709c90b6f282cf6c"
+    },
+    {
+      "file": "track-3.mp3",
+      "title": "聖誕故事",
+      "source": " music3：聖誕故事.mp3",
+      "sourceBytes": 3188192,
+      "bytes": 1594514,
+      "seconds": 99.63,
+      "sha256": "bb645afc3640c3d38c262365f4a5739efc6a6cfa3a47b53356f54028e6088e71"
+    },
+    {
+      "file": "track-4.mp3",
+      "title": "壁爐暖冬",
+      "source": "music4：壁爐暖冬.mp3",
+      "sourceBytes": 3907584,
+      "bytes": 1954176,
+      "seconds": 122.11,
+      "sha256": "22b9262bba461d1c8efbb0aaee0af71f62ef7c6fec2e4e0ca4f4d63943257858"
+    },
+    {
+      "file": "track-5.mp3",
+      "title": "聖誕快樂",
+      "source": "music5：聖誕快樂.mp3",
+      "sourceBytes": 2535340,
+      "bytes": 1268088,
+      "seconds": 79.23,
+      "sha256": "b74f503c191e41eee23becb9bde354cf9414ea5956c2180fd613ffaf396bdbd8"
+    }
+  ]
+}

@@ -294,3 +294,10 @@ node --experimental-vm-modules tests/smoke.mjs
 - `tests/smoke.mjs` 新增比對：壓縮版與原檔的節點、骨架、動畫通道一致，每個小於 2 MB。
 - 既有「首頁使用 `santa-dance.glb`」斷言改為檢查 `santa-dance-web.glb`，原檔完整性比對保留。
 - 瀏覽器實測：首頁下載 23.77 MB → 6.68 MB，兩角色 `ready`，無 console 錯誤。
+
+## 2026-11-01：背景音樂選單
+
+- `tests/music.test.mjs` 驗證記憶解析、損壞資料回到靜音、進度只套用同一首、選單與 `docs/AUDIO-ASSETS.json` 一致。
+- `tests/smoke.mjs` 驗證四頁標記相同、無 autoplay、音檔雜湊與大小、原檔仍在、`shared.js` 各啟動呼叫都在。
+- 瀏覽器實測（Chromium，`document-user-activation-required`，375 / 1440）：首訪靜音無錯誤；選歌後播放；換頁記得同一首，等點擊後從上次進度接續；關閉後換頁維持關閉；減少動態時動畫為 none。
+- 需要支援 Range 的伺服器才能接續進度；`python3 -m http.server` 不支援，會從頭播放。

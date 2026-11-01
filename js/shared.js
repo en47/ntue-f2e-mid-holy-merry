@@ -1,6 +1,7 @@
 // 所有頁面共用；此模組不會啟動其他頁面的遊戲或計時器。
 import { mountForeground } from './components/page-foreground.js';
 import { mountNavLights } from './components/nav-lights.js';
+import { mountMusic } from './components/music-player.js';
 import { mountSantaPlaceholders } from './components/santa-placeholder.js';
 
 document.documentElement.classList.add('js-ready');
@@ -49,67 +50,9 @@ document.querySelectorAll('[data-close-dialog]').forEach(button => {
   button.addEventListener('click', () => button.closest('dialog').close());
 });
 
-// 將正式音檔放進 assets/audio 後，在這裡填入相對路徑。
-// 不呼叫 autoplay；跨頁不自動恢復播放。
-const MUSIC_SOURCE = '';
-const audio = document.querySelector('#site-audio');
-const musicToggle = document.querySelector('#music-toggle');
-const musicPanel = document.querySelector('#music-panel');
-const musicPlay = document.querySelector('#music-play');
-const musicStatus = document.querySelector('#music-status');
-const volume = document.querySelector('#music-volume');
-let objectURL = null;
-audio.volume = Number(volume.value);
-if (MUSIC_SOURCE) {
-  audio.src = MUSIC_SOURCE;
-  musicPlay.disabled = false;
-  musicStatus.textContent = '按下播放，讓音樂陪你過聖誕。';
-}
-musicToggle.addEventListener('click', () => {
-  musicPanel.hidden = !musicPanel.hidden;
-  musicToggle.setAttribute('aria-expanded', String(!musicPanel.hidden));
-});
-document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && !musicPanel.hidden) {
-    musicPanel.hidden = true;
-    musicToggle.setAttribute('aria-expanded', 'false');
-    musicToggle.focus();
-  }
-});
-volume.addEventListener('input', () => { audio.volume = Number(volume.value); });
-document.querySelector('#music-file').addEventListener('change', event => {
-  const file = event.target.files[0];
-  if (!file) return;
-  audio.pause();
-  if (objectURL) URL.revokeObjectURL(objectURL);
-  objectURL = URL.createObjectURL(file);
-  audio.src = objectURL;
-  musicPlay.disabled = false;
-  musicStatus.textContent = `已選擇：${file.name}。按播放開始。`;
-});
-musicPlay.addEventListener('click', async () => {
-  if (!audio.paused) { audio.pause(); return; }
-  try { await audio.play(); } catch {
-    musicStatus.textContent = '無法播放這個音檔，請選擇瀏覽器支援的 MP3、WAV 或 OGG。';
-  }
-});
-audio.addEventListener('play', () => {
-  musicPlay.textContent = '暫停';
-  musicToggle.setAttribute('aria-label', '音樂播放中，開啟音樂控制');
-  musicStatus.textContent = '音樂播放中。';
-});
-audio.addEventListener('pause', () => {
-  musicPlay.textContent = '播放';
-  musicToggle.setAttribute('aria-label', '開啟音樂控制');
-  if (audio.src) musicStatus.textContent = '音樂已暫停。';
-});
-audio.addEventListener('error', () => {
-  musicStatus.textContent = '音檔無法載入，請確認檔案格式或替換音檔。';
-});
-window.addEventListener('pagehide', event => {
-  audio.pause();
-  if (objectURL && !event.persisted) URL.revokeObjectURL(objectURL);
-});
+let music = mountMusic();
+window.addEventListener('pagehide', () => music.destroy());
+window.addEventListener('pageshow', event => { if (event.persisted) music = mountMusic(); });
 
 mountForeground(document.querySelector('.page-foreground'));
 mountSantaPlaceholders();

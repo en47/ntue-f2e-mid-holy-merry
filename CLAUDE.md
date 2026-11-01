@@ -40,7 +40,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 | `wish.html` | `js/shared.js`、`js/wish.js` |
 | `games/christmas-matching.html` | `js/games/game2-embed.js`（iframe 內獨立文件） |
 
-`js/site-loader.js` 是 body 開頭的傳統 script，各頁主題由 `data-loader` 決定，頁面就緒才淡出，動畫由 `css/loader.css` 暫停到結束。`js/shared.js` 在四頁都載入（導覽選單與燈串吊牌 `js/components/nav-lights.js`、資訊對話框、音樂面板），不得啟動任何單頁的遊戲或計時器。需要 3D 的頁面在 HTML 內放 `<script type="importmap">` 把 `three` 指向 `./vendor/three/build/three.module.js`。
+`js/site-loader.js` 是 body 開頭的傳統 script，各頁主題由 `data-loader` 決定，頁面就緒才淡出，動畫由 `css/loader.css` 暫停到結束。`js/shared.js` 在四頁都載入（導覽選單與燈串吊牌 `js/components/nav-lights.js`、資訊對話框、音樂選單 `js/components/music-player.js`），不得啟動任何單頁的遊戲或計時器。需要 3D 的頁面在 HTML 內放 `<script type="importmap">` 把 `three` 指向 `./vendor/three/build/three.module.js`。
 
 導覽與 Footer 標記在四個 HTML 各有一份；修改時必須同步四頁，`tests/smoke.mjs` 第一組會檢查四個互連連結、唯一一個 `aria-current="page"`、所有本機 `src`/`href` 真的存在、以及頁內 ID 不重複。
 
@@ -71,7 +71,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 `game.html` 以兩個 iframe 載入**本機獨立文件**：`vendor/game1-frameless/index.html` 與 `games/christmas-matching.html`。`js/game.js` 只量測外層文字與高度、設定 CSS 變數（例如 `--fly-reserved-height`，依 `vendor/game1-frameless/README.txt` 的 `寬度 × 510/1100 + 142px`），**不要改寫或重新載入 iframe 的 `src`**。配對遊戲的 DOM 寫在 `games/christmas-matching.html`、圖片直接引用 `vendor/game2/images/`，邏輯在 `js/games/game2-matching.js`，對外發出 `matching:level-start` / `pair-match` / `level-complete` / `timeout` / `complete` 事件供擴充，不要改動原作副本或配對判定。
 
 ### 素材完整性清單
-`docs/GAME2-UPSTREAM.json`、`docs/STORYBOOK-ASSETS.json`、`docs/STORYBOOK-CLEAN-ASSETS.json`、`docs/WISH-ASSETS.json`、`vendor/three/UPSTREAM.json`、`assets/models/*.json` 都記錄逐檔 SHA-256，`tests/smoke.mjs` 會逐一比對。動到任何 `vendor/` 副本、PNG 或 GLB 都會讓測試失敗；若是刻意更換素材，必須同時更新對應清單的雜湊。測試也會用 `vendor/three` 的 GLTFLoader 真的解析 GLB（見 `tests/helpers/elf-model.mjs`）。
+`docs/GAME2-UPSTREAM.json`、`docs/STORYBOOK-ASSETS.json`、`docs/STORYBOOK-CLEAN-ASSETS.json`、`docs/WISH-ASSETS.json`、`docs/AUDIO-ASSETS.json`、`vendor/three/UPSTREAM.json`、`assets/models/*.json` 都記錄逐檔 SHA-256，`tests/smoke.mjs` 會逐一比對。動到任何 `vendor/` 副本、PNG 或 GLB 都會讓測試失敗；若是刻意更換素材，必須同時更新對應清單的雜湊。測試也會用 `vendor/three` 的 GLTFLoader 真的解析 GLB（見 `tests/helpers/elf-model.mjs`）。
 
 ## 既有慣例
 

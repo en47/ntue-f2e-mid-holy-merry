@@ -179,6 +179,22 @@ await test('首頁壓縮模型：骨架與動畫和原檔一致，體積明顯�
   const scene = await fs.readFile(path.join(project, 'js/components/characters-scene.js'), 'utf8');
   assert.ok(scene.includes('santa-dance-web.glb') && scene.includes('reindeer-web.glb') && scene.includes('setMeshoptDecoder'));
 });
+await test('背景音樂：四頁選單一致、不寫死 autoplay、壓縮音檔與清單相符、原檔保留', async () => {
+  const blocks = []; for (const page of ['index', 'intro', 'game', 'wish']) { const html = await fs.readFile(path.join(project, `${page}.html`), 'utf8'); blocks.push(html.match(/<div class="music-widget">[\s\S]*?<\/audio>\s*<\/div>/)[0]); assert.ok(!html.includes('music-file') && !/<audio[^>]*autoplay/.test(html), page); }
+  assert.equal(new Set(blocks).size, 1, 'The widget markup must stay identical on all four pages');
+  const manifest = JSON.parse(await fs.readFile(path.join(project, 'docs/AUDIO-ASSETS.json'), 'utf8'));
+  assert.equal(manifest.tracks.length, 5);
+  for (const track of manifest.tracks) {
+    const bytes = await fs.readFile(path.join(project, 'assets/audio', track.file));
+    assert.equal(createHash('sha256').update(bytes).digest('hex'), track.sha256); assert.ok(bytes.length < 2.1e6 && bytes.length < track.sourceBytes * .6, track.file);
+    await fs.access(path.join(project, 'assets', track.source));
+  }
+  const shared = await fs.readFile(path.join(project, 'js/shared.js'), 'utf8');
+  for (const call of ['mountMusic()', 'mountNavLights(nav)', "mountForeground(document.querySelector('.page-foreground'))", 'mountSantaPlaceholders()']) assert.ok(shared.includes(call), call);
+  const player = await fs.readFile(path.join(project, 'js/components/music-player.js'), 'utf8');
+  assert.ok(player.includes('NotAllowedError') && player.includes('waitForGesture') && !player.includes('innerHTML'));
+  assert.ok((await fs.readFile(path.join(project, 'css/shared.css'), 'utf8')).includes('prefers-reduced-motion'));
+});
 await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、牛頓擺圖片不變', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
   for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish']]) {
