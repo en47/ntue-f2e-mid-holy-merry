@@ -76,8 +76,9 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
   main { padding-block: 2.5rem 3rem; }
   .section { margin-top: 3rem; }
   .footer-inner { flex-direction: column; text-align: center; }
-  .music-widget { position: relative; right: auto; bottom: auto; display: flex; justify-content: flex-end; padding: 0 1rem 1rem; background: var(--footer-paper); }
-  .music-panel { right: 1rem; bottom: 86px; }
+  .music-widget { right: .9rem; bottom: .9rem; }
+  .music-toggle { width: 58px; height: 58px; }
+  .music-panel { bottom: 70px; }
 }
 @media (max-width: 600px) {
   .header-inner { padding-block: .7rem; }
