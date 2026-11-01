@@ -237,6 +237,12 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 .music-option.is-current:not(:last-child) .music-bars { display: block; }
 [data-music='playing'] .music-option.is-current .music-bars { animation: music-bars .7s ease-in-out infinite alternate; transform-origin: bottom; }
 @keyframes music-bars { from { transform: scaleY(.55); } to { transform: scaleY(1); } }
+.music-modes { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem; min-width: 0; margin: .6rem 0 0; padding: 0; border: 0; }
+.music-modes label { position: relative; display: grid; place-items: center; min-height: 44px; border: 1px dashed var(--line); border-radius: 10px; font-size: var(--fs-small); font-weight: 600; cursor: pointer; transition: background .2s, color .2s; }
+.music-modes label:hover { background: #f4e7cb; }
+.music-modes input { position: absolute; opacity: 0; }
+.music-modes label:has(input:checked) { color: var(--cream); background: var(--green); border-color: transparent; }
+.music-modes label:has(input:focus-visible) { outline: 2px solid var(--red); outline-offset: 1px; }
 .music-volume { display: block; margin: .7rem 0 .2rem; font-size: var(--fs-small); }
 .music-panel input[type='range'] { width: 100%; accent-color: var(--red); }
 .music-panel .hint { margin: .4rem 0 0; min-height: 1.5em; font-size: var(--fs-small); color: var(--muted); }
