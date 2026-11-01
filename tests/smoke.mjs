@@ -195,7 +195,7 @@ await test('背景音樂：四頁選單一致、不寫死 autoplay、壓縮音�
   assert.ok(player.includes('NotAllowedError') && player.includes('waitForGesture') && !player.includes('innerHTML'));
   assert.ok((await fs.readFile(path.join(project, 'css/shared.css'), 'utf8')).includes('prefers-reduced-motion'));
 });
-await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、牛頓擺圖片不變', async () => {
+await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、畫面不依賴下載', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
   for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish']]) {
     const html = await fs.readFile(path.join(project, `${page}.html`), 'utf8');
@@ -208,7 +208,6 @@ await test('Loading：四頁各自主題、有時間上限、頁面動畫等它�
   const sdkVersion = sdk.match(/firebasejs\/([\d.]+)\//)[1]; assert.equal(wishHtml.match(/rel="modulepreload" href="[^"]*firebasejs\/[\d.]+/g).length, 3); assert.ok(!wishHtml.match(/firebasejs\/[\d.]+/g).some(item => !item.endsWith(sdkVersion)), 'Preloads must match the SDK version');
   const wishJs = await fs.readFile(path.join(project, 'js/wish.js'), 'utf8'); assert.ok(wishJs.indexOf('\nconnectCloud();') < wishJs.indexOf('\nstartScene();') && (wishJs.match(/room\.dataset\.cloud=/g) ?? []).length === 2, 'A failed mailbox must still release the loader');
   assert.ok(!(await fs.readFile(path.join(project, 'admin.html'), 'utf8')).includes('site-loader'));
-  for (const name of ['red', 'green', 'yellow', 'loading']) await fs.access(path.join(project, `assets/illustrations/loading/${name}.png`));
   assert.ok(!js.includes('.png') && !js.includes('<img') && !css.includes('url('), 'The loader must paint without waiting for any download');
 });
 await test('翻頁倒數：只翻變動的數字、減少動態不翻、天數位數改變時重建', async () => {

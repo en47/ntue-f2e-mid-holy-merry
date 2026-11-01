@@ -1,3 +1,5 @@
+> 2026-11-01 更新：本文保留開發歷程，部分內容已過時。`stocking-rack.svg`、`snow-ground.svg` 已刪除，目前做法見 `CLAUDE.md`。
+
 # Wish Room：排版、基本動畫與本機摺信
 
 > 最新狀態：Firebase 已整合並發布規則；以下保留前一階段紀錄。現行雲端流程、管理員初始化及尚待驗收項目見 [FIREBASE-SETUP.md](FIREBASE-SETUP.md)。

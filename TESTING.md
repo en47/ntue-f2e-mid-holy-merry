@@ -311,3 +311,8 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - `tests/smoke.mjs` 新增：`site-loader.js` 與 `loader.css` 不得引用 PNG、`<img>` 或 `url()`，確保 Loading 不必等下載。
 - 瀏覽器實測：模型延遲時 Loading 期間未請求 `assets/illustrations/loading/*.png`，375 / 768 / 1440 動畫完整。
+
+## 2026-11-01：清理素材
+
+- 刪除前逐檔確認檔名與主檔名未被網站、腳本、測試或素材清單引用；Loading 四張 PNG 比對雜湊後確認桌面有副本。
+- `tests/smoke.mjs` 移除「Loading PNG 存在」的檢查，由「Loading 不得引用 PNG」取代。
