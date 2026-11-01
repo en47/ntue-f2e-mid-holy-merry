@@ -1,21 +1,20 @@
 /* Game page only; each game keeps its own isolated document. */
-@font-face { font-family: GameHand; src: url('../assets/fonts/wish-handwritten.woff') format('woff'); font-display: swap; }
 .games-body { --game-snow-paper: #fff9eb; --games-header-height: 108px; }
 /* The document scrolls; Header stays unchanged and scrolls away normally. */
 html.games-document {  scroll-padding-block-start: 1rem; }
-.games-page { --game-hand: GameHand, var(--font-display); --hero-game-gap: clamp(6rem, 9vw, 9rem); --game-section-gap: clamp(7.5rem, 11vw, 10rem); padding-block: 0; overflow-x: clip; }
+.games-page { --game-hand: var(--font-hand); --hero-game-gap: clamp(6rem, 9vw, 9rem); --game-section-gap: clamp(7.5rem, 11vw, 10rem); padding-block: 0; overflow-x: clip; }
 .games-page > .games-hero + .game-section { margin-block-start: var(--hero-game-gap); }
 .games-page > .game-section + .game-section { margin-block-start: var(--game-section-gap); }
 .games-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem 1.5rem; margin: 0 0 .65rem; }
-.games-heading .eyebrow { font-size: .6rem; margin-bottom: .15rem; }
-.games-heading h1 { font: 400 clamp(1.3rem, 2vw, 1.65rem)/1.15 var(--game-hand); margin: 0; color: var(--red); }
-.games-heading p { margin: 0; font-size: .8rem; color: var(--muted); }
+.games-heading .eyebrow { font-size: var(--fs-small); margin-bottom: .15rem; }
+.games-heading h1 { font: 400 var(--fs-title)/1.15 var(--game-hand); margin: 0; color: var(--red); }
+.games-heading p { margin: 0; font-size: var(--fs-small); color: var(--muted); }
 .game-tags { display: flex; justify-content: center; width: fit-content; max-width: 100%; gap: 1rem; margin: .75rem auto 1rem; padding-block: .25rem; }
 .game-tag { width: 210px; min-width: 0; text-decoration: none; transform-origin: 50% 0; animation: game-tag-idle 5.5s ease-in-out infinite; }
 .game-tag:nth-child(2) { animation-delay: -2.3s; }
-.game-tag-paper { position: relative; display: flex; align-items: center; justify-content: center; gap: .6rem; height: 72px; padding: .5rem; border: 1px solid #d5bfa5; border-radius: 12px 9px 13px 10px; background: var(--game-snow-paper); background-image: radial-gradient(#a6876420 .5px, transparent .8px); background-size: 5px 5px; box-shadow: 1px 3px 0 #c7b6a43b; font: 400 1.1rem/1.2 var(--game-hand); transform-origin: 50% 0; }
+.game-tag-paper { position: relative; display: flex; align-items: center; justify-content: center; gap: .6rem; height: 72px; padding: .5rem; border: 1px solid #d5bfa5; border-radius: 12px 9px 13px 10px; background: var(--game-snow-paper); background-image: radial-gradient(#a6876420 .5px, transparent .8px); background-size: 5px 5px; box-shadow: 1px 3px 0 #c7b6a43b; font: 400 var(--fs-body)/1.2 var(--game-hand); transform-origin: 50% 0; }
 .game-tag-paper::before { content: ''; position: absolute; top: -5px; left: calc(50% - 4px); width: 8px; height: 8px; border: 1px solid #b65b54; border-radius: 50%; background: var(--blue); }
-.game-tag-paper small { display: block; margin-bottom: .2rem; font: 600 .65rem/1.2 var(--font-body); letter-spacing: .08em; }
+.game-tag-paper small { display: block; margin-bottom: .2rem; font: 600 var(--fs-small)/1.2 var(--font-body); letter-spacing: .08em; }
 .game-tag-art { display: block; flex: 0 0 30px; }
 @media (hover: hover) {
   .game-tag:hover { animation-play-state: paused; }
@@ -30,9 +29,9 @@ html.games-document {  scroll-padding-block-start: 1rem; }
 .flying-view > .game-section-heading { grid-column: 1; grid-row: 1; width: 100%; margin: 0; }
 .flying-view > .game-frame, .flying-view > .flying-caption { grid-column: 2; }
 .game-section-heading { width: min(100%, 1100px); margin: 0 auto 1rem; }
-.game-section-heading .eyebrow { font-size: .875rem; margin: 0; }
-.game-section-heading h2 { font: 700 clamp(1.9rem, 3.2vw, 2.9rem)/1.08 StorySign, var(--game-hand); color: var(--red); margin: .3rem 0 .6rem; }
-.game-description { color: var(--muted); font-size: 1rem; line-height: 1.75; margin: 0; }
+.game-section-heading .eyebrow { font-size: var(--fs-small); margin: 0; }
+.game-section-heading h2 { font: 700 var(--fs-title)/1.08 var(--font-display); color: var(--red); margin: .3rem 0 .6rem; }
+.game-description { color: var(--muted); font-size: var(--fs-body); line-height: 1.75; margin: 0; }
 /* Empty, unpainted slots remain available for the future Procreate illustrations. */
 .game-illustration-slot { width: min(100%, 280px); aspect-ratio: 4 / 3; margin: 0 auto 1rem; }
 /* Flying keeps a landscape slot; the wreath needs a square one to stay circular. */
@@ -88,7 +87,7 @@ html.games-document {  scroll-padding-block-start: 1rem; }
 @container (max-width: 650px) {
   .flying-game-frame { height: calc(100cqw * .909090909 + 136px); }
 }
-.flying-caption { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1.5rem; width: min(100%, 1100px); margin: clamp(3rem, 8vw, 5.4rem) auto 0; color: var(--muted); font-size: .75rem; }
+.flying-caption { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1.5rem; width: min(100%, 1100px); margin: clamp(3rem, 8vw, 5.4rem) auto 0; color: var(--muted); font-size: var(--fs-small); }
 .flying-caption p { margin: 0; }
 .matching-section { margin: 0; padding: 0; scroll-margin-block-start: var(--sticky-header-height, 0px); }
 .matching-layout { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 35fr) minmax(0, 65fr); column-gap: clamp(1.5rem, 3vw, 3rem); row-gap: 0; align-items: center; }
@@ -124,13 +123,13 @@ html.games-document {  scroll-padding-block-start: 1rem; }
   .game-frame > .frame-charm { display: none; }
   .game-tags { gap: .6rem; margin-block: .6rem .85rem; }
   .game-tag { width: min(210px, calc((100% - .6rem) / 2)); }
-  .game-tag-paper { height: 66px; gap: .35rem; font-size: .95rem; }
+  .game-tag-paper { height: 66px; gap: .35rem; font-size: var(--fs-body); }
   .game-tag-art { flex-basis: 24px; }
   html.games-document {  scroll-padding-block-start: 0; }
   .games-body { --games-header-height: 86px; }
   .fly-frame-shell { width: 100%; }
   .games-heading { display: block; margin-bottom: .8rem; }
-  .games-heading p { margin-top: .3rem; font-size: .75rem; }
+  .games-heading p { margin-top: .3rem; font-size: var(--fs-small); }
   .games-page.reveal-ready [data-reveal='left']:not(.is-visible) { transform: translateX(-12px); }
   .games-page.reveal-ready [data-reveal='right']:not(.is-visible) { transform: translateX(12px); }
 }
