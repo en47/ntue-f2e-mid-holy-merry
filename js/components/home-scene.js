@@ -1,6 +1,6 @@
 // Home pop-up book: a village under faceted snow peaks. Sun at upper left; every building meets the snow.
 import { paperLayer, popLayer, shape } from './paper-art.js';
-import { SHADE, SNOW, airmailLetter, berryBush, facetedPeak, church, cloud, fence, holly, lamp, pine, roofHouse, star } from './paper-props.js';
+import { SHADE, SNOW, airmailLetter, tagArt, berryBush, facetedPeak, church, cloud, fence, holly, lamp, pine, roofHouse, star } from './paper-props.js';
 import { TITLE_BOX, titleGlyphs } from '../data/title-glyphs.js';
 import { taglinePath } from '../data/tagline-glyphs.js';
 
@@ -180,6 +180,16 @@ function mountTitle(host) {
   });
 }
 
+// The replay button is a kraft-paper tag, like the book's tags on the Intro page.
+function mountReplay(button) {
+  const label = document.createElement('span'), icon = shape('svg', { viewBox: '0 0 24 24', class: 'replay-icon', 'aria-hidden': 'true' });
+  label.textContent = button.textContent.replace('↻', '').trim();
+  shape('path', { d: 'M19 12a7 7 0 1 1-2.2-5.1M19 3v5h-5', fill: 'none', stroke: 'currentColor', 'stroke-width': 2.6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, icon);
+  button.replaceChildren();
+  paperLayer(button, '-12 -20 268 124', 'replay-tag', parent => { tagArt('#d3ae76', '#a17c48')(parent); holly(parent, 222, 8, .55); }, { paper: { scale: .7, grain: .45, shadow: .24 }, eager: true });
+  button.append(icon, label);
+}
+
 export function mountHomeScene(root) {
   const stage = root.querySelector('#story-stage');
   mountTitle(root.querySelector('[data-title-art]'));
@@ -188,6 +198,7 @@ export function mountHomeScene(root) {
   const lettering = [...root.querySelectorAll('.storybook-title img')].map(image => image.decode().catch(() => {}));
   Promise.race([Promise.all(lettering), new Promise(resolve => setTimeout(resolve, 700))]).then(() => root.classList.add('title-ready'));
   mountDecor(root);
+  mountReplay(root.querySelector('#replay-story'));
   const paper = { scale: 1.3, grain: .6 }, wide = { ...paper, grain: .4, shadow: .16 }, none = { preserveAspectRatio: 'none' };
   popLayer(stage, '-6 -6 232 232', 'home-sun', sun, { delay: 0, paper });
   popLayer(stage, '-20 0 270 116', 'home-cloud home-cloud-a', parent => cloud(parent, 120, 62, 1.15), { delay: .1, paper });

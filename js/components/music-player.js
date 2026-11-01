@@ -1,5 +1,5 @@
 // Site music: the listener's song and volume follow them across pages; browsers may still hold the sound until their first gesture.
-import { MUSIC_TRACKS, parseMusicPosition, parseMusicState } from '../data/music-tracks.js';
+import { MUSIC_TRACKS, nextTrack, parseMusicPosition, parseMusicState } from '../data/music-tracks.js';
 import { holly, paperLayer, shape } from './paper-art.js';
 
 const STATE_KEY = 'holy-merry:music:v1', POSITION_KEY = 'holy-merry:music:position';
@@ -53,6 +53,9 @@ export function mountMusic() {
   let state = parseMusicState(read(localStorage, STATE_KEY)), gesture = null;
   buildBadge(toggle); buildOptions(options);
   audio.volume = volume.value = state.volume;
+  const modes = document.querySelector('#music-modes');
+  audio.loop = state.mode === 'repeat';
+  modes.querySelector(`[value="${state.mode}"]`).checked = true;
 
   const save = () => write(localStorage, STATE_KEY, JSON.stringify(state));
   const savePosition = () => { if (state.track) write(sessionStorage, POSITION_KEY, JSON.stringify({ track: state.track, time: audio.currentTime })); };
@@ -95,6 +98,8 @@ export function mountMusic() {
   const setPanel = open => { panel.hidden = !open; toggle.setAttribute('aria-expanded', String(open)); };
   toggle.addEventListener('click', () => setPanel(panel.hidden), { signal });
   options.addEventListener('change', event => choose(event.target.value), { signal });
+  modes.addEventListener('change', event => { state = { ...state, mode: event.target.value }; audio.loop = state.mode === 'repeat'; save(); }, { signal });
+  audio.addEventListener('ended', () => { if (state.track) choose(nextTrack(state.track)); }, { signal });
   volume.addEventListener('input', () => { audio.volume = state.volume = Number(volume.value); save(); }, { signal });
   audio.addEventListener('error', () => { if (state.track) show('off', `《${titleOf(state.track)}》暫時無法播放，請換一首。`, '音樂無法播放，開啟音樂選單'); }, { signal });
   document.addEventListener('pointerdown', event => { if (!panel.hidden && !widget.contains(event.target)) setPanel(false); }, { capture: true, signal });
