@@ -81,7 +81,6 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 
 - 漸進增強：JS 或 IntersectionObserver 失效時內容仍須可見（見 `js/game.js` 的 `revealAll()`）。
 - 所有動畫遵守 `prefers-reduced-motion`；優先使用 opacity / transform。
-- 首頁紙層靠 `.pop` 各自的 z-index 交錯，`translate` / `will-change` 會形成堆疊內容；不要加在 `.characters` 這種沒有 z-index 的外層，否則角色會被紙層蓋住。
 - 每個會持有資源的模組都處理 bfcache：`pagehide` 釋放（計時器、observer、Three.js geometry/material/texture dispose），`pageshow` 且 `event.persisted` 時重建或維持暫停。
 - 使用者內容一律 `textContent`，不用 `innerHTML`。
 - 較新的模組（`wish.js`、`services/`、測試）刻意採用緊湊的單行寫法；請比照鄰近檔案的密度與命名，不要改寫既有格式。
