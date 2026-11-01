@@ -1,5 +1,6 @@
 import { dialogues } from './data/dialogues.js';
 import { mountFlipCounter } from './components/flip-counter.js';
+import { burstPaper } from './components/paper-burst.js';
 
 // 固定以台灣時間的 12/25 00:00 為目標；聖誕節當天顯示祝福。
 export function getChristmasCountdown(now = new Date()) {
@@ -25,6 +26,10 @@ function updateCountdown() {
   document.querySelector('.countdown-units').setAttribute('aria-label', `${result.days} 天 ${result.hours} 時 ${result.minutes} 分`);
   document.querySelector('#countdown-label').textContent = result.isChristmas ? '聖誕快樂！今天就是聖誕節。' : `距離 ${result.year} 聖誕節，還有`;
 }
+document.querySelector('#countdown-tap').addEventListener('click', event => {
+  Object.values(counters).forEach(counter => counter.flip());
+  burstPaper(event.currentTarget.parentElement);
+});
 updateCountdown();
 let countdownTimer = setInterval(updateCountdown, 1000);
 window.addEventListener('pagehide', () => clearInterval(countdownTimer));

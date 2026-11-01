@@ -6,7 +6,7 @@ import vm from 'node:vm';
 const context = {};
 vm.createContext(context);
 vm.runInContext(await readFile(new URL('../vendor/game1-frameless/rules.js', import.meta.url), 'utf8'), context);
-const { LANES, REACH, WAVES, speed, interval, blocked, open, nextWave, giftLane } = context.FlightRules;
+const { LANES, REACH, WAVES, speed, interval, blocked, open, nextWave, giftLane, giftMilestone, passedRecord } = context.FlightRules;
 
 function seeded(seed) { return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
 
@@ -59,4 +59,15 @@ test('gifts sit in a blocked lane right beside a clear one', () => {
     assert.ok(blocked(wave).includes(lane), `${wave}`);
     assert.ok(open(wave).some(clear => Math.abs(clear - lane) === 1), `${wave}`);
   }
+});
+
+test('gift milestones land on every fifth gift', () => {
+  assert.deepEqual([0, 1, 4, 5, 6, 10].map(giftMilestone), [false, false, false, true, false, true]);
+});
+
+test('a record fires once, and never on a first run', () => {
+  assert.equal(passedRecord(99.9, 100.1, 100), true);
+  assert.equal(passedRecord(100.1, 100.3, 100), false);
+  assert.equal(passedRecord(50, 51, 100), false);
+  assert.equal(passedRecord(0, 1, 0), false);
 });
