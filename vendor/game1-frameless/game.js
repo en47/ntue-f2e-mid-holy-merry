@@ -5,7 +5,7 @@ const glyphs={"up": [1092, 216, 94, 131], "down": [1264, 222, 99, 130], "8": [54
 function word(key,cls=''){const r=glyphs[key];return `<svg class="word ${cls}" viewBox="${r.join(' ')}" aria-hidden="true" focusable="false"><image href="${handwriting}" width="2048" height="2048"/></svg>`}
 document.querySelectorAll('[data-word]').forEach(e=>e.innerHTML=word(e.dataset.word));
 function scoreInto(id,value){const e=$(id);value=String(Math.max(0,Math.floor(value)));if(e.dataset.value===value)return;e.dataset.value=value;e.innerHTML=[...value].map(n=>word(n,'digit')).join('')+word('unit','unit');e.setAttribute('aria-label',value+' 公尺')}
-function giftsInto(id,count,top){const e=$(id),digits=value=>[...String(value)].map(n=>word(n,'digit')).join('');e.innerHTML='<img class="gift-icon" src="assets/gift.svg" alt="">'+digits(count)+'<i class="gift-slash"></i>'+digits(top);e.setAttribute('aria-label','禮物 '+count+' 個，最多 '+top+' 個')}
+function giftsInto(id,count,top){const e=$(id),digits=value=>[...String(value)].map(n=>word(n,'digit')).join('');e.innerHTML='<img class="gift-icon" src="assets/gift.svg" alt="">'+digits(count)+'<i class="gift-slash"></i>'+digits(top);e.setAttribute('aria-label','禮物 '+count+' 個，最高紀錄 '+top+' 個')}
 function setButton(id,key,label){const e=$(id);e.innerHTML=word(key);e.dataset.state=key;e.setAttribute('aria-label',label)}
 const HEIGHT=510,lanes=[80,160,240,320,400];
 let width=1100,lane=2,y=240,mode='loading',distance=0,best=0,elapsed=0,scroll=0,obstacles=[],spawn=2,last=0,ready=false,gifts=[],sparkles=[],collected=0,mostGifts=0,clearLanes=FlightRules.LANES,coming=[2],giftIn=Infinity;
