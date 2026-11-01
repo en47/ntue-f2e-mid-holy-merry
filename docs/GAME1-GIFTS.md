@@ -13,7 +13,7 @@
 
 ## 紀錄與顯示
 
-- 頂列顯示「本局禮物 / 最多禮物」，最多禮物存在 `localStorage` 的 `santa-crayon-gifts`；距離紀錄 `santa-crayon-best` 不變。
+- 頂列顯示「本局 / 最高紀錄」，遊戲下方的操作說明會解釋這組數字；禮物最高紀錄存在 `localStorage` 的 `santa-crayon-gifts`；距離紀錄 `santa-crayon-best` 不變。
 - 結束時信卡同時顯示距離與禮物，朗讀文字也包含禮物數。
 - 650px 以下頂列仍維持一列；520px 以下收起「公尺」單位，朗讀文字保留。
 - 禮物圖為 `assets/gift.svg`，HUD 與畫布共用。`prefers-reduced-motion` 時禮物不上下浮動，也沒有收集閃光。
