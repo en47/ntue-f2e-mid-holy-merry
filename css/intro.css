@@ -209,7 +209,7 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-bg-cloud { display:none; }
  .intro-story-bg { overflow:hidden; }
  .intro-hanger { width:48px; }
- .intro-book-shell { padding:7px 2px 16px;perspective:1600px; }
+ .intro-book-shell { padding:7px 2px 16px; }
  /* 手機把電腦版的跨頁轉 90 度：上頁紙雕、下頁文字同尺寸，書脊橫在中間；闔書時封面落在下半部。 */
  .intro-book { --page-height:clamp(215px,calc((100svh - 150px) / 2),320px);--mobile-scene-height:var(--page-height);--book-edge:8px;grid-template-columns:1fr;grid-template-rows:repeat(2,var(--page-height));aspect-ratio:auto;height:calc(var(--page-height) * 2);min-height:0; }
  .intro-scene { left:50%;bottom:3%;width:auto;height:94%;max-height:none;translate:-50% 0; }
@@ -234,11 +234,16 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-cover-front { background:linear-gradient(180deg,#2f5244 0 14px,#3f6655 14px); }
  .intro-cover-front::after { inset:20px 8px 8px; }
  .intro-book[data-state='moving'] .intro-copy-stack { visibility:visible; }
- .intro-book[data-state='moving'] .intro-picture { visibility:hidden; }
+ .intro-book[data-state='moving']>.intro-picture { visibility:hidden; }
  .intro-page-art { display:none; }
  .intro-copy-stack { order:2; }
  .intro-picture { order:1;height:var(--mobile-scene-height);border-bottom:1px solid #c8b69b; }
  .intro-book:not([data-state='open']) .intro-spine { visibility:hidden; }
+ /* iOS Safari 會把同平面的書板排到紙頁前面，也不隱藏背面：手機改用平面堆疊，正反面由程式在 90 度時切換。 */
+ .intro-book { transform-style:flat;perspective:1600px; }
+ .intro-cover>span,.intro-turn-front,.intro-turn-back { backface-visibility:visible; }
+ .intro-cover-back,.intro-cover[data-side='inside'] .intro-cover-front,.intro-turn-back,.intro-turn[data-side='back'] .intro-turn-front { visibility:hidden; }
+ .intro-cover[data-side='inside'] .intro-cover-back,.intro-turn[data-side='back'] .intro-turn-back { visibility:visible; }
  .intro-spine { inset:calc(50% - 7px) 0 auto;width:auto;height:14px;background:linear-gradient(180deg,transparent,#9e846455 30%,#fff7dc 49%,#9e846466 63%,transparent); }
  .intro-turn { top:50%;left:0;width:100%;height:50%;transform-origin:50% 0; }
  .intro-turn-back { transform:rotateX(180deg) translateZ(1px); }
