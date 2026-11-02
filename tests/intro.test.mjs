@@ -79,13 +79,22 @@ test('reduced motion and interrupted/background animations keep chapters usable'
  const changing=other.changePage(1);bg.document.hidden=true;bg.document.emit('visibilitychange');await changing;
  assert.equal(other.snapshot().page,1);assert.equal(other.snapshot().busy,false);assert.equal(pendingAnimations.size,0);other.destroy();
 });
-test('phones read all three chapters in one scroll, and closing restores the book',async()=>{
+test('phones turn pages by swiping, stop at the last page and leave closing to the button',async()=>{
  const matchMedia=()=>({matches:true,addEventListener(){},removeEventListener(){}});
  const f=await fixture('js/components/intro-book.js',{matchMedia}),book=f.api.mountIntroBook(f.root,{motion:{matches:true}}),el=id=>f.root.querySelector(`[data-book="${id}"]`);
- await book.open();assert.equal(f.root.dataset.flow,'scroll');assert.equal(el('gift').hidden,false,'The chapter two gift stays reachable');
- assert.equal(await book.changePage(1),false,'Scrolling replaces the chapter buttons');
- await book.close();assert.equal(f.root.dataset.flow,undefined);assert.equal(book.snapshot().page,0);assert.equal(book.snapshot().shut,true);
- await book.open();assert.equal(f.root.dataset.flow,'scroll','Reopening returns to the scroll');book.destroy();
+ const text=el('copies').children,inText={closest:()=>true},onScene={closest:()=>null};
+ const swipe=(target,from,to)=>{const prevented=[];const at=y=>({touches:[{clientX:100,clientY:y}],target,cancelable:true,preventDefault(){prevented.push(y);}});
+  el('book').emit('touchstart',at(from));el('book').emit('touchmove',at(to));el('book').emit('touchend',{});return prevented.length>0;};
+ await book.open();
+ Object.assign(text[0],{scrollTop:0,clientHeight:300,scrollHeight:700});
+ assert.equal(swipe(inText,500,300),false,'Text with room left scrolls instead of turning');await flush();assert.equal(book.snapshot().page,0);
+ text[0].scrollTop=400;assert.equal(swipe(inText,500,300),true,'The bottom of the text turns the page');await flush();assert.equal(book.snapshot().page,1);
+ assert.equal(swipe(onScene,500,300),true,'A swipe on the scene turns at once');await flush();assert.equal(book.snapshot().page,2);
+ assert.equal(el('hint').textContent,'最後一頁');assert.equal(el('book').dataset.ends,'last');
+ assert.equal(swipe(onScene,500,300),false,'The last page hands the swipe back to the site');await flush();assert.equal(book.snapshot().page,2);
+ assert.equal(swipe(onScene,300,500),true,'Swiping down turns back');await flush();assert.equal(book.snapshot().page,1);
+ assert.equal(swipe(onScene,300,330),true);await flush();assert.equal(book.snapshot().page,1,'A short drag does not turn');
+ await book.close();assert.equal(book.snapshot().shut,true);assert.equal(book.snapshot().page,0,'Reopening starts from the first page');assert.equal(swipe(onScene,500,300),false,'A closed book ignores swipes');book.destroy();
 });
 
 test('six map positions and both random outcomes; all postcards reset, interact, close and restore focus',async()=>{

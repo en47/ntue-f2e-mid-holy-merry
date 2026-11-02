@@ -84,6 +84,7 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-book-controls[hidden] { display:flex!important;visibility:hidden; }
 .intro-paper-button { min-height:44px;border:1px solid #b6a080;border-radius:4% 7% 5% 4% / 12% 8% 14% 11%;padding:.55rem 1rem;background:var(--cream);color:var(--red-dark);box-shadow:1px 3px 0 #b7a08055;font-size: var(--fs-small);transition:transform .18s,background .18s; }
 .intro-paper-button:hover:not(:disabled) { transform:translateY(-2px) rotate(-1deg);background:#fffdf4; }
+.intro-swipe-hint { display:none; }
 .intro-count { color:var(--red);font-size: var(--fs-small);letter-spacing:.12em;min-width:63px;text-align:center; }
 .intro-replay { border:0;border-bottom:1px dashed #9fb6bc;background:none;color:var(--muted);min-height:44px;font-size: var(--fs-small);padding:.5rem; }
 .intro-cultures { --foreground-under:calc(clamp(170px,19vw,280px) * .55);--w:min(1120px,100vw - 3rem);--roller:46px;--x0:calc(var(--w) * .04);--map-w:calc(var(--w) * .84);--map-h:calc(var(--map-w) * .548);--roller-h:calc(var(--map-h) + 24px);--letter-w:min(600px,var(--w) * .54);--letter-h:calc(var(--letter-w) * .7895);--stage-h:max(var(--roller-h),var(--letter-h));position:relative;isolation:isolate;padding:1.6rem 0 clamp(18px,2.4vw,36px);display:flex;flex-direction:column;justify-content:center; }
@@ -209,42 +210,38 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-story-bg { overflow:hidden; }
  .intro-hanger { width:48px; }
  .intro-book-shell { padding:7px 2px 16px;perspective:1600px; }
- .intro-book { --mobile-scene-height:clamp(300px,85vw,440px);--book-edge:8px;grid-template-columns:1fr;aspect-ratio:auto;min-height:0; }
+ /* 手機一次一頁：書高貼合螢幕，上方小紙雕，下方文字在頁內捲動；書以上緣為軸往上翻。 */
+ .intro-book { --mobile-scene-height:clamp(150px,30svh,220px);--book-height:clamp(440px,calc(100svh - 150px),640px);--book-edge:8px;grid-template-columns:1fr;grid-template-rows:var(--mobile-scene-height) minmax(0,1fr);aspect-ratio:auto;height:var(--book-height);min-height:0; }
+ .intro-scene { left:50%;bottom:3%;width:auto;height:94%;max-height:none;translate:-50% 0; }
+ .intro-copy-stack { min-height:0; }
+ .intro-copy-stack>.intro-copy { min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch; }
+ .intro-book[data-ends='last'] .intro-copy-stack>.intro-copy { overscroll-behavior:auto; }
  .intro-copy { padding:1.3rem 1.25rem 1.1rem;background:linear-gradient(120deg,#fff8e8,#f3e6cd); }
  .intro-copy h2 { font-size: var(--fs-title); }
  .intro-story { font-size: var(--fs-body);line-height:1.9; }
  .intro-subtitle { margin-bottom:.8rem; }
  .intro-book { scroll-margin-top:.75rem; }
- .intro-book[data-state='closed'] { min-height:min(120vw,480px); }
  .intro-book[data-state='closed'] .intro-copy-stack,.intro-book[data-state='closed'] .intro-picture { display:none; }
  .intro-book[data-state='closed'] .intro-book-board,.intro-book[data-state='moving'] .intro-book-board { clip-path:none; }
  .intro-book-shell:has(.intro-book[data-state='closed']) { transform:none; }
- .intro-cover { left:calc(var(--book-edge) * -1);bottom:auto;height:min(120vw,480px); }
+ .intro-cover { left:calc(var(--book-edge) * -1);bottom:calc(var(--book-edge) * -1);transform-origin:50% 0; }
  .intro-cover-back { display:none!important; }
+ .intro-cover-front { background:linear-gradient(180deg,#2f5244 0 22px,#3f6655 22px); }
+ .intro-cover-front::after { inset:34px 14px 14px; }
  .intro-book[data-state='moving'] .intro-copy-stack { visibility:visible; }
  .intro-page-art { display:none; }
  .intro-copy-stack { order:2; }
  .intro-picture { order:1;height:var(--mobile-scene-height);border-bottom:1px solid #c8b69b; }
  .intro-spine { display:none; }
- .intro-turn { left:0;width:100%; }
+ .intro-turn { left:0;width:100%;transform-origin:50% 0; }
+ .intro-turn-back { display:none; }
  .intro-leaf-desktop { display:none; }
  .intro-leaf-mobile { display:grid;grid-template-rows:var(--mobile-scene-height) 1fr;height:100%; }
- .intro-leaf-mobile>.intro-copy { min-height:0; }
- /* 手機的書比螢幕長，按鈕貼在畫面底部，讀到哪都按得到。 */
- .intro-book-controls { position:sticky;bottom:.4rem;z-index:40;gap:.3rem .4rem;margin-top:.8rem;padding:.3rem;border-radius:12px;background:#fff9ecee;box-shadow:0 3px 10px #4b6a7a44; }
- /* 手機三章上下連續閱讀：每章沿用電腦版的紙雕與紙頁，章與章之間露出書板。 */
- .intro-flow { display:grid;order:3;gap:22px;min-width:0;outline:none; }
- .intro-book[data-state='closed'] .intro-flow { display:none; }
- .intro-flow-chapter { position:relative;display:grid;min-width:0; }
- .intro-flow-chapter>.intro-copy { order:2; }
- .intro-flow-chapter+.intro-flow-chapter::before { content:'';position:absolute;left:6%;right:6%;top:-12px;border-top:2px dashed #d9b36a; }
- /* 書板圖是固定比例，拉長到三章會把圓角壓尖，連續閱讀時改用同色實色。 */
- .intro-story-section[data-flow='scroll'] .intro-book-board { border-radius:14px;background:#3f6655; }
- .intro-story-section[data-flow='scroll'] .intro-book-board>* { display:none; }
- .intro-flow-actions { display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.4rem .8rem;margin-top:1rem; }
- .intro-story-section[data-flow='scroll'] .intro-book>.intro-copy-stack,.intro-story-section[data-flow='scroll'] .intro-book>.intro-picture { display:none; }
- .intro-story-section[data-flow='scroll'] .intro-book-controls { position:static;margin-top:.6rem;background:none;box-shadow:none; }
- .intro-story-section[data-flow='scroll'] :is([data-book='prev'],[data-book='next'],[data-book='count'],[data-book='replay']) { display:none; }
+ .intro-leaf-mobile>.intro-copy { order:2;min-height:0;overflow:hidden; }
+ /* 控制列放在書下方，第二章多出金幣按鈕時版面也不會跳動。 */
+ .intro-book-controls { min-height:96px;gap:.2rem .7rem;margin-top:.5rem;align-content:flex-start; }
+ .intro-book-controls :is([data-book='prev'],[data-book='next']) { position:absolute;width:1px;height:1px;min-width:0;min-height:0;padding:0;overflow:hidden;clip-path:inset(50%); }
+ .intro-swipe-hint { display:block;color:var(--muted);font-size: var(--fs-small); }
  .intro-tag { min-width:104px;min-height:44px;padding:.2rem .6rem;font-size: var(--fs-small); }
  .intro-paper-button { padding:.55rem .85rem;font-size: var(--fs-small); }
  .intro-replay { min-height:36px;padding:.2rem .4rem; }
