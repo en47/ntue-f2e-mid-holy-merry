@@ -21,6 +21,19 @@ function coverFace(parent) {
   holly(parent, 104, 78, .78); holly(parent, 496, 78, .78); star(parent, 300, 58, 26);
 }
 
+// The phone cover is one wide page: the same night runs edge to edge under the plaque.
+function coverWide(parent) {
+  shape('path', { d: 'M22 398V196C22 170 42 158 68 158H572C598 158 618 170 618 196V398Z', fill: '#34506c' }, parent);
+  for (const [x, y, size] of [[64, 196, 7], [112, 234, 5], [534, 232, 5], [582, 194, 7]]) star(parent, x, y, size, '#efd08a');
+  shape('path', { d: 'M22 398V318C120 282 230 312 320 302S520 278 618 314V398Z', fill: '#dbe7ec' }, parent);
+  pine(parent, 86, 362, 96, '#5f8a70'); pine(parent, 552, 364, 108, '#4f7a65');
+  roofHouse(parent, 320, 366, 100, 58, { roof: '#a8564c' });
+  shape('path', { d: 'M22 398V362C150 336 250 372 340 360S520 346 618 364V398Z', fill: SNOW }, parent);
+  shape('path', { d: 'M180 26C260 12 380 12 460 26 494 34 504 62 500 112 504 160 494 196 460 208 380 222 260 222 180 208 146 196 136 160 140 112 136 62 146 34 180 26Z', fill: CREAM }, parent);
+  shape('rect', { x: 154, y: 34, width: 332, height: 166, rx: 22, fill: 'none', stroke: '#c9a877', 'stroke-width': 2.5, 'stroke-dasharray': '8 7' }, parent);
+  holly(parent, 170, 30, .62); holly(parent, 470, 30, .62); star(parent, 320, 18, 20);
+}
+
 // The inside of the cover, seen as the left page lands: board edge only, the page sits on top.
 function coverInside(parent) {
   shape('rect', { x: 6, y: 6, width: 588, height: 588, rx: 16, fill: BOARD }, parent);
@@ -95,6 +108,7 @@ export function mountBookArt(root) {
   face.className = 'intro-cover-face';
   front.append(face);
   paperLayer(face, '0 0 600 620', 'intro-cover-art', coverFace, flat);
+  paperLayer(face, '0 0 640 420', 'intro-cover-wide-art', coverWide, flat);
   const title = document.createElement('span');
   title.className = 'intro-cover-title';
   face.append(title);

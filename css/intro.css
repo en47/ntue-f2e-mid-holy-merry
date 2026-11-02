@@ -72,7 +72,7 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-turn-back { transform:rotateY(180deg) translateZ(1px); }
 .intro-turn::after { content:'';position:absolute;right:0;top:0;width:2px;height:100%;background:#d4bb91;transform:rotateY(90deg);transform-origin:right center; }
 .intro-leaf-desktop,.intro-leaf-desktop>.intro-page { height:100%; }
-.intro-leaf-mobile { display:none; }
+.intro-cover-wide-art { display:none; }
 .intro-coin { position:absolute;left:19%;bottom:34%;width:9%;height:13%;z-index:15;opacity:0;pointer-events:none; }
 .intro-book-controls { display:flex;justify-content:center;align-items:center;gap:.55rem .9rem;flex-wrap:wrap;margin-top:.6rem; }
 .tag-art { z-index:-1; }
@@ -210,34 +210,39 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-story-bg { overflow:hidden; }
  .intro-hanger { width:48px; }
  .intro-book-shell { padding:7px 2px 16px;perspective:1600px; }
- /* 手機一次一頁：書高貼合螢幕，上方小紙雕，下方文字在頁內捲動；書以上緣為軸往上翻。 */
- .intro-book { --mobile-scene-height:clamp(150px,30svh,220px);--book-height:clamp(440px,calc(100svh - 150px),640px);--book-edge:8px;grid-template-columns:1fr;grid-template-rows:var(--mobile-scene-height) minmax(0,1fr);aspect-ratio:auto;height:var(--book-height);min-height:0; }
+ /* 手機把電腦版的跨頁轉 90 度：上頁紙雕、下頁文字同尺寸，書脊橫在中間；闔書時封面落在下半部。 */
+ .intro-book { --page-height:clamp(215px,calc((100svh - 150px) / 2),320px);--mobile-scene-height:var(--page-height);--book-edge:8px;grid-template-columns:1fr;grid-template-rows:repeat(2,var(--page-height));aspect-ratio:auto;height:calc(var(--page-height) * 2);min-height:0; }
  .intro-scene { left:50%;bottom:3%;width:auto;height:94%;max-height:none;translate:-50% 0; }
  .intro-copy-stack { min-height:0; }
  .intro-copy-stack>.intro-copy { min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch; }
  .intro-book[data-ends='last'] .intro-copy-stack>.intro-copy { overscroll-behavior:auto; }
- .intro-copy { padding:1.3rem 1.25rem 1.1rem;background:linear-gradient(120deg,#fff8e8,#f3e6cd); }
+ .intro-copy { padding:.9rem 1.15rem .9rem;background:linear-gradient(120deg,#fff8e8,#f3e6cd); }
  .intro-copy h2 { font-size: var(--fs-title); }
  .intro-story { font-size: var(--fs-body);line-height:1.9; }
  .intro-subtitle { margin-bottom:.8rem; }
  .intro-book { scroll-margin-top:.75rem; }
- .intro-book[data-state='closed'] .intro-copy-stack,.intro-book[data-state='closed'] .intro-picture { display:none; }
- .intro-book[data-state='closed'] .intro-book-board,.intro-book[data-state='moving'] .intro-book-board { clip-path:none; }
- .intro-book-shell:has(.intro-book[data-state='closed']) { transform:none; }
- .intro-cover { left:calc(var(--book-edge) * -1);bottom:calc(var(--book-edge) * -1);transform-origin:50% 0; }
- .intro-cover-back { display:none!important; }
- .intro-cover-front { background:linear-gradient(180deg,#2f5244 0 22px,#3f6655 22px); }
- .intro-cover-front::after { inset:34px 14px 14px; }
+ .intro-book[data-state='closed'] .intro-book-board,.intro-book[data-state='moving'] .intro-book-board { clip-path:inset(50% -20px -32px -20px); }
+ .intro-book-shell:has(.intro-book[data-state='closed']) { transform:translateY(-25%); }
+ .intro-cover { top:50%;left:calc(var(--book-edge) * -1);right:calc(var(--book-edge) * -1);bottom:calc(var(--book-edge) * -1);transform-origin:50% 0; }
+ .intro-cover-back { transform:rotateX(180deg); }
+ .intro-cover-page { inset:var(--book-edge) var(--book-edge) 0; }
+ .intro-cover-page>.intro-picture { height:100%; }
+ .intro-cover-art { display:none; }
+ .intro-cover-wide-art { display:block; }
+ .intro-cover-face { width:min(100cqw,calc(100cqh * 1.52));aspect-ratio:640/420; }
+ .intro-cover-title { left:23%;right:23%;top:6%;aspect-ratio:660/330; }
+ .intro-cover-front { background:linear-gradient(180deg,#2f5244 0 14px,#3f6655 14px); }
+ .intro-cover-front::after { inset:20px 8px 8px; }
  .intro-book[data-state='moving'] .intro-copy-stack { visibility:visible; }
+ .intro-book[data-state='moving'] .intro-picture { visibility:hidden; }
  .intro-page-art { display:none; }
  .intro-copy-stack { order:2; }
  .intro-picture { order:1;height:var(--mobile-scene-height);border-bottom:1px solid #c8b69b; }
- .intro-spine { display:none; }
- .intro-turn { left:0;width:100%;transform-origin:50% 0; }
- .intro-turn-back { display:none; }
- .intro-leaf-desktop { display:none; }
- .intro-leaf-mobile { display:grid;grid-template-rows:var(--mobile-scene-height) 1fr;height:100%; }
- .intro-leaf-mobile>.intro-copy { order:2;min-height:0;overflow:hidden; }
+ .intro-book:not([data-state='open']) .intro-spine { visibility:hidden; }
+ .intro-spine { inset:calc(50% - 7px) 0 auto;width:auto;height:14px;background:linear-gradient(180deg,transparent,#9e846455 30%,#fff7dc 49%,#9e846466 63%,transparent); }
+ .intro-turn { top:50%;left:0;width:100%;height:50%;transform-origin:50% 0; }
+ .intro-turn-back { transform:rotateX(180deg) translateZ(1px); }
+ .intro-leaf-desktop>.intro-copy { overflow:hidden; }
  /* 控制列放在書下方，第二章多出金幣按鈕時版面也不會跳動。 */
  .intro-book-controls { min-height:96px;gap:.2rem .7rem;margin-top:.5rem;align-content:flex-start; }
  .intro-book-controls :is([data-book='prev'],[data-book='next']) { position:absolute;width:1px;height:1px;min-width:0;min-height:0;padding:0;overflow:hidden;clip-path:inset(50%); }
