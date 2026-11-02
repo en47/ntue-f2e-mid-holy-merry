@@ -48,7 +48,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 
 ### 目錄分工
 - `js/components/` — DOM 與 Three.js 行為單元（角色場景、精靈、信封、世界地圖、Intro 故事書）。
-- Intro 故事書在 700px 以下以書本上緣為軸（`rotateX`）開合與翻頁，手指上下滑動翻頁、文字捲到底才翻，最後一頁的滑動交還網頁捲動；超過 700px 維持左右翻書（`rotateY`），兩種版型共用同一批章節節點。
+- Intro 故事書在 700px 以下把跨頁轉 90 度：上頁紙雕、下頁文字同尺寸，書脊橫在中間（`rotateX`），手指上下滑動翻頁、文字捲到底才翻，最後一頁的滑動交還網頁捲動；超過 700px 維持左右翻書（`rotateY`），兩種版型共用同一批章節節點。手機封面是獨立的橫式圖 `coverWide`。
 - `js/components/paper-art.js`、`paper-props.js` — SVG 紙雕工法與道具。每片紙只轉成圖片一次，會動的部位拆成獨立圖層以 CSS 移動，不要動畫 SVG 內部（濾鏡重算成本很高）。
 - `js/data/` — 純資料表。多數由 `scripts/` 的 `.mjs` / `.py` 產生（`envelope-shapes.js` 由 `build-wish-art.mjs`、`title-glyphs.js`、`elf-actions.json`、`elf-ground.js`、`wish-tree-anchors.js`、`storybook-masks`）；**不要手改產出檔**，改腳本後重新產生。
 - `js/services/` — 儲存與 Firebase。

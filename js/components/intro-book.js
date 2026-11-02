@@ -1,6 +1,6 @@
 import { introStories } from '../data/intro-stories.js';
 
-const PHONE_LIFT = 105, SWIPE_START = 10, SWIPE_TURN = 48;
+const PHONE_TURN = 180, SWIPE_START = 10, SWIPE_TURN = 48;
 
 // One coordinator owns every hinge and the leaf. No halfway content swap or timers.
 export function mountIntroBook(root, {
@@ -102,16 +102,20 @@ export function mountIntroBook(root, {
   const stage = element('div', 'intro-scene'); stage.append(clone(views[index].view)); container.append(stage);
   return container;
  }
- function face(target, desktop, index) {
-  const desktopFace = element('div', 'intro-leaf-desktop'); desktopFace.append(desktop);
-  // A stacked spread on narrow screens still turns as one populated paper leaf.
-  const mobileFace = element('div', 'intro-leaf-mobile'); mobileFace.append(picture(index), clone(views[index].copy));
-  target.replaceChildren(desktopFace, mobileFace);
+ function face(target, content) {
+  const wrapper = element('div', 'intro-leaf-desktop'); wrapper.append(content);
+  target.replaceChildren(wrapper);
  }
  function leaf(target) {
   const forward = target > page;
-  face($('front'), forward ? picture(page) : picture(target), forward ? page : target);
-  face($('back'), clone(views[forward ? target : page].copy), forward ? target : page);
+  // Phones lay the spread out top to bottom, so the lower text page is the one that lifts.
+  if (stacked()) {
+   face($('front'), clone(views[forward ? page : target].copy));
+   face($('back'), picture(forward ? target : page));
+  } else {
+   face($('front'), forward ? picture(page) : picture(target));
+   face($('back'), clone(views[forward ? target : page].copy));
+  }
   turn.dataset.direction = forward ? 'forward' : 'backward'; turn.hidden = false;
   turn.style.visibility = 'visible';
   return forward;
@@ -133,29 +137,29 @@ export function mountIntroBook(root, {
   if (!upward) { await fold(page, false); if (disposed || token !== revision) return false; }
   phase('turning'); const forward = leaf(target);
   if (upward) {
-   const shown = $('front').querySelector?.('.intro-leaf-mobile>.intro-copy');
+   const shown = $('front').querySelector?.('.intro-copy');
    if (shown && forward) shown.scrollTop = views[page].copy.scrollTop;
    views[target].copy.scrollTop = 0;
-   if (forward) { settle(page, false); choose('copy', target); choose('view', target); }
-  } else if (forward) choose('view', target); else choose('copy', target);
+  }
+  if (forward === upward) choose('copy', target); else choose('view', target);
   // The leaf covers the underlay. Only reveal its matching static page after it lands.
-  const axis = upward ? 'rotateX' : 'rotateY', flat = 0, flipped = upward ? PHONE_LIFT : -180;
+  const axis = upward ? 'rotateX' : 'rotateY', flat = 0, flipped = upward ? PHONE_TURN : -180;
   const from = forward ? flat : flipped, to = forward ? flipped : flat;
   await animate(turn, [
    { transform: `translateZ(30px) ${axis}(${from}deg)`, boxShadow: '0 2px 2px #6e55331a' },
    { transform: `translateZ(30px) ${axis}(${(from + to) / 2}deg)`, boxShadow: '8px 10px 7px #6e553347' },
    { transform: `translateZ(30px) ${axis}(${to}deg)`, boxShadow: '0 2px 2px #6e55331a' },
-  ], { duration: upward ? 620 : 820, easing: 'cubic-bezier(.45,.08,.25,1)' });
+  ], { duration: upward ? 760 : 820, easing: 'cubic-bezier(.45,.08,.25,1)' });
   if (disposed || token !== revision) return false;
-  if (upward && !forward) settle(page, false);
+  if (upward) settle(page, false);
   page = target; choose('copy', page); choose('view', page); hideLeaf(); announce();
   phase('opening'); await fold(page, true); if (disposed || token !== revision) return false;
   busy = false; phase('open'); controls(); return true;
  }
  // The closed book sits centred; it slides right so the cover's hinge lands on the spine.
  const stacked = () => Boolean(globalThis.matchMedia?.('(max-width: 700px)').matches);
- const slide = (from, to) => stacked() ? Promise.resolve(true) : animate(shell, [{ transform: `translateX(${from}%)` }, { transform: `translateX(${to}%)` }], { duration: 560, easing: 'cubic-bezier(.3,.7,.3,1)' });
- // Phones hinge the book along its top edge; wider screens keep the spine in the middle.
+ const slide = (from, to) => { const axis = stacked() ? 'translateY' : 'translateX'; return animate(shell, [{ transform: `${axis}(${from}%)` }, { transform: `${axis}(${to}%)` }], { duration: 560, easing: 'cubic-bezier(.3,.7,.3,1)' }); };
+ // Phones turn the book over a horizontal spine; wider screens keep the upright one.
  const swing = (from, to, duration) => { const axis = stacked() ? 'rotateX' : 'rotateY'; return animate(cover, [{ transform: `${axis}(${from}deg)` }, { transform: `${axis}(${to}deg)` }], { duration, easing: 'cubic-bezier(.42,.03,.2,1)' }); };
  // One smooth scroll that frames the book with its buttons; scrolling stays free afterwards.
  function frameBook() {
@@ -165,12 +169,15 @@ export function mountIntroBook(root, {
   const offset = span < height ? top - (height - span) / 2 : top - 12;
   globalThis.scrollTo({ top: Math.max(0, globalThis.scrollY + offset), behavior: motion.matches ? 'auto' : 'smooth' });
  }
+ // The inside of the cover lands on the first page of the spread: scene on phones, text elsewhere.
+ const showInsideCover = () => coverPage.replaceChildren(stacked() ? picture(page) : clone(views[page].copy));
  async function openBook() {
   if (disposed || busy || !shut) return false;
   frameBook(); busy = true; const token = ++revision; controls(); phase('sliding');
-  coverPage.replaceChildren(clone(views[page].copy));
+  showInsideCover();
   await slide(-25, 0); if (disposed || token !== revision) return false;
-  phase('covering'); await swing(0, stacked() ? PHONE_LIFT : -180, 1000); if (disposed || token !== revision) return false;
+  showBookTop(); // The book only has its open height once the slide has settled.
+  phase('covering'); await swing(0, stacked() ? PHONE_TURN : -180, 1000); if (disposed || token !== revision) return false;
   shut = false; cover.hidden = true; phase('opening'); await fold(page, true); if (disposed || token !== revision) return false;
   busy = false; phase('open'); controls(); next.focus?.({ preventScroll: true }); return true;
  }
@@ -178,13 +185,13 @@ export function mountIntroBook(root, {
   if (disposed || busy || shut) return false;
   showBookTop(); busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
   await fold(page, false); if (disposed || token !== revision) return false;
-  coverPage.replaceChildren(clone(views[page].copy));
+  showInsideCover();
   shut = true; cover.hidden = false; phase('covering');
-  await swing(stacked() ? PHONE_LIFT : -180, 0, 1000); if (disposed || token !== revision) return false;
+  await swing(stacked() ? PHONE_TURN : -180, 0, 1000); if (disposed || token !== revision) return false;
   phase('sliding'); await slide(0, -25); if (disposed || token !== revision) return false;
   shell.style.transform = ''; busy = false;
   // The next reader on a phone starts at the first page; only a swipe can move forward.
-  if (stacked() && page !== 0) { settle(page, false); page = 0; choose('copy', 0); choose('view', 0); coverPage.replaceChildren(clone(views[0].copy)); announce(); }
+  if (stacked() && page !== 0) { settle(page, false); page = 0; choose('copy', 0); choose('view', 0); announce(); }
   phase('closed'); controls(); cover.focus?.({ preventScroll: true }); return true;
  }
  async function replayScene() {
