@@ -87,6 +87,14 @@ export function mountIntroBook(root, {
    { duration: opening ? 660 : 420, delay: opening ? p.delay * .65 : (600 - p.delay) * .25,
     easing: opening ? 'cubic-bezier(.2,.76,.3,1.04)' : 'cubic-bezier(.42,0,.8,.5)' })));
  }
+ // iOS Safari flattens these sheets and ignores backfaces, so phones swap the face when the sheet is edge-on.
+ async function hinge(node, from, to, duration, showFace, prefix = '') {
+  const frame = angle => ({ transform: `${prefix}rotateX(${angle}deg)` });
+  showFace(from > to);
+  if (!await animate(node, [frame(from), frame(90)], { duration: duration / 2, easing: 'cubic-bezier(.5,.05,.85,.55)' })) return false;
+  showFace(to > from);
+  return animate(node, [frame(90), frame(to)], { duration: duration / 2, easing: 'cubic-bezier(.15,.45,.4,1)' });
+ }
  function stopGift() { giftAnimation?.cancel(); giftAnimation = undefined; }
  const settle = (index, up) => views[index].panels.forEach(p => { p.node.style.transform = up ? p.raised : p.folded; });
  function clone(node) {
@@ -143,13 +151,14 @@ export function mountIntroBook(root, {
   }
   if (forward === upward) choose('copy', target); else choose('view', target);
   // The leaf covers the underlay. Only reveal its matching static page after it lands.
-  const axis = upward ? 'rotateX' : 'rotateY', flat = 0, flipped = upward ? PHONE_TURN : -180;
+  const axis = 'rotateY', flat = 0, flipped = upward ? PHONE_TURN : -180;
   const from = forward ? flat : flipped, to = forward ? flipped : flat;
-  await animate(turn, [
+  if (upward) await hinge(turn, from, to, 760, side => { turn.dataset.side = side ? 'back' : 'front'; }, 'translateZ(30px) ');
+  else await animate(turn, [
    { transform: `translateZ(30px) ${axis}(${from}deg)`, boxShadow: '0 2px 2px #6e55331a' },
    { transform: `translateZ(30px) ${axis}(${(from + to) / 2}deg)`, boxShadow: '8px 10px 7px #6e553347' },
    { transform: `translateZ(30px) ${axis}(${to}deg)`, boxShadow: '0 2px 2px #6e55331a' },
-  ], { duration: upward ? 760 : 820, easing: 'cubic-bezier(.45,.08,.25,1)' });
+  ], { duration: 820, easing: 'cubic-bezier(.45,.08,.25,1)' });
   if (disposed || token !== revision) return false;
   if (upward) settle(page, false);
   page = target; choose('copy', page); choose('view', page); hideLeaf(); announce();
@@ -160,7 +169,9 @@ export function mountIntroBook(root, {
  const stacked = () => Boolean(globalThis.matchMedia?.('(max-width: 700px)').matches);
  const slide = (from, to) => { const axis = stacked() ? 'translateY' : 'translateX'; return animate(shell, [{ transform: `${axis}(${from}%)` }, { transform: `${axis}(${to}%)` }], { duration: 560, easing: 'cubic-bezier(.3,.7,.3,1)' }); };
  // Phones turn the book over a horizontal spine; wider screens keep the upright one.
- const swing = (from, to, duration) => { const axis = stacked() ? 'rotateX' : 'rotateY'; return animate(cover, [{ transform: `${axis}(${from}deg)` }, { transform: `${axis}(${to}deg)` }], { duration, easing: 'cubic-bezier(.42,.03,.2,1)' }); };
+ const swing = (from, to, duration) => stacked()
+  ? hinge(cover, from, to, duration, side => { cover.dataset.side = side ? 'inside' : 'outside'; })
+  : animate(cover, [{ transform: `rotateY(${from}deg)` }, { transform: `rotateY(${to}deg)` }], { duration, easing: 'cubic-bezier(.42,.03,.2,1)' });
  // One smooth scroll that frames the book with its buttons; scrolling stays free afterwards.
  function frameBook() {
   const top = shell.getBoundingClientRect?.().top, bottom = controlBar.getBoundingClientRect?.().bottom;
