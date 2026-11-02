@@ -1,5 +1,7 @@
 import { introStories } from '../data/intro-stories.js';
 
+const PHONE_LIFT = 105, SWIPE_START = 10, SWIPE_TURN = 48;
+
 // One coordinator owns every hinge and the leaf. No halfway content swap or timers.
 export function mountIntroBook(root, {
  stories = introStories,
@@ -11,11 +13,11 @@ export function mountIntroBook(root, {
  const prev = $('prev'), next = $('next'), replay = $('replay'), gift = $('gift');
  const shell = $('shell'), book = $('book'), cover = $('cover'), coverPage = $('cover-page'), close = $('close'), controlBar = $('controls');
  const listeners = [], animations = new Set();
- let page = 0, busy = false, shut = true, disposed = false, revision = 0, giftAnimation, flowing = false, watcher, raised = [];
- const on = (target, type, fn) => {
+ let page = 0, busy = false, shut = true, disposed = false, revision = 0, giftAnimation, swipe;
+ const on = (target, type, fn, options) => {
   if (!target?.addEventListener) return;
-  target.addEventListener(type, fn);
-  listeners.push(() => target.removeEventListener(type, fn));
+  target.addEventListener(type, fn, options);
+  listeners.push(() => target.removeEventListener(type, fn, options));
  };
  const element = (tag, className, text) => {
   const node = document.createElement(tag); node.className = className;
@@ -52,8 +54,10 @@ export function mountIntroBook(root, {
  });
  function controls() {
   prev.disabled = busy || page === 0; next.disabled = busy || page === stories.length - 1;
-  replay.disabled = busy; gift.disabled = busy; gift.hidden = !flowing && page !== 1; close.disabled = busy;
+  replay.disabled = busy; gift.disabled = busy; gift.hidden = page !== 1; close.disabled = busy;
   controlBar.hidden = shut;
+  $('hint').textContent = page === stories.length - 1 ? '最後一頁' : '往上滑，翻下一頁';
+  book.dataset.ends = page === stories.length - 1 ? 'last' : 'more';
   root.setAttribute('aria-busy', String(busy));
  }
  function phase(value) { root.dataset.phase = value; book.dataset.state = shut ? (value === 'closed' ? 'closed' : 'moving') : 'open'; }
@@ -84,46 +88,7 @@ export function mountIntroBook(root, {
     easing: opening ? 'cubic-bezier(.2,.76,.3,1.04)' : 'cubic-bezier(.42,0,.8,.5)' })));
  }
  function stopGift() { giftAnimation?.cancel(); giftAnimation = undefined; }
- // Phones read the chapters as one scroll; each keeps its own scene, and it unfolds on arrival.
- const narrow = globalThis.matchMedia?.('(max-width: 700px)');
- const flow = element('div', 'intro-flow'); flow.tabIndex = -1;
  const settle = (index, up) => views[index].panels.forEach(p => { p.node.style.transform = up ? p.raised : p.folded; });
- function unfold(index) { if (raised[index]) return; raised[index] = true; fold(index, true); }
- function enterFlow() {
-  if (flowing) return;
-  flowing = true; stopGift(); root.dataset.flow = 'scroll';
-  raised = views.map((_, index) => !shut && index === page);
-  const pictures = views.map(({ copy, view }, index) => {
-   const chapter = element('section', 'intro-flow-chapter'), picture = element('div', 'intro-page intro-picture'), stage = element('div', 'intro-scene');
-   stage.setAttribute('role', 'group'); stage.setAttribute('aria-label', stories[index].scene);
-   stage.append(view); picture.append(stage); picture.dataset.chapter = String(index);
-   const actions = element('div', 'intro-flow-actions'), again = element('button', 'intro-replay', '再看一次紙雕 ↻');
-   again.type = 'button'; on(again, 'click', () => replayScene(index)); actions.append(again);
-   if (index === 1) actions.append(gift);
-   copy.append(actions); chapter.append(picture, copy); flow.append(chapter);
-   view.dataset.active = copy.dataset.active = 'true';
-   view.setAttribute('aria-hidden', 'false'); copy.setAttribute('aria-hidden', 'false'); view.inert = copy.inert = false;
-   settle(index, raised[index]);
-   return picture;
-  });
-  book.append(flow);
-  if (!globalThis.IntersectionObserver) { views.forEach((_, index) => unfold(index)); return; }
-  watcher = new IntersectionObserver(entries => { for (const entry of entries) if (entry.isIntersecting && !shut) unfold(Number(entry.target.dataset.chapter)); }, { threshold: .3 });
-  pictures.forEach(picture => watcher.observe(picture));
- }
- function leaveFlow(keep) {
-  if (!flowing) return;
-  flowing = false; stopGift(); delete root.dataset.flow; watcher?.disconnect(); watcher = undefined;
-  for (const animation of animations) animation.cancel();
-  controlBar.append(gift);
-  views.forEach(({ copy, view }, index) => { copy.querySelector('.intro-flow-actions')?.remove?.(); scene.append(view); copies.append(copy); settle(index, index === keep); });
-  flow.replaceChildren(); flow.remove?.();
-  page = keep; raised = []; choose('copy', page); choose('view', page); announce();
- }
- function chapterInView() {
-  const middle = (globalThis.innerHeight || 0) / 2;
-  return [...flow.children].reduce((found, chapter, index) => chapter.getBoundingClientRect?.().top < middle ? index : found, 0);
- }
  function clone(node) {
   const copy = node.cloneNode(true);
   for (const el of [copy, ...copy.querySelectorAll('[id], [data-book], [aria-labelledby]')]) {
@@ -161,19 +126,28 @@ export function mountIntroBook(root, {
   root.querySelector('.intro-book')?.scrollIntoView?.({ block: 'start', behavior: motion.matches ? 'auto' : 'smooth' });
  }
  async function changePage(target) {
-  if (disposed || busy || shut || flowing || target < 0 || target >= stories.length || target === page) return false;
+  if (disposed || busy || shut || target < 0 || target >= stories.length || target === page) return false;
   showBookTop(); busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
-  await fold(page, false); if (disposed || token !== revision) return false;
+  const upward = stacked();
+  // A swipe answers at once on phones: the leaf lifts the page as it stands, scene included.
+  if (!upward) { await fold(page, false); if (disposed || token !== revision) return false; }
   phase('turning'); const forward = leaf(target);
+  if (upward) {
+   const shown = $('front').querySelector?.('.intro-leaf-mobile>.intro-copy');
+   if (shown && forward) shown.scrollTop = views[page].copy.scrollTop;
+   views[target].copy.scrollTop = 0;
+   if (forward) { settle(page, false); choose('copy', target); choose('view', target); }
+  } else if (forward) choose('view', target); else choose('copy', target);
   // The leaf covers the underlay. Only reveal its matching static page after it lands.
-  if (forward) choose('view', target); else choose('copy', target);
-  const from = forward ? 0 : -180, to = forward ? -180 : 0;
+  const axis = upward ? 'rotateX' : 'rotateY', flat = 0, flipped = upward ? PHONE_LIFT : -180;
+  const from = forward ? flat : flipped, to = forward ? flipped : flat;
   await animate(turn, [
-   { transform: `translateZ(30px) rotateY(${from}deg)`, boxShadow: '0 2px 2px #6e55331a' },
-   { transform: `translateZ(30px) rotateY(${(from + to) / 2}deg)`, boxShadow: '8px 10px 7px #6e553347' },
-   { transform: `translateZ(30px) rotateY(${to}deg)`, boxShadow: '0 2px 2px #6e55331a' },
-  ], { duration: 820, easing: 'cubic-bezier(.45,.08,.25,1)' });
+   { transform: `translateZ(30px) ${axis}(${from}deg)`, boxShadow: '0 2px 2px #6e55331a' },
+   { transform: `translateZ(30px) ${axis}(${(from + to) / 2}deg)`, boxShadow: '8px 10px 7px #6e553347' },
+   { transform: `translateZ(30px) ${axis}(${to}deg)`, boxShadow: '0 2px 2px #6e55331a' },
+  ], { duration: upward ? 620 : 820, easing: 'cubic-bezier(.45,.08,.25,1)' });
   if (disposed || token !== revision) return false;
+  if (upward && !forward) settle(page, false);
   page = target; choose('copy', page); choose('view', page); hideLeaf(); announce();
   phase('opening'); await fold(page, true); if (disposed || token !== revision) return false;
   busy = false; phase('open'); controls(); return true;
@@ -181,7 +155,8 @@ export function mountIntroBook(root, {
  // The closed book sits centred; it slides right so the cover's hinge lands on the spine.
  const stacked = () => Boolean(globalThis.matchMedia?.('(max-width: 700px)').matches);
  const slide = (from, to) => stacked() ? Promise.resolve(true) : animate(shell, [{ transform: `translateX(${from}%)` }, { transform: `translateX(${to}%)` }], { duration: 560, easing: 'cubic-bezier(.3,.7,.3,1)' });
- const swing = (from, to, duration) => animate(cover, [{ transform: `rotateY(${from}deg)` }, { transform: `rotateY(${to}deg)` }], { duration, easing: 'cubic-bezier(.42,.03,.2,1)' });
+ // Phones hinge the book along its top edge; wider screens keep the spine in the middle.
+ const swing = (from, to, duration) => { const axis = stacked() ? 'rotateX' : 'rotateY'; return animate(cover, [{ transform: `${axis}(${from}deg)` }, { transform: `${axis}(${to}deg)` }], { duration, easing: 'cubic-bezier(.42,.03,.2,1)' }); };
  // One smooth scroll that frames the book with its buttons; scrolling stays free afterwards.
  function frameBook() {
   const top = shell.getBoundingClientRect?.().top, bottom = controlBar.getBoundingClientRect?.().bottom;
@@ -194,32 +169,34 @@ export function mountIntroBook(root, {
   if (disposed || busy || !shut) return false;
   frameBook(); busy = true; const token = ++revision; controls(); phase('sliding');
   coverPage.replaceChildren(clone(views[page].copy));
-  if (stacked()) { enterFlow(); raised[page] = true; }
   await slide(-25, 0); if (disposed || token !== revision) return false;
-  phase('covering'); await swing(0, stacked() ? -105 : -180, 1000); if (disposed || token !== revision) return false;
+  phase('covering'); await swing(0, stacked() ? PHONE_LIFT : -180, 1000); if (disposed || token !== revision) return false;
   shut = false; cover.hidden = true; phase('opening'); await fold(page, true); if (disposed || token !== revision) return false;
-  busy = false; phase('open'); controls(); (flowing ? flow : next).focus?.({ preventScroll: true }); return true;
+  busy = false; phase('open'); controls(); next.focus?.({ preventScroll: true }); return true;
  }
  async function closeBook() {
   if (disposed || busy || shut) return false;
-  leaveFlow(0); showBookTop(); busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
+  showBookTop(); busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
   await fold(page, false); if (disposed || token !== revision) return false;
   coverPage.replaceChildren(clone(views[page].copy));
   shut = true; cover.hidden = false; phase('covering');
-  await swing(stacked() ? -105 : -180, 0, 1000); if (disposed || token !== revision) return false;
+  await swing(stacked() ? PHONE_LIFT : -180, 0, 1000); if (disposed || token !== revision) return false;
   phase('sliding'); await slide(0, -25); if (disposed || token !== revision) return false;
-  shell.style.transform = ''; busy = false; phase('closed'); controls(); cover.focus?.({ preventScroll: true }); return true;
+  shell.style.transform = ''; busy = false;
+  // The next reader on a phone starts at the first page; only a swipe can move forward.
+  if (stacked() && page !== 0) { settle(page, false); page = 0; choose('copy', 0); choose('view', 0); coverPage.replaceChildren(clone(views[0].copy)); announce(); }
+  phase('closed'); controls(); cover.focus?.({ preventScroll: true }); return true;
  }
- async function replayScene(index = page) {
+ async function replayScene() {
   if (disposed || busy || shut) return false;
   busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
-  await fold(index, false); if (disposed || token !== revision) return false;
-  phase('opening'); await fold(index, true); if (disposed || token !== revision) return false;
+  await fold(page, false); if (disposed || token !== revision) return false;
+  phase('opening'); await fold(page, true); if (disposed || token !== revision) return false;
   busy = false; phase('open'); controls(); return true;
  }
  async function playGift() {
-  if (disposed || busy || (!flowing && page !== 1)) return;
-  stopGift(); const coin = views[1].coin;
+  if (disposed || busy || page !== 1) return;
+  stopGift(); const coin = views[page].coin;
   if (!coin.animate || motion.matches) { $('caption').textContent = '金幣送進長襪，善意為一家人帶來希望。'; return; }
   const animation = coin.animate([
    { opacity: 0, transform: 'translateZ(70px) translate(0,0) scale(.8)' },
@@ -233,7 +210,35 @@ export function mountIntroBook(root, {
   finally { animation.cancel(); if (giftAnimation === animation) giftAnimation = undefined; }
  }
  on(prev, 'click', () => changePage(page - 1)); on(next, 'click', () => changePage(page + 1));
- on(replay, 'click', () => replayScene()); on(gift, 'click', playGift); on(cover, 'click', openBook); on(close, 'click', closeBook);
+ on(replay, 'click', replayScene); on(gift, 'click', playGift); on(cover, 'click', openBook); on(close, 'click', closeBook);
+ // Text scrolls first; a swipe turns the page only once the text has reached that end.
+ const roomToScroll = (down, inside) => {
+  if (!inside) return false;
+  const text = views[page].copy;
+  return down ? text.scrollTop + text.clientHeight < text.scrollHeight - 2 : text.scrollTop > 2;
+ };
+ on(book, 'touchstart', event => {
+  swipe = !shut && !busy && stacked() && event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY, target: event.target } : undefined;
+ }, { passive: true });
+ on(book, 'touchmove', event => {
+  if (!swipe) return;
+  const dx = event.touches[0].clientX - swipe.x, dy = event.touches[0].clientY - swipe.y;
+  if (swipe.turn === undefined) {
+   if (Math.hypot(dx, dy) < SWIPE_START) return;
+   const down = dy < 0, target = page + (down ? 1 : -1);
+   // Past either end there is no leaf left, so the gesture goes back to scrolling the site.
+   const turns = Math.abs(dy) > Math.abs(dx) && target >= 0 && target < stories.length && !roomToScroll(down, Boolean(event.target.closest?.('.intro-copy')));
+   swipe.turn = turns ? target : false;
+  }
+  if (swipe.turn === false) return;
+  swipe.moved = Math.abs(dy);
+  if (event.cancelable) event.preventDefault();
+ }, { passive: false });
+ on(book, 'touchend', () => {
+  if (swipe?.turn !== undefined && swipe.turn !== false && swipe.moved >= SWIPE_TURN) changePage(swipe.turn);
+  swipe = undefined;
+ });
+ on(book, 'touchcancel', () => { swipe = undefined; });
  on(root, 'keydown', event => {
   if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input,textarea,select')) return;
   if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
@@ -244,11 +249,9 @@ export function mountIntroBook(root, {
  on(motion, 'change', () => { if (motion.matches) finish(); });
  on(document, 'visibilitychange', () => { if (document.hidden) finish(); });
  on(globalThis, 'resize', finish);
- // Turning a phone sideways swaps layouts without losing the chapter being read.
- on(narrow, 'change', () => { if (shut || busy) return; if (narrow.matches) enterFlow(); else leaveFlow(chapterInView()); });
  choose('copy', 0); choose('view', 0); hideLeaf(); announce(); controls(); phase('closed');
  return {
   open: openBook, close: closeBook, changePage, replay: replayScene, snapshot: () => ({ page, busy, shut, phase: root.dataset.phase }),
-  destroy() { disposed = true; revision++; stopGift(); watcher?.disconnect(); listeners.forEach(fn => fn()); for (const a of animations) a.cancel(); animations.clear(); hideLeaf(); },
+  destroy() { disposed = true; revision++; stopGift(); listeners.forEach(fn => fn()); for (const a of animations) a.cancel(); animations.clear(); hideLeaf(); },
  };
 }
