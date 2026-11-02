@@ -94,7 +94,7 @@ test('phones turn pages by swiping, stop at the last page and leave closing to t
  assert.equal(swipe(onScene,500,300),false,'The last page hands the swipe back to the site');await flush();assert.equal(book.snapshot().page,2);
  assert.equal(swipe(onScene,300,500),true,'Swiping down turns back');await flush();assert.equal(book.snapshot().page,1);
  assert.equal(swipe(onScene,300,330),true);await flush();assert.equal(book.snapshot().page,1,'A short drag does not turn');
- await book.close();assert.equal(book.snapshot().shut,true);assert.equal(book.snapshot().page,0,'Reopening starts from the first page');assert.equal(swipe(onScene,500,300),false,'A closed book ignores swipes');book.destroy();
+ text[1].scrollTop=120;await book.close();assert.equal(book.snapshot().shut,true);assert.equal(book.snapshot().page,0,'Reopening starts from the first page');assert.equal(text[1].scrollTop,0,'Reopening starts from the top of the text');assert.equal(swipe(onScene,500,300),false,'A closed book ignores swipes');book.destroy();
 });
 
 test('six map positions and both random outcomes; all postcards reset, interact, close and restore focus',async()=>{

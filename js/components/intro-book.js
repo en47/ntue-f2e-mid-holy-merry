@@ -191,7 +191,7 @@ export function mountIntroBook(root, {
   phase('sliding'); await slide(0, -25); if (disposed || token !== revision) return false;
   shell.style.transform = ''; busy = false;
   // The next reader on a phone starts at the first page; only a swipe can move forward.
-  if (stacked() && page !== 0) { settle(page, false); page = 0; choose('copy', 0); choose('view', 0); announce(); }
+  if (stacked()) { settle(page, false); page = 0; choose('copy', 0); choose('view', 0); announce(); views.forEach(view => { view.copy.scrollTop = 0; }); }
   phase('closed'); controls(); cover.focus?.({ preventScroll: true }); return true;
  }
  async function replayScene() {
