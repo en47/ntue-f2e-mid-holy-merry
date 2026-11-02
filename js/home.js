@@ -97,10 +97,11 @@ export function mountStorybook(root) {
   listen(document, 'keydown', event => { if (event.key === 'Tab') root.classList.add('uses-keyboard'); });
   listen(document, 'pointerdown', () => root.classList.remove('uses-keyboard'));
   listen(document, 'visibilitychange', () => { if (document.hidden) clear(); });
-  // A letter belongs to its character, so it folds away once the scene is mostly off screen.
-  if (globalThis.IntersectionObserver) {
-    const leaving = new IntersectionObserver(([entry]) => { if (!entry.isIntersecting) dismiss(); }, { threshold: .4 });
-    leaving.observe(root); cleanups.push(() => leaving.disconnect());
+  // A letter belongs to its character, so it folds away once the reader reaches the footer scenery.
+  const footerScene = document.querySelector('.page-foreground');
+  if (footerScene && globalThis.IntersectionObserver) {
+    const leaving = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) dismiss(); }, { threshold: .25 });
+    leaving.observe(footerScene); cleanups.push(() => leaving.disconnect());
   }
   replay();
   return { destroy() { clear(); cleanups.forEach(cleanup => cleanup()); root.classList.remove('is-opening'); } };
