@@ -37,6 +37,9 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-cover[hidden] { display:none; }
 .intro-cover>span { position:absolute;inset:0;display:block;backface-visibility:hidden; }
 .intro-cover-back { transform:rotateY(180deg); }
+/* iOS / iPadOS Safari 不一定會隱藏背面：所有寬度的封面與翻頁都由程式在側立時切換正反面。 */
+.intro-cover-back,.intro-cover[data-side='inside'] .intro-cover-front,.intro-turn-back,.intro-turn[data-side='back'] .intro-turn-front { visibility:hidden; }
+.intro-cover[data-side='inside'] .intro-cover-back,.intro-turn[data-side='back'] .intro-turn-back { visibility:visible; }
 .intro-cover-inside { position:absolute;inset:0; }
 .intro-cover-page { text-align:left;font:inherit;line-height:1.75;color:var(--story-ink);position:absolute;inset:var(--book-edge) 0 var(--book-edge) var(--book-edge); }
 .intro-cover-page>.intro-copy { height:100%; }
@@ -239,11 +242,9 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-copy-stack { order:2; }
  .intro-picture { order:1;height:var(--mobile-scene-height);border-bottom:1px solid #c8b69b; }
  .intro-book:not([data-state='open']) .intro-spine { visibility:hidden; }
- /* iOS Safari 會把同平面的書板排到紙頁前面，也不隱藏背面：手機改用平面堆疊，正反面由程式在 90 度時切換。 */
+ /* iOS Safari 會把同平面的書板排到紙頁前面：手機改用平面堆疊。 */
  .intro-book { transform-style:flat;perspective:1600px; }
  .intro-cover>span,.intro-turn-front,.intro-turn-back { backface-visibility:visible; }
- .intro-cover-back,.intro-cover[data-side='inside'] .intro-cover-front,.intro-turn-back,.intro-turn[data-side='back'] .intro-turn-front { visibility:hidden; }
- .intro-cover[data-side='inside'] .intro-cover-back,.intro-turn[data-side='back'] .intro-turn-back { visibility:visible; }
  .intro-spine { inset:calc(50% - 7px) 0 auto;width:auto;height:14px;background:linear-gradient(180deg,transparent,#9e846455 30%,#fff7dc 49%,#9e846466 63%,transparent); }
  .intro-turn { top:50%;left:0;width:100%;height:50%;transform-origin:50% 0; }
  .intro-turn-back { transform:rotateX(180deg) translateZ(1px); }

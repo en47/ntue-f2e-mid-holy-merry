@@ -20,7 +20,7 @@ class El {
  emit(type,extra={}){if(type==='click'&&this.disabled)return;for(const fn of this.listeners[type]||[])fn({target:this,preventDefault(){},...extra});}
  closest(){return null;}focus(){this.focused=true;}showModal(){this.open=true;}close(){this.open=false;this.emit('close');}
 }
-async function flush(){for(let i=0;i<16;i++)await Promise.resolve();}
+async function flush(){for(let i=0;i<32;i++)await Promise.resolve();}
 async function settle(){for(let i=0;i<12;i++){await flush();if(!pendingAnimations.size)return;for(const a of [...pendingAnimations])a.finish();}throw new Error('Animation coordinator did not settle');}
 async function fixture(file,globals={}){const document=new El();document.body=new El();document.createElement=()=>new El();document.createElementNS=()=>new El();const context=vm.createContext({document,console,...globals}),modules=new Map();
  async function load(file){file=path.resolve(file);if(modules.has(file))return modules.get(file);const m=new vm.SourceTextModule(await fs.readFile(file,'utf8'),{context});modules.set(file,m);await m.link(spec=>load(path.resolve(path.dirname(file),spec)));return m;}
@@ -59,6 +59,9 @@ test('book waits for every hinge, populated leaf, forward/back, rapid-click guar
  hinges[0].finish();await flush();assert.equal(book.snapshot().phase,'turning');assert.equal(book.snapshot().page,0,'chapter commits only when leaf lands');
  assert.ok(el('front').querySelectorAll().some(n=>n.className?.includes('intro-piece')),'the front carries the folded original scene');
  assert.ok(el('back').querySelectorAll().some(n=>n.textContent===introStories[1].story.split('\n\n')[0]),'the rear carries the next full story');
+ assert.equal(el('turn').dataset.side,'front','the leaf starts on its front face');
+ assert.equal(pendingAnimations.size,1);[...pendingAnimations][0].finish();await flush();assert.equal(book.snapshot().phase,'turning','the leaf is only edge-on halfway');
+ assert.equal(el('turn').dataset.side,'back','the face swaps while the leaf is edge-on, not by backface culling');assert.equal(book.snapshot().page,0);
  assert.equal(pendingAnimations.size,1);[...pendingAnimations][0].finish();await flush();assert.equal(book.snapshot().phase,'opening');assert.equal(book.snapshot().page,1);
  await settle();assert.equal(await changing,true);assert.equal(el('gift').hidden,false);
  el('gift').emit('click');assert.equal(pendingAnimations.size,1);await settle();assert.equal(pendingAnimations.size,0);
