@@ -232,6 +232,19 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-leaf-mobile>.intro-copy { min-height:0; }
  /* 手機的書比螢幕長，按鈕貼在畫面底部，讀到哪都按得到。 */
  .intro-book-controls { position:sticky;bottom:.4rem;z-index:40;gap:.3rem .4rem;margin-top:.8rem;padding:.3rem;border-radius:12px;background:#fff9ecee;box-shadow:0 3px 10px #4b6a7a44; }
+ /* 手機三章上下連續閱讀：每章沿用電腦版的紙雕與紙頁，章與章之間露出書板。 */
+ .intro-flow { display:grid;order:3;gap:22px;min-width:0;outline:none; }
+ .intro-book[data-state='closed'] .intro-flow { display:none; }
+ .intro-flow-chapter { position:relative;display:grid;min-width:0; }
+ .intro-flow-chapter>.intro-copy { order:2; }
+ .intro-flow-chapter+.intro-flow-chapter::before { content:'';position:absolute;left:6%;right:6%;top:-12px;border-top:2px dashed #d9b36a; }
+ /* 書板圖是固定比例，拉長到三章會把圓角壓尖，連續閱讀時改用同色實色。 */
+ .intro-story-section[data-flow='scroll'] .intro-book-board { border-radius:14px;background:#3f6655; }
+ .intro-story-section[data-flow='scroll'] .intro-book-board>* { display:none; }
+ .intro-flow-actions { display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.4rem .8rem;margin-top:1rem; }
+ .intro-story-section[data-flow='scroll'] .intro-book>.intro-copy-stack,.intro-story-section[data-flow='scroll'] .intro-book>.intro-picture { display:none; }
+ .intro-story-section[data-flow='scroll'] .intro-book-controls { position:static;margin-top:.6rem;background:none;box-shadow:none; }
+ .intro-story-section[data-flow='scroll'] :is([data-book='prev'],[data-book='next'],[data-book='count'],[data-book='replay']) { display:none; }
  .intro-tag { min-width:104px;min-height:44px;padding:.2rem .6rem;font-size: var(--fs-small); }
  .intro-paper-button { padding:.55rem .85rem;font-size: var(--fs-small); }
  .intro-replay { min-height:36px;padding:.2rem .4rem; }

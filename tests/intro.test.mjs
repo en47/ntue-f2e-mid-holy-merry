@@ -22,7 +22,7 @@ class El {
 }
 async function flush(){for(let i=0;i<16;i++)await Promise.resolve();}
 async function settle(){for(let i=0;i<12;i++){await flush();if(!pendingAnimations.size)return;for(const a of [...pendingAnimations])a.finish();}throw new Error('Animation coordinator did not settle');}
-async function fixture(file){const document=new El();document.body=new El();document.createElement=()=>new El();document.createElementNS=()=>new El();const context=vm.createContext({document,console}),modules=new Map();
+async function fixture(file,globals={}){const document=new El();document.body=new El();document.createElement=()=>new El();document.createElementNS=()=>new El();const context=vm.createContext({document,console,...globals}),modules=new Map();
  async function load(file){file=path.resolve(file);if(modules.has(file))return modules.get(file);const m=new vm.SourceTextModule(await fs.readFile(file,'utf8'),{context});modules.set(file,m);await m.link(spec=>load(path.resolve(path.dirname(file),spec)));return m;}
  const mod=await load(file);await mod.evaluate();return {api:mod.namespace,root:new El(),document};
 }
@@ -79,6 +79,15 @@ test('reduced motion and interrupted/background animations keep chapters usable'
  const changing=other.changePage(1);bg.document.hidden=true;bg.document.emit('visibilitychange');await changing;
  assert.equal(other.snapshot().page,1);assert.equal(other.snapshot().busy,false);assert.equal(pendingAnimations.size,0);other.destroy();
 });
+test('phones read all three chapters in one scroll, and closing restores the book',async()=>{
+ const matchMedia=()=>({matches:true,addEventListener(){},removeEventListener(){}});
+ const f=await fixture('js/components/intro-book.js',{matchMedia}),book=f.api.mountIntroBook(f.root,{motion:{matches:true}}),el=id=>f.root.querySelector(`[data-book="${id}"]`);
+ await book.open();assert.equal(f.root.dataset.flow,'scroll');assert.equal(el('gift').hidden,false,'The chapter two gift stays reachable');
+ assert.equal(await book.changePage(1),false,'Scrolling replaces the chapter buttons');
+ await book.close();assert.equal(f.root.dataset.flow,undefined);assert.equal(book.snapshot().page,0);assert.equal(book.snapshot().shut,true);
+ await book.open();assert.equal(f.root.dataset.flow,'scroll','Reopening returns to the scroll');book.destroy();
+});
+
 test('six map positions and both random outcomes; all postcards reset, interact, close and restore focus',async()=>{
  assert.deepEqual(introCultures.map(c=>c.id),['iceland','taiwan','japan','newzealand','canada','brazil']);assert.ok(introCultures.every(c=>c.x>0&&c.x<100&&c.y>0&&c.y<100));
  assert.equal(cultureOutcome('iceland',()=>0).variant,'candy');assert.equal(cultureOutcome('iceland',()=>.99).variant,'potato');assert.equal(cultureOutcome('iceland',()=>0,12).step,12);assert.equal(cultureOutcome('iceland',()=>0,13).step,0,'the thirteen nights loop');

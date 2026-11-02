@@ -11,7 +11,7 @@ export function mountIntroBook(root, {
  const prev = $('prev'), next = $('next'), replay = $('replay'), gift = $('gift');
  const shell = $('shell'), book = $('book'), cover = $('cover'), coverPage = $('cover-page'), close = $('close'), controlBar = $('controls');
  const listeners = [], animations = new Set();
- let page = 0, busy = false, shut = true, disposed = false, revision = 0, giftAnimation;
+ let page = 0, busy = false, shut = true, disposed = false, revision = 0, giftAnimation, flowing = false, watcher, raised = [];
  const on = (target, type, fn) => {
   if (!target?.addEventListener) return;
   target.addEventListener(type, fn);
@@ -52,7 +52,7 @@ export function mountIntroBook(root, {
  });
  function controls() {
   prev.disabled = busy || page === 0; next.disabled = busy || page === stories.length - 1;
-  replay.disabled = busy; gift.disabled = busy; gift.hidden = page !== 1; close.disabled = busy;
+  replay.disabled = busy; gift.disabled = busy; gift.hidden = !flowing && page !== 1; close.disabled = busy;
   controlBar.hidden = shut;
   root.setAttribute('aria-busy', String(busy));
  }
@@ -84,6 +84,46 @@ export function mountIntroBook(root, {
     easing: opening ? 'cubic-bezier(.2,.76,.3,1.04)' : 'cubic-bezier(.42,0,.8,.5)' })));
  }
  function stopGift() { giftAnimation?.cancel(); giftAnimation = undefined; }
+ // Phones read the chapters as one scroll; each keeps its own scene, and it unfolds on arrival.
+ const narrow = globalThis.matchMedia?.('(max-width: 700px)');
+ const flow = element('div', 'intro-flow'); flow.tabIndex = -1;
+ const settle = (index, up) => views[index].panels.forEach(p => { p.node.style.transform = up ? p.raised : p.folded; });
+ function unfold(index) { if (raised[index]) return; raised[index] = true; fold(index, true); }
+ function enterFlow() {
+  if (flowing) return;
+  flowing = true; stopGift(); root.dataset.flow = 'scroll';
+  raised = views.map((_, index) => !shut && index === page);
+  const pictures = views.map(({ copy, view }, index) => {
+   const chapter = element('section', 'intro-flow-chapter'), picture = element('div', 'intro-page intro-picture'), stage = element('div', 'intro-scene');
+   stage.setAttribute('role', 'group'); stage.setAttribute('aria-label', stories[index].scene);
+   stage.append(view); picture.append(stage); picture.dataset.chapter = String(index);
+   const actions = element('div', 'intro-flow-actions'), again = element('button', 'intro-replay', '再看一次紙雕 ↻');
+   again.type = 'button'; on(again, 'click', () => replayScene(index)); actions.append(again);
+   if (index === 1) actions.append(gift);
+   copy.append(actions); chapter.append(picture, copy); flow.append(chapter);
+   view.dataset.active = copy.dataset.active = 'true';
+   view.setAttribute('aria-hidden', 'false'); copy.setAttribute('aria-hidden', 'false'); view.inert = copy.inert = false;
+   settle(index, raised[index]);
+   return picture;
+  });
+  book.append(flow);
+  if (!globalThis.IntersectionObserver) { views.forEach((_, index) => unfold(index)); return; }
+  watcher = new IntersectionObserver(entries => { for (const entry of entries) if (entry.isIntersecting && !shut) unfold(Number(entry.target.dataset.chapter)); }, { threshold: .3 });
+  pictures.forEach(picture => watcher.observe(picture));
+ }
+ function leaveFlow(keep) {
+  if (!flowing) return;
+  flowing = false; stopGift(); delete root.dataset.flow; watcher?.disconnect(); watcher = undefined;
+  for (const animation of animations) animation.cancel();
+  controlBar.append(gift);
+  views.forEach(({ copy, view }, index) => { copy.querySelector('.intro-flow-actions')?.remove?.(); scene.append(view); copies.append(copy); settle(index, index === keep); });
+  flow.replaceChildren(); flow.remove?.();
+  page = keep; raised = []; choose('copy', page); choose('view', page); announce();
+ }
+ function chapterInView() {
+  const middle = (globalThis.innerHeight || 0) / 2;
+  return [...flow.children].reduce((found, chapter, index) => chapter.getBoundingClientRect?.().top < middle ? index : found, 0);
+ }
  function clone(node) {
   const copy = node.cloneNode(true);
   for (const el of [copy, ...copy.querySelectorAll('[id], [data-book], [aria-labelledby]')]) {
@@ -121,7 +161,7 @@ export function mountIntroBook(root, {
   root.querySelector('.intro-book')?.scrollIntoView?.({ block: 'start', behavior: motion.matches ? 'auto' : 'smooth' });
  }
  async function changePage(target) {
-  if (disposed || busy || shut || target < 0 || target >= stories.length || target === page) return false;
+  if (disposed || busy || shut || flowing || target < 0 || target >= stories.length || target === page) return false;
   showBookTop(); busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
   await fold(page, false); if (disposed || token !== revision) return false;
   phase('turning'); const forward = leaf(target);
@@ -154,14 +194,15 @@ export function mountIntroBook(root, {
   if (disposed || busy || !shut) return false;
   frameBook(); busy = true; const token = ++revision; controls(); phase('sliding');
   coverPage.replaceChildren(clone(views[page].copy));
+  if (stacked()) { enterFlow(); raised[page] = true; }
   await slide(-25, 0); if (disposed || token !== revision) return false;
   phase('covering'); await swing(0, stacked() ? -105 : -180, 1000); if (disposed || token !== revision) return false;
   shut = false; cover.hidden = true; phase('opening'); await fold(page, true); if (disposed || token !== revision) return false;
-  busy = false; phase('open'); controls(); next.focus?.({ preventScroll: true }); return true;
+  busy = false; phase('open'); controls(); (flowing ? flow : next).focus?.({ preventScroll: true }); return true;
  }
  async function closeBook() {
   if (disposed || busy || shut) return false;
-  showBookTop(); busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
+  leaveFlow(0); showBookTop(); busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
   await fold(page, false); if (disposed || token !== revision) return false;
   coverPage.replaceChildren(clone(views[page].copy));
   shut = true; cover.hidden = false; phase('covering');
@@ -169,16 +210,16 @@ export function mountIntroBook(root, {
   phase('sliding'); await slide(0, -25); if (disposed || token !== revision) return false;
   shell.style.transform = ''; busy = false; phase('closed'); controls(); cover.focus?.({ preventScroll: true }); return true;
  }
- async function replayScene() {
+ async function replayScene(index = page) {
   if (disposed || busy || shut) return false;
   busy = true; const token = ++revision; stopGift(); controls(); phase('closing');
-  await fold(page, false); if (disposed || token !== revision) return false;
-  phase('opening'); await fold(page, true); if (disposed || token !== revision) return false;
+  await fold(index, false); if (disposed || token !== revision) return false;
+  phase('opening'); await fold(index, true); if (disposed || token !== revision) return false;
   busy = false; phase('open'); controls(); return true;
  }
  async function playGift() {
-  if (disposed || busy || page !== 1) return;
-  stopGift(); const coin = views[page].coin;
+  if (disposed || busy || (!flowing && page !== 1)) return;
+  stopGift(); const coin = views[1].coin;
   if (!coin.animate || motion.matches) { $('caption').textContent = '金幣送進長襪，善意為一家人帶來希望。'; return; }
   const animation = coin.animate([
    { opacity: 0, transform: 'translateZ(70px) translate(0,0) scale(.8)' },
@@ -192,7 +233,7 @@ export function mountIntroBook(root, {
   finally { animation.cancel(); if (giftAnimation === animation) giftAnimation = undefined; }
  }
  on(prev, 'click', () => changePage(page - 1)); on(next, 'click', () => changePage(page + 1));
- on(replay, 'click', replayScene); on(gift, 'click', playGift); on(cover, 'click', openBook); on(close, 'click', closeBook);
+ on(replay, 'click', () => replayScene()); on(gift, 'click', playGift); on(cover, 'click', openBook); on(close, 'click', closeBook);
  on(root, 'keydown', event => {
   if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input,textarea,select')) return;
   if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
@@ -203,9 +244,11 @@ export function mountIntroBook(root, {
  on(motion, 'change', () => { if (motion.matches) finish(); });
  on(document, 'visibilitychange', () => { if (document.hidden) finish(); });
  on(globalThis, 'resize', finish);
+ // Turning a phone sideways swaps layouts without losing the chapter being read.
+ on(narrow, 'change', () => { if (shut || busy) return; if (narrow.matches) enterFlow(); else leaveFlow(chapterInView()); });
  choose('copy', 0); choose('view', 0); hideLeaf(); announce(); controls(); phase('closed');
  return {
   open: openBook, close: closeBook, changePage, replay: replayScene, snapshot: () => ({ page, busy, shut, phase: root.dataset.phase }),
-  destroy() { disposed = true; revision++; stopGift(); listeners.forEach(fn => fn()); for (const a of animations) a.cancel(); animations.clear(); hideLeaf(); },
+  destroy() { disposed = true; revision++; stopGift(); watcher?.disconnect(); listeners.forEach(fn => fn()); for (const a of animations) a.cancel(); animations.clear(); hideLeaf(); },
  };
 }
