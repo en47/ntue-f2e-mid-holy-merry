@@ -94,8 +94,18 @@
   .games-hero-santa { left: 4%; width: 92%; bottom: 25%; height: 32%; }
   .games-hero-hill { left: -30%; width: 160%; height: 30%; }
   .games-hero-front { left: -30%; width: 160%; height: 9%; }
-  .games-hero-title-sign { left: 50%; bottom: auto; top: 5%; width: 74%; margin-left: -37%; }
+  /* 手機的標題牌離開地面，改用兩條繩子從畫面頂端垂下，和 Intro 的吊飾相同；彩旗在繩子前面。 */
+  .games-bunting { z-index: 8; }
+  .games-hero-title-sign { left: 50%; bottom: auto; top: 10vw; width: 74%; margin-left: -37%; transform-origin: 50% -20%; }
+  .games-hero-title-sign [data-sign='title-base'] { display: none; }
+  .games-hero-title-sign::before, .games-hero-title-sign::after { content: ''; position: absolute; z-index: -1; top: -200%; height: 222%; width: 3px; border-radius: 2px; background: repeating-linear-gradient(180deg, #a9845b 0 5px, #8f6d48 5px 8px); }
+  .games-hero-title-sign::before { left: 27%; }
+  .games-hero-title-sign::after { right: 21%; }
   .games-hero-navigation { right: 50%; bottom: 3%; width: 76%; margin-right: -38%; }
   .games-hero-title-sign h1 { font-size: var(--fs-title); }
   .games-hero-link { font-size: var(--fs-body); }
 }
+@media (max-width: 600px) and (prefers-reduced-motion: no-preference) {
+  .games-hero.is-opening .games-hero-title-sign { animation: pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay, 0s) both, sign-sway 4.4s ease-in-out 2.2s infinite alternate; }
+}
+@keyframes sign-sway { from { rotate: -.7deg; } to { rotate: .7deg; } }
