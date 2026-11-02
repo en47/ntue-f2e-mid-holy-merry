@@ -37,9 +37,11 @@ html.intro-document { scrollbar-gutter:stable; }
 .intro-cover[hidden] { display:none; }
 .intro-cover>span { position:absolute;inset:0;display:block;backface-visibility:hidden; }
 .intro-cover-back { transform:rotateY(180deg); }
-/* iOS / iPadOS Safari 不一定會隱藏背面：所有寬度的封面與翻頁都由程式在側立時切換正反面。 */
-.intro-cover-back,.intro-cover[data-side='inside'] .intro-cover-front,.intro-turn-back,.intro-turn[data-side='back'] .intro-turn-front { visibility:hidden; }
-.intro-cover[data-side='inside'] .intro-cover-back,.intro-turn[data-side='back'] .intro-turn-back { visibility:visible; }
+/* iOS / iPadOS Safari 不一定會隱藏背面：所有寬度的封面與翻頁都由程式在側立時切換正反面。
+   用透明度而非 visibility：兩面都先畫好，切換時 Safari 不必重畫紙張圖，翻到一半才不會整片消失。 */
+.intro-cover>span,.intro-turn-front,.intro-turn-back { will-change:opacity; }
+.intro-cover-back,.intro-cover[data-side='inside'] .intro-cover-front,.intro-turn-back,.intro-turn[data-side='back'] .intro-turn-front { opacity:0;pointer-events:none; }
+.intro-cover[data-side='inside'] .intro-cover-back,.intro-turn[data-side='back'] .intro-turn-back { opacity:1;pointer-events:auto; }
 .intro-cover-inside { position:absolute;inset:0; }
 .intro-cover-page { text-align:left;font:inherit;line-height:1.75;color:var(--story-ink);position:absolute;inset:var(--book-edge) 0 var(--book-edge) var(--book-edge); }
 .intro-cover-page>.intro-copy { height:100%; }
