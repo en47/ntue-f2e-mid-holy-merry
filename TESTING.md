@@ -514,3 +514,10 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - `npm test` 49 項通過。
 - 在 Game 1280、Wish 820×1180、Intro 390、Home 320 開啟 FAQ／Site Accessibility／Contact us，內文捲到底量測：捲動區下緣距縫線 21–23px，左右距縫線 9–14px，全部在框內；標題字型為 StorySign（Mountains of Christmas），標題吊牌沒有超出彈窗。截圖確認 390、320 寬時 Site Accessibility 換成兩行，題目換行時星星在第一行。
+
+## 2026-11-03：觸控開彈窗不出現焦點框
+
+- `npm test` 49 項通過。
+- Chromium 模擬 iPhone（390、觸控）：點 Site Accessibility 打開後焦點在 `.info-body`、outline 為 none，截圖 × 沒有紅圈；按 Tab 焦點到 ×、outline 為 solid。鍵盤 Enter 打開 FAQ 時焦點同樣在內文區，按方向鍵下可捲動。
+- Intro 展開地圖、點冰島開明信片：焦點在標題、outline 為 none，截圖關閉鈕沒有紅圈；按 Tab 到插圖按鈕，焦點框正常。
+- 這台機器的 WebKit 無法開頁面，iOS Safari 未實機驗證；做法與先前在 iPhone 上已確認有效的配對遊戲修正相同。

@@ -172,6 +172,8 @@ html.intro-document { scrollbar-gutter:stable; }
 @keyframes intro-post-open { from{opacity:0;transform:translateY(16px) rotate(-1deg)}to{opacity:1;transform:none} }
 .intro-post-close { position:absolute;top:.3rem;right:.3rem;z-index:4;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--red-dark);font-size: var(--fs-title);line-height:1; }
 .intro-post-close:hover { background:#f1e3c8; }
+/* 開啟時焦點放在標題而非關閉鈕，觸控裝置不會出現紅色焦點框。 */
+.intro-postcard h2:focus { outline:none; }
 .intro-post-head { margin-right:2.4rem; }
 .intro-post-country { color:var(--green);font-size: var(--fs-small);font-weight:700;letter-spacing:.08em; }
 .intro-postcard h2 { margin:.1rem 0 .7rem;color:var(--red-dark);font-size: var(--fs-title); }

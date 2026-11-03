@@ -21,6 +21,7 @@ function decorate(dialog) {
   // 標題固定在信紙上方，只有內文在縫線內捲動，文字不會跑出紙外。
   const body = document.createElement('div'), list = document.createElement('dl');
   body.className = 'info-body'; list.className = 'info-list';
+  body.tabIndex = -1;
   dialog.querySelector('#info-content').before(body);
   body.append(dialog.querySelector('#info-content'), list);
   // 點信紙外（backdrop）關閉；按下與放開都在外面才算，避免拖曳選字時誤關。
@@ -51,4 +52,6 @@ export function showInfo(dialog, title, content) {
   } else paragraph.textContent = content;
   body.scrollTop = 0;
   dialog.showModal();
+  // 焦點放在內文而非 ×：iOS／iPadOS 會替程式聚焦的按鈕畫焦點框；鍵盤按 Tab 仍會到 ×。
+  body.focus({ preventScroll: true });
 }

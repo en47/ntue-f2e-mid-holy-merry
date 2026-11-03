@@ -10,7 +10,7 @@ export function mountIntroPostcards(root, { cultures = introCultures, random = M
   const art=$('art');art.setAttribute('aria-label',country.action);art.dataset.country=country.id;art.dataset.variant='';art.classList.remove('is-playing');
   const entry=sceneFor(id);art.replaceChildren(...(entry?[entry.host]:[]));entry?.scene.reset();steps[id]=0;
   for(const b of pins.children)b.setAttribute('aria-expanded',String(b.dataset.country===id));
-  document.body.classList.add('intro-modal-open');if(!dialog.open)dialog.showModal();$('close').focus({preventScroll:true});
+  document.body.classList.add('intro-modal-open');if(!dialog.open)dialog.showModal();$('title').focus({preventScroll:true});
  }
  function reset(){document.body.classList.remove('intro-modal-open');for(const b of pins.children)b.setAttribute('aria-expanded','false');lastFocus?.focus({preventScroll:true});}
  function close(){dialog.close();}

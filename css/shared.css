@@ -74,6 +74,7 @@ dialog { width: min(530px, calc(100% - 2rem)); padding: 2rem; color: var(--ink);
 #info-title .info-title-holly { inset: auto; left: -1.5em; top: -.75em; width: 2.6em; height: 2.1em; z-index: 1; }
 /* 內文在縫線內捲動，上下邊緣淡出，看得出還有下文。 */
 .info-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: .8rem .5rem 1.2rem 0; scrollbar-width: thin; scrollbar-color: #d9bfa3 transparent; -webkit-mask-image: linear-gradient(transparent, #000 .9rem, #000 calc(100% - 1.4rem), transparent); mask-image: linear-gradient(transparent, #000 .9rem, #000 calc(100% - 1.4rem), transparent); }
+.info-body:focus { outline: none; }
 #info-content { margin: 0 .4rem; line-height: 1.75; }
 .info-list { margin: 0; }
 .info-list dt { position: relative; margin-top: 1.1em; padding: 1em 0 0 1.6em; border-top: 2px dashed #e3cfae; color: var(--red-dark); font-weight: 700; }
