@@ -272,3 +272,8 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
   .music-toggle { width: 44px; height: 44px; }
   .music-panel { bottom: 54px; }
 }
+.faq-list { margin: 0; }
+.faq-list dt { margin-top: 1.1em; font-weight: 700; color: var(--red-dark); }
+.faq-list dt:first-child { margin-top: .6em; }
+.faq-list dt::before { content: 'Q. '; }
+.faq-list dd { margin: .3em 0 0; line-height: 1.75; }
