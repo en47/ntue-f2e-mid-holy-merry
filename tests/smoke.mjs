@@ -370,14 +370,16 @@ async function game2Environment() {
   return { ...env, root, game, levelConfig, flush, solve, initChristmasMatchingGame };
 }
 
-await test('game2：只有鍵盤操作才把焦點移到第一張卡，觸控不會出現焦點框', async () => {
-  const touch = await game2Environment();
-  touch.root.dispatch('pointerdown'); touch.element('#start-btn').dispatch('click');
-  assert.ok(!touch.element('#card-grid').children[0].focused, '觸控開始時不搶焦點');
-  const keys = await game2Environment();
-  keys.root.dispatch('keydown'); keys.element('#start-btn').dispatch('click');
-  assert.ok(keys.element('#card-grid').children[0].focused, '鍵盤開始時直接選到第一張卡');
-  touch.game.destroy(); keys.game.destroy();
+await test('game2：開始時焦點放在卡片區而不是卡片，任何裝置都不會出現焦點框', async () => {
+  for (const input of ['pointerdown', 'keydown']) {
+    const env = await game2Environment();
+    env.root.dispatch(input); env.element('#start-btn').dispatch('click');
+    assert.ok(env.element('#card-grid').focused, `${input}：卡片區取得焦點`);
+    assert.ok(!env.element('#card-grid').children.some(card => card.focused), `${input}：沒有卡片被程式選取`);
+    env.game.destroy();
+  }
+  const html = await fs.readFile(path.join(project, 'games/christmas-matching.html'), 'utf8'), css = await fs.readFile(path.join(project, 'css/game2-matching.css'), 'utf8');
+  assert.match(html, /id="card-grid"[^>]*tabindex="-1"/); assert.match(css, /\.card-grid:focus \{ outline: none; \}/);
 });
 
 await test('game2：五關牌數、秒數、雙卡翻牌計數、錯配鎖定與通關', async () => {
