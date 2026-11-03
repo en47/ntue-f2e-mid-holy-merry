@@ -503,3 +503,9 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - `npm test` 49 項通過。
 - 在 Game 1280、Home 390、Intro 1280／390／320 開啟 FAQ、無障礙與 Contact：三種內容都套用紙雕信紙。FAQ 8 題、無障礙 4 項；四頁頁尾都是英文。320 寬時標題不換行也不超出（標題右緣 281，彈窗右緣 301；窄於 360px 時縮小彈窗內距，字級仍用 `--fs-title`），沒有 JS 錯誤。
+
+## 2026-11-03：說明彈窗捲動與點外面關閉
+
+- `npm test` 49 項通過。
+- Game 1280、Wish 820×1180（iPad）、Intro 390 開啟 FAQ 捲到中段：彈窗本身不捲（`scrollHeight` 等於 `clientHeight`），內文區上緣在標題下方、下緣在縫線內，截圖確認文字沒有超出信紙。
+- 三種尺寸：點信紙內不關、點 backdrop 關閉、× 關閉、Escape 關閉；iPad 與手機用觸控點外面也會關閉。沒有 JS 錯誤。
