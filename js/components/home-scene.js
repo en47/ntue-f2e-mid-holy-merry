@@ -2,6 +2,7 @@
 import { paperLayer, popLayer, shape } from './paper-art.js';
 import { SHADE, SNOW, airmailLetter, tagArt, berryBush, facetedPeak, church, cloud, fence, holly, lamp, pine, roofHouse, star } from './paper-props.js';
 import { TITLE_BOX, titleGlyphs } from '../data/title-glyphs.js';
+import { mountPondSurprise } from './pond-snowman.js';
 import { taglinePath } from '../data/tagline-glyphs.js';
 
 const GREEN = '#5f8a70', DEEP = '#4f7a65', ICE = '#c7dbe6', CREAM = '#f7f0e3';
@@ -209,6 +210,7 @@ export function mountHomeScene(root) {
   popLayer(stage, '0 0 680 366', 'home-village-left', leftVillage, { delay: .75, paper });
   popLayer(stage, '0 0 840 386', 'home-village-right', rightVillage, { delay: .95, paper });
   popLayer(stage, '0 0 1600 460', 'home-ground', ground, { delay: .5, paper: wide, ...none });
+  mountPondSurprise(stage, text => { const live = root.querySelector('#dialogue-announcer'); if (live) live.textContent = text; });
   popLayer(stage, '0 0 540 170', 'home-pond', pond, { delay: 1.1, paper: { ...paper, grain: .35, shadow: .08 } });
   popLayer(stage, '0 0 440 230', 'home-mid', midGround, { delay: 1.25, paper });
   popLayer(stage, '0 0 572 452', 'home-near-left', nearLeft, { delay: 1.45, paper });

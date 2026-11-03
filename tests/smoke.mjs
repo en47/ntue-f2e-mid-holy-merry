@@ -609,11 +609,15 @@ await test('雙角色目前控制器：單 Renderer、拖曳／捲動分流、�
   assert.equal(talks,0); assert.equal(slot.hasPointerCapture(),false);
   slot.dispatch('pointerdown',pointer); slot.dispatch('pointerup',pointer); slot.dispatch('click',{detail:1}); assert.equal(talks,1);
   slot.dispatch('keydown',{key:'Enter',repeat:false}); slot.dispatch('click',{detail:0}); assert.equal(talks,2);
-  slot.dispatch('keydown',{key:'Enter',repeat:true}); assert.equal(talks,2);
+  // A tap far outside the model is handed to the scenery behind it; nobody claims it here, so the character still speaks.
+  let passed = 0; slot.addEventListener('character:pass-through', () => passed++);
+  slot.dispatch('pointerdown',pointer); slot.dispatch('pointerup',pointer); slot.dispatch('click',{detail:1,clientX:-9999,clientY:-9999}); assert.equal(passed,1); assert.equal(talks,3);
+  slot.dispatch('keydown',{key:'Enter',repeat:false}); slot.dispatch('click',{detail:0}); assert.equal(talks,4);
+  slot.dispatch('keydown',{key:'Enter',repeat:true}); assert.equal(talks,4);
   slot.dispatch('pointerdown',pointer); slot.dispatch('pointermove',{...pointer,clientX:300}); frame();
   const scene = renderers[0].renders.at(-2); const turn = scene.children.find(node => node.isGroup);
   assert.ok(Math.abs(turn.rotation.y) > 2); assert.equal(slot.hasPointerCapture(),true);
-  slot.dispatch('pointerup',pointer); slot.dispatch('click',{detail:1}); assert.equal(talks,2); for (let i=0;i<240;i++) frame(); assert.equal(turn.rotation.y,0);
+  slot.dispatch('pointerup',pointer); slot.dispatch('click',{detail:1}); assert.equal(talks,4); for (let i=0;i<240;i++) frame(); assert.equal(turn.rotation.y,0);
   slot.dispatch('keydown',{key:'p',repeat:false}); assert.equal(slot.dataset.animation,'paused');
   slot.dispatch('keydown',{key:'p',code:'KeyP',metaKey:true,repeat:false}); assert.equal(slot.dataset.animation,'paused');
   slot.dispatch('keydown',{key:'ㄣ',code:'KeyP',repeat:false}); assert.equal(slot.dataset.animation,'playing');

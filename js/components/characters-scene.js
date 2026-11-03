@@ -260,6 +260,22 @@ export function mountCharacters(root) {
     } finally { view.loading = false; }
   }
 
+  // The model's screen box from its 3D bounds and the view camera; padded, since limbs sway past the bind pose.
+  const corner = new THREE.Vector3();
+  function hitsModel(view, x, y) {
+    if (!view.model || !view.rect) return true;
+    const box = new THREE.Box3().setFromObject(view.turn), rootRect = root.getBoundingClientRect(), r = view.rect;
+    if (box.isEmpty()) return true;
+    let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity;
+    for (let i = 0; i < 8; i++) {
+      corner.set(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).project(view.camera);
+      const px = rootRect.left + r.left + (corner.x + 1) / 2 * r.width, py = rootRect.top + r.top + (1 - corner.y) / 2 * r.height;
+      left = Math.min(left, px); right = Math.max(right, px); top = Math.min(top, py); bottom = Math.max(bottom, py);
+    }
+    const pad = (right - left) * .06;
+    return x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad;
+  }
+
   for (const view of views) {
     function release(event, cancelled = false) {
       const pointer = view.pointer;
@@ -301,6 +317,12 @@ export function mountCharacters(root) {
       if (!view.ready) return;
       if (view.suppressClick && event.detail !== 0) { view.suppressClick = false; return; }
       view.suppressClick = false;
+      // A pointer tap beside the model, inside its stage box, may belong to the scenery drawn behind it.
+      if (event.detail !== 0 && Number.isFinite(event.clientX) && !hitsModel(view, event.clientX, event.clientY)) {
+        const pass = new CustomEvent('character:pass-through', { bubbles: true, cancelable: true, detail: { x: event.clientX, y: event.clientY } });
+        view.slot.dispatchEvent(pass);
+        if (pass.defaultPrevented) return;
+      }
       view.slot.dispatchEvent(new CustomEvent('character:speak', { bubbles: true, detail: { character: view.id } }));
     });
     listen(view.slot, 'keydown', event => {
