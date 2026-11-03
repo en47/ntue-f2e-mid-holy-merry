@@ -13,6 +13,12 @@ export function stringPins(tags, width) {
 export function wirePath(pins, { rise, sag }) {
   return pins.slice(1).reduce((path, pin, index) => `${path}Q${(pins[index] + pin) / 2} ${rise + sag * 2} ${pin} ${rise}`, `M${pins[0]} ${rise}`);
 }
+// Height of the wire at x; each span's control point sits midway, so x runs linearly with the curve.
+export function wireHeight(pins, { rise, sag }, x) {
+  const index = Math.max(0, pins.findIndex((pin, i) => i > 0 && x <= pin) - 1), from = pins[index], to = pins[index + 1] ?? from + 1;
+  const t = Math.min(1, Math.max(0, (x - from) / (to - from)));
+  return rise + sag * 4 * t * (1 - t);
+}
 export function stringBulbs(pins, { rise, sag }, width) {
   return pins.slice(1).flatMap((pin, index) => BULB_STOPS.map(t => ({ x: pins[index] + (pin - pins[index]) * t, y: rise + sag * 4 * t * (1 - t) }))).filter(({ x }) => x >= 0 && x <= width);
 }

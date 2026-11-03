@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { nearestBulbs, stringBulbs, stringPins, travelBulbs, wirePath } from '../js/data/nav-string.js';
+import { nearestBulbs, stringBulbs, stringPins, travelBulbs, wirePath, wireHeight } from '../js/data/nav-string.js';
 
 const shape = { rise: 10, sag: 8 };
 test('pins reach past both header edges at the tag spacing', () => {
@@ -24,4 +24,11 @@ test('a light travels towards the new tag, either way along the string', () => {
 });
 test('the bulbs around a tag are the nearest ones', () => {
   assert.deepEqual(nearestBulbs([{ x: 0 }, { x: 40 }, { x: 55 }, { x: 90 }], 50, 2).map(({ x }) => x), [55, 40]);
+});
+
+test('wire height: the menu tag cord ends on the curve between two pins', () => {
+  const shape = { rise: 3, sag: 4 }, pins = [0, 100, 200];
+  assert.equal(wireHeight(pins, shape, 0), 3); assert.equal(wireHeight(pins, shape, 100), 3);
+  assert.equal(wireHeight(pins, shape, 50), 7); assert.equal(wireHeight(pins, shape, 150), 7);
+  assert.ok(wireHeight(pins, shape, 25) > 3 && wireHeight(pins, shape, 25) < 7);
 });
