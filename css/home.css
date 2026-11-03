@@ -72,24 +72,29 @@
 .pond-hole, .pond-lip { opacity: 0; transform-origin: 50% 54%; }
 .pond-lip { z-index: 2; }
 .pond-ripple { position: absolute; left: 50%; top: 54%; width: 34%; aspect-ratio: 74 / 22; margin: -5% 0 0 -17%; border: 2px solid #f4fafc; border-radius: 50%; opacity: 0; pointer-events: none; }
-/* 雪人從冰洞中線升起：外框只到洞口，下半身被裁掉，像從水裡冒出來。 */
-.pond-rise { position: absolute; z-index: 1; left: 50%; bottom: 46%; width: 24%; aspect-ratio: 140 / 220; translate: -50% 0; overflow: hidden; pointer-events: none; }
-.pond-snowman { position: absolute; inset: 0; translate: 0 100%; }
+/* 雪人從冰洞中線升起：只裁掉洞口以下，手臂往外伸也不會被切到。 */
+.pond-rise { position: absolute; z-index: 1; left: 50%; bottom: 46%; width: 24%; aspect-ratio: 140 / 220; translate: -50% 0; clip-path: inset(-100% -100% 0 -100%); pointer-events: none; }
+.pond-snowman { position: absolute; inset: 0; translate: 0 100%; transform-origin: 50% 100%; }
 .pond-surprise.is-shown .pond-hole, .pond-surprise.is-shown .pond-lip { opacity: 1; }
 .pond-surprise.is-shown .pond-snowman { translate: 0 0; }
 @media (prefers-reduced-motion: no-preference) {
-  .pond-surprise.is-rising .pond-hole, .pond-surprise.is-rising .pond-lip { animation: pond-open 4.4s ease-out both; }
+  .pond-surprise.is-rising .pond-hole, .pond-surprise.is-rising .pond-lip { animation: pond-open 6.4s ease-out both; }
   .pond-surprise.is-rising .pond-ripple, .pond-surprise.is-rippling .pond-ripple { animation: pond-ripple 1.2s ease-out calc(var(--ring) * .35s) both; }
-  .pond-surprise.is-rising .pond-snowman { animation: pond-rise 4.4s cubic-bezier(.3,.7,.4,1) both; }
-  .pond-surprise.is-rising .pond-arm { animation: pond-push 1.3s cubic-bezier(.45,0,.3,1) 1.05s both; }
+  /* 升起後打一套慢太極：身體左右移重心，雙手輪流畫弧上推（雲手），打完再沉回冰洞。 */
+  .pond-surprise.is-rising .pond-snowman { animation: pond-rise 6.4s cubic-bezier(.3,.7,.4,1) both, pond-sway 6.4s ease-in-out both; }
+  .pond-surprise.is-rising .pond-arm { animation: pond-cloud-near 6.4s ease-in-out both; }
+  .pond-surprise.is-rising .pond-hip { animation: pond-cloud-far 6.4s ease-in-out both; }
   .pond-idle { position: absolute; left: 50%; top: 54%; width: 26%; aspect-ratio: 74 / 22; margin: -4% 0 0 -13%; border: 1.5px solid #f4fafc; border-radius: 50%; opacity: 0; pointer-events: none; animation: pond-idle 5.4s ease-out calc(var(--idle) * .45s) infinite; }
   .pond-surprise:is(.is-rising, .is-rippling, .is-shown) .pond-idle { animation: none; }
 }
 @keyframes pond-open { 0% { opacity: 0; transform: scale(.2); } 7% { opacity: 1; transform: scale(1.06); } 11%, 90% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.3); } }
 @keyframes pond-ripple { from { opacity: .9; transform: scale(.4); } to { opacity: 0; transform: scale(2.2); } }
-/* 升起 → 停住擺出太極推掌 → 慢慢沉回冰洞，沉完冰洞才合上。 */
-@keyframes pond-rise { 0%, 6% { translate: 0 100%; } 22% { translate: 0 -4%; } 26%, 70% { translate: 0 0; } 88%, 100% { translate: 0 100%; } }
-@keyframes pond-push { from { rotate: 62deg; } to { rotate: 0deg; } }
+/* 升起 → 打太極 → 慢慢沉回冰洞，沉完冰洞才合上。 */
+@keyframes pond-rise { 0%, 4% { translate: 0 100%; } 15% { translate: 0 -4%; } 18%, 80% { translate: 0 0; } 94%, 100% { translate: 0 100%; } }
+@keyframes pond-sway { 0%, 18% { rotate: 0deg; } 32% { rotate: -5deg; } 48% { rotate: 5deg; } 63% { rotate: -4deg; } 76%, 100% { rotate: 0deg; } }
+/* 近手放下時往身體外側轉（逆時針），不會掃過臉。 */
+@keyframes pond-cloud-near { 0%, 17% { rotate: -105deg; } 30% { rotate: 0deg; } 44% { rotate: -72deg; } 58% { rotate: -4deg; } 72% { rotate: -64deg; } 80% { rotate: -12deg; } 100% { rotate: -105deg; } }
+@keyframes pond-cloud-far { 0%, 22% { rotate: 0deg; } 37% { rotate: -78deg; } 51% { rotate: -8deg; } 65% { rotate: -70deg; } 78%, 100% { rotate: 0deg; } }
 @keyframes pond-idle { 0% { opacity: 0; transform: scale(.35); } 8% { opacity: .55; } 30%, 100% { opacity: 0; transform: scale(1.6); } }
 .home-mid { z-index: 5; left: 7%; width: 18%; aspect-ratio: 440 / 230; bottom: 27%; }
 .home-near-left { z-index: 10; left: -3%; width: 27%; aspect-ratio: 572 / 452; bottom: 7%; }
