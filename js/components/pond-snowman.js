@@ -67,6 +67,8 @@ function boots(parent) {
 
 export function mountPondSurprise(stage, announce) {
   const motion = matchMedia('(prefers-reduced-motion: reduce)'), phone = matchMedia('(max-width: 700px)');
+  // A phone turned sideways is wide but short: the reindeer covers the ice beside the hole, so the snowman only floats up.
+  const sideways = matchMedia('(min-width: 701px) and (max-height: 500px) and (pointer: coarse)');
   const button = document.createElement('button');
   button.type = 'button'; button.className = 'pond-surprise';
   button.setAttribute('aria-label', '點冰湖，看看誰冒出來');
@@ -85,15 +87,16 @@ export function mountPondSurprise(stage, announce) {
   stage.append(button);
 
   let timer = 0;
-  const finish = () => { clearTimeout(timer); timer = 0; button.classList.remove('is-rising', 'is-shown', 'is-rippling'); };
+  const STATES = ['is-rising', 'is-floating', 'is-shown', 'is-rippling'];
+  const finish = () => { clearTimeout(timer); timer = 0; button.classList.remove(...STATES); };
   function surprise() {
-    if (['is-rising', 'is-shown', 'is-rippling'].some(name => button.classList.contains(name))) return;
+    if (STATES.some(name => button.classList.contains(name))) return;
     if (phone.matches) { if (!motion.matches) button.classList.add('is-rippling'); return; }
-    announce?.('冰湖裡冒出一個雪人，跳上冰面打起太極拳！');
+    announce?.(sideways.matches ? '冰湖裡浮出一個雪人！' : '冰湖裡冒出一個雪人，跳上冰面打起太極拳！');
     if (motion.matches) { button.classList.add('is-shown'); timer = setTimeout(finish, SHOW_MS); return; }
-    button.classList.add('is-rising');
+    button.classList.add(sideways.matches ? 'is-floating' : 'is-rising');
   }
-  const onEnd = event => { if (event.animationName === 'pond-rise') finish(); };
+  const onEnd = event => { if (['pond-rise', 'pond-float'].includes(event.animationName)) finish(); };
   // Only the phone's ripple-only tap ends with the rings; on wider screens the snowman's own animation ends the show.
   const onRipple = event => { if (event.animationName === 'pond-ripple' && event.target === lastRing && button.classList.contains('is-rippling')) finish(); };
   // A tap that lands on a character's empty stage, over the ice, still reaches the pond.
