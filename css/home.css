@@ -87,6 +87,13 @@
   .pond-surprise.is-rising .pond-boots { animation: pond-boots 8.4s linear both; }
   .pond-surprise.is-rising .pond-arm { animation: pond-whip-front 8.4s ease-in-out both; }
   .pond-surprise.is-rising .pond-hip { animation: pond-whip-back 8.4s ease-in-out both; }
+  /* 手機橫放：麋鹿擋在冰洞旁，雪人只從洞裡浮起、輕輕上下飄，再沉回去。 */
+  .pond-surprise.is-floating .pond-hole, .pond-surprise.is-floating .pond-lip { animation: pond-open 4.2s ease-out both; }
+  .pond-surprise.is-floating .pond-ripple { animation: pond-ripple 1.2s ease-out calc(var(--ring) * .35s) both; }
+  .pond-surprise.is-floating .pond-snowman { animation: pond-float 4.2s ease-in-out both; }
+  .pond-surprise.is-floating .pond-arm { rotate: -40deg; }
+  .pond-surprise.is-floating .pond-hip { rotate: 40deg; }
+  .pond-surprise.is-floating .pond-idle { animation: none; }
   .pond-idle { position: absolute; left: 50%; top: 54%; width: 26%; aspect-ratio: 74 / 22; margin: -4% 0 0 -13%; border: 1.5px solid #f4fafc; border-radius: 50%; opacity: 0; pointer-events: none; animation: pond-idle 5.4s ease-out calc(var(--idle) * .45s) infinite; }
   .pond-surprise:is(.is-rising, .is-rippling, .is-shown) .pond-idle { animation: none; }
 }
@@ -100,6 +107,7 @@
   77% { translate: -32% -22%; } 80% { translate: 0 15%; } 83% { translate: 0 15%; }
   97%, 100% { translate: 0 100%; }
 }
+@keyframes pond-float { 0%, 6% { translate: 0 100%; } 26% { translate: 0 11%; } 38% { translate: 0 17%; } 50% { translate: 0 12%; } 62% { translate: 0 17%; } 72% { translate: 0 14%; } 96%, 100% { translate: 0 100%; } }
 @keyframes pond-clip { 0%, 15.5% { clip-path: inset(-100% -100% 0 -100%); } 16%, 79% { clip-path: inset(-100%); } 79.5%, 100% { clip-path: inset(-100% -100% 0 -100%); } }
 @keyframes pond-boots { 0%, 16% { opacity: 0; } 17%, 78% { opacity: 1; } 79%, 100% { opacity: 0; } }
 @keyframes pond-sway { 0%, 25% { rotate: 0deg; } 36%, 50% { rotate: -6deg; } 56% { rotate: -2deg; } 62%, 70% { rotate: -6deg; } 75%, 100% { rotate: 0deg; } }
