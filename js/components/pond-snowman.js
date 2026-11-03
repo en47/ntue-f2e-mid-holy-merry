@@ -2,8 +2,11 @@
 // Only transform and opacity animate.
 import { paperLayer, shape } from './paper-art.js';
 
-const PAPER = { scale: 1, grain: .45, shadow: .22 }, POND = '0 0 540 170', BODY = '0 0 140 220';
-const SNOW = '#fbf7ee', SNOW_SHADE = '#d9e5ea', INK = '#4b3d38', STICK = '#7a5a43', MITTEN = '#b5544c', SHOW_MS = 2600;
+// The body sheet is wider than the snowman, so arms spread for single whip and boots below the base stay on the paper.
+const PAPER = { scale: 1, grain: .45, shadow: .22 }, POND = '0 0 540 170', BODY = '-50 -10 240 270';
+// paperLayer reads origins from the viewBox's top-left corner, so the shoulders are given in sheet coordinates.
+const SHEET = ([x, y]) => [x + 50, y + 10];
+const SNOW = '#fbf7ee', SNOW_SHADE = '#d9e5ea', INK = '#4b3d38', STICK = '#7a5a43', MITTEN = '#b5544c', BOOT = '#5a4a44', CUFF = '#f7efe1', SHOW_MS = 2600;
 // The hole sits where pond.svg is deepest; its rim is the pond's own outline scaled down.
 export const HOLE = { x: 270, y: 92, rx: 74, ry: 22 };
 
@@ -24,7 +27,7 @@ function lip(parent) {
   shape('path', { d: `M${x - rx * .6} ${y + ry * .95}C${x - 20} ${y + ry * 1.25} ${x + 30} ${y + ry * 1.2} ${x + rx * .55} ${y + ry * .95}`, stroke: '#ffffff', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, parent);
 }
 
-// A tai chi snowman: both arms are their own sheets, so the routine can move them in slow alternating arcs.
+// A tai chi snowman in single whip: front palm up and out, back hand hooked, boots set in a bow stance.
 function body(parent) {
   const ball = (cy, r) => {
     shape('circle', { cx: 70, cy, r, fill: SNOW }, parent);
@@ -37,19 +40,29 @@ function body(parent) {
   shape('path', { d: 'M57 38H83', stroke: '#b5544c', 'stroke-width': 6 }, parent);
   shape('path', { d: 'M70 64L98 70L70 74Z', fill: '#d98a4e' }, parent);
   for (const [cx, cy, r] of [[70, 112, 3.6], [70, 130, 3.6], [70, 158, 3.6]]) shape('circle', { cx, cy, r, fill: INK }, parent);
-  // Calm, focused eyes and a small mouth, like the stance in the reference photo.
   shape('path', { d: 'M56 58Q61 55 66 58M74 58Q79 55 84 58', stroke: INK, 'stroke-width': 2.6, 'stroke-linecap': 'round', fill: 'none' }, parent);
   shape('path', { d: 'M64 79Q70 82 76 79', stroke: INK, 'stroke-width': 2.4, 'stroke-linecap': 'round', fill: 'none' }, parent);
   for (const cx of [54, 86]) shape('circle', { cx, cy: 72, r: 4, fill: '#e8a093', opacity: .7 }, parent);
 }
-function hipArm(parent) {
-  shape('path', { d: 'M98 112L122 126L104 142', stroke: STICK, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, parent);
-  shape('ellipse', { cx: 103, cy: 142, rx: 6, ry: 5, fill: MITTEN }, parent);
-}
+// Front hand: an upright palm pushed out to the side.
 function arm(parent) {
-  shape('path', { d: 'M42 106L20 88L24 54', stroke: STICK, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, parent);
-  shape('path', { d: 'M18 56C16 44 18 34 24 32C29 30 32 36 32 44L32 58C30 62 20 62 18 56Z', fill: MITTEN }, parent);
-  shape('path', { d: 'M31 46C35 44 37 48 34 52', stroke: '#8f3f39', 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  shape('path', { d: 'M42 106C26 104 10 104 -10 104', stroke: STICK, 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  shape('path', { d: 'M-20 108C-25 96 -23 84 -17 82C-12 80 -8 86 -8 94L-8 110C-10 114 -18 114 -20 108Z', fill: MITTEN }, parent);
+  shape('path', { d: 'M-8 98C-3 97 -2 102 -6 105', stroke: '#8f3f39', 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none' }, parent);
+}
+// Back hand: the hook, fingers gathered and pointing down.
+function hipArm(parent) {
+  shape('path', { d: 'M98 112C118 108 136 106 152 106', stroke: STICK, 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  shape('path', { d: 'M147 102C156 98 166 102 165 112C164 121 157 124 153 117C151 112 149 108 147 102Z', fill: MITTEN }, parent);
+}
+// Boots only show once the snowman is out of the water; the front foot turns out, the back foot braces.
+function boots(parent) {
+  shape('ellipse', { cx: 72, cy: 253, rx: 50, ry: 5, fill: '#8eaab6', opacity: .3 }, parent);
+  shape('path', { d: 'M36 210L56 212L54 240L56 252L14 252C8 252 8 240 18 238L36 236Z', fill: BOOT }, parent);
+  shape('path', { d: 'M86 212L106 210L112 236L128 240C136 242 136 252 128 252L100 252L96 240Z', fill: BOOT }, parent);
+  shape('path', { d: 'M14 250H56M100 250H130', stroke: '#3f3330', 'stroke-width': 3, 'stroke-linecap': 'round' }, parent);
+  shape('path', { d: 'M32 205L59 207L58 217L33 215Z', fill: CUFF }, parent);
+  shape('path', { d: 'M83 207L109 204L110 214L85 216Z', fill: CUFF }, parent);
 }
 
 export function mountPondSurprise(stage, announce) {
@@ -63,9 +76,10 @@ export function mountPondSurprise(stage, announce) {
   for (const delay of [0, 1, 2]) { const ring = document.createElement('i'); ring.className = 'pond-idle'; ring.style.setProperty('--idle', delay); button.append(ring); }
   const rise = document.createElement('span'), snowman = document.createElement('span');
   rise.className = 'pond-rise'; snowman.className = 'pond-snowman';
-  paperLayer(snowman, BODY, 'pond-hip', hipArm, { paper: PAPER, eager: true, origin: [98, 112] });
+  paperLayer(snowman, BODY, 'pond-boots', boots, { paper: PAPER, eager: true });
+  paperLayer(snowman, BODY, 'pond-hip', hipArm, { paper: PAPER, eager: true, origin: SHEET([98, 112]) });
   paperLayer(snowman, BODY, 'pond-body', body, { paper: PAPER, eager: true });
-  paperLayer(snowman, BODY, 'pond-arm', arm, { paper: PAPER, eager: true, origin: [42, 106] });
+  paperLayer(snowman, BODY, 'pond-arm', arm, { paper: PAPER, eager: true, origin: SHEET([42, 106]) });
   rise.append(snowman); button.append(rise);
   paperLayer(button, POND, 'pond-lip', lip, { paper: PAPER, eager: true });
   stage.append(button);
@@ -75,7 +89,7 @@ export function mountPondSurprise(stage, announce) {
   function surprise() {
     if (['is-rising', 'is-shown', 'is-rippling'].some(name => button.classList.contains(name))) return;
     if (phone.matches) { if (!motion.matches) button.classList.add('is-rippling'); return; }
-    announce?.('冰湖裡冒出一個雪人，慢慢打起太極拳！');
+    announce?.('冰湖裡冒出一個雪人，跳上冰面打起太極拳！');
     if (motion.matches) { button.classList.add('is-shown'); timer = setTimeout(finish, SHOW_MS); return; }
     button.classList.add('is-rising');
   }
