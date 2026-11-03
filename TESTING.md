@@ -419,3 +419,9 @@ node --experimental-vm-modules tests/smoke.mjs
 - 手機回報修正後仍有綠框。查到 `games/christmas-matching.html` 的 CSS 與程式網址沒有版本號，GitHub Pages 允許快取 10 分鐘，手機可能仍在執行舊程式；這頁也一直不在 `stamp-modules.mjs` 的清單內。
 - `stamp-modules.mjs` 支援子資料夾頁面（以 `../` 開頭、importmap 從該資料夾解析），並加入配對遊戲頁；根目錄五頁輸出逐字未變。
 - `tests/smoke.mjs` 新增：配對遊戲頁在清單內，入口與內部模組都有內容版本號。
+
+## 2026-11-03：配對遊戲焦點改放卡片區
+
+- iPad 回報仍有綠框。無法確認是快取還是輸入偵測失靈，因此改為不依賴偵測：每關開始時焦點放在卡片區（`tabindex="-1"`、無外框），不再程式選取任何卡片。
+- `tests/smoke.mjs` 改為驗證觸控與鍵盤開始時都由卡片區取得焦點、沒有卡片被選取。
+- 瀏覽器實測：iPad Pro 11、iPhone 13 觸控開始，卡片與卡片區皆無外框；1440 鍵盤 Enter 開始後按 Tab 到第一張卡、出現外框、Enter 可翻牌。
