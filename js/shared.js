@@ -3,6 +3,7 @@ import { mountForeground } from './components/page-foreground.js';
 import { mountNavLights } from './components/nav-lights.js';
 import { mountMusic } from './components/music-player.js';
 import { mountSantaPlaceholders } from './components/santa-placeholder.js';
+import { FAQ } from './data/faq.js';
 
 document.documentElement.classList.add('js-ready');
 // Animate only deliberate section-link activation; native manual scrolling stays untouched.
@@ -34,15 +35,30 @@ window.addEventListener('pageshow', event => { if (event.persisted) navLights = 
 
 const info = {
   accessibility: ['無障礙與操作', '本網站支援鍵盤 Tab 導覽、Enter 操作按鈕，以及系統的減少動態效果設定。雪橇遊戲開始後可使用上下方向鍵移動、Escape 暫停，也提供畫面按鈕。若有閱讀需求，可透過瀏覽器調整文字大小。'],
-  faq: ['常見問題', '願望會公開嗎？預設不會。信會存在 Firebase 雲端，只有你和管理員看得到；寄信時勾選同意公開，並通過管理員審核後，才會公開掛在聖誕樹上，所有訪客都看得到你填的稱呼和信件內容。訪客不需要登入，同一個瀏覽器重新整理後信還在；清除網站資料、換瀏覽器或裝置，就找不回原本的信。'],
+  faq: ['常見問題', FAQ],
   contact: ['Contact us', '聯絡方式與社群連結尚待網站作者提供。這裡已保留入口，之後可替換為正式電子郵件與社群網址。'],
 };
 const infoDialog = document.querySelector('#info-dialog');
+const infoContent = document.querySelector('#info-content');
+// FAQ 以問答清單呈現；關閉時收回，其他說明（含 Intro 自訂的）沿用單段文字。
+const faqList = document.createElement('dl');
+faqList.className = 'faq-list';
+faqList.hidden = true;
+infoContent.after(faqList);
+infoDialog.addEventListener('close', () => { faqList.hidden = true; infoContent.hidden = false; });
 document.querySelectorAll('[data-info]').forEach(button => {
   button.addEventListener('click', () => {
     const [title, content] = info[button.dataset.info];
     document.querySelector('#info-title').textContent = title;
-    document.querySelector('#info-content').textContent = content;
+    const isList = Array.isArray(content);
+    infoContent.hidden = isList; faqList.hidden = !isList;
+    if (isList) {
+      faqList.replaceChildren(...content.flatMap(([question, answer]) => {
+        const term = document.createElement('dt'), detail = document.createElement('dd');
+        term.textContent = question; detail.textContent = answer;
+        return [term, detail];
+      }));
+    } else infoContent.textContent = content;
     infoDialog.showModal();
   });
 });

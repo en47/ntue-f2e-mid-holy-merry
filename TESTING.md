@@ -493,3 +493,8 @@ node --experimental-vm-modules tests/smoke.mjs
 - Wish 月亮：點擊後月亮發光，流星從夜空右上隨機位置往左下劃過後自動移除；讀屏念出「一顆流星劃過，快許個願！」；減少動態時改為原地閃一下。截圖發現第一版亮星在尾端、像倒著飛，已改為亮星在前。
 - 實測 1440 與 iPhone 13：兩個按鈕都在最上層可點、動畫結束狀態清空。
 - `assets/fonts/WISH-FONT-LICENSE.txt` 版權行由「Google Inc.」改為字型檔內記載的 LXGW WenKai Project Authors。
+
+## 2026-11-03：幽默版 FAQ
+
+- `npm test` 49 項通過。
+- 在 Game（1280）、Home（390 手機）與 Intro 開啟 FAQ，三頁都列出 8 題、單段文字隱藏，手機版可捲動。關閉後改開「無障礙與操作」，問答清單會收回，改顯示單段文字。Intro 也一樣。
