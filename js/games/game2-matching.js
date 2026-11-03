@@ -74,6 +74,11 @@ export function initChristmasMatchingGame(root) {
     currentLevelIndex = 0;
     startLevel();
   }
+  // Only keyboard players are handed the first card; a programmatic focus after a tap draws a focus ring on iOS.
+  let keyboardInput = false;
+  const fromKeyboard = () => { keyboardInput = true; }, fromPointer = () => { keyboardInput = false; };
+  root.addEventListener('keydown', fromKeyboard, true);
+  root.addEventListener('pointerdown', fromPointer, true);
   startBtn.addEventListener('click', startGame);
   restartBtn.addEventListener('click', restartGame);
 
@@ -101,7 +106,7 @@ export function initChristmasMatchingGame(root) {
     timer = setInterval(countdown, 1000);
     announce(`第 ${currentConfig.level} / 5 關：${currentConfig.pairs} 組禮物，限時 ${currentConfig.time} 秒。`);
     emit('matching:level-start');
-    cardGridEl.querySelector('.card')?.focus({ preventScroll: true });
+    if (keyboardInput) cardGridEl.querySelector('.card')?.focus({ preventScroll: true });
   }
 
   function generateCards(pairsCount, gridClass) {
@@ -276,6 +281,8 @@ export function initChristmasMatchingGame(root) {
       clearInterval(timer);
       clearPending();
       clearModal();
+      root.removeEventListener('keydown', fromKeyboard, true);
+      root.removeEventListener('pointerdown', fromPointer, true);
       startBtn.removeEventListener('click', startGame);
       restartBtn.removeEventListener('click', restartGame);
       modalOverlay.removeEventListener('keydown', modalKeydown);
