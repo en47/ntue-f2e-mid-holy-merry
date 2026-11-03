@@ -3,7 +3,7 @@
 import { paperLayer, shape } from './paper-art.js';
 
 const PAPER = { scale: 1, grain: .45, shadow: .22 }, POND = '0 0 540 170', BODY = '0 0 140 220';
-const SNOW = '#fbf7ee', SNOW_SHADE = '#d9e5ea', INK = '#4b3d38', SHOW_MS = 2600;
+const SNOW = '#fbf7ee', SNOW_SHADE = '#d9e5ea', INK = '#4b3d38', STICK = '#7a5a43', MITTEN = '#b5544c', SHOW_MS = 2600;
 // The hole sits where pond.svg is deepest; its rim is the pond's own outline scaled down.
 export const HOLE = { x: 270, y: 92, rx: 74, ry: 22 };
 
@@ -24,24 +24,30 @@ function lip(parent) {
   shape('path', { d: `M${x - rx * .6} ${y + ry * .95}C${x - 20} ${y + ry * 1.25} ${x + 30} ${y + ry * 1.2} ${x + rx * .55} ${y + ry * .95}`, stroke: '#ffffff', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, parent);
 }
 
+// A tai chi snowman: the far arm rests on the hip, the near arm rises slowly with the palm turned out.
 function body(parent) {
   const ball = (cy, r) => {
     shape('circle', { cx: 70, cy, r, fill: SNOW }, parent);
     shape('path', { d: `M${70 + r * .35} ${cy - r * .92}A${r} ${r} 0 0 1 ${70 + r * .35} ${cy + r * .92}A${r * 1.3} ${r * 1.3} 0 0 0 ${70 + r * .35} ${cy - r * .92}Z`, fill: SNOW_SHADE }, parent);
   };
-  shape('path', { d: 'M44 112L10 92M22 99L12 84M22 99L6 102', stroke: '#7a5a43', 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  shape('path', { d: 'M98 112L122 126L104 142', stroke: STICK, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, parent);
   ball(178, 42); ball(112, 30); ball(66, 23);
+  shape('ellipse', { cx: 103, cy: 142, rx: 6, ry: 5, fill: MITTEN }, parent);
   shape('path', { d: 'M42 86C60 96 80 96 98 86L98 96C80 106 60 106 42 96Z', fill: '#b5544c' }, parent);
   shape('path', { d: 'M82 94L94 126L78 124Z', fill: '#a34a43' }, parent);
   shape('path', { d: 'M48 46H92M56 46L58 14H82L84 46Z', fill: '#5a4a44', stroke: '#5a4a44', 'stroke-width': 6, 'stroke-linejoin': 'round' }, parent);
   shape('path', { d: 'M57 38H83', stroke: '#b5544c', 'stroke-width': 6 }, parent);
   shape('path', { d: 'M70 64L98 70L70 74Z', fill: '#d98a4e' }, parent);
-  for (const [cx, cy, r] of [[61, 58, 3.4], [79, 58, 3.4], [70, 112, 3.6], [70, 130, 3.6], [70, 158, 3.6]]) shape('circle', { cx, cy, r, fill: INK }, parent);
-  shape('path', { d: 'M60 78Q70 85 80 78', stroke: INK, 'stroke-width': 2.4, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  for (const [cx, cy, r] of [[70, 112, 3.6], [70, 130, 3.6], [70, 158, 3.6]]) shape('circle', { cx, cy, r, fill: INK }, parent);
+  // Calm, focused eyes and a small mouth, like the stance in the reference photo.
+  shape('path', { d: 'M56 58Q61 55 66 58M74 58Q79 55 84 58', stroke: INK, 'stroke-width': 2.6, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  shape('path', { d: 'M64 79Q70 82 76 79', stroke: INK, 'stroke-width': 2.4, 'stroke-linecap': 'round', fill: 'none' }, parent);
   for (const cx of [54, 86]) shape('circle', { cx, cy: 72, r: 4, fill: '#e8a093', opacity: .7 }, parent);
 }
 function arm(parent) {
-  shape('path', { d: 'M96 110L130 84M120 92L126 76M120 92L136 94', stroke: '#7a5a43', 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none' }, parent);
+  shape('path', { d: 'M42 106L20 88L24 54', stroke: STICK, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, parent);
+  shape('path', { d: 'M18 56C16 44 18 34 24 32C29 30 32 36 32 44L32 58C30 62 20 62 18 56Z', fill: MITTEN }, parent);
+  shape('path', { d: 'M31 46C35 44 37 48 34 52', stroke: '#8f3f39', 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none' }, parent);
 }
 
 export function mountPondSurprise(stage, announce) {
@@ -51,10 +57,12 @@ export function mountPondSurprise(stage, announce) {
   button.setAttribute('aria-label', '點冰湖，看看誰冒出來');
   paperLayer(button, POND, 'pond-hole', hole, { paper: PAPER, eager: true });
   for (const delay of [0, 1]) { const ring = document.createElement('i'); ring.className = 'pond-ripple'; ring.style.setProperty('--ring', delay); button.append(ring); }
+  // Before anyone taps, faint rings keep rising from the middle of the ice, as if something is underneath.
+  for (const delay of [0, 1, 2]) { const ring = document.createElement('i'); ring.className = 'pond-idle'; ring.style.setProperty('--idle', delay); button.append(ring); }
   const rise = document.createElement('span'), snowman = document.createElement('span');
   rise.className = 'pond-rise'; snowman.className = 'pond-snowman';
   paperLayer(snowman, BODY, 'pond-body', body, { paper: PAPER, eager: true });
-  paperLayer(snowman, BODY, 'pond-arm', arm, { paper: PAPER, eager: true, origin: [96, 110] });
+  paperLayer(snowman, BODY, 'pond-arm', arm, { paper: PAPER, eager: true, origin: [42, 106] });
   rise.append(snowman); button.append(rise);
   paperLayer(button, POND, 'pond-lip', lip, { paper: PAPER, eager: true });
   stage.append(button);
@@ -69,7 +77,8 @@ export function mountPondSurprise(stage, announce) {
     button.classList.add('is-rising');
   }
   const onEnd = event => { if (event.animationName === 'pond-rise') finish(); };
-  const onRipple = event => { if (event.animationName === 'pond-ripple' && event.target === lastRing) finish(); };
+  // Only the phone's ripple-only tap ends with the rings; on wider screens the snowman's own animation ends the show.
+  const onRipple = event => { if (event.animationName === 'pond-ripple' && event.target === lastRing && button.classList.contains('is-rippling')) finish(); };
   // A tap that lands on a character's empty stage, over the ice, still reaches the pond.
   const onPass = event => {
     const box = button.getBoundingClientRect();
