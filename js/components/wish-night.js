@@ -62,10 +62,33 @@ function sidePines(parent) {
   pine(parent, 120, 400, 300, PINE, SNOW); pine(parent, 300, 404, 200, '#34645a', SNOW);
 }
 
+// Tap the moon: it glows, and a shooting star crosses the sky from a different spot each time.
+function mountShootingStar(sky, moonLayer) {
+  const button = document.createElement('button');
+  button.type = 'button'; button.className = 'moon-tap'; button.setAttribute('aria-label', '點月亮，看一顆流星劃過');
+  moonLayer.append(button);
+  const live = document.createElement('p'); live.className = 'sr-only'; live.setAttribute('role', 'status'); sky.after(live);
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  button.addEventListener('click', () => {
+    if (sky.querySelector('.shooting-star')) return;
+    live.textContent = '一顆流星劃過，快許個願！';
+    moonLayer.classList.remove('is-glowing'); void moonLayer.offsetWidth; moonLayer.classList.add('is-glowing');
+    const star = document.createElement('i');
+    star.className = motion.matches ? 'shooting-star is-still' : 'shooting-star';
+    star.setAttribute('aria-hidden', 'true');
+    star.style.left = `${55 + Math.random() * 35}%`; star.style.top = `${4 + Math.random() * 18}%`;
+    // Reduced motion switches animations off site-wide, so a timer, not animationend, clears the still star.
+    if (motion.matches) setTimeout(() => star.remove(), 1400);
+    else star.addEventListener('animationend', () => star.remove(), { once: true });
+    sky.append(star);
+  });
+}
+
 export function mountNightScene(room) {
   const sky = room.querySelector('.room-sky'), none = { preserveAspectRatio: 'none' };
   stars(sky);
-  popLayer(sky, '0 0 220 220', 'night-moon', moon, { delay: .1, paper: SOFT });
+  const moonLayer = popLayer(sky, '0 0 220 220', 'night-moon', moon, { delay: .1, paper: SOFT });
+  mountShootingStar(sky, moonLayer);
   for (const [name, delay] of [['night-cloud-a', .2], ['night-cloud-b', .3]]) popLayer(sky, '-20 0 270 116', `night-cloud ${name}`, parent => cloud(parent, 120, 62, 1.15, '#7f97ad'), { delay, paper: SOFT });
   popLayer(sky, '0 0 1600 300', 'night-forest', farForest, { delay: .25, paper: SOFT, ...none });
   popLayer(sky, '0 0 520 440', 'night-cottage', cottage, { delay: .55, paper: PAPER });

@@ -31,6 +31,14 @@
 .games-wheel-art { inset: 0; position: absolute; }
 .games-seat { position: absolute; width: 15%; aspect-ratio: 80 / 90; margin: -1.5% 0 0 -7.5%; transform-origin: 50% 6%; animation: wheel-spin 48s linear infinite reverse; }
 .games-seat-art { inset: 0; position: absolute; }
+.wheel-tap { position: absolute; left: 6%; top: 1%; width: 88%; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; pointer-events: auto; }
+.wheel-tap:focus-visible { outline: 2px solid var(--red); outline-offset: -6px; }
+.games-seat-art { transform-origin: 50% 6%; }
+@media (prefers-reduced-motion: no-preference) {
+  /* 轉快時車廂往外甩、左右晃，轉回原速後停下。 */
+  .games-ferris.is-whirling .games-seat-art { animation: seat-swing .45s ease-in-out infinite alternate; }
+}
+@keyframes seat-swing { from { rotate: -9deg; } to { rotate: 9deg; } }
 .games-ridge { z-index: 4; left: -1%; width: 102%; bottom: 0; height: 41%; }
 .games-mid { z-index: 4; left: -1%; width: 102%; aspect-ratio: 1600 / 340; bottom: 13%; }
 /* Clipped at the hill line, so Santa rises from behind it rather than from the page edge. */

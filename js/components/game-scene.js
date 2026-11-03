@@ -176,6 +176,40 @@ function mountBalloonRide(flight, paper) {
   window.addEventListener('pagehide', land);
 }
 
+// Tap the Ferris wheel: it speeds up for about one turn and eases back. The seats share the wheel's timing,
+// so changing every playback rate together keeps them hanging upright the whole time.
+function mountWheelBoost(ride, spin) {
+  const button = document.createElement('button');
+  button.type = 'button'; button.className = 'wheel-tap'; button.setAttribute('aria-label', '點摩天輪，讓它轉快一圈');
+  ride.append(button);
+  const live = document.createElement('p'); live.className = 'sr-only'; live.setAttribute('role', 'status'); ride.after(live);
+  const PEAK = 18, UP = 700, HOLD = 1300, DOWN = 1500;
+  let frame = 0;
+  const spins = () => [spin, ...spin.querySelectorAll('.games-seat')].flatMap(node => node.getAnimations()).filter(a => a.animationName === 'wheel-spin');
+  const rate = elapsed => {
+    if (elapsed < UP) return 1 + (PEAK - 1) * Math.sin(elapsed / UP * Math.PI / 2);
+    if (elapsed < UP + HOLD) return PEAK;
+    const t = Math.min(1, (elapsed - UP - HOLD) / DOWN);
+    return 1 + (PEAK - 1) * (1 - t) * (1 - t);
+  };
+  const stop = () => { cancelAnimationFrame(frame); frame = 0; spins().forEach(a => { a.playbackRate = 1; }); ride.classList.remove('is-whirling'); };
+  button.addEventListener('click', () => {
+    if (frame) return;
+    live.textContent = '摩天輪呼地轉了一大圈！';
+    const animations = spins();
+    if (!animations.length) return; // Reduced motion keeps the wheel still.
+    ride.classList.add('is-whirling');
+    const start = performance.now();
+    const step = now => {
+      const elapsed = now - start, value = rate(elapsed);
+      animations.forEach(a => { a.playbackRate = value; });
+      if (elapsed < UP + HOLD + DOWN) frame = requestAnimationFrame(step); else stop();
+    };
+    frame = requestAnimationFrame(step);
+  });
+  window.addEventListener('pagehide', stop);
+}
+
 export function mountGameScene(hero) {
   const paper = { scale: 1.3, grain: .6 }, wide = { ...paper, grain: .4, shadow: .16 }, none = { preserveAspectRatio: 'none' };
   popLayer(hero, '0 0 1600 170', 'games-bunting', bunting, { delay: .15, paper });
@@ -199,6 +233,7 @@ export function mountGameScene(hero) {
     popLayer(seat, '0 0 80 90', 'games-seat-art', gondola(colours[index % 4]), { paper: { scale: .8, grain: .5 } });
     spin.append(seat);
   }
+  mountWheelBoost(ride, spin);
   popLayer(hero, '0 0 1600 300', 'games-ridge', ridge, { delay: .8, paper: wide, ...none });
   popLayer(hero, '0 0 1600 340', 'games-mid', edgePines, { delay: .9, paper: { ...paper, scale: 1.2 } });
   popLayer(hero, '0 0 1600 230', 'games-hero-hill', hill, { delay: 1, paper: wide, ...none });
