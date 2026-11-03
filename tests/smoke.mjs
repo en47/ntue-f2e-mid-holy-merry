@@ -119,6 +119,11 @@ await test('快取版本：每頁的 CSS、入口與內部模組版本都對應�
   assert.ok(PAGES.includes('games/christmas-matching.html'));
   assert.match(JSON.parse(matching.match(/<script type="importmap">(.*)<\/script>/)[1]).imports['../js/games/game2-matching.js'], /\?v=[0-9a-f]{10}$/);
   assert.match(matching, /src="\.\.\/js\/games\/game2-embed\.js\?v=[0-9a-f]{10}"/);
+  // Both games are iframes; their URLs and the flying game's own files change with their content.
+  const host = await fs.readFile(path.join(project, 'game.html'), 'utf8');
+  for (const frame of ['vendor/game1-frameless/index.html', 'games/christmas-matching.html']) assert.match(host, new RegExp(`src="${frame.replaceAll('.', '\\.')}\\?v=[0-9a-f]{10}"`), frame);
+  const flying = await fs.readFile(path.join(project, 'vendor/game1-frameless/index.html'), 'utf8');
+  for (const file of ['style.css', 'rules.js', 'game.js']) assert.match(flying, new RegExp(`="${file.replace('.', '\\.')}\\?v=[0-9a-f]{10}"`), file);
 });
 await test('Firebase 模擬器：只有本機主機名稱啟用，且一定換成 demo 專案', async () => {
   const { localEmulatorTarget, createFirebaseClients } = await import(pathToFileURL(path.join(project, 'js/services/firebase-client-core.js')).href);
@@ -338,7 +343,7 @@ await test('game2：原始副本雜湊、22 張圖片與正式載入入口', asy
     assert.equal(createHash('sha256').update(data).digest('hex'), file.sha256, file.path);
   }
   const host = await fs.readFile(path.join(project, 'game.html'), 'utf8');
-  assert.match(host, /<iframe[^>]+src="games\/christmas-matching\.html"/);
+  assert.match(host, /<iframe[^>]+src="games\/christmas-matching\.html\?v=[0-9a-f]{10}"/);
   assert.ok(!host.includes('matching-start-shortcut'));
   const script = await fs.readFile(path.join(project, 'js/game.js'), 'utf8');
   assert.ok(!script.includes('initChristmasMatchingGame')); 

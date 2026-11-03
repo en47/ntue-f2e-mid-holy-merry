@@ -431,3 +431,10 @@ node --experimental-vm-modules tests/smoke.mjs
 - 手機回報禮物卡片偏左。卡片欄寬有上限（第一關 4 × 75px + 間距約 336px），卡片區最多 360px，多出的寬度全留在右側。
 - 在適配樣式 `css/game2-matching.css` 加上 `justify-content: center`，原作副本未改。
 - 實測五關卡片左右空白（px）：iPhone 13 修正前第一關 3/45、修正後 24/24；768 / 1440 修正前 129/153、修正後 141/141；iPhone SE 原本即貼齊 0/0；所有寬度五關左右差均為 0，無橫向溢出。
+
+## 2026-11-03：遊戲 iframe 網址版本號
+
+- iPhone 15 Plus 回報置中修正上線後仍偏左。判斷為 iframe 文件本身網址固定，手機沿用快取的舊遊戲頁，裡面的新 CSS 版本號也就不會被讀到。
+- `stamp-modules.mjs` 先處理 iframe 內的頁面，再依其內容替 `game.html` 的兩個 iframe `src` 加版本號；飛行遊戲的 `style.css`、`rules.js`、`game.js` 也加上版本號（原本完全沒有）。
+- 實測 430 / 375 / 768 / 1440：兩個遊戲以新網址載入、iframe 高度與內容相符、飛行遊戲可開始、配對卡片左右空白相同、無 404 與溢出。
+- 尚未在 iPhone 15 Plus 實機確認。

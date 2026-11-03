@@ -44,7 +44,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 
 導覽與 Footer 標記在四個 HTML 各有一份；修改時必須同步四頁，`tests/smoke.mjs` 第一組會檢查四個互連連結、唯一一個 `aria-current="page"`、所有本機 `src`/`href` 真的存在、以及頁內 ID 不重複。
 
-改動 CSS / JS 後執行 `node scripts/stamp-modules.mjs`（四頁、`admin.html` 與 iframe 內的 `games/christmas-matching.html`）：它依檔案內容更新 HTML 的 `?v=` 與 importmap（內部模組沒有寫在 HTML，版本只能靠 importmap 傳下去），`npm test` 會在忘記執行時失敗。
+改動 CSS / JS 後執行 `node scripts/stamp-modules.mjs`（四頁、`admin.html`、兩個遊戲 iframe 內的頁面，以及 `game.html` 裡的 iframe `src`）：它依檔案內容更新 HTML 的 `?v=` 與 importmap（內部模組沒有寫在 HTML，版本只能靠 importmap 傳下去），`npm test` 會在忘記執行時失敗。
 
 ### 目錄分工
 - `js/components/` — DOM 與 Three.js 行為單元（角色場景、精靈、信封、世界地圖、Intro 故事書）。
