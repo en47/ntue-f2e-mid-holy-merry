@@ -6,21 +6,24 @@
 .games-cloud { z-index: 1; aspect-ratio: 270 / 116; }
 .games-cloud-a { top: 22%; left: 28%; width: 12%; }
 .games-cloud-b { top: 15%; right: 30%; width: 14%; }
-.games-balloon { z-index: 2; top: 15%; left: 3%; width: 8.5%; aspect-ratio: 200 / 270; }
+/* 平時熱氣球壓低在山後：吊籃與乘客整個藏在山峰後面，只露出球體上半。bottom 依遠山的高度（隨寬度縮放）計算。 */
+.games-balloon { z-index: 2; bottom: calc(33% + 7.2vw - 10px); left: 3%; width: 8.5%; aspect-ratio: 200 / 270; }
 .games-balloon img { animation: balloon-float 6s ease-in-out infinite alternate; }
 /* 場景紙雕只是畫，透明的部分不能擋住熱氣球；只有熱氣球的按鈕接收點擊。 */
 .games-hero > .pop { pointer-events: none; }
-.balloon-tap { position: absolute; left: 6%; top: 3%; width: 88%; height: 72%; padding: 0; border: 0; border-radius: 50% 50% 45% 45%; background: none; cursor: pointer; pointer-events: auto; }
+.balloon-flight { --rise: -62%; position: absolute; inset: 0; }
+.balloon-rider { visibility: hidden; transform-origin: 50% 85%; }
+.balloon-rider.is-riding { visibility: visible; }
+.balloon-tap { position: absolute; left: 6%; top: 3%; width: 88%; height: 50%; padding: 0; border: 0; border-radius: 50% 50% 40% 40%; background: none; cursor: pointer; pointer-events: auto; }
 .balloon-tap:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
-.games-balloon.is-up, .games-hero.is-opening .games-balloon.is-up { z-index: 5; translate: 18% -38%; }
+.balloon-flight.is-up { translate: 14% var(--rise); }
 @media (prefers-reduced-motion: no-preference) {
-  /* 浮起時越過山頂才移到雪山前面，籃子不會在山後突然跳出來。 */
-  /* 要蓋過開場的 .games-hero.is-opening .pop 彈出動畫（那時早已播完）。 */
-  .games-hero.is-opening .games-balloon.is-flying, .games-balloon.is-flying { animation: balloon-ride 6s ease-in-out both; }
-  .games-balloon.is-flying .balloon-arm { animation: balloon-wave .35s ease-in-out 1.6s 8 alternate both; }
+  /* 升起：籃子從山後冒出來；停留時乘客左右晃著打招呼；再慢慢沉回山後。熱氣球一直在山的後面，不切換前後層。 */
+  .balloon-flight.is-flying { animation: balloon-ride 6.5s ease-in-out both; }
+  .balloon-flight.is-flying .balloon-rider { animation: balloon-greet .5s ease-in-out 1.7s 6 alternate both; }
 }
-@keyframes balloon-ride { 0% { translate: 0 0; z-index: 2; } 18% { z-index: 2; } 19% { z-index: 5; } 28%, 70% { translate: 18% -38%; z-index: 5; } 49% { translate: 20% -41%; } 88% { z-index: 5; } 89% { z-index: 2; } 100% { translate: 0 0; z-index: 2; } }
-@keyframes balloon-wave { from { rotate: -10deg; } to { rotate: 22deg; } }
+@keyframes balloon-ride { 0% { translate: 0 0; } 30%, 68% { translate: 14% var(--rise); } 49% { translate: 16% calc(var(--rise) - 3%); } 100% { translate: 0 0; } }
+@keyframes balloon-greet { from { rotate: -7deg; } to { rotate: 7deg; } }
 .games-far { z-index: 2; left: -2%; width: 104%; aspect-ratio: 1600 / 430; bottom: 33%; }
 .games-carousel { z-index: 3; left: 10%; width: 21%; aspect-ratio: 460 / 464; bottom: 31%; }
 .games-ferris { z-index: 3; right: 9%; width: 25%; aspect-ratio: 520 / 540; bottom: 31%; }
@@ -81,7 +84,9 @@
   .games-bunting { width: 150%; left: -25%; }
   .games-cloud-a { top: 16%; left: 34%; width: 20%; }
   .games-cloud-b { top: 24%; right: 6%; width: 22%; }
-  .games-balloon { top: 13%; left: 7%; width: 15%; }
+  .games-balloon { top: auto; bottom: calc(36% + 12.4vw - 10px); left: 7%; width: 15%; }
+  /* 平板前方是比山更高的旋轉木馬帳篷，要浮得更高籃子才露得出來。 */
+  .balloon-flight { --rise: -92%; }
   .games-far { left: -25%; width: 150%; bottom: 36%; }
   .games-carousel { left: 2%; width: 34%; bottom: 33%; }
   .games-ferris { right: 2%; width: 42%; bottom: 31%; }
