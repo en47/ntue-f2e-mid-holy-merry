@@ -203,6 +203,27 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
   .site-nav.is-open a:nth-child(4) .nav-tag { animation-delay: .21s; }
   .nav-label { font-size: var(--fs-small); }
   .nav-bulb { width: 6px; height: 9px; margin-left: -3px; }
+  /* 手機選單鈕：同一張紙吊牌掛在燈串上，打開時換成紅紙、三條線收成叉。 */
+  .menu-toggle.is-strung { --tag-width: 78px; --tag-height: 38px; display: block; align-self: flex-start; margin-top: 14px; padding: 0; min-height: 0; border: 0; border-radius: 0; background: none; color: var(--ink); }
+  .menu-toggle.is-strung .nav-label { gap: .3rem; grid-auto-flow: column; justify-content: center; align-items: center; font-weight: 600; }
+  .menu-toggle[aria-expanded='true'] .nav-paper-red { opacity: 1; }
+  .menu-toggle[aria-expanded='true'] .nav-label { color: var(--cream); }
+  .menu-toggle:active .nav-drop { translate: 0 6px; }
+  .menu-toggle:active .nav-cord { scale: 1 1.25; }
+  .menu-toggle:focus-visible { outline: none; }
+  .menu-toggle:focus-visible .nav-drop { outline: 2px solid var(--red); outline-offset: 2px; border-radius: 12px; }
+  .menu-icon { width: 14px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; overflow: visible; }
+  .menu-icon path { transform-box: fill-box; transform-origin: center; transition: transform .25s ease, opacity .2s; }
+  .menu-toggle[aria-expanded='true'] .menu-icon path:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+  .menu-toggle[aria-expanded='true'] .menu-icon path:nth-child(2) { opacity: 0; }
+  .menu-toggle[aria-expanded='true'] .menu-icon path:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+}
+/* 最窄的手機放不下品牌字與文字吊牌：只留圖示，「選單」仍給讀屏使用。 */
+@media (max-width: 359px) {
+  .header-inner { gap: .25rem; }
+  .menu-toggle.is-strung { --tag-width: 46px; }
+  .site-nav.is-strung { --tag-width: 66px; }
+  .menu-toggle.is-strung .menu-label > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .nav-bulb::before { left: 1px; }
 }
 
