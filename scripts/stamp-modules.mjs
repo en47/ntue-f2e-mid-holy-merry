@@ -6,7 +6,9 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const PAGES = ['index.html', 'intro.html', 'game.html', 'wish.html', 'admin.html'];
+export const PAGES = ['index.html', 'intro.html', 'game.html', 'wish.html', 'admin.html', 'games/christmas-matching.html'];
+// A page in a subfolder reaches js/ and css/ through ../, and its import map resolves from that folder.
+const prefixOf = page => '../'.repeat(page.split('/').length - 1);
 const THREE = './vendor/three/build/three.module.js';
 const version = async file => createHash('sha256').update(await fs.readFile(path.join(project, file))).digest('hex').slice(0, 10);
 
@@ -21,19 +23,20 @@ async function walk(file, seen) {
   }
 }
 
-export async function stamp(html) {
-  const entries = [...html.matchAll(/<script type="module" src="(js\/[^"?]+)/g)].map(match => match[1]);
+export async function stamp(html, page = 'index.html') {
+  const prefix = prefixOf(page), base = prefix || './', at = prefix.replaceAll('.', '\\.');
+  const entries = [...html.matchAll(new RegExp(`<script type="module" src="${at}(js\\/[^"?]+)`, 'g'))].map(match => match[1]);
   const modules = new Set();
   for (const entry of entries) await walk(entry, modules);
-  const imports = { three: THREE };
-  for (const file of [...modules].filter(file => !entries.includes(file)).sort()) imports[`./${file}`] = `./${file}?v=${await version(file)}`;
+  const imports = prefix ? {} : { three: THREE };
+  for (const file of [...modules].filter(file => !entries.includes(file)).sort()) imports[`${base}${file}`] = `${base}${file}?v=${await version(file)}`;
   const map = `<script type="importmap">${JSON.stringify({ imports })}</script>`;
   let next = /<script type="importmap">.*<\/script>/.test(html)
     ? html.replace(/<script type="importmap">.*<\/script>/, () => map)
     : html.replace(/( *)<script type="module"/, (match, indent) => `${indent}${map}\n${match}`);
-  for (const [, , file] of [...next.matchAll(/(src|href)="((?:js|css)\/[^"?]+)(?:\?v=[^"]*)?"/g)]) {
+  for (const [, , file] of [...next.matchAll(new RegExp(`(src|href)="${at}((?:js|css)\\/[^"?]+)(?:\\?v=[^"]*)?"`, 'g'))]) {
     const stamped = await version(file);
-    next = next.replace(new RegExp(`((?:src|href)=")${file.replaceAll('.', '\\.')}(?:\\?v=[^"]*)?"`, 'g'), `$1${file}?v=${stamped}"`);
+    next = next.replace(new RegExp(`((?:src|href)=")${at}${file.replaceAll('.', '\\.')}(?:\\?v=[^"]*)?"`, 'g'), `$1${prefix}${file}?v=${stamped}"`);
   }
   return next;
 }
@@ -41,7 +44,7 @@ export async function stamp(html) {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   for (const page of PAGES) {
     const file = path.join(project, page), html = await fs.readFile(file, 'utf8');
-    await fs.writeFile(file, await stamp(html));
+    await fs.writeFile(file, await stamp(html, page));
   }
   console.log('stamped', PAGES.join(', '));
 }
