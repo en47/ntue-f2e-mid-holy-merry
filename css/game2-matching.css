@@ -282,6 +282,8 @@
 .hm-matching .card[aria-disabled="true"] { cursor: default; }
 .hm-matching .card:focus-visible { outline: 3px solid #1a472a; outline-offset: 3px; }
 .hm-matching .card-grid:focus { outline: none; }
+/* 卡片欄寬有上限，填不滿 max-width 時多出的寬度要平均分到兩側，不能全留在右邊。 */
+.hm-matching .card-grid { justify-content: center; }
 .hm-matching .modal-overlay { z-index: 5; padding: 16px; border-radius: inherit; }
 .hm-matching .modal-box { width: min(100%, 530px); max-height: 100%; overflow-y: auto; padding: 8px; }
 .hm-matching .banner-img { width: auto; height: auto; max-width: 100%; max-height: min(220px, 55vh); object-fit: contain; flex-shrink: 0; }
