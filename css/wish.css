@@ -12,6 +12,9 @@
 .wish-room.is-opening .pop { animation: pop-up 1.05s cubic-bezier(.2,.8,.3,1) var(--pop-delay, 0s) both; }
 .wish-room:not(.is-opening) .pop { opacity: 0; }
 .night-stars { left: 0; right: 0; top: 0; height: 52%; }
+.night-star, .night-dot { position: absolute; display: block; translate: -50% -50%; }
+.night-star { width: var(--size); aspect-ratio: 1; background: #f3df9e; clip-path: polygon(50.0% 0.0%, 63.2% 31.8%, 97.6% 34.5%, 71.4% 57.0%, 79.4% 90.5%, 50.0% 72.5%, 20.6% 90.5%, 28.6% 57.0%, 2.4% 34.5%, 36.8% 31.8%); }
+.night-dot { width: 4.8px; aspect-ratio: 1; border-radius: 50%; background: #e7eef5; }
 .night-moon { top: 7%; left: 37%; width: clamp(70px, 9vw, 130px); aspect-ratio: 1; }
 .night-cloud { aspect-ratio: 270 / 116; }
 .night-cloud-a { top: 22%; left: 33%; width: 11%; }

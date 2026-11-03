@@ -1,13 +1,23 @@
 // The Wish Room's night: a snowy cottage under the moon. Same paper as the other pages, darker tones.
 import { popLayer, shape } from './paper-art.js';
-import { cloud, pine, star } from './paper-props.js';
+import { cloud, pine } from './paper-props.js';
 
 const SNOW = '#e6edf3', SNOW_SHADE = '#b7c8d8', PINE = '#2f5a50', PINE_FAR = '#3c6168', LIT = '#f4c668';
 const PAPER = { scale: 1.2, grain: .45, shadow: .3, rim: '#d7dee4' }, SOFT = { ...PAPER, grain: .35, shadow: .16 };
 
-function stars(parent) {
-  for (const [x, y, size] of [[80, 60, 7], [190, 150, 5], [300, 44, 8], [450, 120, 5], [620, 54, 7], [760, 170, 4], [900, 70, 8], [1060, 150, 5], [1210, 46, 7], [1340, 130, 6], [1500, 64, 7], [1560, 190, 4], [120, 240, 4], [680, 250, 4], [1130, 250, 4]]) star(parent, x, y, size, '#f3df9e');
-  for (const [x, y] of [[230, 90], [380, 200], [530, 40], [840, 120], [980, 210], [1280, 200], [1440, 110], [60, 170]]) shape('circle', { cx: x, cy: y, r: 2.4, fill: '#e7eef5' }, parent);
+// Stars are separate sprites placed in percent: the sky stretches with the screen, the stars keep their shape.
+const STARS = [[80, 60, 7], [190, 150, 5], [300, 44, 8], [450, 120, 5], [620, 54, 7], [760, 170, 4], [900, 70, 8], [1060, 150, 5], [1210, 46, 7], [1340, 130, 6], [1500, 64, 7], [1560, 190, 4], [120, 240, 4], [680, 250, 4], [1130, 250, 4]], DOTS = [[230, 90], [380, 200], [530, 40], [840, 120], [980, 210], [1280, 200], [1440, 110], [60, 170]];
+function stars(sky) {
+  const host = document.createElement('div'); host.className = 'pop night-stars'; host.setAttribute('aria-hidden', 'true');
+  const place = (className, x, y, size) => {
+    const node = document.createElement('i'); node.className = className;
+    node.style.left = `${(x / 1600 * 100).toFixed(2)}%`; node.style.top = `${(y / 300 * 100).toFixed(2)}%`;
+    if (size) node.style.setProperty('--size', `${size * 1.8}px`);
+    host.append(node);
+  };
+  for (const [x, y, size] of STARS) place('night-star', x, y, size);
+  for (const [x, y] of DOTS) place('night-dot', x, y);
+  sky.prepend(host);
 }
 
 function moon(parent) {
@@ -54,7 +64,7 @@ function sidePines(parent) {
 
 export function mountNightScene(room) {
   const sky = room.querySelector('.room-sky'), none = { preserveAspectRatio: 'none' };
-  popLayer(sky, '0 0 1600 300', 'night-stars', stars, { delay: 0, paper: null, ...none });
+  stars(sky);
   popLayer(sky, '0 0 220 220', 'night-moon', moon, { delay: .1, paper: SOFT });
   for (const [name, delay] of [['night-cloud-a', .2], ['night-cloud-b', .3]]) popLayer(sky, '-20 0 270 116', `night-cloud ${name}`, parent => cloud(parent, 120, 62, 1.15, '#7f97ad'), { delay, paper: SOFT });
   popLayer(sky, '0 0 1600 300', 'night-forest', farForest, { delay: .25, paper: SOFT, ...none });
