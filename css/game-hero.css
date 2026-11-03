@@ -8,6 +8,19 @@
 .games-cloud-b { top: 15%; right: 30%; width: 14%; }
 .games-balloon { z-index: 2; top: 15%; left: 3%; width: 8.5%; aspect-ratio: 200 / 270; }
 .games-balloon img { animation: balloon-float 6s ease-in-out infinite alternate; }
+/* 場景紙雕只是畫，透明的部分不能擋住熱氣球；只有熱氣球的按鈕接收點擊。 */
+.games-hero > .pop { pointer-events: none; }
+.balloon-tap { position: absolute; left: 6%; top: 3%; width: 88%; height: 72%; padding: 0; border: 0; border-radius: 50% 50% 45% 45%; background: none; cursor: pointer; pointer-events: auto; }
+.balloon-tap:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.games-balloon.is-up, .games-hero.is-opening .games-balloon.is-up { z-index: 5; translate: 18% -38%; }
+@media (prefers-reduced-motion: no-preference) {
+  /* 浮起時越過山頂才移到雪山前面，籃子不會在山後突然跳出來。 */
+  /* 要蓋過開場的 .games-hero.is-opening .pop 彈出動畫（那時早已播完）。 */
+  .games-hero.is-opening .games-balloon.is-flying, .games-balloon.is-flying { animation: balloon-ride 6s ease-in-out both; }
+  .games-balloon.is-flying .balloon-arm { animation: balloon-wave .35s ease-in-out 1.6s 8 alternate both; }
+}
+@keyframes balloon-ride { 0% { translate: 0 0; z-index: 2; } 18% { z-index: 2; } 19% { z-index: 5; } 28%, 70% { translate: 18% -38%; z-index: 5; } 49% { translate: 20% -41%; } 88% { z-index: 5; } 89% { z-index: 2; } 100% { translate: 0 0; z-index: 2; } }
+@keyframes balloon-wave { from { rotate: -10deg; } to { rotate: 22deg; } }
 .games-far { z-index: 2; left: -2%; width: 104%; aspect-ratio: 1600 / 430; bottom: 33%; }
 .games-carousel { z-index: 3; left: 10%; width: 21%; aspect-ratio: 460 / 464; bottom: 31%; }
 .games-ferris { z-index: 3; right: 9%; width: 25%; aspect-ratio: 520 / 540; bottom: 31%; }
