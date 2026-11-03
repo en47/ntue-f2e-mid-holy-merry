@@ -35,13 +35,13 @@ window.addEventListener('pagehide', () => navLights.destroy());
 window.addEventListener('pageshow', event => { if (event.persisted) navLights = mountNavLights(nav); });
 
 const info = {
-  accessibility: ['無障礙與操作', [
+  accessibility: ['Site Accessibility', [
     ['鍵盤操作', '可用 Tab 鍵在按鈕與連結之間移動，按 Enter 操作。'],
     ['雪橇遊戲', '開始後用上下方向鍵移動、Escape 暫停，也可以點畫面上的按鈕。'],
     ['減少動態', '支援系統的「減少動態效果」設定，動畫停用時內容與互動仍可使用。'],
     ['文字大小', '如有閱讀需求，可透過瀏覽器放大文字。'],
   ]],
-  faq: ['常見問題', FAQ],
+  faq: ['FAQ', FAQ],
   contact: ['Contact us', '聯絡方式與社群連結尚待網站作者提供。這裡已保留入口，之後可替換為正式電子郵件與社群網址。'],
 };
 const infoDialog = document.querySelector('#info-dialog');

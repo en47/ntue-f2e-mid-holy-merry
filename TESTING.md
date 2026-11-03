@@ -509,3 +509,8 @@ node --experimental-vm-modules tests/smoke.mjs
 - `npm test` 49 項通過。
 - Game 1280、Wish 820×1180（iPad）、Intro 390 開啟 FAQ 捲到中段：彈窗本身不捲（`scrollHeight` 等於 `clientHeight`），內文區上緣在標題下方、下緣在縫線內，截圖確認文字沒有超出信紙。
 - 三種尺寸：點信紙內不關、點 backdrop 關閉、× 關閉、Escape 關閉；iPad 與手機用觸控點外面也會關閉。沒有 JS 錯誤。
+
+## 2026-11-03：說明彈窗縫線與英文標題
+
+- `npm test` 49 項通過。
+- 在 Game 1280、Wish 820×1180、Intro 390、Home 320 開啟 FAQ／Site Accessibility／Contact us，內文捲到底量測：捲動區下緣距縫線 21–23px，左右距縫線 9–14px，全部在框內；標題字型為 StorySign（Mountains of Christmas），標題吊牌沒有超出彈窗。截圖確認 390、320 寬時 Site Accessibility 換成兩行，題目換行時星星在第一行。
