@@ -588,3 +588,7 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - `npm test` 55 項通過。
 - 1440×900（頁面計時器放慢 20 倍以便在慢速 WebGL 下截圖）：雪地範圍 0–1440 × 681–758；沿最下緣走 15 步不留腳印、中段走 15 步留下 8 個完整腳印，所有痕跡外框都在範圍內。橫越樹幹底部的線被樹幹擋住、只在兩側可見。往上超出邊界的愛心在邊緣前收尾為圓頭；邊緣重新進入不留小點，單點一下仍留一點。
+
+## 2026-11-05：移除管理員授權用的臨時 IAM 角色
+
+- 本人在 Google Cloud 專案 IAM 頁面移除授權用帳號的「服務帳戶憑證建立者」（專案層級）；`firebase-adminsdk-fbsvc` 本身的角色未變動。`docs/FIREBASE-ADMIN-VERIFICATION.md` 更正授權範圍為專案層級並記錄收尾。未修改網站程式、`firestore.rules`、`firebase.json`，未部署。
