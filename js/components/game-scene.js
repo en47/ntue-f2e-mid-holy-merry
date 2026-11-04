@@ -1,19 +1,29 @@
 // Game hero stage: a snowy funfair instead of Home's village. Same paper, same light direction.
 import { paperLayer, popLayer, shape } from './paper-art.js';
 import { SHADE, SNOW, cloud, facetedPeak, fence, pine, star } from './paper-props.js';
-import { mountCoaster } from './game-coaster.js';
+import { mountCoaster, trackLine as smoothLine } from './game-coaster.js';
 
 const GREEN = '#5f8a70', DEEP = '#4f7a65', RED = '#b5544c', CREAM = '#f6ecda', GOLD = '#dcae55', TEAL = '#7fa3a8';
 
-// Two shallow swags hung from the corners and the middle. The pennants touch edge to edge, so they form the line without a cord.
+// The cord dips where the scene is low (over the balloon and tent, and at the right edge) and stays high over the
+// coaster crest and the wheel, so full-size pennants clear them. Each pennant hangs from the cord itself, a little
+// different in size, spacing and swing, like a hand-strung paper garland.
+const CORD = [[-20, 22], [160, 48], [360, 74], [520, 52], [640, 16], [800, 16], [920, 30], [1040, 28], [1180, 16], [1300, 15], [1440, 32], [1620, 58]];
+const jitter = (index, salt) => { const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453; return value - Math.floor(value); };
 function bunting(parent) {
-  const flags = [RED, CREAM, GREEN, GOLD, TEAL], width = 40, gap = 4, drop = 42;
-  const sag = x => 6 + 26 * Math.sin(Math.PI * (x % 800) / 800);
-  for (let index = 0, x = gap / 2; x + width <= 1600; index++, x += width + gap) {
-    const x2 = x + width, y1 = sag(x), y2 = sag(x2), run = Math.hypot(width, y2 - y1);
-    // The tip hangs square to the pennant's own top edge.
-    const tipX = (x + x2) / 2 - (y2 - y1) / run * drop, tipY = (y1 + y2) / 2 + width / run * drop;
-    shape('path', { d: `M${x} ${y1}L${x2} ${y2}L${tipX.toFixed(1)} ${tipY.toFixed(1)}Z`, fill: flags[index % flags.length] }, parent);
+  const flags = [RED, CREAM, GREEN, GOLD, TEAL], cord = smoothLine(CORD, 16);
+  const cordY = x => {
+    const index = Math.max(1, cord.findIndex(point => point[0] >= x)), [x1, y1] = cord[index - 1], [x2, y2] = cord[index];
+    return y1 + (y2 - y1) * (x - x1) / ((x2 - x1) || 1);
+  };
+  shape('path', { d: `M${cord.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join('L')}`, stroke: '#a9845b', 'stroke-width': 4, fill: 'none' }, parent);
+  for (let index = 0; index < 22; index++) {
+    const size = .9 + jitter(index, 2) * .2, half = 26 * size, drop = 62 * size, swing = (jitter(index, 3) - .5) * .24;
+    const x = (index + .5) / 22 * 1600 + (jitter(index, 1) - .5) * 16, y1 = cordY(x - half), y2 = cordY(x + half);
+    // Both top corners sit on the cord; the tip hangs square to that edge, then swings a few degrees.
+    const run = Math.hypot(half * 2, y2 - y1), downX = -(y2 - y1) / run, downY = half * 2 / run;
+    const tipX = x + (downX * Math.cos(swing) - downY * Math.sin(swing)) * drop, tipY = (y1 + y2) / 2 + (downX * Math.sin(swing) + downY * Math.cos(swing)) * drop;
+    shape('path', { d: `M${(x - half).toFixed(1)} ${y1.toFixed(1)}L${(x + half).toFixed(1)} ${y2.toFixed(1)}L${tipX.toFixed(1)} ${tipY.toFixed(1)}Z`, fill: flags[index % flags.length] }, parent);
   }
 }
 
@@ -215,7 +225,7 @@ function mountWheelBoost(ride, spin) {
 
 export function mountGameScene(hero) {
   const paper = { scale: 1.3, grain: .6 }, wide = { ...paper, grain: .4, shadow: .16 }, none = { preserveAspectRatio: 'none' };
-  popLayer(hero, '0 0 1600 96', 'games-bunting', bunting, { delay: .15, paper });
+  popLayer(hero, '0 0 1600 170', 'games-bunting', bunting, { delay: .15, paper });
   popLayer(hero, '-20 0 270 116', 'games-cloud games-cloud-a', parent => cloud(parent, 120, 62, 1.15), { delay: .1, paper });
   popLayer(hero, '-20 0 270 116', 'games-cloud games-cloud-b', parent => cloud(parent, 120, 62, 1.15), { delay: .3, paper });
   const flight = popLayer(hero, '0 0 200 270', 'games-balloon', balloon, { delay: .4, paper });
