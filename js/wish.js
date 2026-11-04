@@ -5,6 +5,7 @@ import { mountWishLights } from './components/wish-lights.js';
 import { mountTitleArt } from './components/title-art.js';
 import { mountWishReader } from './components/wish-reader.js';
 import { mountCottage } from './components/wish-cottage.js';
+import { mountSnowDoodle } from './components/snow-doodle.js';
 import { paperLayer } from './components/paper-art.js';
 import { airmailLetter, tagArt } from './components/paper-props.js';
 const form = document.querySelector('#wish-form');
@@ -125,6 +126,7 @@ mountTitleArt(room.querySelector('#room-title'), 'the-wish-room', { palette: ['#
 mountNightScene(room);
 const cottage = mountCottage(room);
 mountWishPaper(room);
+mountSnowDoodle(room);
 const lights = mountWishLights(room);
 let sceneController = null, sceneVersion = 0;
 async function startScene() {
