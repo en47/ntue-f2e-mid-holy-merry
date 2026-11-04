@@ -59,7 +59,8 @@ main { padding-block: 3.5rem 4.5rem; }
 .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 1.3rem; font-size: var(--fs-small); }
 .footer-links { display: flex; align-items: center; gap: 1rem; }
 .footer-inner p { margin: 0; }
-.footer-note { color: var(--muted); font-size: var(--fs-small); }
+/* 音樂按鈕固定在右下角；頁尾右側讓出按鈕寬度，Contact us 才不會被蓋住（寬螢幕本來就有足夠邊距，不會內縮）。 */
+@media (min-width: 701px) { .footer-inner { padding-right: max(0px, min(calc(68px + .7rem), calc(68px + 2.2rem - (100% - var(--content)) / 2))); } }
 .music-widget { position: fixed; right: 1.4rem; bottom: 1.4rem; z-index: 20; }
 dialog { width: min(530px, calc(100% - 2rem)); padding: 2rem; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); max-height: 85dvh; overflow-y: auto; }
 /* 頁尾說明：紙雕信紙（JS 產生 --info-sheet），沒有圖時退回素色紙。 */
@@ -75,6 +76,22 @@ dialog { width: min(530px, calc(100% - 2rem)); padding: 2rem; color: var(--ink);
 /* 內文在縫線內捲動，上下邊緣淡出，看得出還有下文。 */
 .info-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: .8rem .5rem 1.2rem 0; scrollbar-width: thin; scrollbar-color: #d9bfa3 transparent; -webkit-mask-image: linear-gradient(transparent, #000 .9rem, #000 calc(100% - 1.4rem), transparent); mask-image: linear-gradient(transparent, #000 .9rem, #000 calc(100% - 1.4rem), transparent); }
 .info-body:focus { outline: none; }
+/* Contact us：航空信封。縫線換成和 Intro 明信片同色的紅綠斜紋。 */
+#info-dialog.is-airmail::before { border: 9px solid; border-radius: 0; border-image: repeating-linear-gradient(-45deg, #a84a42 0 14px, #fdf6e6 14px 28px, #4f7d68 28px 42px, #fdf6e6 42px 56px) 9; }
+.info-contact { padding: 0 .4rem; }
+.contact-lead { margin: 0 0 1rem; line-height: 1.75; }
+.contact-stamp { float: right; width: 64px; height: auto; margin: .2rem 0 .6rem 1rem; transform: rotate(5deg); filter: drop-shadow(0 3px 4px #5a3a2a33); }
+.contact-address { margin: 0 0 .9rem; padding: .2rem 0 .2rem 1rem; border-left: 3px solid #e3cfae; color: var(--ink); font-family: var(--font-display); font-style: normal; font-size: var(--fs-body); font-weight: 700; line-height: 1.5; }
+.contact-address span { display: block; }
+.contact-address span:first-child { color: var(--red-dark); font-size: var(--fs-title); line-height: 1.2; }
+.contact-copy { clear: both; padding: .45rem 1.1rem; border: 0; border-radius: 999px; background: var(--red); color: #fffbed; font: inherit; font-weight: 700; cursor: pointer; }
+.contact-copy:hover { background: var(--red-dark); }
+.contact-status { display: block; min-height: 1.75em; margin-top: .3rem; color: var(--green); font-size: var(--fs-small); }
+.contact-links { margin: .4rem 0 1rem; padding: .9rem 0 0; border-top: 2px dashed #e3cfae; list-style: none; }
+.contact-links li + li { margin-top: .4rem; }
+.contact-links a { color: var(--red-dark); font-weight: 700; }
+.contact-links a::before { content: '✉ '; }
+.contact-note { margin: 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.6; }
 #info-content { margin: 0 .4rem; line-height: 1.75; }
 .info-list { margin: 0; }
 .info-list dt { position: relative; margin-top: 1.1em; padding: 1em 0 0 1.6em; border-top: 2px dashed #e3cfae; color: var(--red-dark); font-weight: 700; }

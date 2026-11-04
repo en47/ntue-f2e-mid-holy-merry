@@ -521,3 +521,11 @@ node --experimental-vm-modules tests/smoke.mjs
 - Chromium 模擬 iPhone（390、觸控）：點 Site Accessibility 打開後焦點在 `.info-body`、outline 為 none，截圖 × 沒有紅圈；按 Tab 焦點到 ×、outline 為 solid。鍵盤 Enter 打開 FAQ 時焦點同樣在內文區，按方向鍵下可捲動。
 - Intro 展開地圖、點冰島開明信片：焦點在標題、outline 為 none，截圖關閉鈕沒有紅圈；按 Tab 到插圖按鈕，焦點框正常。
 - 這台機器的 WebKit 無法開頁面，iOS Safari 未實機驗證；做法與先前在 iPhone 上已確認有效的配對遊戲修正相同。
+
+## 2026-11-04：Contact us 航空信封
+
+- `npm test` 49 項通過。
+- Game 1280、Intro 390、Wish 320 開 Contact us：套用航空斜紋、標題為 Contact us、兩個連結都是 `target="_blank" rel="noopener noreferrer"`、郵票載入；320 寬內文可捲動。截圖確認版面。
+- 用 CDP 確認地址「Tähtikuja 1」11 個字全部由 Mountains of Christmas 顯示，「ä」沒有改用其他字型。點「複製地址」後，剪貼簿是五行地址，狀態顯示「已複製」。關掉後開 FAQ：航空斜紋移除、聯絡卡片隱藏、8 題正常。
+- 兩個外部連結 `curl` 都回應 200。
+- 頁尾與音樂按鈕：13 種寬度（1920–320）× 四頁捲到底量測，Contact us 都沒被音樂按鈕蓋住（701–1280 間距 13px）。701px 的 4px 水平捲動來自導覽燈串，正式網站相同，非本次造成。

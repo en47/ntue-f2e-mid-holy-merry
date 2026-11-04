@@ -4,7 +4,6 @@
 .wish-page .page-foreground { height: clamp(120px, 13vw, 190px); margin-top: 0; background: #22384f; }
 .room-edge { position: absolute; z-index: 6; left: 0; bottom: -1px; width: 100%; height: clamp(18px, 2.6vw, 34px); fill: #22384f; pointer-events: none; }
 .wish-page .site-footer .text-button { color: #fbecc4; }
-.wish-page .site-footer .footer-note { color: #aebccb; }
 .wish-page main { padding: 0; }
 .wish-room { --ground: 12%; position: relative; isolation: isolate; overflow: hidden; overflow: clip; width: 100%; height: clamp(600px, calc(100svh - 108px), 950px); margin: 0; background: linear-gradient(#22384f 0%, #33526f 52%, #5c7c97 78%); }
 .room-sky { position: absolute; inset: 0; pointer-events: none; z-index: -2; }

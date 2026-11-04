@@ -4,6 +4,7 @@ import { mountNavLights } from './components/nav-lights.js';
 import { mountMusic } from './components/music-player.js';
 import { mountSantaPlaceholders } from './components/santa-placeholder.js';
 import { FAQ } from './data/faq.js';
+import { CONTACT } from './data/contact.js';
 import { showInfo } from './components/info-dialog.js';
 
 document.documentElement.classList.add('js-ready');
@@ -42,7 +43,7 @@ const info = {
     ['文字大小', '如有閱讀需求，可透過瀏覽器放大文字。'],
   ]],
   faq: ['FAQ', FAQ],
-  contact: ['Contact us', '聯絡方式與社群連結尚待網站作者提供。這裡已保留入口，之後可替換為正式電子郵件與社群網址。'],
+  contact: ['Contact us', CONTACT],
 };
 const infoDialog = document.querySelector('#info-dialog');
 document.querySelectorAll('[data-info]').forEach(button => {
