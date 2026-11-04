@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CARS, trainKeyframes } from '../js/components/game-coaster.js';
+import { CARS, TRACKS, trackLine, trainKeyframes } from '../js/components/game-coaster.js';
 
 const boxX = transform => parseFloat(transform.match(/translate\(([-\d.]+)%/)[1]) * 16;
 
@@ -31,4 +31,12 @@ test('reduced motion parks the train on the visible part of the lift hill', () =
   const { parked } = trainKeyframes();
   assert.equal(parked.length, CARS);
   for (const pose of parked) assert.ok(boxX(pose) > 420 && boxX(pose) < 700, pose);
+});
+
+test('the small-screen track keeps the lift hill and drop, then stays flat past the wheel', () => {
+  const after = trackLine(TRACKS.flat).filter(([x]) => x > 1000);
+  assert.ok(after.every(([, y]) => Math.abs(y - 346) < 4), 'no camelback after the drop');
+  assert.deepEqual(TRACKS.flat.slice(0, 10), TRACKS.full.slice(0, 10));
+  const { cars, run } = trainKeyframes({ points: TRACKS.flat });
+  assert.ok(boxX(cars[2].at(-1).transform) > 1600 && run > 4000 && run < 10000, `run ${run}`);
 });

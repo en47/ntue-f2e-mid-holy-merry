@@ -2,6 +2,7 @@
 // It uses the far mountains' units (x 0–1600, their base at y 430); the box reaches 200 units higher for the sky
 // and 90 lower, so the trestle feet always end behind the snow ridge.
 // The train runs by itself: in from the left, up the lift hill, down behind Santa, out to the right, then a pause.
+// Screens up to 900px wide, and phones held sideways, get the flat variant after the drop.
 import { paperLayer, popLayer, shape } from './paper-art.js';
 
 export const COASTER_BOX = '0 -200 1600 720';
@@ -11,6 +12,11 @@ const TOP = -200, WIDTH = 1600, HEIGHT = 720;
 const TRACK = [[-300, 300], [-120, 300], [60, 298], [220, 302], [380, 300], [450, 284], [520, 214], [580, 160], [630, 108], [668, 90], [704, 98],
   [744, 150], [790, 256], [846, 326], [912, 338], [980, 276], [1030, 170], [1072, 128], [1114, 136], [1170, 222], [1240, 304], [1320, 334],
   [1410, 300], [1490, 240], [1560, 236], [1660, 286], [1800, 304], [1960, 306]];
+// Small screens keep only the lift hill and the big drop; after it the track runs low and flat behind the wheel,
+// so the wheel's spokes are not crossed by a camelback and a tall trestle.
+const FLAT = [...TRACK.slice(0, TRACK.findIndex(([x]) => x === 912) + 1), [1000, 344], [1150, 346], [1400, 346], [1700, 346], [1960, 346]];
+export const TRACKS = { full: TRACK, flat: FLAT };
+const COMPACT = '(max-width: 900px), (max-height: 500px)';
 const LIFT_FROM = 450, CRUISE = 420, LIFT = 150, GRAVITY = 820, DRAG = .00012;
 export const CAR_GAP = 56, CARS = 3, PAUSE = 4000;
 
@@ -60,9 +66,9 @@ export function trainTimeline(line = trackLine()) {
 }
 
 // One keyframe list per car. Each car element covers the whole coaster box, so translate percentages are box units.
-export function trainKeyframes({ frames = 180, pause = PAUSE } = {}) {
+export function trainKeyframes({ points = TRACK, frames = 180, pause = PAUSE } = {}) {
   // The front car follows the timeline; the others trail it by CAR_GAP. Both ends of the track lie off screen.
-  const timeline = trainTimeline(), run = timeline.duration, cycle = run + pause;
+  const timeline = trainTimeline(trackLine(points)), run = timeline.duration, cycle = run + pause;
   const pose = ({ x, y, angle }) => `translate(${(x / WIDTH * 100).toFixed(3)}%, ${((y - TOP) / HEIGHT * 100).toFixed(3)}%) rotate(${angle.toFixed(2)}deg)`;
   const cars = Array.from({ length: CARS }, (_, car) => {
     const keyframes = [];
@@ -91,8 +97,8 @@ function trackHeight(line, x) {
   const [x1, y1] = line[index - 1], [x2, y2] = line[index];
   return y1 + (y2 - y1) * (x - x1) / ((x2 - x1) || 1);
 }
-function drawTrack(parent) {
-  const line = trackLine(), d = `M${line.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join('L')}`, base = FOOT;
+const drawTrack = points => parent => {
+  const line = trackLine(points), d = `M${line.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join('L')}`, base = FOOT;
   // Wooden trestle: posts every 40 units, ledgers every 60 units of height, one diagonal per bay. Their feet stand behind the snow ridge.
   const posts = [];
   for (let x = 0; x <= WIDTH; x += 40) posts.push([x, trackHeight(line, x) + 8]);
@@ -108,7 +114,7 @@ function drawTrack(parent) {
   shape('path', { d, stroke: WOOD, 'stroke-width': 13, 'stroke-linejoin': 'round', fill: 'none' }, parent);
   shape('path', { d, stroke: TIE, 'stroke-width': 13, 'stroke-dasharray': '3 11', fill: 'none' }, parent);
   shape('path', { d, stroke: SNOW, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none', transform: 'translate(0 -6)' }, parent);
-}
+};
 
 // Small sleigh cars with two riders each; the art's bottom-centre sits on the rail.
 const RIDER_HATS = [['#b5544c', '#fbf8f1'], ['#5f8a70', '#dcae55'], ['#4f7a65', '#fbf8f1'], ['#b5544c', '#dcae55'], ['#dcae55', '#fbf8f1'], ['#7fa3a8', '#fbf8f1']];
@@ -128,9 +134,11 @@ function car(fill, index) {
 }
 
 export function mountCoaster(hero, { paper, delay = 3400 } = {}) {
-  const layer = popLayer(hero, COASTER_BOX, 'games-coaster', drawTrack, { delay: .5, paper });
-  const { cars, cycle, parked } = trainKeyframes();
-  const elements = cars.map((_, index) => {
+  const compact = matchMedia(COMPACT), variant = () => (compact.matches ? 'flat' : 'full');
+  let shown = variant(), plan = trainKeyframes({ points: TRACKS[shown] });
+  const layer = popLayer(hero, COASTER_BOX, 'games-coaster', drawTrack(TRACKS[shown]), { delay: .5, paper });
+  const track = layer.querySelector('img'), sources = { [shown]: track.src };
+  const elements = plan.cars.map((_, index) => {
     const element = document.createElement('div');
     element.className = 'coaster-car';
     paperLayer(element, '-6 -6 76 54', 'coaster-car-art', car(['#b5544c', '#5f8a70', '#dcae55'][index], index), { paper: { scale: .5, grain: .45, shadow: .25 }, eager: true });
@@ -139,13 +147,25 @@ export function mountCoaster(hero, { paper, delay = 3400 } = {}) {
   });
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   let animations = [], inView = true;
-  const park = () => { animations.forEach(animation => animation.cancel()); animations = []; elements.forEach((element, index) => { element.style.transform = parked[index]; }); };
+  const park = () => { animations.forEach(animation => animation.cancel()); animations = []; elements.forEach((element, index) => { element.style.transform = plan.parked[index]; }); };
   const start = () => {
     if (motion.matches) { park(); return; }
     elements.forEach(element => { element.style.transform = ''; });
-    if (!animations.length) animations = elements.map((element, index) => element.animate(cars[index], { duration: cycle, delay, iterations: Infinity, fill: 'both' }));
+    if (!animations.length) {
+      animations = elements.map((element, index) => element.animate(plan.cars[index], { duration: plan.cycle, delay, iterations: Infinity, fill: 'both' }));
+      delay = 0; // Only the first ride waits for the opening.
+    }
     animations.forEach(animation => { if (inView && !document.hidden) animation.play(); else animation.pause(); });
   };
+  // Rotating a phone can cross the compact query: swap the track picture (each variant drawn once) and the ride.
+  compact.addEventListener('change', () => {
+    if (variant() === shown) return;
+    shown = variant(); plan = trainKeyframes({ points: TRACKS[shown] });
+    sources[shown] ??= paperLayer(document.createElement('div'), COASTER_BOX, '', drawTrack(TRACKS[shown]), { paper, eager: true }).querySelector('img').src;
+    track.src = sources[shown];
+    animations.forEach(animation => animation.cancel()); animations = [];
+    start();
+  });
   const observer = new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; start(); });
   observer.observe(hero);
   motion.addEventListener('change', start);
