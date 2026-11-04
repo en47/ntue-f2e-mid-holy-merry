@@ -566,3 +566,8 @@ node --experimental-vm-modules tests/smoke.mjs
 ## 2026-11-04：新增第二位管理員
 
 - 以 `tools/firebase-admin/set-admin-claim.mjs` 對 UID `YOgd6P5qm1h69uh2UWX3qMDHoGC3` 先試跑、再 `--grant --apply`，工具讀回確認 `admin: true`。詳細流程與收尾見 `docs/FIREBASE-ADMIN-VERIFICATION.md`。新管理員須在 admin.html 登出再登入取得新 token；尚未由新管理員實際登入審核頁驗收。
+
+## 2026-11-04：故事書窄視窗翻頁按鈕
+
+- `npm test` 53 項通過。
+- 滑鼠 633×700：翻開後上一章／下一章按鈕可見（104×44），按下一章到 02/03「聖尼古拉」，再按上一章回 01/03；不顯示滑動提示。觸控 390×844（`hover: none`）：按鈕維持隱藏、顯示滑動提示。滑鼠 1280×800 桌機版行為不變。截圖確認按鈕在書下方。
