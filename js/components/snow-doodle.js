@@ -1,9 +1,10 @@
-// Wish 頁信紙下方的雪地：滑鼠經過留下小靴印，按住拖曳用樹枝在雪上劃線，幾秒後被雪蓋平。
+// Wish 頁最前面的雪地：滑鼠經過留下小靴印，按住拖曳用樹枝在雪上劃線，很快被雪蓋平。
 // 只在有滑鼠的電腦、而且信紙下方真的空出一片雪地時出現（例如全螢幕這類較高的視窗）。
+// 雪地從左到右都能畫；聖誕樹、精靈與聖誕襪的感應區疊在上面，在它們身上照舊操作它們。
 import { paperLayer, pauseOffscreen, shape } from './paper-art.js';
 import { tagArt } from './paper-props.js';
 
-const MIN_GAP = 100, STRIDE = 22, PRINT_LIFE = 2200, LINE_LIFE = 5200, FILL = 2400, MAX_LINES = 14;
+const MIN_GAP = 100, STRIDE = 22, PRINT_LIFE = 900, LINE_LIFE = 2200, FILL = 1100, MAX_LINES = 14;
 const SNOW = '#fbfdff', PRESSED = '#bfd0dc', GROOVE = '#a9bdcc';
 const SOLE = 'M0-12C5-12 6-6 5 0 4 4 2 5 0 5-2 5-4 4-5 0-6-6-5-12 0-12Z';
 
@@ -31,7 +32,7 @@ export function mountSnowDoodle(room) {
   field.className = 'snow-doodle'; field.hidden = true; field.setAttribute('aria-hidden', 'true');
   const marks = shape('svg', { class: 'snow-marks' }, field);
   const hint = document.createElement('div'), tag = document.createElement('span');
-  hint.className = 'snow-hint'; tag.className = 'snow-tag'; tag.textContent = '在雪地上畫畫看';
+  hint.className = 'snow-hint'; tag.className = 'snow-tag'; tag.lang = 'en'; tag.textContent = 'Draw in the snow';
   paperLayer(hint, '0 0 150 86', 'snow-twig', twig, { paper: { scale: .5, grain: .45, shadow: .28 }, eager: true });
   paperLayer(tag, '0 0 240 90', 'snow-tag-art', tagArt('#a84a42', '#853a34'), { paper: { scale: .7, grain: .45, shadow: .24 }, eager: true, preserveAspectRatio: 'none' });
   hint.append(tag); field.append(hint);
@@ -89,14 +90,15 @@ export function mountSnowDoodle(room) {
   field.addEventListener('pointerup', lift);
   field.addEventListener('lostpointercapture', lift);
 
-  // The field spans the snow between the letter's bottom edge, the stocking post and the room's lower edge.
+  // The field is the bright front snow, edge to edge, from under the letter down to the room's lower edge.
   // Layout offsets, not on-screen boxes: the letter's opening animation moves it with transforms for a moment.
   function place() {
     const letterBottom = form.offsetTop + form.offsetHeight, roomHeight = room.clientHeight;
     const usable = mouse.matches && getComputedStyle(form).position === 'absolute' && roomHeight - letterBottom >= MIN_GAP;
-    const left = Math.max(6, form.offsetLeft - 16), right = station.offsetLeft + station.offsetWidth * .08;
+    const left = 0, right = room.clientWidth;
     // Stay on the bright front snow: on tall screens the band right under the letter is the darker far slope.
-    const ground = room.querySelector('.night-snow'), front = ground ? ground.offsetParent.offsetTop + ground.offsetTop + ground.offsetHeight * .36 : 0;
+    // Its top edge dips lowest about a third of the way across, at 42% of the snow layer's height.
+    const ground = room.querySelector('.night-snow'), front = ground ? ground.offsetParent.offsetTop + ground.offsetTop + ground.offsetHeight * .42 : 0;
     const top = Math.max(letterBottom + 8, front), bottom = roomHeight - edge.getBoundingClientRect().height * .5;
     if (!usable || right - left < 220 || bottom - top < 70) { field.hidden = true; clear(); return; }
     const next = `${Math.round(right - left)}x${Math.round(bottom - top)}`;
