@@ -5,13 +5,15 @@ import { mountCoaster } from './game-coaster.js';
 
 const GREEN = '#5f8a70', DEEP = '#4f7a65', RED = '#b5544c', CREAM = '#f6ecda', GOLD = '#dcae55', TEAL = '#7fa3a8';
 
+// Two shallow swags hung from the corners and the middle. The pennants touch edge to edge, so they form the line without a cord.
 function bunting(parent) {
-  const flags = [RED, CREAM, GREEN, GOLD, TEAL];
-  shape('path', { d: 'M-10 18C260 92 520 92 800 40S1340 16 1610 70', stroke: '#a9845b', 'stroke-width': 4, fill: 'none' }, parent);
-  for (let index = 0; index < 22; index++) {
-    const t = (index + .5) / 22, x = t * 1600;
-    const y = 18 + Math.sin(t * Math.PI) * 58 - Math.sin(t * Math.PI * 2) * 24;
-    shape('path', { d: `M${x - 26} ${y}L${x + 26} ${y + 2}L${x} ${y + 62}Z`, fill: flags[index % flags.length] }, parent);
+  const flags = [RED, CREAM, GREEN, GOLD, TEAL], width = 40, gap = 4, drop = 42;
+  const sag = x => 6 + 26 * Math.sin(Math.PI * (x % 800) / 800);
+  for (let index = 0, x = gap / 2; x + width <= 1600; index++, x += width + gap) {
+    const x2 = x + width, y1 = sag(x), y2 = sag(x2), run = Math.hypot(width, y2 - y1);
+    // The tip hangs square to the pennant's own top edge.
+    const tipX = (x + x2) / 2 - (y2 - y1) / run * drop, tipY = (y1 + y2) / 2 + width / run * drop;
+    shape('path', { d: `M${x} ${y1}L${x2} ${y2}L${tipX.toFixed(1)} ${tipY.toFixed(1)}Z`, fill: flags[index % flags.length] }, parent);
   }
 }
 
@@ -213,7 +215,7 @@ function mountWheelBoost(ride, spin) {
 
 export function mountGameScene(hero) {
   const paper = { scale: 1.3, grain: .6 }, wide = { ...paper, grain: .4, shadow: .16 }, none = { preserveAspectRatio: 'none' };
-  popLayer(hero, '0 0 1600 170', 'games-bunting', bunting, { delay: .15, paper });
+  popLayer(hero, '0 0 1600 96', 'games-bunting', bunting, { delay: .15, paper });
   popLayer(hero, '-20 0 270 116', 'games-cloud games-cloud-a', parent => cloud(parent, 120, 62, 1.15), { delay: .1, paper });
   popLayer(hero, '-20 0 270 116', 'games-cloud games-cloud-b', parent => cloud(parent, 120, 62, 1.15), { delay: .3, paper });
   const flight = popLayer(hero, '0 0 200 270', 'games-balloon', balloon, { delay: .4, paper });

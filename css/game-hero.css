@@ -2,7 +2,8 @@
    Back to front: clouds, mountains, scenery, Santa, snow hill, signs, snowbank, torn edge. */
 .games-hero { position: relative; isolation: isolate; width: 100%; height: calc(100svh - var(--games-header-height)); min-height: 600px; margin: 0; padding: 0; overflow: hidden; overflow: clip; background: linear-gradient(180deg, #c7e3ec 0%, #dcedf1 42%, #f4efe4 74%, #fbf6ea 100%); }
 .hero-paper { transform-origin: 50% 100%; }
-.games-bunting { z-index: 1; top: -1%; left: 0; width: 100%; aspect-ratio: 1600 / 170; transform-origin: 50% 0; }
+/* 彩旗掛在最前面、貼著頂端；矮而寬的視窗裡雲霄飛車頂或摩天輪就算碰到，也是從旗子後面經過。 */
+.games-bunting { z-index: 8; top: 0; left: 0; width: 100%; aspect-ratio: 1600 / 96; transform-origin: 50% 0; }
 .games-cloud { z-index: 1; aspect-ratio: 270 / 116; }
 .games-cloud-a { top: 22%; left: 16%; width: 12%; }
 .games-cloud-b { top: 15%; right: 30%; width: 14%; }
@@ -130,7 +131,6 @@
   .games-hero-hill { left: -30%; width: 160%; height: 30%; }
   .games-hero-front { left: -30%; width: 160%; height: 9%; }
   /* 手機的標題牌離開地面，改用兩條繩子從畫面頂端垂下，和 Intro 的吊飾相同；彩旗在繩子前面。 */
-  .games-bunting { z-index: 8; }
   .games-hero-title-sign { left: 50%; bottom: auto; top: 10vw; width: 74%; margin-left: -37%; transform-origin: 50% -20%; }
   .games-hero-title-sign [data-sign='title-base'] { display: none; }
   .games-hero-title-sign::before, .games-hero-title-sign::after { content: ''; position: absolute; z-index: -1; top: -200%; height: 222%; width: 3px; border-radius: 2px; background: repeating-linear-gradient(180deg, #a9845b 0 5px, #8f6d48 5px 8px); }
