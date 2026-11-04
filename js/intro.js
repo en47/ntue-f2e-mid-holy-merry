@@ -28,7 +28,7 @@ const harbor=mountHarbor(cultures);
 paperLayer(cultures.querySelector('.intro-letter-open'),'0 0 240 106','tag-art',tagArt('#a84a42','#853a34'),{paper:{scale:.7,grain:.45,shadow:.24},eager:true,preserveAspectRatio:'none'});
 const scroll=mountIntroScroll(cultures,{sleigh:mountMapArt(cultures.querySelector('.intro-map-canvas'))});
 // Localized, up-to-date Intro help without changing other pages' shared module.
-const info={accessibility:['Site Accessibility',[['鍵盤操作','可用 Tab 選取按鈕，Enter 或空白鍵操作。'],['故事書','選取故事書後，可用左右方向鍵翻章。'],['地圖與明信片','地圖上的六個紅點可打開文化明信片，下方國家名稱也能操作；明信片可按 Escape 關閉。'],['減少動態','支援系統的減少動態設定，動畫停用時內容及互動仍可使用。']]],contact:['Contact us','聯絡方式與社群連結尚待網站作者提供。']};
+const info={accessibility:['Site Accessibility',[['鍵盤操作','可用 Tab 選取按鈕，Enter 或空白鍵操作。'],['故事書','選取故事書後，可用左右方向鍵翻章。'],['地圖與明信片','地圖上的六個紅點可打開文化明信片，下方國家名稱也能操作；明信片可按 Escape 關閉。'],['減少動態','支援系統的減少動態設定，動畫停用時內容及互動仍可使用。']]]};
 const help=event=>{const button=event.target.closest('[data-info]');if(!button)return;const item=info[button.dataset.info];if(!item)return;event.stopImmediatePropagation();showInfo(document.querySelector('#info-dialog'),...item);};
 document.addEventListener('click',help,true);
 addEventListener('pagehide',event=>{if(event.persisted)return;book.destroy();postcards.destroy();scroll.destroy();harbor.destroy();headerSize.disconnect();document.removeEventListener('click',help,true);},{once:false});

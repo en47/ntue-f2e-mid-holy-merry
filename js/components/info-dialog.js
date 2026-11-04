@@ -19,11 +19,11 @@ function decorate(dialog) {
   paperLayer(title, '0 0 240 90', 'info-title-tag', tagArt('#ad3c3b', '#87302f'), { paper: { scale: .7, grain: .4, shadow: .24 }, eager: true, preserveAspectRatio: 'none' });
   paperLayer(title, '0 0 100 80', 'info-title-holly', group => { holly(group, 46, 44, .85); star(group, 84, 20, 9); }, { paper: { scale: .5, grain: .4, shadow: .3 }, eager: true });
   // 標題固定在信紙上方，只有內文在縫線內捲動，文字不會跑出紙外。
-  const body = document.createElement('div'), list = document.createElement('dl');
-  body.className = 'info-body'; list.className = 'info-list';
+  const body = document.createElement('div'), list = document.createElement('dl'), card = document.createElement('div');
+  body.className = 'info-body'; list.className = 'info-list'; card.className = 'info-contact';
   body.tabIndex = -1;
   dialog.querySelector('#info-content').before(body);
-  body.append(dialog.querySelector('#info-content'), list);
+  body.append(dialog.querySelector('#info-content'), list, card);
   // 點信紙外（backdrop）關閉；按下與放開都在外面才算，避免拖曳選字時誤關。
   const outside = event => {
     const box = dialog.getBoundingClientRect();
@@ -32,18 +32,49 @@ function decorate(dialog) {
   let pressedOutside = false;
   dialog.addEventListener('pointerdown', event => { pressedOutside = outside(event); });
   dialog.addEventListener('click', event => { if (pressedOutside && outside(event)) dialog.close(); pressedOutside = false; });
-  return { text, body, list };
+  return { text, body, list, card };
+}
+
+const make = (tag, className, text) => {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+};
+// Contact us：航空信封上的地址、複製按鈕與官方連結（另開分頁）。
+function contactCard(card, { lead, address, links, note }) {
+  const stamp = make('img', 'contact-stamp');
+  stamp.src = new URL('../../images/wish/stamp-tree.svg', import.meta.url).href;
+  stamp.alt = ''; stamp.width = 120; stamp.height = 144;
+  const lines = make('address', 'contact-address');
+  lines.lang = 'en';
+  address.forEach(line => lines.append(make('span', '', line)));
+  const copy = make('button', 'contact-copy', '複製地址'), status = make('span', 'contact-status');
+  copy.type = 'button'; status.setAttribute('role', 'status');
+  copy.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(address.join('\n')); status.textContent = '已複製，可以寫到信封上了！'; }
+    catch { getSelection()?.selectAllChildren(lines); status.textContent = '已選取地址，請手動複製。'; }
+  });
+  const list = make('ul', 'contact-links');
+  for (const [label, href] of links) {
+    const link = make('a', '', label);
+    link.href = href; link.target = '_blank'; link.rel = 'noopener noreferrer';
+    list.append(make('li')); list.lastChild.append(link);
+  }
+  card.replaceChildren(make('p', 'contact-lead', lead), stamp, lines, copy, status, list, make('p', 'contact-note', note));
 }
 
 const parts = new WeakMap();
-// `content` 是一段文字，或 [標題, 說明] 的陣列（FAQ、無障礙說明）。
+// `content` 是一段文字、[標題, 說明] 的陣列（FAQ、無障礙說明），或聯絡卡片資料（Contact us）。
 export function showInfo(dialog, title, content) {
   if (!parts.has(dialog)) parts.set(dialog, decorate(dialog));
-  const { text, body, list } = parts.get(dialog), paragraph = dialog.querySelector('#info-content');
-  const isList = Array.isArray(content);
+  const { text, body, list, card } = parts.get(dialog), paragraph = dialog.querySelector('#info-content');
+  const isList = Array.isArray(content), isCard = !isList && typeof content === 'object';
   text.textContent = title;
-  paragraph.hidden = isList; list.hidden = !isList;
-  if (isList) {
+  paragraph.hidden = isList || isCard; list.hidden = !isList; card.hidden = !isCard;
+  dialog.classList.toggle('is-airmail', isCard);
+  if (isCard) contactCard(card, content);
+  else if (isList) {
     list.replaceChildren(...content.flatMap(([term, detail]) => {
       const dt = document.createElement('dt'), dd = document.createElement('dd');
       dt.textContent = term; dd.textContent = detail;
