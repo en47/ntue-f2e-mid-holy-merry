@@ -75,4 +75,31 @@ export function mountHeroSigns(root) {
     image.className = 'sign-art';
     slot.append(image);
   }
+  fitSignLabels(root.querySelector('.games-hero-navigation'));
+}
+
+// Both arrow labels stay on one line at the title size. When a board is too narrow for "Christmas Matching",
+// the two labels shrink together by the same factor, so the boards never hold a wrapped, overflowing label.
+function fitSignLabels(nav) {
+  const links = [...nav.querySelectorAll('.games-hero-link')];
+  const labels = links.map(link => {
+    const label = document.createElement('span');
+    label.className = 'games-hero-label';
+    label.append(...link.childNodes);
+    link.append(label);
+    return label;
+  });
+  const fit = () => {
+    const ratio = Math.min(1, ...links.map((link, index) => {
+      const style = getComputedStyle(link), room = link.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      return labels[index].offsetWidth ? room / labels[index].offsetWidth : 1;
+    }));
+    nav.style.setProperty('--label-fit', ratio.toFixed(3));
+  };
+  const observer = new ResizeObserver(fit);
+  const watch = () => links.forEach(link => observer.observe(link));
+  watch();
+  document.fonts?.ready.then(fit); // The display font changes the label width once it arrives.
+  window.addEventListener('pagehide', () => observer.disconnect());
+  window.addEventListener('pageshow', event => { if (event.persisted) { watch(); fit(); } });
 }

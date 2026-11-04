@@ -72,6 +72,9 @@
 .games-hero.is-opening .sign-board-bottom { animation-duration: 3.7s; animation-delay: 2.4s; }
 .games-hero-title-sign h1 { position: absolute; left: 17%; top: 22%; width: 72%; height: 42%; display: grid; align-content: center; margin: 0; color: #74473a; font: 700 var(--fs-title)/1.08 var(--font-display); letter-spacing: 0; text-align: center; overflow-wrap: normal; }
 .games-hero-link { position: absolute; z-index: 2; left: 16%; width: 66%; height: 22%; display: flex; align-items: center; justify-content: center; padding: 0 .5rem; border: 0; border-radius: 12px; background: transparent; box-shadow: none; color: #74473a; font: 700 var(--fs-title)/1.1 var(--font-display); text-align: center; overflow-wrap: normal; pointer-events: auto; cursor: pointer; }
+/* 路牌文字維持一行；木板太窄時由 JS 算出 --label-fit，兩塊一起等比例縮小（字級仍是 token）。 */
+.games-hero-link { white-space: nowrap; }
+.games-hero-label { display: inline-block; scale: var(--label-fit, 1); }
 .sign-board-top .games-hero-link { top: 20%; }
 .sign-board-bottom .games-hero-link { top: 58%; height: 19%; }
 .games-hero-link:hover { color: #4e2f25; text-decoration: underline; text-underline-offset: .2em; }
