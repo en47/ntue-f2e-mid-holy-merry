@@ -4,7 +4,7 @@
 .hero-paper { transform-origin: 50% 100%; }
 .games-bunting { z-index: 1; top: -1%; left: 0; width: 100%; aspect-ratio: 1600 / 170; transform-origin: 50% 0; }
 .games-cloud { z-index: 1; aspect-ratio: 270 / 116; }
-.games-cloud-a { top: 22%; left: 28%; width: 12%; }
+.games-cloud-a { top: 22%; left: 16%; width: 12%; }
 .games-cloud-b { top: 15%; right: 30%; width: 14%; }
 /* 平時熱氣球壓低在山後：吊籃與乘客整個藏在山峰後面，只露出球體上半。bottom 依遠山的高度（隨寬度縮放）計算。 */
 .games-balloon { z-index: 2; bottom: calc(33% + 7.2vw - 10px); left: 3%; width: 8.5%; aspect-ratio: 200 / 270; }
@@ -25,6 +25,12 @@
 @keyframes balloon-ride { 0% { translate: 0 0; } 30%, 68% { translate: 14% var(--rise); } 49% { translate: 16% calc(var(--rise) - 3%); } 100% { translate: 0 0; } }
 @keyframes balloon-greet { from { rotate: -7deg; } to { rotate: 7deg; } }
 .games-far { z-index: 2; left: -2%; width: 104%; aspect-ratio: 1600 / 430; bottom: 33%; }
+/* 雲霄飛車和遠山共用座標，畫布比遠山往上多 200 單位、往下多 90 單位（104vw × 90/1600 ≈ 5.85vw），支架的腳藏在雪坡後。
+   軌道在帳篷、聖誕老人、摩天輪後面，爬坡頂和駝峰露在天空。 */
+.games-coaster { z-index: 3; left: -2%; width: 104%; aspect-ratio: 1600 / 720; bottom: calc(33% - 5.85vw); }
+.coaster-car { position: absolute; inset: 0; transform-origin: 0 0; }
+/* 車廂圖的底部中央（輪子下緣再高一點）對準軌道上的點，車廂繞著這點跟著坡度傾斜。 */
+.coaster-car-art { inset: auto; left: 0; top: 0; width: 4.75%; height: auto; aspect-ratio: 76 / 54; translate: -50% -104%; }
 .games-carousel { z-index: 3; left: 10%; width: 21%; aspect-ratio: 460 / 464; bottom: 31%; }
 .games-ferris { z-index: 3; right: 9%; width: 25%; aspect-ratio: 520 / 540; bottom: 31%; }
 .games-wheel { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 1; animation: wheel-spin 48s linear infinite; }
@@ -96,6 +102,8 @@
   /* 平板前方是比山更高的旋轉木馬帳篷，要浮得更高籃子才露得出來。 */
   .balloon-flight { --rise: -92%; }
   .games-far { left: -25%; width: 150%; bottom: 36%; }
+  /* 平板天空很高：軌道比遠山窄（120%），最高點和駝峰會高過帳篷、聖誕老人與摩天輪。 */
+  .games-coaster { left: -10%; width: 120%; bottom: calc(36% - 6.75vw); }
   .games-carousel { left: 2%; width: 34%; bottom: 33%; }
   .games-ferris { right: 2%; width: 42%; bottom: 31%; }
   .games-ridge { left: -20%; width: 140%; height: 43%; }
@@ -113,6 +121,7 @@
   .games-cloud-b { top: 27%; right: 4%; width: 32%; }
   .games-balloon { display: none; }
   .games-far { left: -60%; width: 220%; bottom: 44%; }
+  .games-coaster { display: none; }
   .games-carousel { left: -12%; width: 50%; bottom: 41%; }
   .games-ferris { right: -14%; width: 56%; bottom: 38%; }
   .games-ridge { left: -30%; width: 160%; height: 49%; }

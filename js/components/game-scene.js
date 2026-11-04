@@ -1,6 +1,7 @@
 // Game hero stage: a snowy funfair instead of Home's village. Same paper, same light direction.
 import { paperLayer, popLayer, shape } from './paper-art.js';
 import { SHADE, SNOW, cloud, facetedPeak, fence, pine, star } from './paper-props.js';
+import { mountCoaster } from './game-coaster.js';
 
 const GREEN = '#5f8a70', DEEP = '#4f7a65', RED = '#b5544c', CREAM = '#f6ecda', GOLD = '#dcae55', TEAL = '#7fa3a8';
 
@@ -219,6 +220,7 @@ export function mountGameScene(hero) {
   flight.dataset.float = '';
   mountBalloonRide(flight, paper);
   popLayer(hero, '0 0 1600 430', 'games-far', mountains, { delay: .2, paper: wide });
+  mountCoaster(hero, { paper });
   popLayer(hero, '0 -14 460 464', 'games-carousel', carousel, { delay: .55, paper });
   const ride = popLayer(hero, '0 0 520 540', 'games-ferris', ferrisStand, { delay: .7, paper });
   const spin = document.createElement('div');
