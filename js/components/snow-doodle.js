@@ -5,6 +5,8 @@ import { paperLayer, pauseOffscreen, shape } from './paper-art.js';
 import { tagArt } from './paper-props.js';
 
 const MIN_GAP = 100, STRIDE = 22, PRINT_LIFE = 900, LINE_LIFE = 2200, FILL = 1100, MAX_LINES = 14;
+// Marks stay this far inside the field, so no boot or groove is ever cut by its edge (a boot reaches ~16px from its centre).
+const LINE_EDGE = 10, PRINT_EDGE = 18;
 const SNOW = '#fbfdff', PRESSED = '#bfd0dc', GROOVE = '#a9bdcc';
 const SOLE = 'M0-12C5-12 6-6 5 0 4 4 2 5 0 5-2 5-4 4-5 0-6-6-5-12 0-12Z';
 
@@ -40,11 +42,12 @@ export function mountSnowDoodle(room) {
   pauseOffscreen([tag]);
 
   const mouse = matchMedia('(hover: hover) and (pointer: fine)'), timers = new Set();
-  let size = '', last, side = 1, line, path = '';
+  let size = '', width = 0, height = 0, last, side = 1, line, path = '', pressed = false;
   const later = (delay, run) => { const id = setTimeout(() => { timers.delete(id); run(); }, delay); timers.add(id); };
   // Fresh snow covers a mark: it fades (no motion), then leaves the DOM.
   const settle = (node, life) => later(life, () => { node.classList.add('is-filling'); later(FILL, () => node.remove()); });
-  const clear = () => { timers.forEach(clearTimeout); timers.clear(); marks.replaceChildren(); line = last = undefined; };
+  const clear = () => { timers.forEach(clearTimeout); timers.clear(); marks.replaceChildren(); line = last = undefined; pressed = false; };
+  const inside = ([x, y], edge) => x >= edge && y >= edge && x <= width - edge && y <= height - edge;
   const local = event => { const box = field.getBoundingClientRect(); return [event.clientX - box.left, event.clientY - box.top]; };
 
   function stamp({ x, y, angle }) {
@@ -59,10 +62,33 @@ export function mountSnowDoodle(room) {
   }
   function groove(d) { for (const stroke of line.children) stroke.setAttribute('d', d); }
 
+  // A groove: bright lower lip, pressed snow, and a darker inner edge on top.
+  // A press leaves a dot even without moving; a groove restarted by brushing back over the edge needs real length.
+  function begin(point, pressedHere = false) {
+    last = point; path = `M${point[0].toFixed(1)} ${point[1].toFixed(1)}l0 0`;
+    line = shape('g', { class: 'snow-line' }, marks);
+    line.dataset.dot = pressedHere ? 'keep' : 'drop';
+    for (const [stroke, strokeWidth, lift] of [[SNOW, 5, 2.2], [PRESSED, 7, 0], [GROOVE, 2.5, -1.4]]) {
+      shape('path', { stroke, 'stroke-width': strokeWidth, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none', transform: `translate(0 ${lift})` }, line);
+    }
+    groove(path);
+    const grooves = marks.querySelectorAll('.snow-line');
+    if (grooves.length > MAX_LINES) grooves[0].remove();
+  }
+  // Ending a groove leaves a round tip where the twig lifted.
+  const lift = () => {
+    if (!line) return;
+    if (line.dataset.dot === 'drop' && !path.includes('L')) line.remove(); else settle(line, LINE_LIFE);
+    line = last = undefined;
+  };
+
   field.addEventListener('pointermove', event => {
     if (event.pointerType !== 'mouse') return;
     const point = local(event);
-    if (line) {
+    if (pressed) {
+      // Near the edge the twig lifts early; coming back inside while still pressed starts a new groove.
+      if (!inside(point, LINE_EDGE)) { lift(); return; }
+      if (!line) { begin(point); return; }
       if (Math.hypot(point[0] - last[0], point[1] - last[1]) < 3) return;
       path += `L${point[0].toFixed(1)} ${point[1].toFixed(1)}`; last = point; groove(path);
       return;
@@ -70,25 +96,20 @@ export function mountSnowDoodle(room) {
     if (!last) { last = point; return; }
     const step = footstep(last, point, side);
     if (!step) return;
-    side = -side; last = point; stamp(step);
+    side = -side; last = point;
+    if (inside([step.x, step.y], PRINT_EDGE)) stamp(step); // Only whole boots: none half off the snow.
   });
-  field.addEventListener('pointerleave', () => { if (!line) last = undefined; });
+  field.addEventListener('pointerleave', () => { if (!pressed) last = undefined; });
   field.addEventListener('pointerdown', event => {
     if (event.pointerType !== 'mouse' || event.button !== 0) return;
     event.preventDefault(); field.setPointerCapture(event.pointerId);
-    last = local(event); path = `M${last[0].toFixed(1)} ${last[1].toFixed(1)}l0 0`;
-    // A groove: bright lower lip, pressed snow, and a darker inner edge on top.
-    line = shape('g', { class: 'snow-line' }, marks);
-    for (const [stroke, width, lift] of [[SNOW, 5, 2.2], [PRESSED, 7, 0], [GROOVE, 2.5, -1.4]]) {
-      shape('path', { stroke, 'stroke-width': width, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none', transform: `translate(0 ${lift})` }, line);
-    }
-    groove(path);
-    const grooves = marks.querySelectorAll('.snow-line');
-    if (grooves.length > MAX_LINES) grooves[0].remove();
+    pressed = true; last = undefined;
+    const point = local(event);
+    if (inside(point, LINE_EDGE)) begin(point, true);
   });
-  const lift = () => { if (!line) return; settle(line, LINE_LIFE); line = last = undefined; };
-  field.addEventListener('pointerup', lift);
-  field.addEventListener('lostpointercapture', lift);
+  const release = () => { pressed = false; lift(); };
+  field.addEventListener('pointerup', release);
+  field.addEventListener('lostpointercapture', release);
 
   // The field is the bright front snow, edge to edge, from under the letter down to the room's lower edge.
   // Layout offsets, not on-screen boxes: the letter's opening animation moves it with transforms for a moment.
@@ -99,13 +120,15 @@ export function mountSnowDoodle(room) {
     // Stay on the bright front snow: on tall screens the band right under the letter is the darker far slope.
     // Its top edge dips lowest about a third of the way across, at 42% of the snow layer's height.
     const ground = room.querySelector('.night-snow'), front = ground ? ground.offsetParent.offsetTop + ground.offsetTop + ground.offsetHeight * .42 : 0;
-    const top = Math.max(letterBottom + 8, front), bottom = roomHeight - edge.getBoundingClientRect().height * .5;
-    if (!usable || right - left < 220 || bottom - top < 70) { field.hidden = true; clear(); return; }
+    // The bottom stops where the room's dark wave begins, so no mark slips under it.
+    const top = Math.max(letterBottom + 8, front), bottom = roomHeight - edge.getBoundingClientRect().height;
+    if (!usable || right - left < 220 || bottom - top < 64) { field.hidden = true; clear(); return; }
     const next = `${Math.round(right - left)}x${Math.round(bottom - top)}`;
     Object.assign(field.style, { left: `${left}px`, top: `${top}px`, width: `${right - left}px`, height: `${bottom - top}px` });
     field.style.setProperty('--hint-scale', Math.min(1, (bottom - top - 6) / 86).toFixed(3));
     // Marks keep their pixel spots when a status line nudges the letter; they are only wiped when the field hides.
-    if (next !== size) { size = next; marks.setAttribute('viewBox', `0 0 ${Math.round(right - left)} ${Math.round(bottom - top)}`); }
+    width = right - left; height = bottom - top;
+    if (next !== size) { size = next; marks.setAttribute('viewBox', `0 0 ${Math.round(width)} ${Math.round(height)}`); }
     field.hidden = false;
   }
   const observer = new ResizeObserver(place);
