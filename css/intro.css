@@ -255,8 +255,6 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-leaf-desktop>.intro-copy { overflow:hidden; }
  /* 控制列放在書下方，第二章多出金幣按鈕時版面也不會跳動。 */
  .intro-book-controls { min-height:96px;gap:.2rem .7rem;margin-top:.5rem;align-content:flex-start; }
- .intro-book-controls :is([data-book='prev'],[data-book='next']) { position:absolute;width:1px;height:1px;min-width:0;min-height:0;padding:0;overflow:hidden;clip-path:inset(50%); }
- .intro-swipe-hint { display:block;color:var(--muted);font-size: var(--fs-small); }
  .intro-tag { min-width:104px;min-height:44px;padding:.2rem .6rem;font-size: var(--fs-small); }
  .intro-paper-button { padding:.55rem .85rem;font-size: var(--fs-small); }
  .intro-replay { min-height:36px;padding:.2rem .4rem; }
@@ -281,6 +279,11 @@ html.intro-document { scrollbar-gutter:stable; }
  .intro-country-link { padding:.4rem .65rem;font-size: var(--fs-small); }
  .intro-postcard { padding:1rem .9rem;border-width:8px; }
  }
+/* 觸控螢幕用手指上下滑動翻頁，上一章／下一章按鈕只留給讀屏；電腦視窗縮到 700px 以下時沒有手指可滑，按鈕照常顯示。 */
+@media (max-width:700px) and (hover:none) {
+ .intro-book-controls :is([data-book='prev'],[data-book='next']) { position:absolute;width:1px;height:1px;min-width:0;min-height:0;padding:0;overflow:hidden;clip-path:inset(50%); }
+ .intro-swipe-hint { display:block;color:var(--muted);font-size: var(--fs-small); }
+}
 @media (prefers-reduced-motion:reduce) {
  .title-letter,.is-opening .intro-book,.is-opening .intro-hanger { animation:none; }
  .is-opening .intro-hanger { opacity:1; }
