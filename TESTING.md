@@ -562,3 +562,7 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - `npm test` 53 項通過。
 - 量測（標題牌上下緣／路牌上緣／聖誕老人區塊，距場景頂端）：578×687 原為 56–336／319／275–480（全擋住），改後 34–206／432／237–442；390×844 改前改後相同（37–227／531／326–569）；430×932 標題牌仍為 74% 寬。截圖 578×687、600×800、540×720、480×640、360×640：聖誕老人露出到腰帶，兩塊牌子沒有蓋到臉。
+
+## 2026-11-04：新增第二位管理員
+
+- 以 `tools/firebase-admin/set-admin-claim.mjs` 對 UID `YOgd6P5qm1h69uh2UWX3qMDHoGC3` 先試跑、再 `--grant --apply`，工具讀回確認 `admin: true`。詳細流程與收尾見 `docs/FIREBASE-ADMIN-VERIFICATION.md`。新管理員須在 admin.html 登出再登入取得新 token；尚未由新管理員實際登入審核頁驗收。
