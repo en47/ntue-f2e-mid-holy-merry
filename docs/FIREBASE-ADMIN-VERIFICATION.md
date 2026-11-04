@@ -52,3 +52,14 @@
 - [Firebase custom claims](https://firebase.google.com/docs/auth/admin/custom-claims)
 
 一般 gcloud 使用者 ADC 不能直接假設可用於 Firebase Auth；本次採用真正的服務帳戶 impersonation，未使用 Web API key 冒充 Admin SDK 權限。
+
+## 2026-11-04：新增第二位管理員
+
+| 項目 | 結果 |
+| --- | --- |
+| 管理員 UID | `YOgd6P5qm1h69uh2UWX3qMDHoGC3`；帳號由本人在 Firebase Console 建立，密碼未經過代理 |
+| 工具 | Google 官方 gcloud CLI 592.0.0（`google-cloud-cli-darwin-arm.tar.gz`），SHA-256 `57553ae3c300f4ebaaa8fb4dee8d40c4d8c1141d84d266b41c1daf1669c4001a` 與官方安裝頁公布值一致；放在 `/private/tmp/holy-merry-gcloud`，設定目錄獨立（`CLOUDSDK_CONFIG`），未改系統 PATH。先下載的 591.0.0 版本檔雜湊與上次紀錄不符，未執行即刪除 |
+| 授權方式 | 本人在服務帳戶 `firebase-adminsdk-fbsvc` 上替自己的 Google 帳號加入「服務帳戶憑證建立者」，以 `gcloud auth application-default login --impersonate-service-account` 取得 impersonated ADC（無私鑰）。第一次加入角色未儲存成功，試跑回報 PERMISSION_DENIED；重新儲存後約 40 秒生效 |
+| custom claim | `set-admin-claim.mjs --grant` 試跑確認帳號存在、啟用、有 password provider；`--grant --apply` 寫入 `admin: true`，工具重新 getUser 回報 Claim verified |
+| 收尾 | `gcloud auth application-default revoke` 刪除本機 ADC（impersonated 憑證無法從伺服器撤銷，只刪本機檔案），並刪除暫存的 gcloud 與設定目錄；IAM 角色由本人在 Console 移除 |
+| 未改動 | `firestore.rules`、`firebase.json` 與網站程式都沒有修改，也沒有部署 |
