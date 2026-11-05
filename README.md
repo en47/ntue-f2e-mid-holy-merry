@@ -4,7 +4,7 @@ Holy Moly! It's Christmas! 一個紙雕繪本風格的聖誕主題網站，有 3
 
 **線上網站：** https://en47.github.io/ntue-f2e-mid-holy-merry/
 
-**備用網址：** https://holymerry.web.app（Firebase Hosting，GitHub Pages 連不上時使用）
+**備用網址：** https://holymerry.web.app
 
 原生 HTML、CSS、ES modules 製作，沒有框架，也不需要建置。Node.js 只用於測試。
 
