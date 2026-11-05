@@ -262,7 +262,8 @@ html.intro-document { scrollbar-gutter:stable; }
  .harbor-sea { --boat:66px;--floe:112px;--land:138px;--sea:300px;inset:calc(1.6rem + 310px) 0 0; }
  .harbor-boat { left:44vw; }
  .harbor-cloud,.harbor-gull { display:none; }
- .intro-letter { width:calc(100% - var(--roller) * 2 - 1rem);aspect-ratio:auto;height:330px;top:15px;left:calc(var(--roller) * 2 + 1rem);padding:2.8rem 1.8rem 2.2rem; }
+ /* 信封的虛線框在寬度的 9.6% 處（插圖會拉伸），文字左右內距跟著信封寬度走，任何手機寬度都留在框內。 */
+ .intro-letter { width:calc(100% - var(--roller) * 2 - 1rem);aspect-ratio:auto;height:330px;top:15px;left:calc(var(--roller) * 2 + 1rem);padding:2.8rem calc((100% - var(--roller) * 2 - 1rem) * .096 + .9rem) 2.2rem; }
  .intro-roller-ribbon { font-size: var(--fs-small);padding:.6rem .15rem; }
  .intro-letter { gap:.55rem; }
  /* 手機地圖比舞台矮，按鈕貼到地圖下方，才不會壓到燈塔。 */
