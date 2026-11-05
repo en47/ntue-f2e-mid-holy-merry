@@ -617,4 +617,4 @@ node --experimental-vm-modules tests/smoke.mjs
 ## 2026-11-05：README 與 Firebase 實測
 
 - 使用者回報已在正式網站自行實測 Firebase 相關功能（寄信、管理員審核、樹上信封）皆正常；本機仍沒有 Java，`npm run test:firebase` 未在這台電腦執行。
-- `README.md` 補上各頁新增的互動、回到頂端按鈕、說明彈窗內容、音樂「每次造訪預設關閉」的新行為與新增管理員的流程。
+- `README.md` 精簡更新：頁面表每列一句重點，全站功能補上音樂「每次打開預設關閉」與頁尾彈窗、回到頂端按鈕，新增管理員改為連到 `docs/FIREBASE-SETUP.md`。
