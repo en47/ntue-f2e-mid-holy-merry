@@ -8,6 +8,9 @@ const line = (parent, d, stroke, width) => path(parent, d, 'none', { stroke, 'st
 const circle = (parent, cx, cy, r, fill) => shape('circle', { cx, cy, r, fill }, parent);
 const group = (parent, x, y, scale = 1) => shape('g', { transform: `translate(${x} ${y}) scale(${scale})` }, parent);
 const layer = (host, draw, className = '') => paperLayer(host, BOX, `post-layer ${className}`, draw, { paper: PAPER, eager: true });
+// Every layer spans the whole 640×360 scene, so moves are written in scene units and turned into percentages of the layer:
+// the same move lands in the same spot whether the card is 330px wide on a phone or 620px on a desktop.
+const shift = (x, y = 0) => `translate(${(x / 6.4).toFixed(3)}%, ${(y / 3.6).toFixed(3)}%)`;
 function move(element, frames, duration = 600, delay = 0, easing = 'cubic-bezier(.2,.8,.3,1.2)') {
   return element.animate(frames, { duration: reduced() ? 1 : duration, delay: reduced() ? 0 : delay, easing, fill: 'forwards' });
 }
@@ -52,7 +55,7 @@ function iceland(host) {
     path(parent, 'M424 192C428 236 476 236 480 192 468 204 436 204 424 192Z', '#fbf8f1');
     line(parent, 'M436 180q6 6 12 0M458 180q6 6 12 0', '#5a4033', 3);
   });
-  hide(elf).style.transform = 'translateX(40px)';
+  hide(elf).style.transform = shift(40);
   const prizes = Object.fromEntries(Object.keys({ candy: 0, chocolate: 0, mittens: 0, horse: 0, book: 0, potato: 0 }).map(name => [name, prizeLayer(host, name, 250, 216, 1)]));
   const shoe = layer(host, parent => {
     path(parent, 'M176 214C170 248 160 268 166 284 170 292 180 292 188 292H340C352 292 354 278 342 270 310 254 276 256 260 238L256 208C232 200 204 202 176 214Z', '#a84a42');
@@ -67,9 +70,9 @@ function iceland(host) {
     play({ variant, step }) {
       clear(elf, shoe, Object.values(prizes)); Object.values(prizes).forEach(hide);
       dots.forEach((dot, index) => dot.classList.toggle('is-on', index <= step));
-      move(elf, [{ opacity: 0, transform: 'translateX(60px)' }, { opacity: 1, transform: 'none', offset: .3 }, { opacity: 1, transform: 'none', offset: .75 }, { opacity: 0, transform: 'translateX(60px)' }], 1500, 0, 'ease-in-out');
+      move(elf, [{ opacity: 0, transform: shift(60) }, { opacity: 1, transform: 'none', offset: .3 }, { opacity: 1, transform: 'none', offset: .75 }, { opacity: 0, transform: shift(60) }], 1500, 0, 'ease-in-out');
       move(shoe, [{ transform: 'rotate(0)' }, { transform: 'rotate(-3deg)' }, { transform: 'rotate(3deg)' }, { transform: 'rotate(0)' }], 420, 420, 'ease-in-out');
-      move(prizes[variant], [{ opacity: 0, transform: 'translateY(46px) scale(.7)' }, { opacity: 1, transform: 'translateY(-42px) scale(1)' }], 620, 560);
+      move(prizes[variant], [{ opacity: 0, transform: `${shift(0, 46)} scale(.7)` }, { opacity: 1, transform: `${shift(0, -42)} scale(1)` }], 620, 560);
     },
   };
 }
@@ -97,9 +100,9 @@ function taiwan(host) {
     play({ variant }, { share }) {
       clear(parts()); Object.values(prizes).forEach(hide);
       const index = share === undefined ? Math.floor(Math.random() * 3) : Math.min(2, Math.floor(share * 3)), box = boxes[index];
-      move(box.lid, [{ transform: 'none' }, { transform: 'translateY(-90px) rotate(-16deg)', opacity: 0 }], 520, 240);
-      for (const part of [box.body, box.lid]) move(part, [{ translate: '0 0' }, { translate: '-5px 0' }, { translate: '5px 0' }, { translate: '0 0' }], 240, 0, 'linear');
-      move(prizes[variant], [{ opacity: 0, transform: `translate(${box.x - 320}px, 90px) scale(.5)` }, { opacity: 1, transform: `translate(${box.x - 320}px, -36px) scale(1)` }], 620, 480);
+      move(box.lid, [{ transform: 'none' }, { transform: `${shift(0, -90)} rotate(-16deg)`, opacity: 0 }], 520, 240);
+      for (const part of [box.body, box.lid]) move(part, [{ translate: '0 0' }, { translate: `${(-5 / 6.4).toFixed(3)}% 0` }, { translate: `${(5 / 6.4).toFixed(3)}% 0` }, { translate: '0 0' }], 240, 0, 'linear');
+      move(prizes[variant], [{ opacity: 0, transform: `${shift(box.x - 320, 90)} scale(.5)` }, { opacity: 1, transform: `${shift(box.x - 320, -36)} scale(1)` }], 620, 480);
     },
   };
 }
@@ -129,7 +132,7 @@ function japan(host) {
     play({ step }) {
       if (step === 0) clear(slices);
       const [x, y] = slices[step].dataset.out.split(',').map(Number);
-      move(slices[step], [{ transform: 'none', opacity: 1 }, { transform: `translate(${x}px,${y}px) scale(1.05)`, opacity: 1, offset: .55 }, { transform: `translate(${x * 2.6}px,${y * 2.6}px) scale(.9)`, opacity: 0 }], 800, 0, 'ease-out');
+      move(slices[step], [{ transform: 'none', opacity: 1 }, { transform: `${shift(x, y)} scale(1.05)`, opacity: 1, offset: .55 }, { transform: `${shift(x * 2.6, y * 2.6)} scale(.9)`, opacity: 0 }], 800, 0, 'ease-out');
     },
   };
 }
@@ -168,7 +171,7 @@ function newzealand(host) {
     play({ step }) {
       if (step === 0) { clear(blooms, kiwi); blooms.forEach(hide); hide(kiwi); petals.replaceChildren(); }
       move(blooms[step], [{ opacity: 0, transform: 'scale(.1)' }, { opacity: 1, transform: 'scale(1)' }], 520);
-      if (step === blooms.length - 1) { fall(); move(kiwi, [{ opacity: 0, transform: 'translateX(120px)' }, { opacity: 1, transform: 'none' }], 900, 200, 'ease-out'); }
+      if (step === blooms.length - 1) { fall(); move(kiwi, [{ opacity: 0, transform: shift(120) }, { opacity: 1, transform: 'none' }], 900, 200, 'ease-out'); }
     },
   };
 }
@@ -203,8 +206,8 @@ function canada(host) {
     reset() { clear(letter, reply); hide(letter); hide(reply); },
     play() {
       clear(letter, reply); hide(reply);
-      move(letter, [{ opacity: 1, transform: 'none' }, { opacity: 1, transform: 'translate(170px,-120px) rotate(-8deg) scale(.86)', offset: .7 }, { opacity: 0, transform: 'translate(170px,-92px) scale(.3)' }], 900, 0, 'ease-in-out');
-      move(reply, [{ opacity: 0, transform: 'translate(-90px,40px) scale(.4)' }, { opacity: 1, transform: 'none' }], 620, 1050);
+      move(letter, [{ opacity: 1, transform: 'none' }, { opacity: 1, transform: `${shift(170, -120)} rotate(-8deg) scale(.86)`, offset: .7 }, { opacity: 0, transform: `${shift(170, -92)} scale(.3)` }], 900, 0, 'ease-in-out');
+      move(reply, [{ opacity: 0, transform: `${shift(-90, 40)} scale(.4)` }, { opacity: 1, transform: 'none' }], 620, 1050);
     },
   };
 }

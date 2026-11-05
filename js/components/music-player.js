@@ -1,8 +1,9 @@
-// Site music: the listener's song and volume follow them across pages; browsers may still hold the sound until their first gesture.
-import { MUSIC_TRACKS, nextTrack, parseMusicPosition, parseMusicState } from '../data/music-tracks.js';
+// Site music: the song follows the listener across pages within one visit; volume and play mode are remembered for good.
+// Browsers may still hold the sound until their first gesture.
+import { MUSIC_TRACKS, musicStateFor, nextTrack, parseMusicPosition } from '../data/music-tracks.js';
 import { holly, paperLayer, shape } from './paper-art.js';
 
-const STATE_KEY = 'holy-merry:music:v1', POSITION_KEY = 'holy-merry:music:position';
+const STATE_KEY = 'holy-merry:music:v1', TRACK_KEY = 'holy-merry:music:track', POSITION_KEY = 'holy-merry:music:position';
 const OFF_OPTION = { id: '', title: '關閉音樂' };
 const read = (store, key) => { try { return store.getItem(key); } catch { return null; } };
 const write = (store, key, value) => { try { store.setItem(key, value); } catch { /* Remembering is a convenience only. */ } };
@@ -50,14 +51,17 @@ export function mountMusic() {
   const widget = document.querySelector('.music-widget'), toggle = document.querySelector('#music-toggle'), panel = document.querySelector('#music-panel');
   const audio = document.querySelector('#site-audio'), options = document.querySelector('#music-options'), status = document.querySelector('#music-status'), volume = document.querySelector('#music-volume');
   const events = new AbortController(), { signal } = events;
-  let state = parseMusicState(read(localStorage, STATE_KEY)), gesture = null;
+  let state = musicStateFor(read(localStorage, STATE_KEY), read(sessionStorage, TRACK_KEY)), gesture = null;
   buildBadge(toggle); buildOptions(options);
   audio.volume = volume.value = state.volume;
   const modes = document.querySelector('#music-modes');
   audio.loop = state.mode === 'repeat';
   modes.querySelector(`[value="${state.mode}"]`).checked = true;
 
-  const save = () => write(localStorage, STATE_KEY, JSON.stringify(state));
+  const save = () => {
+    write(localStorage, STATE_KEY, JSON.stringify({ volume: state.volume, mode: state.mode }));
+    write(sessionStorage, TRACK_KEY, JSON.stringify({ track: state.track }));
+  };
   const savePosition = () => { if (state.track) write(sessionStorage, POSITION_KEY, JSON.stringify({ track: state.track, time: audio.currentTime })); };
   function show(view, message, label) {
     widget.dataset.music = view; status.textContent = message; toggle.setAttribute('aria-label', label);

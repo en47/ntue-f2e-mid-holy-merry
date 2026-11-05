@@ -14,6 +14,12 @@ export function parseMusicState(raw) {
     return { track: isTrack(track) ? track : null, volume: Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : DEFAULT_MUSIC.volume, mode: MUSIC_MODES.includes(mode) ? mode : DEFAULT_MUSIC.mode };
   } catch { return { ...DEFAULT_MUSIC }; }
 }
+// Volume and play mode are kept for good; the song itself only lasts one visit (one tab), so every new visit starts silent.
+// Songs saved long-term by older versions are ignored, which turns returning visitors' music off as the FAQ promises.
+export function musicStateFor(keptRaw, visitRaw) {
+  const { volume, mode } = parseMusicState(keptRaw);
+  return { track: parseMusicState(visitRaw).track, volume, mode };
+}
 // The playlist wraps, so "next" keeps playing after the last song.
 export const nextTrack = id => MUSIC_TRACKS[(MUSIC_TRACKS.findIndex(track => track.id === id) + 1) % MUSIC_TRACKS.length].id;
 export function parseMusicPosition(raw, track) {
