@@ -216,6 +216,8 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 
 .brand { position: relative; top: 8px; }
 .site-nav.is-strung { --tag-width: 96px; --tag-height: 41px; gap: .4rem; }
+/* 701–780px 的電腦版：四張吊牌縮小一點，才放得進網站標誌旁邊，不會擠出畫面右緣。 */
+@media (min-width: 701px) and (max-width: 780px) { .site-nav.is-strung { --tag-width: 84px; gap: .3rem; } }
 .site-nav.is-strung a, .site-nav.is-strung a:hover, .site-nav.is-strung a[aria-current='page'], .site-nav.is-strung a[aria-current='page']:hover { display: block; padding: 0; color: var(--ink); background: none; border-radius: 0; transform: none; outline: none; }
 .nav-tag { position: relative; display: block; width: var(--tag-width); height: var(--tag-height); transform-origin: 50% calc(var(--cord, 12px) * -1); }
 .nav-cord { position: absolute; left: calc(50% - .75px); top: calc(var(--cord, 12px) * -1); width: 1.5px; height: calc(var(--cord, 12px) + 7px); background: #4f6a62; transform-origin: top; transition: scale .14s ease-out; }
