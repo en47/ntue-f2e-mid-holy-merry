@@ -2,6 +2,7 @@
 import { mountForeground } from './components/page-foreground.js';
 import { mountNavLights } from './components/nav-lights.js';
 import { mountMusic } from './components/music-player.js';
+import { mountBackToTop } from './components/back-to-top.js';
 import { mountSantaPlaceholders } from './components/santa-placeholder.js';
 import { FAQ } from './data/faq.js';
 import { CONTACT } from './data/contact.js';
@@ -56,6 +57,10 @@ document.querySelectorAll('[data-close-dialog]').forEach(button => {
 let music = mountMusic();
 window.addEventListener('pagehide', () => music.destroy());
 window.addEventListener('pageshow', event => { if (event.persisted) music = mountMusic(); });
+
+let backToTop = mountBackToTop();
+window.addEventListener('pagehide', () => backToTop.destroy());
+window.addEventListener('pageshow', event => { if (event.persisted) backToTop = mountBackToTop(); });
 
 mountForeground(document.querySelector('.page-foreground'));
 mountSantaPlaceholders();

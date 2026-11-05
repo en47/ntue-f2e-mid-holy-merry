@@ -308,8 +308,17 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 .music-volume { display: block; margin: .7rem 0 .2rem; font-size: var(--fs-small); }
 .music-panel input[type='range'] { width: 100%; accent-color: var(--red); }
 .music-panel .hint { margin: .4rem 0 0; min-height: 1.5em; font-size: var(--fs-small); color: var(--muted); }
+/* 回到頂端：疊在音樂按鈕正上方、中心對齊；音樂面板（z-index 20）打開時蓋在它上面。 */
+.back-to-top { position: fixed; z-index: 19; right: calc(1.4rem + 6px); bottom: calc(1.4rem + 80px); width: 56px; height: 56px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; opacity: 0; visibility: hidden; translate: 0 8px; transition: opacity .25s, visibility .25s, translate .25s; }
+.back-to-top.is-shown { opacity: 1; visibility: visible; translate: 0 0; }
+.back-to-top.is-shown:hover { translate: 0 -2px; }
+.back-to-top:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.back-to-top-badge, .back-to-top-arrow { inset: -5px; }
+.back-to-top-arrow.is-launching { animation: candy-launch .45s cubic-bezier(.3,1.6,.5,1); }
+@keyframes candy-launch { 40% { translate: 0 -7px; } }
 @media (max-width: 700px) {
   .music-widget { right: .4rem; bottom: .25rem; }
+  .back-to-top { right: .4rem; bottom: calc(.25rem + 52px); width: 44px; height: 44px; }
   .music-toggle { width: 44px; height: 44px; }
   .music-panel { bottom: 54px; }
 }

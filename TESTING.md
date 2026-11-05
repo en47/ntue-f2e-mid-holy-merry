@@ -592,3 +592,8 @@ node --experimental-vm-modules tests/smoke.mjs
 ## 2026-11-05：移除管理員授權用的臨時 IAM 角色
 
 - 本人在 Google Cloud 專案 IAM 頁面移除授權用帳號的「服務帳戶憑證建立者」（專案層級）；`firebase-adminsdk-fbsvc` 本身的角色未變動。`docs/FIREBASE-ADMIN-VERIFICATION.md` 更正授權範圍為專案層級並記錄收尾。未修改網站程式、`firestore.rules`、`firebase.json`，未部署。
+
+## 2026-11-05：回到頂端按鈕
+
+- `npm test` 55 項通過。
+- 1440×900 與 390×844（觸控）四頁：頂端時隱藏；捲到底時 Intro、Game（兩種寬度）與手機版 Wish 出現，點擊後 scrollY 回到 0 且按鈕隱藏；電腦版 Home（可捲 349px）、Wish（240px）與手機版 Home 不出現。按鈕中心與音樂按鈕對齊（x 1384／362），顯示時間隔 12px。鍵盤 Enter 觸發後焦點在 `.brand`。打開音樂面板時，按鈕位置最上層是音樂面板。截圖確認外觀。
