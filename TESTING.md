@@ -629,3 +629,9 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - `npm test` 59 項通過（新增 `tests/prefetch.test.mjs` 2 項：清單檔案都存在且沒有版本號；都會上傳到 Firebase 備用網址）。
 - 以送出 `Cache-Control: max-age=600` 的本機伺服器模擬 GitHub Pages，1440×900：首頁載入畫面 3.7 秒消失，預先下載約 9.5 秒開始，13 個檔案全部完成；同一分頁換到 Game 時 9 個、Wish 時 4 個大檔案的 `transferSize` 都是 0（由快取提供）。手機 390×844 觸控：首頁 12 秒內沒有任何預先下載。第一版用沒有期限的 `requestIdleCallback`，首頁持續動畫時一直沒有執行，加上 1.5 秒期限後才正常。
+
+## 2026-11-05：配對遊戲卡片圖加入預先下載
+
+- `npm test` 59 項通過，smoke 40 組通過；清單 27 個檔案、20.8MB，都存在且會上傳到 Firebase 備用網址。
+- 以送出 `Cache-Control: max-age=600` 的本機伺服器模擬 GitHub Pages，1440×900：首頁開啟後 11.1 秒內 14 張卡片圖全部下載完；同一分頁換到 Game、按下 Christmas Matching 開始，第一關用到的蓋子、盒子與 4 張禮物圖 `transferSize` 都是 0（由快取提供，1～13ms），8 張卡片立即顯示。
+- 實測當晚網路約 3.7Mbps：GitHub Pages 首頁兩個模型共 3.2MB 需 7～13 秒；剛推送後第一次開啟較慢，之後首頁 6 秒就緒。
