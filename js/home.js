@@ -1,6 +1,7 @@
 import { dialogues } from './data/dialogues.js';
 import { mountFlipCounter } from './components/flip-counter.js';
 import { burstPaper } from './components/paper-burst.js';
+import { prefetchLater } from './components/page-prefetch.js';
 
 // 固定以台灣時間的 12/25 00:00 為目標；聖誕節當天顯示祝福。
 export function getChristmasCountdown(now = new Date()) {
@@ -33,6 +34,10 @@ document.querySelector('#countdown-tap').addEventListener('click', event => {
 updateCountdown();
 let countdownTimer = setInterval(updateCountdown, 1000);
 window.addEventListener('pagehide', () => clearInterval(countdownTimer));
+
+// While Home is on screen, fetch the big Game and Wish files in the background; leaving Home stops it.
+const stopPrefetch = prefetchLater();
+window.addEventListener('pagehide', stopPrefetch);
 window.addEventListener('pageshow', event => {
   if (event.persisted) { updateCountdown(); countdownTimer = setInterval(updateCountdown, 1000); }
 });
