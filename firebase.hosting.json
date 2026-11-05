@@ -1,0 +1,30 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "firebase.hosting.json",
+      "firestore.rules",
+      "firestore.indexes.json",
+      "**/.*",
+      "**/*.log",
+      "**/.*/**",
+      "**/node_modules/**",
+      "docs/**",
+      "scripts/**",
+      "tests/**",
+      "tools/**",
+      "**/*.md",
+      "package.json",
+      "package-lock.json",
+      "screenshots/**",
+      "assets/models/wish-tree.glb",
+      "assets/models/wish-elf.glb",
+      "assets/models/reindeer.glb",
+      "assets/models/santa-dance.glb",
+      "assets/models/santa-claus.glb",
+      "assets/santa claus.glb",
+      "assets/*music*.mp3"
+    ]
+  }
+}

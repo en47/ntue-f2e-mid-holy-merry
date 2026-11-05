@@ -4,6 +4,8 @@ Holy Moly! It's Christmas! 一個紙雕繪本風格的聖誕主題網站，有 3
 
 **線上網站：** https://en47.github.io/ntue-f2e-mid-holy-merry/
 
+**備用網址：** https://holymerry.web.app（Firebase Hosting，GitHub Pages 連不上時使用）
+
 原生 HTML、CSS、ES modules 製作，沒有框架，也不需要建置。Node.js 只用於測試。
 
 ## 頁面
@@ -73,6 +75,14 @@ npm run test:firebase  # Firestore 規則與整合測試
 GitHub Pages 從 `main` 分支根目錄發布，push 後約 1 分鐘生效。Firestore 規則與索引由 Firebase 另外部署，不會跟著 push 更新；步驟見 [docs/FIREBASE-SETUP.md](docs/FIREBASE-SETUP.md)。
 
 改動 CSS 或 JS 後要執行 `node scripts/stamp-modules.mjs` 更新版本號，否則 `npm test` 會失敗。
+
+備用網址不會隨 push 更新，要手動部署；只上傳網站檔案，不動 `firebase.json` 與資料庫規則：
+
+```sh
+npx firebase deploy --only hosting --project holymerry --config firebase.hosting.json
+```
+
+Firebase Hosting 免費方案每天約 360MB 流量，大約夠 20 人完整逛完一次，所以平常分享仍以 GitHub Pages 為主。
 
 新增管理員的步驟見 [docs/FIREBASE-SETUP.md](docs/FIREBASE-SETUP.md)。
 

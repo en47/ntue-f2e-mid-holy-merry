@@ -618,3 +618,9 @@ node --experimental-vm-modules tests/smoke.mjs
 
 - 使用者回報已在正式網站自行實測 Firebase 相關功能（寄信、管理員審核、樹上信封）皆正常；本機仍沒有 Java，`npm run test:firebase` 未在這台電腦執行。
 - `README.md` 精簡更新：頁面表每列一句重點，全站功能補上音樂「每次打開預設關閉」與頁尾彈窗、回到頂端按鈕，新增管理員改為連到 `docs/FIREBASE-SETUP.md`。
+
+## 2026-11-05：Firebase Hosting 備用網址
+
+- 以 Firebase CLI 的 `listFiles()` 確認上傳清單：256 個檔案，沒有點開頭路徑、記錄檔、說明檔，也沒有 node_modules、docs、tests、tools、scripts、screenshots。
+- `npx firebase deploy --only hosting --project holymerry --config firebase.hosting.json` 完成；`firebase.json` 未修改。
+- https://holymerry.web.app：15 種不該公開的路徑（`.git/HEAD`、`.git/config`、node_modules、docs、tests、tools、README、firebase.json、firebase.hosting.json、firestore.rules、記錄檔、package.json、screenshots、原始模型）全部 404；首頁、四頁、admin、兩個遊戲 iframe、網頁版模型、音樂與 Three.js 全部 200。瀏覽器開啟五頁（Wish 另測 390 寬）沒有錯誤與載入失敗；Wish 顯示「已連接聖誕信箱」、樹上 10 封；admin 登入表單可用。只讀取，未寫入信件。
