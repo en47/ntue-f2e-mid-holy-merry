@@ -56,7 +56,8 @@ function iceland(host) {
     line(parent, 'M436 180q6 6 12 0M458 180q6 6 12 0', '#5a4033', 3);
   });
   hide(elf).style.transform = shift(40);
-  const prizes = Object.fromEntries(Object.keys({ candy: 0, chocolate: 0, mittens: 0, horse: 0, book: 0, potato: 0 }).map(name => [name, prizeLayer(host, name, 250, 216, 1)]));
+  // Centred on the boot's opening (x 172–262), so each gift rises straight out of the shoe.
+  const prizes = Object.fromEntries(Object.keys({ candy: 0, chocolate: 0, mittens: 0, horse: 0, book: 0, potato: 0 }).map(name => [name, prizeLayer(host, name, 217, 216, 1)]));
   const shoe = layer(host, parent => {
     path(parent, 'M176 214C170 248 160 268 166 284 170 292 180 292 188 292H340C352 292 354 278 342 270 310 254 276 256 260 238L256 208C232 200 204 202 176 214Z', '#a84a42');
     path(parent, 'M172 206C200 194 234 194 262 202L260 224C232 216 204 216 176 226Z', SNOW);
