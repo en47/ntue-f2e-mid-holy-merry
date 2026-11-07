@@ -673,7 +673,8 @@ export function doorPath({ paper }, { width, height }) {
 }
 
 const at = (x, z) => [x, GROUND, z];
-// Every board of the village. Boards with `rig` stand on a moving group (cabin-art.js explains the other fields).
+// Every board of the village. Boards with `rig` stand on a moving group (cabin-art.js explains the other fields). Every other
+// board has an `at`, even ones the scene moves every frame: one without would wait at the origin, inside the cabin.
 export const WORLD = [
   // The wishing corner, the first thing you meet turning left.
   { id: 'wish-tree', w: 1.7, h: 3.1, px: 220, at: at(-9.4, .4), turn: face(-9.4, .4), draw: wishTree },
@@ -694,8 +695,8 @@ export const WORLD = [
   { id: 'coaster-ends', w: COASTER.w, h: COASTER.h, px: 80, rig: 'coaster', at: [0, 0, .1], draw: coasterEnds },
   { id: 'coaster-car-a', w: .64, h: .46, px: 200, rig: 'coaster', at: [0, 0, .06], center: true, clones: 2, draw: coasterCar(0) },
   { id: 'coaster-car-b', w: .64, h: .46, px: 200, rig: 'coaster', at: [0, 0, .06], center: true, draw: coasterCar(1) },
-  { id: 'balloon-red', w: 1.5, h: 2, px: 160, center: true, billboard: true, clones: 2, draw: balloon([RED, CREAM, GOLD]) },
-  { id: 'balloon-green', w: 1.5, h: 2, px: 160, center: true, billboard: true, draw: balloon([GREEN, CREAM, '#7fa3a8']) },
+  { id: 'balloon-red', w: 1.5, h: 2, px: 160, at: BALLOONS[0], center: true, billboard: true, clones: 2, draw: balloon([RED, CREAM, GOLD]) },
+  { id: 'balloon-green', w: 1.5, h: 2, px: 160, at: BALLOONS[2], center: true, billboard: true, draw: balloon([GREEN, CREAM, '#7fa3a8']) },
   { id: 'stall-cocoa', w: 2.1, h: 2.3, px: 190, at: at(-12.2, 11), turn: face(-12.2, 11), draw: stall('cocoa') },
   { id: 'stall-cookie', w: 2.1, h: 2.3, px: 190, at: at(-9.6, 13.2), turn: face(-9.6, 13.2), draw: stall('cookie') },
   { id: 'bunting-wheel', w: 6, h: 3.2, px: 90, at: at(-14.8, 3), turn: face(-14.8, 3), draw: bunting },
@@ -719,7 +720,7 @@ export const WORLD = [
   { id: 'lighthouse', w: 1.2, h: LIGHT.h, px: LIGHT.px, at: [LIGHT.x, LIGHT.base, LIGHT.z], turn: face(LIGHT.x, LIGHT.z), draw: lighthouse },
   { id: 'boat', w: 1.4, h: 1.7, px: 160, at: [24, GROUND - .12, -6], turn: face(24, -6), draw: boat },
   { id: 'rocks', w: 1.6, h: .7, px: 200, at: [13.6, GROUND - .05, 9.2], turn: face(13.6, 9.2), draw: rocks },
-  { id: 'gull', w: .5, h: .26, px: 200, center: true, billboard: true, clones: 3, draw: gull },
+  { id: 'gull', w: .5, h: .26, px: 200, at: [LIGHT.x - 3, 4.3, LIGHT.z + 1], center: true, billboard: true, clones: 3, draw: gull },
   { id: 'island', w: 14, h: 2.4, px: 22, at: at(30, -12), turn: face(30, -12), draw: hills(1), kind: 'scenery', fog: false },
   { id: 'world-sign', w: 1.2, h: 2.1, px: 240, at: at(10.2, 9.4), turn: face(10.2, 9.4), draw: worldSign },
   { id: 'postcards', w: 1.4, h: 1.5, px: 220, at: at(9.2, 11.8), turn: face(9.2, 11.8), draw: postcards },
@@ -736,15 +737,15 @@ export const WORLD = [
   { id: 'boathouse', w: 2.4, h: 2.5, px: 170, at: at(11.4, 15.2), turn: face(11.4, 15.2), draw: boathouse },
   { id: 'dock', w: 3.2, h: 1.2, px: 170, at: [13.6, GROUND - .2, 13.6], turn: face(13.6, 13.6), draw: dock },
   { id: 'boat-moored', w: 1.4, h: 1.7, px: 160, at: [15.6, GROUND - .12, 14.8], turn: face(15.6, 14.8), draw: boat },
-  { id: 'buoy', w: .42, h: .7, px: 220, billboard: true, clones: FLOATS.length, draw: buoy },
+  { id: 'buoy', w: .42, h: .7, px: 220, at: [FLOATS[0][0], GROUND - .14, FLOATS[0][1]], billboard: true, clones: FLOATS.length, draw: buoy },
   { id: 'seal-floe', w: 1.7, h: .8, px: 200, at: [FLOE[0], GROUND - .1, FLOE[1]], turn: face(...FLOE), draw: sealFloe },
   { id: 'barrels', w: 1.5, h: .95, px: 200, at: at(7.6, 13.6), turn: face(7.6, 13.6), draw: barrels },
   { id: 'bench-shore', w: 1.4, h: .9, px: 200, at: at(6.2, 14.4), turn: face(6.2, 14.4), draw: bench },
   { id: 'rocks-shore', w: 1.6, h: .7, px: 200, at: [11.9, GROUND - .05, 18.6], turn: face(11.9, 18.6), draw: rocks },
   // The left edge, past the fair: a skating pond with two skaters, a sled of presents, a snow fort, the ticket booth, a lamp.
   { id: 'skating-pond', w: 4.4, h: 2, px: 80, at: at(POND.x, POND.z), flat: 'ground', turn: POND.turn, draw: pond },
-  { id: 'skater-red', w: .55, h: .85, px: 220, billboard: true, draw: skater(RED) },
-  { id: 'skater-green', w: .55, h: .85, px: 220, billboard: true, draw: skater(GREEN) },
+  { id: 'skater-red', w: .55, h: .85, px: 220, at: at(POND.x, POND.z), billboard: true, draw: skater(RED) },
+  { id: 'skater-green', w: .55, h: .85, px: 220, at: at(POND.x, POND.z), billboard: true, draw: skater(GREEN) },
   { id: 'sled-sacks', w: 1.4, h: .75, px: 200, at: at(-5.6, 13.6), turn: face(-5.6, 13.6), draw: sledSacks },
   { id: 'snow-fort', w: 1.2, h: .7, px: 200, at: at(-12.6, 16.4), turn: face(-12.6, 16.4), draw: snowFort },
   { id: 'ticket-booth', w: 1.1, h: 1.9, px: 200, at: at(-14.6, 13.6), turn: face(-14.6, 13.6), draw: ticketBooth },

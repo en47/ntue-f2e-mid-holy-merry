@@ -172,6 +172,9 @@ await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村�
   assert.ok(entry.includes('mountCabinPaper(') && paperUi.includes('paperFilter') && paperUi.includes('ResizeObserver') && ['note', 'tag', 'letter', 'wood'].every(name => paperUi.includes(`${name}: [`)) && !santaCss.includes('border-image') && santaCss.includes('.cabin[data-paper] :where('), 'Every box of words in the yard is one whole sheet of paper drawn at its own size (no sliced seams), with a plain fallback until the paper is ready');
   const hoisting = await fs.readFile(path.join(project, 'js/components/cabin-pulley.js'), 'utf8');
   assert.ok(hoisting.includes('setPointerCapture') && hoisting.includes('ArrowDown:') && hoisting.includes('12/24 — 夜班交接') && hoisting.includes('state.locked') && hoisting.includes('events.abort()') && !hoisting.includes('innerHTML') && scene.includes('rise / HOIST.radius') && scene.includes('placeHoist'), 'The hoist is pulled by hand (or arrow keys), the wheel turns by the rope it pays out, and the note waits behind the bale');
+  const { WORLD } = await import(pathToFileURL(path.join(project, 'js/components/cabin-world.js')).href), adrift = WORLD.filter(board => !board.at && !board.rig && !board.texture).map(board => board.id);
+  assert.deepEqual(adrift, [], 'Every village board starts somewhere: one without a place waits at the origin, inside the cabin');
+  assert.ok(scene.includes("sheets.get('balloon-green')"), 'The single green balloon is moved too, not left behind');
   const village = await fs.readFile(path.join(project, 'js/components/cabin-world.js'), 'utf8');
   for (const id of ['wish-post', 'wheel', 'horse', 'lighthouse', 'world-sign', 'ski-mountain', 'game-sign']) assert.ok(village.includes(`id: '${id}'`), `The village has its ${id}`);
   assert.ok(!village.includes('innerHTML') && !village.includes("from 'three'"), 'The village is paper art only; the scene builds it');
