@@ -576,7 +576,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       car.position.set(at.x - along.y * .2, at.y + along.x * .2, .06); car.rotation.z = Math.atan2(along.y, along.x);
     });
     // Hot-air balloons hang over the fair, each drifting and bobbing on its own slow beat.
-    [...(clones.get('balloon-red') ?? []), ...(clones.get('balloon-green') ?? [])].forEach((ball, i) => {
+    // The green balloon is a single board, so it is a sheet rather than a set of clones.
+    [...(clones.get('balloon-red') ?? []), sheets.get('balloon-green')?.holder].filter(Boolean).forEach((ball, i) => {
       const [x, y, z] = BALLOONS[i % BALLOONS.length], drift = still ? 0 : 1;
       ball.position.set(x + Math.sin(t * .13 + i * 2) * .6 * drift, y + Math.sin(t * .4 + i * 1.3) * .25 * drift, z + Math.cos(t * .11 + i) * .4 * drift);
     });
