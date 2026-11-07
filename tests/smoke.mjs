@@ -192,6 +192,31 @@ await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村�
   assert.ok(frames.length >= 6 && properties.every(name => name === 'transform' || name === 'opacity') && loaderCss.includes('prefers-reduced-motion: reduce) { .site-loader * { animation: none'), 'The walk only animates transform and opacity, so it keeps moving while the page is busy; reduced motion stills it');
   assert.ok((await fs.readFile(path.join(project, 'js/data/heading-glyphs.js'), 'utf8')).includes('santas-cabin'));
 });
+await test('Santa 紙板預先畫成 WebP：圖片對應目前畫法、手機用小套、只有大螢幕飛行、看不到的稍後才載', async () => {
+  const { cabinCuts, SETS } = await import(pathToFileURL(path.join(project, 'scripts/build-cabin-boards.mjs')).href);
+  const manifest = JSON.parse(await fs.readFile(path.join(project, 'docs/CABIN-BOARDS.json'), 'utf8')), cuts = await cabinCuts();
+  assert.deepEqual(manifest.sets, SETS);
+  for (const cut of cuts) {
+    const entry = manifest.files[cut.file];
+    assert.ok(entry, `少了 images/cabin/${cut.file}，請執行 node scripts/build-cabin-boards.mjs`);
+    assert.equal(entry.fingerprint, cut.fingerprint, `images/cabin/${cut.file} 的畫法已變更，請執行 node scripts/build-cabin-boards.mjs`);
+    assert.equal(createHash('sha256').update(await fs.readFile(path.join(project, 'images/cabin', cut.file))).digest('hex'), entry.sha256, `images/cabin/${cut.file} 與清單雜湊不符`);
+  }
+  const files = (await Promise.all(Object.keys(SETS).map(async set => (await fs.readdir(path.join(project, 'images/cabin', set))).map(name => `${set}/${name}`)))).flat();
+  assert.deepEqual(files.sort(), cuts.map(cut => cut.file).sort(), 'images/cabin 只放清單上的圖片');
+  assert.deepEqual(Object.keys(manifest.files).sort(), cuts.map(cut => cut.file).sort());
+  const { CUTS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-cuts.js')).href), names = [...new Set(cuts.map(cut => cut.name))];
+  assert.deepEqual(CUTS.sets, SETS); assert.deepEqual(Object.keys(CUTS.sheets).sort(), names.sort());
+  for (const name of names) assert.equal(CUTS.sheets[name], createHash('sha256').update(Object.keys(SETS).map(set => manifest.files[`${set}/${name}.webp`].sha256).join()).digest('hex').slice(0, 10), `${name} 的網址版本過期`);
+  for (const name of ['sign--stars-4', 'mailbox--open-true', 'hoist-hatch--open-true', 'smoke', 'hoist-bale', 'outfit-red-scarf']) assert.ok(names.includes(name), `${name} 也事先畫好`);
+  assert.ok(names.filter(name => name.startsWith('outfit-')).length === 21, 'Every accessory has its picture');
+  const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), paint = await fs.readFile(path.join(project, 'js/components/cabin-paint.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8');
+  assert.ok(!scene.includes('paperFilter') && !scene.includes('XMLSerializer') && scene.includes('cutBoard(') && paint.includes('return paintBoard(board, CUTS.sets[set], state)'), 'The scene only loads pictures; a missing or broken one is cut in the browser instead');
+  assert.ok(paint.includes('quality > .6 ? \'large\' : \'small\'') && scene.includes('cutSet('), 'Phones get the smaller set');
+  assert.ok(entry.includes("(min-width: 1100px) and (min-height: 650px) and (hover: hover) and (pointer: fine)") && entry.includes('fly: fly && roomy.matches'), 'The arrival flight is only for a large desktop window');
+  assert.ok(scene.indexOf('const santaReady = loadSanta()') > scene.indexOf('ready = true; frameView();') && scene.includes('boardInSight(board, sweep)') && scene.includes('!roomIn'), 'Santa, the room and what the first view cannot see come after the page opens; walking in waits for the room');
+  assert.ok(entry.includes('result.santa.then('), 'The note on the empty chair waits until Santa is known not to come');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

@@ -7,6 +7,8 @@ const stage = document.querySelector('#cabin-stage'), status = document.querySel
 const back = document.querySelector('#cabin-back'), tip = document.querySelector('#cabin-tip'), explore = [...document.querySelectorAll('.cabin-explore [data-spot]')], looks = [...document.querySelectorAll('.cabin-explore [data-look]')];
 const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
+// The flight down over the village is for a large desktop window; a phone, a tablet or a small window starts at the house.
+const roomy = matchMedia('(min-width: 1100px) and (min-height: 650px) and (hover: hover) and (pointer: fine)');
 mountCabinBackdrop(document.querySelector('.cabin-backdrop'));
 mountCabinPaper(document.querySelector('.cabin'));
 // The letter-paper chat with Santa waits in the room (its writing line stays off until the AI reply is ready).
@@ -48,6 +50,8 @@ function showTip() {
 }
 
 // The first visit opens with a flight down over the village, once the loader has faded; a page back from the cache does not.
+// Santa's own model comes just after the page opens (he is indoors, out of sight): the note on his chair waits until it is
+// known that he cannot come.
 async function mountCabin(fly = true) {
   const run = ++generation;
   stage.dataset.state = 'loading'; stage.setAttribute('aria-busy', 'true'); progress(0);
@@ -55,17 +59,21 @@ async function mountCabin(fly = true) {
   try {
     const [{ mountCabin: build }, { mountPlay }] = await Promise.all([import('./components/cabin-scene.js'), import('./components/cabin-play.js')]);
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (note) play?.note(note); }, isCurrent: () => run === generation, fly });
+    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (note) play?.note(note); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
     if (!result || run !== generation) { result?.destroy(); return; }
     cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; } });
     cabin.setFound([...found]);
     if (found.size) cabin.repaint('sign', { stars: found.size });
     play.restore([...found]);
-    stage.dataset.state = 'ready'; stage.dataset.santa = result.santa ? 'home' : 'away';
-    away.hidden = result.santa; progress(1);
+    stage.dataset.state = 'ready'; stage.dataset.santa = 'home'; progress(1);
     const arrive = () => cabin?.arrive().then(showTip);
     if (document.documentElement.classList.contains('is-loading')) addEventListener('site-loader:done', arrive, { once: true }); else arrive();
-    status.textContent = result.santa ? '聖誕老人在屋裡烤火。點小屋就能推門進去，也可以左右轉轉，看看整座村子。' : '聖誕老人去餵麋鹿了，搖椅上留了一張紙條。';
+    const welcome = status.textContent = '聖誕老人在屋裡烤火。點小屋就能推門進去，也可以左右轉轉，看看整座村子。';
+    result.santa.then(home => {
+      if (home || run !== generation) return;
+      stage.dataset.santa = 'away'; away.hidden = false;
+      if (status.textContent === welcome) status.textContent = '聖誕老人去餵麋鹿了，搖椅上留了一張紙條。';
+    });
   } catch (error) {
     if (run !== generation) return;
     console.error('Santa cabin failed to load', error);

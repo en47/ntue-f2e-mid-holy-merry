@@ -5,10 +5,10 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, CHAIR, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, PX, REINDEER, ROOM_PROPS, SIGN, SMOKE, SPOTS, hayBale, hoistBracket, hoistHatch, hoistToggle, hoistWheel } from './cabin-art.js';
+import { BOARDS, CHAIR, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, REINDEER, ROOM_PROPS, SIGN, SPOTS } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
-import { paperFilter, shape } from './paper-art.js';
+import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
 import { createHeadTracker } from './santa-head.js';
 
 // Head turns stay small and are shared with the neck: larger angles crease the beard (see docs/SANTA-CABIN.md).
@@ -34,20 +34,19 @@ for (const spot of SPOTS) {
 const ARRIVAL = { eye: [-9, 20, 26], heading: -.33, pitch: .63, fov: 44 };
 const ease = u => u * u * (3 - 2 * u), between = (u, from, to) => ease(THREE.MathUtils.clamp((u - from) / (to - from), 0, 1));
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle)), lerp = THREE.MathUtils.lerp;
-let paperCount = 0;
-
-// Each board is cut once into an image; nothing in the SVG animates afterwards.
-async function paintBoard(board, quality) {
-  // Distant scenery is drawn at fewer art units per metre; room surfaces are cut a little coarser to save memory.
-  const px = board.px ?? PX, width = Math.round(board.w * px), height = Math.round(board.h * px), density = board.kind === 'wall' || board.kind === 'floor' ? .7 : 1;
-  const svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width: Math.round(width * quality * density), height: Math.round(height * quality * density) });
-  const plain = shape('g', {}, svg);
-  const paper = shape('g', { filter: paperFilter(svg, `cabin-paper-${++paperCount}`, { scale: board.kind === 'scenery' ? .8 : board.kind ? 1.6 : 1.1, grain: .5, shadow: 0 }) }, svg);
-  board.draw({ plain, paper, svg }, { width, height }, board.state);
-  const image = new Image();
-  image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`;
-  await image.decode();
-  return image;
+// Whether the first view from in front of the house takes in something standing at (x, z), `width` across. `sweep` is how
+// far that view reaches to either side, [right, left], as headings (radians, positive to the left).
+function inSight([right, left], x, z, width) {
+  const [ex, , ez] = VIEWS.outside.eye, angle = Math.atan2(ex - x, ez - z), spread = Math.atan2(width / 2, Math.hypot(x - ex, z - ez));
+  return angle + spread > right && angle - spread < left;
+}
+// The same for a board, wherever it or any copy stands. A painted skin (the sea, the carousel) shows its plain colour until
+// its pattern comes, so it never holds the page up.
+function boardInSight(board, sweep) {
+  if (board.texture) return false;
+  const at = board.rig ? RIGS[board.rig].at : board.at;
+  const places = board.copies ? board.copies.map(([x, z, size]) => [x, z, size * board.w / board.h]) : [[at[0], at[2], board.w]];
+  return places.some(([x, z, width]) => inSight(sweep, x, z, width));
 }
 
 // A cream copy of a board's silhouette, set just behind it, shows as the paper's cut edge when seen at an angle.
@@ -88,7 +87,7 @@ function roofFrame(side, layer) {
 }
 
 export async function mountCabin(stage, { onProgress = () => {}, onView = () => {}, onTouch = () => {}, isCurrent = () => true, fly = false } = {}) {
-  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  const motion = matchMedia('(prefers-reduced-motion: reduce)'), flying = fly && !motion.matches;
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -103,6 +102,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // where the visitor was looking outside, so coming back out faces the same way again.
   // `perched` holds the camera up at the start of the arrival until the loader has gone.
   let spin = 0, trip = null, pending = null, hovered = null, pointer = null, perched = false, away = { heading: 0, pitch: VIEWS.outside.pitch };
+  // `roomIn` once the room's boards have come (just after the page opens); `choice` counts requests for a view.
+  let roomIn = false, choice = 0;
   const eye = new THREE.Vector3(0, 3.7, 8.6), goalEye = eye.clone(), look = new THREE.Vector3();
 
   const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(fov, 1, .05, 110);
@@ -157,10 +158,22 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   solid(new THREE.BoxGeometry(.34, 1.1, .34), 0xc9bba6, new THREE.Vector3(FIRE.x, 2.72, FIRE.z));
   solid(new THREE.BoxGeometry(.42, .09, .42), 0xfbf8f1, new THREE.Vector3(FIRE.x, 3.3, FIRE.z));
 
-  // Cut the boards at a resolution the screen can show; phones get smaller textures.
-  const quality = Math.min(1, Math.max(.5, stage.clientWidth * Math.min(devicePixelRatio || 1, 2) / 2000));
-  let painted = 0, santaShare = 0, reindeerShare = 0;
-  const report = () => onProgress(Math.min(1, painted / (BOARDS.length + WORLD.length + 1) * .35 + santaShare * .45 + reindeerShare * .2));
+  // Each view blends its lens and distance between portrait and landscape screens.
+  const blend = () => THREE.MathUtils.clamp(((stage.clientWidth || 1) / (stage.clientHeight || 1) - .7) / .5, 0, 1);
+  // Every board comes as a ready picture (cabin-paint.js) at a size the screen can show: phones get the smaller set.
+  const set = cutSet(Math.min(1, Math.max(.5, stage.clientWidth * Math.min(devicePixelRatio || 1, 2) / 2000)));
+  // What must be there before the page opens: the house, the yard and as much of the village as the first view takes in
+  // (all of it when the visit opens with the flight over it). The room, Santa himself and the rest of the village follow
+  // straight after, while the visitor looks round outside; nothing indoors can be seen from out there.
+  // The first view's sweep is its lens's half-span either side of where it looks on this screen, with a little to spare: a
+  // phone held upright sees a narrow slice, so even the reindeer, just off to the right, can come a moment later.
+  const opening = goalFor('outside'), half = Math.atan(Math.tan(THREE.MathUtils.degToRad(opening.fov) / 2) * (stage.clientWidth || 1) / (stage.clientHeight || 1)) + .15;
+  const sweep = [opening.heading - half, opening.heading + half], seen = board => flying || boardInSight(board, sweep);
+  const indoor = board => board.room || board.chair, first = [], after = [];
+  for (const board of [...BOARDS, ...WORLD]) (indoor(board) || WORLD.includes(board) && !seen(board) ? after : first).push(board);
+  const reindeerFirst = flying || inSight(sweep, REINDEER.x, REINDEER.z, 1.4);
+  let painted = 0, reindeerShare = reindeerFirst ? 0 : 1;
+  const report = () => onProgress(Math.min(1, painted / (first.length + 1) * .6 + reindeerShare * .4));
   // Sheets by id, so a game can redraw one (the snowman's hat, the hay in the loft) and a tap can wiggle one.
   const flames = [], twinkles = [], swings = [], smoke = [], billboards = [], sheets = new Map(), lifting = new Map();
   // Soft bluish shadows on the snow, thrown right and back, away from the low sun on the left.
@@ -273,7 +286,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   ribbon(-.9, .02, 0xe4ded2, GROUND + .006);
   const foam = ribbon(-.05, .45, 0xf4f8f8, GROUND + .02, .85);
 
-  const smokeReady = paintBoard(SMOKE, quality).then(image => {
+  const smokeReady = cutBoard('smoke', PIECES.smoke, set).then(image => {
     const map = texture(image);
     for (let i = 0; i < 3; i++) {
       const puff = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false, toneMapped: false })));
@@ -281,13 +294,17 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     }
     painted++; report();
   });
-  // Every board, the village's too, is cut before the page opens: the arrival flies over all of it. A village board that
-  // fails is left out; a house board that fails fails the whole cabin.
-  const boards = [...BOARDS, ...WORLD].map(async board => {
-    try { const map = texture(await paintBoard(board, quality)); if (board.texture) skin(board, map); else standBoard(board, map); }
+  // A village board that fails is left out; a house board that fails before the page opens fails the whole cabin.
+  const addBoard = async board => {
+    const image = await cutBoard(board.id, board, set); if (disposed) return;
+    const map = texture(image); if (board.texture) skin(board, map); else standBoard(board, map);
+  };
+  const boards = first.map(async board => {
+    try { await addBoard(board); }
     catch (error) { if (!WORLD.includes(board)) throw error; console.error('Village board failed', board.id, error); }
     painted++; report();
   });
+  const hoistParts = Promise.all(['hoist-bracket', 'hoist-wheel', 'hoist-bale', 'hoist-toggle', 'hoist-hatch'].map(name => cutBoard(name, PIECES[name], set)));
 
   // Warm glows: the fire, the lantern, the reading lamp, the porch and the lighthouse lamp. Sprites always face the camera.
   const warm = keep(textures, radialTexture([[0, 'rgba(255,190,110,.8)'], [.45, 'rgba(255,150,70,.28)'], [1, 'rgba(255,140,60,0)']]));
@@ -353,25 +370,28 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // so it follows every nod and turn. Measured on the model from his red nose and smile.
   const MOUTH = new THREE.Vector3(0, -.24, .14);
   let santaModel, spine, spineRest, tracker, reindeerHolder, reindeerHead, reindeerRest, reindeerSkull, reindeerScale = 1;
-  const santa = loader.loadAsync(new URL('../../assets/models/santa-seated-web.glb', import.meta.url).href, event => { if (event.total) { santaShare = event.loaded / event.total; report(); } })
+  const loadSanta = () => loader.loadAsync(new URL('../../assets/models/santa-seated-web.glb', import.meta.url).href)
     .then(gltf => {
+      if (disposed) { free(gltf.scene); return false; }
       santaModel = gltf.scene; chair.add(fitModel(santaModel, 1));
       spine = santaModel.getObjectByName('mixamorigSpine2'); spineRest = spine?.quaternion.clone();
       tracker = createHeadTracker(santaModel, stage, { ...HEAD, unanimated: true, onMove: () => wake() });
-      return true;
-    }).catch(error => { console.error('Seated Santa failed to load', error); return false; })
-    .finally(() => { santaShare = 1; report(); });
+      redraw(); return true;
+    }).catch(error => { console.error('Seated Santa failed to load', error); return false; });
   // The reindeer from the Home page waits outside; most visitors already have this file cached.
-  const reindeer = loader.loadAsync(new URL('../../assets/models/reindeer-web.glb', import.meta.url).href, event => { if (event.total) { reindeerShare = event.loaded / event.total; report(); } })
+  const loadReindeer = () => loader.loadAsync(new URL('../../assets/models/reindeer-web.glb', import.meta.url).href, event => { if (event.total && reindeerFirst) { reindeerShare = event.loaded / event.total; report(); } })
     .then(gltf => {
+      if (disposed) { free(gltf.scene); return false; }
       const holder = fitModel(gltf.scene, REINDEER.height); holder.position.set(REINDEER.x, GROUND, REINDEER.z); holder.rotation.y = REINDEER.turn; world.add(holder); shadow(REINDEER.x, REINDEER.z, 1.2, .6, 1);
       reindeerHolder = holder; reindeerScale = holder.scale.x; gltf.scene.traverse(node => { if (node.isBone && /Head_0$/.test(node.name)) reindeerHead = node; if (node.isBone && /Head_3$/.test(node.name)) reindeerSkull = node; }); reindeerRest = reindeerHead?.quaternion.clone();
+      if (ready) redraw();
       return true;
     })
     .catch(error => { console.error('Reindeer failed to load', error); return false; })
     .finally(() => { reindeerShare = 1; report(); });
 
-  const [, , santaReady] = await Promise.all([Promise.all(boards), smokeReady, santa, reindeer]);
+  const reindeer = reindeerFirst ? loadReindeer() : null;
+  await Promise.all([Promise.all(boards), smokeReady, reindeer]);
   // The snowman's wardrobe: a small sheet for each place, laid just in front of him so it moves, turns and bows with him.
   // Each accessory is cut the first time it is worn and kept, so trying it on again is instant.
   const snowman = sheets.get('snowman'), worn = new Map(), outfits = new Map();
@@ -387,9 +407,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // by the same length of rope, and each rope runs from the wheel's rim to what it holds.
   const barn = sheets.get('stable'), hoist = { pull: 0 };
   if (barn) {
-    const piece = async (draw, w, h, state) => texture(await paintBoard({ w, h, px: 420, draw, state }, quality));
     const sheet = (map, w, h, lift = 0) => { const geometry = keep(geometries, new THREE.PlaneGeometry(w, h)); geometry.translate(0, lift * h, 0); const mesh = new THREE.Mesh(geometry, keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false }))); barn.holder.add(mesh); return mesh; };
-    const [bracket, wheel, bale, toggle, hatch] = await Promise.all([piece(hoistBracket, .62, .34), piece(hoistWheel, HOIST.radius * 2.3, HOIST.radius * 2.3), piece(hayBale, ...HOIST.bale), piece(hoistToggle, ...HOIST.toggle), piece(hoistHatch, ...HOIST.hatch, {})]);
+    const [bracket, wheel, bale, toggle, hatch] = (await hoistParts).map(texture);
     const hang = HOIST.x - HOIST.radius, pull = HOIST.x + HOIST.radius;
     hoist.hatch = sheet(hatch, ...HOIST.hatch, .5); hoist.hatch.position.set(hang, 0, .03);
     hoist.bale = sheet(bale, ...HOIST.bale, .5); hoist.bale.position.set(hang, 0, .16);
@@ -409,17 +428,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   placeHoist();
   function outfitTexture(item) {
     if (!outfits.has(item.id)) {
-      const { size: [w, h], box } = PLACES[item.place];
-      const board = { w, h, px: 640, draw: ({ paper }, { width, height }) => item.draw(shape('g', { transform: `scale(${width / 100} ${height / box})` }, paper)) };
-      outfits.set(item.id, paintBoard(board, quality).then(image => texture(image)));
+      outfits.set(item.id, cutBoard(`outfit-${item.id}`, outfitBoard(item), set).then(image => texture(image)));
     }
     return outfits.get(item.id);
   }
   if (!isCurrent()) { release3d(); return null; }
   stage.prepend(renderer.domElement);
 
-  // Each view blends its lens and distance between portrait and landscape screens.
-  const blend = () => THREE.MathUtils.clamp(((stage.clientWidth || 1) / (stage.clientHeight || 1) - .7) / .5, 0, 1);
   function goalFor(name) {
     const settings = VIEWS[name], t = blend(), aspect = (stage.clientWidth || 1) / (stage.clientHeight || 1);
     if (settings.eye) {
@@ -635,6 +650,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const stop = () => { cancelAnimationFrame(frame); frame = undefined; lastTick = 0; };
   const start = () => { if (frame === undefined && inView && !document.hidden) frame = requestAnimationFrame(tick); };
   // Under reduced motion nothing runs on its own: every change jumps straight to its end and draws once.
+  // `redraw` also draws a still frame when the loop is stopped, for something that has just arrived.
+  const redraw = () => { wake(); if (motion.matches || frame === undefined) draw(); };
   function wake() {
     if (!ready) return;
     if (motion.matches) { if (trip) finishTrip(); heading = goalHeading; pitch = goalPitch; eye.copy(goalEye); fov = goalFov; spin = 0; pose(); tracker?.update(1); draw(); }
@@ -647,6 +664,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   }
   function setView(name) {
     if (!VIEWS[name]) return;
+    const asked = ++choice;
+    if (name === 'inside' && view === 'outside' && !roomIn) { roomReady.then(() => { if (asked === choice) setView('inside'); }); return; }
     if (trip?.direction === 'fly') finishTrip();
     if (trip) { pending = name; return; }
     if (name === view) return;
@@ -832,7 +851,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   });
 
   ready = true; frameView();
-  if (fly && !motion.matches) {
+  if (flying) {
     perched = true; eye.set(...ARRIVAL.eye); goalEye.copy(eye); heading = goalHeading = ARRIVAL.heading; pitch = goalPitch = ARRIVAL.pitch; fov = goalFov = ARRIVAL.fov;
   }
   pose(); tracker?.update(0); draw();
@@ -844,6 +863,10 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   renderer.domElement.addEventListener('webglcontextrestored', draw, { signal: events.signal });
   stage.dataset.view = view;
   if (!motion.matches) start();
+  const roomReady = Promise.all(after.filter(indoor).map(board => addBoard(board).catch(error => console.error('Room board failed', board.id, error)))).then(() => { roomIn = true; redraw(); });
+  for (const board of after.filter(board => !indoor(board))) addBoard(board).then(redraw, error => console.error('Village board failed', board.id, error));
+  const santaReady = loadSanta();
+  if (!reindeer) loadReindeer();
 
   function destroy() {
     stop(); clearTimeout(returnTimer); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
@@ -853,12 +876,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   async function repaint(id, patch) {
     const sheet = sheets.get(id); if (!sheet) return;
     sheet.board.state = { ...sheet.board.state, ...patch };
-    const image = await paintBoard(sheet.board, quality);
+    const image = await cutBoard(id, sheet.board, set);
     if (disposed) return;
     const next = texture(image), old = sheet.material.map;
     sheet.material.map = next; if (sheet.edges) sheet.edges.map = next; textures.delete(old); old.dispose(); wake(); if (motion.matches || frame === undefined) draw();
   }
   const api = {
+    // Resolves true once Santa sits in his chair, false if his model could not load.
     santa: santaReady, destroy, setView, get view() { return view; }, repaint,
     rect: id => { const spot = SPOTS.find(item => item.id === id); return spot ? rectOfBox(...spot.box) : null; },
     rectOfBox,
@@ -907,7 +931,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     },
     async openHatch(open) {
       if (!hoist.hatch) return;
-      const map = texture(await paintBoard({ w: HOIST.hatch[0], h: HOIST.hatch[1], px: 420, draw: hoistHatch, state: { open } }, quality));
+      const map = texture(await cutBoard('hoist-hatch', PIECES['hoist-hatch'], set, open ? { open: true } : {}));
       if (disposed) return;
       const old = hoist.hatch.material.map; hoist.hatch.material.map = map; textures.delete(old); old.dispose(); wake(); if (motion.matches || frame === undefined) draw();
     },
@@ -931,14 +955,17 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   };
   return api;
 
+  function free(model) {
+    model.traverse(node => {
+      node.geometry?.dispose();
+      for (const material of [node.material].flat()) { if (!material) continue; Object.values(material).forEach(value => { if (value?.isTexture) value.dispose(); }); material.dispose(); }
+      node.skeleton?.dispose();
+    });
+  }
   // Hoisted, and touches nothing declared after the first await, so an abandoned load can call it too.
   function release3d() {
     disposed = true; events.abort(); tracker?.destroy();
-    for (const model of models) model.traverse(node => {
-      node.geometry?.dispose();
-      for (const material of [node.material].flat()) { if (!material) continue; Object.values(material).forEach(value => { if (value?.isTexture) textures.add(value); }); material.dispose(); }
-      node.skeleton?.dispose();
-    });
+    models.forEach(free);
     textures.forEach(value => value.dispose()); materials.forEach(value => value.dispose()); geometries.forEach(value => value.dispose());
     environment?.dispose(); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
   }
