@@ -6,7 +6,7 @@ import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.j
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
 import { BOARDS, CHAIR, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, PX, REINDEER, ROOM_PROPS, SIGN, SMOKE, SPOTS, hayBale, hoistBracket, hoistHatch, hoistToggle, hoistWheel } from './cabin-art.js';
-import { CAROUSEL, LIFT, LIGHTHOUSE, PROPS, RIGS, RUNS, SHORE, WHEEL, WORLD } from './cabin-world.js';
+import { BALLOONS, CAROUSEL, LIFT, LIGHTHOUSE, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { paperFilter, shape } from './paper-art.js';
 import { createHeadTracker } from './santa-head.js';
@@ -310,7 +310,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const glint = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: keep(textures, radialTexture([[0, 'rgba(255,255,240,1)'], [.25, 'rgba(255,230,150,.8)'], [1, 'rgba(255,220,120,0)']], 64)), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })));
   glint.visible = false; world.add(glint);
   let snowmanMove = null, found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null;
-  const wiggles = new Map(), runs = RUNS.map(points => new THREE.SplineCurve(points.map(([x, y]) => new THREE.Vector2(x, y))));
+  const wiggles = new Map(), runs = RUNS.map(points => new THREE.SplineCurve(points.map(([x, y]) => new THREE.Vector2(x, y)))), track = new THREE.SplineCurve(TRACK.map(([x, y]) => new THREE.Vector2(x, y)));
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const fitModel = (model, height) => {
     const bounds = new THREE.Box3().setFromObject(model), size = bounds.getSize(new THREE.Vector3()), center = bounds.getCenter(new THREE.Vector3());
@@ -544,6 +544,20 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     (clones.get('skier') ?? []).forEach((skier, i) => {
       const run = runs[i % runs.length], u = still ? .25 + i * .2 : (t * .035 + i * .37) % 1, at = run.getPoint(u), next = run.getPoint(Math.min(1, u + .01));
       skier.position.set(at.x, at.y + .3, .05); skier.scale.x = next.x < at.x ? -1 : 1; skier.visible = u < .985;
+    });
+    // The coaster train: out of the station, up the lift, down the drop, over the camelback and into the tunnel; then a
+    // pause while it is out of sight. Cars sit just above the rail, tilted with it.
+    const train = [clones.get('coaster-car-a')?.[0], sheets.get('coaster-car-b')?.holder, clones.get('coaster-car-a')?.[1]].filter(Boolean), lap = still ? .45 : (t * .075) % 1.35;
+    train.forEach((car, i) => {
+      const u = lap - i * .05;
+      car.visible = u > .05 && u < .95; if (!car.visible) return;
+      const at = track.getPointAt(u), along = track.getTangentAt(u);
+      car.position.set(at.x - along.y * .2, at.y + along.x * .2, .06); car.rotation.z = Math.atan2(along.y, along.x);
+    });
+    // Hot-air balloons hang over the fair, each drifting and bobbing on its own slow beat.
+    [...(clones.get('balloon-red') ?? []), ...(clones.get('balloon-green') ?? [])].forEach((ball, i) => {
+      const [x, y, z] = BALLOONS[i % BALLOONS.length], drift = still ? 0 : 1;
+      ball.position.set(x + Math.sin(t * .13 + i * 2) * .6 * drift, y + Math.sin(t * .4 + i * 1.3) * .25 * drift, z + Math.cos(t * .11 + i) * .4 * drift);
     });
     (clones.get('gondola') ?? []).forEach((cabin, i, all) => {
       const u = still ? i / all.length : (t * .02 + i / all.length) % 1;

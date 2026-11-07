@@ -833,8 +833,8 @@ export const BOARDS = [
   // Firs: one board per variant, planted at each [x, z, height]. Each tree turns to face the camera, so its outline stays clean from any side.
   // The second half of each list stands around the fair, the wishing corner and the coast (cabin-world.js).
   { id: 'fir-a', w: 1, h: 2, draw: fir(0), copies: [[-3.9, -3.2, 3.1], [4.4, -3.6, 3.3], [-11, -11, 4.2], [-20.5, -5.5, 4.6], [-23, 7, 5], [-6.9, 10.6, 2.3], [9.6, 1.4, 3.2]] },
-  { id: 'fir-b', w: 1, h: 2, draw: fir(1), copies: [[-5.1, -4.4, 2.4], [12, -14, 4.4], [-4.6, -10, 4.6], [-13.4, -4.4, 3.6], [-16.5, 13.5, 4.2], [8.4, 14.5, 3.4]] },
-  { id: 'fir-c', w: 1, h: 2, draw: fir(2), copies: [[3.2, -4.9, 2.2], [-6.6, -2.2, 2], [9, -7, 3], [-7.6, -.6, 2.4], [-19.5, 15, 4.6], [6.8, 6.2, 2.4]] },
+  { id: 'fir-b', w: 1, h: 2, draw: fir(1), copies: [[-5.1, -4.4, 2.4], [12, -14, 4.4], [-4.6, -10, 4.6], [-13.4, -4.4, 3.6], [-25, 2, 4.4], [8.4, 14.5, 3.4]] },
+  { id: 'fir-c', w: 1, h: 2, draw: fir(2), copies: [[3.2, -4.9, 2.2], [-6.6, -2.2, 2], [9, -7, 3], [-7.6, -.6, 2.4], [-12.5, 19.5, 4.2], [6.8, 6.2, 2.4]] },
   { id: 'sign', w: 1.8, h: 1.12, at: [SIGN.x, SIGN.top, SIGN.z], hang: true, sway: true, draw: nameSign, state: { stars: 0 } },
   { id: 'mailbox', w: .5, h: .95, at: [SIGN.x, GROUND, SIGN.z + .45], draw: mailbox, state: {} },
   { id: 'sleigh', w: 1.3, h: .8, at: [3.15, GROUND, -.2], turn: -.35, draw: sleigh },

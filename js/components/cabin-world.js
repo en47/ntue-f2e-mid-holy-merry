@@ -3,7 +3,7 @@
 // (cabin-art.js); the zones stand outside the resting view, so they only appear once you turn toward them.
 // Units: 1 = Santa's seated height. Light comes from the upper left.
 import { holly, pine, shape } from './paper-art.js';
-import { roofHouse, snowyFir, star } from './paper-props.js';
+import { facetedPeak, roofHouse, snowyFir, star } from './paper-props.js';
 import { GROUND, candyCane, drift, fence, hills, lampPost, path } from './cabin-art.js';
 
 // Where the visitor stands looking at the house (cabin-scene.js keeps the eye about here on a wide screen).
@@ -31,10 +31,18 @@ export const RUNS = [
   [[8.8, 7.9], [7.2, 6.6], [9.2, 5.2], [7, 3.6], [8.8, 2], [7.6, .6]],
 ];
 export const LIFT = { from: [-11.6, .7], to: [-6.6, 8.1] };
+// The roller coaster at the back of the fair: a wooden trestle track out of a little station on the left and into a snowy
+// tunnel on the right, in the board's own units (x across from its middle, y up from the snow). A train of three paper cars
+// runs it again and again along the same line (cabin-scene.js).
+export const COASTER = { x: -18, z: 17.4, w: 10.4, h: 4.6 };
+export const TRACK = [[-4.5, .95], [-3.4, .95], [-2.6, 2.3], [-1.9, 3.5], [-1.25, 3.95], [-.6, 3.5], [.35, 1.35], [1.05, .95], [1.85, 1.85], [2.55, 2.35], [3.25, 1.9], [3.95, 1.1], [4.6, 1]];
+// Hot-air balloons drifting over the fair; each sways a little about its place.
+export const BALLOONS = [[-18, 5.4, 3], [-25, 6.4, 12.5], [-21, 4.8, -6]];
 export const RIGS = {
   wheel: { at: [WHEEL.x, GROUND + WHEEL.hub, WHEEL.z], turn: face(WHEEL.x, WHEEL.z) },
   carousel: { at: [CAROUSEL.x, GROUND, CAROUSEL.z] },
   ski: { at: [SKI.x, GROUND, SKI.z], turn: face(SKI.x, SKI.z) },
+  coaster: { at: [COASTER.x, GROUND, COASTER.z], turn: face(COASTER.x, COASTER.z) },
 };
 
 // A smooth line through points (uniform Catmull-Rom, the same curve THREE.SplineCurve follows).
@@ -239,6 +247,68 @@ export function bunting({ paper }, { width, height }) {
   }
 }
 
+export function coaster({ paper }, { width, height }) {
+  const unit = width / COASTER.w, X = x => (x + COASTER.w / 2) * unit, Y = y => height - y * unit, line = TRACK.map(([x, y]) => [X(x), Y(y)]);
+  // The trestle: a post every 0.4, ledgers and one diagonal per bay, all standing in the snow.
+  const at = x => { for (let i = 1; i < line.length; i++) if (line[i][0] >= x) { const [x0, y0] = line[i - 1], [x1, y1] = line[i]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return line.at(-1)[1]; };
+  for (let x = X(-3.4); x <= X(4.2); x += .4 * unit) {
+    const top = at(x) + 6, next = x + .4 * unit;
+    shape('path', { d: `M${x} ${top}V${height}`, stroke: '#a98c6f', 'stroke-width': 5 }, paper);
+    for (let y = height - .6 * unit; y > Math.max(top, at(next) + 6) + 8; y -= .6 * unit) shape('path', { d: `M${x} ${y}H${next}M${x} ${y}L${next} ${Math.min(height, y + .6 * unit)}`, stroke: '#c4ab8c', 'stroke-width': 2.6 }, paper);
+  }
+  const d = smooth(line);
+  shape('path', { d, stroke: '#8f6a4f', 'stroke-width': 11, fill: 'none', 'stroke-linejoin': 'round' }, paper);
+  shape('path', { d, stroke: '#6f513d', 'stroke-width': 11, fill: 'none', 'stroke-dasharray': '3 10' }, paper);
+  shape('path', { d, stroke: SNOW, 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round', transform: 'translate(0 -5)' }, paper);
+  // The station the train leaves from, and the snowy tunnel it disappears into.
+  const sx = X(-4.4);
+  shape('rect', { x: sx - 60, y: Y(1.6), width: 150, height: Y(0) - Y(1.6), fill: '#e9d9b8' }, paper);
+  shape('path', { d: `M${sx - 76} ${Y(1.55)}L${sx + 15} ${Y(2.35)}L${sx + 106} ${Y(1.55)}Z`, fill: RED }, paper);
+  snowCap(paper, sx - 70, Y(1.75), 170, 14);
+  shape('rect', { x: sx - 30, y: Y(1.2), width: 90, height: 34, rx: 6, fill: CREAM }, paper);
+  star(paper, sx + 15, Y(1.2) + 17, 12, RED);
+  const tx = X(4.55);
+  shape('path', { d: `M${tx - 70} ${height}C${tx - 70} ${Y(2.4)} ${tx + 90} ${Y(2.6)} ${width} ${Y(1.6)}V${height}Z`, fill: '#eef2f3' }, paper);
+  shape('path', { d: `M${tx - 34} ${height}V${Y(.9)}C${tx - 34} ${Y(1.5)} ${tx + 30} ${Y(1.5)} ${tx + 30} ${Y(.9)}V${height}Z`, fill: '#4a3f3a' }, paper);
+  shape('path', { d: `M${tx - 44} ${Y(.9)}C${tx - 44} ${Y(1.65)} ${tx + 40} ${Y(1.65)} ${tx + 40} ${Y(.9)}`, stroke: '#c4ab8c', 'stroke-width': 8, fill: 'none' }, paper);
+  lights(paper, [X(-1.9), Y(3.5) - 14], [X(-.6), Y(3.5) - 14], -18, 6, 5);
+}
+// A coaster car for two, the sleigh-shaped kind the Game page's coaster runs, drawn level; the scene tilts it on the track.
+export function coasterCar(index) {
+  return ({ paper }, { width, height }) => {
+    const g = shape('g', { transform: `scale(${width / 64} ${height / 46})` }, paper), body = [RED, GREEN, GOLD][index % 3];
+    for (const [cx, hat] of [[22, GREEN], [42, RED]]) {
+      shape('circle', { cx, cy: 15, r: 7, fill: '#f2c9a8' }, g);
+      shape('path', { d: `M${cx - 8} 11L${cx + 2} -1L${cx + 8} 11Z`, fill: hat }, g);
+      shape('path', { d: `M${cx - 9} 11H${cx + 9}`, stroke: CREAM, 'stroke-width': 3.5, 'stroke-linecap': 'round' }, g);
+    }
+    shape('path', { d: 'M4 20H58C62 20 62 36 56 38H8C4 38 2 24 4 20Z', fill: body }, g);
+    shape('path', { d: 'M6 22H56', stroke: CREAM, 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+    for (const cx of [16, 46]) shape('circle', { cx, cy: 41, r: 5, fill: '#5a4a44' }, g);
+  };
+}
+// A hot-air balloon in red, cream and gold, as on the Game page, with a small basket.
+export function balloon(colours) {
+  const [outer, inner, middle] = colours;
+  return ({ paper }, { width, height }) => {
+    const g = shape('g', { transform: `scale(${width / 200} ${height / 270})` }, paper);
+    shape('path', { d: 'M100 14C40 14 8 62 18 110 26 146 70 178 84 196H116C130 178 174 146 182 110 192 62 160 14 100 14Z', fill: outer }, g);
+    shape('path', { d: 'M100 14C74 14 56 62 62 110 66 146 84 178 92 196H108C116 178 134 146 138 110 144 62 126 14 100 14Z', fill: inner }, g);
+    shape('path', { d: 'M100 14C92 30 88 70 92 110 94 146 98 178 100 196 102 178 106 146 108 110 112 70 108 30 100 14Z', fill: middle }, g);
+    shape('path', { d: 'M86 196L84 226M114 196L116 226', stroke: '#8a6a55', 'stroke-width': 3, fill: 'none' }, g);
+    shape('rect', { x: 78, y: 226, width: 44, height: 30, rx: 5, fill: '#a98c6f' }, g);
+  };
+}
+// Far ranges cut like Home's and Game's peaks (facetedPeak), in the paler tones of distance. Each entry: [x across the board
+// 0–1, peak height 0–1, half-widths left and right as a share of the board]. They sit low at both ends of the board.
+const FAR_TONES = { cream: '#f3f1ec', ice: '#d9e4ea', sky: '#bcd0dd', dusk: '#a6bfd0' };
+export function peaks(range) {
+  return ({ paper }, { width, height }) => {
+    shape('path', { d: `M0 ${height}C${width * .2} ${height * .78} ${width * .8} ${height * .78} ${width} ${height}Z`, fill: FAR_TONES.cream }, paper);
+    for (const [x, top, left, right] of range) facetedPeak(paper, width * x, height * (1 - top), height, width * left, width * right, FAR_TONES);
+  };
+}
+
 // ——— The winter coast. ———
 // One tile of the sea, repeated across the whole bay; drawn without the paper filter so the tiles meet without seams.
 export function seaTile({ plain }, { width, height }) {
@@ -251,15 +321,24 @@ export function seaTile({ plain }, { width, height }) {
     shape('path', { d, stroke: row % 2 ? SEA_LIGHT : SEA_DEEP, 'stroke-width': 5, fill: 'none', opacity: .75 }, plain);
   }
 }
-// A long paper wave standing in the water, parallel to the shore; it rocks and slides gently (cabin-scene.js).
+// A long paper wave standing in the water, parallel to the shore; it rocks and slides gently (cabin-scene.js). Its body is
+// the sea's own colour, and its crests shrink to nothing toward both ends, so it melts into the water instead of stopping
+// in a square step.
 export function wave(level) {
-  const body = [SEA_DEEP, SEA, SEA_LIGHT][level];
+  const crest = [SEA_DEEP, SEA, SEA_LIGHT][level];
   return ({ paper }, { width, height }) => {
-    const crest = height * .38, period = height * 2.2;
-    let d = `M0 ${height}V${crest}`;
-    for (let x = 0; x < width; x += period) d += `C${x + period * .3} ${crest - height * .34} ${x + period * .55} ${crest - height * .3} ${x + period * .64} ${crest + 2}C${x + period * .74} ${crest - height * .06} ${x + period * .88} ${crest + height * .1} ${x + period} ${crest}`;
-    shape('path', { d: `${d}V${height}Z`, fill: body }, paper);
-    for (let x = 0; x < width; x += period) shape('path', { d: `M${x + period * .36} ${crest - height * .2}C${x + period * .5} ${crest - height * .32} ${x + period * .6} ${crest - height * .16} ${x + period * .64} ${crest}C${x + period * .54} ${crest - height * .12} ${x + period * .46} ${crest - height * .16} ${x + period * .36} ${crest - height * .2}Z`, fill: FOAM }, paper);
+    const period = height * 2.2, fade = width * .14, lift = x => Math.max(0, Math.min(1, x / fade, (width - x) / fade));
+    const top = x => { const phase = (x % period) / period; return height - height * (.18 + .5 * Math.pow(Math.sin(phase * Math.PI), 3)) * lift(x); };
+    let d = `M0 ${height}`;
+    for (let x = 0; x <= width; x += period / 24) d += `L${x.toFixed(1)} ${top(x).toFixed(1)}`;
+    shape('path', { d: `${d}L${width} ${height}Z`, fill: SEA }, paper);
+    shape('path', { d: d.replace(`M0 ${height}`, `M0 ${top(0)}`), fill: 'none', stroke: crest, 'stroke-width': 3, opacity: .6 }, paper);
+    // Foam on each crest, smaller toward the ends.
+    for (let x = period / 2; x < width; x += period) {
+      const size = lift(x); if (size < .15) continue;
+      const y = top(x), w = period * .32 * size;
+      shape('path', { d: `M${x - w} ${y + 3}C${x - w * .4} ${y - 6 * size} ${x + w * .4} ${y - 6 * size} ${x + w} ${y + 3}C${x + w * .3} ${y} ${x - w * .3} ${y} ${x - w} ${y + 3}Z`, fill: FOAM }, paper);
+    }
   };
 }
 const rock = (parent, x, base, w, h, tone) => {
@@ -483,11 +562,21 @@ export const WORLD = [
   { id: 'carousel-roof', w: 12.6, h: 2.2, px: 60, texture: true, draw: carouselRoof },
   { id: 'carousel-fringe', w: 12.6, h: .34, px: 100, texture: true, draw: carouselFringe },
   { id: 'carousel-drum', w: 11, h: .3, px: 100, texture: true, draw: carouselDrum },
+  { id: 'coaster', w: COASTER.w, h: COASTER.h, px: 90, rig: 'coaster', at: [0, 0, 0], draw: coaster },
+  { id: 'coaster-car-a', w: .64, h: .46, px: 200, rig: 'coaster', at: [0, 0, .06], center: true, clones: 2, draw: coasterCar(0) },
+  { id: 'coaster-car-b', w: .64, h: .46, px: 200, rig: 'coaster', at: [0, 0, .06], center: true, draw: coasterCar(1) },
+  { id: 'balloon-red', w: 1.5, h: 2, px: 160, center: true, billboard: true, clones: 2, draw: balloon([RED, CREAM, GOLD]) },
+  { id: 'balloon-green', w: 1.5, h: 2, px: 160, center: true, billboard: true, draw: balloon([GREEN, CREAM, '#7fa3a8']) },
   { id: 'stall-cocoa', w: 2.1, h: 2.3, px: 190, at: at(-12.2, 11), turn: face(-12.2, 11), draw: stall('cocoa') },
   { id: 'stall-cookie', w: 2.1, h: 2.3, px: 190, at: at(-9.6, 13.2), turn: face(-9.6, 13.2), draw: stall('cookie') },
   { id: 'bunting-wheel', w: 6, h: 3.2, px: 90, at: at(-14.8, 3), turn: face(-14.8, 3), draw: bunting },
   { id: 'bunting-stalls', w: 4.6, h: 3, px: 100, at: at(-11, 9), turn: face(-11, 9), draw: bunting },
   { id: 'park-path', w: 14, h: 2, px: 60, at: at(-12, 5), flat: 'ground', turn: 1.25, draw: path },
+  // Far mountain ranges all round, drawn hazy (no fog) like the ski mountain: behind everything, to the left past the fair, and
+  // across the bay.
+  { id: 'peaks-back', w: 120, h: 14, px: 12, at: at(0, -52), kind: 'scenery', fog: false, draw: peaks([[.12, .55, .07, .08], [.27, .8, .09, .08], [.42, .62, .07, .07], [.6, .95, .1, .09], [.76, .7, .08, .08], [.9, .5, .07, .06]]) },
+  { id: 'peaks-left', w: 60, h: 10, px: 14, at: at(-44, 2), turn: face(-44, 2), kind: 'scenery', fog: false, draw: peaks([[.18, .6, .1, .1], [.38, .9, .12, .12], [.6, .7, .1, .1], [.8, .55, .1, .09]]) },
+  { id: 'peaks-bay', w: 56, h: 9, px: 14, at: at(46, -18), turn: face(46, -18), kind: 'scenery', fog: false, draw: peaks([[.2, .55, .1, .1], [.42, .85, .12, .11], [.66, .65, .1, .1], [.84, .45, .09, .08]]) },
   { id: 'hills-left', w: 56, h: 4.6, px: 18, at: at(-34, 6), turn: face(-34, 6), draw: hills(1), kind: 'scenery' },
   { id: 'fence-left', w: 2.4, h: .7, px: 200, at: at(-6.6, 6.4), turn: face(-6.6, 6.4), draw: fence },
   { id: 'cane-left', w: .3, h: .95, px: 260, at: at(-7.4, 4.3), turn: face(-7.4, 4.3), draw: candyCane },
