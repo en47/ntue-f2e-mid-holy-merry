@@ -4,7 +4,7 @@
 // Units: 1 = Santa's seated height. Light comes from the upper left.
 import { holly, pine, shape } from './paper-art.js';
 import { facetedPeak, roofHouse, snowyFir, star } from './paper-props.js';
-import { GROUND, candyCane, drift, fence, hills, lampPost, path } from './cabin-art.js';
+import { GROUND, bench, candyCane, drift, fence, hills, lampPost, path, pond } from './cabin-art.js';
 
 // Where the visitor stands looking at the house (cabin-scene.js keeps the eye about here on a wide screen).
 export const VIEWPOINT = { x: 0, z: 11.5 };
@@ -31,13 +31,19 @@ export const RUNS = [
   [[8.8, 7.9], [7.2, 6.6], [9.2, 5.2], [7, 3.6], [8.8, 2], [7.6, .6]],
 ];
 export const LIFT = { from: [-11.6, .7], to: [-6.6, 8.1] };
-// The roller coaster at the back of the fair: a wooden trestle track out of a little station on the left and into a snowy
-// tunnel on the right, in the board's own units (x across from its middle, y up from the snow). A train of three paper cars
-// runs it again and again along the same line (cabin-scene.js).
-export const COASTER = { x: -18, z: 17.4, w: 10.4, h: 4.6 };
-export const TRACK = [[-4.5, .95], [-3.4, .95], [-2.6, 2.3], [-1.9, 3.5], [-1.25, 3.95], [-.6, 3.5], [.35, 1.35], [1.05, .95], [1.85, 1.85], [2.55, 2.35], [3.25, 1.9], [3.95, 1.1], [4.6, 1]];
+// The roller coaster at the back of the fair, in the board's own units (x across from its middle, y up from the snow): out
+// of a little station on the left, a chain lift up to the tallest crest, a steep drop, then two lower hills — each lower
+// than the last, as a train coasting on its own speed could climb — and into a snowy tunnel on the right. The train's speed
+// follows the drop below the crest (cabin-scene.js), so it crawls up the lift and races down.
+export const COASTER = { x: -18.5, z: 15.8, w: 13, h: 7, lift: [-5.4, -1.1] };
+export const TRACK = [[-6.3, 1], [-5.4, 1], [-4.6, 1.9], [-3.4, 3.4], [-2.2, 4.9], [-1.55, 5.7], [-1.1, 5.85], [-.7, 5.4], [-.25, 3.5], [.2, 1.5], [.6, .95], [1.25, 1.05], [1.85, 2.5], [2.4, 3.7], [2.85, 3.9], [3.3, 3.3], [3.8, 1.6], [4.3, 1], [4.85, 1.75], [5.3, 2.15], [5.75, 1.6], [6.3, 1.05]];
 // Hot-air balloons drifting over the fair; each sways a little about its place.
 export const BALLOONS = [[-18, 5.4, 3], [-25, 6.4, 12.5], [-21, 4.8, -6]];
+// The far ends of the turn, so neither edge is bare snow. Left, past the fair: a skating pond (its long axis turned across
+// the line of sight) with two skaters gliding round it. Right, past the lighthouse: buoys and a seal on an ice floe.
+export const POND = { x: -7.8, z: 15.6, turn: -1.09, radius: [1.45, .55] };
+export const FLOATS = [[16.8, 11.2], [19.5, 17.5]];
+export const FLOE = [17.8, 8.4];
 export const RIGS = {
   wheel: { at: [WHEEL.x, GROUND + WHEEL.hub, WHEEL.z], turn: face(WHEEL.x, WHEEL.z) },
   carousel: { at: [CAROUSEL.x, GROUND, CAROUSEL.z] },
@@ -249,29 +255,32 @@ export function bunting({ paper }, { width, height }) {
 
 export function coaster({ paper }, { width, height }) {
   const unit = width / COASTER.w, X = x => (x + COASTER.w / 2) * unit, Y = y => height - y * unit, line = TRACK.map(([x, y]) => [X(x), Y(y)]);
-  // The trestle: a post every 0.4, ledgers and one diagonal per bay, all standing in the snow.
+  // The trestle: a post every 0.45 units, ledgers and one diagonal per bay, all standing in the snow; taller bents under the hills.
   const at = x => { for (let i = 1; i < line.length; i++) if (line[i][0] >= x) { const [x0, y0] = line[i - 1], [x1, y1] = line[i]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return line.at(-1)[1]; };
-  for (let x = X(-3.4); x <= X(4.2); x += .4 * unit) {
-    const top = at(x) + 6, next = x + .4 * unit;
+  for (let x = X(-5.3); x <= X(5.8); x += .45 * unit) {
+    const top = at(x) + 6, next = x + .45 * unit;
     shape('path', { d: `M${x} ${top}V${height}`, stroke: '#a98c6f', 'stroke-width': 5 }, paper);
-    for (let y = height - .6 * unit; y > Math.max(top, at(next) + 6) + 8; y -= .6 * unit) shape('path', { d: `M${x} ${y}H${next}M${x} ${y}L${next} ${Math.min(height, y + .6 * unit)}`, stroke: '#c4ab8c', 'stroke-width': 2.6 }, paper);
+    for (let y = height - .7 * unit; y > Math.max(top, at(next) + 6) + 8; y -= .7 * unit) shape('path', { d: `M${x} ${y}H${next}M${x} ${y}L${next} ${Math.min(height, y + .7 * unit)}`, stroke: '#c4ab8c', 'stroke-width': 2.6 }, paper);
   }
   const d = smooth(line);
   shape('path', { d, stroke: '#8f6a4f', 'stroke-width': 11, fill: 'none', 'stroke-linejoin': 'round' }, paper);
   shape('path', { d, stroke: '#6f513d', 'stroke-width': 11, fill: 'none', 'stroke-dasharray': '3 10' }, paper);
+  // The chain up the lift hill, the one stretch the train is pulled.
+  const [from, to] = COASTER.lift, chain = smooth(line.filter(([x]) => x >= X(from) && x <= X(to)));
+  shape('path', { d: chain, stroke: '#3b302a', 'stroke-width': 2.4, fill: 'none', 'stroke-dasharray': '4 3' }, paper);
   shape('path', { d, stroke: SNOW, 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round', transform: 'translate(0 -5)' }, paper);
+  lights(paper, [X(-1.9), Y(5.7) - 14], [X(-.4), Y(5.2) - 14], -16, 6, 5);
   // The station the train leaves from, and the snowy tunnel it disappears into.
-  const sx = X(-4.4);
-  shape('rect', { x: sx - 60, y: Y(1.6), width: 150, height: Y(0) - Y(1.6), fill: '#e9d9b8' }, paper);
-  shape('path', { d: `M${sx - 76} ${Y(1.55)}L${sx + 15} ${Y(2.35)}L${sx + 106} ${Y(1.55)}Z`, fill: RED }, paper);
-  snowCap(paper, sx - 70, Y(1.75), 170, 14);
-  shape('rect', { x: sx - 30, y: Y(1.2), width: 90, height: 34, rx: 6, fill: CREAM }, paper);
-  star(paper, sx + 15, Y(1.2) + 17, 12, RED);
-  const tx = X(4.55);
-  shape('path', { d: `M${tx - 70} ${height}C${tx - 70} ${Y(2.4)} ${tx + 90} ${Y(2.6)} ${width} ${Y(1.6)}V${height}Z`, fill: '#eef2f3' }, paper);
-  shape('path', { d: `M${tx - 34} ${height}V${Y(.9)}C${tx - 34} ${Y(1.5)} ${tx + 30} ${Y(1.5)} ${tx + 30} ${Y(.9)}V${height}Z`, fill: '#4a3f3a' }, paper);
-  shape('path', { d: `M${tx - 44} ${Y(.9)}C${tx - 44} ${Y(1.65)} ${tx + 40} ${Y(1.65)} ${tx + 40} ${Y(.9)}`, stroke: '#c4ab8c', 'stroke-width': 8, fill: 'none' }, paper);
-  lights(paper, [X(-1.9), Y(3.5) - 14], [X(-.6), Y(3.5) - 14], -18, 6, 5);
+  const sx = X(-5.95);
+  shape('rect', { x: sx - 62, y: Y(1.7), width: 124, height: Y(0) - Y(1.7), fill: '#e9d9b8' }, paper);
+  shape('path', { d: `M${sx - 78} ${Y(1.65)}L${sx} ${Y(2.5)}L${sx + 78} ${Y(1.65)}Z`, fill: RED }, paper);
+  snowCap(paper, sx - 72, Y(1.85), 144, 14);
+  shape('rect', { x: sx - 40, y: Y(1.3), width: 80, height: 32, rx: 6, fill: CREAM }, paper);
+  star(paper, sx, Y(1.3) + 16, 12, RED);
+  const tx = X(6.05);
+  shape('path', { d: `M${tx - 70} ${height}C${tx - 70} ${Y(2.5)} ${tx + 60} ${Y(2.7)} ${width} ${Y(1.8)}V${height}Z`, fill: '#eef2f3' }, paper);
+  shape('path', { d: `M${tx - 34} ${height}V${Y(.9)}C${tx - 34} ${Y(1.55)} ${tx + 28} ${Y(1.55)} ${tx + 28} ${Y(.9)}V${height}Z`, fill: '#4a3f3a' }, paper);
+  shape('path', { d: `M${tx - 44} ${Y(.9)}C${tx - 44} ${Y(1.7)} ${tx + 38} ${Y(1.7)} ${tx + 38} ${Y(.9)}`, stroke: '#c4ab8c', 'stroke-width': 8, fill: 'none' }, paper);
 }
 // A coaster car for two, the sleigh-shaped kind the Game page's coaster runs, drawn level; the scene tilts it on the track.
 export function coasterCar(index) {
@@ -310,34 +319,34 @@ export function peaks(range) {
 }
 
 // ——— The winter coast. ———
-// One tile of the sea, repeated across the whole bay; drawn without the paper filter so the tiles meet without seams.
+// One large tile of the sea, repeated across the bay. Mostly calm water: a few broad, faint patches and a handful of short,
+// uneven glints, scattered rather than in rows (rows of ripples, squeezed by distance, made a dense pattern). Everything stays
+// inside the tile, so the tiles meet without seams; drawn without the paper filter for the same reason.
 export function seaTile({ plain }, { width, height }) {
   shape('rect', { x: 0, y: 0, width, height, fill: SEA }, plain);
-  const wave = width / 3;
-  for (let row = 0; row < 6; row++) {
-    const y = (row + .5) * height / 6, shift = (row % 2) * wave / 2;
-    let d = `M${-wave + shift} ${y}`;
-    for (let x = -wave + shift; x < width + wave; x += wave) d += `q${wave / 4} -9 ${wave / 2} 0t${wave / 2} 0`;
-    shape('path', { d, stroke: row % 2 ? SEA_LIGHT : SEA_DEEP, 'stroke-width': 5, fill: 'none', opacity: .75 }, plain);
+  for (const [x, y, rx, ry, fill] of [[.3, .32, .2, .09, SEA_LIGHT], [.72, .7, .18, .08, SEA_DEEP], [.62, .2, .12, .05, SEA_DEEP], [.2, .78, .14, .06, SEA_LIGHT]]) shape('ellipse', { cx: width * x, cy: height * y, rx: width * rx, ry: height * ry, fill, opacity: .22 }, plain);
+  for (const [x, y, w] of [[.14, .2, .1], [.52, .44, .06], [.34, .62, .08], [.78, .3, .07], [.66, .86, .09], [.1, .52, .05]]) {
+    const x0 = width * x, y0 = height * y, run = width * w;
+    shape('path', { d: `M${x0} ${y0}q${run / 2} -${height * .008} ${run} 0`, stroke: '#cfe0ea', 'stroke-width': height * .006, fill: 'none', 'stroke-linecap': 'round', opacity: .55 }, plain);
   }
 }
 // A long paper wave standing in the water, parallel to the shore; it rocks and slides gently (cabin-scene.js). Its body is
-// the sea's own colour, and its crests shrink to nothing toward both ends, so it melts into the water instead of stopping
-// in a square step.
+// the sea's own colour; its crests come at uneven spacing and heights (a regular row of them read as a pattern), only the
+// tallest carry a little foam, and they shrink to nothing toward both ends, so the wave melts into the water.
 export function wave(level) {
   const crest = [SEA_DEEP, SEA, SEA_LIGHT][level];
   return ({ paper }, { width, height }) => {
-    const period = height * 2.2, fade = width * .14, lift = x => Math.max(0, Math.min(1, x / fade, (width - x) / fade));
-    const top = x => { const phase = (x % period) / period; return height - height * (.18 + .5 * Math.pow(Math.sin(phase * Math.PI), 3)) * lift(x); };
+    const fade = width * .16, lift = x => Math.max(0, Math.min(1, x / fade, (width - x) / fade)), peaks = [];
+    for (let x = 0, i = level * 7; x < width; i++) { const span = height * (3.2 + noise(i + 30) * 3.4); peaks.push([x, span, .35 + noise(i + 50) * .65]); x += span; }
+    const top = x => { const [start, span, size] = peaks.findLast(([at]) => at <= x) ?? peaks[0], phase = (x - start) / span; return height - height * (.16 + .46 * size * Math.pow(Math.sin(phase * Math.PI), 2)) * lift(x); };
     let d = `M0 ${height}`;
-    for (let x = 0; x <= width; x += period / 24) d += `L${x.toFixed(1)} ${top(x).toFixed(1)}`;
+    for (let x = 0; x <= width; x += height / 4) d += `L${x.toFixed(1)} ${top(x).toFixed(1)}`;
     shape('path', { d: `${d}L${width} ${height}Z`, fill: SEA }, paper);
-    shape('path', { d: d.replace(`M0 ${height}`, `M0 ${top(0)}`), fill: 'none', stroke: crest, 'stroke-width': 3, opacity: .6 }, paper);
-    // Foam on each crest, smaller toward the ends.
-    for (let x = period / 2; x < width; x += period) {
-      const size = lift(x); if (size < .15) continue;
-      const y = top(x), w = period * .32 * size;
-      shape('path', { d: `M${x - w} ${y + 3}C${x - w * .4} ${y - 6 * size} ${x + w * .4} ${y - 6 * size} ${x + w} ${y + 3}C${x + w * .3} ${y} ${x - w * .3} ${y} ${x - w} ${y + 3}Z`, fill: FOAM }, paper);
+    shape('path', { d: d.replace(`M0 ${height}`, `M0 ${top(0)}`), fill: 'none', stroke: crest, 'stroke-width': 3, opacity: .5 }, paper);
+    for (const [start, span, size] of peaks) {
+      const x = start + span / 2, scale = size * lift(x); if (scale < .7) continue;
+      const y = top(x), w = span * .18 * scale;
+      shape('path', { d: `M${x - w} ${y + 3}C${x - w * .4} ${y - 5 * scale} ${x + w * .4} ${y - 5 * scale} ${x + w} ${y + 3}C${x + w * .3} ${y} ${x - w * .3} ${y} ${x - w} ${y + 3}Z`, fill: FOAM }, paper);
     }
   };
 }
@@ -454,6 +463,123 @@ export function beachGrass({ paper }, { width, height }) {
   shape('path', { d: `M0 ${height}C${width * .2} ${height - 30} ${width * .6} ${height - 22} ${width} ${height - 12}V${height}Z`, fill: SNOW }, paper);
 }
 
+// ——— The edges of the turn. ———
+// A fisherman's boathouse at the water's edge: on stilts, a round window, a life ring by the door, snow on the roof.
+export function boathouse({ paper }, { width, height }) {
+  const ground = height - 10, eave = height * .42, left = width * .14, right = width * .86, cx = width / 2, floor = ground - 46;
+  for (const x of [left + 14, cx, right - 14]) shape('rect', { x: x - 7, y: floor, width: 14, height: 46, fill: '#6f513d' }, paper);
+  shape('rect', { x: left, y: eave, width: right - left, height: floor - eave, fill: '#7fa3a8' }, paper);
+  for (let y = eave + 22; y < floor - 4; y += 22) shape('path', { d: `M${left} ${y}H${right}`, stroke: '#6b8f94', 'stroke-width': 3 }, paper);
+  shape('path', { d: `M${left - 24} ${eave + 8}L${cx} ${height * .12}L${right + 24} ${eave + 8}Z`, fill: '#4a3f3a' }, paper);
+  shape('path', { d: `M${left - 26} ${eave + 8}L${cx} ${height * .1}L${right + 26} ${eave + 8}C${right - 20} ${eave - 12} ${cx + 30} ${height * .22} ${cx} ${height * .2}C${cx - 30} ${height * .22} ${left + 20} ${eave - 12} ${left - 26} ${eave + 8}Z`, fill: SNOW }, paper);
+  shape('rect', { x: cx - 30, y: eave + 46, width: 60, height: floor - eave - 46, rx: 6, fill: '#4f6a62' }, paper);
+  shape('circle', { cx: (left + cx) / 2 - 6, cy: eave + 62, r: 20, fill: '#fbe7b0', stroke: CREAM, 'stroke-width': 6 }, paper);
+  shape('circle', { cx: right - 40, cy: eave + 66, r: 22, fill: 'none', stroke: RED, 'stroke-width': 12 }, paper);
+  shape('circle', { cx: right - 40, cy: eave + 66, r: 22, fill: 'none', stroke: CREAM, 'stroke-width': 12, 'stroke-dasharray': '17 17.6' }, paper);
+  shape('path', { d: `M0 ${height}C${width * .2} ${ground - 18} ${width * .5} ${ground - 6} ${width} ${ground - 14}V${height}Z`, fill: SNOW }, paper);
+}
+// A short wooden landing stage out into the water, with a mooring post and its rope.
+export function dock({ paper }, { width, height }) {
+  const deck = height * .42;
+  for (let x = 30; x < width; x += 90) shape('rect', { x: x - 9, y: deck, width: 18, height: height - deck, fill: '#6f513d' }, paper);
+  shape('rect', { x: 0, y: deck - 22, width, height: 26, rx: 4, fill: '#a8774d' }, paper);
+  for (let x = 34; x < width; x += 34) shape('path', { d: `M${x} ${deck - 22}v26`, stroke: '#8f6340', 'stroke-width': 2 }, paper);
+  snowCap(paper, 0, deck - 24, width, 8);
+  shape('rect', { x: width - 46, y: deck - 72, width: 16, height: 54, rx: 4, fill: '#6f513d' }, paper);
+  shape('path', { d: `M${width - 44} ${deck - 52}C${width - 70} ${deck - 40} ${width - 84} ${deck - 20} ${width - 96} ${deck + 4}`, stroke: '#c9a46a', 'stroke-width': 4, fill: 'none' }, paper);
+  waterline(paper, width, height, height * .3);
+}
+export function buoy({ paper }, { width, height }) {
+  const cx = width / 2;
+  shape('path', { d: `M${cx - 30} ${height - 40}C${cx - 30} ${height * .35} ${cx + 30} ${height * .35} ${cx + 30} ${height - 40}Z`, fill: RED }, paper);
+  shape('rect', { x: cx - 31, y: height * .58, width: 62, height: 14, fill: CREAM }, paper);
+  shape('path', { d: `M${cx} ${height * .44}V${height * .1}`, stroke: INK, 'stroke-width': 4 }, paper);
+  shape('path', { d: `M${cx} ${height * .1}l22 8-22 8Z`, fill: GOLD }, paper);
+  waterline(paper, width, height, 34);
+}
+// A grey seal resting on a small ice floe, head up toward the shore.
+export function sealFloe({ paper }, { width, height }) {
+  shape('path', { d: `M10 ${height - 34}L${width * .2} ${height - 58}L${width * .55} ${height - 62}L${width * .9} ${height - 54}L${width - 8} ${height - 36}L${width * .7} ${height - 26}L${width * .3} ${height - 24}Z`, fill: '#f4f8f9' }, paper);
+  shape('path', { d: `M10 ${height - 34}L${width * .3} ${height - 24}L${width * .7} ${height - 26}L${width - 8} ${height - 36}V${height - 22}L${width * .7} ${height - 12}L${width * .3} ${height - 10}L10 ${height - 20}Z`, fill: '#c9dbe5' }, paper);
+  const by = height - 56, grey = '#8d99a0';
+  shape('path', { d: `M${width * .3} ${by}C${width * .3} ${by - 40} ${width * .62} ${by - 46} ${width * .74} ${by - 18}C${width * .8} ${by - 6} ${width * .86} ${by + 2} ${width * .9} ${by - 4}L${width * .88} ${by + 6}C${width * .7} ${by + 8} ${width * .45} ${by + 8} ${width * .3} ${by}Z`, fill: grey }, paper);
+  shape('path', { d: `M${width * .5} ${by}l-14 10 22 -2Z`, fill: '#77838a' }, paper);
+  shape('circle', { cx: width * .3, cy: by - 24, r: 22, fill: grey }, paper);
+  shape('ellipse', { cx: width * .23, cy: by - 18, rx: 11, ry: 8, fill: '#a9b3b9' }, paper);
+  shape('circle', { cx: width * .29, cy: by - 31, r: 3, fill: INK }, paper);
+  shape('circle', { cx: width * .19, cy: by - 21, r: 3.4, fill: INK }, paper);
+  waterline(paper, width, height, 20);
+}
+// Fishermen's barrels and a crate of fish waiting by the boathouse.
+export function barrels({ paper }, { width, height }) {
+  const base = height - 6;
+  for (const [x, w, h] of [[16, 80, 120], [104, 74, 100]]) {
+    shape('path', { d: `M${x} ${base}C${x - 9} ${base - h * .5} ${x - 9} ${base - h * .5} ${x} ${base - h}H${x + w}C${x + w + 9} ${base - h * .5} ${x + w + 9} ${base - h * .5} ${x + w} ${base}Z`, fill: '#a8774d' }, paper);
+    for (const t of [.22, .78]) shape('path', { d: `M${x - 4} ${base - h * t}H${x + w + 4}`, stroke: '#3b302a', 'stroke-width': 5 }, paper);
+    shape('ellipse', { cx: x + w / 2, cy: base - h, rx: w / 2 + 2, ry: 9, fill: SNOW }, paper);
+  }
+  const cx = 196, top = base - 56;
+  shape('rect', { x: cx, y: top, width: 92, height: 56, rx: 4, fill: '#c39466' }, paper);
+  shape('path', { d: `M${cx} ${top + 28}h92`, stroke: '#a8774d', 'stroke-width': 4 }, paper);
+  for (const [x, tilt] of [[cx + 26, -12], [cx + 62, 10]]) {
+    const fish = shape('g', { transform: `rotate(${tilt} ${x} ${top})` }, paper);
+    shape('ellipse', { cx: x, cy: top - 4, rx: 22, ry: 8, fill: '#9fb5c0' }, fish);
+    shape('path', { d: `M${x + 20} ${top - 4}l12 -8v16Z`, fill: '#9fb5c0' }, fish);
+    shape('circle', { cx: x - 14, cy: top - 6, r: 2, fill: INK }, fish);
+  }
+}
+// A skater gliding with arms out, facing right; the scene flips her when she turns the other way round the pond.
+export function skater(colour) {
+  return ({ paper }, { width, height }) => {
+    const g = shape('g', { transform: `scale(${width / 120} ${height / 185})` }, paper);
+    shape('path', { d: 'M54 120L46 166M66 120L84 160', stroke: '#3f5a6e', 'stroke-width': 10, 'stroke-linecap': 'round' }, g);
+    shape('path', { d: 'M32 172H62M72 166L100 161', stroke: '#c9d6dc', 'stroke-width': 4, 'stroke-linecap': 'round' }, g);
+    shape('path', { d: 'M42 124C38 98 44 72 60 68 76 72 82 98 78 124Z', fill: colour }, g);
+    shape('path', { d: 'M46 86L20 100M74 86L102 74', stroke: colour, 'stroke-width': 9, 'stroke-linecap': 'round' }, g);
+    for (const [x, y] of [[18, 101], [104, 73]]) shape('circle', { cx: x, cy: y, r: 6, fill: CREAM }, g);
+    shape('path', { d: 'M48 72C56 76 66 76 74 72V80C66 84 56 84 48 80Z', fill: GREEN }, g);
+    shape('path', { d: 'M66 80L77 100 70 101 62 82Z', fill: DEEP_GREEN }, g);
+    shape('circle', { cx: 61, cy: 54, r: 15, fill: '#f2c9a8' }, g);
+    shape('circle', { cx: 67, cy: 52, r: 1.8, fill: INK }, g);
+    shape('circle', { cx: 69, cy: 59, r: 3, fill: '#e9a08f' }, g);
+    shape('path', { d: 'M45 50C45 32 77 32 77 50Z', fill: colour === RED ? GREEN : RED }, g);
+    shape('circle', { cx: 61, cy: 32, r: 6, fill: CREAM }, g);
+  };
+}
+// A wooden sled with a sack of presents, left in the snow by the pond.
+export function sledSacks({ paper }, { width, height }) {
+  const base = height - 10;
+  shape('path', { d: `M16 ${base}H${width - 40}C${width - 16} ${base} ${width - 10} ${base - 20} ${width - 14} ${base - 34}`, stroke: '#a9845b', 'stroke-width': 7, fill: 'none', 'stroke-linecap': 'round' }, paper);
+  shape('path', { d: `M50 ${base}V${base - 22}M${width - 70} ${base}V${base - 22}`, stroke: '#a9845b', 'stroke-width': 6 }, paper);
+  shape('rect', { x: 24, y: base - 36, width: width - 70, height: 16, rx: 5, fill: RED }, paper);
+  shape('path', { d: `M70 ${base - 36}C50 ${base - 70} 70 ${base - 110} 110 ${base - 104}C150 ${base - 110} 168 ${base - 70} 150 ${base - 36}Z`, fill: '#d9c3a0' }, paper);
+  shape('path', { d: `M100 ${base - 100}l10 -12 10 12`, stroke: RED, 'stroke-width': 5, fill: 'none' }, paper);
+  gift(paper, 158, base - 36, 44, 36, GREEN, GOLD); gift(paper, 196, base - 36, 34, 26, RED, CREAM);
+  snowCap(paper, 76, base - 104, 70, 10);
+}
+// A low snow-block fort with a pile of snowballs ready beside it.
+export function snowFort({ paper }, { width, height }) {
+  const base = height - 6;
+  for (let row = 0; row < 2; row++) for (let col = 0; col < 3 - row; col++) shape('rect', { x: 14 + col * 46 + row * 23, y: base - 30 - row * 28, width: 44, height: 28, rx: 8, fill: SNOW, stroke: '#d6e3e9', 'stroke-width': 3 }, paper);
+  shape('path', { d: `M84 ${base - 58}V${base - 100}`, stroke: '#8a6a55', 'stroke-width': 4 }, paper);
+  shape('path', { d: `M84 ${base - 100}l28 9-28 9Z`, fill: RED }, paper);
+  for (const [x, y] of [[178, base - 14], [204, base - 14], [191, base - 36]]) shape('circle', { cx: x, cy: y, r: 13, fill: SNOW, stroke: '#d6e3e9', 'stroke-width': 3 }, paper);
+}
+// The fair's candy-striped ticket booth.
+export function ticketBooth({ paper }, { width, height }) {
+  const base = height - 6, top = height * .32, cx = width / 2;
+  shape('rect', { x: 24, y: top, width: width - 48, height: base - top, fill: CREAM }, paper);
+  for (let x = 24; x < width - 24; x += 28) shape('rect', { x, y: top + 110, width: 14, height: base - top - 110, fill: RED }, paper);
+  shape('rect', { x: cx - 44, y: top + 24, width: 88, height: 62, rx: 8, fill: '#fbe7b0', stroke: '#8f5a3c', 'stroke-width': 6 }, paper);
+  shape('rect', { x: cx - 52, y: top + 88, width: 104, height: 12, rx: 4, fill: '#8f5a3c' }, paper);
+  shape('path', { d: `M10 ${top}C10 ${top - 84} ${width - 10} ${top - 84} ${width - 10} ${top}Z`, fill: RED }, paper);
+  for (let i = 0; i < 6; i++) { const x = 10 + i * (width - 20) / 6, w = (width - 20) / 6; shape('path', { d: `M${x} ${top}a${w / 2} ${w / 2.4} 0 0 0 ${w} 0Z`, fill: i % 2 ? RED : CREAM }, paper); }
+  snowCap(paper, 16, top - 62, width - 32, 18);
+  shape('path', { d: `M${cx} ${top - 64}V${top - 110}`, stroke: '#8a6a55', 'stroke-width': 4 }, paper);
+  shape('path', { d: `M${cx} ${top - 110}l26 8-26 8Z`, fill: GREEN }, paper);
+  star(paper, cx, top + 55, 14, RED);
+}
+
 // ——— The ski mountain behind the village, painted in the haze of distance (it is drawn without fog). ———
 export function skiMountain({ paper }, { width, height }) {
   const X = x => (x + SKI.w / 2) * width / SKI.w, Y = y => height - y * height / SKI.h, P = ([x, y]) => [X(x), Y(y)];
@@ -562,7 +688,7 @@ export const WORLD = [
   { id: 'carousel-roof', w: 12.6, h: 2.2, px: 60, texture: true, draw: carouselRoof },
   { id: 'carousel-fringe', w: 12.6, h: .34, px: 100, texture: true, draw: carouselFringe },
   { id: 'carousel-drum', w: 11, h: .3, px: 100, texture: true, draw: carouselDrum },
-  { id: 'coaster', w: COASTER.w, h: COASTER.h, px: 90, rig: 'coaster', at: [0, 0, 0], draw: coaster },
+  { id: 'coaster', w: COASTER.w, h: COASTER.h, px: 80, rig: 'coaster', at: [0, 0, 0], draw: coaster },
   { id: 'coaster-car-a', w: .64, h: .46, px: 200, rig: 'coaster', at: [0, 0, .06], center: true, clones: 2, draw: coasterCar(0) },
   { id: 'coaster-car-b', w: .64, h: .46, px: 200, rig: 'coaster', at: [0, 0, .06], center: true, draw: coasterCar(1) },
   { id: 'balloon-red', w: 1.5, h: 2, px: 160, center: true, billboard: true, clones: 2, draw: balloon([RED, CREAM, GOLD]) },
@@ -577,22 +703,21 @@ export const WORLD = [
   { id: 'peaks-back', w: 120, h: 14, px: 12, at: at(0, -52), kind: 'scenery', fog: false, draw: peaks([[.12, .55, .07, .08], [.27, .8, .09, .08], [.42, .62, .07, .07], [.6, .95, .1, .09], [.76, .7, .08, .08], [.9, .5, .07, .06]]) },
   { id: 'peaks-left', w: 60, h: 10, px: 14, at: at(-44, 2), turn: face(-44, 2), kind: 'scenery', fog: false, draw: peaks([[.18, .6, .1, .1], [.38, .9, .12, .12], [.6, .7, .1, .1], [.8, .55, .1, .09]]) },
   { id: 'peaks-bay', w: 56, h: 9, px: 14, at: at(46, -18), turn: face(46, -18), kind: 'scenery', fog: false, draw: peaks([[.2, .55, .1, .1], [.42, .85, .12, .11], [.66, .65, .1, .1], [.84, .45, .09, .08]]) },
-  { id: 'hills-left', w: 56, h: 4.6, px: 18, at: at(-34, 6), turn: face(-34, 6), draw: hills(1), kind: 'scenery' },
+  { id: 'hills-left', w: 56, h: 4.6, px: 18, at: at(-34, 6), turn: face(-34, 6), draw: hills(1), kind: 'scenery', fog: false },
   { id: 'fence-left', w: 2.4, h: .7, px: 200, at: at(-6.6, 6.4), turn: face(-6.6, 6.4), draw: fence },
   { id: 'cane-left', w: .3, h: .95, px: 260, at: at(-7.4, 4.3), turn: face(-7.4, 4.3), draw: candyCane },
   { id: 'drift-left-near', w: 1.6, h: .5, px: 160, at: at(-6.2, 9.8), turn: face(-6.2, 9.8), draw: drift },
   { id: 'drift-left-mid', w: 1.2, h: .4, px: 180, at: at(-5, 4.6), turn: face(-5, 4.6), mirror: true, draw: drift },
   // The coast: the sea itself is one flat sheet in cabin-scene.js, tiled with this pattern.
-  { id: 'sea', w: 6, h: 6, px: 85, texture: true, repeat: [1 / 6, 1 / 6], draw: seaTile },
+  { id: 'sea', w: 18, h: 18, px: 40, texture: true, repeat: [1 / 18, 1 / 18], draw: seaTile },
   { id: 'wave-near', w: 16, h: .55, px: 100, at: [14.2, GROUND - .06, 6], turn: -Math.PI / 2 + .04, draw: wave(0) },
   { id: 'wave-mid', w: 24, h: .6, px: 80, at: [16.6, GROUND - .06, 2], turn: -Math.PI / 2 + .1, draw: wave(1) },
-  { id: 'wave-far', w: 30, h: .7, px: 60, at: [20.4, GROUND - .06, -2], turn: -Math.PI / 2 + .14, draw: wave(2) },
   { id: 'islet', w: 3.6, h: 1.3, px: 140, at: [LIGHT.x, GROUND - .1, LIGHT.z + .25], turn: face(LIGHT.x, LIGHT.z), draw: islet },
   { id: 'lighthouse', w: 1.2, h: LIGHT.h, px: LIGHT.px, at: [LIGHT.x, LIGHT.base, LIGHT.z], turn: face(LIGHT.x, LIGHT.z), draw: lighthouse },
   { id: 'boat', w: 1.4, h: 1.7, px: 160, at: [24, GROUND - .12, -6], turn: face(24, -6), draw: boat },
   { id: 'rocks', w: 1.6, h: .7, px: 200, at: [13.6, GROUND - .05, 9.2], turn: face(13.6, 9.2), draw: rocks },
   { id: 'gull', w: .5, h: .26, px: 200, center: true, billboard: true, clones: 3, draw: gull },
-  { id: 'island', w: 14, h: 2.4, px: 22, at: at(30, -12), turn: face(30, -12), draw: hills(1), kind: 'scenery' },
+  { id: 'island', w: 14, h: 2.4, px: 22, at: at(30, -12), turn: face(30, -12), draw: hills(1), kind: 'scenery', fog: false },
   { id: 'world-sign', w: 1.2, h: 2.1, px: 240, at: at(10.2, 9.4), turn: face(10.2, 9.4), draw: worldSign },
   { id: 'postcards', w: 1.4, h: 1.5, px: 220, at: at(9.2, 11.8), turn: face(9.2, 11.8), draw: postcards },
   { id: 'dinghy', w: 1.3, h: .5, px: 220, at: at(11.2, 5.6), turn: face(11.2, 5.6), draw: dinghy },
@@ -604,6 +729,23 @@ export const WORLD = [
   { id: 'ski-mountain', w: SKI.w, h: SKI.h, px: 50, rig: 'ski', at: [0, 0, 0], kind: 'scenery', fog: false, draw: skiMountain },
   { id: 'skier', w: .55, h: .7, px: 220, rig: 'ski', at: [0, 0, .05], center: true, clones: 3, fog: false, draw: skier },
   { id: 'gondola', w: .42, h: .55, px: 220, rig: 'ski', at: [0, 0, .07], hang: true, clones: 3, fog: false, draw: gondola },
+  // The right edge of the turn: the boathouse and its landing stage, a moored boat, buoys, a seal on a floe, barrels and a bench.
+  { id: 'boathouse', w: 2.4, h: 2.5, px: 170, at: at(11.4, 15.2), turn: face(11.4, 15.2), draw: boathouse },
+  { id: 'dock', w: 3.2, h: 1.2, px: 170, at: [13.6, GROUND - .2, 13.6], turn: face(13.6, 13.6), draw: dock },
+  { id: 'boat-moored', w: 1.4, h: 1.7, px: 160, at: [15.6, GROUND - .12, 14.8], turn: face(15.6, 14.8), draw: boat },
+  { id: 'buoy', w: .42, h: .7, px: 220, billboard: true, clones: FLOATS.length, draw: buoy },
+  { id: 'seal-floe', w: 1.7, h: .8, px: 200, at: [FLOE[0], GROUND - .1, FLOE[1]], turn: face(...FLOE), draw: sealFloe },
+  { id: 'barrels', w: 1.5, h: .95, px: 200, at: at(7.6, 13.6), turn: face(7.6, 13.6), draw: barrels },
+  { id: 'bench-shore', w: 1.4, h: .9, px: 200, at: at(6.2, 14.4), turn: face(6.2, 14.4), draw: bench },
+  { id: 'rocks-shore', w: 1.6, h: .7, px: 200, at: [11.9, GROUND - .05, 18.6], turn: face(11.9, 18.6), draw: rocks },
+  // The left edge, past the fair: a skating pond with two skaters, a sled of presents, a snow fort, the ticket booth, a lamp.
+  { id: 'skating-pond', w: 4.4, h: 2, px: 80, at: at(POND.x, POND.z), flat: 'ground', turn: POND.turn, draw: pond },
+  { id: 'skater-red', w: .55, h: .85, px: 220, billboard: true, draw: skater(RED) },
+  { id: 'skater-green', w: .55, h: .85, px: 220, billboard: true, draw: skater(GREEN) },
+  { id: 'sled-sacks', w: 1.4, h: .75, px: 200, at: at(-5.6, 13.6), turn: face(-5.6, 13.6), draw: sledSacks },
+  { id: 'snow-fort', w: 1.2, h: .7, px: 200, at: at(-12.6, 16.4), turn: face(-12.6, 16.4), draw: snowFort },
+  { id: 'ticket-booth', w: 1.1, h: 1.9, px: 200, at: at(-14.6, 13.6), turn: face(-14.6, 13.6), draw: ticketBooth },
+  { id: 'lamp-pond', w: .55, h: 2.2, px: 240, at: at(-4.6, 13.2), turn: face(-4.6, 13.2), draw: lampPost },
   // The centre: the path to the door and the signs pointing everywhere else.
   { id: 'door-path', w: 4.2, h: 1.1, px: 120, at: at(0, 3.75), flat: 'ground', turn: Math.PI / 2, draw: doorPath },
   // Just off the house's front-left corner, clear of the snowman and the mailbox from where the visitor stands.

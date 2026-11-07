@@ -6,7 +6,7 @@ import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.j
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
 import { BOARDS, CHAIR, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, PX, REINDEER, ROOM_PROPS, SIGN, SMOKE, SPOTS, hayBale, hoistBracket, hoistHatch, hoistToggle, hoistWheel } from './cabin-art.js';
-import { BALLOONS, CAROUSEL, LIFT, LIGHTHOUSE, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
+import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { paperFilter, shape } from './paper-art.js';
 import { createHeadTracker } from './santa-head.js';
@@ -311,6 +311,19 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   glint.visible = false; world.add(glint);
   let snowmanMove = null, found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null;
   const wiggles = new Map(), runs = RUNS.map(points => new THREE.SplineCurve(points.map(([x, y]) => new THREE.Vector2(x, y)))), track = new THREE.SplineCurve(TRACK.map(([x, y]) => new THREE.Vector2(x, y)));
+  // The coaster's timetable, worked out once. The chain pulls the train slowly to the top of the lift hill; from there it
+  // coasts, its speed set by how far it has dropped below the crest (v² = v₀² + 2g·drop) less a little friction for the
+  // distance run, so it crawls up the lift, races down the drop and slows over each lower hill. g is in scene units per
+  // second² (one unit is about 1.3 m). `rides` holds, for each of 400 equal steps along the track, the time to get there.
+  const ride = (() => {
+    const STEPS = 400, G = 7.5, CHAIN = 1.2, FRICTION = .45, points = track.getSpacedPoints(STEPS), step = track.getLength() / STEPS;
+    let crest = 0; points.forEach((point, i) => { if (point.x <= COASTER.lift[1] + .3 && point.y > points[crest].y) crest = i; });
+    const speed = i => i <= crest ? CHAIN : Math.max(.9, Math.sqrt(CHAIN * CHAIN + 2 * G * (points[crest].y - points[i].y) - FRICTION * (i - crest) * step));
+    const times = [0];
+    for (let i = 1; i <= STEPS; i++) times.push(times[i - 1] + step / ((speed(i - 1) + speed(i)) / 2));
+    // Where the front of the train is (0–1 along the track) after `time` seconds of the ride; past the end it waits unseen.
+    return { length: times[STEPS] + 2.5, at(time) { let low = 0, high = STEPS; while (high - low > 1) { const mid = (low + high) >> 1; if (times[mid] <= time) low = mid; else high = mid; } return Math.min(1, (low + (time - times[low]) / ((times[high] - times[low]) || 1)) / STEPS); } };
+  })();
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const fitModel = (model, height) => {
     const bounds = new THREE.Box3().setFromObject(model), size = bounds.getSize(new THREE.Vector3()), center = bounds.getCenter(new THREE.Vector3());
@@ -526,7 +539,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const angle = i / all.length * Math.PI * 2;
       horse.position.set(Math.sin(angle) * CAROUSEL.ring, .95 + (still ? 0 : Math.sin(t * 2.2 + i * 1.7) * .1), Math.cos(angle) * CAROUSEL.ring); horse.rotation.y = angle;
     });
-    ['wave-near', 'wave-mid', 'wave-far'].forEach((id, i) => {
+    ['wave-near', 'wave-mid'].forEach((id, i) => {
       const sheet = sheets.get(id); if (!sheet) return;
       const along = still ? 0 : Math.sin(t * .3 + i * 2) * .3, turned = sheet.board.turn;
       sheet.holder.position.set(sheet.home.x + Math.cos(turned) * along, sheet.home.y + (still ? 0 : Math.sin(t * .9 + i * 1.7) * .035), sheet.home.z - Math.sin(turned) * along);
@@ -545,12 +558,12 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const run = runs[i % runs.length], u = still ? .25 + i * .2 : (t * .035 + i * .37) % 1, at = run.getPoint(u), next = run.getPoint(Math.min(1, u + .01));
       skier.position.set(at.x, at.y + .3, .05); skier.scale.x = next.x < at.x ? -1 : 1; skier.visible = u < .985;
     });
-    // The coaster train: out of the station, up the lift, down the drop, over the camelback and into the tunnel; then a
-    // pause while it is out of sight. Cars sit just above the rail, tilted with it.
-    const train = [clones.get('coaster-car-a')?.[0], sheets.get('coaster-car-b')?.holder, clones.get('coaster-car-a')?.[1]].filter(Boolean), lap = still ? .45 : (t * .075) % 1.35;
+    // The coaster train runs its timetable: out of the station, up the chain, down the drop, over the two lower hills and into
+    // the tunnel, then a short wait out of sight. The cars keep a fixed spacing along the rail, just above it, tilted with it.
+    const train = [clones.get('coaster-car-a')?.[0], sheets.get('coaster-car-b')?.holder, clones.get('coaster-car-a')?.[1]].filter(Boolean), front = still ? .3 : ride.at(t % ride.length);
     train.forEach((car, i) => {
-      const u = lap - i * .05;
-      car.visible = u > .05 && u < .95; if (!car.visible) return;
+      const u = front - i * .032, x = u > 0 ? track.getPointAt(u).x : -9;
+      car.visible = u > 0 && x > -5.3 && x < 5.85; if (!car.visible) return;
       const at = track.getPointAt(u), along = track.getTangentAt(u);
       car.position.set(at.x - along.y * .2, at.y + along.x * .2, .06); car.rotation.z = Math.atan2(along.y, along.x);
     });
@@ -559,6 +572,20 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const [x, y, z] = BALLOONS[i % BALLOONS.length], drift = still ? 0 : 1;
       ball.position.set(x + Math.sin(t * .13 + i * 2) * .6 * drift, y + Math.sin(t * .4 + i * 1.3) * .25 * drift, z + Math.cos(t * .11 + i) * .4 * drift);
     });
+    // Two skaters glide round the pond, each on her own beat; seen from the visitor, she faces the way she is going.
+    const across = [Math.cos(POND.turn), -Math.sin(POND.turn)], along = [Math.sin(POND.turn), Math.cos(POND.turn)], right = [Math.cos(heading), -Math.sin(heading)];
+    ['skater-red', 'skater-green'].forEach((id, i) => {
+      const skater = sheets.get(id)?.holder; if (!skater) return;
+      const angle = (still ? 1 : t * (.45 + i * .12)) + i * Math.PI, [a, b] = POND.radius;
+      const dx = across[0] * Math.cos(angle) * a + along[0] * Math.sin(angle) * b, dz = across[1] * Math.cos(angle) * a + along[1] * Math.sin(angle) * b;
+      skater.position.set(POND.x + dx, GROUND + .01, POND.z + dz);
+      const vx = -across[0] * Math.sin(angle) * a + along[0] * Math.cos(angle) * b, vz = -across[1] * Math.sin(angle) * a + along[1] * Math.cos(angle) * b;
+      skater.scale.x = vx * right[0] + vz * right[1] < 0 ? -1 : 1;
+    });
+    // Buoys and the seal's floe ride the swell.
+    (clones.get('buoy') ?? []).forEach((float, i) => { const [x, z] = FLOATS[i]; float.position.set(x, GROUND - .14 + (still ? 0 : Math.sin(t * 1.1 + i * 2) * .05), z); float.rotation.z = still ? 0 : Math.sin(t * .9 + i) * .08; });
+    const floe = sheets.get('seal-floe');
+    if (floe) { floe.holder.position.y = floe.home.y + (still ? 0 : Math.sin(t * .7 + 1) * .04); floe.holder.rotation.z = still ? 0 : Math.sin(t * .5) * .03; }
     (clones.get('gondola') ?? []).forEach((cabin, i, all) => {
       const u = still ? i / all.length : (t * .02 + i / all.length) % 1;
       cabin.position.set(lerp(LIFT.from[0], LIFT.to[0], u), lerp(LIFT.from[1], LIFT.to[1], u), .07);
