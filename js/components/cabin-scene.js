@@ -14,7 +14,7 @@ const HEAD = { maxYaw: .24, maxPitch: .1 };
 const RETURN_AFTER = 1600, PAPER_EDGE = 0xefe1c4, CUT = 0xf5ecdc, SNOWFIELD = 0xfff9eb, HAZE = 0xf3e7dd;
 // What each view looks at, how far it stands back (or what it must fit), its lens, and how far it may turn (radians).
 const VIEWS = {
-  outside: { target: [0, 1.7, .3], tallTarget: [-.62, 1.7, .3], fit: [8.8, 5.6], tallFit: [5.6, 5.6], fov: 36, pitch: .24, maxYaw: .55, minPitch: .1, maxPitch: .44 },
+  outside: { target: [0, 1.7, .3], tallTarget: [-.85, 1.7, .3], fit: [8.8, 5.6], tallFit: [6, 5.6], fov: 36, pitch: .24, maxYaw: .55, minPitch: .1, maxPitch: .44 },
   inside: { target: [CHAIR.x + .15, .62, CHAIR.z], distance: 2.5, tallDistance: 3.2, fov: 34, pitch: .12, maxYaw: .32, minPitch: .02, maxPitch: .28 },
 };
 let paperCount = 0;
@@ -108,7 +108,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const cut = solid(new THREE.BoxGeometry(length, HOUSE.roof - gap * 2, HOUSE.overhang - gap), 0x4a3f3a, roof.center.clone().addScaledVector(roof.outward, -HOUSE.roof / 2).setZ(front));
     cut.rotation.z = angle;
     // Only a lip of snow along the front edge: the rest of the roof shows its shingles with the snow painted on them.
-    const snow = solid(new THREE.BoxGeometry(length * .94, .05, .2), 0xfbf8f1, roof.center.clone().addScaledVector(roof.outward, .026).addScaledVector(roof.up, -.02).setZ(HOUSE.depth / 2 + HOUSE.overhang - .1));
+    const snow = solid(new THREE.BoxGeometry(length * .9, .03, .2), 0xfbf8f1, roof.center.clone().addScaledVector(roof.outward, .026).addScaledVector(roof.up, -.02).setZ(HOUSE.depth / 2 + HOUSE.overhang - .1));
     snow.rotation.z = angle;
   }
   // The iron bracket the name sign hangs from, fixed to the front-left corner of the house.

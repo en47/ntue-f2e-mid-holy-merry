@@ -15,7 +15,7 @@ export const CHAIR = { x: -.45, z: .05 };
 export const GROUND = -.14;
 // The reindeer waits by the sleigh on the right; the name sign hangs from an iron bracket at the front-left corner, over the mailbox.
 export const REINDEER = { x: 2.3, z: 1.2, turn: -.75, height: 1.3 };
-export const SIGN = { x: -2.45, top: 1.84, z: HOUSE.depth / 2, arm: 1.45 };
+export const SIGN = { x: -2.7, top: 1.93, z: HOUSE.depth / 2, arm: 1.9 };
 export const LANTERN = { x: .3, z: .05 };
 // The fireplace on the back wall; its chimney rises out of the right slope of the roof.
 export const FIRE = { x: .88 };
@@ -165,15 +165,15 @@ export function roofInside({ plain }, { width, height }) {
   for (let x = 80; x < width; x += 80) shape('path', { d: `M${x} 0V${height}`, stroke: '#b07f53', 'stroke-width': 4 }, plain);
   for (let y = 60; y < height; y += 240) shape('rect', { x: 0, y, width, height: 40, fill: TIMBER }, plain);
 }
-// On the roof: rows of paper shingles, snow along the ridge and the eave. Art: left is the eave, right the ridge.
+// On the roof: rows of dark paper shingles carrying only a thin line of snow at the ridge and a few drifts, so the roof keeps
+// its dark outline against the pale morning sky. Art: left is the eave, right the ridge.
 export function roofOutside({ plain, paper }, { width, height }) {
   shape('rect', { x: 0, y: 0, width, height, fill: '#3f3531' }, plain);
   for (let x = 0, row = 0; x < width; x += 62, row++) {
     for (let y = -30 + (row % 2) * 34; y < height; y += 68) shape('rect', { x, y, width: 70, height: 64, rx: 26, fill: ['#5a4d47', '#4f4440', '#62544d'][(row + Math.round(y / 68)) % 3] }, plain);
   }
-  shape('path', { d: `M${width} 0V${height}H${width - 150}C${width - 210} ${height * .8} ${width - 130} ${height * .6} ${width - 200} ${height * .4}S${width - 140} ${height * .1} ${width - 190} 0Z`, fill: SNOW }, paper);
-  shape('path', { d: `M0 0V${height}H40C70 ${height * .85} 30 ${height * .6} 60 ${height * .45}S30 ${height * .15} 50 0Z`, fill: SNOW }, paper);
-  for (let i = 0; i < 6; i++) shape('ellipse', { cx: 300 + noise(i + 40) * (width - 600), cy: noise(i + 60) * height, rx: 60 + noise(i) * 70, ry: 30 + noise(i + 2) * 30, fill: SNOW }, paper);
+  shape('path', { d: `M${width} 0V${height}H${width - 46}C${width - 70} ${height * .75} ${width - 40} ${height * .5} ${width - 64} ${height * .3}S${width - 44} ${height * .08} ${width - 58} 0Z`, fill: SNOW }, paper);
+  for (let i = 0; i < 4; i++) shape('ellipse', { cx: 260 + noise(i + 40) * (width - 520), cy: 80 + noise(i + 60) * (height - 160), rx: 34 + noise(i) * 30, ry: 16 + noise(i + 2) * 12, fill: SNOW, opacity: .9 }, paper);
 }
 
 // Garland draped along the front edge of the roof, with bows and pinecones, like the reference cottage.
@@ -578,7 +578,7 @@ export const BOARDS = [
   { id: 'fir-a', w: 1, h: 2, draw: fir(0), copies: [[-3.9, -3.2, 3.1], [4.4, -3.6, 3.3], [-11, -11, 4.2]] },
   { id: 'fir-b', w: 1, h: 2, draw: fir(1), copies: [[-5.1, -4.4, 2.4], [12, -14, 4.4]] },
   { id: 'fir-c', w: 1, h: 2, draw: fir(2), copies: [[3.2, -4.9, 2.2], [-6.6, -2.2, 2], [9, -7, 3]] },
-  { id: 'sign', w: 1.4, h: .74, at: [SIGN.x, SIGN.top, SIGN.z], hang: true, sway: true, draw: nameSign },
+  { id: 'sign', w: 1.8, h: .92, at: [SIGN.x, SIGN.top, SIGN.z], hang: true, sway: true, draw: nameSign },
   { id: 'mailbox', w: .5, h: .95, at: [SIGN.x, GROUND, SIGN.z + .45], draw: mailbox },
   { id: 'sleigh', w: 1.3, h: .8, at: [3.15, GROUND, -.2], turn: -.35, draw: sleigh },
   { id: 'fence', w: 2.4, h: .7, at: [-4.2, GROUND, -.4], turn: .45, draw: fence },
