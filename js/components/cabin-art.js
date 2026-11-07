@@ -24,7 +24,7 @@ export const FIRE = { x: .88, z: BACK + .25 };
 // never sweeps across the camera walking through it (cabin-scene.js).
 export const DOOR = { width: .66, height: 1.5, swing: 1.75, hinge: -.33, z: HOUSE.depth / 2 + HOUSE.thick / 2 };
 // Where you stand once inside: a few steps in from the door, turned toward Santa in his chair.
-export const INSIDE = { eye: [.45, 1.15, .9], heading: .78, pitch: .22 };
+export const INSIDE = { eye: [.45, 1.15, .9], heading: .78, pitch: .32 };
 const CREAM = '#fbf3df', SNOW = '#fbf8f1', RED = '#a84a42', GREEN = '#4f7d68', DEEP_GREEN = '#3f6653', GOLD = '#e0b04f';
 const WOOD = '#8f5a3c', WOOD_LIT = '#a86b47', TIMBER = '#6b4a33', PLASTER = '#f1e4c8';
 // Stable "random" numbers, so every visit cuts the same cabin.
@@ -841,6 +841,7 @@ export const SPOTS = [
 export const ROOM_PROPS = [
   { id: 'santa', name: '聖誕老人', note: '聖誕老人朝你點點頭：「外面很冷吧？在火爐邊暖暖身子。」' },
   { id: 'door', name: '大門', box: [[0, DOOR.height / 2, DOOR.z], [DOOR.width, DOOR.height, .3]] },
+  { id: 'back-door', name: '後門', box: [[0, .62, BACK + .05], [.5, 1.24, .12]], note: '後門通往後院的玩具工坊，明年的禮物已經開始做了。' },
   { id: 'bookshelf', name: '書架', box: [[-1.22, .62, BACK + .15], [.6, 1.25, .3]], note: '書架上排滿了一年又一年的送禮紀錄。' },
   { id: 'fireplace', name: '壁爐', box: [[FIRE.x, .57, BACK + .15], [1.05, 1.14, .3]], note: '壁爐的火劈啪作響，架上掛著三隻襪子。' },
   { id: 'tree', name: '聖誕樹', box: [[1.25, .68, .55], [.8, 1.36, .8]], note: '屋裡的聖誕樹掛著彩燈，一閃一閃。' },
