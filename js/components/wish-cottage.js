@@ -1,4 +1,5 @@
 // The cottage is alive: smoke drifts with the wind, and its door opens on a random visitor.
+// It is Santa's Cabin seen from outside on Christmas Eve: whoever answers asks you back in the morning (santa.html).
 import { paperLayer, shape } from './paper-art.js';
 import { SNOW, star } from './paper-props.js';
 
@@ -74,7 +75,9 @@ export function mountCottage(room) {
   }, { paper: PAPER, eager: true });
   const guest = document.createElement('div'); guest.className = 'cottage-guest'; guest.setAttribute('aria-hidden', 'true');
   const status = document.createElement('p'); status.className = 'sr-only'; status.setAttribute('role', 'status');
-  house.append(smoke, guest, door); room.append(status);
+  // Once someone has answered, a paper tag leads into the cabin; it stays so the way in is never a race.
+  const invite = document.createElement('a'); invite.className = 'cottage-invite'; invite.href = 'santa.html'; invite.textContent = '明天早上來坐坐 →'; invite.hidden = true;
+  house.append(smoke, guest, door, invite); room.append(status);
   const timers = new Set(), later = (ms, fn) => timers.add(setTimeout(fn, ms));
   let busy = false, lastGuest = -1;
   door.addEventListener('click', () => {
@@ -84,7 +87,8 @@ export function mountCottage(room) {
     lastGuest = index;
     const [name, draw] = GUESTS[index];
     guest.replaceChildren(); paperLayer(guest, '-8 0 136 170', '', draw, { paper: PAPER, eager: true });
-    status.textContent = `${name}來打招呼了。`;
+    status.textContent = index === 0 ? '聖誕老人來應門：「我正要出門送禮物，明天早上來屋裡坐坐吧！」' : `${name}來應門：「聖誕老人出門送禮物了，明天早上來屋裡坐坐吧！」`;
+    invite.hidden = false;
     house.classList.add('door-open');
     later(STEP, () => guest.classList.add('is-out'));
     later(STEP + STAY, () => guest.classList.remove('is-out'));            // Back through the door first…

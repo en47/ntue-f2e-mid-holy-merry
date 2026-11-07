@@ -1,8 +1,19 @@
 import { mountTitleArt } from './components/title-art.js';
+import { mountCabinBackdrop } from './components/cabin-backdrop.js';
 
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
+const enter = document.querySelector('#cabin-enter'), leave = document.querySelector('#cabin-leave'), hint = document.querySelector('#cabin-hint-text');
 mountTitleArt(document.querySelector('#cabin-title'), 'santas-cabin');
+mountCabinBackdrop(document.querySelector('.cabin-backdrop'));
+// Outside sees the whole house; inside moves up to Santa. The buttons are the keyboard and screen-reader way in and out.
+function showView(view) {
+  enter.hidden = view === 'inside'; leave.hidden = view !== 'inside';
+  hint.textContent = view === 'inside' ? '拖曳看看屋裡四周，放開會轉回聖誕老人' : '拖曳轉轉小屋，點聖誕老人進屋';
+  status.textContent = view === 'inside' ? '走進屋裡了：聖誕老人就坐在你面前。' : '回到屋外，看得到整棟小屋。';
+}
+enter.addEventListener('click', () => { cabin?.setView('inside'); leave.focus(); });
+leave.addEventListener('click', () => { cabin?.setView('outside'); enter.focus(); });
 
 let cabin = null, generation = 0;
 // The loader's queue walks forward as this number grows (0–100).
@@ -14,7 +25,7 @@ async function mountCabin() {
   try {
     const { mountCabin: build } = await import('./components/cabin-scene.js');
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, isCurrent: () => run === generation });
+    const result = await build(stage, { onProgress: progress, onView: showView, isCurrent: () => run === generation });
     if (!result || run !== generation) { result?.destroy(); return; }
     cabin = result;
     stage.dataset.state = 'ready'; stage.dataset.santa = result.santa ? 'home' : 'away';

@@ -142,7 +142,7 @@ await test('Wish 壓縮模型：網頁載入壓縮檔、雜湊正確、原始 GL
   const elf = await fs.readFile(path.join(project, 'assets/models/wish-elf-web.glb')), data = JSON.parse(elf.toString('utf8', 20, 20 + elf.readUInt32LE(12)).trim());
   assert.equal(data.skins[0].joints.length, 65); assert.equal(data.animations.length, 1);
 });
-await test('Santa 小屋：壓縮坐姿模型、紙雕立體盒、排隊 Loading 跟著真實進度', async () => {
+await test('Santa 小屋：壓縮坐姿模型、剖面紙雕小屋、屋外與屋內兩種鏡頭、排隊 Loading 跟著真實進度', async () => {
   const gltf = async name => { const glb = await fs.readFile(path.join(project, `assets/models/${name}.glb`)); return { bytes: glb, data: JSON.parse(glb.toString('utf8', 20, 20 + glb.readUInt32LE(12)).trim()) }; };
   const source = await gltf('santa-seated'), web = await gltf('santa-seated-web'), meta = JSON.parse(await fs.readFile(path.join(project, 'assets/models/santa-seated-web.json'), 'utf8'));
   assert.equal(createHash('sha256').update(web.bytes).digest('hex'), meta.sha256); assert.ok(web.bytes.length < 2e6 && web.bytes.length < source.bytes.length / 5);
@@ -155,6 +155,9 @@ await test('Santa 小屋：壓縮坐姿模型、紙雕立體盒、排隊 Loading
   assert.ok(art.includes('export const BOARDS') && art.includes('paper-props.js') && !art.includes('innerHTML'));
   const html = await fs.readFile(path.join(project, 'santa.html'), 'utf8'), loader = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8');
   assert.ok(html.includes(">Santa's Cabin</h1>") && html.includes('class="cabin-gesture" type="button" aria-label=') && html.includes('data-santa-placeholder'));
+  assert.ok(html.includes('id="cabin-enter"') && html.includes('id="cabin-leave"') && scene.includes("setView('inside')") && scene.includes('reindeer-web.glb'), 'Buttons give keyboard users the way in and out of the house');
+  const cottage = await fs.readFile(path.join(project, 'js/components/wish-cottage.js'), 'utf8');
+  assert.ok(cottage.includes("invite.href = 'santa.html'"), 'The Wish cottage is the same house: whoever answers asks you in');
   assert.ok(loader.includes("'#cabin-stage'") && loader.includes('dataset.progress') && loader.includes('prefers-reduced-motion'), 'The queue walks with the real download and stays still under reduced motion');
   assert.ok((await fs.readFile(path.join(project, 'js/data/heading-glyphs.js'), 'utf8')).includes('santas-cabin'));
 });

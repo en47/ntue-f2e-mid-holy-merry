@@ -1,31 +1,277 @@
-// Santa's Cabin as a paper room: every board is drawn here once, then stood up around the camera by cabin-scene.js.
-// Units: 1 = Santa's seated height. Each board's art is drawn at PX units per world unit; light comes from the upper left.
+// Santa's Cabin as a paper dollhouse: its front is cut away so the room shows, like a pop-up book page.
+// Every board is drawn here once, then stood up in 3D by cabin-scene.js. Units: 1 = Santa's seated height.
+// Light comes from the upper left. It is Christmas morning: Santa is home from the night's deliveries.
 import { holly, pine, shape } from './paper-art.js';
 import { roofHouse, star } from './paper-props.js';
 
 export const PX = 500;
-// The room runs from the back wall forward past the camera, so turning to look around never shows its open side.
-export const BOX = { width: 3.6, back: -.9, front: 4, height: 2.3 };
-BOX.depth = BOX.front - BOX.back; BOX.middle = (BOX.front + BOX.back) / 2;
-export const CHAIR = { x: -.25, z: 0 };
-const LOG = ['#b9875a', '#c39060', '#b07f53'], CHINK = '#dccbaa', CREAM = '#fbf3df', SNOW = '#fbf8f1';
-const RED = '#a84a42', GREEN = '#4f7d68', GOLD = '#e0b04f', WOOD = '#8f5a3c', WOOD_LIT = '#a86b47';
+// Inner floor from x -1.6 to 1.6 and z -1 to 1, walls 1.9 high, ridge at 3. The front is open.
+export const HOUSE = { width: 3.2, depth: 2, wall: 1.9, ridge: 3, thick: .1, eaves: .32, overhang: .15 };
+HOUSE.slope = Math.hypot(HOUSE.width / 2, HOUSE.ridge - HOUSE.wall);
+export const CHAIR = { x: -.45, z: .05 };
+// The snowy base the house stands on, the reindeer waiting outside, and the lantern hung from the ridge.
+export const PLATFORM = { rx: 3.9, rz: 2.5, top: -.12, height: .42 };
+export const REINDEER = { x: -2.6, z: .8, turn: .8, height: 1.3 };
+export const LANTERN = { x: .3, z: .05 };
+// The fireplace on the back wall; its chimney rises out of the right slope of the roof.
+export const FIRE = { x: .88 };
+const CREAM = '#fbf3df', SNOW = '#fbf8f1', RED = '#a84a42', GREEN = '#4f7d68', DEEP_GREEN = '#3f6653', GOLD = '#e0b04f';
+const WOOD = '#8f5a3c', WOOD_LIT = '#a86b47', TIMBER = '#6b4a33', PLASTER = '#f1e4c8';
 // Stable "random" numbers, so every visit cuts the same cabin.
 const noise = index => { const value = Math.sin(index * 12.9898) * 43758.5453; return value - Math.floor(value); };
+const clip = (svg, id, d) => { shape('path', { d }, shape('clipPath', { id }, shape('defs', {}, svg))); return `url(#${id})`; };
 
-function logs(parent, width, height, rows, seed = 1) {
-  const row = height / rows;
-  shape('rect', { x: 0, y: 0, width, height, fill: CHINK }, parent);
-  for (let i = 0; i < rows; i++) {
-    const y = i * row;
-    shape('rect', { x: -40, y: y + row * .06, width: width + 80, height: row * .86, rx: row * .43, fill: LOG[(i + seed) % 3] }, parent);
-    shape('path', { d: `M0 ${y + row * .24}H${width}`, stroke: '#d6a874', 'stroke-width': row * .09, opacity: .7 }, parent);
-    shape('path', { d: `M0 ${y + row * .78}H${width}`, stroke: '#8f6340', 'stroke-width': row * .1, opacity: .45 }, parent);
-    for (let k = 0; k < width / 260; k++) {
-      const x = noise(i * 31 + k * 7 + seed) * (width - 120) + 60, length = 60 + noise(i + k * 13 + seed) * 110;
-      shape('path', { d: `M${x} ${y + row * .5}c${length * .3} -${row * .08} ${length * .7} ${row * .08} ${length} 0`, stroke: '#8f6340', 'stroke-width': 3, fill: 'none', opacity: .4 }, parent);
+// Walls are cream plaster under a dark timber frame, with a wood wainscot along the bottom: wood is the outline, not the whole wall.
+function plaster(parent, width, height, fill = PLASTER) {
+  shape('rect', { x: 0, y: 0, width, height, fill }, parent);
+  for (let i = 0; i < width * height / 9000; i++) shape('circle', { cx: noise(i) * width, cy: noise(i + 999) * height, r: 1.5 + noise(i + 3) * 2.5, fill: '#e2d0ad', opacity: .45 }, parent);
+}
+function wainscot(parent, width, height, top) {
+  shape('rect', { x: 0, y: top, width, height: height - top, fill: '#a8774d' }, parent);
+  for (let x = 20; x < width - 40; x += 190) shape('rect', { x, y: top + 34, width: 160, height: height - top - 60, rx: 6, fill: '#b98a5a', stroke: '#8f6340', 'stroke-width': 5 }, parent);
+  shape('rect', { x: 0, y: top - 6, width, height: 26, fill: TIMBER }, parent);
+}
+const beam = (parent, x, y, width, height) => shape('rect', { x, y, width, height, fill: TIMBER }, parent);
+const brace = (parent, d) => shape('path', { d, stroke: TIMBER, 'stroke-width': 30, 'stroke-linecap': 'square', fill: 'none' }, parent);
+
+function stones(parent, x, y, width, height) {
+  shape('rect', { x, y, width, height, fill: '#b9ae9e' }, parent);
+  for (let row = 0; row * 50 < height; row++) {
+    for (let col = -1; col * 70 < width; col++) {
+      const sx = x + col * 70 + (row % 2) * 35 + noise(row * 9 + col) * 8;
+      shape('rect', { x: sx, y: y + row * 50 + 4, width: 62, height: 42, rx: 18, fill: ['#d9d1c3', '#cfc5b5', '#e3dccf'][(row + col + 3) % 3] }, parent);
     }
   }
+}
+
+// A green-framed window onto the snowy morning; `id` keeps the clip unique inside one board.
+function morningWindow(parent, svg, x, y, width, height, id) {
+  const view = shape('g', { 'clip-path': clip(svg, id, `M${x} ${y}H${x + width}V${y + height}H${x}Z`) }, parent);
+  shape('rect', { x, y, width, height, fill: '#cfe3ee' }, view);
+  shape('rect', { x, y: y + height * .42, width, height: height * .2, fill: '#f6e2d4' }, view);
+  shape('circle', { cx: x + width * .7, cy: y + height * .5, r: height * .13, fill: '#fbe7b0' }, view);
+  shape('path', { d: `M${x} ${y + height * .62}C${x + width * .3} ${y + height * .5} ${x + width * .6} ${y + height * .6} ${x + width} ${y + height * .52}V${y + height}H${x}Z`, fill: '#e6eef2' }, view);
+  pine(view, x + width * .24, y + height * .78, height * .3, DEEP_GREEN);
+  pine(view, x + width * .82, y + height * .72, height * .24, GREEN);
+  shape('path', { d: `M${x} ${y + height * .84}C${x + width * .4} ${y + height * .76} ${x + width * .7} ${y + height * .84} ${x + width} ${y + height * .78}V${y + height}H${x}Z`, fill: SNOW }, view);
+  for (let i = 0; i < 12; i++) shape('circle', { cx: x + noise(i + x) * width, cy: y + noise(i + y) * height * .7, r: 3 + noise(i) * 3, fill: '#fff', opacity: .9 }, view);
+  const bar = 20;
+  shape('path', { d: `M${x - bar} ${y - bar}H${x + width + bar}V${y + height + bar}H${x - bar}ZM${x} ${y}V${y + height}H${x + width}V${y}Z`, fill: GREEN, 'fill-rule': 'evenodd' }, parent);
+  shape('path', { d: `M${x + width / 2} ${y}V${y + height}M${x} ${y + height * .5}H${x + width}`, stroke: GREEN, 'stroke-width': bar * .7 }, parent);
+  shape('rect', { x: x - bar * 2, y: y + height + bar * .6, width: width + bar * 4, height: bar * 1.4, rx: 6, fill: WOOD_LIT }, parent);
+  garland(parent, x - bar, x + width + bar, y - bar - 6, 10);
+}
+
+function archedDoor(parent, x, top, width, bottom) {
+  const r = width / 2;
+  shape('path', { d: `M${x - 22} ${bottom}V${top + r}A${r + 22} ${r + 22} 0 0 1 ${x + width + 22} ${top + r}V${bottom}Z`, fill: WOOD }, parent);
+  shape('path', { d: `M${x} ${bottom}V${top + r}A${r} ${r} 0 0 1 ${x + width} ${top + r}V${bottom}Z`, fill: GREEN }, parent);
+  for (let i = 1; i < 4; i++) shape('path', { d: `M${x + width * i / 4} ${top + (i === 2 ? 0 : r * .3)}V${bottom}`, stroke: DEEP_GREEN, 'stroke-width': 6 }, parent);
+  shape('path', { d: `M${x + width * .12} ${bottom - 60}H${x + width * .88}`, stroke: DEEP_GREEN, 'stroke-width': 10 }, parent);
+  wreath(parent, x + r, top + r + 70, 62);
+  shape('circle', { cx: x + width - 34, cy: top + (bottom - top) * .58, r: 11, fill: GOLD }, parent);
+}
+
+export function backWall({ plain, paper, svg }, { width, height }) {
+  const eave = height - HOUSE.wall * PX, rail = height - .42 * PX;
+  const wall = shape('g', { 'clip-path': clip(svg, 'gable', `M0 ${height}V${eave}L${width / 2} 0L${width} ${eave}V${height}Z`) }, plain);
+  plaster(wall, width, height);
+  // The fireplace stands in front at x = .88; its stone chimney climbs on up through the gable.
+  stones(wall, 1155, 0, 170, 880);
+  wainscot(wall, width, height, rail);
+  beam(wall, 0, eave - 22, width, 44);
+  beam(wall, 0, 250, width, 34);
+  brace(wall, `M${width / 2} 268L${width / 2 - 250} ${eave - 20}M${width / 2} 268L${width / 2 + 250} ${eave - 20}`);
+  for (const x of [0, 628, 948, width - 40]) beam(wall, x, eave, x === 0 || x === width - 40 ? 40 : 32, (x === 628 || x === 948 ? height : rail) - eave);
+  // A round window high in the gable, and a gold star above the collar beam.
+  const ox = width / 2, oy = 405;
+  shape('circle', { cx: ox, cy: oy, r: 86, fill: GREEN }, paper);
+  shape('circle', { cx: ox, cy: oy, r: 66, fill: '#cfe3ee' }, paper);
+  shape('path', { d: `M${ox - 66} ${oy + 18}C${ox - 20} ${oy} ${ox + 20} ${oy + 16} ${ox + 66} ${oy + 6}V${oy + 70}H${ox - 66}Z`, fill: SNOW }, paper);
+  shape('path', { d: `M${ox} ${oy - 66}V${oy + 66}M${ox - 66} ${oy}H${ox + 66}`, stroke: GREEN, 'stroke-width': 10 }, paper);
+  star(paper, ox, 150, 34, GOLD);
+  pictureFrame(paper, 70, 610, 200, 150);
+  archedDoor(paper, 690, 880, 228, height);
+}
+
+export function sideWall(side) {
+  return ({ plain, paper, svg }, { width, height }) => {
+    const rail = height - .42 * PX;
+    plaster(plain, width, height); wainscot(plain, width, height, rail);
+    for (const x of [0, width / 2 - 16, width - 36]) beam(plain, x, 0, x ? 32 : 36, rail);
+    beam(plain, 0, 0, width, 30);
+    if (side === 'left') {
+      // Texture left is the front of the room. The window holds the advent house on its sill.
+      morningWindow(paper, svg, 560, 210, 300, 300, 'left-window');
+      adventHouse(paper, 710, 551, adventLit());
+      for (const [x, y, w, h, fill] of [[120, 300, 140, 110, RED], [150, 250, 80, 50, GOLD]]) shape('rect', { x, y, width: w, height: h, rx: 10, fill }, paper);
+    } else {
+      // Texture left is the back. A window by the fireplace, a shelf of candles toward the front.
+      morningWindow(paper, svg, 150, 230, 260, 260, 'right-window');
+      const y = 470;
+      shape('rect', { x: 560, y, width: 360, height: 24, rx: 6, fill: WOOD_LIT }, paper);
+      for (const [cx, h] of [[610, 90], [660, 64]]) {
+        shape('rect', { x: cx - 16, y: y - h, width: 32, height: h, rx: 4, fill: CREAM }, paper);
+        shape('path', { d: `M${cx} ${y - h - 34}C${cx + 14} ${y - h - 18} ${cx + 10} ${y - h - 4} ${cx} ${y - h - 2}C${cx - 10} ${y - h - 4} ${cx - 14} ${y - h - 18} ${cx} ${y - h - 34}Z`, fill: '#f2a541' }, paper);
+      }
+      shape('path', { d: `M760 ${y}V${y - 96}C760 ${y - 120} 860 ${y - 120} 860 ${y - 96}V${y}Z`, fill: '#cfe1e7' }, paper);
+      shape('rect', { x: 774, y: y - 132, width: 72, height: 22, rx: 8, fill: RED }, paper);
+      for (const [cx, cy] of [[790, y - 40], [830, y - 62], [820, y - 24]]) shape('circle', { cx, cy, r: 13, fill: '#a8774d' }, paper);
+    }
+  };
+}
+
+// The outside of a side wall: whiter plaster, timber braces, a shuttered window with a holly box, snow drifted at the foot.
+export function outerWall({ plain, paper }, { width, height }) {
+  plaster(plain, width, height, '#f5eddd');
+  for (const x of [0, width / 2 - 16, width - 36]) beam(plain, x, 0, 34, height);
+  beam(plain, 0, 0, width, 34); beam(plain, 0, height * .52, width, 28);
+  brace(plain, `M40 ${height * .52}L${width / 2 - 20} 40M${width - 40} ${height * .52}L${width / 2 + 20} 40`);
+  const x = width / 2 - 130, y = height * .58;
+  shape('rect', { x, y, width: 260, height: 220, fill: '#f6d98c' }, paper);
+  shape('path', { d: `M${x + 130} ${y}V${y + 220}M${x} ${y + 110}H${x + 260}`, stroke: GREEN, 'stroke-width': 14 }, paper);
+  for (const sx of [x - 90, x + 268]) shape('rect', { x: sx, y: y - 6, width: 82, height: 232, rx: 6, fill: GREEN }, paper);
+  shape('rect', { x: x - 20, y: y + 226, width: 300, height: 50, rx: 8, fill: WOOD }, paper);
+  for (let i = 0; i < 4; i++) holly(paper, x + 30 + i * 66, y + 226, .6);
+  shape('path', { d: `M0 ${height}C${width * .2} ${height - 70} ${width * .5} ${height - 40} ${width * .7} ${height - 80}S${width} ${height - 50} ${width} ${height - 60}V${height}Z`, fill: SNOW }, paper);
+}
+
+export function floor({ plain, paper }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, fill: '#7d5636' }, plain);
+  for (let i = 0; i * 160 < width; i++) {
+    shape('rect', { x: i * 160 + 3, y: 0, width: 154, height, fill: ['#b08559', '#a87c53', '#b98d60'][i % 3] }, plain);
+    for (let k = 0; k < 2; k++) { const y = noise(i * 7 + k) * height; shape('path', { d: `M${i * 160 + 3} ${y}h154`, stroke: '#7d5636', 'stroke-width': 4 }, plain); }
+  }
+  // A cream rug with a red border and paper poinsettias; floor art runs from the back wall (top) to the open front (bottom).
+  const cx = (CHAIR.x + .25 + HOUSE.width / 2) * PX, cy = (CHAIR.z + .3 + HOUSE.depth / 2) * PX, w = 1000, h = 540;
+  shape('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: 22, fill: RED }, paper);
+  shape('rect', { x: cx - w / 2 + 34, y: cy - h / 2 + 34, width: w - 68, height: h - 68, rx: 14, fill: CREAM }, paper);
+  shape('rect', { x: cx - w / 2 + 56, y: cy - h / 2 + 56, width: w - 112, height: h - 112, rx: 10, fill: 'none', stroke: GREEN, 'stroke-width': 8, 'stroke-dasharray': '20 12' }, paper);
+  for (let row = 0; row < 2; row++) for (let col = 0; col < 4; col++) poinsettia(paper, cx - w * .33 + col * w * .22, cy - h * .18 + row * h * .36, 50);
+}
+function poinsettia(parent, x, y, size) {
+  for (let i = 0; i < 4; i++) shape('path', { d: 'M0 0C-12-18-6-44 0-56 6-44 12-18 0 0Z', fill: GREEN, transform: `translate(${x} ${y}) rotate(${45 + i * 90}) scale(${size / 56})` }, parent);
+  for (let i = 0; i < 6; i++) shape('path', { d: 'M0 0C-14-16-10-40 0-50 10-40 14-16 0 0Z', fill: RED, transform: `translate(${x} ${y}) rotate(${i * 60}) scale(${size / 56})` }, parent);
+  shape('circle', { cx: x, cy: y, r: size * .16, fill: GOLD }, parent);
+}
+
+// Under the roof: boards run with the ridge, rafters run down the slope. Art: left is the eave, right the ridge.
+export function roofInside({ plain }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, fill: '#c9955f' }, plain);
+  for (let x = 80; x < width; x += 80) shape('path', { d: `M${x} 0V${height}`, stroke: '#b07f53', 'stroke-width': 4 }, plain);
+  for (let y = 60; y < height; y += 240) shape('rect', { x: 0, y, width, height: 40, fill: TIMBER }, plain);
+}
+// On the roof: rows of paper shingles, snow along the ridge and the eave. Art: left is the eave, right the ridge.
+export function roofOutside({ plain, paper }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, fill: '#3f3531' }, plain);
+  for (let x = 0, row = 0; x < width; x += 62, row++) {
+    for (let y = -30 + (row % 2) * 34; y < height; y += 68) shape('rect', { x, y, width: 70, height: 64, rx: 26, fill: ['#5a4d47', '#4f4440', '#62544d'][(row + Math.round(y / 68)) % 3] }, plain);
+  }
+  shape('path', { d: `M${width} 0V${height}H${width - 150}C${width - 210} ${height * .8} ${width - 130} ${height * .6} ${width - 200} ${height * .4}S${width - 140} ${height * .1} ${width - 190} 0Z`, fill: SNOW }, paper);
+  shape('path', { d: `M0 0V${height}H40C70 ${height * .85} 30 ${height * .6} 60 ${height * .45}S30 ${height * .15} 50 0Z`, fill: SNOW }, paper);
+  for (let i = 0; i < 6; i++) shape('ellipse', { cx: 300 + noise(i + 40) * (width - 600), cy: noise(i + 60) * height, rx: 60 + noise(i) * 70, ry: 30 + noise(i + 2) * 30, fill: SNOW }, paper);
+}
+
+// Garland draped along the front edge of the roof, with bows and pinecones, like the reference cottage.
+export function roofGarland({ paper }, { width, height }) {
+  const peak = [width / 2, 46], left = [40, height - 50], right = [width - 40, height - 50];
+  for (const [from, to] of [[left, peak], [peak, right]]) {
+    for (let i = 0; i <= 30; i++) {
+      const t = i / 30, x = from[0] + (to[0] - from[0]) * t, y = from[1] + (to[1] - from[1]) * t + Math.sin(t * Math.PI * 5) * 10;
+      for (let k = 0; k < 3; k++) shape('path', { d: 'M0-24C11-17 15-4 11 8 8 16 3 20 0 24-3 20-8 16-11 8-15-4-11-17 0-24Z', fill: [DEEP_GREEN, GREEN, '#5f8a70'][k], transform: `translate(${x + (k - 1) * 14} ${y + (k % 2) * 10}) rotate(${noise(i * 3 + k) * 360}) scale(.9)` }, paper);
+      if (i % 4 === 2) { shape('circle', { cx: x, cy: y + 16, r: 9, fill: '#b4544c' }, paper); shape('circle', { cx: x + 12, cy: y + 10, r: 8, fill: '#b4544c' }, paper); }
+      if (i % 7 === 5) shape('ellipse', { cx: x - 8, cy: y + 24, rx: 12, ry: 18, fill: '#8a6248' }, paper);
+    }
+  }
+  for (const [x, y] of [left, peak, right]) {
+    shape('path', { d: `M${x} ${y}c-34-30-60-6-36 12 14 10 30 4 36-12zm0 0c34-30 60-6 36 12-14 10-30 4-36-12z`, fill: RED }, paper);
+    shape('path', { d: `M${x - 4} ${y + 2}l-20 46h14l10-24 10 24h14l-20-46z`, fill: '#87302f' }, paper);
+    shape('circle', { cx: x, cy: y, r: 9, fill: '#87302f' }, paper);
+  }
+}
+
+export function lantern({ paper }, { width, height }) {
+  const cx = width / 2;
+  shape('path', { d: `M${cx} 0V120`, stroke: '#3b2a24', 'stroke-width': 5, 'stroke-dasharray': '10 6' }, paper);
+  shape('path', { d: `M${cx - 50} 150L${cx} 112 ${cx + 50} 150Z`, fill: '#3b2a24' }, paper);
+  shape('rect', { x: cx - 46, y: 150, width: 92, height: 110, rx: 8, fill: '#ffe3a0' }, paper);
+  shape('path', { d: `M${cx - 46} 150V260M${cx + 46} 150V260M${cx} 150V260`, stroke: '#3b2a24', 'stroke-width': 6 }, paper);
+  shape('rect', { x: cx - 10, y: 200, width: 20, height: 40, rx: 4, fill: CREAM }, paper);
+  shape('path', { d: `M${cx} 172C${cx + 9} 184 ${cx + 6} 196 ${cx} 198C${cx - 6} 196 ${cx - 9} 184 ${cx} 172Z`, fill: '#f2a541' }, paper);
+  shape('rect', { x: cx - 52, y: 258, width: 104, height: 16, rx: 6, fill: '#3b2a24' }, paper);
+}
+
+export function bookshelf({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, rx: 8, fill: WOOD }, paper);
+  shape('rect', { x: 16, y: 16, width: width - 32, height: height - 32, fill: '#6b4a33' }, paper);
+  const shelves = 4, gap = (height - 32) / shelves, colours = [RED, GREEN, GOLD, '#7cb8ec', CREAM, '#b5625a', DEEP_GREEN];
+  for (let s = 0; s < shelves; s++) {
+    const base = 16 + gap * (s + 1);
+    shape('rect', { x: 10, y: base - 10, width: width - 20, height: 16, fill: WOOD_LIT }, paper);
+    let x = 26;
+    while (x < width - 60) {
+      const w = 18 + noise(s * 17 + x) * 18, h = gap * (.55 + noise(x + s) * .3);
+      if (s === 1 && x > width * .55) { shape('rect', { x, y: base - 10 - 46, width: 50, height: 46, rx: 8, fill: '#b5625a' }, paper); holly(paper, x + 25, base - 60, .5); break; }
+      shape('rect', { x, y: base - 10 - h, width: w, height: h, rx: 3, fill: colours[Math.floor(noise(x * 3 + s) * colours.length)] }, paper);
+      x += w + 4;
+    }
+  }
+}
+
+export function lampTable({ paper }, { width, height }) {
+  const cx = width / 2, top = height - 230;
+  shape('rect', { x: cx - 16, y: top + 18, width: 32, height: 200, fill: WOOD }, paper);
+  shape('path', { d: `M${cx - 70} ${height - 6}C${cx - 60} ${height - 36} ${cx + 60} ${height - 36} ${cx + 70} ${height - 6}Z`, fill: WOOD }, paper);
+  shape('ellipse', { cx, cy: top + 12, rx: 110, ry: 20, fill: WOOD }, paper);
+  shape('ellipse', { cx, cy: top + 4, rx: 110, ry: 20, fill: WOOD_LIT }, paper);
+  // Lamp with a cream shade (its glow is a separate sprite), and the cookies and milk left out last night.
+  shape('rect', { x: cx + 18, y: top - 120, width: 14, height: 120, fill: GOLD }, paper);
+  shape('ellipse', { cx: cx + 25, cy: top - 4, rx: 30, ry: 9, fill: GOLD }, paper);
+  shape('path', { d: `M${cx - 22} ${top - 120}L${cx + 2} ${top - 200}H${cx + 48}L${cx + 72} ${top - 120}Z`, fill: '#fbe9c2' }, paper);
+  shape('ellipse', { cx: cx - 50, cy: top - 2, rx: 40, ry: 10, fill: CREAM }, paper);
+  for (const [x, y] of [[cx - 64, top - 12], [cx - 36, top - 14]]) { shape('circle', { cx: x, cy: y, r: 14, fill: '#c08a5a' }, paper); shape('circle', { cx: x - 3, cy: y - 3, r: 3, fill: '#5b3a2c' }, paper); }
+  shape('path', { d: `M${cx - 98} ${top}L${cx - 101} ${top - 60}H${cx - 69}L${cx - 72} ${top}Z`, fill: '#fffdf7' }, paper);
+}
+
+export function treeLights({ paper }, { width, height }) {
+  // Only the bulbs, drawn over the tree so they can twinkle on their own layer.
+  for (let i = 0; i < 26; i++) {
+    const t = noise(i + 7), y = 140 + t * (height - 280), half = (y - 80) / (height - 200) * width * .42;
+    shape('circle', { cx: width / 2 + (noise(i + 31) * 2 - 1) * half, cy: y, r: 7, fill: ['#ffd77a', '#ef6f5e', '#7fce9a', '#7cb8ec'][i % 4] }, paper);
+  }
+}
+
+// Outside: drifts along the front of the snowy base, pines, the mailbox and the sleigh.
+export function drifts({ paper }, { width, height }) {
+  for (let i = 0; i < 9; i++) {
+    const x = i / 8 * width, w = 300 + noise(i + 3) * 220, h = 120 + noise(i + 5) * 120;
+    shape('path', { d: `M${x - w / 2} ${height}C${x - w * .3} ${height - h} ${x + w * .3} ${height - h} ${x + w / 2} ${height}Z`, fill: SNOW }, paper);
+    shape('path', { d: `M${x + w * .1} ${height - h * .7}C${x + w * .35} ${height - h * .5} ${x + w * .45} ${height - h * .2} ${x + w / 2} ${height}H${x + w * .25}C${x + w * .3} ${height - h * .3} ${x + w * .25} ${height - h * .55} ${x + w * .1} ${height - h * .7}Z`, fill: '#e2ebef' }, paper);
+    if (i % 3 === 1) holly(paper, x, height - h * .7, .7);
+  }
+}
+export function pineBoard({ paper }, { width, height }) { pine(paper, width / 2, height - 10, height - 20, '#5f8a70'); }
+export function mailbox({ paper }, { width, height }) {
+  const cx = width / 2;
+  shape('rect', { x: cx - 14, y: 230, width: 28, height: height - 230, fill: WOOD }, paper);
+  shape('path', { d: `M${cx - 110} 240V140C${cx - 110} 80 ${cx + 110} 80 ${cx + 110} 140V240Z`, fill: RED }, paper);
+  shape('path', { d: `M${cx - 110} 140C${cx - 110} 80 ${cx + 110} 80 ${cx + 110} 140`, stroke: '#87302f', 'stroke-width': 10, fill: 'none' }, paper);
+  shape('path', { d: `M${cx - 120} 110C${cx - 80} 60 ${cx + 80} 60 ${cx + 120} 110C${cx + 60} 96 ${cx - 60} 96 ${cx - 120} 110Z`, fill: SNOW }, paper);
+  shape('rect', { x: cx + 96, y: 150, width: 14, height: 80, fill: GOLD }, paper);
+  shape('rect', { x: cx + 96, y: 210, width: 50, height: 20, fill: GOLD }, paper);
+  star(paper, cx, 190, 28, GOLD);
+}
+export function sleigh({ paper }, { width, height }) {
+  const ground = height - 16;
+  shape('path', { d: `M30 ${ground - 20}H${width - 120}C${width - 60} ${ground - 20} ${width - 30} ${ground - 60} ${width - 30} ${ground - 110}`, stroke: '#a9845b', 'stroke-width': 14, fill: 'none', 'stroke-linecap': 'round' }, paper);
+  shape('path', { d: `M90 ${ground - 20}V${ground - 70}M${width - 180} ${ground - 20}V${ground - 70}`, stroke: '#a9845b', 'stroke-width': 12 }, paper);
+  shape('path', { d: `M40 ${ground - 70}H${width - 90}L${width - 130} ${ground - 170}H${width * .35}C${width * .2} ${ground - 200} 80 ${ground - 170} 40 ${ground - 70}Z`, fill: RED }, paper);
+  shape('path', { d: `M40 ${ground - 70}H${width - 90}`, stroke: GOLD, 'stroke-width': 10 }, paper);
+  shape('path', { d: `M${width * .42} ${ground - 160}C${width * .4} ${ground - 300} ${width * .7} ${ground - 300} ${width * .68} ${ground - 160}Z`, fill: '#e9d9b8' }, paper);
+  shape('path', { d: `M${width * .5} ${ground - 268}l-20-34m40 34l20-34`, stroke: RED, 'stroke-width': 10, 'stroke-linecap': 'round' }, paper);
+}
+export function smokePuff({ paper }, { width, height }) {
+  shape('path', { d: `M${width * .2} ${height * .8}C${width * .05} ${height * .8} ${width * .05} ${height * .45} ${width * .25} ${height * .45}C${width * .25} ${height * .15} ${width * .6} ${height * .1} ${width * .65} ${height * .35}C${width * .9} ${height * .3} ${width * .98} ${height * .7} ${width * .8} ${height * .8}Z`, fill: '#f4f1ec' }, paper);
 }
 
 function garland(parent, from, to, y, sag) {
@@ -55,45 +301,6 @@ function wreath(parent, x, y, radius) {
   shape('path', { d: `M${x - 6} ${y + radius * .78}l-${radius * .22} ${radius * .55}h${radius * .16}l${radius * .1} -${radius * .3} ${radius * .1} ${radius * .3}h${radius * .16}l-${radius * .22} -${radius * .55}Z`, fill: '#87302f' }, parent);
 }
 
-function cabinWindow(parent, svg, x, y, width, height) {
-  const defs = shape('defs', {}, svg), id = `cabin-window-${x}-${y}`;
-  shape('rect', { x, y, width, height }, shape('clipPath', { id }, defs));
-  const view = shape('g', { 'clip-path': `url(#${id})` }, parent);
-  shape('rect', { x, y, width, height, fill: '#4d6f8e' }, view);
-  shape('rect', { x, y: y + height * .55, width, height: height * .45, fill: '#5d7f9c' }, view);
-  shape('circle', { cx: x + width * .76, cy: y + height * .22, r: height * .09, fill: '#f6e7b4' }, view);
-  for (let i = 0; i < 9; i++) star(view, x + noise(i + 40) * width, y + noise(i + 70) * height * .45, 5 + noise(i) * 4, '#f3df9e');
-  shape('path', { d: `M${x} ${y + height * .78}C${x + width * .25} ${y + height * .66} ${x + width * .55} ${y + height * .74} ${x + width} ${y + height * .64}V${y + height}H${x}Z`, fill: '#dce8ee' }, view);
-  pine(view, x + width * .22, y + height * .8, height * .32, '#3f6653');
-  pine(view, x + width * .36, y + height * .76, height * .22, '#4f7d68');
-  pine(view, x + width * .82, y + height * .74, height * .26, '#3f6653');
-  shape('path', { d: `M${x} ${y + height * .9}C${x + width * .3} ${y + height * .8} ${x + width * .7} ${y + height * .86} ${x + width} ${y + height * .8}V${y + height}H${x}Z`, fill: SNOW }, view);
-  for (let i = 0; i < 18; i++) shape('circle', { cx: x + noise(i + 5) * width, cy: y + noise(i + 9) * height, r: 3 + noise(i + 3) * 3, fill: '#fff', opacity: .85 }, view);
-  const bar = 22;
-  shape('path', { d: `M${x - bar} ${y - bar}H${x + width + bar}V${y + height + bar}H${x - bar}ZM${x} ${y}V${y + height}H${x + width}V${y}Z`, fill: CREAM, 'fill-rule': 'evenodd' }, parent);
-  shape('path', { d: `M${x + width / 2} ${y}V${y + height}M${x} ${y + height * .48}H${x + width}`, stroke: CREAM, 'stroke-width': bar * .8 }, parent);
-  shape('rect', { x: x - bar * 2.2, y: y + height + bar * .6, width: width + bar * 4.4, height: bar * 1.5, rx: 6, fill: WOOD_LIT }, parent);
-  shape('rect', { x: x - bar * 2.2, y: y + height + bar * 1.6, width: width + bar * 4.4, height: bar * .5, fill: WOOD }, parent);
-  // Curtains, tied back on each side; the folds keep their shade on the right.
-  for (const side of [-1, 1]) {
-    const edge = side < 0 ? x - bar * 1.6 : x + width + bar * 1.6, inner = edge - side * width * .2;
-    shape('path', { d: `M${edge} ${y - bar * 2}H${inner}C${inner + side * 14} ${y + height * .3} ${edge - side * 20} ${y + height * .5} ${edge - side * 26} ${y + height * .62}C${edge - side * 10} ${y + height * .8} ${edge} ${y + height} ${edge + side * 10} ${y + height + bar * .6}H${edge + side * 30}V${y - bar * 2}Z`, fill: '#b5544c' }, parent);
-    shape('path', { d: `M${inner + side * 30} ${y - bar}C${inner + side * 34} ${y + height * .3} ${edge - side * 8} ${y + height * .5} ${edge - side * 14} ${y + height * .6}`, stroke: '#87302f', 'stroke-width': 6, fill: 'none', opacity: .5 }, parent);
-    shape('ellipse', { cx: edge - side * 18, cy: y + height * .62, rx: 20, ry: 11, fill: GOLD }, parent);
-  }
-  shape('rect', { x: x - bar * 3, y: y - bar * 2.6, width: width + bar * 6, height: 18, rx: 9, fill: WOOD }, parent);
-}
-
-// The advent house on the sill: one lit window per December day so far (all lit outside December).
-export function adventLit(date = new Date()) { return date.getMonth() === 11 ? Math.min(date.getDate(), 24) : date.getMonth() === 10 ? 0 : 24; }
-function adventHouse(parent, x, base, lit) {
-  roofHouse(parent, x, base, 150, 110, { wall: '#ecdcc0', roof: '#a8564c', chimney: true });
-  for (let i = 0; i < 24; i++) {
-    const column = i % 6, row = Math.floor(i / 6);
-    shape('rect', { x: x - 62 + column * 21, y: base - 104 + row * 16, width: 13, height: 10, rx: 2, fill: i < lit ? '#f4cf74' : '#9a8670' }, parent);
-  }
-}
-
 function pictureFrame(parent, x, y, width, height) {
   shape('rect', { x, y, width, height, rx: 8, fill: WOOD }, parent);
   shape('rect', { x: x + 14, y: y + 14, width: width - 28, height: height - 28, fill: '#dfeef3' }, parent);
@@ -104,120 +311,8 @@ function pictureFrame(parent, x, y, width, height) {
   shape('path', { d: `M${rx - 46} ${ry - 50}l-6 -18m6 18l8 -16m-8 16l-14 -8`, stroke: '#8a6a55', 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none' }, parent);
 }
 
-export function backWall({ plain, paper, svg }, { width, height }) {
-  logs(plain, width, height, 12);
-  garland(paper, 0, width, 54, 24);
-  pictureFrame(paper, 130, 150, 220, 170);
-  // The window sits high enough that the advent house on its sill shows above the rocking chair's back.
-  cabinWindow(paper, svg, 560, 170, 420, 330);
-  adventHouse(paper, 770, 513, adventLit());
-  wreath(paper, 1400, 330, 92);
-}
-
-// Wall art runs along z: the left wall's art starts at the front (near the camera), the right wall's at the back.
-const along = (side, z) => (side === 'left' ? BOX.front - z : z - BOX.back) * PX;
-export function sideWall(side) {
-  const withDoor = side === 'left';
-  return ({ plain, paper, svg }, { width, height }) => {
-    logs(plain, width, height, 12, withDoor ? 2 : 0);
-    garland(paper, 0, width, 54, 24);
-    cabinWindow(paper, svg, along(side, 3) - 190, 280, 380, 330);
-    if (withDoor) {
-      coatRack(paper, along(side, 2), height - 10);
-      // A plank door left ajar onto the snow, beside the tree, for the reindeer to peek through later.
-      const x = along(side, .8), y = 420, w = 300, h = height - y;
-      shape('rect', { x: x - 26, y: y - 26, width: w + 52, height: h + 26, rx: 10, fill: WOOD }, paper);
-      shape('rect', { x, y, width: w, height: h, fill: '#5d7f9c' }, paper);
-      shape('path', { d: `M${x} ${y + h * .62}C${x + w * .4} ${y + h * .5} ${x + w * .7} ${y + h * .6} ${x + w} ${y + h * .54}V${y + h}H${x}Z`, fill: SNOW }, paper);
-      shape('path', { d: `M${x + w * .42} ${y}H${x + w}V${y + h}H${x + w * .42}L${x + w * .34} ${y + h - 12}V${y + 12}Z`, fill: '#a8774d' }, paper);
-      for (const fy of [.25, .55, .85]) shape('rect', { x: x + w * .38, y: y + h * fy - 12, width: w * .62, height: 24, fill: '#8f6340' }, paper);
-      wreath(paper, x + w * .71, y + h * .18, 42);
-      shape('circle', { cx: x + w * .48, cy: y + h * .55, r: 9, fill: GOLD }, paper);
-    } else {
-      letterDesk(paper, along(side, 1.8), height - 10);
-      // Beside the fireplace: a shelf of candles and a cookie jar, with snowshoes hung below.
-      const y = 470;
-      shape('rect', { x: 180, y, width: 560, height: 26, rx: 6, fill: WOOD_LIT }, paper);
-      shape('path', { d: `M220 ${y + 26}l40 60h-16l-40-60ZM700 ${y + 26}l-40 60h16l40-60Z`, fill: WOOD }, paper);
-      for (const [cx, h] of [[250, 90], [300, 64]]) {
-        shape('rect', { x: cx - 16, y: y - h, width: 32, height: h, rx: 4, fill: CREAM }, paper);
-        shape('path', { d: `M${cx} ${y - h - 34}C${cx + 14} ${y - h - 18} ${cx + 10} ${y - h - 4} ${cx} ${y - h - 2}C${cx - 10} ${y - h - 4} ${cx - 14} ${y - h - 18} ${cx} ${y - h - 34}Z`, fill: '#f2a541' }, paper);
-      }
-      shape('path', { d: `M430 ${y}V${y - 96}C430 ${y - 120} 530 ${y - 120} 530 ${y - 96}V${y}Z`, fill: '#cfe1e7' }, paper);
-      shape('rect', { x: 444, y: y - 132, width: 72, height: 22, rx: 8, fill: RED }, paper);
-      for (const [cx, cy] of [[460, y - 40], [500, y - 62], [490, y - 24]]) shape('circle', { cx, cy, r: 13, fill: '#a8774d' }, paper);
-      shape('rect', { x: 590, y: y - 120, width: 110, height: 120, rx: 8, fill: WOOD }, paper);
-      shape('rect', { x: 602, y: y - 108, width: 86, height: 96, fill: '#f6e7b4' }, paper);
-      star(paper, 645, y - 60, 26, GOLD);
-      for (const sx of [330, 520]) {
-        shape('ellipse', { cx: sx, cy: 760, rx: 52, ry: 110, fill: 'none', stroke: WOOD, 'stroke-width': 14 }, paper);
-        shape('path', { d: `M${sx - 44} 720H${sx + 44}M${sx - 50} 780H${sx + 50}M${sx} 660V860`, stroke: '#d9c9a8', 'stroke-width': 5 }, paper);
-      }
-    }
-  };
-}
-
-export function floor({ plain, paper }, { width, height }) {
-  const plank = 112;
-  shape('rect', { x: 0, y: 0, width, height, fill: '#7d5636' }, plain);
-  for (let i = 0; i * plank < width; i++) {
-    shape('rect', { x: i * plank + 3, y: 0, width: plank - 6, height, fill: ['#a87c53', '#9e734b', '#b08559'][i % 3] }, plain);
-    for (let k = 0; k < 3; k++) { const y = noise(i * 7 + k) * height; shape('path', { d: `M${i * plank + 3} ${y}h${plank - 6}`, stroke: '#7d5636', 'stroke-width': 4 }, plain); }
-  }
-  // A braided rug under the rocking chair; floor art runs from the back wall (top) to the front edge (bottom).
-  const cx = (CHAIR.x + BOX.width / 2) * PX, cy = (CHAIR.z - BOX.back) * PX + 40;
-  [['#4f7d68', 430, 250], [CREAM, 392, 222], ['#a84a42', 352, 196], [GOLD, 300, 164], ['#a84a42', 252, 136], [CREAM, 196, 104], ['#4f7d68', 140, 72]].forEach(([fill, rx, ry]) => {
-    shape('ellipse', { cx, cy, rx, ry, fill }, paper);
-    shape('ellipse', { cx, cy, rx: rx - 18, ry: ry - 14, fill: 'none', stroke: '#00000022', 'stroke-width': 5, 'stroke-dasharray': '10 9' }, paper);
-  });
-  // A welcome mat by the door you came in through, near the bottom of the view.
-  const mat = (BOX.front - BOX.back - 1.1) * PX;
-  shape('rect', { x: cx - 230, y: mat, width: 460, height: 190, rx: 30, fill: '#8a6a55' }, paper);
-  shape('rect', { x: cx - 200, y: mat + 26, width: 400, height: 138, rx: 20, fill: 'none', stroke: '#c9a77c', 'stroke-width': 10, 'stroke-dasharray': '18 12' }, paper);
-  holly(paper, cx, mat + 95, 1.1);
-}
-
-export function ceiling({ plain, paper }, { width, height }) {
-  // Planks run across the room; heavy beams cross them, and a string of lights zigzags between the beams.
-  shape('rect', { x: 0, y: 0, width, height, fill: '#8f6340' }, plain);
-  for (let y = 0; y < height; y += 90) shape('rect', { x: 0, y: y + 3, width, height: 84, fill: ['#a8774d', '#9c6b46', '#b07f53'][(y / 90) % 3] }, plain);
-  const beams = [.12, .38, .64, .9].map(t => t * height);
-  for (const y of beams) {
-    shape('rect', { x: 0, y: y - 34, width, height: 68, fill: '#7d5636' }, paper);
-    shape('rect', { x: 0, y: y - 34, width, height: 14, fill: '#94653f' }, paper);
-  }
-  for (let i = 0; i < beams.length - 1; i++) garland(paper, 60, width - 60, beams[i] + 60, 50);
-}
-
-// Santa's red coat and hat waiting on pegs, his boots below.
-function coatRack(parent, x, base) {
-  shape('rect', { x: x - 170, y: base - 760, width: 340, height: 40, rx: 10, fill: WOOD_LIT }, parent);
-  for (const peg of [-110, 0, 110]) shape('circle', { cx: x + peg, cy: base - 740, r: 13, fill: WOOD }, parent);
-  shape('path', { d: `M${x - 110} ${base - 735}C${x - 160} ${base - 690} ${x - 175} ${base - 520} ${x - 160} ${base - 420}H${x - 40}C${x - 30} ${base - 520} ${x - 50} ${base - 690} ${x - 110} ${base - 735}Z`, fill: RED }, parent);
-  shape('rect', { x: x - 166, y: base - 448, width: 132, height: 34, rx: 14, fill: SNOW }, parent);
-  shape('path', { d: `M${x - 110} ${base - 735}V${base - 430}`, stroke: SNOW, 'stroke-width': 22 }, parent);
-  shape('path', { d: `M${x - 20} ${base - 730}C${x - 6} ${base - 800} ${x + 40} ${base - 820} ${x + 80} ${base - 790}L${x + 30} ${base - 724}Z`, fill: RED }, parent);
-  shape('rect', { x: x - 34, y: base - 736, width: 74, height: 24, rx: 12, fill: SNOW }, parent);
-  shape('circle', { cx: x + 82, cy: base - 790, r: 14, fill: SNOW }, parent);
-  shape('path', { d: `M${x + 110} ${base - 735}C${x + 90} ${base - 640} ${x + 130} ${base - 560} ${x + 100} ${base - 470}`, stroke: GREEN, 'stroke-width': 26, fill: 'none', 'stroke-linecap': 'round' }, parent);
-  for (const bx of [-70, 30]) shape('path', { d: `M${x + bx} ${base}V${base - 90}H${x + bx + 44}V${base - 34}H${x + bx + 70}C${x + bx + 84} ${base - 34} ${x + bx + 84} ${base} ${x + bx + 70} ${base}Z`, fill: '#3b2a24' }, parent);
-}
-
-// Santa's writing desk: a stack of letters, a quill and the Nice List hanging over the edge.
-function letterDesk(parent, x, base) {
-  shape('rect', { x: x - 200, y: base - 300, width: 400, height: 36, rx: 8, fill: WOOD_LIT }, parent);
-  shape('rect', { x: x - 180, y: base - 266, width: 120, height: 266, fill: WOOD }, parent);
-  shape('rect', { x: x + 130, y: base - 266, width: 30, height: 266, fill: WOOD }, parent);
-  for (const dy of [-230, -150, -70]) { shape('rect', { x: x - 170, y: base + dy, width: 100, height: 62, rx: 6, fill: WOOD_LIT }, parent); shape('circle', { cx: x - 120, cy: base + dy + 31, r: 7, fill: GOLD }, parent); }
-  for (let i = 0; i < 6; i++) shape('rect', { x: x - 150 + i * 6, y: base - 340 - i * 22, width: 150, height: 40, rx: 4, fill: [CREAM, '#f2e3c4', '#efe0bf'][i % 3], transform: `rotate(${(i % 2 ? 4 : -3)} ${x - 75} ${base - 320 - i * 22})` }, parent);
-  shape('circle', { cx: x - 60, cy: base - 450, r: 18, fill: RED }, parent);
-  shape('path', { d: `M${x + 60} ${base - 300}V${base - 340}C${x + 60} ${base - 360} ${x + 100} ${base - 360} ${x + 100} ${base - 340}V${base - 300}Z`, fill: '#3b4a5a' }, parent);
-  shape('path', { d: `M${x + 84} ${base - 344}C${x + 120} ${base - 420} ${x + 150} ${base - 460} ${x + 170} ${base - 470}C${x + 150} ${base - 430} ${x + 120} ${base - 390} ${x + 88} ${base - 340}Z`, fill: SNOW }, parent);
-  shape('path', { d: `M${x + 10} ${base - 304}H${x + 110}V${base - 170}C${x + 110} ${base - 150} ${x + 90} ${base - 140} ${x + 70} ${base - 150}H${x + 10}Z`, fill: '#f6ecda' }, parent);
-  for (let i = 0; i < 6; i++) shape('path', { d: `M${x + 24} ${base - 284 + i * 20}h${i % 2 ? 60 : 74}`, stroke: '#b6a58a', 'stroke-width': 4, 'stroke-linecap': 'round' }, parent);
-}
-
-export function fireplace({ paper }, { width, height }) {
+export function fireplace({ paper: sheet }, size) {
+  const width = 600, height = 650, paper = shape('g', { transform: `scale(${size.width / width} ${size.height / height})` }, sheet);
   const mantel = 250, opening = { x: 150, y: 400, width: 300, height: 190 };
   // Chimney breast of rounded river stones.
   shape('rect', { x: 20, y: 0, width: width - 40, height: height - 40, fill: '#b9ae9e' }, paper);
@@ -258,7 +353,8 @@ export function flames({ paper }, { width, height }) {
   }
 }
 
-export function tree({ paper }, { width, height }) {
+export function tree({ paper: sheet }, size) {
+  const width = 475, height = 875, paper = shape('g', { transform: `scale(${size.width / width} ${size.height / height})` }, sheet);
   const cx = width / 2, base = height - 70;
   shape('rect', { x: cx - 26, y: base - 40, width: 52, height: 60, fill: '#7d5636' }, paper);
   shape('path', { d: `M${cx - 120} ${height - 24}C${cx - 90} ${base - 10} ${cx + 90} ${base - 10} ${cx + 120} ${height - 24}Z`, fill: RED }, paper);
@@ -283,7 +379,6 @@ export function tree({ paper }, { width, height }) {
   gift(cx - 230, 110, 80, '#8aa9ad', CREAM); gift(cx + 90, 130, 100, '#b5625a', '#efdcae'); gift(cx - 70, 80, 56, '#e9d9b8', RED);
 }
 
-// The rocking chair is four boards: a back behind Santa, two side profiles and the armrest fronts before him.
 export function chairBack({ paper }, { width, height }) {
   const post = 34, left = 18, right = width - 18 - post, seat = height - 150;
   shape('path', { d: `M${left} ${height - 20}V40C${left} 10 ${left + post} 10 ${left + post} 40V${height - 20}Z`, fill: WOOD }, paper);
@@ -322,35 +417,46 @@ export function chairFront({ paper }, { width, height }) {
   }
 }
 
-export function sideTable({ paper }, { width, height }) {
-  const cx = width / 2, top = 110;
-  shape('path', { d: `M${cx - 18} ${top + 20}V${height - 40}H${cx + 18}V${top + 20}Z`, fill: WOOD }, paper);
-  shape('path', { d: `M${cx - 70} ${height - 10}C${cx - 60} ${height - 40} ${cx + 60} ${height - 40} ${cx + 70} ${height - 10}Z`, fill: WOOD }, paper);
-  shape('ellipse', { cx, cy: top + 14, rx: 100, ry: 20, fill: WOOD }, paper);
-  shape('ellipse', { cx, cy: top + 6, rx: 100, ry: 20, fill: WOOD_LIT }, paper);
-  // Milk and cookies left out for Santa.
-  shape('ellipse', { cx: cx - 34, cy: top, rx: 46, ry: 11, fill: CREAM }, paper);
-  for (const [x, y] of [[cx - 52, top - 10], [cx - 22, top - 14], [cx - 38, top - 26]]) {
-    shape('circle', { cx: x, cy: y, r: 16, fill: '#c08a5a' }, paper);
-    shape('circle', { cx: x - 4, cy: y - 3, r: 3, fill: '#5b3a2c' }, paper); shape('circle', { cx: x + 5, cy: y + 4, r: 3, fill: '#5b3a2c' }, paper);
+// The advent house on the window sill: one lit window per December day so far (all lit outside December).
+export function adventLit(date = new Date()) { return date.getMonth() === 11 ? Math.min(date.getDate(), 24) : date.getMonth() === 10 ? 0 : 24; }
+function adventHouse(parent, x, base, lit) {
+  roofHouse(parent, x, base, 150, 110, { wall: '#ecdcc0', roof: '#a8564c', chimney: true });
+  for (let i = 0; i < 24; i++) {
+    const column = i % 6, row = Math.floor(i / 6);
+    shape('rect', { x: x - 62 + column * 21, y: base - 104 + row * 16, width: 13, height: 10, rx: 2, fill: i < lit ? '#f4cf74' : '#9a8670' }, parent);
   }
-  shape('path', { d: `M${cx + 30} ${top}L${cx + 26} ${top - 74}H${cx + 66}L${cx + 62} ${top}Z`, fill: '#eef3f6' }, paper);
-  shape('path', { d: `M${cx + 29} ${top - 6}L${cx + 27} ${top - 52}H${cx + 65}L${cx + 63} ${top - 6}Z`, fill: '#fffdf7' }, paper);
 }
 
-// Every board: art size in world units and where it stands. Room surfaces are cut at a lower density to save memory.
+const wall = (id, w, h, at, extra) => ({ id, w, h, at, kind: 'wall', ...extra });
+// Every board: art size in world units and where it stands. `kind` marks room surfaces (cut at a lower density, no paper edge).
 export const BOARDS = [
-  { id: 'back', w: BOX.width, h: BOX.height, at: [0, 0, BOX.back], draw: backWall, kind: 'wall' },
-  { id: 'left', w: BOX.depth, h: BOX.height, at: [-BOX.width / 2, 0, BOX.middle], turn: Math.PI / 2, draw: sideWall('left'), kind: 'wall' },
-  { id: 'right', w: BOX.depth, h: BOX.height, at: [BOX.width / 2, 0, BOX.middle], turn: -Math.PI / 2, draw: sideWall('right'), kind: 'wall' },
-  { id: 'floor', w: BOX.width, h: BOX.depth, at: [0, 0, BOX.middle], flat: 'floor', draw: floor, kind: 'floor' },
-  { id: 'ceiling', w: BOX.width, h: BOX.depth, at: [0, BOX.height, BOX.middle], flat: 'ceiling', draw: ceiling, kind: 'floor' },
-  { id: 'tree', w: .95, h: 1.75, at: [-1.28, 0, -.5], draw: tree },
-  { id: 'fireplace', w: 1.2, h: 1.3, at: [1.02, 0, -.8], draw: fireplace },
-  { id: 'flames', w: .48, h: .38, at: [1.02, .12, -.76], draw: flames, flame: true },
-  { id: 'table', w: .42, h: .55, at: [.42, 0, .2], draw: sideTable },
+  wall('back', HOUSE.width, HOUSE.ridge, [0, 0, -HOUSE.depth / 2], { draw: backWall }),
+  wall('left', HOUSE.depth, HOUSE.wall, [-HOUSE.width / 2, 0, 0], { turn: Math.PI / 2, draw: sideWall('left') }),
+  wall('right', HOUSE.depth, HOUSE.wall, [HOUSE.width / 2, 0, 0], { turn: -Math.PI / 2, draw: sideWall('right') }),
+  wall('left-out', HOUSE.depth, HOUSE.wall, [-HOUSE.width / 2 - HOUSE.thick, 0, 0], { turn: -Math.PI / 2, draw: outerWall }),
+  wall('right-out', HOUSE.depth, HOUSE.wall, [HOUSE.width / 2 + HOUSE.thick, 0, 0], { turn: Math.PI / 2, draw: outerWall }),
+  { id: 'floor', w: HOUSE.width, h: HOUSE.depth, at: [0, 0, 0], flat: 'floor', draw: floor, kind: 'floor' },
+  { id: 'roof-in-left', roof: 'left', layer: 'inner', w: HOUSE.slope, h: HOUSE.depth, draw: roofInside, kind: 'floor' },
+  { id: 'roof-in-right', roof: 'right', layer: 'inner', w: HOUSE.slope, h: HOUSE.depth, draw: roofInside, kind: 'floor' },
+  { id: 'roof-out-left', roof: 'left', layer: 'outer', w: HOUSE.slope + HOUSE.eaves, h: HOUSE.depth + HOUSE.overhang * 2, draw: roofOutside, kind: 'floor' },
+  { id: 'roof-out-right', roof: 'right', layer: 'outer', w: HOUSE.slope + HOUSE.eaves, h: HOUSE.depth + HOUSE.overhang * 2, draw: roofOutside, kind: 'floor' },
+  { id: 'garland', w: HOUSE.width + HOUSE.eaves * 2.6, h: 1.42, at: [0, HOUSE.wall - .26, HOUSE.depth / 2 + HOUSE.overhang + .03], draw: roofGarland },
+  { id: 'lantern', w: .3, h: .56, at: [LANTERN.x, HOUSE.ridge, LANTERN.z], hang: true, draw: lantern },
+  { id: 'bookshelf', w: .55, h: 1.25, at: [-1.22, 0, -.9], draw: bookshelf },
+  { id: 'fireplace', w: 1.05, h: 1.14, at: [FIRE.x, 0, -.92], draw: fireplace },
+  { id: 'flames', w: .36, h: .28, at: [FIRE.x, .09, -.88], draw: flames, flame: true },
+  { id: 'tree', w: .74, h: 1.36, at: [1.3, 0, .7], draw: tree },
+  { id: 'tree-lights', w: .74, h: 1.36, at: [1.3, 0, .71], draw: treeLights, twinkle: true },
+  { id: 'lamp-table', w: .5, h: .9, at: [-1.18, 0, .32], draw: lampTable },
   { id: 'chair-back', w: .82, h: 1.12, at: [0, 0, -.3], draw: chairBack, chair: true },
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
   { id: 'chair-front', w: .82, h: .44, at: [0, 0, .2], draw: chairFront, chair: true },
+  { id: 'drifts', w: PLATFORM.rx * 2, h: .62, at: [0, PLATFORM.top - .26, PLATFORM.rz - .12], draw: drifts },
+  { id: 'pine-left', w: 1.3, h: 2.3, at: [-2.75, PLATFORM.top, -1.35], draw: pineBoard },
+  { id: 'pine-left-small', w: .9, h: 1.5, at: [-3.25, PLATFORM.top, -.5], draw: pineBoard },
+  { id: 'pine-right', w: 1.2, h: 2.1, at: [2.8, PLATFORM.top, -1.25], draw: pineBoard },
+  { id: 'mailbox', w: .55, h: 1.05, at: [2.35, PLATFORM.top, 1.15], draw: mailbox },
+  { id: 'sleigh', w: 1.3, h: .8, at: [2.75, PLATFORM.top, -.05], turn: -.35, draw: sleigh },
 ];
+export const SMOKE = { w: .55, h: .4, draw: smokePuff };
