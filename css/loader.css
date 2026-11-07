@@ -41,15 +41,40 @@ html.is-loading body > :not(.site-loader), html.is-loading body > :not(.site-loa
 @keyframes loader-fly { from { offset-distance: 0%; rotate: -8deg; } to { offset-distance: 100%; rotate: 8deg; } }
 .loader-stars path { animation: loader-breathe 1.3s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
 .loader-stars path:nth-child(2n) { animation-delay: .6s; }
-/* Santa：排隊進小屋。隊伍位置由 site-loader.js 依真實進度設定，這裡只負責走路的過場。 */
-.loader-queue { width: min(440px, 90vw); }
-.loader-queue .q { transition: transform .8s cubic-bezier(.4, .1, .3, 1), opacity .45s ease .35s; }
-.loader-queue .q.is-in { opacity: 0; }
-.loader-queue .q-body { transform-box: fill-box; transform-origin: 50% 100%; animation: loader-waddle .5s ease-in-out infinite alternate; }
-.loader-queue .q:nth-of-type(2n) .q-body { animation-delay: -.25s; }
-@keyframes loader-waddle { from { rotate: -4deg; } to { rotate: 4deg; } }
-.loader-door { transform-box: view-box; transform-origin: 314px 118px; transition: transform .35s ease; }
-.loader-door.is-open { transform: scaleX(.18); }
-.loader-ticket { display: inline-block; margin-left: .6rem; padding: .05rem .55rem; color: #fbf3df; background: #a84a42; border-radius: 6px; box-shadow: 0 3px 0 #87302f; letter-spacing: .04em; rotate: -4deg; }
+/* Santa：訪客在雪地裡一直往小屋走，背後的村子（雪山、摩天輪、燈塔、冒煙的小屋）分三層慢慢滑過。
+   會動的全是 HTML 圖層的 transform／opacity，瀏覽器可以交給合成執行緒播放：小屋在背後畫紙板、解模型時動畫也不會停。
+   腳印依真實進度一格格踩亮（site-loader.js）。 */
+.site-loader-santa { background: linear-gradient(#c9dfeb, #dfeaf0 42%, #f6e4d8 70%, #fbefe4); }
+.loader-trek { position: relative; width: min(440px, 88vw); aspect-ratio: 440 / 210; overflow: hidden; border: 6px solid #fbf3df; border-radius: 28px; background: linear-gradient(#d3e6ee, #eef1f0 58%, #f7ebe0); box-shadow: 0 10px 0 -2px #dccaa9; }
+.trek-sun { position: absolute; left: 9%; top: 10%; width: 18%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(#fdf0c8 0 30%, #fbe3b899 46%, transparent 70%); }
+.trek-strip { position: absolute; top: 0; left: 0; width: 200%; height: 100%; will-change: transform; animation: trek-pan var(--pace) linear infinite; }
+.trek-strip svg { display: block; width: 100%; height: 100%; }
+.trek-far { --pace: 46s; }
+.trek-mid { --pace: 19s; }
+.trek-near { --pace: 7s; }
+@keyframes trek-pan { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.trek-puff { position: absolute; top: 46%; width: 2.4%; aspect-ratio: 1; margin-left: -1.2%; border-radius: 50%; background: #f4f1ec; opacity: 0; will-change: transform, opacity; animation: trek-smoke 2.7s ease-out infinite; }
+.trek-puff:nth-of-type(3n + 2) { animation-delay: -.9s; }
+.trek-puff:nth-of-type(3n) { animation-delay: -1.8s; }
+@keyframes trek-smoke { 0% { transform: translate(0, 0) scale(.4); opacity: 0; } 25% { opacity: .9; } 100% { transform: translate(70%, -260%) scale(1.5); opacity: 0; } }
+/* 走路：身體上下起伏，兩條腿前後交替擺動，提燈晃。 */
+.trek-walker { position: absolute; left: 30%; bottom: 8%; width: 13.5%; aspect-ratio: 50 / 80; will-change: transform; animation: trek-bob .36s ease-in-out infinite alternate; }
+.trek-body { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.trek-leg { position: absolute; top: 70%; left: 34%; width: 14%; height: 30%; border-radius: 3px 3px 5px 5px; background: linear-gradient(#3f5a6e 62%, #2f2622 62%); transform-origin: 50% 0; will-change: transform; animation: trek-stride .72s ease-in-out infinite alternate; }
+.trek-leg-front { left: 50%; animation-delay: -.72s; }
+.trek-lantern { position: absolute; left: 74%; top: 52%; width: 30%; transform-origin: 50% 0; will-change: transform; animation: trek-swing .72s ease-in-out infinite alternate; }
+.trek-lantern svg { display: block; width: 100%; height: auto; }
+@keyframes trek-bob { from { transform: translateY(0); } to { transform: translateY(-4%); } }
+@keyframes trek-stride { from { transform: rotate(24deg); } to { transform: rotate(-24deg); } }
+@keyframes trek-swing { from { transform: rotate(-14deg); } to { transform: rotate(10deg); } }
+.trek-flake { position: absolute; top: -4%; width: 1.4%; aspect-ratio: 1; border-radius: 50%; background: #fffdf6; box-shadow: 0 0 0 1px #d6e3e966; will-change: transform; animation: trek-fall 6s linear infinite; }
+.trek-flake:nth-of-type(2n) { animation-duration: 7.6s; animation-delay: -3s; }
+.trek-flake:nth-of-type(3n) { animation-duration: 5.2s; animation-delay: -1.6s; }
+.trek-flake:nth-of-type(4n) { animation-delay: -4.4s; }
+@keyframes trek-fall { from { transform: translate(0, 0); } to { transform: translate(-40px, 260px); } }
+.trek-steps { display: flex; gap: .55rem; margin: -.4rem 0 0; }
+.trek-step { width: 12px; height: 8px; border-radius: 50%; background: #d9cdbd; transition: background-color .3s ease; }
+.trek-step:nth-child(2n) { translate: 0 6px; }
+.trek-step.is-on { background: #8a5a3c; }
 @media (max-width: 480px) { .cradle, .loader-word { scale: .78; } }
-@media (prefers-reduced-motion: reduce) { .site-loader * { animation: none !important; } .loader-envelope { offset-distance: 50%; } .loader-queue .q, .loader-door { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .site-loader * { animation: none !important; } .loader-envelope { offset-distance: 50%; } .trek-step { transition: none; } }

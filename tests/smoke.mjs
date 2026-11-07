@@ -167,7 +167,10 @@ await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村�
   assert.ok(scene.includes('turn: Infinity') && scene.includes('function walk(') && scene.includes('world.visible') && scene.includes('away.heading'), 'Inside turns all the way round; walking out faces the way you came in');
   const cottage = await fs.readFile(path.join(project, 'js/components/wish-cottage.js'), 'utf8');
   assert.ok(cottage.includes("invite.href = 'santa.html'"), 'The Wish cottage is the same house: whoever answers asks you in');
-  assert.ok(loader.includes("'#cabin-stage'") && loader.includes('dataset.progress') && loader.includes('prefers-reduced-motion'), 'The queue walks with the real download and stays still under reduced motion');
+  const loaderCss = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8'), trek = loaderCss.slice(loaderCss.indexOf('.loader-trek'), loaderCss.indexOf('@media (max-width: 480px)'));
+  assert.ok(loader.includes("'#cabin-stage'") && loader.includes('dataset.progress') && loader.includes('trek-step'), 'The footprints fill in with the real download');
+  const frames = [...trek.matchAll(/@keyframes trek-[\w-]+ \{(.*)\}$/gm)].map(match => match[1]), properties = frames.flatMap(body => [...body.matchAll(/([\w-]+):/g)].map(match => match[1]));
+  assert.ok(frames.length >= 6 && properties.every(name => name === 'transform' || name === 'opacity') && loaderCss.includes('prefers-reduced-motion: reduce) { .site-loader * { animation: none'), 'The walk only animates transform and opacity, so it keeps moving while the page is busy; reduced motion stills it');
   assert.ok((await fs.readFile(path.join(project, 'js/data/heading-glyphs.js'), 'utf8')).includes('santas-cabin'));
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
