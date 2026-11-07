@@ -4,7 +4,8 @@
 //   head box  — head circle centre (50, 75.3), radius 25.7, so its crown is at y 49.6
 //   neck box  — where head meets body near y 20; the middle ball is about 52 wide at y 26
 //   face box  — head centre (50, 50), radius 45; eyes at (34.3, 36.5) and (63.5, 36.5); the nose starts at the centre
-//   hand box  — the tip of his right twig arm at (50, 50); the arm comes in from the lower left
+//   hand box  — both twig arms: the right tip at (87.2, 25), the left at (12.8, 25), each arm rising 29° toward its tip.
+//               Things he holds are drawn round the right tip; mittens go on both.
 import { holly, shape } from './paper-art.js';
 import { star } from './paper-props.js';
 
@@ -16,8 +17,16 @@ export const PLACES = {
   head: { name: '頭部', at: [0, 1.38], size: [.7, .7], box: 100, nudge: .018 },
   neck: { name: '頸部', at: [0, .97], size: [.7, .42], box: 60, nudge: .006 },
   face: { name: '臉部', at: [0, 1.203], size: [.4, .4], box: 100, nudge: .012 },
-  hand: { name: '手持', at: [.446, .974], size: [.5, .5], box: 100, nudge: .01 },
+  hand: { name: '手持', at: [0, .974], size: [1.2, .6], box: 50, nudge: .01 },
 };
+// The twig tips in the hand box, the arms' rise toward them (degrees), and the scale of things held in the right hand.
+const RIGHT_TIP = [87.2, 25], LEFT_TIP = [12.8, 25], ARM = 29.05, HELD = .005 / .012;
+function mitten(g) {
+  shape('path', { d: 'M-1.8 -3.6C2 -5 6 -5 8.5 -3 10.6 -1.2 10.6 2.2 8.4 3.8 6 5.4 1 5 -1.8 3.6Z', fill: RED }, g);
+  shape('path', { d: 'M1.5 -3.8C.8 -7 4.2 -8.2 5.6 -5.2Z', fill: RED }, g);
+  shape('rect', { x: -5, y: -4.4, width: 3.8, height: 8.8, rx: 1.5, fill: SNOW }, g);
+  shape('path', { d: 'M3.6 -1.2l1.8 1.8M6.2 -1.6l1.6 1.6', stroke: CREAM, 'stroke-width': .7, 'stroke-linecap': 'round' }, g);
+}
 const scarf = (g, body, tail, trim) => {
   shape('path', { d: 'M20 20C34 28 66 28 80 20V32C66 40 34 40 20 32Z', fill: body }, g);
   shape('path', { d: 'M60 33L69 58H58L54 35Z', fill: tail }, g);
@@ -126,12 +135,19 @@ const ITEMS = [
     shape('path', { d: 'M50 46C44 38 38 40 42 45M50 46C56 38 62 40 58 45', stroke: GOLD, 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round' }, g);
     star(g, 43, 63, 3, CREAM);
   } },
-  { id: 'mitten', place: 'hand', name: '手套', thumb: '34 28 36 40', draw: g => {
-    shape('path', { d: 'M42 46C40 36 48 31 55 35L58 40C63 37 68 42 63 47L58 57C54 63 44 61 42 53Z', fill: RED }, g);
-    shape('path', { d: 'M40 52L58 58 56 64 38 58Z', fill: SNOW }, g);
-    shape('path', { d: 'M47 42l3 3M52 44l3 3', stroke: CREAM, 'stroke-width': 1.6 }, g);
+  // A pair, one on each twig: the cuff wraps the twig just short of its end and the mitten covers the tip. Drawn along the
+  // arm (x outward, origin at the tip), then turned to the right arm's angle and mirrored for the left.
+  { id: 'mittens', place: 'hand', name: '一雙手套', icon: ['-12 -10 48 22', g => { mitten(shape('g', { transform: 'translate(0 2) rotate(-20)' }, g)); mitten(shape('g', { transform: 'translate(24 2) scale(-1 1) rotate(-20)' }, g)); }], draw: g => {
+    mitten(shape('g', { transform: `translate(${RIGHT_TIP[0]} ${RIGHT_TIP[1]}) rotate(${-ARM})` }, g));
+    mitten(shape('g', { transform: `translate(${LEFT_TIP[0]} ${LEFT_TIP[1]}) scale(-1 1) rotate(${-ARM})` }, g));
   } },
 ];
+for (const item of ITEMS) {
+  if (item.place !== 'hand' || item.id === 'mittens') continue;
+  const { draw, thumb } = item, [x, y, w, h] = thumb.split(' ').map(Number), at = ([px, py]) => [RIGHT_TIP[0] + (px - 50) * HELD, RIGHT_TIP[1] + (py - 50) * HELD];
+  item.draw = g => draw(shape('g', { transform: `translate(${RIGHT_TIP[0]} ${RIGHT_TIP[1]}) scale(${HELD}) translate(-50 -50)` }, g));
+  item.thumb = [...at([x, y]), w * HELD, h * HELD].map(value => +value.toFixed(2)).join(' ');
+}
 export const WARDROBE = ITEMS;
 export const itemFor = id => ITEMS.find(item => item.id === id) ?? null;
 export const known = (place, id) => ITEMS.some(item => item.id === id && item.place === place);
