@@ -41,6 +41,9 @@ export function createSound(widget = document.querySelector('.music-widget'), au
     nope: () => { tone(NOTE.E5, 0, .16, { type: 'sine', gain: .14 }); tone(NOTE.C5, .11, .22, { type: 'sine', gain: .12 }); },
     drop: () => tone(220, 0, .14, { type: 'sine', gain: .18, slide: 160 }),
     cheer: () => { [NOTE.C6, NOTE.E6, NOTE.G6, NOTE.C7].forEach((note, i) => tone(note, i * .09, .5, { gain: .13 })); for (let i = 0; i < 4; i++) rustle(.05 + i * .1, .06, 6000, 7000, .05); },
+    chew: () => { for (let i = 0; i < 3; i++) rustle(i * .16, .07, 1100, 520, .2); },
+    happy: () => { tone(NOTE.E5, 0, .14, { type: 'sine', gain: .14, slide: NOTE.A5 }); tone(NOTE.A5, .15, .2, { type: 'sine', gain: .14, slide: NOTE.E6 }); },
+    refuse: () => { tone(300, 0, .18, { type: 'sine', gain: .15, slide: 260 }); tone(280, .2, .26, { type: 'sine', gain: .13, slide: 220 }); },
     jingle: () => { [NOTE.G5, NOTE.C6, NOTE.E6].forEach((note, i) => tone(note, i * .07, .35, { gain: .12 })); },
   };
   return {

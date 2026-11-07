@@ -66,13 +66,31 @@
 .wardrobe-ghost.is-settled { scale: .7; opacity: 0; }
 .play-confetti { position: absolute; width: 9px; height: 13px; border-radius: 2px; pointer-events: none; animation: play-confetti 1.6s cubic-bezier(.2, .7, .4, 1) both; }
 @keyframes play-confetti { from { transform: translate(0, 0) rotate(0deg); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) rotate(var(--spin)); opacity: 0; } }
+/* 麋鹿餵食：下方的籃子和五格「今天吃了幾份」，拖近嘴巴時出現一圈暖光，牠說話時頭旁冒出紙對話框。 */
+.feed-tray { position: absolute; left: 50%; bottom: 1rem; translate: -50% 0; display: flex; flex-direction: column; align-items: center; gap: .45rem; pointer-events: auto; }
+.feed-meter { display: flex; gap: .35rem; margin: 0; padding: .3rem .7rem; background: #fffbedee; border-radius: 99px; box-shadow: 0 3px 0 -1px #dccaa9; }
+.feed-meal { width: 16px; height: 14px; background: #e8dcc6; clip-path: path('M8 14C3 10 0 7 0 4 0 1.5 2 0 4 0 6 0 7 1 8 2.5 9 1 10 0 12 0 14 0 16 1.5 16 4 16 7 13 10 8 14Z'); transition: background-color .3s ease, scale .3s ease; }
+.feed-meal.is-eaten { background: #d9614f; scale: 1.15; }
+.feed-basket { display: flex; gap: .6rem; padding: .5rem .9rem; border-radius: 18px; background: #a8774dcc; box-shadow: inset 0 0 0 3px #8f5a3c, 0 6px 0 -2px #6b4a33; }
+.feed-basket .play-item.is-lifted, .feed-basket .play-item.is-gone { opacity: .3; }
+.feed-basket .play-item.is-gone { scale: .6; }
+.feed-basket .play-item { transition: opacity .3s ease, scale .3s ease; }
+.feed-mouth { position: absolute; border-radius: 50%; background: radial-gradient(#ffe8a499, transparent 70%); opacity: 0; scale: .7; pointer-events: none; transition: opacity .2s ease, scale .2s ease; }
+.feed-mouth.is-open { opacity: 1; scale: 1.15; }
+.feed-ghost { position: absolute; top: 0; left: 0; z-index: 6; pointer-events: none; filter: drop-shadow(0 8px 6px #3b2a2433); }
+.feed-ghost .art-layer, .feed-basket .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.feed-ghost.is-flying { transition: translate .3s cubic-bezier(.3, .7, .4, 1), scale .3s ease, opacity .3s ease; }
+.feed-ghost.is-eaten { scale: .15; opacity: 0; }
+.reindeer-bubble { position: absolute; z-index: 5; max-width: 13rem; margin: 0; padding: .45rem .9rem; translate: -105% -100%; color: var(--ink); background: var(--cream); border-radius: 16px 16px 4px 16px; box-shadow: 0 4px 0 -1px #dccaa9; font-family: var(--font-hand); font-size: var(--fs-small); pointer-events: none; }
+.reindeer-bubble.is-popping { animation: bubble-pop .32s cubic-bezier(.3, 1.4, .5, 1) both; }
+@keyframes bubble-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
 @media (max-width: 700px) {
   .wardrobe { top: auto; right: .6rem; bottom: .6rem; left: .6rem; width: auto; height: 38%; padding: .6rem; }
   /* 窄螢幕上提示放到「回到小屋前」下面，不會疊在一起。 */
   .cabin-caption { top: 3.6rem; max-width: calc(100% - 2rem); }
   .wardrobe-items { grid-template-columns: repeat(3, 1fr); }
 }
-@media (prefers-reduced-motion: reduce) { .play-target, .play-burst, .play-confetti { animation: none; } .play-item, .wardrobe-item, .wardrobe-ghost.is-flying { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .play-target, .play-burst, .play-confetti { animation: none; } .play-item, .wardrobe-item, .wardrobe-ghost.is-flying, .feed-ghost.is-flying, .feed-meal, .feed-mouth { transition: none; } .reindeer-bubble.is-popping { animation: none; } }
 /* 紙雕聖誕老人替身：3D 小屋準備好之前先站在雪地上。 */
 .cabin-stage .santa-placeholder-host { position: absolute; left: 50%; bottom: 22%; width: min(220px, 30%); aspect-ratio: 300 / 270; translate: -50% 0; transition: opacity .4s ease; pointer-events: none; }
 .cabin-stage:not([data-state='loading']) .santa-placeholder-host { opacity: 0; }
