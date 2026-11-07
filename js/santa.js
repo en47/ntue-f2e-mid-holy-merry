@@ -1,4 +1,5 @@
 import { mountCabinBackdrop } from './components/cabin-backdrop.js';
+import { mountCabinPaper } from './components/cabin-paper.js';
 
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
@@ -6,6 +7,7 @@ const back = document.querySelector('#cabin-back'), tip = document.querySelector
 const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 mountCabinBackdrop(document.querySelector('.cabin-backdrop'));
+mountCabinPaper(document.querySelector('.cabin'));
 
 // Corners already found stay found on this browser (a convenience: an empty store just starts over).
 // Ids no longer in the yard (the elf that used to sit in a fir) are dropped.
