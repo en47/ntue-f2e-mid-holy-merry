@@ -5,6 +5,7 @@ import { paperLayer, shape } from './paper-art.js';
 import { createSound } from './cabin-sound.js';
 import { snowmanGame } from './cabin-snowman.js';
 import { feedGame } from './cabin-feed.js';
+import { pulleyGame } from './cabin-pulley.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 
@@ -30,8 +31,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const layer = element('div', 'cabin-play', stage), caption = element('p', 'cabin-caption', layer);
   caption.setAttribute('aria-hidden', 'true'); caption.hidden = true;
   const timers = new Set(), later = (ms, run) => { const id = setTimeout(() => { timers.delete(id); run(); }, ms); timers.add(id); };
-  const memory = { hay: 0 };
-  // What lasts between visits (the snowman's outfit, the reindeer's meals today), and the yard's small sounds.
+  // What lasts between visits (the snowman's outfit, the reindeer's meals today, the barn's hoist), and the yard's small sounds.
   let storage = null; try { storage = localStorage; } catch { /* this visit only */ }
   const progress = readProgress(storage, known), save = () => writeProgress(progress, storage), sound = createSound();
   let cleanup = () => {};
@@ -103,22 +103,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     },
     reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art: ART, paper: PAPER }),
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti }),
-    stable() {
-      if (memory.hay >= 4) { say('乾草都堆好了，麋鹿今晚有得吃了。'); return; }
-      say(`把乾草一捆捆拖上閣樓（${memory.hay}/4）`);
-      const loft = () => cabin.rectOfBox([7.4, 1.94, -7], [.7, .5, .3]), pile = element('div', 'play-pile', layer);
-      for (let i = memory.hay; i < 4; i++) {
-        draggable(prop('hay', pile, '把乾草搬上閣樓'), {
-          use: spot => {
-            if (spot && !inside(spot, loft(), 40)) return false;
-            memory.hay++; cabin.repaint('stable', { hay: memory.hay });
-            say(memory.hay >= 4 ? '乾草都堆好了！麋鹿今晚有得吃了。' : `堆上閣樓了（${memory.hay}/4）`);
-            if (memory.hay >= 4) onFound('stable');
-            return true;
-          },
-        });
-      }
-    },
+    stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound }),
   };
 
   function leave() { timers.forEach(clearTimeout); timers.clear(); cleanup(); cleanup = () => {}; layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
@@ -130,7 +115,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // Coming back shows the yard as it was left: the snowman in his outfit, finished corners finished.
     restore(ids) {
       for (const place of Object.keys(PLACES)) cabin.dress(place, progress.outfit[place]);
-      if (ids.includes('stable')) { memory.hay = 4; cabin.repaint('stable', { hay: 4 }); }
+      cabin.hoist(progress.hoist.locked ? 1 : 0); if (progress.hoist.locked && progress.hoist.found) cabin.openHatch(true);
       if (ids.includes('mailbox')) cabin.repaint('mailbox', { open: true });
     },
     destroy() { leave(); sound.destroy(); layer.remove(); },

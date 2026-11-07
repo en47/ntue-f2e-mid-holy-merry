@@ -447,7 +447,7 @@ export function hoofprints({ paper }, { width, height }) {
   }
 }
 // A few Christmas things around the yard, spaced well apart: the reindeer's red stable, a lamp-lit path to it, a snowman, a far village.
-export function stable({ paper }, { width, height }, state = {}) {
+export function stable({ paper }, { width, height }) {
   const ground = height - 8, eave = height * .5, peak = height * .14, cx = width / 2;
   shape('path', { d: `M${width * .12} ${ground}V${eave}L${cx} ${peak + 40}L${width * .88} ${eave}V${ground}Z`, fill: RED }, paper);
   for (let x = width * .16; x < width * .86; x += 34) shape('path', { d: `M${x} ${ground}V${eave + (Math.abs(x - cx) < width * .3 ? -(width * .3 - Math.abs(x - cx)) * .6 : 0)}`, stroke: '#87302f', 'stroke-width': 3, opacity: .5 }, paper);
@@ -458,15 +458,57 @@ export function stable({ paper }, { width, height }, state = {}) {
   shape('path', { d: `M${door.x} ${door.y}L${door.x + door.w} ${ground}M${door.x + door.w} ${door.y}L${door.x} ${ground}`, stroke: CREAM, 'stroke-width': 10 }, paper);
   shape('rect', { x: door.x - 8, y: door.y - 8, width: door.w + 16, height: ground - door.y + 8, fill: 'none', stroke: CREAM, 'stroke-width': 12 }, paper);
   wreath(paper, cx, door.y - 30, 30);
-  // The hayloft under the gable: open and dark until bales are stacked in it.
-  const loft = { x: cx - 74, y: peak + 70, w: 148, h: 104 }, bales = state.hay ?? 0;
+  // The hayloft under the gable, with a few bales already stored.
+  const loft = { x: cx - 74, y: peak + 70, w: 148, h: 104 };
   shape('rect', { x: loft.x - 10, y: loft.y - 10, width: loft.w + 20, height: loft.h + 14, fill: CREAM }, paper);
   shape('rect', { x: loft.x, y: loft.y, width: loft.w, height: loft.h, fill: '#4a2422' }, paper);
-  for (let i = 0; i < bales; i++) {
-    const x = loft.x + 8 + (i % 2) * 70, y = loft.y + loft.h - 48 - Math.floor(i / 2) * 46;
-    shape('rect', { x, y, width: 64, height: 42, rx: 12, fill: '#d9b36a' }, paper);
-    shape('path', { d: `M${x + 6} ${y + 14}h52M${x + 6} ${y + 28}h52`, stroke: '#b98f48', 'stroke-width': 4 }, paper);
+  for (const [x, y] of [[8, 56], [78, 56], [42, 12]]) {
+    shape('rect', { x: loft.x + x, y: loft.y + y, width: 64, height: 42, rx: 12, fill: '#d9b36a' }, paper);
+    shape('path', { d: `M${loft.x + x + 6} ${loft.y + y + 14}h52M${loft.x + x + 6} ${loft.y + y + 28}h52`, stroke: '#b98f48', 'stroke-width': 4 }, paper);
   }
+}
+// The hay hoist on the barn's face, left of the door (stable-board units: x from the board's middle, y up from the snow).
+// A single pulley under the eave: one rope runs down to a bale, the other to a wooden toggle you pull, so the bale rises
+// exactly as far as the toggle comes down. At rest the bale sits on the snow, hiding a little hatch in the wall behind it.
+export const HOIST = { x: -.9, wheel: 1.55, radius: .14, lift: .9, bale: [.5, .42], toggle: [.13, .24], rest: 1.05, hatch: [.44, .36] };
+export function hoistBracket({ paper }, { width, height }) {
+  shape('rect', { x: width * .1, y: height * .2, width: width * .8, height: height * .22, rx: 6, fill: TIMBER }, paper);
+  shape('path', { d: `M${width * .82} ${height * .42}V${height * .9}L${width * .3} ${height * .42}`, stroke: '#3b302a', 'stroke-width': 9, fill: 'none', 'stroke-linejoin': 'round' }, paper);
+  shape('rect', { x: width * .44, y: height * .42, width: width * .12, height: height * .26, fill: '#3b302a' }, paper);
+  shape('path', { d: `M${width * .08} ${height * .22}C${width * .3} ${height * .08} ${width * .7} ${height * .14} ${width * .92} ${height * .2}V${height * .26}H${width * .08}Z`, fill: SNOW }, paper);
+}
+export function hoistWheel({ paper }, { width, height }) {
+  const c = width / 2, r = width * .44;
+  shape('circle', { cx: c, cy: c, r, fill: '#a86b47' }, paper);
+  shape('circle', { cx: c, cy: c, r: r * .78, fill: '#c39466' }, paper);
+  for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; shape('path', { d: `M${c} ${c}L${c + Math.cos(a) * r * .74} ${c + Math.sin(a) * r * .74}`, stroke: TIMBER, 'stroke-width': 8 }, paper); }
+  shape('circle', { cx: c, cy: c, r: r * .2, fill: '#3b302a' }, paper);
+  shape('circle', { cx: c + r * .4, cy: c - r * .3, r: r * .08, fill: GOLD }, paper);
+}
+export function hayBale({ paper }, { width, height }) {
+  shape('rect', { x: 6, y: height * .18, width: width - 12, height: height * .8, rx: 26, fill: '#d9b36a' }, paper);
+  for (let i = 0; i < 9; i++) { const x = 20 + noise(i + 70) * (width - 40); shape('path', { d: `M${x} ${height * .24}l${(noise(i + 4) - .5) * 30} ${height * .7}`, stroke: '#c49a52', 'stroke-width': 4, opacity: .7 }, paper); }
+  for (const x of [.3, .7]) shape('rect', { x: width * x - 6, y: height * .18, width: 12, height: height * .8, fill: '#a8774d' }, paper);
+  shape('path', { d: `M${width * .3} ${height * .2}L${width / 2} 6L${width * .7} ${height * .2}`, stroke: '#7d5636', 'stroke-width': 6, fill: 'none' }, paper);
+  shape('circle', { cx: width / 2, cy: 10, r: 8, fill: 'none', stroke: '#3b302a', 'stroke-width': 5 }, paper);
+  shape('path', { d: `M14 ${height * .24}C${width * .3} ${height * .12} ${width * .7} ${height * .16} ${width - 14} ${height * .26}V${height * .32}H14Z`, fill: SNOW }, paper);
+}
+export function hoistToggle({ paper }, { width, height }) {
+  shape('rect', { x: width * .2, y: height * .12, width: width * .6, height: height * .82, rx: width * .3, fill: '#a86b47' }, paper);
+  shape('rect', { x: width * .34, y: height * .22, width: width * .14, height: height * .62, rx: 4, fill: '#c39466' }, paper);
+  shape('circle', { cx: width / 2, cy: height * .08, r: width * .16, fill: 'none', stroke: '#3b302a', 'stroke-width': 5 }, paper);
+}
+// The hatch behind the bale: a small dark cubby in the wall with a little crate tucked inside. `state.open` lifts its lid.
+export function hoistHatch({ paper }, { width, height }, state = {}) {
+  shape('rect', { x: 0, y: 0, width, height, rx: 10, fill: TIMBER }, paper);
+  shape('rect', { x: 12, y: 12, width: width - 24, height: height - 18, rx: 6, fill: '#2f1d18' }, paper);
+  const crate = { x: width * .22, y: height * .44, w: width * .56, h: height * .48 };
+  shape('rect', { x: crate.x, y: crate.y, width: crate.w, height: crate.h, rx: 6, fill: '#c39466' }, paper);
+  shape('path', { d: `M${crate.x} ${crate.y + crate.h / 2}h${crate.w}M${crate.x + crate.w / 2} ${crate.y}v${crate.h}`, stroke: '#a8774d', 'stroke-width': 6 }, paper);
+  if (state.open) {
+    shape('path', { d: `M${crate.x - 6} ${crate.y}L${crate.x + 14} ${crate.y - crate.h * .55}H${crate.x + crate.w + 2}L${crate.x + crate.w} ${crate.y}Z`, fill: '#d9b48a' }, paper);
+    shape('rect', { x: crate.x + crate.w * .28, y: crate.y - 14, width: crate.w * .44, height: 22, rx: 3, fill: '#fffdf6', transform: `rotate(-6 ${crate.x + crate.w / 2} ${crate.y})` }, paper);
+  } else shape('rect', { x: crate.x - 4, y: crate.y - 12, width: crate.w + 8, height: 16, rx: 5, fill: '#d9b48a' }, paper);
 }
 export function snowman({ paper }, { width, height }) {
   // Only the snowman himself: what he wears is laid over him in four places by the wardrobe game (cabin-wardrobe.js).
@@ -799,7 +841,7 @@ export const BOARDS = [
   { id: 'fence', w: 2.4, h: .7, at: [-5, GROUND, -2.5], turn: .3, draw: fence },
   { id: 'pond', w: 3.6, h: 1.8, at: [-5.6, GROUND, -4.6], flat: 'ground', draw: pond },
   { id: 'hoofprints', w: 4.4, h: 1.2, at: [4.2, GROUND, -.6], flat: 'ground', turn: .5, draw: hoofprints },
-  { id: 'stable', w: 3.4, h: 2.7, at: [7.4, GROUND, -7], turn: -.45, draw: stable, state: { hay: 0 } },
+  { id: 'stable', w: 3.4, h: 2.7, at: [7.4, GROUND, -7], turn: -.45, draw: stable },
   { id: 'path', w: 10, h: 1.6, at: [5.2, GROUND, -2.4], flat: 'ground', turn: -1.05, draw: path },
   { id: 'lamp-near', w: .55, h: 2.2, at: [4.1, GROUND, -1.2], turn: -.4, draw: lampPost },
   { id: 'lamp-far', w: .55, h: 2.2, at: [5.3, GROUND, -4.9], turn: -.45, draw: lampPost },
@@ -824,7 +866,7 @@ export const SPOTS = [
   { id: 'mailbox', name: '郵筒', box: [[SIGN.x, .45, SIGN.z + .45], [.8, 1.1, .6]], view: { target: [SIGN.x, .75, SIGN.z + .45], distance: 3, pitch: .1, yaw: .28 } },
   { id: 'reindeer', name: '麋鹿', box: [[REINDEER.x, .55, REINDEER.z], [1.3, 1.4, 1.2]], view: { target: [REINDEER.x, .62, REINDEER.z], distance: 3.4, pitch: .1, yaw: -.12 } },
   { id: 'snowman', name: '雪人', box: [[-5.4, .55, -1.2], [1.1, 1.5, .8]], view: { target: [-5.4, .82, -1.2], distance: 3.5, pitch: .06, yaw: .32, aside: .42, tallDrop: .5, tallDistance: 5.6 } },
-  { id: 'stable', name: '馴鹿小屋', box: [[7.4, 1.2, -7], [3.6, 2.8, 1.4]], view: { target: [7.2, 1.25, -6.8], distance: 6, pitch: .1, yaw: -.38 } },
+  { id: 'stable', name: '馴鹿小屋', box: [[7.4, 1.2, -7], [3.6, 2.8, 1.4]], view: { target: [7.05, .95, -7.05], distance: 4.4, pitch: .08, yaw: -.05, tallDistance: 6.4 } },
 ];
 
 // Things in the room that answer a tap with a line of their own. `box` is the tap target [centre, size]; the door takes you out.

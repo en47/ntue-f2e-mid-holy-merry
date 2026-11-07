@@ -81,13 +81,27 @@
 .reindeer-bubble { position: absolute; z-index: 5; max-width: 13rem; margin: 0; padding: .45rem .9rem; translate: -105% -100%; color: var(--ink); background: var(--cream); border-radius: 16px 16px 4px 16px; box-shadow: 0 4px 0 -1px #dccaa9; font-family: var(--font-hand); font-size: var(--fs-small); pointer-events: none; }
 .reindeer-bubble.is-popping { animation: bubble-pop .32s cubic-bezier(.3, 1.4, .5, 1) both; }
 @keyframes bubble-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+/* 穀倉滑輪：木頭握把上的抓取區（往下拉）、掛鉤與鬆開的紙標籤、暗格的亮點，和兩種筆跡的紙條。 */
+.hoist-grip { position: absolute; padding: 0; background: radial-gradient(#ffe8a466, transparent 70%); border: 2px dashed #c08a3e88; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.hoist-grip.is-pulling { cursor: grabbing; animation: none; border-color: #c08a3e; }
+.hoist-grip.is-locked { border-color: transparent; background: none; animation: none; cursor: default; }
+.hoist-grip:focus-visible, .hoist-hook:focus-visible, .hoist-release:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.hoist-hint { position: absolute; padding: .4rem .8rem; color: var(--ink); background: var(--cream); border-radius: 12px; font-size: var(--fs-small); font-weight: 700; pointer-events: none; rotate: 3deg; }
+.hoist-hook, .hoist-release { position: absolute; translate: 0 -50%; padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; white-space: nowrap; pointer-events: auto; }
+.hoist-hook { animation: bubble-pop .32s cubic-bezier(.3, 1.4, .5, 1) both; }
+.hoist-release { translate: 0 0; }
+.cabin-note { width: min(22rem, calc(100% - 2rem)); rotate: 2deg; }
+.note-line { margin: 0; font-family: var(--font-hand); line-height: 1.6; }
+.note-first { color: #5b3a2c; font-size: var(--fs-body); }
+.note-second { display: flex; align-items: center; gap: .4rem; margin: .2rem 0 1rem 2.4rem; color: #3f5a6e; font-size: var(--fs-title); letter-spacing: .12em; rotate: -6deg; }
+.note-mark { width: 5.5rem; height: auto; }
 @media (max-width: 700px) {
   .wardrobe { top: auto; right: .6rem; bottom: .6rem; left: .6rem; width: auto; height: 38%; padding: .6rem; }
   /* 窄螢幕上提示放到「回到小屋前」下面，不會疊在一起。 */
   .cabin-caption { top: 3.6rem; max-width: calc(100% - 2rem); }
   .wardrobe-items { grid-template-columns: repeat(3, 1fr); }
 }
-@media (prefers-reduced-motion: reduce) { .play-target, .play-burst, .play-confetti { animation: none; } .play-item, .wardrobe-item, .wardrobe-ghost.is-flying, .feed-ghost.is-flying, .feed-meal, .feed-mouth { transition: none; } .reindeer-bubble.is-popping { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .play-target, .play-burst, .play-confetti { animation: none; } .play-item, .wardrobe-item, .wardrobe-ghost.is-flying, .feed-ghost.is-flying, .feed-meal, .feed-mouth { transition: none; } .reindeer-bubble.is-popping, .hoist-grip, .hoist-hook { animation: none; } }
 /* 紙雕聖誕老人替身：3D 小屋準備好之前先站在雪地上。 */
 .cabin-stage .santa-placeholder-host { position: absolute; left: 50%; bottom: 22%; width: min(220px, 30%); aspect-ratio: 300 / 270; translate: -50% 0; transition: opacity .4s ease; pointer-events: none; }
 .cabin-stage:not([data-state='loading']) .santa-placeholder-host { opacity: 0; }
@@ -99,9 +113,9 @@
 /* 紙雕文字框：提示、對話框、按鈕、抽屜、籃子、信都是同一種撕紙邊、帶紙紋與落影的紙片（cabin-paper.js 畫成九宮格交給
    border-image），不是平整的圓角方塊；框多大，紙角都保持原樣。JavaScript 沒跑時維持上面的樸素樣式。 */
 /* 先把原本的底色、圓角、陰影清掉（:where 權重最低，下面每種紙片都蓋得過它）。 */
-.cabin[data-paper] :where(.cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore:focus-within, .play-pile, .cabin-letter, .cabin-back, .cabin-letter-close, .wardrobe-reset, .wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .feed-basket, .play-basket) { background: none; border: 1px solid transparent; border-radius: 0; box-shadow: none; }
-.cabin[data-paper] :is(.cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore:focus-within, .play-pile) { border-image: var(--paper-note) 30 fill / 24px round; }
-.cabin[data-paper] :is(.cabin-back, .cabin-letter-close, .wardrobe-reset, .wardrobe-tabs button[aria-pressed="true"]) { color: var(--cream); border-image: var(--paper-tag) 30 fill / 20px round; }
+.cabin[data-paper] :where(.hoist-hint, .hoist-hook, .hoist-release, .cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore:focus-within, .play-pile, .cabin-letter, .cabin-back, .cabin-letter-close, .wardrobe-reset, .wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .feed-basket, .play-basket) { background: none; border: 1px solid transparent; border-radius: 0; box-shadow: none; }
+.cabin[data-paper] :is(.cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore:focus-within, .play-pile, .hoist-hint) { border-image: var(--paper-note) 30 fill / 24px round; }
+.cabin[data-paper] :is(.cabin-back, .cabin-letter-close, .wardrobe-reset, .wardrobe-tabs button[aria-pressed="true"], .hoist-hook, .hoist-release) { color: var(--cream); border-image: var(--paper-tag) 30 fill / 20px round; }
 .cabin[data-paper] :is(.wardrobe-tabs button:not([aria-pressed="true"]), .wardrobe-item, .cabin-explore button) { border-image: var(--paper-pale) 30 fill / 18px round; }
 .cabin[data-paper] .wardrobe-item[aria-pressed="true"] { border-image: var(--paper-picked) 30 fill / 18px round; }
 .cabin[data-paper] :is(.feed-basket, .play-basket) { border-image: var(--paper-wood) 30 fill / 24px round; }

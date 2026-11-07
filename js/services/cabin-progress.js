@@ -4,7 +4,8 @@ const KEY = 'holy-merry:cabin:v1';
 export const PLACES = ['head', 'neck', 'face', 'hand'];
 // The snowman as he was built: only a carrot nose.
 export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'carrot', hand: null });
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 } });
+// The barn's hoist: whether its rope is hooked at the top, and whether the note behind the bale has been read.
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false } });
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
 export const dayOf = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -24,6 +25,7 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   if (Array.isArray(saved.combos)) progress.combos = [...new Set(saved.combos.filter(id => typeof id === 'string'))].slice(0, 20);
   const { day, count } = saved.feed ?? {};
   if (typeof day === 'string' && Number.isInteger(count)) progress.feed = { day, count: Math.max(0, Math.min(MEALS, count)) };
+  progress.hoist = { locked: saved.hoist?.locked === true, found: saved.hoist?.found === true };
   return progress;
 }
 // Returns false when the browser will not keep it (private mode, full storage); the yard still plays for this visit.
