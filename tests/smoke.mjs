@@ -155,7 +155,11 @@ await test('Santa 小屋：壓縮坐姿模型、剖面紙雕小屋、屋外與�
   assert.ok(art.includes('export const BOARDS') && art.includes('paper-props.js') && !art.includes('innerHTML'));
   const html = await fs.readFile(path.join(project, 'santa.html'), 'utf8'), loader = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8');
   assert.ok(html.includes(">Santa's Cabin</h1>") && html.includes('class="cabin-gesture" type="button" aria-label=') && html.includes('data-santa-placeholder'));
-  assert.ok(html.includes('id="cabin-enter"') && html.includes('id="cabin-leave"') && scene.includes("setView('inside')") && scene.includes('reindeer-web.glb'), 'Buttons give keyboard users the way in and out of the house');
+  assert.ok(html.includes('id="cabin-back"') && html.includes('class="cabin-explore"') && scene.includes("setView('inside')") && scene.includes('setView(spot)') && scene.includes('reindeer-web.glb'), 'Every corner of the yard can be reached by tapping it or from the keyboard list');
+  const play = await fs.readFile(path.join(project, 'js/components/cabin-play.js'), 'utf8');
+  assert.equal((art.match(/\{ id: '(mailbox|reindeer|snowman|stable)', name:/g) ?? []).length, 4, 'Four corners to explore');
+  assert.ok(!/\bELF\b|flyElf|id: 'elf'/.test(art + scene + play) && !html.includes('data-spot="elf"'), 'The Santa page has no elf; the Wish elf is untouched');
+  assert.ok(play.includes('onFound') && play.includes("event.detail === 0") && !play.includes('innerHTML'), 'Every game can also be played with Enter, and never writes HTML');
   const cottage = await fs.readFile(path.join(project, 'js/components/wish-cottage.js'), 'utf8');
   assert.ok(cottage.includes("invite.href = 'santa.html'"), 'The Wish cottage is the same house: whoever answers asks you in');
   assert.ok(loader.includes("'#cabin-stage'") && loader.includes('dataset.progress') && loader.includes('prefers-reduced-motion'), 'The queue walks with the real download and stays still under reduced motion');
