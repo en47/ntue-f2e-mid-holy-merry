@@ -119,3 +119,23 @@ export function tagArt(fill, edge) {
 }
 
 export { holly, pine };
+
+// A snowy fir in the site's paper style: a slender cone of five soft tiers with gently scalloped hems,
+// a thin cap of snow on the top of each tier, and the side away from the low sun (right) a shade darker.
+// `base` is where the trunk meets the snow; `ratio` is width / height of the tree's box.
+export function snowyFir(parent, cx, base, height, variant = 0, ratio = .5) {
+  const width = height * ratio, top = base - height * .97, tiers = 5;
+  const green = ['#5f8a70', '#55806a', '#668f76'][variant % 3];
+  shape('rect', { x: cx - width * .045, y: base - height * .12, width: width * .09, height: height * .12, fill: '#7d5a44' }, parent);
+  for (let i = tiers - 1; i >= 0; i--) {
+    const t = i / (tiers - 1), bottom = top + height * (.3 + t * .58), crown = top + height * t * .5;
+    const half = width * (.2 + t * .3), scallops = 3 + Math.round(t * 2), step = half * 2 / scallops, sag = height * .025;
+    let hem = `L${cx + half} ${bottom}`;
+    for (let k = scallops - 1; k >= 0; k--) { const x = cx - half + k * step; hem += `Q${x + step / 2} ${bottom + sag} ${x} ${bottom}`; }
+    shape('path', { d: `M${cx} ${crown}C${cx + half * .35} ${crown + (bottom - crown) * .35} ${cx + half * .8} ${bottom - (bottom - crown) * .25} ${cx + half} ${bottom}${hem}C${cx - half * .8} ${bottom - (bottom - crown) * .25} ${cx - half * .35} ${crown + (bottom - crown) * .35} ${cx} ${crown}Z`, fill: green }, parent);
+    shape('path', { d: `M${cx} ${crown}C${cx + half * .35} ${crown + (bottom - crown) * .35} ${cx + half * .8} ${bottom - (bottom - crown) * .25} ${cx + half} ${bottom}Q${cx + half * .5} ${bottom + sag} ${cx} ${bottom}Z`, fill: '#3f6653', opacity: .28 }, parent);
+    // Snow sits only on the upper part of each tier, thickest toward the trunk.
+    const cap = (bottom - crown) * .32;
+    shape('path', { d: `M${cx} ${crown - height * .006}C${cx + half * .3} ${crown + cap * .5} ${cx + half * .5} ${crown + cap} ${cx + half * .58} ${crown + cap * 1.25}C${cx + half * .3} ${crown + cap * .95} ${cx - half * .3} ${crown + cap * .95} ${cx - half * .58} ${crown + cap * 1.25}C${cx - half * .5} ${crown + cap} ${cx - half * .3} ${crown + cap * .5} ${cx} ${crown - height * .006}Z`, fill: SNOW, opacity: .95 }, parent);
+  }
+}

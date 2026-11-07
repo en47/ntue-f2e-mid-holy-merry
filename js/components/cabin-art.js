@@ -2,16 +2,20 @@
 // Every board is drawn here once, then stood up in 3D by cabin-scene.js. Units: 1 = Santa's seated height.
 // Light comes from the upper left. It is Christmas morning: Santa is home from the night's deliveries.
 import { holly, pine, shape } from './paper-art.js';
-import { roofHouse, star } from './paper-props.js';
+import { church, roofHouse, snowyFir, star } from './paper-props.js';
+import { headingGlyphs } from '../data/heading-glyphs.js';
 
 export const PX = 500;
 // Inner floor from x -1.6 to 1.6 and z -1 to 1, walls 1.9 high, ridge at 3. The front is open.
-export const HOUSE = { width: 3.2, depth: 2, wall: 1.9, ridge: 3, thick: .1, eaves: .32, overhang: .15 };
+// The roof is thicker than the walls: its cut edge reads as a band of shingles, as on the reference cottage.
+export const HOUSE = { width: 3.2, depth: 2, wall: 1.9, ridge: 3, thick: .1, roof: .2, eaves: .32, overhang: .15 };
 HOUSE.slope = Math.hypot(HOUSE.width / 2, HOUSE.ridge - HOUSE.wall);
 export const CHAIR = { x: -.45, z: .05 };
-// The snowy base the house stands on, the reindeer waiting outside, and the lantern hung from the ridge.
-export const PLATFORM = { rx: 3.9, rz: 2.5, top: -.12, height: .42 };
-export const REINDEER = { x: -2.6, z: .8, turn: .8, height: 1.3 };
+// The house stands on its foundation slab a little above the snow, which runs out to the hills.
+export const GROUND = -.14;
+// The reindeer waits by the sleigh on the right; the name sign hangs from an iron bracket at the front-left corner, over the mailbox.
+export const REINDEER = { x: 2.3, z: 1.2, turn: -.75, height: 1.3 };
+export const SIGN = { x: -2.45, top: 1.84, z: HOUSE.depth / 2, arm: 1.45 };
 export const LANTERN = { x: .3, z: .05 };
 // The fireplace on the back wall; its chimney rises out of the right slope of the roof.
 export const FIRE = { x: .88 };
@@ -241,16 +245,131 @@ export function treeLights({ paper }, { width, height }) {
   }
 }
 
-// Outside: drifts along the front of the snowy base, pines, the mailbox and the sleigh.
-export function drifts({ paper }, { width, height }) {
-  for (let i = 0; i < 9; i++) {
-    const x = i / 8 * width, w = 300 + noise(i + 3) * 220, h = 120 + noise(i + 5) * 120;
-    shape('path', { d: `M${x - w / 2} ${height}C${x - w * .3} ${height - h} ${x + w * .3} ${height - h} ${x + w / 2} ${height}Z`, fill: SNOW }, paper);
-    shape('path', { d: `M${x + w * .1} ${height - h * .7}C${x + w * .35} ${height - h * .5} ${x + w * .45} ${height - h * .2} ${x + w / 2} ${height}H${x + w * .25}C${x + w * .3} ${height - h * .3} ${x + w * .25} ${height - h * .55} ${x + w * .1} ${height - h * .7}Z`, fill: '#e2ebef' }, paper);
-    if (i % 3 === 1) holly(paper, x, height - h * .7, .7);
+// A snowy fir board (see snowyFir in paper-props.js); the art fills the board from the bottom edge.
+export function fir(variant) {
+  return ({ paper }, { width, height }) => snowyFir(paper, width / 2, height - 10, height - 26, variant, width / height);
+}
+
+// Distant snowy hills, paler and bluer the further away they are. Only soft rolling crests: at this distance a forest would
+// flatten into streaks, so the trees are left to the few 3D firs nearby. Level 0 is nearest.
+export function hills(level) {
+  const snow = ['#f1f4f2', '#e6edef', '#dce5ec'][level], shade = ['#e3eaec', '#d8e2e8', '#cfdbe4'][level];
+  return ({ paper }, { width, height }) => {
+    const count = 15, points = Array.from({ length: count }, (_, i) => [i / (count - 1) * width, height * (.12 + noise(i * 5 + level * 13) * .55)]);
+    let d = `M0 ${height}V${points[0][1]}`;
+    for (let i = 1; i < points.length; i++) { const [x0, y0] = points[i - 1], [x1, y1] = points[i]; d += `C${x0 + (x1 - x0) * .5} ${y0} ${x0 + (x1 - x0) * .5} ${y1} ${x1} ${y1}`; }
+    shape('path', { d: `${d}V${height}Z`, fill: snow }, paper);
+    // The far side of each crest falls into a little shade, away from the sun on the left.
+    for (let i = 1; i < points.length - 1; i++) {
+      const [x, y] = points[i], [nx, ny] = points[i + 1];
+      if (y > points[i - 1][1] || y > ny) continue;
+      shape('path', { d: `M${x} ${y}C${x + (nx - x) * .4} ${y} ${x + (nx - x) * .6} ${ny} ${nx} ${ny}L${nx} ${height}H${x + (nx - x) * .2}C${x + (nx - x) * .25} ${y + (height - y) * .5} ${x + (nx - x) * .1} ${y + (height - y) * .2} ${x} ${y}Z`, fill: shade, opacity: .55 }, paper);
+    }
+  };
+}
+
+// The cabin's name board, hung by two ropes; the letters are the same paper glyphs as every page title.
+export function nameSign({ paper }, { width, height }) {
+  const board = { x: 14, y: 54, w: width - 28, h: height - 70 };
+  shape('path', { d: `M${width * .16} 0V${board.y + 6}M${width * .84} 0V${board.y + 6}`, stroke: '#4a3a30', 'stroke-width': 6 }, paper);
+  shape('rect', { x: board.x, y: board.y, width: board.w, height: board.h, rx: 24, fill: WOOD }, paper);
+  shape('rect', { x: board.x + 14, y: board.y + 14, width: board.w - 28, height: board.h - 28, rx: 14, fill: '#c39466' }, paper);
+  shape('path', { d: `M${board.x + 16} ${board.y + board.h / 2}H${board.x + board.w - 16}`, stroke: '#ad7e52', 'stroke-width': 4 }, paper);
+  shape('rect', { x: board.x + 24, y: board.y + 24, width: board.w - 48, height: board.h - 48, rx: 10, fill: 'none', stroke: CREAM, 'stroke-width': 4, 'stroke-dasharray': '14 10', opacity: .8 }, paper);
+  shape('path', { d: `M${board.x - 4} ${board.y + 14}C${board.x + board.w * .2} ${board.y - 12} ${board.x + board.w * .45} ${board.y + 6} ${board.x + board.w * .6} ${board.y - 6}S${board.x + board.w} ${board.y + 4} ${board.x + board.w + 4} ${board.y + 16}C${board.x + board.w * .6} ${board.y + 10} ${board.x + board.w * .3} ${board.y + 18} ${board.x - 4} ${board.y + 14}Z`, fill: SNOW }, paper);
+  const { box, glyphs } = headingGlyphs['santas-cabin'], [, , gw, gh] = box.split(' ').map(Number);
+  const scale = Math.min((board.w - 70) / gw, (board.h - 46) / gh), ox = board.x + (board.w - gw * scale) / 2, oy = board.y + (board.h - gh * scale) / 2 + 4;
+  const letters = shape('g', { transform: `translate(${ox} ${oy}) scale(${scale})` }, paper);
+  glyphs.forEach(({ d }, index) => shape('path', { d, fill: [RED, '#b5604a', GREEN, RED, '#c08a3e'][index % 5], stroke: CREAM, 'stroke-width': 9, 'paint-order': 'stroke', 'stroke-linejoin': 'round' }, letters));
+  holly(paper, board.x + 30, board.y + 20, .55);
+}
+
+export function fence({ paper }, { width, height }) {
+  for (const x of [20, width / 2 - 12, width - 44]) {
+    shape('rect', { x, y: 30, width: 24, height: height - 30, rx: 6, fill: '#8a6a55' }, paper);
+    shape('ellipse', { cx: x + 12, cy: 30, rx: 18, ry: 9, fill: SNOW }, paper);
+  }
+  for (const y of [height * .35, height * .65]) {
+    shape('rect', { x: 0, y, width, height: 18, rx: 8, fill: '#a8845f' }, paper);
+    shape('path', { d: `M4 ${y + 2}C${width * .3} ${y - 12} ${width * .6} ${y - 4} ${width - 4} ${y - 8}V${y + 4}H4Z`, fill: SNOW }, paper);
   }
 }
-export function pineBoard({ paper }, { width, height }) { pine(paper, width / 2, height - 10, height - 20, '#5f8a70'); }
+// Flat on the snow: a frozen pond, and a reindeer's hoofprints coming in from the woods.
+export function pond({ paper }, { width, height }) {
+  shape('ellipse', { cx: width / 2, cy: height / 2, rx: width / 2 - 6, ry: height / 2 - 6, fill: '#f4f7f8' }, paper);
+  shape('ellipse', { cx: width / 2, cy: height / 2, rx: width / 2 - 40, ry: height / 2 - 34, fill: '#c9dfea' }, paper);
+  for (const [dx, dy, w] of [[-.18, -.1, .3], [.12, .12, .22], [.2, -.16, .12]]) shape('rect', { x: width * (.5 + dx), y: height * (.5 + dy), width: width * w, height: 6, rx: 3, fill: '#eef6fa', transform: `rotate(-12 ${width / 2} ${height / 2})` }, paper);
+}
+export function hoofprints({ paper }, { width, height }) {
+  for (let i = 0; i < 14; i++) {
+    const t = i / 13, x = t * width, y = height / 2 + Math.sin(t * Math.PI * 1.4) * height * .22 + (i % 2 ? 22 : -22);
+    for (const dx of [-7, 7]) shape('ellipse', { cx: x + dx, cy: y, rx: 6, ry: 10, fill: '#c5d4de', transform: `rotate(${80 + Math.cos(t * 4) * 20} ${x} ${y})` }, paper);
+  }
+}
+// A few Christmas things around the yard, spaced well apart: the reindeer's red stable, a lamp-lit path to it, a snowman, a far village.
+export function stable({ paper }, { width, height }) {
+  const ground = height - 8, eave = height * .5, peak = height * .14, cx = width / 2;
+  shape('path', { d: `M${width * .12} ${ground}V${eave}L${cx} ${peak + 40}L${width * .88} ${eave}V${ground}Z`, fill: RED }, paper);
+  for (let x = width * .16; x < width * .86; x += 34) shape('path', { d: `M${x} ${ground}V${eave + (Math.abs(x - cx) < width * .3 ? -(width * .3 - Math.abs(x - cx)) * .6 : 0)}`, stroke: '#87302f', 'stroke-width': 3, opacity: .5 }, paper);
+  shape('path', { d: `M${width * .04} ${eave + 12}L${cx} ${peak}L${width * .96} ${eave + 12}L${width * .9} ${eave + 26}L${cx} ${peak + 22}L${width * .1} ${eave + 26}Z`, fill: '#4a3f3a' }, paper);
+  shape('path', { d: `M${width * .04} ${eave + 12}L${cx} ${peak}L${width * .96} ${eave + 12}C${width * .8} ${eave - 8} ${width * .65} ${peak + 30} ${cx} ${peak + 18}C${width * .35} ${peak + 30} ${width * .2} ${eave - 8} ${width * .04} ${eave + 12}Z`, fill: SNOW }, paper);
+  const door = { x: cx - width * .17, y: eave + 40, w: width * .34 };
+  shape('rect', { x: door.x, y: door.y, width: door.w, height: ground - door.y, fill: '#7a3430' }, paper);
+  shape('path', { d: `M${door.x} ${door.y}L${door.x + door.w} ${ground}M${door.x + door.w} ${door.y}L${door.x} ${ground}`, stroke: CREAM, 'stroke-width': 10 }, paper);
+  shape('rect', { x: door.x - 8, y: door.y - 8, width: door.w + 16, height: ground - door.y + 8, fill: 'none', stroke: CREAM, 'stroke-width': 12 }, paper);
+  wreath(paper, cx, door.y - 70, 34);
+  shape('rect', { x: cx - 28, y: peak + 80, width: 56, height: 46, rx: 6, fill: '#f4cf74' }, paper);
+  for (const x of [width * .02, width * .74]) { shape('rect', { x, y: ground - 70, width: width * .24, height: 70, rx: 18, fill: '#d9b36a' }, paper); shape('path', { d: `M${x} ${ground - 70}h${width * .24}`, stroke: SNOW, 'stroke-width': 14, 'stroke-linecap': 'round' }, paper); }
+}
+export function snowman({ paper }, { width, height }) {
+  const cx = width / 2, ground = height - 8, ball = (cy, r) => { shape('circle', { cx, cy, r, fill: SNOW }, paper); shape('path', { d: `M${cx + r * .3} ${cy - r * .95}A${r} ${r} 0 0 1 ${cx + r * .3} ${cy + r * .95}A${r * 1.3} ${r * 1.3} 0 0 0 ${cx + r * .3} ${cy - r * .95}Z`, fill: '#d9e5ec' }, paper); };
+  const r1 = width * .36, r2 = width * .27, r3 = width * .2, y1 = ground - r1, y2 = y1 - r1 - r2 * .7, y3 = y2 - r2 - r3 * .7;
+  for (const side of [-1, 1]) shape('path', { d: `M${cx + side * r2 * .8} ${y2}l${side * width * .28} ${-height * .1}m${-side * width * .1} ${height * .04}l${side * width * .06} ${-height * .05}`, stroke: '#6b4a33', 'stroke-width': 7, 'stroke-linecap': 'round', fill: 'none' }, paper);
+  ball(y1, r1); ball(y2, r2); ball(y3, r3);
+  shape('path', { d: `M${cx - r2} ${y2 - r2 * .55}C${cx - r2 * .3} ${y2 - r2 * .3} ${cx + r2 * .3} ${y2 - r2 * .3} ${cx + r2} ${y2 - r2 * .55}L${cx + r2} ${y2 - r2 * .3}C${cx + r2 * .3} ${y2} ${cx - r2 * .3} ${y2} ${cx - r2} ${y2 - r2 * .3}Z`, fill: RED }, paper);
+  shape('path', { d: `M${cx + r2 * .4} ${y2 - r2 * .3}l${r2 * .35} ${r2 * 1.1}h-${r2 * .4}Z`, fill: '#87302f' }, paper);
+  shape('path', { d: `M${cx} ${y3}l${r3 * 1.1} ${r3 * .18}-${r3 * 1.1} ${r3 * .2}Z`, fill: '#e8873c' }, paper);
+  for (const dx of [-.35, .3]) shape('circle', { cx: cx + r3 * dx, cy: y3 - r3 * .3, r: r3 * .1, fill: '#3b2a24' }, paper);
+  for (const dy of [-.45, 0, .45]) shape('circle', { cx, cy: y1 + r1 * dy - r1 * .1, r: r1 * .08, fill: '#3b2a24' }, paper);
+  shape('rect', { x: cx - r3 * .85, y: y3 - r3 * 1.05, width: r3 * 1.7, height: r3 * .2, rx: 4, fill: '#3b2a24' }, paper);
+  shape('rect', { x: cx - r3 * .6, y: y3 - r3 * 1.9, width: r3 * 1.2, height: r3 * .9, rx: 4, fill: '#3b2a24' }, paper);
+  shape('rect', { x: cx - r3 * .6, y: y3 - r3 * 1.3, width: r3 * 1.2, height: r3 * .18, fill: RED }, paper);
+}
+export function lampPost({ paper }, { width, height }) {
+  const cx = width / 2, ground = height - 6, head = 70;
+  shape('rect', { x: cx - 9, y: head + 70, width: 18, height: ground - head - 70, fill: DEEP_GREEN }, paper);
+  shape('path', { d: `M${cx - 30} ${ground}h60l-12-34h-36Z`, fill: DEEP_GREEN }, paper);
+  shape('path', { d: `M${cx - 40} ${head + 70}L${cx - 30} ${head}H${cx + 30}L${cx + 40} ${head + 70}Z`, fill: '#ffe3a0' }, paper);
+  shape('path', { d: `M${cx - 40} ${head + 70}L${cx - 30} ${head}H${cx + 30}L${cx + 40} ${head + 70}ZM${cx} ${head}V${head + 70}`, stroke: DEEP_GREEN, 'stroke-width': 7, fill: 'none' }, paper);
+  shape('path', { d: `M${cx - 44} ${head}L${cx} ${head - 40}L${cx + 44} ${head}Z`, fill: DEEP_GREEN }, paper);
+  shape('path', { d: `M${cx - 46} ${head - 2}C${cx - 30} ${head - 30} ${cx + 30} ${head - 30} ${cx + 46} ${head - 2}C${cx + 20} ${head - 14} ${cx - 20} ${head - 14} ${cx - 46} ${head - 2}Z`, fill: SNOW }, paper);
+  for (let y = head + 110; y < ground - 60; y += 70) shape('path', { d: `M${cx - 18} ${y}C${cx} ${y - 22} ${cx + 18} ${y + 10} ${cx + 18} ${y + 30}`, stroke: GREEN, 'stroke-width': 12, fill: 'none', 'stroke-linecap': 'round' }, paper);
+  shape('path', { d: `M${cx} ${head + 104}c-26-22-44-4-26 10 10 8 22 2 26-10zm0 0c26-22 44-4 26 10-10 8-22 2-26-10z`, fill: RED }, paper);
+}
+export function candyCane({ paper }, { width, height }) {
+  const cx = width / 2 + 6, ground = height - 4, top = 40;
+  shape('path', { d: `M${cx} ${ground}V${top + 26}C${cx} ${top - 22} ${cx - 56} ${top - 22} ${cx - 56} ${top + 18}`, stroke: CREAM, 'stroke-width': 22, fill: 'none', 'stroke-linecap': 'round' }, paper);
+  shape('path', { d: `M${cx} ${ground}V${top + 26}C${cx} ${top - 22} ${cx - 56} ${top - 22} ${cx - 56} ${top + 18}`, stroke: RED, 'stroke-width': 22, fill: 'none', 'stroke-dasharray': '14 18' }, paper);
+}
+// A distant village on the far side of the snow: a few lit cottages and a church, softened by the morning haze.
+export function village({ paper }, { width, height }) {
+  const ground = height - 4;
+  for (const [x, w, h, roof] of [[.12, 70, 50, '#a8564c'], [.26, 60, 44, '#7a8f99'], [.62, 66, 46, '#a8564c'], [.78, 56, 40, '#8a6a55'], [.9, 62, 48, '#7a8f99']]) roofHouse(paper, width * x, ground, w, h, { wall: '#ecdcc0', roof });
+  church(paper, width * .4, ground);
+  shape('path', { d: `M0 ${ground}C${width * .3} ${ground - 10} ${width * .7} ${ground - 4} ${width} ${ground - 8}V${height}H0Z`, fill: SNOW }, paper);
+}
+// The trodden path from the yard back to the stable, a little bluer where feet have packed the snow.
+export function path({ paper }, { width, height }) {
+  const d = `M0 ${height * .55}C${width * .25} ${height * .3} ${width * .5} ${height * .75} ${width * .75} ${height * .45}S${width} ${height * .4} ${width} ${height * .5}`;
+  shape('path', { d, stroke: '#dbe5ec', 'stroke-width': height * .5, fill: 'none', 'stroke-linecap': 'round' }, paper);
+  shape('path', { d, stroke: '#cfdbe4', 'stroke-width': height * .22, fill: 'none', 'stroke-linecap': 'round', opacity: .7 }, paper);
+}
+
+// Snow drifted against the house's foundation, outside the cut.
+export function drift({ paper }, { width, height }) {
+  shape('path', { d: `M0 ${height}C${width * .1} ${height * .3} ${width * .6} ${height * .1} ${width} ${height * .7}V${height}Z`, fill: SNOW }, paper);
+  shape('path', { d: `M${width * .55} ${height * .2}C${width * .8} ${height * .3} ${width * .95} ${height * .6} ${width} ${height * .7}V${height}H${width * .7}C${width * .75} ${height * .6} ${width * .7} ${height * .35} ${width * .55} ${height * .2}Z`, fill: '#dbe5ec' }, paper);
+}
 export function mailbox({ paper }, { width, height }) {
   const cx = width / 2;
   shape('rect', { x: cx - 14, y: 230, width: 28, height: height - 230, fill: WOOD }, paper);
@@ -452,11 +571,28 @@ export const BOARDS = [
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
   { id: 'chair-front', w: .82, h: .44, at: [0, 0, .2], draw: chairFront, chair: true },
-  { id: 'drifts', w: PLATFORM.rx * 2, h: .62, at: [0, PLATFORM.top - .26, PLATFORM.rz - .12], draw: drifts },
-  { id: 'pine-left', w: 1.3, h: 2.3, at: [-2.75, PLATFORM.top, -1.35], draw: pineBoard },
-  { id: 'pine-left-small', w: .9, h: 1.5, at: [-3.25, PLATFORM.top, -.5], draw: pineBoard },
-  { id: 'pine-right', w: 1.2, h: 2.1, at: [2.8, PLATFORM.top, -1.25], draw: pineBoard },
-  { id: 'mailbox', w: .55, h: 1.05, at: [2.35, PLATFORM.top, 1.15], draw: mailbox },
-  { id: 'sleigh', w: 1.3, h: .8, at: [2.75, PLATFORM.top, -.05], turn: -.35, draw: sleigh },
+  { id: 'hills-far', w: 150, h: 6.5, px: 14, at: [0, GROUND, -46], draw: hills(2), kind: 'scenery' },
+  { id: 'hills-mid', w: 110, h: 4.4, px: 18, at: [0, GROUND, -30], draw: hills(1), kind: 'scenery' },
+  { id: 'hills-near', w: 80, h: 2.8, px: 22, at: [0, GROUND, -19], draw: hills(0), kind: 'scenery' },
+  // Firs: one board per variant, planted at each [x, z, height]. Each tree turns to face the camera, so its outline stays clean from any side.
+  { id: 'fir-a', w: 1, h: 2, draw: fir(0), copies: [[-3.9, -3.2, 3.1], [4.4, -3.6, 3.3], [-11, -11, 4.2]] },
+  { id: 'fir-b', w: 1, h: 2, draw: fir(1), copies: [[-5.1, -4.4, 2.4], [12, -14, 4.4]] },
+  { id: 'fir-c', w: 1, h: 2, draw: fir(2), copies: [[3.2, -4.9, 2.2], [-6.6, -2.2, 2], [9, -7, 3]] },
+  { id: 'sign', w: 1.4, h: .74, at: [SIGN.x, SIGN.top, SIGN.z], hang: true, sway: true, draw: nameSign },
+  { id: 'mailbox', w: .5, h: .95, at: [SIGN.x, GROUND, SIGN.z + .45], draw: mailbox },
+  { id: 'sleigh', w: 1.3, h: .8, at: [3.15, GROUND, -.2], turn: -.35, draw: sleigh },
+  { id: 'fence', w: 2.4, h: .7, at: [-4.2, GROUND, -.4], turn: .45, draw: fence },
+  { id: 'pond', w: 3.6, h: 1.8, at: [-5.6, GROUND, -4.6], flat: 'ground', draw: pond },
+  { id: 'hoofprints', w: 4.4, h: 1.2, at: [4.2, GROUND, -.6], flat: 'ground', turn: .5, draw: hoofprints },
+  { id: 'stable', w: 3.4, h: 2.7, at: [7.4, GROUND, -7], turn: -.45, draw: stable },
+  { id: 'path', w: 10, h: 1.6, at: [5.2, GROUND, -2.4], flat: 'ground', turn: -1.05, draw: path },
+  { id: 'lamp-near', w: .55, h: 2.2, at: [4.1, GROUND, -1.2], turn: -.4, draw: lampPost },
+  { id: 'lamp-far', w: .55, h: 2.2, at: [6.1, GROUND, -4.6], turn: -.45, draw: lampPost },
+  { id: 'cane-near', w: .3, h: .95, at: [5, GROUND, -3], turn: -.4, draw: candyCane },
+  { id: 'cane-far', w: .3, h: .95, at: [6.7, GROUND, -5.9], turn: -.45, draw: candyCane },
+  { id: 'snowman', w: .9, h: 1.4, at: [-5.4, GROUND, -1.2], turn: .35, draw: snowman },
+  { id: 'village', w: 13, h: 2.4, px: 60, at: [-8, GROUND, -24], draw: village, kind: 'scenery' },
+  { id: 'drift-left', w: .9, h: .34, at: [-2.05, GROUND, .9], draw: drift },
+  { id: 'drift-right', w: .9, h: .34, at: [2.05, GROUND, .9], mirror: true, draw: drift },
 ];
 export const SMOKE = { w: .55, h: .4, draw: smokePuff };

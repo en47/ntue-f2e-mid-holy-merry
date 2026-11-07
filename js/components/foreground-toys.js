@@ -142,6 +142,10 @@ function wishingStar(host) {
 // Santa's Cabin: a sleigh bell that swings and throws paper confetti when rung.
 function jingleBell(host) {
   const button = toyButton(host, '搖響雪橇鈴鐺');
+  // The bell hangs from a short post set in the snow, so it is grounded like everything else in the footer.
+  paperLayer(button, '0 0 200 200', 'toy-bell-post', parent => {
+    shape('ellipse', { cx: 118, cy: 196, rx: 70, ry: 8, fill: '#c9d7e1', opacity: .7 }, parent);
+  }, { paper: null, eager: true });
   const bell = paperLayer(button, '0 0 200 200', 'toy-bell', parent => {
     shape('path', { d: 'M72 30C72 6 128 6 128 30', stroke: '#87302f', 'stroke-width': 12, fill: 'none', 'stroke-linecap': 'round' }, parent);
     shape('path', { d: 'M100 32C62 32 50 68 48 106 46 130 36 142 28 150H172C164 142 154 130 152 106 150 68 138 32 100 32Z', fill: '#e0b04f' }, parent);
