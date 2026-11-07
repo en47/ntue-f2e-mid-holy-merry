@@ -31,6 +31,15 @@
     intro: '<svg class="loader-art" viewBox="0 0 320 200" aria-hidden="true"><path d="M10 188C60 166 120 170 160 186 200 170 260 166 310 188V196H10Z" fill="#8c5a44"/><path d="M160 180C120 158 70 156 24 174V44C70 26 120 28 160 50Z" fill="#fbf3e3"/><path d="M160 180C200 158 250 156 296 174V44C250 26 200 28 160 50Z" fill="#f4e7cf"/><path d="M50 72C80 62 110 62 138 74M50 96C80 86 110 86 138 98M50 120C80 110 110 110 138 122M182 74C210 62 240 62 270 72M182 98C210 86 240 86 270 96M182 122C210 110 240 110 270 120" stroke="#d9c5a2" stroke-width="4" stroke-linecap="round" fill="none"/><g class="loader-leaf"><path d="M160 180C200 158 250 156 296 174V44C250 26 200 28 160 50Z" fill="#fff9ec" stroke="#e6d3b0" stroke-width="2"/></g><g class="loader-leaf loader-leaf-b"><path d="M160 180C200 158 250 156 296 174V44C250 26 200 28 160 50Z" fill="#fdf3df" stroke="#e6d3b0" stroke-width="2"/></g><path d="M160 50V180" stroke="#c9a877" stroke-width="3"/></svg><p class="loader-caption">故事翻開中……</p>',
     game: '<svg class="loader-art loader-wheel-art" viewBox="0 0 240 260" aria-hidden="true"><path d="M120 120L58 252H76L120 156 164 252H182Z" fill="#a98c6f"/><g class="loader-wheel"><circle cx="120" cy="120" r="98" fill="none" stroke="#b68f6a" stroke-width="8"/><circle cx="120" cy="120" r="66" fill="none" stroke="#c9ad8d" stroke-width="4"/><g stroke="#b68f6a" stroke-width="4">' + spokes + '</g>' + seats + '</g><circle cx="120" cy="120" r="12" fill="#dcae55"/></svg><p class="loader-caption">遊樂園開門中……</p>',
     wish: '<svg class="loader-art" viewBox="0 0 320 210" aria-hidden="true"><g class="loader-stars" fill="#f3df9e"><path d="M40 40l4 10 11 1-8 7 3 11-10-6-10 6 3-11-8-7 11-1Z"/><path d="M270 24l3 8 9 1-7 6 3 9-8-5-8 5 3-9-7-6 9-1Z"/><path d="M290 130l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1Z"/><path d="M26 140l2 6 7 1-5 4 2 7-6-4-6 4 2-7-5-4 7-1Z"/></g><path d="M20 180C90 90 230 90 300 34" fill="none" stroke="#6f8ba5" stroke-width="3" stroke-dasharray="3 11" stroke-linecap="round"/><g class="loader-envelope"><path d="M-44-30H44C49-30 52-27 52-22V22C52 27 49 30 44 30H-44C-49 30-52 27-52 22V-22C-52-27-49-30-44-30Z" fill="#f7e7c6"/><path d="M-50-28L0 10 50-28Z" fill="#ecd6ab"/><circle cy="6" r="11" fill="#a84a42"/></g></svg><p class="loader-caption">星星點亮中……</p>',
+    // Santa: a queue to the cabin door. Each quarter of the real download walks one guest inside.
+    santa: '<svg class="loader-art loader-queue" viewBox="0 0 366 196" aria-hidden="true"><path d="M0 172C80 160 200 180 366 166V196H0Z" fill="#fbf8f1"/><path d="M18 178H300" stroke="#c9dbe2" stroke-width="3" stroke-dasharray="4 10" stroke-linecap="round"/>' +
+      '<path d="M294 170V92L328 64 362 92V170Z" fill="#b9875a"/><path d="M294 112H362M294 132H362M294 152H362" stroke="#dccbaa" stroke-width="3"/><path d="M288 96L328 58 368 96" stroke="#fbf8f1" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="314" y="118" width="28" height="52" fill="#f4cf74"/>' +
+      '<g class="loader-door"><rect x="314" y="118" width="28" height="52" fill="#8f5a3c"/><circle cx="336" cy="146" r="2.4" fill="#e0b04f"/></g>' +
+      '<g class="q"><g class="q-body"><path d="M-4 0V-10M4 0V-10" stroke="#3f6653" stroke-width="5" stroke-linecap="round"/><path d="M-11-9L0-32 11-9Z" fill="#4f7d68"/><rect x="-8" y="-17" width="16" height="3" fill="#3b2a24"/><circle cx="0" cy="-36" r="7" fill="#f2c9a8"/><path d="M6-37l6-3-4 5Z" fill="#f2c9a8"/><path d="M-7-40L-2-56 10-50 7-40Z" fill="#b5544c"/><circle cx="10" cy="-50" r="2.6" fill="#f4d581"/></g></g>' +
+      '<g class="q"><g class="q-body"><path d="M-6 0h6M3 0h7" stroke="#e8a03c" stroke-width="4" stroke-linecap="round"/><ellipse cx="0" cy="-20" rx="13" ry="20" fill="#2f3a45"/><ellipse cx="3" cy="-18" rx="8" ry="14" fill="#fbf8f1"/><path d="M9-31l9 2-9 3Z" fill="#e8a03c"/><circle cx="6" cy="-33" r="1.6" fill="#2b1d16"/><path d="M-11-25C-4-21 8-21 12-25V-21C8-17-4-17-11-21Z" fill="#4f7d68"/></g></g>' +
+      '<g class="q"><g class="q-body"><circle cx="0" cy="-15" r="15" fill="#fbf8f1" stroke="#d6e3e9" stroke-width="2"/><circle cx="0" cy="-38" r="11" fill="#fbf8f1" stroke="#d6e3e9" stroke-width="2"/><path d="M-11-29H11V-25H-11Z" fill="#b5544c"/><path d="M3-39l11 2-11 3Z" fill="#e8873c"/><circle cx="2" cy="-43" r="1.6" fill="#2b1d16"/><rect x="-6" y="-62" width="12" height="13" fill="#3b2a24"/><rect x="-10" y="-50" width="20" height="3" fill="#3b2a24"/></g></g>' +
+      '<g class="q"><g class="q-body"><path d="M-20 0V-16M-12 0V-16M10 0V-16M18 0V-16" stroke="#7d5636" stroke-width="5" stroke-linecap="round"/><ellipse cx="0" cy="-24" rx="26" ry="14" fill="#9c6b4a"/><circle cx="-26" cy="-30" r="4" fill="#fbf3df"/><path d="M14-32L22-48 34-46 30-36 20-28Z" fill="#9c6b4a"/><ellipse cx="30" cy="-48" rx="10" ry="8" fill="#9c6b4a"/><circle cx="40" cy="-47" r="4" fill="#d9483b"/><circle cx="30" cy="-51" r="1.6" fill="#2b1d16"/><path d="M26-55l-6-12m6 12l2-14m-8 2l-6-4M32-55l4-12m0 0l6-4" stroke="#7d5636" stroke-width="3" stroke-linecap="round" fill="none"/></g></g></svg>' +
+      '<p class="loader-caption">排隊進小屋……<span class="loader-ticket">No.5</span></p>',
   };
   var loader = document.createElement('div');
   loader.className = 'site-loader site-loader-' + page;
@@ -47,6 +56,7 @@
     intro: function () { return document.querySelector('#intro-storybook.is-opening'); },
     game: function () { var slot = document.querySelector('.games-hero-santa'); return slot && slot.dataset.state !== 'loading'; },
     // The room opens once the letters hang on the tree, so nobody sees it bare; the time cap covers a slow mailbox.
+    santa: function () { var stage = document.querySelector('#cabin-stage'); return stage && stage.dataset.state !== 'loading'; },
     wish: function () { var scene = document.querySelector('#scene-loading'); if (!scene || !scene.hidden) return false; var room = scene.parentElement.dataset; return room.cloud !== undefined && Number(room.envelopes || 0) >= Number(room.cloud); },
   };
   function finish() {
@@ -56,9 +66,27 @@
     loader.classList.add('is-done');
     setTimeout(function () { loader.remove(); }, 450);
   }
+  // Santa's queue: guests ahead walk in as the cabin reports progress; the last step opens the door for you.
+  var guests = page === 'santa' ? loader.querySelectorAll('.q') : [], door = loader.querySelector('.loader-door');
+  var SLOTS = [282, 228, 174, 120], walked = -1, doorTimer = 0, still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function walk(step) {
+    if (step <= walked) return;
+    walked = step;
+    for (var i = 0; i < guests.length; i++) {
+      var inside = i < step;
+      guests[i].style.transform = 'translate(' + (inside ? 328 : SLOTS[i - step]) + 'px, 172px)' + (inside ? ' scale(.6)' : '');
+      guests[i].classList.toggle('is-in', inside);
+    }
+    if (door && step > 0) { door.classList.add('is-open'); clearTimeout(doorTimer); doorTimer = setTimeout(function () { if (walked < 4) door.classList.remove('is-open'); }, 650); }
+  }
+  if (guests.length) walk(0);
   function check() {
     var elapsed = Date.now() - started;
-    if (elapsed >= MAX_WAIT || (loaded && elapsed >= minimum && (ready[page] || function () { return true; })())) { finish(); return; }
+    if (guests.length) { var stage = document.querySelector('#cabin-stage'); walk(Math.min(3, Math.floor((stage ? Number(stage.dataset.progress) || 0 : 0) / 25))); }
+    if (elapsed >= MAX_WAIT || (loaded && elapsed >= minimum && (ready[page] || function () { return true; })())) {
+      if (guests.length && walked < 4 && !still) { walk(4); timer = setTimeout(finish, 700); return; }
+      finish(); return;
+    }
     timer = setTimeout(check, 120);
   }
   addEventListener('load', function () { loaded = true; });

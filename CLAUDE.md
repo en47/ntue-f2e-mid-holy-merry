@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 專案性質
 
-原生 HTML / CSS / ES modules 的聖誕主題網站（Home / Intro / Game / Wish 四頁＋`admin.html`），**沒有建置步驟與打包工具**。Three.js、model-viewer 與兩個外部遊戲原作都以原樣副本放在 `vendor/`。Node.js 只用於測試，不是執行網站的前提。
+原生 HTML / CSS / ES modules 的聖誕主題網站（Home / Intro / Game / Wish / Santa 五頁＋`admin.html`），**沒有建置步驟與打包工具**。Three.js、model-viewer 與兩個外部遊戲原作都以原樣副本放在 `vendor/`。Node.js 只用於測試，不是執行網站的前提。
 
 ## 常用指令
 
@@ -38,17 +38,19 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 | `intro.html` | `js/shared.js`、`js/intro.js` |
 | `game.html` | `js/shared.js`、`js/game.js`、`js/game-hero.js` |
 | `wish.html` | `js/shared.js`、`js/wish.js` |
+| `santa.html` | `js/shared.js`、`js/santa.js`（動態載入 `js/components/cabin-scene.js`） |
 | `games/christmas-matching.html` | `js/games/game2-embed.js`（iframe 內獨立文件） |
 
-`js/site-loader.js` 是 body 開頭的傳統 script，動畫全部內嵌 SVG（不可依賴下載），各頁主題由 `data-loader` 決定，頁面就緒才淡出，動畫由 `css/loader.css` 暫停到結束。`js/shared.js` 在四頁都載入（導覽選單與燈串吊牌 `js/components/nav-lights.js`、資訊對話框、音樂選單 `js/components/music-player.js`），不得啟動任何單頁的遊戲或計時器。需要 3D 的頁面在 HTML 內放 `<script type="importmap">` 把 `three` 指向 `./vendor/three/build/three.module.js`。
+`js/site-loader.js` 是 body 開頭的傳統 script，動畫全部內嵌 SVG（不可依賴下載），各頁主題由 `data-loader` 決定，頁面就緒才淡出，動畫由 `css/loader.css` 暫停到結束。`js/shared.js` 在五頁都載入（導覽選單與燈串吊牌 `js/components/nav-lights.js`、資訊對話框、音樂選單 `js/components/music-player.js`），不得啟動任何單頁的遊戲或計時器。需要 3D 的頁面在 HTML 內放 `<script type="importmap">` 把 `three` 指向 `./vendor/three/build/three.module.js`。
 
-導覽與 Footer 標記在四個 HTML 各有一份；修改時必須同步四頁，`tests/smoke.mjs` 第一組會檢查四個互連連結、唯一一個 `aria-current="page"`、所有本機 `src`/`href` 真的存在、以及頁內 ID 不重複。
+導覽與 Footer 標記在五個 HTML 各有一份；修改時必須同步五頁，`tests/smoke.mjs` 第一組會檢查五個互連連結、唯一一個 `aria-current="page"`、所有本機 `src`/`href` 真的存在、以及頁內 ID 不重複。
 
-改動 CSS / JS 後執行 `node scripts/stamp-modules.mjs`（四頁、`admin.html`、兩個遊戲 iframe 內的頁面，以及 `game.html` 裡的 iframe `src`）：它依檔案內容更新 HTML 的 `?v=` 與 importmap（內部模組沒有寫在 HTML，版本只能靠 importmap 傳下去），`npm test` 會在忘記執行時失敗。
+改動 CSS / JS 後執行 `node scripts/stamp-modules.mjs`（五頁、`admin.html`、兩個遊戲 iframe 內的頁面，以及 `game.html` 裡的 iframe `src`）：它依檔案內容更新 HTML 的 `?v=` 與 importmap（內部模組沒有寫在 HTML，版本只能靠 importmap 傳下去），`npm test` 會在忘記執行時失敗。
 
 ### 目錄分工
 - `js/components/` — DOM 與 Three.js 行為單元（角色場景、精靈、信封、世界地圖、Intro 故事書）。
 - Intro 故事書在 700px 以下把跨頁轉 90 度：上頁紙雕、下頁文字同尺寸，書脊橫在中間（`rotateX`），手指上下滑動翻頁、文字捲到底才翻，最後一頁的滑動交還網頁捲動；超過 700px 維持左右翻書（`rotateY`），兩種版型共用同一批章節節點。手機封面是獨立的橫式圖 `coverWide`。
+- Santa 小屋是紙雕立體盒：`js/components/cabin-art.js` 畫每片紙板並定義位置（單位：聖誕老人坐高 = 1），`cabin-scene.js` 把紙板畫成貼圖立進 Three.js，夾住坐姿模型 `santa-seated-web.glb`（`scripts/build-cabin-models.mjs` 產生）。頭部轉動上限刻意很小，超過會壓到鬍子與帽沿，見 `docs/SANTA-CABIN.md`。
 - `js/components/paper-art.js`、`paper-props.js` — SVG 紙雕工法與道具。每片紙只轉成圖片一次，會動的部位拆成獨立圖層以 CSS 移動，不要動畫 SVG 內部（濾鏡重算成本很高）。
 - `js/data/` — 純資料表。多數由 `scripts/` 的 `.mjs` / `.py` 產生（`envelope-shapes.js` 由 `build-wish-art.mjs`、`title-glyphs.js`、`elf-actions.json`、`elf-ground.js`、`wish-tree-anchors.js`、`storybook-masks`）；**不要手改產出檔**，改腳本後重新產生。
 - `js/services/` — 儲存與 Firebase。

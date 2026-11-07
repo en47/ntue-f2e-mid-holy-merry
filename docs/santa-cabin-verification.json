@@ -1,0 +1,37 @@
+{
+ "date": "2026-11-07",
+ "branch": "santa-cabin（從 final）",
+ "model": {
+  "source": "assets/models/santa-seated.glb",
+  "sourceBytes": 9340000,
+  "web": "assets/models/santa-seated-web.glb",
+  "webBytes": 1293652,
+  "joints": 52
+ },
+ "tests": {
+  "npm test": "59 項通過",
+  "smoke": "41 組通過（新增 Santa 小屋一組；五頁導覽、頁尾玩具、音樂、Loading 檢查擴充為五頁）"
+ },
+ "browser": {
+  "desktop1440": {
+   "loaderGoneMs": 4122,
+   "state": "ready",
+   "santa": "home",
+   "consoleErrors": 0
+  },
+  "phone390": {
+   "loaderGoneMs": 3794,
+   "state": "ready",
+   "santa": "home",
+   "consoleErrors": 0
+  },
+  "note": "本機伺服器、無頭 Chromium（無 GPU），送出 Cache-Control: max-age=600"
+ },
+ "checks": [
+  "拖曳向左、向右轉動：看得到盒子牛皮紙外側與搖椅側面輪廓，放開後回正",
+  "鍵盤：焦點在 .cabin-gesture，方向鍵可轉",
+  "減少動態：靜止 1.5 秒畫面完全不變；按方向鍵仍會轉",
+  "模型下載失敗：data-santa=away，空搖椅與紙條出現，主控台無其他錯誤",
+  "導覽 5 張吊牌：320～1440px 共 13 種寬度都不超出畫面、不壓到標誌"
+ ]
+}
