@@ -517,7 +517,8 @@ export const WORLD = [
   { id: 'gondola', w: .42, h: .55, px: 220, rig: 'ski', at: [0, 0, .07], hang: true, clones: 3, fog: false, draw: gondola },
   // The centre: the path to the door and the signs pointing everywhere else.
   { id: 'door-path', w: 4.2, h: 1.1, px: 120, at: at(0, 3.75), flat: 'ground', turn: Math.PI / 2, draw: doorPath },
-  { id: 'way-sign', w: .9, h: 1.7, px: 260, at: at(-3.6, 2.9), turn: face(-3.6, 2.9), draw: waySign },
+  // Just off the house's front-left corner, clear of the snowman and the mailbox from where the visitor stands.
+  { id: 'way-sign', w: .9, h: 1.7, px: 260, at: at(-1.85, 2.7), turn: face(-1.85, 2.7), draw: waySign },
   { id: 'game-sign', w: 2.4, h: 2.2, px: 150, at: at(5.4, -16), turn: face(5.4, -16), draw: gameSign },
 ];
 

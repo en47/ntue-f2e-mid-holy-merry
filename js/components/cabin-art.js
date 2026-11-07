@@ -13,8 +13,8 @@ HOUSE.slope = Math.hypot(HOUSE.width / 2, HOUSE.ridge - HOUSE.wall);
 export const CHAIR = { x: -.45, z: .05 };
 // The house stands on its foundation slab a little above the snow, which runs out to the hills.
 export const GROUND = -.14;
-// The reindeer waits by the sleigh on the right; the name sign hangs from an iron bracket at the front-left corner, over the mailbox.
-export const REINDEER = { x: 2.6, z: 2.25, turn: -.75, height: 1.3 };
+// The reindeer waits by the sleigh on the right, turned toward where the visitor stands; the name sign hangs from an iron bracket at the front-left corner, over the mailbox.
+export const REINDEER = { x: 2.9, z: 2.3, turn: -.3, height: 1.3 };
 export const SIGN = { x: -2.7, top: 1.93, z: HOUSE.depth / 2 + HOUSE.thick, arm: 1.9 };
 export const LANTERN = { x: .3, z: .05 };
 // The fireplace on the back wall; its chimney rises out of the right slope of the roof.
@@ -822,7 +822,7 @@ export const SMOKE = { w: .55, h: .4, draw: smokePuff };
 // The corners of the yard you can step up to. `box` is the tap target [centre, size]; `view` is where the camera goes.
 export const SPOTS = [
   { id: 'mailbox', name: '郵筒', box: [[SIGN.x, .45, SIGN.z + .45], [.8, 1.1, .6]], view: { target: [SIGN.x, .75, SIGN.z + .45], distance: 3, pitch: .1, yaw: .28 } },
-  { id: 'reindeer', name: '麋鹿', box: [[REINDEER.x, .55, REINDEER.z], [1.3, 1.4, 1.2]], view: { target: [REINDEER.x, .62, REINDEER.z], distance: 3.4, pitch: .1, yaw: .3 } },
+  { id: 'reindeer', name: '麋鹿', box: [[REINDEER.x, .55, REINDEER.z], [1.3, 1.4, 1.2]], view: { target: [REINDEER.x, .62, REINDEER.z], distance: 3.4, pitch: .1, yaw: -.12 } },
   { id: 'snowman', name: '雪人', box: [[-5.4, .55, -1.2], [1.1, 1.5, .8]], view: { target: [-5.4, .82, -1.2], distance: 3.5, pitch: .06, yaw: .32, aside: .42, tallDrop: .5, tallDistance: 5.6 } },
   { id: 'stable', name: '馴鹿小屋', box: [[7.4, 1.2, -7], [3.6, 2.8, 1.4]], view: { target: [7.2, 1.25, -6.8], distance: 6, pitch: .1, yaw: -.38 } },
 ];

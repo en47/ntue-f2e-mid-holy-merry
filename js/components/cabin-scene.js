@@ -322,7 +322,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // The reindeer's mouth has no bone of its own: it sits at a fixed point in the frame of the bone behind his ears (Head_3),
   // so it follows every nod and turn. Measured on the model from his red nose and smile.
   const MOUTH = new THREE.Vector3(0, -.24, .14);
-  let santaModel, spine, spineRest, tracker, reindeerHolder, reindeerHead, reindeerRest, reindeerSkull;
+  let santaModel, spine, spineRest, tracker, reindeerHolder, reindeerHead, reindeerRest, reindeerSkull, reindeerScale = 1;
   const santa = loader.loadAsync(new URL('../../assets/models/santa-seated-web.glb', import.meta.url).href, event => { if (event.total) { santaShare = event.loaded / event.total; report(); } })
     .then(gltf => {
       santaModel = gltf.scene; chair.add(fitModel(santaModel, 1));
@@ -335,7 +335,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const reindeer = loader.loadAsync(new URL('../../assets/models/reindeer-web.glb', import.meta.url).href, event => { if (event.total) { reindeerShare = event.loaded / event.total; report(); } })
     .then(gltf => {
       const holder = fitModel(gltf.scene, REINDEER.height); holder.position.set(REINDEER.x, GROUND, REINDEER.z); holder.rotation.y = REINDEER.turn; world.add(holder); shadow(REINDEER.x, REINDEER.z, 1.2, .6, 1);
-      reindeerHolder = holder; gltf.scene.traverse(node => { if (node.isBone && /Head_0$/.test(node.name)) reindeerHead = node; if (node.isBone && /Head_3$/.test(node.name)) reindeerSkull = node; }); reindeerRest = reindeerHead?.quaternion.clone();
+      reindeerHolder = holder; reindeerScale = holder.scale.x; gltf.scene.traverse(node => { if (node.isBone && /Head_0$/.test(node.name)) reindeerHead = node; if (node.isBone && /Head_3$/.test(node.name)) reindeerSkull = node; }); reindeerRest = reindeerHead?.quaternion.clone();
       return true;
     })
     .catch(error => { console.error('Reindeer failed to load', error); return false; })
@@ -471,7 +471,11 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
         if (kind === 'refuse') extraYaw = Math.sin(Math.min(1, u * 3) * Math.PI / 2) * .5 * (u < .7 ? 1 : (1 - u) / .3) + Math.sin(u * Math.PI * 8) * .05;
         if (u >= 1) reindeerAction = null;
       }
+      // At rest he is never quite still: breathing, shifting his weight, his head drifting a little.
+      if (!still) { extraYaw += Math.sin(t * .6) * .07; extraPitch += Math.sin(t * 1.3 + 1) * .03; }
       reindeerHolder.position.y = GROUND + hop;
+      reindeerHolder.rotation.z = still ? 0 : Math.sin(t * .9) * .015;
+      reindeerHolder.scale.set(reindeerScale, reindeerScale * (still ? 1 : 1 + Math.sin(t * 1.7) * .01), reindeerScale);
       reindeerHead.quaternion.copy(reindeerRest);
       reindeerHolder.updateMatrixWorld(true);
       const parent = reindeerHead.parent.getWorldQuaternion(new THREE.Quaternion()), across = new THREE.Vector3(1, 0, 0).applyQuaternion(reindeerHolder.quaternion);
@@ -689,9 +693,20 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const hit = view === 'inside' && onSanta(event.clientX, event.clientY) ? { prop: { id: 'santa' } } : hitAt(event.clientX, event.clientY);
       stage.classList.toggle('is-pointing', Boolean(hit));
       setHover(hit?.spot ?? hit?.prop?.id ?? (hit?.house ? 'house' : null));
+      gaze(event.clientX, event.clientY);
     });
   });
-  on(gesture, 'pointerleave', () => { stage.classList.remove('is-pointing'); setHover(null); });
+  on(gesture, 'pointerleave', () => { stage.classList.remove('is-pointing'); setHover(null); gaze(null); });
+  // The reindeer looks at the pointer: at a point just in front of the screen, on the line through the pointer, so with the
+  // pointer in the middle he looks straight at the visitor. Head turns are capped well inside what looks natural.
+  function gaze(x, y) {
+    if (x == null || !reindeerSkull || !(view === 'outside' || view === 'reindeer')) { reindeerAim = [0, 0]; wake(); return; }
+    const rect = stage.getBoundingClientRect();
+    ndc.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1); raycaster.setFromCamera(ndc, camera);
+    const toward = raycaster.ray.at(1.5, new THREE.Vector3()).sub(reindeerSkull.getWorldPosition(new THREE.Vector3()));
+    reindeerAim = [THREE.MathUtils.clamp(wrap(Math.atan2(toward.x, toward.z) - REINDEER.turn), -.6, .6), THREE.MathUtils.clamp(-Math.atan2(toward.y, Math.hypot(toward.x, toward.z)), -.3, .35)];
+    wake();
+  }
   // Any touch or key during the arrival lands at once: nobody has to wait for the flight to start looking round.
   const land = () => { if (trip?.direction === 'fly') finishTrip(); };
   // At a corner of the yard the view holds still: the game laid over it gets every drag.
@@ -799,11 +814,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       spin = 0; goalHeading = clampTurn(turn); goalPitch = away.pitch; wake();
     },
     // Points the reindeer's head at a spot on the stage (stage pixels); null looks straight ahead again.
-    reindeerLook(point) {
-      if (!point) { reindeerAim = [0, 0]; wake(); return; }
-      const box = rectOfBox([REINDEER.x, .9, REINDEER.z], [.6, .6, .6]), cx = box.left + box.width / 2, cy = box.top + box.height / 2;
-      reindeerAim = [THREE.MathUtils.clamp((cx - point.x) / (stage.clientWidth * .3), -1, 1) * .5, THREE.MathUtils.clamp((point.y - cy) / (stage.clientHeight * .3), -1, 1) * .3]; wake();
-    },
+    reindeerLook(point) { const rect = stage.getBoundingClientRect(); gaze(point && rect.left + point.x, point && rect.top + point.y); },
     reindeerAct(kind) { reindeerAction = kind ? { kind, start: clock } : null; wake(); },
     // His mouth on screen (stage pixels), a little generous, for the food to be dropped into.
     mouthRect() {
