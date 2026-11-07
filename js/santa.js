@@ -41,20 +41,23 @@ function showTip() {
   stage.addEventListener('pointerdown', hide, { once: true }); setTimeout(hide, 8000);
 }
 
-async function mountCabin() {
+// The first visit opens with a flight down over the village, once the loader has faded; a page back from the cache does not.
+async function mountCabin(fly = true) {
   const run = ++generation;
   stage.dataset.state = 'loading'; stage.setAttribute('aria-busy', 'true'); progress(0);
   status.textContent = '小屋準備中……'; away.hidden = true;
   try {
     const [{ mountCabin: build }, { mountPlay }] = await Promise.all([import('./components/cabin-scene.js'), import('./components/cabin-play.js')]);
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (note) play?.note(note); }, isCurrent: () => run === generation });
+    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (note) play?.note(note); }, isCurrent: () => run === generation, fly });
     if (!result || run !== generation) { result?.destroy(); return; }
     cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; } });
     cabin.setFound([...found]);
     if (found.size) { cabin.repaint('sign', { stars: found.size }); play.restore([...found]); }
     stage.dataset.state = 'ready'; stage.dataset.santa = result.santa ? 'home' : 'away';
-    away.hidden = result.santa; progress(1); showTip();
+    away.hidden = result.santa; progress(1);
+    const arrive = () => cabin?.arrive().then(showTip);
+    if (document.documentElement.classList.contains('is-loading')) addEventListener('site-loader:done', arrive, { once: true }); else arrive();
     status.textContent = result.santa ? '聖誕老人在屋裡烤火。點小屋就能推門進去，也可以左右轉轉，看看整座村子。' : '聖誕老人去餵麋鹿了，搖椅上留了一張紙條。';
   } catch (error) {
     if (run !== generation) return;
@@ -66,5 +69,5 @@ async function mountCabin() {
   }
 }
 window.addEventListener('pagehide', () => { generation++; clearTimeout(enterTimer); play?.destroy(); play = null; cabin?.destroy(); cabin = null; });
-window.addEventListener('pageshow', event => { if (event.persisted) mountCabin(); });
+window.addEventListener('pageshow', event => { if (event.persisted) mountCabin(false); });
 mountCabin();
