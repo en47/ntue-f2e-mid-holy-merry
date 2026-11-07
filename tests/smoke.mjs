@@ -175,6 +175,9 @@ await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村�
   const { WORLD } = await import(pathToFileURL(path.join(project, 'js/components/cabin-world.js')).href), adrift = WORLD.filter(board => !board.at && !board.rig && !board.texture).map(board => board.id);
   assert.deepEqual(adrift, [], 'Every village board starts somewhere: one without a place waits at the origin, inside the cabin');
   assert.ok(scene.includes("sheets.get('balloon-green')"), 'The single green balloon is moved too, not left behind');
+  const chat = await fs.readFile(path.join(project, 'js/components/cabin-chat.js'), 'utf8'), backdrop = await fs.readFile(path.join(project, 'js/components/cabin-backdrop.js'), 'utf8');
+  assert.ok(entry.includes('mountCabinChat(stage)') && chat.includes('input.disabled = true') && chat.includes("'from-santa'".slice(1, -1)) && !chat.includes('innerHTML') && santaCss.includes('.cabin-stage[data-view="inside"]:not(.is-walking) .cabin-chat'), 'A letter-paper chat waits in the room, its writing line off until the AI reply exists');
+  assert.ok(!backdrop.includes('cabin-sun') && !scene.includes('--cabin-turn') && scene.includes('sprite.position.set(-27.5'), 'The sun rises behind the far mountains in the 3D scene instead of sliding on the page behind it');
   const village = await fs.readFile(path.join(project, 'js/components/cabin-world.js'), 'utf8');
   for (const id of ['wish-post', 'wheel', 'horse', 'lighthouse', 'world-sign', 'ski-mountain', 'game-sign']) assert.ok(village.includes(`id: '${id}'`), `The village has its ${id}`);
   assert.ok(!village.includes('innerHTML') && !village.includes("from 'three'"), 'The village is paper art only; the scene builds it');
