@@ -1,24 +1,31 @@
-/* Santa's Cabin：紙雕立體盒，可以拖著轉；版面跟其他頁一樣置中。 */
-.santa-main { padding-block: 2rem 1rem; }
-.cabin { display: grid; justify-items: center; gap: 1rem; }
-.cabin-heading { display: grid; justify-items: center; gap: .3rem; text-align: center; }
-.cabin-heading h1 { margin: 0; color: var(--red); }
-.cabin-heading .title-art { width: clamp(260px, 34vw, 440px); }
-.cabin-lead { margin: 0; color: var(--muted); }
-.cabin-stage { position: relative; width: 100%; aspect-ratio: 16 / 10; max-height: 76svh; }
+/* Santa's Cabin：整頁就是小屋內部。小屋撐滿導覽列以下的畫面，標題是從天花板垂下來的縫線木牌。 */
+.santa-main { padding: 0; }
+/* 3D 還沒出來（或無法顯示）時，先用同色的原木牆撐住畫面。 */
+.cabin { position: relative; height: max(560px, calc(100svh - 108px)); overflow: hidden; background: repeating-linear-gradient(#c39060 0 46px, #b07f53 46px 50px, #dccbaa 50px 54px); }
+.cabin-stage { position: absolute; inset: 0; }
 .cabin-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.cabin-gesture { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 24px; background: none; cursor: grab; touch-action: pan-y; }
+.cabin-gesture { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 0; background: none; cursor: grab; touch-action: pan-y; }
 .cabin-stage.is-turning .cabin-gesture { cursor: grabbing; }
-.cabin-gesture:focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
+.cabin-gesture:focus-visible { outline: 3px solid var(--yellow); outline-offset: -8px; }
+.cabin-sign { position: absolute; z-index: 2; top: 1.1rem; left: 50%; translate: -50% 0; display: grid; justify-items: center; width: max-content; max-width: calc(100% - 2rem); padding: .8rem 1.8rem .9rem; text-align: center; background: var(--cream); border-radius: 18px; box-shadow: 0 6px 0 -1px #dccaa9, 0 16px 26px #3b2a2440; pointer-events: none; }
+.cabin-sign::before { content: ''; position: absolute; inset: .45rem; border: 2px dashed #ad3c3b66; border-radius: 12px; }
+.cabin-sign::after { content: ''; position: absolute; left: 16%; right: 16%; bottom: 100%; height: 1.2rem; background: linear-gradient(#8a6a55, #8a6a55) left / 3px 100% no-repeat, linear-gradient(#8a6a55, #8a6a55) right / 3px 100% no-repeat; }
+.cabin-sign h1 { margin: 0; color: var(--red); }
+.cabin-sign .title-art { width: clamp(200px, 19vw, 290px); }
+.cabin-lead::after { content: '　'; }
+.cabin-hint { position: absolute; z-index: 2; left: 50%; bottom: 1.4rem; translate: -50% 0; margin: 0; color: var(--ink); font-size: var(--fs-small); white-space: nowrap; pointer-events: none; }
+.cabin-hint > span { display: inline-block; padding: .25rem .9rem; border-radius: 999px; background: var(--cream); box-shadow: 0 3px 0 #dccaa9; }
 /* 紙雕聖誕老人替身：3D 小屋準備好之前先坐在畫面中間。 */
-.cabin-stage .santa-placeholder-host { position: absolute; left: 50%; bottom: 14%; width: min(220px, 34%); aspect-ratio: 300 / 270; translate: -50% 0; transition: opacity .4s ease; pointer-events: none; }
+.cabin-stage .santa-placeholder-host { position: absolute; left: 50%; bottom: 16%; width: min(240px, 32%); aspect-ratio: 300 / 270; translate: -50% 0; transition: opacity .4s ease; pointer-events: none; }
 .cabin-stage:not([data-state='loading']) .santa-placeholder-host { opacity: 0; }
-.cabin-away { position: absolute; left: 50%; top: 42%; max-width: 15rem; margin: 0; padding: .7rem 1rem; translate: -50% 0; rotate: -3deg; color: var(--ink); background: var(--cream); border: 2px dashed #ad3c3b73; border-radius: 12px; box-shadow: 0 6px 0 -2px #dccaa9; text-align: center; pointer-events: none; }
+.cabin-away { position: absolute; left: 50%; top: 38%; max-width: 15rem; margin: 0; padding: .7rem 1rem; translate: -50% 0; rotate: -3deg; color: var(--ink); background: var(--cream); border: 2px dashed #ad3c3b73; border-radius: 12px; box-shadow: 0 6px 0 -2px #dccaa9; text-align: center; pointer-events: none; }
 .cabin-error { display: none; }
-.cabin-stage[data-state='error'] .cabin-error { position: absolute; inset: 0; display: grid; place-content: center; padding: 2rem; color: var(--muted); text-align: center; }
-.cabin-hint { margin: 0; color: var(--muted); font-size: var(--fs-small); text-align: center; }
-.cabin-hint span { display: inline-block; padding: .2rem .8rem; border-radius: 999px; background: var(--cream); box-shadow: 0 3px 0 #dccaa9; }
+.cabin-stage[data-state='error'] .cabin-error { position: absolute; inset: 0; display: grid; place-content: center; padding: 2rem; color: var(--cream); text-align: center; }
+.cabin-noscript { position: absolute; left: 50%; bottom: 30%; translate: -50% 0; padding: .7rem 1rem; background: var(--cream); border-radius: 12px; }
 @media (max-width: 700px) {
-  .santa-main { padding-top: 1.2rem; }
-  .cabin-stage { aspect-ratio: 1; max-height: 72svh; }
+  .cabin { height: max(520px, calc(100svh - 86px)); }
+  .cabin-sign { top: 1rem; padding: .6rem 1.2rem .7rem; }
+  .cabin-lead { display: none; }
+  .cabin-sign .title-art { width: min(230px, 60vw); }
+  .cabin-hint { bottom: 1rem; }
 }

@@ -1,13 +1,13 @@
-// Santa's Cabin as a paper diorama: every board is drawn here once, then stood up in the 3D box by cabin-scene.js.
+// Santa's Cabin as a paper room: every board is drawn here once, then stood up around the camera by cabin-scene.js.
 // Units: 1 = Santa's seated height. Each board's art is drawn at PX units per world unit; light comes from the upper left.
 import { holly, pine, shape } from './paper-art.js';
 import { roofHouse, star } from './paper-props.js';
 
 export const PX = 500;
-export const BOX = { width: 3.6, depth: 1.8, height: 2.3 };
+// The room runs from the back wall forward past the camera, so turning to look around never shows its open side.
+export const BOX = { width: 3.6, back: -.9, front: 4, height: 2.3 };
+BOX.depth = BOX.front - BOX.back; BOX.middle = (BOX.front + BOX.back) / 2;
 export const CHAIR = { x: -.25, z: 0 };
-// The front frame, which the camera keeps fully in view on wide screens.
-export const FRAME = { width: 3.76, height: 2.5, bottom: -.06, z: BOX.depth / 2 + .02 };
 const LOG = ['#b9875a', '#c39060', '#b07f53'], CHINK = '#dccbaa', CREAM = '#fbf3df', SNOW = '#fbf8f1';
 const RED = '#a84a42', GREEN = '#4f7d68', GOLD = '#e0b04f', WOOD = '#8f5a3c', WOOD_LIT = '#a86b47';
 // Stable "random" numbers, so every visit cuts the same cabin.
@@ -114,13 +114,18 @@ export function backWall({ plain, paper, svg }, { width, height }) {
   wreath(paper, 1400, 330, 92);
 }
 
-export function sideWall(withDoor) {
-  return ({ plain, paper }, { width, height }) => {
+// Wall art runs along z: the left wall's art starts at the front (near the camera), the right wall's at the back.
+const along = (side, z) => (side === 'left' ? BOX.front - z : z - BOX.back) * PX;
+export function sideWall(side) {
+  const withDoor = side === 'left';
+  return ({ plain, paper, svg }, { width, height }) => {
     logs(plain, width, height, 12, withDoor ? 2 : 0);
     garland(paper, 0, width, 54, 24);
+    cabinWindow(paper, svg, along(side, 3) - 190, 280, 380, 330);
     if (withDoor) {
-      // Front corner of the left wall: a plank door left ajar onto the snow, for the reindeer to peek through later.
-      const x = 120, y = 420, w = 300, h = height - y;
+      coatRack(paper, along(side, 2), height - 10);
+      // A plank door left ajar onto the snow, beside the tree, for the reindeer to peek through later.
+      const x = along(side, .8), y = 420, w = 300, h = height - y;
       shape('rect', { x: x - 26, y: y - 26, width: w + 52, height: h + 26, rx: 10, fill: WOOD }, paper);
       shape('rect', { x, y, width: w, height: h, fill: '#5d7f9c' }, paper);
       shape('path', { d: `M${x} ${y + h * .62}C${x + w * .4} ${y + h * .5} ${x + w * .7} ${y + h * .6} ${x + w} ${y + h * .54}V${y + h}H${x}Z`, fill: SNOW }, paper);
@@ -129,7 +134,8 @@ export function sideWall(withDoor) {
       wreath(paper, x + w * .71, y + h * .18, 42);
       shape('circle', { cx: x + w * .48, cy: y + h * .55, r: 9, fill: GOLD }, paper);
     } else {
-      // The right wall: a shelf of candles and a cookie jar, with snowshoes hung below.
+      letterDesk(paper, along(side, 1.8), height - 10);
+      // Beside the fireplace: a shelf of candles and a cookie jar, with snowshoes hung below.
       const y = 470;
       shape('rect', { x: 180, y, width: 560, height: 26, rx: 6, fill: WOOD_LIT }, paper);
       shape('path', { d: `M220 ${y + 26}l40 60h-16l-40-60ZM700 ${y + 26}l-40 60h16l40-60Z`, fill: WOOD }, paper);
@@ -159,11 +165,56 @@ export function floor({ plain, paper }, { width, height }) {
     for (let k = 0; k < 3; k++) { const y = noise(i * 7 + k) * height; shape('path', { d: `M${i * plank + 3} ${y}h${plank - 6}`, stroke: '#7d5636', 'stroke-width': 4 }, plain); }
   }
   // A braided rug under the rocking chair; floor art runs from the back wall (top) to the front edge (bottom).
-  const cx = (CHAIR.x + BOX.width / 2) * PX, cy = (CHAIR.z + BOX.depth / 2) * PX + 40;
+  const cx = (CHAIR.x + BOX.width / 2) * PX, cy = (CHAIR.z - BOX.back) * PX + 40;
   [['#4f7d68', 430, 250], [CREAM, 392, 222], ['#a84a42', 352, 196], [GOLD, 300, 164], ['#a84a42', 252, 136], [CREAM, 196, 104], ['#4f7d68', 140, 72]].forEach(([fill, rx, ry]) => {
     shape('ellipse', { cx, cy, rx, ry, fill }, paper);
     shape('ellipse', { cx, cy, rx: rx - 18, ry: ry - 14, fill: 'none', stroke: '#00000022', 'stroke-width': 5, 'stroke-dasharray': '10 9' }, paper);
   });
+  // A welcome mat by the door you came in through, near the bottom of the view.
+  const mat = (BOX.front - BOX.back - 1.1) * PX;
+  shape('rect', { x: cx - 230, y: mat, width: 460, height: 190, rx: 30, fill: '#8a6a55' }, paper);
+  shape('rect', { x: cx - 200, y: mat + 26, width: 400, height: 138, rx: 20, fill: 'none', stroke: '#c9a77c', 'stroke-width': 10, 'stroke-dasharray': '18 12' }, paper);
+  holly(paper, cx, mat + 95, 1.1);
+}
+
+export function ceiling({ plain, paper }, { width, height }) {
+  // Planks run across the room; heavy beams cross them, and a string of lights zigzags between the beams.
+  shape('rect', { x: 0, y: 0, width, height, fill: '#8f6340' }, plain);
+  for (let y = 0; y < height; y += 90) shape('rect', { x: 0, y: y + 3, width, height: 84, fill: ['#a8774d', '#9c6b46', '#b07f53'][(y / 90) % 3] }, plain);
+  const beams = [.12, .38, .64, .9].map(t => t * height);
+  for (const y of beams) {
+    shape('rect', { x: 0, y: y - 34, width, height: 68, fill: '#7d5636' }, paper);
+    shape('rect', { x: 0, y: y - 34, width, height: 14, fill: '#94653f' }, paper);
+  }
+  for (let i = 0; i < beams.length - 1; i++) garland(paper, 60, width - 60, beams[i] + 60, 50);
+}
+
+// Santa's red coat and hat waiting on pegs, his boots below.
+function coatRack(parent, x, base) {
+  shape('rect', { x: x - 170, y: base - 760, width: 340, height: 40, rx: 10, fill: WOOD_LIT }, parent);
+  for (const peg of [-110, 0, 110]) shape('circle', { cx: x + peg, cy: base - 740, r: 13, fill: WOOD }, parent);
+  shape('path', { d: `M${x - 110} ${base - 735}C${x - 160} ${base - 690} ${x - 175} ${base - 520} ${x - 160} ${base - 420}H${x - 40}C${x - 30} ${base - 520} ${x - 50} ${base - 690} ${x - 110} ${base - 735}Z`, fill: RED }, parent);
+  shape('rect', { x: x - 166, y: base - 448, width: 132, height: 34, rx: 14, fill: SNOW }, parent);
+  shape('path', { d: `M${x - 110} ${base - 735}V${base - 430}`, stroke: SNOW, 'stroke-width': 22 }, parent);
+  shape('path', { d: `M${x - 20} ${base - 730}C${x - 6} ${base - 800} ${x + 40} ${base - 820} ${x + 80} ${base - 790}L${x + 30} ${base - 724}Z`, fill: RED }, parent);
+  shape('rect', { x: x - 34, y: base - 736, width: 74, height: 24, rx: 12, fill: SNOW }, parent);
+  shape('circle', { cx: x + 82, cy: base - 790, r: 14, fill: SNOW }, parent);
+  shape('path', { d: `M${x + 110} ${base - 735}C${x + 90} ${base - 640} ${x + 130} ${base - 560} ${x + 100} ${base - 470}`, stroke: GREEN, 'stroke-width': 26, fill: 'none', 'stroke-linecap': 'round' }, parent);
+  for (const bx of [-70, 30]) shape('path', { d: `M${x + bx} ${base}V${base - 90}H${x + bx + 44}V${base - 34}H${x + bx + 70}C${x + bx + 84} ${base - 34} ${x + bx + 84} ${base} ${x + bx + 70} ${base}Z`, fill: '#3b2a24' }, parent);
+}
+
+// Santa's writing desk: a stack of letters, a quill and the Nice List hanging over the edge.
+function letterDesk(parent, x, base) {
+  shape('rect', { x: x - 200, y: base - 300, width: 400, height: 36, rx: 8, fill: WOOD_LIT }, parent);
+  shape('rect', { x: x - 180, y: base - 266, width: 120, height: 266, fill: WOOD }, parent);
+  shape('rect', { x: x + 130, y: base - 266, width: 30, height: 266, fill: WOOD }, parent);
+  for (const dy of [-230, -150, -70]) { shape('rect', { x: x - 170, y: base + dy, width: 100, height: 62, rx: 6, fill: WOOD_LIT }, parent); shape('circle', { cx: x - 120, cy: base + dy + 31, r: 7, fill: GOLD }, parent); }
+  for (let i = 0; i < 6; i++) shape('rect', { x: x - 150 + i * 6, y: base - 340 - i * 22, width: 150, height: 40, rx: 4, fill: [CREAM, '#f2e3c4', '#efe0bf'][i % 3], transform: `rotate(${(i % 2 ? 4 : -3)} ${x - 75} ${base - 320 - i * 22})` }, parent);
+  shape('circle', { cx: x - 60, cy: base - 450, r: 18, fill: RED }, parent);
+  shape('path', { d: `M${x + 60} ${base - 300}V${base - 340}C${x + 60} ${base - 360} ${x + 100} ${base - 360} ${x + 100} ${base - 340}V${base - 300}Z`, fill: '#3b4a5a' }, parent);
+  shape('path', { d: `M${x + 84} ${base - 344}C${x + 120} ${base - 420} ${x + 150} ${base - 460} ${x + 170} ${base - 470}C${x + 150} ${base - 430} ${x + 120} ${base - 390} ${x + 88} ${base - 340}Z`, fill: SNOW }, parent);
+  shape('path', { d: `M${x + 10} ${base - 304}H${x + 110}V${base - 170}C${x + 110} ${base - 150} ${x + 90} ${base - 140} ${x + 70} ${base - 150}H${x + 10}Z`, fill: '#f6ecda' }, parent);
+  for (let i = 0; i < 6; i++) shape('path', { d: `M${x + 24} ${base - 284 + i * 20}h${i % 2 ? 60 : 74}`, stroke: '#b6a58a', 'stroke-width': 4, 'stroke-linecap': 'round' }, parent);
 }
 
 export function fireplace({ paper }, { width, height }) {
@@ -287,22 +338,13 @@ export function sideTable({ paper }, { width, height }) {
   shape('path', { d: `M${cx + 29} ${top - 6}L${cx + 27} ${top - 52}H${cx + 65}L${cx + 63} ${top - 6}Z`, fill: '#fffdf7' }, paper);
 }
 
-// The front of the box, like the cover cut-out of a pop-up book: a stitched red frame with lights along the top.
-export function frame({ paper }, { width, height }) {
-  const side = 90, top = 165, bottom = 55;
-  shape('path', { d: `M0 ${height}V60C0 20 20 0 60 0H${width - 60}C${width - 20} 0 ${width} 20 ${width} 60V${height}ZM${side} ${height - bottom}H${width - side}V${top + 40}C${width - side} ${top} ${width - side - 40} ${top} ${width - side - 80} ${top}H${side + 80}C${side + 40} ${top} ${side} ${top} ${side} ${top + 40}Z`, fill: RED, 'fill-rule': 'evenodd' }, paper);
-  shape('path', { d: `M${side - 34} ${height - bottom + 30}V${top + 20}C${side - 34} ${top - 20} ${side - 10} ${top - 34} ${side + 40} ${top - 34}H${width - side - 40}C${width - side + 10} ${top - 34} ${width - side + 34} ${top - 20} ${width - side + 34} ${top + 20}V${height - bottom + 30}`, stroke: CREAM, 'stroke-width': 7, 'stroke-dasharray': '22 16', fill: 'none', opacity: .85 }, paper);
-  garland(paper, 30, width - 30, 74, 26);
-  for (const x of [0, width]) shape('path', { d: `M${x - 160} ${height}C${x - 120} ${height - 90} ${x + 120} ${height - 90} ${x + 160} ${height}Z`, fill: SNOW }, paper);
-  star(paper, width / 2, 80, 50, GOLD);
-}
-
-// Every board: art size in world units, where it stands, and whether its back shows a kraft card when the box turns.
+// Every board: art size in world units and where it stands. Room surfaces are cut at a lower density to save memory.
 export const BOARDS = [
-  { id: 'back', w: BOX.width, h: BOX.height, at: [0, 0, -BOX.depth / 2], draw: backWall, kind: 'wall' },
-  { id: 'left', w: BOX.depth, h: BOX.height, at: [-BOX.width / 2, 0, 0], turn: Math.PI / 2, draw: sideWall(true), kind: 'wall', exterior: true },
-  { id: 'right', w: BOX.depth, h: BOX.height, at: [BOX.width / 2, 0, 0], turn: -Math.PI / 2, draw: sideWall(false), kind: 'wall', exterior: true },
-  { id: 'floor', w: BOX.width, h: BOX.depth, at: [0, 0, 0], flat: true, draw: floor, kind: 'floor' },
+  { id: 'back', w: BOX.width, h: BOX.height, at: [0, 0, BOX.back], draw: backWall, kind: 'wall' },
+  { id: 'left', w: BOX.depth, h: BOX.height, at: [-BOX.width / 2, 0, BOX.middle], turn: Math.PI / 2, draw: sideWall('left'), kind: 'wall' },
+  { id: 'right', w: BOX.depth, h: BOX.height, at: [BOX.width / 2, 0, BOX.middle], turn: -Math.PI / 2, draw: sideWall('right'), kind: 'wall' },
+  { id: 'floor', w: BOX.width, h: BOX.depth, at: [0, 0, BOX.middle], flat: 'floor', draw: floor, kind: 'floor' },
+  { id: 'ceiling', w: BOX.width, h: BOX.depth, at: [0, BOX.height, BOX.middle], flat: 'ceiling', draw: ceiling, kind: 'floor' },
   { id: 'tree', w: .95, h: 1.75, at: [-1.28, 0, -.5], draw: tree },
   { id: 'fireplace', w: 1.2, h: 1.3, at: [1.02, 0, -.8], draw: fireplace },
   { id: 'flames', w: .48, h: .38, at: [1.02, .12, -.76], draw: flames, flame: true },
@@ -311,5 +353,4 @@ export const BOARDS = [
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
   { id: 'chair-front', w: .82, h: .44, at: [0, 0, .2], draw: chairFront, chair: true },
-  { id: 'frame', w: FRAME.width, h: FRAME.height, at: [0, FRAME.bottom, FRAME.z], draw: frame },
 ];

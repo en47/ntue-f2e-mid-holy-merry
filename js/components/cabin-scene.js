@@ -1,24 +1,26 @@
-// Santa's Cabin in Three.js: the paper boards from cabin-art.js stand in a box around the seated Santa GLB.
-// Drag (or arrow keys) turns the box a little; it settles back to the front on its own.
+// Santa's Cabin in Three.js: the paper boards from cabin-art.js form a room around the seated Santa GLB.
+// The camera stands inside the room; dragging (or the arrow keys) looks around, then it settles back on Santa.
 import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, CHAIR, FRAME, PX } from './cabin-art.js';
+import { BOARDS, BOX, CHAIR, PX } from './cabin-art.js';
 import { paperFilter, shape } from './paper-art.js';
 import { createHeadTracker } from './santa-head.js';
 
-// Radians. The box never turns far enough to show a board edge-on or the back of the wall.
-const BASE_PITCH = .13, MAX_YAW = .5, MIN_PITCH = .03, MAX_PITCH = .32, RETURN_AFTER = 1600, FOV = 30;
+// Radians. The camera circles Santa inside the room and never reaches a wall, the ceiling or the room's open front.
+const BASE_PITCH = .21, MAX_YAW = .38, MIN_PITCH = .1, MAX_PITCH = .34, RETURN_AFTER = 1600;
+// Landscape screens stand further back with a narrower lens; portrait phones come closer with a wider one.
+const VIEW = { wide: { fov: 46, distance: 3.6, aspect: 1.2 }, tall: { fov: 60, distance: 2.8, aspect: .7 } };
 // Head turns stay small and are shared with the neck: larger angles crease the beard (see docs/SANTA-CABIN.md).
 const HEAD = { maxYaw: .24, maxPitch: .1 };
-const KRAFT = 0xc9a77c, PAPER_EDGE = 0xefe1c4;
+const PAPER_EDGE = 0xefe1c4;
 let paperCount = 0;
 
 // Each board is cut once into an image; nothing in the SVG animates afterwards.
 async function paintBoard(board, quality) {
-  const width = Math.round(board.w * PX), height = Math.round(board.h * PX);
-  const svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width: Math.round(width * quality), height: Math.round(height * quality) });
+  const width = Math.round(board.w * PX), height = Math.round(board.h * PX), density = board.kind ? .7 : 1;
+  const svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width: Math.round(width * quality * density), height: Math.round(height * quality * density) });
   const plain = shape('g', {}, svg);
   const paper = shape('g', { filter: paperFilter(svg, `cabin-paper-${++paperCount}`, { scale: board.kind ? 1.6 : 1.1, grain: .5, shadow: 0 }) }, svg);
   board.draw({ plain, paper, svg }, { width, height });
@@ -63,7 +65,7 @@ export async function mountCabin(stage, { onProgress = () => {}, isCurrent = () 
   let yaw = 0, pitch = BASE_PITCH, goalYaw = 0, goalPitch = BASE_PITCH, distance = 6, ready = false;
   let frame, lastTick = 0, lastDraw = 0, clock = 0, inView = true, dragging = false, returnTimer = 0, settling = false, resize, visible;
   const keep = (set, value) => { set.add(value); return value; };
-  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(FOV, 1, .1, 60);
+  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(VIEW.wide.fov, 1, .05, 60);
   const room = new RoomEnvironment(), pmrem = new THREE.PMREMGenerator(renderer);
   let environment;
   try { environment = pmrem.fromScene(room, .04); } finally { room.dispose(); pmrem.dispose(); }
@@ -89,16 +91,13 @@ export async function mountCabin(stage, { onProgress = () => {}, isCurrent = () 
     if (!board.flat) geometry.translate(0, board.h / 2, 0);
     const holder = new THREE.Group(), mesh = new THREE.Mesh(geometry, material);
     holder.add(mesh); holder.position.set(...board.at);
-    if (board.flat) { holder.rotation.x = -Math.PI / 2; holder.position.y = .002; }
+    if (board.flat === 'floor') { holder.rotation.x = -Math.PI / 2; holder.position.y = .002; }
+    if (board.flat === 'ceiling') holder.rotation.x = Math.PI / 2;
     if (board.turn) holder.rotation.y = board.turn;
     if (board.mirror) holder.scale.x = -1;
     if (!board.kind) {
       const edge = new THREE.Mesh(geometry, keep(materials, edgeMaterial(texture)));
       edge.position.z = -.012; holder.add(edge);
-    }
-    if (board.exterior) {
-      const back = new THREE.Mesh(geometry, keep(materials, new THREE.MeshBasicMaterial({ color: KRAFT, side: THREE.BackSide, toneMapped: false })));
-      holder.add(back);
     }
     if (board.flame) flames.push(holder);
     (board.chair ? chair : box).add(holder);
@@ -130,17 +129,17 @@ export async function mountCabin(stage, { onProgress = () => {}, isCurrent = () 
   if (!isCurrent()) { release3d(); return null; }
   stage.prepend(renderer.domElement);
 
-  // View: orbit a fixed target. Wide screens fit the whole front frame; narrow ones crop to the chair and fireplace.
-  const target = new THREE.Vector3(0, 1.1, 0);
+  // View: circle a point on Santa. Between portrait and landscape the lens and distance blend smoothly.
+  const target = new THREE.Vector3(CHAIR.x, .9, CHAIR.z);
   function frameView() {
     const width = stage.clientWidth, height = stage.clientHeight;
     if (!width || !height) return;
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(width, height, false);
-    const aspect = width / height, half = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
-    // Sizes are measured at the frame, which stands nearer the camera than the box's centre.
-    const wide = aspect >= 1.15, needWidth = wide ? FRAME.width + .24 : 2.6, needHeight = FRAME.height + (wide ? .2 : .15);
-    distance = Math.max(needHeight / 2 / half, needWidth / 2 / (half * aspect)) + FRAME.z;
-    target.set(wide ? 0 : -.12, FRAME.bottom + FRAME.height / 2, 0);
+    const aspect = width / height, t = THREE.MathUtils.clamp((aspect - VIEW.tall.aspect) / (VIEW.wide.aspect - VIEW.tall.aspect), 0, 1);
+    camera.fov = THREE.MathUtils.lerp(VIEW.tall.fov, VIEW.wide.fov, t);
+    // Wide screens aim a little higher, so the window and its advent house clear the hanging title sign.
+    target.y = THREE.MathUtils.lerp(.9, 1, t);
+    distance = Math.min(THREE.MathUtils.lerp(VIEW.tall.distance, VIEW.wide.distance, t), BOX.front - CHAIR.z - .3);
     camera.aspect = aspect; camera.updateProjectionMatrix();
   }
   function place() {
