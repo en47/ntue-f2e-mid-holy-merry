@@ -1,9 +1,9 @@
-/* Santa's Cabin：聖誕節早晨，一棟正面切開的紙雕小屋坐在雪地上；屋前的雪地一路接到頁尾。 */
+/* Santa's Cabin：聖誕節早晨的紙雕聖誕村，小屋在中間；屋前的雪地一路接到頁尾。 */
 .santa-main { padding: 0; }
 .cabin { position: relative; height: max(580px, calc(100svh - 108px)); overflow: hidden; background: linear-gradient(#c9dfeb, #dfeaf0 42%, #f6e4d8 70%, #fbefe4); }
 .cabin-backdrop { position: absolute; inset: 0; pointer-events: none; }
-/* 太陽低掛在左上：光線、影子方向（往右後）都跟著它。 */
-.cabin-sun { position: absolute; left: 6%; top: 6%; width: 26vmin; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(#fdf0c8 0 24%, #fbe3b8aa 40%, transparent 70%); }
+/* 太陽低掛在左上：光線、影子方向（往右後）都跟著它。轉頭時太陽跟著天空移動（--cabin-turn 由 cabin-scene.js 設定）。 */
+.cabin-sun { position: absolute; left: 6%; top: 6%; width: 26vmin; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(#fdf0c8 0 24%, #fbe3b8aa 40%, transparent 70%); translate: calc(var(--cabin-turn, 0) * 100vw) 0; }
 .cabin-flake { position: absolute; top: -12px; width: 7px; height: 7px; border-radius: 50%; background: #fffdf6; box-shadow: 0 0 0 1px #d6e3e966; animation: cabin-snow 11s linear infinite; }
 /* 雪花和煙囪的煙都往右飄：同一陣風。 */
 @keyframes cabin-snow { 0% { translate: 0 0; opacity: 0; } 8% { opacity: .9; } 92% { opacity: .9; } 100% { translate: 60px calc(min(100svh, 900px)); opacity: 0; } }
@@ -11,6 +11,9 @@
 .cabin-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .cabin-gesture { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 0; background: none; cursor: grab; touch-action: pan-y; }
 .cabin-stage.is-turning .cabin-gesture { cursor: grabbing; }
+/* 屋裡可以上下左右環顧：手指的上下滑動也交給場景，按「走出門外」或點門口回到網頁。 */
+.cabin-stage[data-view="inside"] .cabin-gesture { touch-action: none; }
+.cabin-stage.is-walking .cabin-gesture { cursor: default; }
 .cabin-gesture:focus-visible { outline: 3px solid var(--red); outline-offset: -8px; }
 /* 平常畫面上沒有介面：推進到某個角落時才出現「回到小屋」，第一次來時有一張會自己消失的提示。 */
 .cabin-stage.is-pointing .cabin-gesture { cursor: pointer; }

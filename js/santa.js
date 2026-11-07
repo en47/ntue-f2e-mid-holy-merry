@@ -2,7 +2,7 @@ import { mountCabinBackdrop } from './components/cabin-backdrop.js';
 
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
-const back = document.querySelector('#cabin-back'), tip = document.querySelector('#cabin-tip'), explore = [...document.querySelectorAll('.cabin-explore [data-spot]')];
+const back = document.querySelector('#cabin-back'), tip = document.querySelector('#cabin-tip'), explore = [...document.querySelectorAll('.cabin-explore [data-spot]')], looks = [...document.querySelectorAll('.cabin-explore [data-look]')];
 const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 mountCabinBackdrop(document.querySelector('.cabin-backdrop'));
@@ -21,13 +21,14 @@ function onFound(id) {
   status.textContent = found.size === SPOTS.length ? '招牌上的星星全亮了！院子裡的秘密你全找到了。' : `發現了一個角落（${found.size}/${SPOTS.length}），招牌上又亮了一顆星。`;
 }
 function onView(view) {
-  back.hidden = view === 'outside'; clearTimeout(enterTimer); play?.leave();
+  back.hidden = view === 'outside'; back.textContent = view === 'inside' ? '← 走出門外' : '← 回到小屋前'; clearTimeout(enterTimer); play?.leave();
   if (SPOTS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : 1000);
-  if (view === 'inside') status.textContent = '走進屋裡了：聖誕老人就坐在你面前。';
-  if (view === 'outside') status.textContent = '回到屋外，看得到整個院子。';
+  if (view === 'inside') status.textContent = '推開門走進屋裡：聖誕老人坐在火爐邊。拖曳可以環顧整個房間，點門口就能出去。';
+  if (view === 'outside') status.textContent = '回到屋外。往左轉是遊樂場和許願角，往右轉是海邊和燈塔，雪山在小屋後面。';
 }
 back.addEventListener('click', () => cabin?.setView('outside'));
 explore.forEach(button => button.addEventListener('click', () => { cabin?.setView(button.dataset.spot); back.focus(); }));
+looks.forEach(button => button.addEventListener('click', () => { cabin?.look(button.dataset.look); stage.querySelector('.cabin-gesture').focus(); }));
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && cabin && cabin.view !== 'outside') { cabin.setView('outside'); stage.querySelector('.cabin-gesture').focus(); } });
 markExplore();
 
@@ -47,14 +48,14 @@ async function mountCabin() {
   try {
     const [{ mountCabin: build }, { mountPlay }] = await Promise.all([import('./components/cabin-scene.js'), import('./components/cabin-play.js')]);
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, onView, isCurrent: () => run === generation });
+    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (note) play?.note(note); }, isCurrent: () => run === generation });
     if (!result || run !== generation) { result?.destroy(); return; }
     cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; } });
     cabin.setFound([...found]);
     if (found.size) { cabin.repaint('sign', { stars: found.size }); play.restore([...found]); }
     stage.dataset.state = 'ready'; stage.dataset.santa = result.santa ? 'home' : 'away';
     away.hidden = result.santa; progress(1); showTip();
-    status.textContent = result.santa ? '聖誕老人正坐在搖椅上。院子裡藏著四個角落可以探索。' : '聖誕老人去餵麋鹿了，搖椅上留了一張紙條。';
+    status.textContent = result.santa ? '聖誕老人在屋裡烤火。點小屋就能推門進去，也可以左右轉轉，看看整座村子。' : '聖誕老人去餵麋鹿了，搖椅上留了一張紙條。';
   } catch (error) {
     if (run !== generation) return;
     console.error('Santa cabin failed to load', error);

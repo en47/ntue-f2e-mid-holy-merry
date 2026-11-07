@@ -1,29 +1,41 @@
-// Santa's Cabin as a paper dollhouse: its front is cut away so the room shows, like a pop-up book page.
-// Every board is drawn here once, then stood up in 3D by cabin-scene.js. Units: 1 = Santa's seated height.
+// Santa's Cabin as a paper cottage: closed on every side, so from the snow it is a whole house, and the only way in is
+// the front door. Every board is drawn here once, then stood up in 3D by cabin-scene.js. Units: 1 = Santa's seated height.
 // Light comes from the upper left. It is Christmas morning: Santa is home from the night's deliveries.
 import { holly, pine, shape } from './paper-art.js';
 import { church, roofHouse, snowyFir, star } from './paper-props.js';
 import { headingGlyphs } from '../data/heading-glyphs.js';
 
 export const PX = 500;
-// Inner floor from x -1.6 to 1.6 and z -1 to 1, walls 1.9 high, ridge at 3. The front is open.
-// The roof is thicker than the walls: its cut edge reads as a band of shingles, as on the reference cottage.
-export const HOUSE = { width: 3.2, depth: 2, wall: 1.9, ridge: 3, thick: .1, roof: .2, eaves: .32, overhang: .15 };
+// Inner floor from x -1.6 to 1.6 and z -1.5 to 1.5, walls 1.9 high, ridge at 3: deep enough to stand inside and look round.
+// The roof is thicker than the walls: its front edge reads as a band of shingles, as on the reference cottage.
+export const HOUSE = { width: 3.2, depth: 3, wall: 1.9, ridge: 3, thick: .1, roof: .2, eaves: .32, overhang: .15 };
 HOUSE.slope = Math.hypot(HOUSE.width / 2, HOUSE.ridge - HOUSE.wall);
 export const CHAIR = { x: -.45, z: .05 };
 // The house stands on its foundation slab a little above the snow, which runs out to the hills.
 export const GROUND = -.14;
 // The reindeer waits by the sleigh on the right; the name sign hangs from an iron bracket at the front-left corner, over the mailbox.
-export const REINDEER = { x: 2.3, z: 1.2, turn: -.75, height: 1.3 };
-export const SIGN = { x: -2.7, top: 1.93, z: HOUSE.depth / 2, arm: 1.9 };
+export const REINDEER = { x: 2.6, z: 2.25, turn: -.75, height: 1.3 };
+export const SIGN = { x: -2.7, top: 1.93, z: HOUSE.depth / 2 + HOUSE.thick, arm: 1.9 };
 export const LANTERN = { x: .3, z: .05 };
 // The fireplace on the back wall; its chimney rises out of the right slope of the roof.
-export const FIRE = { x: .88 };
+const BACK = -HOUSE.depth / 2;
+export const FIRE = { x: .88, z: BACK + .25 };
+// The front door, cut through both faces of the front wall. It hangs on its left post and swings out into the snow, so it
+// never sweeps across the camera walking through it (cabin-scene.js).
+export const DOOR = { width: .66, height: 1.5, swing: 1.75, hinge: -.33, z: HOUSE.depth / 2 + HOUSE.thick / 2 };
+// Where you stand once inside: a few steps in from the door, turned toward Santa in his chair.
+export const INSIDE = { eye: [.45, 1.15, .9], heading: .78, pitch: .22 };
 const CREAM = '#fbf3df', SNOW = '#fbf8f1', RED = '#a84a42', GREEN = '#4f7d68', DEEP_GREEN = '#3f6653', GOLD = '#e0b04f';
 const WOOD = '#8f5a3c', WOOD_LIT = '#a86b47', TIMBER = '#6b4a33', PLASTER = '#f1e4c8';
 // Stable "random" numbers, so every visit cuts the same cabin.
 const noise = index => { const value = Math.sin(index * 12.9898) * 43758.5453; return value - Math.floor(value); };
 const clip = (svg, id, d) => { shape('path', { d }, shape('clipPath', { id }, shape('defs', {}, svg))); return `url(#${id})`; };
+// The same, with the doorway left out, so the wall's paper is cut right through there.
+const cutDoor = (svg, id, outline, centre, height) => {
+  const w = DOOR.width * PX, x = centre - w / 2, y = height - DOOR.height * PX;
+  shape('path', { d: `${outline}M${x} ${y}H${x + w}V${height}H${x}Z`, 'clip-rule': 'evenodd' }, shape('clipPath', { id }, shape('defs', {}, svg)));
+  return `url(#${id})`;
+};
 
 // Walls are cream plaster under a dark timber frame, with a wood wainscot along the bottom: wood is the outline, not the whole wall.
 function plaster(parent, width, height, fill = PLASTER) {
@@ -123,6 +135,127 @@ export function sideWall(side) {
       for (const [cx, cy] of [[790, y - 40], [830, y - 62], [820, y - 24]]) shape('circle', { cx, cy, r: 13, fill: '#a8774d' }, paper);
     }
   };
+}
+
+// The front wall from the snow: lime plaster and timber like the sides, one lit window by the door, a woodpile with skis
+// leaning on it on the other side (the window inside the room is on the same side as this one).
+export function frontOutside({ plain, paper, svg }, { width, height }) {
+  const cx = width / 2, eave = height - HOUSE.wall * PX, edge = eave + HOUSE.thick * PX * (HOUSE.ridge - HOUSE.wall) / (HOUSE.width / 2), base = height - 90;
+  const wall = shape('g', { 'clip-path': cutDoor(svg, 'front-out', `M0 ${height}V${edge}L${cx} 0L${width} ${edge}V${height}Z`, cx, height) }, plain);
+  plaster(wall, width, height, '#f5eddd');
+  stones(wall, 0, base, width, 90);
+  for (const x of [0, width - 40]) beam(wall, x, 0, 40, base);
+  for (const x of [cx - 250, cx + 218]) beam(wall, x, eave, 32, base - eave);
+  beam(wall, 0, eave - 20, width, 36);
+  brace(wall, `M${cx} 130L${cx - 300} ${eave - 20}M${cx} 130L${cx + 300} ${eave - 20}`);
+  // A lit round window high in the gable.
+  shape('circle', { cx, cy: eave * .56, r: 82, fill: GREEN }, paper);
+  shape('circle', { cx, cy: eave * .56, r: 62, fill: '#f6d98c' }, paper);
+  shape('path', { d: `M${cx} ${eave * .56 - 62}V${eave * .56 + 62}M${cx - 62} ${eave * .56}H${cx + 62}`, stroke: GREEN, 'stroke-width': 10 }, paper);
+  litWindow(paper, width - 485, eave + 110, 270, 250);
+  woodpile(paper, 150, base, 360);
+  // The door's frame, a holly swag over it and a lantern either side.
+  const w = DOOR.width * PX, x = cx - w / 2, y = height - DOOR.height * PX;
+  shape('path', { d: `M${x - 34} ${height}V${y - 34}H${x + w + 34}V${height}ZM${x} ${height}V${y}H${x + w}V${height}Z`, fill: WOOD, 'fill-rule': 'evenodd' }, paper);
+  garland(paper, x - 50, x + w + 50, y - 50, 8);
+  for (const lx of [x - 74, x + w + 74]) wallLantern(paper, lx, y + 70);
+  for (const [from, to] of [[0, x - 40], [x + w + 40, width]]) shape('path', { d: `M${from} ${height}C${from + (to - from) * .2} ${height - 60} ${from + (to - from) * .6} ${height - 30} ${to} ${height - 40}V${height}Z`, fill: SNOW }, paper);
+}
+// The same wall from inside: the window onto the morning on one side of the door, coat pegs with a spare red coat on the other.
+export function frontInside({ plain, paper, svg }, { width, height }) {
+  const cx = width / 2, eave = height - HOUSE.wall * PX, rail = height - .42 * PX;
+  const wall = shape('g', { 'clip-path': cutDoor(svg, 'front-in', `M0 ${height}V${eave}L${cx} 0L${width} ${eave}V${height}Z`, cx, height) }, plain);
+  plaster(wall, width, height); wainscot(wall, width, height, rail);
+  beam(wall, 0, eave - 22, width, 44); beam(wall, 0, 250, width, 34);
+  brace(wall, `M${cx} 268L${cx - 250} ${eave - 20}M${cx} 268L${cx + 250} ${eave - 20}`);
+  for (const x of [0, width - 40]) beam(wall, x, eave, 40, rail - eave);
+  const oy = 405;
+  shape('circle', { cx, cy: oy, r: 76, fill: GREEN }, paper);
+  shape('circle', { cx, cy: oy, r: 58, fill: '#cfe3ee' }, paper);
+  shape('path', { d: `M${cx - 58} ${oy + 16}C${cx - 20} ${oy} ${cx + 20} ${oy + 14} ${cx + 58} ${oy + 6}V${oy + 60}H${cx - 58}Z`, fill: SNOW }, paper);
+  shape('path', { d: `M${cx} ${oy - 58}V${oy + 58}M${cx - 58} ${oy}H${cx + 58}`, stroke: GREEN, 'stroke-width': 9 }, paper);
+  morningWindow(paper, svg, 175, eave + 110, 250, 250, 'front-window');
+  const w = DOOR.width * PX, x = cx - w / 2, y = height - DOOR.height * PX;
+  shape('path', { d: `M${x - 30} ${height}V${y - 30}H${x + w + 30}V${height}ZM${x} ${height}V${y}H${x + w}V${height}Z`, fill: WOOD_LIT, 'fill-rule': 'evenodd' }, paper);
+  for (let i = 0; i < 5; i++) holly(paper, x - 20 + i * (w + 40) / 4, y - 34, .62);
+  pictureFrame(paper, 470, eave + 150, 150, 120);
+  holly(paper, 545, eave + 146, .6);
+  coatPegs(paper, 1070, eave + 170, 390, height - 14);
+}
+function litWindow(parent, x, y, width, height) {
+  for (const sx of [x - 58, x + width + 14]) shape('rect', { x: sx, y: y - 6, width: 44, height: height + 12, rx: 6, fill: GREEN }, parent);
+  shape('rect', { x, y, width, height, fill: '#f6d98c' }, parent);
+  shape('rect', { x: x + 16, y: y + 16, width: width - 32, height: height * .42, rx: 10, fill: '#fbe7b0' }, parent);
+  for (const side of [0, 1]) {
+    const edge = side ? x + width : x, dir = side ? -1 : 1;
+    shape('path', { d: `M${edge} ${y}h${dir * width * .32}C${edge + dir * width * .2} ${y + height * .3} ${edge + dir * 40} ${y + height * .48} ${edge} ${y + height * .62}Z`, fill: CREAM }, parent);
+    shape('circle', { cx: edge + dir * 18, cy: y + height * .5, r: 9, fill: RED }, parent);
+  }
+  shape('path', { d: `M${x + width / 2} ${y}V${y + height}M${x} ${y + height / 2}H${x + width}`, stroke: GREEN, 'stroke-width': 14 }, parent);
+  shape('rect', { x: x - 8, y: y - 8, width: width + 16, height: height + 16, fill: 'none', stroke: GREEN, 'stroke-width': 16 }, parent);
+  shape('path', { d: `M${x - 18} ${y - 10}C${x + width * .3} ${y - 34} ${x + width * .7} ${y - 22} ${x + width + 18} ${y - 12}V${y - 2}H${x - 18}Z`, fill: SNOW }, parent);
+  shape('rect', { x: x - 26, y: y + height + 8, width: width + 52, height: 44, rx: 8, fill: WOOD }, parent);
+  for (let i = 0; i < 4; i++) holly(parent, x + 20 + i * (width - 40) / 3, y + height + 10, .6);
+}
+function wallLantern(parent, x, y) {
+  shape('path', { d: `M${x} ${y - 40}v-20h${x > 850 ? -26 : 26}`, stroke: '#3b302a', 'stroke-width': 7, fill: 'none' }, parent);
+  shape('path', { d: `M${x - 26} ${y - 34}L${x} ${y - 58} ${x + 26} ${y - 34}Z`, fill: '#3b302a' }, parent);
+  shape('rect', { x: x - 22, y: y - 36, width: 44, height: 60, rx: 6, fill: '#ffe3a0', stroke: '#3b302a', 'stroke-width': 6 }, parent);
+  shape('path', { d: `M${x} ${y - 20}C${x + 8} ${y - 8} ${x + 6} ${y + 4} ${x} ${y + 6}C${x - 6} ${y + 4} ${x - 8} ${y - 8} ${x} ${y - 20}Z`, fill: '#f2a541' }, parent);
+}
+// Split logs stacked against the wall under a snowy plank, and a pair of skis propped beside them.
+function woodpile(parent, x, base, width) {
+  const rows = 4, r = 30;
+  for (let row = 0; row < rows; row++) for (let col = 0; col * r * 2 < width - r * (row % 2); col++) {
+    const cx = x + r + col * r * 2 + (row % 2) * r, cy = base - r - row * r * 1.75;
+    shape('circle', { cx, cy, r, fill: ['#b98a5a', '#a8774d', '#c39466'][(row + col) % 3] }, parent);
+    shape('circle', { cx, cy, r: r * .45, fill: 'none', stroke: '#8f6340', 'stroke-width': 3 }, parent);
+  }
+  const top = base - rows * r * 1.75 - 18;
+  shape('rect', { x: x - 20, y: top - 18, width: width + 40, height: 22, rx: 6, fill: WOOD }, parent);
+  shape('path', { d: `M${x - 24} ${top - 16}C${x + width * .3} ${top - 44} ${x + width * .7} ${top - 30} ${x + width + 24} ${top - 18}V${top - 8}H${x - 24}Z`, fill: SNOW }, parent);
+  for (const [dx, fill] of [[width + 40, RED], [width + 70, RED]]) shape('path', { d: `M${x + dx} ${base}L${x + dx + 30} ${top - 120}C${x + dx + 34} ${top - 140} ${x + dx + 50} ${top - 140} ${x + dx + 46} ${top - 116}L${x + dx + 18} ${base}Z`, fill }, parent);
+  shape('path', { d: `M${x + width + 30} ${base}L${x + width + 64} ${top - 70}M${x + width + 96} ${base}L${x + width + 80} ${top - 70}`, stroke: '#3b302a', 'stroke-width': 6 }, parent);
+}
+// A peg rail by the door: a spare red coat, a hat and a scarf, boots standing underneath.
+function coatPegs(parent, x, y, width, floor) {
+  shape('rect', { x, y, width, height: 26, rx: 8, fill: WOOD_LIT }, parent);
+  for (const px of [x + 70, x + width / 2, x + width - 70]) shape('circle', { cx: px, cy: y + 13, r: 10, fill: WOOD }, parent);
+  const cx = x + 70;
+  shape('path', { d: `M${cx} ${y + 20}C${cx - 60} ${y + 30} ${cx - 80} ${y + 70} ${cx - 82} ${y + 330}H${cx + 82}C${cx + 80} ${y + 70} ${cx + 60} ${y + 30} ${cx} ${y + 20}Z`, fill: RED }, parent);
+  shape('rect', { x: cx - 86, y: y + 310, width: 172, height: 34, rx: 16, fill: SNOW }, parent);
+  shape('rect', { x: cx - 12, y: y + 40, width: 24, height: 290, rx: 10, fill: SNOW }, parent);
+  shape('rect', { x: cx - 80, y: y + 180, width: 160, height: 26, fill: '#3b2a24' }, parent);
+  shape('rect', { x: cx - 18, y: y + 176, width: 36, height: 34, rx: 4, fill: 'none', stroke: GOLD, 'stroke-width': 7 }, parent);
+  const hx = x + width / 2;
+  shape('path', { d: `M${hx - 50} ${y + 120}C${hx - 40} ${y + 60} ${hx + 20} ${y + 20} ${hx + 70} ${y + 70}L${hx + 50} ${y + 120}Z`, fill: RED }, parent);
+  shape('rect', { x: hx - 58, y: y + 112, width: 116, height: 30, rx: 14, fill: SNOW }, parent);
+  shape('circle', { cx: hx + 74, cy: y + 76, r: 18, fill: SNOW }, parent);
+  const sx = x + width - 70;
+  for (const [dx, len] of [[-14, 230], [14, 190]]) {
+    shape('rect', { x: sx + dx - 14, y: y + 18, width: 28, height: len, rx: 8, fill: GREEN }, parent);
+    for (let k = 1; k < 4; k++) shape('rect', { x: sx + dx - 14, y: y + 18 + len * k / 4, width: 28, height: 10, fill: CREAM }, parent);
+  }
+  for (const bx of [x + 110, x + 190]) {
+    shape('path', { d: `M${bx} ${floor}V${floor - 120}h50V${floor - 30}h34c14 0 18 30 0 30Z`, fill: '#2f2622' }, parent);
+    shape('rect', { x: bx - 6, y: floor - 132, width: 62, height: 22, rx: 10, fill: SNOW }, parent);
+  }
+}
+// The door's two faces, back to back on one hinge. Seen from the snow the hinge is on the left; from inside, on the right.
+export function doorOutside({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, rx: 12, fill: GREEN }, paper);
+  for (let i = 1; i < 4; i++) shape('path', { d: `M${width * i / 4} 10V${height - 10}`, stroke: DEEP_GREEN, 'stroke-width': 6 }, paper);
+  for (const y of [height * .16, height * .8]) shape('rect', { x: 0, y, width: width * .55, height: 18, rx: 6, fill: '#3b302a' }, paper);
+  wreath(paper, width / 2, height * .34, 66);
+  shape('circle', { cx: width - 42, cy: height * .56, r: 13, fill: GOLD }, paper);
+  shape('rect', { x: width * .2, y: height * .66, width: width * .6, height: 14, rx: 6, fill: GOLD }, paper);
+}
+export function doorInside({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, rx: 12, fill: WOOD_LIT }, paper);
+  for (let i = 1; i < 4; i++) shape('path', { d: `M${width * i / 4} 10V${height - 10}`, stroke: WOOD, 'stroke-width': 6 }, paper);
+  shape('path', { d: `M20 ${height * .22}H${width - 20}M20 ${height * .78}H${width - 20}M${width - 30} ${height * .22}L30 ${height * .78}`, stroke: WOOD, 'stroke-width': 24, 'stroke-linecap': 'round' }, paper);
+  for (const y of [height * .16, height * .8]) shape('rect', { x: width * .45, y, width: width * .55, height: 18, rx: 6, fill: '#3b302a' }, paper);
+  shape('rect', { x: 26, y: height * .52, width: 18, height: 70, rx: 8, fill: '#3b302a' }, paper);
 }
 
 // The outside of a side wall: whiter plaster, timber braces, a shuttered window with a holly box, snow drifted at the foot.
@@ -255,7 +388,8 @@ export function fir(variant) {
 export function hills(level) {
   const snow = ['#f1f4f2', '#e6edef', '#dce5ec'][level], shade = ['#e3eaec', '#d8e2e8', '#cfdbe4'][level];
   return ({ paper }, { width, height }) => {
-    const count = 15, points = Array.from({ length: count }, (_, i) => [i / (count - 1) * width, height * (.12 + noise(i * 5 + level * 13) * .55)]);
+    // Both ends come down to the snow: turning round, a hill's end would otherwise stand up like a cut-out.
+    const count = 15, points = Array.from({ length: count }, (_, i) => [i / (count - 1) * width, height - height * (.88 - noise(i * 5 + level * 13) * .55) * Math.min(1, i / 3, (count - 1 - i) / 3)]);
     let d = `M0 ${height}V${points[0][1]}`;
     for (let i = 1; i < points.length; i++) { const [x0, y0] = points[i - 1], [x1, y1] = points[i]; d += `C${x0 + (x1 - x0) * .5} ${y0} ${x0 + (x1 - x0) * .5} ${y1} ${x1} ${y1}`; }
     shape('path', { d: `${d}V${height}Z`, fill: snow }, paper);
@@ -633,24 +767,30 @@ function adventHouse(parent, x, base, lit) {
 const wall = (id, w, h, at, extra) => ({ id, w, h, at, kind: 'wall', ...extra });
 // Every board: art size in world units and where it stands. `kind` marks room surfaces (cut at a lower density, no paper edge).
 export const BOARDS = [
-  wall('back', HOUSE.width, HOUSE.ridge, [0, 0, -HOUSE.depth / 2], { draw: backWall }),
-  wall('left', HOUSE.depth, HOUSE.wall, [-HOUSE.width / 2, 0, 0], { turn: Math.PI / 2, draw: sideWall('left') }),
-  wall('right', HOUSE.depth, HOUSE.wall, [HOUSE.width / 2, 0, 0], { turn: -Math.PI / 2, draw: sideWall('right') }),
+  wall('back', HOUSE.width, HOUSE.ridge, [0, 0, BACK], { draw: backWall, room: true }),
+  wall('left', HOUSE.depth, HOUSE.wall, [-HOUSE.width / 2, 0, 0], { turn: Math.PI / 2, draw: sideWall('left'), room: true }),
+  wall('right', HOUSE.depth, HOUSE.wall, [HOUSE.width / 2, 0, 0], { turn: -Math.PI / 2, draw: sideWall('right'), room: true }),
+  wall('front-in', HOUSE.width, HOUSE.ridge, [0, 0, HOUSE.depth / 2], { turn: Math.PI, draw: frontInside, room: true }),
   wall('left-out', HOUSE.depth, HOUSE.wall, [-HOUSE.width / 2 - HOUSE.thick, 0, 0], { turn: -Math.PI / 2, draw: outerWall }),
   wall('right-out', HOUSE.depth, HOUSE.wall, [HOUSE.width / 2 + HOUSE.thick, 0, 0], { turn: Math.PI / 2, draw: outerWall }),
-  { id: 'floor', w: HOUSE.width, h: HOUSE.depth, at: [0, 0, 0], flat: 'floor', draw: floor, kind: 'floor' },
-  { id: 'roof-in-left', roof: 'left', layer: 'inner', w: HOUSE.slope, h: HOUSE.depth, draw: roofInside, kind: 'floor' },
-  { id: 'roof-in-right', roof: 'right', layer: 'inner', w: HOUSE.slope, h: HOUSE.depth, draw: roofInside, kind: 'floor' },
+  wall('front-out', HOUSE.width + HOUSE.thick * 2, HOUSE.ridge, [0, 0, HOUSE.depth / 2 + HOUSE.thick], { draw: frontOutside }),
+  // The door's faces hang on the door rig (its hinge), not on the house.
+  { id: 'door-out', w: DOOR.width, h: DOOR.height, at: [DOOR.width / 2, 0, .012], rig: 'door', kind: 'wall', draw: doorOutside },
+  { id: 'door-in', w: DOOR.width, h: DOOR.height, at: [DOOR.width / 2, 0, -.012], turn: Math.PI, rig: 'door', kind: 'wall', draw: doorInside },
+  { id: 'floor', w: HOUSE.width, h: HOUSE.depth, at: [0, 0, 0], flat: 'floor', draw: floor, kind: 'floor', room: true },
+  { id: 'roof-in-left', roof: 'left', layer: 'inner', w: HOUSE.slope, h: HOUSE.depth, draw: roofInside, kind: 'floor', room: true },
+  { id: 'roof-in-right', roof: 'right', layer: 'inner', w: HOUSE.slope, h: HOUSE.depth, draw: roofInside, kind: 'floor', room: true },
   { id: 'roof-out-left', roof: 'left', layer: 'outer', w: HOUSE.slope + HOUSE.eaves, h: HOUSE.depth + HOUSE.overhang * 2, draw: roofOutside, kind: 'floor' },
   { id: 'roof-out-right', roof: 'right', layer: 'outer', w: HOUSE.slope + HOUSE.eaves, h: HOUSE.depth + HOUSE.overhang * 2, draw: roofOutside, kind: 'floor' },
   { id: 'garland', w: HOUSE.width + HOUSE.eaves * 2.6, h: 1.42, at: [0, HOUSE.wall - .26, HOUSE.depth / 2 + HOUSE.overhang + .03], draw: roofGarland },
-  { id: 'lantern', w: .3, h: .56, at: [LANTERN.x, HOUSE.ridge, LANTERN.z], hang: true, draw: lantern },
-  { id: 'bookshelf', w: .55, h: 1.25, at: [-1.22, 0, -.9], draw: bookshelf },
-  { id: 'fireplace', w: 1.05, h: 1.14, at: [FIRE.x, 0, -.92], draw: fireplace },
-  { id: 'flames', w: .36, h: .28, at: [FIRE.x, .09, -.88], draw: flames, flame: true },
-  { id: 'tree', w: .74, h: 1.36, at: [1.3, 0, .7], draw: tree },
-  { id: 'tree-lights', w: .74, h: 1.36, at: [1.3, 0, .71], draw: treeLights, twinkle: true },
-  { id: 'lamp-table', w: .5, h: .9, at: [-1.18, 0, .32], draw: lampTable },
+  { id: 'lantern', w: .3, h: .56, at: [LANTERN.x, HOUSE.ridge, LANTERN.z], hang: true, draw: lantern, room: true },
+  { id: 'bookshelf', w: .55, h: 1.25, at: [-1.22, 0, BACK + .1], draw: bookshelf, room: true },
+  { id: 'fireplace', w: 1.05, h: 1.14, at: [FIRE.x, 0, BACK + .08], draw: fireplace, room: true },
+  { id: 'flames', w: .36, h: .28, at: [FIRE.x, .09, BACK + .12], draw: flames, flame: true, room: true },
+  // Free-standing in the room, so they turn to face you wherever you stand: from the side they would be a sliver of paper.
+  { id: 'tree', w: .74, h: 1.36, at: [1.25, 0, .55], draw: tree, room: true, billboard: true },
+  { id: 'tree-lights', w: .74, h: 1.36, at: [1.25, 0, .55], draw: treeLights, twinkle: true, room: true, billboard: true, nudge: .01 },
+  { id: 'lamp-table', w: .5, h: .9, at: [-1.18, 0, .32], draw: lampTable, room: true, billboard: true },
   { id: 'chair-back', w: .82, h: 1.12, at: [0, 0, -.3], draw: chairBack, chair: true },
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
@@ -659,9 +799,10 @@ export const BOARDS = [
   { id: 'hills-mid', w: 110, h: 4.4, px: 18, at: [0, GROUND, -30], draw: hills(1), kind: 'scenery' },
   { id: 'hills-near', w: 80, h: 2.8, px: 22, at: [0, GROUND, -19], draw: hills(0), kind: 'scenery' },
   // Firs: one board per variant, planted at each [x, z, height]. Each tree turns to face the camera, so its outline stays clean from any side.
-  { id: 'fir-a', w: 1, h: 2, draw: fir(0), copies: [[-3.9, -3.2, 3.1], [4.4, -3.6, 3.3], [-11, -11, 4.2]] },
-  { id: 'fir-b', w: 1, h: 2, draw: fir(1), copies: [[-5.1, -4.4, 2.4], [12, -14, 4.4], [-4.6, -10, 4.6]] },
-  { id: 'fir-c', w: 1, h: 2, draw: fir(2), copies: [[3.2, -4.9, 2.2], [-6.6, -2.2, 2], [9, -7, 3]] },
+  // The second half of each list stands around the fair, the wishing corner and the coast (cabin-world.js).
+  { id: 'fir-a', w: 1, h: 2, draw: fir(0), copies: [[-3.9, -3.2, 3.1], [4.4, -3.6, 3.3], [-11, -11, 4.2], [-20.5, -5.5, 4.6], [-23, 7, 5], [-6.9, 10.6, 2.3], [9.6, 1.4, 3.2]] },
+  { id: 'fir-b', w: 1, h: 2, draw: fir(1), copies: [[-5.1, -4.4, 2.4], [12, -14, 4.4], [-4.6, -10, 4.6], [-13.4, -4.4, 3.6], [-16.5, 13.5, 4.2], [8.4, 14.5, 3.4]] },
+  { id: 'fir-c', w: 1, h: 2, draw: fir(2), copies: [[3.2, -4.9, 2.2], [-6.6, -2.2, 2], [9, -7, 3], [-7.6, -.6, 2.4], [-19.5, 15, 4.6], [6.8, 6.2, 2.4]] },
   { id: 'sign', w: 1.8, h: 1.12, at: [SIGN.x, SIGN.top, SIGN.z], hang: true, sway: true, draw: nameSign, state: { stars: 0 } },
   { id: 'mailbox', w: .5, h: .95, at: [SIGN.x, GROUND, SIGN.z + .45], draw: mailbox, state: {} },
   { id: 'sleigh', w: 1.3, h: .8, at: [3.15, GROUND, -.2], turn: -.35, draw: sleigh },
@@ -683,8 +824,8 @@ export const BOARDS = [
   { id: 'corral', w: 2.4, h: .7, at: [9.6, GROUND, -5.4], turn: -1.15, draw: fence },
   { id: 'post-office', w: 3.6, h: 2.6, at: [11.2, GROUND, -11.5], turn: -.55, draw: postOffice },
   { id: 'village', w: 13, h: 2.4, px: 60, at: [-8, GROUND, -24], draw: village, kind: 'scenery' },
-  { id: 'drift-left', w: .9, h: .34, at: [-2.05, GROUND, .9], draw: drift },
-  { id: 'drift-right', w: .9, h: .34, at: [2.05, GROUND, .9], mirror: true, draw: drift },
+  { id: 'drift-left', w: .9, h: .34, at: [-2.05, GROUND, HOUSE.depth / 2 + .05], draw: drift },
+  { id: 'drift-right', w: .9, h: .34, at: [2.05, GROUND, HOUSE.depth / 2 + .05], mirror: true, draw: drift },
 ];
 export const SMOKE = { w: .55, h: .4, draw: smokePuff };
 
@@ -694,4 +835,16 @@ export const SPOTS = [
   { id: 'reindeer', name: '麋鹿', box: [[REINDEER.x, .55, REINDEER.z], [1.3, 1.4, 1.2]], view: { target: [REINDEER.x, .8, REINDEER.z], distance: 3.2, pitch: .1, yaw: -.3 } },
   { id: 'snowman', name: '雪人', box: [[-5.4, .55, -1.2], [1.1, 1.5, .8]], view: { target: [-5.4, .7, -1.2], distance: 3.1, pitch: .08, yaw: .32 } },
   { id: 'stable', name: '馴鹿小屋', box: [[7.4, 1.2, -7], [3.6, 2.8, 1.4]], view: { target: [7.2, 1.25, -6.8], distance: 6, pitch: .1, yaw: -.38 } },
+];
+
+// Things in the room that answer a tap with a line of their own. `box` is the tap target [centre, size]; the door takes you out.
+export const ROOM_PROPS = [
+  { id: 'santa', name: '聖誕老人', note: '聖誕老人朝你點點頭：「外面很冷吧？在火爐邊暖暖身子。」' },
+  { id: 'door', name: '大門', box: [[0, DOOR.height / 2, DOOR.z], [DOOR.width, DOOR.height, .3]] },
+  { id: 'bookshelf', name: '書架', box: [[-1.22, .62, BACK + .15], [.6, 1.25, .3]], note: '書架上排滿了一年又一年的送禮紀錄。' },
+  { id: 'fireplace', name: '壁爐', box: [[FIRE.x, .57, BACK + .15], [1.05, 1.14, .3]], note: '壁爐的火劈啪作響，架上掛著三隻襪子。' },
+  { id: 'tree', name: '聖誕樹', box: [[1.25, .68, .55], [.8, 1.36, .8]], note: '屋裡的聖誕樹掛著彩燈，一閃一閃。' },
+  { id: 'lamp-table', name: '小桌', box: [[-1.18, .45, .32], [.6, .9, .6]], note: '小桌上還留著昨晚的餅乾和牛奶。' },
+  { id: 'window', name: '窗台', box: [[-1.55, 1.12, .08], [.15, .75, .75]], note: '窗台上的降臨小屋，十二月每過一天就多亮一扇窗。' },
+  { id: 'coat', name: '掛衣架', box: [[-.9, 1.05, HOUSE.depth / 2 - .08], [.85, 1, .2]], note: '門邊掛著一件紅外套、帽子和圍巾，靴子還沾著雪。' },
 ];
