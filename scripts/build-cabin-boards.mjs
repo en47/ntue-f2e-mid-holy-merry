@@ -11,17 +11,20 @@ import { withSvgDom } from './svg-dom.mjs';
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = 'images/cabin', MANIFEST = 'docs/CABIN-BOARDS.json', DATA = 'js/data/cabin-cuts.js';
-// 大套給桌機與平板，小套給手機（cabin-paint.js 的 cutSet 依螢幕挑選）。
-const SETS = { large: .75, small: .5 }, WEBP = { quality: 82, alphaQuality: 90, effort: 6, smartSubsample: true };
+// hi 給 Retina 與大螢幕桌機、large 給一般桌機與平板、small 給手機（cabin-paint.js 的 cutSet 依螢幕挑選）。
+// 紙雕是平塗色塊加細紙紋：桌機兩套用 drawing 預設與較高品質，邊緣與彩旗不糊；手機螢幕小，維持較省的設定。
+const SETS = { hi: 1, large: .75, small: .5 };
+const WEBP = { hi: { quality: 90, alphaQuality: 90, effort: 6, smartSubsample: true, preset: 'drawing' }, small: { quality: 82, alphaQuality: 90, effort: 6, smartSubsample: true } };
+WEBP.large = WEBP.hi;
 const sha = value => createHash('sha256').update(value).digest('hex');
 
-// 每張圖的畫稿標記與指紋：指紋一致就表示圖片仍對應目前的畫法（tests/smoke.mjs 也用同一個函式檢查）。
+// 每張圖的畫稿標記與指紋（含壓縮設定）：指紋一致就表示圖片仍對應目前的畫法（tests/smoke.mjs 也用同一個函式檢查）。
 export async function cabinCuts() {
   return withSvgDom(async () => {
     const { everyCut, boardMarkup } = await import(pathToFileURL(path.join(project, 'js/components/cabin-paint.js')).href);
     return Object.entries(SETS).flatMap(([set, quality]) => everyCut().map(([name, board, state]) => {
       const markup = boardMarkup(board, quality, state);
-      return { set, name, file: `${set}/${name}.webp`, markup, fingerprint: sha(markup) };
+      return { set, name, file: `${set}/${name}.webp`, markup, fingerprint: sha(JSON.stringify(WEBP[set]) + markup) };
     }));
   });
 }
@@ -54,7 +57,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
           canvas.getContext('2d').drawImage(image, 0, 0);
           return canvas.toDataURL('image/png').slice('data:image/png;base64,'.length);
         }, cut.markup);
-        const { data, info } = await sharp(Buffer.from(png, 'base64')).webp(WEBP).toBuffer({ resolveWithObject: true });
+        const { data, info } = await sharp(Buffer.from(png, 'base64')).webp(WEBP[cut.set]).toBuffer({ resolveWithObject: true });
         await fs.writeFile(path.join(project, OUT, cut.file), data);
         files[cut.file] = { fingerprint: cut.fingerprint, sha256: sha(data), width: info.width, height: info.height, bytes: data.length };
       }

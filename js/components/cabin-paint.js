@@ -2,8 +2,8 @@
 // the snowman's accessories. scripts/build-cabin-boards.mjs cuts them all ahead of time at two sizes (images/cabin/), so
 // the page only downloads finished pictures instead of running the paper filter on every board while it opens. A sheet
 // with no picture, or whose picture fails to load, is cut here in the browser exactly as before.
-import { BOARDS, HOIST, PX, SMOKE, hayBale, hoistBracket, hoistHatch, hoistToggle, hoistWheel } from './cabin-art.js';
-import { WORLD } from './cabin-world.js';
+import { BOARDS, HOIST, PX, SMOKE, SPOTS, hayBale, hoistBracket, hoistHatch, hoistToggle, hoistWheel } from './cabin-art.js';
+import { RIGS, VIEWPOINT, WORLD } from './cabin-world.js';
 import { PLACES, WARDROBE } from './cabin-wardrobe.js';
 import { paperFilter, shape } from './paper-art.js';
 import { CUTS } from '../data/cabin-cuts.js';
@@ -31,14 +31,31 @@ const variantName = (name, state) => JSON.stringify(state ?? null) === FIRST.get
 // Every picture there is: its file name, the board and the look it shows.
 export const everyCut = () => SHEETS.flatMap(([name, board]) => [[name, board, board.state], ...(VARIANTS[name] ?? []).map(state => [variantName(name, state), board, state])]);
 
-// The picture set for a screen: the finer one wherever boards are drawn large enough to show the difference.
-export const cutSet = quality => quality > .6 ? 'large' : 'small';
+// The picture set for a screen, by how fine it shows the boards: a Retina or large desktop screen, an ordinary one, a phone.
+export const cutSet = quality => quality >= .9 ? 'hi' : quality > .6 ? 'large' : 'small';
+
+// The village was drawn coarse back when the browser cut every board on each visit; as ready pictures its boards are cut as
+// fine as they show on a large screen: SHARP pixels per metre at the nearest place they are seen from (where the visitor
+// stands outside, or a corner of the yard), at most four times their own art. The house and the yard keep their own
+// fineness. No picture is cut wider or taller than 4096 pixels, the most every graphics card takes. The drawing itself
+// does not change, only how finely it is cut.
+const SHARP = 2000, LIMIT = 4096;
+const EYES = [[VIEWPOINT.x, VIEWPOINT.z], ...SPOTS.map(({ view: { target, distance, pitch, yaw } }) => [target[0] + Math.sin(yaw) * Math.cos(pitch) * distance, target[2] + Math.cos(yaw) * Math.cos(pitch) * distance])];
+function detail(board) {
+  if (!WORLD.includes(board)) return 1;
+  const at = board.rig ? RIGS[board.rig].at : board.at;
+  if (!at) return 1;
+  const places = board.copies ? board.copies.map(([x, z]) => [x, z]) : [[at[0], at[2]]], px = board.px ?? PX;
+  const near = Math.max(1, Math.min(...EYES.flatMap(([ex, ez]) => places.map(([x, z]) => Math.hypot(x - ex, z - ez)))));
+  return Math.min(4, Math.max(1, SHARP / near / px));
+}
 
 // A board drawn as SVG at `quality` of its full size; nothing in it animates afterwards. Distant scenery is drawn at fewer
 // art units per metre; room surfaces are cut a little coarser to save memory.
 export function boardSvg(board, quality, state = board.state) {
-  const px = board.px ?? PX, width = Math.round(board.w * px), height = Math.round(board.h * px), density = board.kind === 'wall' || board.kind === 'floor' ? .7 : 1;
-  const svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width: Math.round(width * quality * density), height: Math.round(height * quality * density) });
+  const px = board.px ?? PX, width = Math.round(board.w * px), height = Math.round(board.h * px);
+  const scale = Math.min(quality * (board.kind === 'wall' || board.kind === 'floor' ? .7 : 1) * detail(board), LIMIT / Math.max(width, height));
+  const svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width: Math.round(width * scale), height: Math.round(height * scale) });
   const plain = shape('g', {}, svg);
   const paper = shape('g', { filter: paperFilter(svg, 'cabin-paper', { scale: board.kind === 'scenery' ? .8 : board.kind ? 1.6 : 1.1, grain: .5, shadow: 0 }) }, svg);
   board.draw({ plain, paper, svg }, { width, height }, state);

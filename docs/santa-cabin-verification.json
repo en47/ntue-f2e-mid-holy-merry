@@ -118,5 +118,56 @@
    "smoke": "43 組通過",
    "node:test": "66 項通過"
   }
+ },
+ "quality": {
+  "date": "2026-11-08",
+  "branch": "santa-quality（從 final）",
+  "cause": [
+   "Retina 由 1.0 倍降為 0.75 倍",
+   "村子紙板解析度原本就很低（後方山脈 1080×126 放大 4～5 倍）",
+   "WebP q82 抹平小圖色塊邊界"
+  ],
+  "sets": {
+   "hi": {
+    "quality": 1,
+    "MB": 3.86
+   },
+   "large": {
+    "quality": 0.75,
+    "MB": 2.62
+   },
+   "small": {
+    "quality": 0.5,
+    "MB": 0.95
+   }
+  },
+  "encodingPsnrDb": {
+   "q82": 38.7,
+   "q90drawing": 41.3,
+   "nearLossless60": 53.4
+  },
+  "readySeconds": {
+   "note": "改動前（現場畫）→ 現在；無快取、gzip、真實 GPU",
+   "desktop1440": [
+    6.7,
+    0.9
+   ],
+   "retina1440x2": [
+    15.3,
+    1.2
+   ],
+   "phoneCpu4_4G": [
+    14.4,
+    5.0
+   ],
+   "phoneCpu6_3G": [
+    ">34",
+    20.7
+   ]
+  },
+  "frameMsWhileTurning": {
+   "retina1.5x": 16.7,
+   "retina2x": 16.7
+  }
  }
 }
