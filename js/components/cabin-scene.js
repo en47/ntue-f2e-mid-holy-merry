@@ -115,7 +115,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // Two groups: the room is always there (its closed walls hide it from outside); the village and the house's outer shell
   // are hidden once the visitor is indoors with the door shut, so nothing outside is drawn behind the walls.
   const world = new THREE.Group(), indoors = new THREE.Group(), chair = new THREE.Group();
-  chair.position.set(CHAIR.x, 0, CHAIR.z); indoors.add(chair); scene.add(world, indoors);
+  // The rocking chair is turned on the rug to face whoever walks in; it rocks about its own runners (yaw first, then rock).
+  chair.position.set(CHAIR.x, 0, CHAIR.z); chair.rotation.order = 'YXZ'; chair.rotation.y = Math.atan2(INSIDE.eye[0] - CHAIR.x, INSIDE.eye[2] - CHAIR.z);
+  indoors.add(chair); scene.add(world, indoors);
   const solid = (geometry, colour, position, parent = world) => {
     const mesh = new THREE.Mesh(keep(geometries, geometry), keep(materials, new THREE.MeshStandardMaterial({ color: colour, roughness: 1, metalness: 0 })));
     mesh.position.copy(position); parent.add(mesh); return mesh;
