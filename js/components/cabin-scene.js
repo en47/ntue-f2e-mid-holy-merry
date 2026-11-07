@@ -319,7 +319,10 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     model.traverse(node => { if (node.isMesh) node.frustumCulled = false; });
     return holder;
   };
-  let santaModel, spine, spineRest, tracker, reindeerHolder, reindeerHead, reindeerRest;
+  // The reindeer's mouth has no bone of its own: it sits at a fixed point in the frame of the bone behind his ears (Head_3),
+  // so it follows every nod and turn. Measured on the model from his red nose and smile.
+  const MOUTH = new THREE.Vector3(0, -.24, .14);
+  let santaModel, spine, spineRest, tracker, reindeerHolder, reindeerHead, reindeerRest, reindeerSkull;
   const santa = loader.loadAsync(new URL('../../assets/models/santa-seated-web.glb', import.meta.url).href, event => { if (event.total) { santaShare = event.loaded / event.total; report(); } })
     .then(gltf => {
       santaModel = gltf.scene; chair.add(fitModel(santaModel, 1));
@@ -332,7 +335,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const reindeer = loader.loadAsync(new URL('../../assets/models/reindeer-web.glb', import.meta.url).href, event => { if (event.total) { reindeerShare = event.loaded / event.total; report(); } })
     .then(gltf => {
       const holder = fitModel(gltf.scene, REINDEER.height); holder.position.set(REINDEER.x, GROUND, REINDEER.z); holder.rotation.y = REINDEER.turn; world.add(holder); shadow(REINDEER.x, REINDEER.z, 1.2, .6, 1);
-      reindeerHolder = holder; gltf.scene.traverse(node => { if (node.isBone && /Head_0$/.test(node.name)) reindeerHead = node; }); reindeerRest = reindeerHead?.quaternion.clone();
+      reindeerHolder = holder; gltf.scene.traverse(node => { if (node.isBone && /Head_0$/.test(node.name)) reindeerHead = node; if (node.isBone && /Head_3$/.test(node.name)) reindeerSkull = node; }); reindeerRest = reindeerHead?.quaternion.clone();
       return true;
     })
     .catch(error => { console.error('Reindeer failed to load', error); return false; })
@@ -452,18 +455,23 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       sheet.lift += (goal - sheet.lift) * (still ? 1 : .25); sheet.holder.scale.copy(sheet.base).multiplyScalar(sheet.lift);
       if (goal === 1 && Math.abs(sheet.lift - 1) < .002) { sheet.holder.scale.copy(sheet.base); lifting.delete(id); }
     }
-    // The reindeer's head follows the food in your hand; nods while it eats, shakes at gingerbread, droops when full.
+    // The reindeer's head follows the food in your hand. Eating, he chews (small quick bobs with the head a little down);
+    // lichen, his favourite, makes him hop and nod; gingerbread he turns away from. Only the head bone turns and the whole
+    // body lifts: nothing in the model is stretched.
     if (reindeerHead && reindeerRest) {
       const response = still ? 1 : .15;
       reindeerTurn[0] += (reindeerAim[0] - reindeerTurn[0]) * response; reindeerTurn[1] += (reindeerAim[1] - reindeerTurn[1]) * response;
-      let extraYaw = 0, extraPitch = 0;
+      let extraYaw = 0, extraPitch = 0, hop = 0;
       if (reindeerAction) {
-        const u = (t - reindeerAction.start) / 1.4;
-        if (reindeerAction.kind === 'nod') extraPitch = u < 1 ? Math.sin(u * Math.PI * 4) * .18 : 0;
-        if (reindeerAction.kind === 'shake') extraYaw = u < 1 ? Math.sin(u * Math.PI * 5) * .3 : 0;
-        if (reindeerAction.kind === 'sleep') extraPitch = Math.min(1, u) * .45;
-        if (u >= 1 && reindeerAction.kind !== 'sleep') reindeerAction = null;
+        const { kind } = reindeerAction, u = still ? 1 : Math.min(1, (t - reindeerAction.start) / (kind === 'nod' || kind === 'shake' ? 1.4 : 1.8));
+        if (kind === 'nod') extraPitch = Math.sin(u * Math.PI * 4) * .18;
+        if (kind === 'shake') extraYaw = Math.sin(u * Math.PI * 5) * .3;
+        if (kind === 'chew') extraPitch = Math.sin(u * Math.PI) * .1 + Math.sin(u * Math.PI * 12) * .045 * (1 - u);
+        if (kind === 'happy') { extraPitch = Math.sin(u * Math.PI * 4) * .2; hop = Math.abs(Math.sin(u * Math.PI * 2)) * .12 * (1 - u * .4); }
+        if (kind === 'refuse') extraYaw = Math.sin(Math.min(1, u * 3) * Math.PI / 2) * .5 * (u < .7 ? 1 : (1 - u) / .3) + Math.sin(u * Math.PI * 8) * .05;
+        if (u >= 1) reindeerAction = null;
       }
+      reindeerHolder.position.y = GROUND + hop;
       reindeerHead.quaternion.copy(reindeerRest);
       reindeerHolder.updateMatrixWorld(true);
       const parent = reindeerHead.parent.getWorldQuaternion(new THREE.Quaternion()), across = new THREE.Vector3(1, 0, 0).applyQuaternion(reindeerHolder.quaternion);
@@ -797,6 +805,12 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       reindeerAim = [THREE.MathUtils.clamp((cx - point.x) / (stage.clientWidth * .3), -1, 1) * .5, THREE.MathUtils.clamp((point.y - cy) / (stage.clientHeight * .3), -1, 1) * .3]; wake();
     },
     reindeerAct(kind) { reindeerAction = kind ? { kind, start: clock } : null; wake(); },
+    // His mouth on screen (stage pixels), a little generous, for the food to be dropped into.
+    mouthRect() {
+      if (!reindeerSkull) return null;
+      reindeerHolder.updateMatrixWorld(true);
+      return rectOfBox(reindeerSkull.localToWorld(MOUTH.clone()).toArray(), [.34, .3, .34]);
+    },
   };
   return api;
 

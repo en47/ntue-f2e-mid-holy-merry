@@ -4,7 +4,13 @@ const KEY = 'holy-merry:cabin:v1';
 export const PLACES = ['head', 'neck', 'face', 'hand'];
 // The snowman as he was built: only a carrot nose.
 export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'carrot', hand: null });
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [] });
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 } });
+// The reindeer eats five meals, then is full until the next day on this computer's calendar.
+export const MEALS = 5;
+export const dayOf = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+export const mealsToday = (progress, date = new Date()) => progress.feed.day === dayOf(date) ? progress.feed.count : 0;
+export const full = (progress, date = new Date()) => mealsToday(progress, date) >= MEALS;
+export function eat(progress, date = new Date()) { progress.feed = { day: dayOf(date), count: Math.min(MEALS, mealsToday(progress, date) + 1) }; return progress.feed.count; }
 
 // A missing, broken or partly unknown record keeps whatever is still valid. `known(place, id)` says which accessories exist.
 export function readProgress(storage = globalThis.localStorage, known = () => true) {
@@ -16,6 +22,8 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
     if (id === null || (typeof id === 'string' && known(place, id))) progress.outfit[place] = id;
   }
   if (Array.isArray(saved.combos)) progress.combos = [...new Set(saved.combos.filter(id => typeof id === 'string'))].slice(0, 20);
+  const { day, count } = saved.feed ?? {};
+  if (typeof day === 'string' && Number.isInteger(count)) progress.feed = { day, count: Math.max(0, Math.min(MEALS, count)) };
   return progress;
 }
 // Returns false when the browser will not keep it (private mode, full storage); the yard still plays for this visit.

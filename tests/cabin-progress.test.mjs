@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { DEFAULT_OUTFIT, dressed, readProgress, writeProgress } from '../js/services/cabin-progress.js';
+import { DEFAULT_OUTFIT, MEALS, dayOf, dressed, eat, full, mealsToday, readProgress, writeProgress } from '../js/services/cabin-progress.js';
 
 const memory = (initial = {}) => { const data = { ...initial }; return { getItem: key => data[key] ?? null, setItem: (key, value) => { data[key] = String(value); }, data }; };
 
@@ -23,4 +23,17 @@ test('a storage that refuses to save does not throw', () => {
 test('dressed means something in every place', () => {
   assert.equal(dressed(DEFAULT_OUTFIT), false);
   assert.equal(dressed({ head: 'beret', neck: 'bow', face: 'carrot', hand: 'broom' }), true);
+});
+test('the reindeer is full after five meals, until the next day', () => {
+  const progress = readProgress(memory()), today = new Date(2026, 11, 24, 20), tomorrow = new Date(2026, 11, 25, 7);
+  for (let i = 1; i <= MEALS; i++) assert.equal(eat(progress, today), i);
+  assert.equal(eat(progress, today), MEALS, 'never more than five');
+  assert.equal(full(progress, today), true);
+  assert.equal(mealsToday(progress, tomorrow), 0); assert.equal(full(progress, tomorrow), false);
+  assert.equal(dayOf(today), '2026-12-24');
+});
+test('a saved meal count is read back and kept in range', () => {
+  const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ feed: { day: '2026-12-24', count: 99 } }) });
+  assert.deepEqual(readProgress(store).feed, { day: '2026-12-24', count: MEALS });
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ feed: { day: 3, count: 'x' } }) })).feed, { day: '', count: 0 });
 });
