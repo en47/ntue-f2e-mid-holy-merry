@@ -37,3 +37,8 @@ test('a saved meal count is read back and kept in range', () => {
   assert.deepEqual(readProgress(store).feed, { day: '2026-12-24', count: MEALS });
   assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ feed: { day: 3, count: 'x' } }) })).feed, { day: '', count: 0 });
 });
+test('the hoist remembers being hooked and the note being read, and nothing else', () => {
+  assert.deepEqual(readProgress(memory()).hoist, { locked: false, found: false });
+  const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ hoist: { locked: true, found: 'yes' } }) });
+  assert.deepEqual(readProgress(store).hoist, { locked: true, found: false });
+});

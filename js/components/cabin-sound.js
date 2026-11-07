@@ -44,6 +44,10 @@ export function createSound(widget = document.querySelector('.music-widget'), au
     chew: () => { for (let i = 0; i < 3; i++) rustle(i * .16, .07, 1100, 520, .2); },
     happy: () => { tone(NOTE.E5, 0, .14, { type: 'sine', gain: .14, slide: NOTE.A5 }); tone(NOTE.A5, .15, .2, { type: 'sine', gain: .14, slide: NOTE.E6 }); },
     refuse: () => { tone(300, 0, .18, { type: 'sine', gain: .15, slide: 260 }); tone(280, .2, .26, { type: 'sine', gain: .13, slide: 220 }); },
+    creak: () => { tone(520, 0, .16, { type: 'sawtooth', gain: .04, slide: 610 }); tone(610, .05, .12, { type: 'sine', gain: .06, slide: 480 }); },
+    click: () => { rustle(0, .03, 3600, 3000, .2); tone(1400, 0, .06, { type: 'square', gain: .05 }); tone(900, .05, .07, { type: 'square', gain: .04 }); },
+    thud: () => { tone(140, 0, .22, { type: 'sine', gain: .25, slide: 70 }); rustle(0, .14, 900, 300, .12); },
+    open: () => { tone(330, 0, .28, { type: 'triangle', gain: .07, slide: 420 }); rustle(.05, .18, 2600, 1200, .1); },
     jingle: () => { [NOTE.G5, NOTE.C6, NOTE.E6].forEach((note, i) => tone(note, i * .07, .35, { gain: .12 })); },
   };
   return {

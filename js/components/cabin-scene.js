@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, CHAIR, DOOR, FIRE, GROUND, HOUSE, INSIDE, LANTERN, PX, REINDEER, ROOM_PROPS, SIGN, SMOKE, SPOTS } from './cabin-art.js';
+import { BOARDS, CHAIR, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, PX, REINDEER, ROOM_PROPS, SIGN, SMOKE, SPOTS, hayBale, hoistBracket, hoistHatch, hoistToggle, hoistWheel } from './cabin-art.js';
 import { CAROUSEL, LIFT, LIGHTHOUSE, PROPS, RIGS, RUNS, SHORE, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { paperFilter, shape } from './paper-art.js';
@@ -352,6 +352,31 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       mesh.position.set(x, y, nudge); mesh.visible = false; snowman.holder.add(mesh); worn.set(place, { mesh, id: null });
     }
   }
+  // The hay hoist on the barn: paper pieces on the barn's own sheet, so they stand and turn with it. One number, how far
+  // the toggle has been pulled (0 to 1), places everything: the bale rises as far as the toggle comes down, the wheel turns
+  // by the same length of rope, and each rope runs from the wheel's rim to what it holds.
+  const barn = sheets.get('stable'), hoist = { pull: 0 };
+  if (barn) {
+    const piece = async (draw, w, h, state) => texture(await paintBoard({ w, h, px: 420, draw, state }, quality));
+    const sheet = (map, w, h, lift = 0) => { const geometry = keep(geometries, new THREE.PlaneGeometry(w, h)); geometry.translate(0, lift * h, 0); const mesh = new THREE.Mesh(geometry, keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false }))); barn.holder.add(mesh); return mesh; };
+    const [bracket, wheel, bale, toggle, hatch] = await Promise.all([piece(hoistBracket, .62, .34), piece(hoistWheel, HOIST.radius * 2.3, HOIST.radius * 2.3), piece(hayBale, ...HOIST.bale), piece(hoistToggle, ...HOIST.toggle), piece(hoistHatch, ...HOIST.hatch, {})]);
+    const hang = HOIST.x - HOIST.radius, pull = HOIST.x + HOIST.radius;
+    hoist.hatch = sheet(hatch, ...HOIST.hatch, .5); hoist.hatch.position.set(hang, 0, .03);
+    hoist.bale = sheet(bale, ...HOIST.bale, .5); hoist.bale.position.set(hang, 0, .16);
+    hoist.toggle = sheet(toggle, ...HOIST.toggle, -.5); hoist.toggle.position.set(pull, HOIST.rest, .2);
+    hoist.wheel = sheet(wheel, HOIST.radius * 2.3, HOIST.radius * 2.3); hoist.wheel.position.set(HOIST.x, HOIST.wheel, .21);
+    sheet(bracket, .62, .34).position.set(HOIST.x, HOIST.wheel + .11, .13);
+    const rope = keep(geometries, new THREE.PlaneGeometry(.022, 1).translate(0, -.5, 0)), cord = flat(0xb98a52);
+    hoist.ropes = [hang, pull].map(x => { const mesh = new THREE.Mesh(rope, cord); mesh.position.set(x, HOIST.wheel, .19); barn.holder.add(mesh); return mesh; });
+  }
+  function placeHoist() {
+    if (!hoist.bale) return;
+    const rise = hoist.pull * HOIST.lift, baleTop = rise + HOIST.bale[1], toggleTop = HOIST.rest - rise;
+    hoist.bale.position.y = rise; hoist.toggle.position.y = toggleTop;
+    hoist.wheel.rotation.z = -rise / HOIST.radius;
+    hoist.ropes[0].scale.y = HOIST.wheel - baleTop; hoist.ropes[1].scale.y = HOIST.wheel - toggleTop;
+  }
+  placeHoist();
   function outfitTexture(item) {
     if (!outfits.has(item.id)) {
       const { size: [w, h], box } = PLACES[item.place];
@@ -804,6 +829,30 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
         xs.push((point.x + 1) / 2 * rect.width); ys.push((1 - point.y) / 2 * rect.height);
       }
       return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+    },
+    // The hay hoist: how far the toggle is pulled (0–1), where its parts are on screen, and the hatch's lid.
+    hoist(pull) { hoist.pull = THREE.MathUtils.clamp(pull, 0, 1); placeHoist(); wake(); if (motion.matches || frame === undefined) draw(); },
+    hoistRects() {
+      if (!barn || !hoist.bale) return null;
+      barn.holder.updateMatrixWorld(true);
+      const rise = hoist.pull * HOIST.lift, hang = HOIST.x - HOIST.radius, pull = HOIST.x + HOIST.radius, [tw, th] = HOIST.toggle, [hw, hh] = HOIST.hatch;
+      const local = (center, size) => {
+        const rect = stage.getBoundingClientRect(), xs = [], ys = [];
+        for (const dx of [-.5, .5]) for (const dy of [-.5, .5]) {
+          const point = new THREE.Vector3(center[0] + dx * size[0], center[1] + dy * size[1], center[2]).applyMatrix4(barn.holder.matrixWorld).project(camera);
+          xs.push((point.x + 1) / 2 * rect.width); ys.push((1 - point.y) / 2 * rect.height);
+        }
+        return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+      };
+      // `reach` is how many stage pixels the toggle travels from rest to fully pulled, to turn a drag into a pull.
+      const top = local([pull, HOIST.rest, .2], [.01, .01]), bottom = local([pull, HOIST.rest - HOIST.lift, .2], [.01, .01]);
+      return { toggle: local([pull, HOIST.rest - rise - th / 2, .2], [tw, th]), hatch: local([hang, hh / 2, .03], [hw, hh]), wheel: local([HOIST.x, HOIST.wheel, .21], [HOIST.radius * 2, HOIST.radius * 2]), reach: bottom.top - top.top };
+    },
+    async openHatch(open) {
+      if (!hoist.hatch) return;
+      const map = texture(await paintBoard({ w: HOIST.hatch[0], h: HOIST.hatch[1], px: 420, draw: hoistHatch, state: { open } }, quality));
+      if (disposed) return;
+      const old = hoist.hatch.material.map; hoist.hatch.material.map = map; textures.delete(old); old.dispose(); wake(); if (motion.matches || frame === undefined) draw();
     },
     snowmanAct(kind) { if (motion.matches || !snowman) return; snowmanMove = { kind, start: clock }; wake(); },
     // Turn to face one side of the village: 'left' (the fair), 'right' (the coast) or 'back' (the house and the mountain).
