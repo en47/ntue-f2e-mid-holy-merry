@@ -42,8 +42,8 @@
 .play-burst { position: absolute; width: 30px; height: 30px; margin-left: -15px; pointer-events: none; animation: play-float 1.6s ease-out both; }
 .play-burst .art-layer, .wardrobe-item .art-layer, .wardrobe-ghost .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 @keyframes play-float { from { opacity: 0; translate: 0 10px; } 20% { opacity: 1; } to { opacity: 0; translate: 0 -70px; } }
-/* 雪人換裝：右側的紙雕衣櫃（手機在下方），四個抽屜分頁；點配件就穿上，點雪人身上的配件就拿下。 */
-.wardrobe { position: absolute; top: 4.4rem; right: 1rem; bottom: 1rem; width: min(15.5rem, 34%); display: flex; flex-direction: column; gap: .6rem; padding: .8rem; border-radius: 20px; background: #fffbedee; box-shadow: inset 0 0 0 3px #e8dcc2, 0 8px 0 -2px #dccaa9; pointer-events: auto; }
+/* 雪人換裝：右側的紙雕衣櫃（手機在下方），四個抽屜分頁；點配件就穿上，點雪人身上的配件就拿下。底部讓開右下角的音樂按鈕。 */
+.wardrobe { position: absolute; top: 4.4rem; right: 1rem; bottom: 5.4rem; width: min(15.5rem, 34%); display: flex; flex-direction: column; gap: .6rem; padding: .8rem; border-radius: 20px; background: #fffbedee; box-shadow: inset 0 0 0 3px #e8dcc2, 0 8px 0 -2px #dccaa9; pointer-events: auto; }
 .wardrobe-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: .3rem; }
 .wardrobe-tabs button { padding: .35rem 0; color: var(--ink); background: #efe4cc; border: 0; border-radius: 10px 10px 4px 4px; font-size: var(--fs-small); font-weight: 700; }
 .wardrobe-tabs button[aria-pressed="true"] { color: var(--cream); background: var(--red); }
@@ -125,6 +125,8 @@
   /* 窄螢幕上提示放到「回到小屋前」下面，不會疊在一起。 */
   .cabin-caption { top: 3.6rem; max-width: calc(100% - 2rem); }
   .wardrobe-items { grid-template-columns: repeat(3, 1fr); }
+  /* 衣櫃在下方時，「恢復原樣」右端讓開音樂按鈕。 */
+  .wardrobe-reset { margin-right: 3.8rem; }
 }
 @media (prefers-reduced-motion: reduce) { .play-target, .play-burst, .play-confetti { animation: none; } .play-item, .wardrobe-item, .wardrobe-ghost.is-flying, .feed-ghost.is-flying, .feed-meal, .feed-mouth { transition: none; } .reindeer-bubble.is-popping, .hoist-grip, .hoist-hook { animation: none; } }
 /* 紙雕聖誕老人替身：3D 小屋準備好之前先站在雪地上。 */
@@ -162,5 +164,20 @@
 .santa-page .page-foreground { margin-top: 0; background: #fff9eb; }
 @media (max-width: 700px) {
   .cabin { height: max(560px, calc(100svh - 86px)); }
+}
+/* 觸控螢幕：每個按鈕至少 44px 見方，手指點得準。 */
+@media (pointer: coarse) {
+  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send { min-width: 44px; min-height: 44px; }
+}
+/* 橫拿的手機：小屋和螢幕一樣高（點進角落或屋裡時捲到剛好整個露出），衣櫃、食物籃、對話框改成右側窄欄，提示放到左上。 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .cabin { height: 100svh; }
+  .cabin-caption { left: 1rem; top: 4rem; max-width: calc(60% - 2rem); translate: none; text-align: left; }
+  .wardrobe { top: .6rem; right: .6rem; width: min(17rem, 36%); padding: .6rem; }
+  .wardrobe-items { grid-template-columns: repeat(3, 1fr); }
+  .feed-tray { left: auto; right: 1rem; top: 50%; bottom: auto; translate: 0 -50%; }
+  .feed-basket { flex-direction: column; }
+  .cabin-chat { top: .6rem; width: min(20rem, 40%); }
+  .cabin-letter { max-height: calc(100% - 1.5rem); overflow: auto; }
 }
 @media (prefers-reduced-motion: reduce) { .cabin-flake { display: none; } }

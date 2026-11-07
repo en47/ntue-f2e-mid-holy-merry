@@ -217,6 +217,18 @@ await test('Santa 紙板預先畫成 WebP：圖片對應目前畫法、手機用
   assert.ok(scene.indexOf('const santaReady = loadSanta()') > scene.indexOf('ready = true; frameView();') && scene.includes('boardInSight(board, sweep)') && scene.includes('!roomIn'), 'Santa, the room and what the first view cannot see come after the page opens; walking in waits for the room');
   assert.ok(entry.includes('result.santa.then('), 'The note on the empty chair waits until Santa is known not to come');
 });
+await test('Santa 手機版：觸控按鈕至少 44px、橫拿手機改右側窄欄、看不到的模型不畫、面板讓開音樂按鈕', async () => {
+  const css = await fs.readFile(path.join(project, 'css/santa.css'), 'utf8'), scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8');
+  const block = query => { const start = css.indexOf(`@media ${query} {`); assert.ok(start >= 0, `少了 @media ${query}`); return css.slice(start, css.indexOf('\n}', start)); };
+  const coarse = block('(pointer: coarse)');
+  for (const selector of ['.cabin-back', '.wardrobe-tabs button', '.wardrobe-reset', '.hoist-hook', '.hoist-release', '.cabin-letter-close', '.chat-fold', '.chat-send']) assert.ok(coarse.includes(selector), `${selector} 在觸控螢幕上至少 44px`);
+  assert.ok(coarse.includes('min-width: 44px; min-height: 44px'));
+  const sideways = block('(orientation: landscape) and (max-height: 500px)');
+  assert.ok(sideways.includes('.cabin { height: 100svh; }') && sideways.includes('.feed-basket { flex-direction: column; }') && sideways.includes('.wardrobe {') && sideways.includes('.cabin-chat {'), 'A phone held sideways gets the whole screen and the trays down the right side');
+  assert.ok(entry.includes("matchMedia('(orientation: landscape) and (max-height: 500px)')") && entry.includes('fitSideways()'), 'Opening a corner sideways scrolls the cabin fully into view');
+  assert.ok(/\.wardrobe \{[^}]*bottom: 5\.4rem/.test(css) && css.includes('.wardrobe-reset { margin-right: 3.8rem; }'), 'The wardrobe stays clear of the music button');
+  assert.ok(scene.includes("chair.visible = view === 'inside' || trip?.direction === 'in' || trip?.direction === 'out'") && scene.includes('reindeerHolder.visible = frustum.intersectsSphere(reindeerBounds)'), 'Santa is drawn only around the room and the reindeer only while in view');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

@@ -9,6 +9,13 @@ const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], FOUND = 'holy-merry:
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 // The flight down over the village is for a large desktop window; a phone, a tablet or a small window starts at the house.
 const roomy = matchMedia('(min-width: 1100px) and (min-height: 650px) and (hover: hover) and (pointer: fine)');
+// A phone held sideways: the cabin is as tall as the screen (css/santa.css), so opening a corner or the room scrolls it fully
+// into view, with the trays down its right side.
+const sideways = matchMedia('(orientation: landscape) and (max-height: 500px)'), cabinBox = stage.closest('.cabin');
+function fitSideways() {
+  const box = cabinBox.getBoundingClientRect();
+  if (sideways.matches && (box.top < -1 || box.bottom > innerHeight + 1)) cabinBox.scrollIntoView({ block: 'start', behavior: motion.matches ? 'auto' : 'smooth' });
+}
 mountCabinBackdrop(document.querySelector('.cabin-backdrop'));
 mountCabinPaper(document.querySelector('.cabin'));
 // The letter-paper chat with Santa waits in the room (its writing line stays off until the AI reply is ready).
@@ -28,7 +35,7 @@ function onFound(id) {
   status.textContent = found.size === SPOTS.length ? '招牌上的星星全亮了！院子裡的秘密你全找到了。' : `發現了一個角落（${found.size}/${SPOTS.length}），招牌上又亮了一顆星。`;
 }
 function onView(view) {
-  if (view !== 'outside') tip.classList.add('is-gone');
+  if (view !== 'outside') { tip.classList.add('is-gone'); fitSideways(); }
   back.hidden = view === 'outside'; back.textContent = view === 'inside' ? '← 走出門外' : '← 回到小屋前'; clearTimeout(enterTimer); play?.leave();
   if (SPOTS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : 1000);
   if (view === 'inside') status.textContent = '推開門走進屋裡：聖誕老人坐在火爐邊。拖曳可以環顧整個房間，點門口就能出去。';
