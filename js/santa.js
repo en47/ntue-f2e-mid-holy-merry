@@ -2,33 +2,59 @@ import { mountCabinBackdrop } from './components/cabin-backdrop.js';
 
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
-const enter = document.querySelector('#cabin-enter'), leave = document.querySelector('#cabin-leave'), hint = document.querySelector('#cabin-hint-text');
+const back = document.querySelector('#cabin-back'), tip = document.querySelector('#cabin-tip'), explore = [...document.querySelectorAll('.cabin-explore [data-spot]')];
+const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
+const motion = matchMedia('(prefers-reduced-motion: reduce)');
 mountCabinBackdrop(document.querySelector('.cabin-backdrop'));
-// Outside sees the whole house; inside moves up to Santa. The buttons are the keyboard and screen-reader way in and out.
-function showView(view) {
-  enter.hidden = view === 'inside'; leave.hidden = view !== 'inside';
-  hint.textContent = view === 'inside' ? '拖曳看看屋裡四周，放開會轉回聖誕老人' : '拖曳轉轉小屋，點聖誕老人進屋';
-  status.textContent = view === 'inside' ? '走進屋裡了：聖誕老人就坐在你面前。' : '回到屋外，看得到整棟小屋。';
-}
-enter.addEventListener('click', () => { cabin?.setView('inside'); leave.focus(); });
-leave.addEventListener('click', () => { cabin?.setView('outside'); enter.focus(); });
 
-let cabin = null, generation = 0;
-// The loader's queue walks forward as this number grows (0–100).
+// Corners already found stay found on this browser (a convenience: an empty store just starts over).
+// Ids no longer in the yard (the elf that used to sit in a fir) are dropped.
+let found = new Set(); try { found = new Set((JSON.parse(localStorage.getItem(FOUND)) || []).filter(id => SPOTS.includes(id))); } catch { /* start fresh */ }
+let cabin = null, play = null, generation = 0, enterTimer = 0;
 const progress = value => { stage.dataset.progress = String(Math.round(value * 100)); };
+const markExplore = () => explore.forEach(button => button.classList.toggle('is-found', found.has(button.dataset.spot)));
+
+function onFound(id) {
+  if (found.has(id)) return;
+  found.add(id); try { localStorage.setItem(FOUND, JSON.stringify([...found])); } catch { /* still lit for this visit */ }
+  cabin?.setFound([...found]); cabin?.repaint('sign', { stars: found.size }); markExplore();
+  status.textContent = found.size === SPOTS.length ? '招牌上的星星全亮了！院子裡的秘密你全找到了。' : `發現了一個角落（${found.size}/${SPOTS.length}），招牌上又亮了一顆星。`;
+}
+function onView(view) {
+  back.hidden = view === 'outside'; clearTimeout(enterTimer); play?.leave();
+  if (SPOTS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : 1000);
+  if (view === 'inside') status.textContent = '走進屋裡了：聖誕老人就坐在你面前。';
+  if (view === 'outside') status.textContent = '回到屋外，看得到整個院子。';
+}
+back.addEventListener('click', () => cabin?.setView('outside'));
+explore.forEach(button => button.addEventListener('click', () => { cabin?.setView(button.dataset.spot); back.focus(); }));
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && cabin && cabin.view !== 'outside') { cabin.setView('outside'); stage.querySelector('.cabin-gesture').focus(); } });
+markExplore();
+
+// A one-time hint, gone after the first touch of the scene.
+function showTip() {
+  let seen = false; try { seen = sessionStorage.getItem(TIP) === '1'; sessionStorage.setItem(TIP, '1'); } catch { /* show it anyway */ }
+  if (seen) return;
+  tip.hidden = false;
+  const hide = () => tip.classList.add('is-gone');
+  stage.addEventListener('pointerdown', hide, { once: true }); setTimeout(hide, 8000);
+}
+
 async function mountCabin() {
   const run = ++generation;
   stage.dataset.state = 'loading'; stage.setAttribute('aria-busy', 'true'); progress(0);
   status.textContent = '小屋準備中……'; away.hidden = true;
   try {
-    const { mountCabin: build } = await import('./components/cabin-scene.js');
+    const [{ mountCabin: build }, { mountPlay }] = await Promise.all([import('./components/cabin-scene.js'), import('./components/cabin-play.js')]);
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, onView: showView, isCurrent: () => run === generation });
+    const result = await build(stage, { onProgress: progress, onView, isCurrent: () => run === generation });
     if (!result || run !== generation) { result?.destroy(); return; }
-    cabin = result;
+    cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; } });
+    cabin.setFound([...found]);
+    if (found.size) { cabin.repaint('sign', { stars: found.size }); play.restore([...found]); }
     stage.dataset.state = 'ready'; stage.dataset.santa = result.santa ? 'home' : 'away';
-    away.hidden = result.santa; progress(1);
-    status.textContent = result.santa ? '聖誕老人正坐在搖椅上。' : '聖誕老人去餵麋鹿了，搖椅上留了一張紙條。';
+    away.hidden = result.santa; progress(1); showTip();
+    status.textContent = result.santa ? '聖誕老人正坐在搖椅上。院子裡藏著四個角落可以探索。' : '聖誕老人去餵麋鹿了，搖椅上留了一張紙條。';
   } catch (error) {
     if (run !== generation) return;
     console.error('Santa cabin failed to load', error);
@@ -38,6 +64,6 @@ async function mountCabin() {
     if (run === generation) stage.setAttribute('aria-busy', 'false');
   }
 }
-window.addEventListener('pagehide', () => { generation++; cabin?.destroy(); cabin = null; });
+window.addEventListener('pagehide', () => { generation++; clearTimeout(enterTimer); play?.destroy(); play = null; cabin?.destroy(); cabin = null; });
 window.addEventListener('pageshow', event => { if (event.persisted) mountCabin(); });
 mountCabin();

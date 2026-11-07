@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, CHAIR, FIRE, GROUND, HOUSE, LANTERN, PX, REINDEER, SIGN, SMOKE } from './cabin-art.js';
+import { BOARDS, CHAIR, FIRE, GROUND, HOUSE, LANTERN, PX, REINDEER, SIGN, SMOKE, SPOTS } from './cabin-art.js';
 import { paperFilter, shape } from './paper-art.js';
 import { createHeadTracker } from './santa-head.js';
 
@@ -17,6 +17,11 @@ const VIEWS = {
   outside: { target: [0, 1.7, .3], tallTarget: [-.85, 1.7, .3], fit: [8.8, 5.6], tallFit: [6, 5.6], fov: 36, pitch: .24, maxYaw: .55, minPitch: .1, maxPitch: .44 },
   inside: { target: [CHAIR.x + .15, .62, CHAIR.z], distance: 2.5, tallDistance: 3.2, fov: 34, pitch: .12, maxYaw: .32, minPitch: .02, maxPitch: .28 },
 };
+// Each corner of the yard is a view of its own: the camera steps up to it and only turns a little while you play there.
+for (const spot of SPOTS) {
+  const { target, distance, pitch, yaw } = spot.view;
+  VIEWS[spot.id] = { target, distance, tallDistance: distance * 1.35, fov: 34, pitch, yaw, maxYaw: .12, minPitch: 0, maxPitch: .25 };
+}
 let paperCount = 0;
 
 // Each board is cut once into an image; nothing in the SVG animates afterwards.
@@ -26,7 +31,7 @@ async function paintBoard(board, quality) {
   const svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width: Math.round(width * quality * density), height: Math.round(height * quality * density) });
   const plain = shape('g', {}, svg);
   const paper = shape('g', { filter: paperFilter(svg, `cabin-paper-${++paperCount}`, { scale: board.kind === 'scenery' ? .8 : board.kind ? 1.6 : 1.1, grain: .5, shadow: 0 }) }, svg);
-  board.draw({ plain, paper, svg }, { width, height });
+  board.draw({ plain, paper, svg }, { width, height }, board.state);
   const image = new Image();
   image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`;
   await image.decode();
@@ -124,7 +129,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const quality = Math.min(1, Math.max(.5, stage.clientWidth * Math.min(devicePixelRatio || 1, 2) / 2000));
   let painted = 0, santaShare = 0, reindeerShare = 0;
   const report = () => onProgress(Math.min(1, painted / (BOARDS.length + 1) * .35 + santaShare * .45 + reindeerShare * .2));
-  const flames = [], twinkles = [], swings = [], smoke = [], billboards = [];
+  // Sheets by id, so a game can redraw one (the snowman's hat, the hay in the loft).
+  const flames = [], twinkles = [], swings = [], smoke = [], billboards = [], sheets = new Map();
   // Soft bluish shadows on the snow, thrown right and back, away from the low sun on the left.
   const shade = keep(textures, radialTexture([[0, 'rgba(110,140,170,.42)'], [1, 'rgba(110,140,170,0)']], 64));
   const shadowMaterial = keep(materials, new THREE.MeshBasicMaterial({ map: shade, transparent: true, depthWrite: false, toneMapped: false }));
@@ -168,7 +174,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       if (board.flat === 'ground') { holder.rotation.set(-Math.PI / 2, 0, board.turn ?? 0); holder.position.y = GROUND + .006; }
       else if (board.turn) holder.rotation.y = board.turn;
       if (board.mirror) holder.scale.x = -1;
-      if (!board.kind && !board.flat) { const edge = new THREE.Mesh(geometry, keep(materials, edgeMaterial(map))); edge.position.z = -.012; holder.add(edge); }
+      if (!board.kind && !board.flat) { const edge = new THREE.Mesh(geometry, keep(materials, edgeMaterial(map))); edge.position.z = -.012; holder.add(edge); sheets.set(board.id, { board, material, edge, holder, home: holder.position.clone() }); }
       if (!board.kind && !board.flat && !board.hang && !board.chair && board.at[1] === GROUND) shadow(board.at[0], board.at[2], board.w * 1.1, board.w * .5, board.h);
     }
     if (board.flame) flames.push(holder);
@@ -194,6 +200,14 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const blob = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(1.1, .75)), keep(materials, new THREE.MeshBasicMaterial({ map: keep(textures, radialTexture([[0, 'rgba(60,35,20,.4)'], [1, 'rgba(60,35,20,0)']], 64)), transparent: true, depthWrite: false, toneMapped: false })));
   blob.rotation.x = -Math.PI / 2; blob.position.set(CHAIR.x, .006, CHAIR.z + .05); house.add(blob);
 
+  const hitTargets = SPOTS.map(spot => {
+    const [[x, y, z], [w, h, d]] = spot.box, mesh = new THREE.Mesh(keep(geometries, new THREE.BoxGeometry(w, h, d)), keep(materials, new THREE.MeshBasicMaterial({ visible: false })));
+    mesh.position.set(x, y, z); mesh.userData.spot = spot.id; house.add(mesh); return mesh;
+  });
+  const glint = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: keep(textures, radialTexture([[0, 'rgba(255,255,240,1)'], [.25, 'rgba(255,230,150,.8)'], [1, 'rgba(255,220,120,0)']], 64)), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })));
+  glint.visible = false; house.add(glint);
+  let found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null;
+  const wiggles = new Map();
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const fitModel = (model, height) => {
     const bounds = new THREE.Box3().setFromObject(model), size = bounds.getSize(new THREE.Vector3()), center = bounds.getCenter(new THREE.Vector3());
@@ -202,7 +216,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     model.traverse(node => { if (node.isMesh) node.frustumCulled = false; });
     return holder;
   };
-  let santaModel, spine, spineRest, tracker;
+  let santaModel, spine, spineRest, tracker, reindeerHolder, reindeerHead, reindeerRest;
   const santa = loader.loadAsync(new URL('../../assets/models/santa-seated-web.glb', import.meta.url).href, event => { if (event.total) { santaShare = event.loaded / event.total; report(); } })
     .then(gltf => {
       santaModel = gltf.scene; chair.add(fitModel(santaModel, 1));
@@ -213,7 +227,11 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     .finally(() => { santaShare = 1; report(); });
   // The reindeer from the Home page waits outside; most visitors already have this file cached.
   const reindeer = loader.loadAsync(new URL('../../assets/models/reindeer-web.glb', import.meta.url).href, event => { if (event.total) { reindeerShare = event.loaded / event.total; report(); } })
-    .then(gltf => { const holder = fitModel(gltf.scene, REINDEER.height); holder.position.set(REINDEER.x, GROUND, REINDEER.z); holder.rotation.y = REINDEER.turn; house.add(holder); shadow(REINDEER.x, REINDEER.z, 1.2, .6, 1); return true; })
+    .then(gltf => {
+      const holder = fitModel(gltf.scene, REINDEER.height); holder.position.set(REINDEER.x, GROUND, REINDEER.z); holder.rotation.y = REINDEER.turn; house.add(holder); shadow(REINDEER.x, REINDEER.z, 1.2, .6, 1);
+      reindeerHolder = holder; gltf.scene.traverse(node => { if (node.isBone && /Head_0$/.test(node.name)) reindeerHead = node; }); reindeerRest = reindeerHead?.quaternion.clone();
+      return true;
+    })
     .catch(error => { console.error('Reindeer failed to load', error); return false; })
     .finally(() => { reindeerShare = 1; report(); });
 
@@ -260,6 +278,38 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     for (const [index, material] of twinkles.entries()) material.opacity = still ? 1 : .72 + Math.sin(t * 2.6 + index) * .28;
     for (const [holder, swing] of swings) holder.rotation.z = still ? 0 : Math.sin(t * 1.1) * swing;
     lanternGlow.material.opacity = .85 + (still ? 0 : Math.sin(t * 3.1) * .1);
+    // A glint over a corner not yet found, every few seconds, only while looking at the whole yard.
+    if (!still && view === 'outside' && t > nextGlint) {
+      const hidden = SPOTS.filter(spot => !found.has(spot.id));
+      glintSpot = hidden.length ? hidden[Math.floor(Math.random() * hidden.length)] : null; glintAt = t; nextGlint = t + 5.5;
+    }
+    const glow = glintSpot && view === 'outside' && !still ? (t - glintAt) / 1.4 : 1;
+    glint.visible = glow < 1;
+    if (glint.visible) { const [[x, y, z], [, h]] = glintSpot.box; glint.position.set(x, y + h * .45, z + .1); glint.scale.setScalar(Math.sin(glow * Math.PI) * .9); }
+    for (const [id, started] of wiggles) {
+      const sheet = sheets.get(id), u = (t - started) / 1.6;
+      if (!sheet) continue;
+      sheet.holder.rotation.z = u < 1 ? Math.sin(u * Math.PI * 5) * .12 * (1 - u) : 0;
+      if (u >= 1) wiggles.delete(id);
+    }
+    // The reindeer's head follows the food in your hand; nods while it eats, shakes at gingerbread, droops when full.
+    if (reindeerHead && reindeerRest) {
+      const ease = still ? 1 : .15;
+      reindeerTurn[0] += (reindeerAim[0] - reindeerTurn[0]) * ease; reindeerTurn[1] += (reindeerAim[1] - reindeerTurn[1]) * ease;
+      let extraYaw = 0, extraPitch = 0;
+      if (reindeerAction) {
+        const u = (t - reindeerAction.start) / 1.4;
+        if (reindeerAction.kind === 'nod') extraPitch = u < 1 ? Math.sin(u * Math.PI * 4) * .18 : 0;
+        if (reindeerAction.kind === 'shake') extraYaw = u < 1 ? Math.sin(u * Math.PI * 5) * .3 : 0;
+        if (reindeerAction.kind === 'sleep') extraPitch = Math.min(1, u) * .45;
+        if (u >= 1 && reindeerAction.kind !== 'sleep') reindeerAction = null;
+      }
+      reindeerHead.quaternion.copy(reindeerRest);
+      reindeerHolder.updateMatrixWorld(true);
+      const parent = reindeerHead.parent.getWorldQuaternion(new THREE.Quaternion()), side = new THREE.Vector3(1, 0, 0).applyQuaternion(reindeerHolder.quaternion);
+      const delta = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), reindeerTurn[0] + extraYaw).multiply(new THREE.Quaternion().setFromAxisAngle(side, reindeerTurn[1] + extraPitch));
+      reindeerHead.quaternion.premultiply(parent.clone().invert().multiply(delta).multiply(parent));
+    }
     for (const puff of smoke) {
       const life = still ? puff.userData.phase : (t * .18 + puff.userData.phase) % 1;
       puff.position.set(FIRE.x + life * 1.25, 3.38 + life * .6, -.75); puff.scale.set(.3 + life * .4, .22 + life * .28, 1);
@@ -294,7 +344,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (!VIEWS[name] || name === view) return;
     view = name; clearTimeout(returnTimer);
     const goal = goalFor(view); goalTarget.copy(goal.target); goalDistance = goal.distance; goalFov = goal.fov;
-    goalYaw = 0; goalPitch = VIEWS[view].pitch;
+    goalYaw = VIEWS[view].yaw ?? 0; goalPitch = VIEWS[view].pitch;
     stage.dataset.view = view; onView(view); wake();
   }
   const onVisibility = () => { if (document.hidden) stop(); else if (!motion.matches) start(); };
@@ -303,11 +353,12 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // Turning: drag anywhere on the stage, or use the arrow keys on the focused gesture button. A tap on Santa goes inside.
   const gesture = stage.querySelector('.cabin-gesture'), on = (node, type, handler, options = {}) => node?.addEventListener(type, handler, { ...options, signal: events.signal });
   const limits = () => VIEWS[view];
-  const clampYaw = value => Math.max(-limits().maxYaw, Math.min(limits().maxYaw, value)), clampPitch = value => Math.max(limits().minPitch, Math.min(limits().maxPitch, value));
+  const baseYaw = () => limits().yaw ?? 0;
+  const clampYaw = value => Math.max(baseYaw() - limits().maxYaw, Math.min(baseYaw() + limits().maxYaw, value)), clampPitch = value => Math.max(limits().minPitch, Math.min(limits().maxPitch, value));
   function scheduleReturn() {
     clearTimeout(returnTimer);
     if (motion.matches) return;
-    returnTimer = setTimeout(() => { goalYaw = 0; goalPitch = limits().pitch; wake(); }, RETURN_AFTER);
+    returnTimer = setTimeout(() => { goalYaw = baseYaw(); goalPitch = limits().pitch; wake(); }, RETURN_AFTER);
   }
   function onSanta(x, y) {
     if (!santaModel) return false;
@@ -316,6 +367,27 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const xs = corners.map(point => rect.left + (point.x + 1) / 2 * rect.width), ys = corners.map(point => rect.top + (1 - point.y) / 2 * rect.height);
     return x >= Math.min(...xs) && x <= Math.max(...xs) && y >= Math.min(...ys) && y <= Math.max(...ys);
   }
+  const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  function spotAt(x, y) {
+    const rect = stage.getBoundingClientRect();
+    ndc.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    return raycaster.intersectObjects(hitTargets, false)[0]?.object.userData.spot ?? null;
+  }
+  // Screen rectangle (relative to the stage) of a spot's box or of any world-space box, for the games laid over the scene.
+  function rectOfBox(center, size) {
+    const rect = stage.getBoundingClientRect(), xs = [], ys = [];
+    for (const dx of [-.5, .5]) for (const dy of [-.5, .5]) for (const dz of [-.5, .5]) {
+      const point = new THREE.Vector3(center[0] + dx * size[0], center[1] + dy * size[1], center[2] + dz * size[2]).project(camera);
+      xs.push((point.x + 1) / 2 * rect.width); ys.push((1 - point.y) / 2 * rect.height);
+    }
+    return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+  }
+  let hoverFrame = 0;
+  on(gesture, 'pointermove', event => {
+    if (pointer || event.pointerType !== 'mouse' || view !== 'outside' || hoverFrame) return;
+    hoverFrame = requestAnimationFrame(() => { hoverFrame = 0; stage.classList.toggle('is-pointing', Boolean(spotAt(event.clientX, event.clientY) || onSanta(event.clientX, event.clientY))); });
+  });
   let pointer = null;
   on(gesture, 'pointerdown', event => {
     if (pointer || (event.pointerType === 'mouse' && event.button !== 0)) return;
@@ -334,7 +406,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (!pointer || (event && event.pointerId !== pointer.id)) return;
     const tapped = !pointer.moved && event?.type === 'pointerup';
     pointer = null; dragging = false; stage.classList.remove('is-turning');
-    if (tapped && view === 'outside' && onSanta(event.clientX, event.clientY)) setView('inside');
+    const spot = tapped && view === 'outside' ? spotAt(event.clientX, event.clientY) : null;
+    if (spot) setView(spot);
+    else if (tapped && view === 'outside' && onSanta(event.clientX, event.clientY)) setView('inside');
     else { scheduleReturn(); wake(); }
   };
   on(gesture, 'pointerup', release); on(gesture, 'pointercancel', release); on(gesture, 'lostpointercapture', release);
@@ -342,8 +416,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   on(gesture, 'keydown', event => {
     const step = { ArrowLeft: [.12, 0], ArrowRight: [-.12, 0], ArrowUp: [0, -.05], ArrowDown: [0, .05] }[event.key];
     if (step) { event.preventDefault(); goalYaw = clampYaw(goalYaw + step[0]); goalPitch = clampPitch(goalPitch + step[1]); scheduleReturn(); wake(); }
-    else if (event.key === 'Escape' && view === 'inside') setView('outside');
-    else if (event.key === 'Home') { goalYaw = 0; goalPitch = limits().pitch; wake(); }
+    else if (event.key === 'Escape' && view !== 'outside') setView('outside');
+    else if (event.key === 'Home') { goalYaw = baseYaw(); goalPitch = limits().pitch; wake(); }
   });
 
   ready = true; frameView(); pose(); tracker?.update(0); draw();
@@ -360,7 +434,28 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     stop(); clearTimeout(returnTimer); resize?.disconnect(); visible?.disconnect();
     release3d();
   }
-  return { santa: santaReady, destroy, setView, get view() { return view; } };
+  // What the games may do to the scene.
+  async function repaint(id, patch) {
+    const sheet = sheets.get(id); if (!sheet) return;
+    sheet.board.state = { ...sheet.board.state, ...patch };
+    const next = texture(await paintBoard(sheet.board, quality)), old = sheet.material.map;
+    sheet.material.map = next; sheet.edge.material.map = next; textures.delete(old); old.dispose(); wake(); if (motion.matches || frame === undefined) draw();
+  }
+  const api = {
+    santa: santaReady, destroy, setView, get view() { return view; }, repaint,
+    rect: id => { const spot = SPOTS.find(item => item.id === id); return spot ? rectOfBox(...spot.box) : null; },
+    rectOfBox,
+    setFound(ids) { found = new Set(ids); },
+    wave(id) { if (!motion.matches) { wiggles.set(id, clock); wake(); } },
+    // Points the reindeer's head at a spot on the stage (stage pixels); null looks straight ahead again.
+    reindeerLook(point) {
+      if (!point) { reindeerAim = [0, 0]; wake(); return; }
+      const box = rectOfBox([REINDEER.x, .9, REINDEER.z], [.6, .6, .6]), cx = box.left + box.width / 2, cy = box.top + box.height / 2;
+      reindeerAim = [THREE.MathUtils.clamp((cx - point.x) / (stage.clientWidth * .3), -1, 1) * .5, THREE.MathUtils.clamp((point.y - cy) / (stage.clientHeight * .3), -1, 1) * .3]; wake();
+    },
+    reindeerAct(kind) { reindeerAction = kind ? { kind, start: clock } : null; wake(); },
+  };
+  return api;
 
   // Hoisted, and touches nothing declared after the first await, so an abandoned load can call it too.
   function release3d() {
