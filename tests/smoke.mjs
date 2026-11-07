@@ -212,7 +212,11 @@ await test('Santa 紙板預先畫成 WebP：圖片對應目前畫法、手機用
   assert.ok(names.filter(name => name.startsWith('outfit-')).length === 21, 'Every accessory has its picture');
   const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), paint = await fs.readFile(path.join(project, 'js/components/cabin-paint.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8');
   assert.ok(!scene.includes('paperFilter') && !scene.includes('XMLSerializer') && scene.includes('cutBoard(') && paint.includes('return paintBoard(board, CUTS.sets[set], state)'), 'The scene only loads pictures; a missing or broken one is cut in the browser instead');
-  assert.ok(paint.includes('quality > .6 ? \'large\' : \'small\'') && scene.includes('cutSet('), 'Phones get the smaller set');
+  assert.ok(paint.includes("quality >= .9 ? 'hi' : quality > .6 ? 'large' : 'small'") && scene.includes('cutSet('), 'Retina and large screens get the finest set, phones the smallest');
+  assert.ok(Object.values(manifest.files).every(entry => entry.width <= 4096 && entry.height <= 4096), 'No picture is wider or taller than 4096 pixels');
+  const peaks = manifest.files['hi/peaks-back.webp'], sign = manifest.files['hi/sign.webp'];
+  assert.ok(peaks.width >= 4000 && sign.width === 1050, 'Far scenery is cut as fine as it shows on a large screen; the house keeps its own fineness');
+  assert.ok(scene.includes("matchMedia('(pointer: fine)').matches ? 2 : 1.5") && scene.includes('Math.min(devicePixelRatio || 1, sharpest)'), 'A desktop draws the scene at up to 2×, phones at 1.5×');
   assert.ok(entry.includes("(min-width: 1100px) and (min-height: 650px) and (hover: hover) and (pointer: fine)") && entry.includes('fly: fly && roomy.matches'), 'The arrival flight is only for a large desktop window');
   assert.ok(scene.indexOf('const santaReady = loadSanta()') > scene.indexOf('ready = true; frameView();') && scene.includes('boardInSight(board, sweep)') && scene.includes('!roomIn'), 'Santa, the room and what the first view cannot see come after the page opens; walking in waits for the room');
   assert.ok(entry.includes('result.santa.then('), 'The note on the empty chair waits until Santa is known not to come');

@@ -88,6 +88,8 @@ function roofFrame(side, layer) {
 
 export async function mountCabin(stage, { onProgress = () => {}, onView = () => {}, onTouch = () => {}, isCurrent = () => true, fly = false } = {}) {
   const motion = matchMedia('(prefers-reduced-motion: reduce)'), flying = fly && !motion.matches;
+  // A desktop screen gets the scene as sharp as the page around it (up to 2×); phones stop at 1.5× to spare the battery.
+  const sharpest = matchMedia('(pointer: fine)').matches ? 2 : 1.5;
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -462,7 +464,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   function frameView() {
     const width = stage.clientWidth, height = stage.clientHeight;
     if (!width || !height) return;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(width, height, false);
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, sharpest)); renderer.setSize(width, height, false);
     camera.aspect = width / height;
     if (trip || perched) return;
     const goal = goalFor(view); goalEye.copy(goal.eye); goalFov = goal.fov;

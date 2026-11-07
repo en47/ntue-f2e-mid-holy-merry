@@ -1,2167 +1,3262 @@
 {
   "generator": "scripts/build-cabin-boards.mjs",
   "sets": {
+    "hi": 1,
     "large": 0.75,
     "small": 0.5
   },
   "webp": {
-    "quality": 82,
-    "alphaQuality": 90,
-    "effort": 6,
-    "smartSubsample": true
+    "hi": {
+      "quality": 90,
+      "alphaQuality": 90,
+      "effort": 6,
+      "smartSubsample": true,
+      "preset": "drawing"
+    },
+    "small": {
+      "quality": 82,
+      "alphaQuality": 90,
+      "effort": 6,
+      "smartSubsample": true
+    },
+    "large": {
+      "quality": 90,
+      "alphaQuality": 90,
+      "effort": 6,
+      "smartSubsample": true,
+      "preset": "drawing"
+    }
   },
   "files": {
+    "hi/back.webp": {
+      "fingerprint": "bbd0c6bbbd3f71e0910006f4fb78d8fbd5c50bdf499c23e67217a7ff5e6af706",
+      "sha256": "d4c19f0b6b0414cf2991aa9394e0293f9114805fce480e1c10acd7758343d156",
+      "width": 1120,
+      "height": 1050,
+      "bytes": 44554
+    },
+    "hi/balloon-green.webp": {
+      "fingerprint": "a939e301e072862dbff6539aae00e16acef226172b2572c1929435b0fc11d6b9",
+      "sha256": "b3dc79ac94fc534c63f0a5a6025686a9c273e3d20112d5fe81206a38f38c8c29",
+      "width": 240,
+      "height": 320,
+      "bytes": 10914
+    },
+    "hi/balloon-red.webp": {
+      "fingerprint": "43800c3a65c8cfd8d1ea37a8763f86cea5e4d56ddfce49f915e5d66569620525",
+      "sha256": "dfb28d779721afaec155bada9914bc247f2d6983cd1e06fde1114b085e84b413",
+      "width": 240,
+      "height": 320,
+      "bytes": 11220
+    },
+    "hi/barrels.webp": {
+      "fingerprint": "ff9762a5d32fe47d01268d71992ff5e9322da135410b32c82ef48dbf54b29e57",
+      "sha256": "57af166060bf90787dec7579a6609b15e421c28cd5df4f5dce8650e06607fff3",
+      "width": 380,
+      "height": 241,
+      "bytes": 11136
+    },
+    "hi/bench-shore.webp": {
+      "fingerprint": "1dcc050b7dc5022ef31d16a7bc1eb1976ead93a53f389fda48f884c0737f59a2",
+      "sha256": "b38ce9ceac9445112e87fb8934c9a171211a97e4ab317e2e78de16d05d4422a9",
+      "width": 409,
+      "height": 263,
+      "bytes": 10678
+    },
+    "hi/bench.webp": {
+      "fingerprint": "47417945db4ef9067966db462f07dc42ba905c8f8f57d3c1e47e9efe44a12020",
+      "sha256": "5d8597accf3ee13eb0d462467b72f6f9af37d6099db3cb81907e43e2cbbf8362",
+      "width": 700,
+      "height": 450,
+      "bytes": 14650
+    },
+    "hi/bird-feeder.webp": {
+      "fingerprint": "a9bb80e8b7781ffd2cdd10b9bfcc4937d456386be56c1af651ef9c89452660b4",
+      "sha256": "5b604789a827925c629d65e0571f1033367125198e273aa01d721e6f3f9f6312",
+      "width": 275,
+      "height": 750,
+      "bytes": 7202
+    },
+    "hi/boat-moored.webp": {
+      "fingerprint": "e2ab499daa12a094bb3173e634080a57c9c225a06b2a87debbc06ac018ad9377",
+      "sha256": "0dcce91ae68f2170dd665a2ec87e6ffe10e9eb374a3c86e929d4d801b63a321c",
+      "width": 224,
+      "height": 272,
+      "bytes": 6448
+    },
+    "hi/boat.webp": {
+      "fingerprint": "e2ab499daa12a094bb3173e634080a57c9c225a06b2a87debbc06ac018ad9377",
+      "sha256": "0dcce91ae68f2170dd665a2ec87e6ffe10e9eb374a3c86e929d4d801b63a321c",
+      "width": 224,
+      "height": 272,
+      "bytes": 6448
+    },
+    "hi/boathouse.webp": {
+      "fingerprint": "fa7ddf2348aea1214f8a5d911d8ea0785f9e71249dcbe44ea2d4058c8f709309",
+      "sha256": "5a1b0717a70818f0f7ec767dfc69e2a5a38884f681569be8a586450181762571",
+      "width": 408,
+      "height": 425,
+      "bytes": 19802
+    },
+    "hi/bookshelf.webp": {
+      "fingerprint": "629cee71665515bbf7baeacc52faa5396fb9e6bd5a22e67ba5a8e5b0863bd5ca",
+      "sha256": "7d796e10bd07b7cf7d1e64608ae6bddaef9a33f6ff959473bfb60675c0e0ffa5",
+      "width": 275,
+      "height": 625,
+      "bytes": 36302
+    },
+    "hi/bunting-stalls.webp": {
+      "fingerprint": "2cb2d9e1642b16a91ab3247be36a6be3f3d4e9a54687d7883aba9639d1c2928f",
+      "sha256": "f605c175a1920f3063a34f2d947c85c889cb6512a562bf3a723e8ec61cbb0abc",
+      "width": 958,
+      "height": 625,
+      "bytes": 31556
+    },
+    "hi/bunting-wheel.webp": {
+      "fingerprint": "2edebca66c553cb791301c9827b84947330ec4691661b3ba3868be0b6ef8fb55",
+      "sha256": "f78ba1c1e8ab466a1987f2e02d19ddfa65bdd5a328cde379154fe12508cc0f52",
+      "width": 1139,
+      "height": 607,
+      "bytes": 33740
+    },
+    "hi/buoy.webp": {
+      "fingerprint": "342fec98ffab138771fa64daee6ae2592babc307185212c9946d201a198ae9f0",
+      "sha256": "d81d69a0339261d217b7e3964fca21ce5244e489d384d438d61065c414039b63",
+      "width": 92,
+      "height": 154,
+      "bytes": 2714
+    },
+    "hi/cane-far.webp": {
+      "fingerprint": "cccd1a1a5023f5821459614719a70b6727dc094188dc5bfd2d5616bae779f2ea",
+      "sha256": "8c417fc1f04093f068cb28716d5d5fdd80c2b93a15dcc0d95e9ec87a9a210d69",
+      "width": 150,
+      "height": 475,
+      "bytes": 3968
+    },
+    "hi/cane-left.webp": {
+      "fingerprint": "494cdecb9999321a791b206788991e9b6b88bcd0f9fa7b81491d1928b60ae645",
+      "sha256": "c52139d3ccc0bc80484ddb0cbc65908f3493f3a22174f8e103d3d03438039463",
+      "width": 158,
+      "height": 501,
+      "bytes": 5102
+    },
+    "hi/cane-near.webp": {
+      "fingerprint": "cccd1a1a5023f5821459614719a70b6727dc094188dc5bfd2d5616bae779f2ea",
+      "sha256": "8c417fc1f04093f068cb28716d5d5fdd80c2b93a15dcc0d95e9ec87a9a210d69",
+      "width": 150,
+      "height": 475,
+      "bytes": 3968
+    },
+    "hi/car-green.webp": {
+      "fingerprint": "7fb1cfb144f7d208ac0e87f9bbac4b6ce322977d45f7d8ab7e8597e339dafabd",
+      "sha256": "0351cced6dc5dde51381c4a6ab43441ecd192e468ff8290e19cc4a3a3b71878d",
+      "width": 180,
+      "height": 200,
+      "bytes": 4776
+    },
+    "hi/car-red.webp": {
+      "fingerprint": "10fd4df7586d0383bcba056da40b0fa89cf78d0445596c8ac7dc4c2ae6fcd1d0",
+      "sha256": "2258e11f8ee919f6b5f0783f67b59b12f6daa5857a9d9ae4e220ca27f9725edc",
+      "width": 180,
+      "height": 200,
+      "bytes": 4804
+    },
+    "hi/carousel-drum.webp": {
+      "fingerprint": "d4ca38bba0d55ea40bc7fc3c844cdd4c45376758e678732ad430198ae4fac5cd",
+      "sha256": "7b418e59746ef3e5f85a1a7f11d665fd547ff68df2e078a676157e148ef25701",
+      "width": 2309,
+      "height": 63,
+      "bytes": 10812
+    },
+    "hi/carousel-fringe.webp": {
+      "fingerprint": "dd1df071cde29eab17884c0afcae54781eb4435ee7ad63ecd74fdf6352c7b770",
+      "sha256": "f614273457fb85bd42e6ed37005eeabb0ca8b99e2344119b6dec047b31fa3101",
+      "width": 2644,
+      "height": 71,
+      "bytes": 20776
+    },
+    "hi/carousel-roof.webp": {
+      "fingerprint": "4c4cd5cbd5ccbd9ee756f69429189de9543148d1328f1d025e30ecc658af2549",
+      "sha256": "1c5da90bea5e29b3f1b18d1ff1affa0b868fd99073171a41f84f50a9864470cd",
+      "width": 2644,
+      "height": 462,
+      "bytes": 13622
+    },
+    "hi/chair-back.webp": {
+      "fingerprint": "05178053591375b239705ee7dd4f97d0bb1290fbae237a01ef302826642f24f0",
+      "sha256": "19a1d0a73e488747ab05cb685cf14cacfe638fab45a3d4baab3c02ace608db00",
+      "width": 410,
+      "height": 560,
+      "bytes": 33482
+    },
+    "hi/chair-front.webp": {
+      "fingerprint": "da5dbaf4ef60c40b8a5dabf7fec3bfd51d2d792850cff7eaeb4fc25a7e6639f9",
+      "sha256": "a0afa1dea1b178eb1184b4dda4af25a4f65b6fe5823b8e91c6ef2c66e7eff89b",
+      "width": 410,
+      "height": 220,
+      "bytes": 6868
+    },
+    "hi/chair-left.webp": {
+      "fingerprint": "3b16f88ee83b34bb5945fb30abb00dc216d04b4c1877a6cdc62cde4b6009882d",
+      "sha256": "1e2805a327326502f09ab1dd72651efdc318f64d1fe434260939d5e6e0d7dff9",
+      "width": 450,
+      "height": 500,
+      "bytes": 17202
+    },
+    "hi/chair-right.webp": {
+      "fingerprint": "3b16f88ee83b34bb5945fb30abb00dc216d04b4c1877a6cdc62cde4b6009882d",
+      "sha256": "1e2805a327326502f09ab1dd72651efdc318f64d1fe434260939d5e6e0d7dff9",
+      "width": 450,
+      "height": 500,
+      "bytes": 17202
+    },
+    "hi/coaster-car-a.webp": {
+      "fingerprint": "403b68c143a4d716f154977f9304d654c510bd6681a30de3934ce13c109e6ee6",
+      "sha256": "10f9df16eb0b46f3cce7f351f2d10f9045c79bc122eed0f26ba8f1f5b54561cf",
+      "width": 128,
+      "height": 92,
+      "bytes": 3622
+    },
+    "hi/coaster-car-b.webp": {
+      "fingerprint": "ff727f58693680661de48c777d8d9fbe38b4ce894fcfdaaf98078ea56c9f28d2",
+      "sha256": "424550cc6fbe7984594bfd1361186d79a6d95927adbcd495879e3acba23379f6",
+      "width": 128,
+      "height": 92,
+      "bytes": 3530
+    },
+    "hi/coaster-ends.webp": {
+      "fingerprint": "639bc5b65df0c3bb3200a6831a036df767610e55561cc3308f1dc24cbfcb9c89",
+      "sha256": "34fec25d75bce46a9009715e0e472a3c9d106955d009f3b424b9c143d9c04b8e",
+      "width": 1369,
+      "height": 737,
+      "bytes": 12110
+    },
+    "hi/coaster.webp": {
+      "fingerprint": "67b3cf1ae623128725ad8133b9b490730bb4c7675cbcb87bea2c6953f94311ef",
+      "sha256": "5c177d0321dd17227ede1317b89f2fbab39883dfe2fb1c26f3725e4354401ea5",
+      "width": 1369,
+      "height": 737,
+      "bytes": 120852
+    },
+    "hi/corral.webp": {
+      "fingerprint": "58fa6dd07a7e55389eed7c5da55c639845882f4a77f3699f3d68aca9880d78e2",
+      "sha256": "c589455bad5ec41ffcc1660ed9bfda03aa670960a88d07c971cd1e7966907edf",
+      "width": 1200,
+      "height": 350,
+      "bytes": 19278
+    },
+    "hi/dinghy.webp": {
+      "fingerprint": "69842e758ae942ccd64219e864b034f4e6db1856b19d6221b6d1d72f5a38d55c",
+      "sha256": "21998afed2fcc5d895edbac366fa792540e5b26957e52e1094a94862739bd987",
+      "width": 299,
+      "height": 115,
+      "bytes": 6172
+    },
+    "hi/dock.webp": {
+      "fingerprint": "796e8287d43c9fec105fcf0a99f158669e5389cf4d2fca2d7d6a78f6dbf11ca1",
+      "sha256": "b568dfb344738fd0a4aa49e602ff00f6108b9cb7af32ec3433f0511d8302f780",
+      "width": 544,
+      "height": 204,
+      "bytes": 13226
+    },
+    "hi/door-in.webp": {
+      "fingerprint": "596fb0c487c6d21faa41f9923be6a8497ae9125760dacf7f35b1b5ca797921c7",
+      "sha256": "554472215201c14225e33e283d45b77564f0247847e56b38e2df181c2be0fcce",
+      "width": 231,
+      "height": 525,
+      "bytes": 22648
+    },
+    "hi/door-out.webp": {
+      "fingerprint": "5c70ba032de118c542d159e41f987fb182b47f7e74ab226f92e37a21db011fff",
+      "sha256": "3aca6c661b0baea5cc82f19cfa5295bad90b6512545432d6702735c0510bcc8f",
+      "width": 231,
+      "height": 525,
+      "bytes": 25060
+    },
+    "hi/door-path.webp": {
+      "fingerprint": "79da32f9e641f1313f8839ef7cfc8186abd90deb2fbaab1d62fe2766acde23a5",
+      "sha256": "91bce499f1581f441a9102ea002efd419172492e2f3dd65d3a974dc93769aa45",
+      "width": 2016,
+      "height": 528,
+      "bytes": 10332
+    },
+    "hi/drift-left-mid.webp": {
+      "fingerprint": "db1467691dbc5d1cd3433d038a514c9222d6033d19aae78f40487f57ba93711c",
+      "sha256": "b1d3f6d0195df88fda574cbc9fb1351a6c749ef459e79f3b0a6e614553e7e9ef",
+      "width": 864,
+      "height": 288,
+      "bytes": 5562
+    },
+    "hi/drift-left-near.webp": {
+      "fingerprint": "2c6e551df800f0a1c93e77ccfede1400cc09d69ed5d793442f0a0c03abb530ff",
+      "sha256": "f68087fc26e8618599c101199b70ce473f1a811e230afe9857faeb32489d2ab2",
+      "width": 498,
+      "height": 156,
+      "bytes": 2932
+    },
+    "hi/drift-left.webp": {
+      "fingerprint": "c15cd9f195834ef1edb75872b92284cad06f9d4d116136da5afa7539820538f0",
+      "sha256": "51afe3c1d8348b5ee2be72044839dd213f8a73e653567d2bea6e85daf288a8e3",
+      "width": 450,
+      "height": 170,
+      "bytes": 2848
+    },
+    "hi/drift-right-mid.webp": {
+      "fingerprint": "3cd925225dc8fe97d8d3bf1f1915a918a7b9a16ae82f8d19b828a1e57a4f5759",
+      "sha256": "e5d71052d43fb6660f1b4c65abb41bb703ddabb5b4ae55fc78b7b3479155a00b",
+      "width": 436,
+      "height": 145,
+      "bytes": 2584
+    },
+    "hi/drift-right-near.webp": {
+      "fingerprint": "fa3c747a3abfc374cae83704551d2cfa93e63aa7f40df1d333ec5c2b914ac77e",
+      "sha256": "8b08a201cec7d8e9fb1f62108661308fbd348de48a9b9abc7801834177bc8c2a",
+      "width": 508,
+      "height": 159,
+      "bytes": 2868
+    },
+    "hi/drift-right.webp": {
+      "fingerprint": "c15cd9f195834ef1edb75872b92284cad06f9d4d116136da5afa7539820538f0",
+      "sha256": "51afe3c1d8348b5ee2be72044839dd213f8a73e653567d2bea6e85daf288a8e3",
+      "width": 450,
+      "height": 170,
+      "bytes": 2848
+    },
+    "hi/fence-left.webp": {
+      "fingerprint": "affeb629029267c96fc4f70d2470f8e007203982ff598a14a7bf0d000c7ac026",
+      "sha256": "130200a97e693aa5edaa3abd8138ee8459ba855633683c9e9ecf143287dcba87",
+      "width": 988,
+      "height": 288,
+      "bytes": 21232
+    },
+    "hi/fence.webp": {
+      "fingerprint": "58fa6dd07a7e55389eed7c5da55c639845882f4a77f3699f3d68aca9880d78e2",
+      "sha256": "c589455bad5ec41ffcc1660ed9bfda03aa670960a88d07c971cd1e7966907edf",
+      "width": 1200,
+      "height": 350,
+      "bytes": 19278
+    },
+    "hi/fir-a.webp": {
+      "fingerprint": "6281b035a9dec1d7bb97cdab60e51f1d73b1700447b16bebbd5958d329a6c96c",
+      "sha256": "7aa0c2fd8a3e3694a02bcf7400ed3ac61b298b3d37d8cdeb5e2ac0fe9b3fde08",
+      "width": 500,
+      "height": 1000,
+      "bytes": 50320
+    },
+    "hi/fir-b.webp": {
+      "fingerprint": "2e4995eaea765429e0e22354887abccc5abf53b8bcc176827c435061540daaa4",
+      "sha256": "650f1ad836eb5c76d3cc424ed58f58965cdc01f6697f99455f12f043be05a7c2",
+      "width": 500,
+      "height": 1000,
+      "bytes": 52142
+    },
+    "hi/fir-c.webp": {
+      "fingerprint": "6ad3cb99f17d63552b2e75270e8f027edcb46f2d2de109bfd58eb57275981431",
+      "sha256": "1b7904de7237cefe1a3ccd7b368689720f77d32a6945c79d2c0c1465ffc248d0",
+      "width": 500,
+      "height": 1000,
+      "bytes": 48272
+    },
+    "hi/fireplace.webp": {
+      "fingerprint": "694a28d45562a7e40ace7cd1dda9c2c90a7e6011c918a97e4331ad00ae61adb9",
+      "sha256": "6c652495ff6805b151b4d19996f83dda25bfff8f86264c39018b562ff94f3a11",
+      "width": 525,
+      "height": 570,
+      "bytes": 37246
+    },
+    "hi/flames.webp": {
+      "fingerprint": "21023cc75fc458521dfb26a13cd69f1839f88a599049a7c88038bc7e815d7041",
+      "sha256": "7d585981cd7759245f868943f7bd3a819cc007bf6bf958eae1837cad8e85cd6c",
+      "width": 180,
+      "height": 140,
+      "bytes": 3522
+    },
+    "hi/floor.webp": {
+      "fingerprint": "6d9a4024f23ff30c6239d861d01b45d7c964c09e608d7ce4b3ce41112e53d130",
+      "sha256": "56c9977b17ab1a3100a7c40ded3a4f6979431dfc908cbacae2427517a8642111",
+      "width": 1120,
+      "height": 1050,
+      "bytes": 39638
+    },
+    "hi/front-in.webp": {
+      "fingerprint": "a1ce5d90a552ae484bdf110189498652079fb948996030e366274dce96da0a33",
+      "sha256": "535afa9d93e08923ed2cf7b913b8241691c4611b31b5c538173a5d42c5242432",
+      "width": 1120,
+      "height": 1050,
+      "bytes": 49150
+    },
+    "hi/front-out.webp": {
+      "fingerprint": "a79385bb3147fb9e2d4d95aaf612e8a36a1f25b253cf56eebaf8bdf48aa49d7e",
+      "sha256": "b232b64d02983521341ebf005969e430742b247de751042e965bee60971c8089",
+      "width": 1190,
+      "height": 1050,
+      "bytes": 61376
+    },
+    "hi/game-sign.webp": {
+      "fingerprint": "e3a74bb8c3ab6f00c3d05a5142f5d1a31f89f8e7826510414adcf47f9c62e648",
+      "sha256": "017ce0e6ac2727fd3e541301c11b0afd32a271cd797165f52b16757fd8ae3e00",
+      "width": 360,
+      "height": 330,
+      "bytes": 14530
+    },
+    "hi/garland.webp": {
+      "fingerprint": "6641083abdd2613bc8e4519c5e1c5eb7347d66bf5e57abcbaf50f78fbaca664e",
+      "sha256": "e9d34a9f0ceeb19cfaea370b275d042f15a8fe86c0b6b3bc442672e3ca36958b",
+      "width": 2016,
+      "height": 710,
+      "bytes": 59420
+    },
+    "hi/gondola.webp": {
+      "fingerprint": "98e388e630dd1641585395c318332e4e80dfce45cd38a3bdfc9cc0358698c20a",
+      "sha256": "0b1d8d27025cdd99d723d3c5efc18cd58af168fe0132ca48ad6d9a7f11972830",
+      "width": 92,
+      "height": 121,
+      "bytes": 2410
+    },
+    "hi/grass-far.webp": {
+      "fingerprint": "9bc15c778ccb846eb4195f94733c09f77341e63a9600b3b5868faa8eac7f67b9",
+      "sha256": "455125edb8f7601e7fa7306484ff1a84abcdb3fbe3ab250bb7bb54577e8c7bd2",
+      "width": 240,
+      "height": 120,
+      "bytes": 7832
+    },
+    "hi/grass-near.webp": {
+      "fingerprint": "3dbe194c56615ea8af2e01e39b4a6ade1ef974693212000fcb36914dea747014",
+      "sha256": "6b328722745a28becdc7b2cf3b28947a8e27730aa48116f5a99b6678b1658abc",
+      "width": 398,
+      "height": 199,
+      "bytes": 12988
+    },
+    "hi/gull.webp": {
+      "fingerprint": "a758ebc5eb59141ffb6e3e94b6d6dfdbd1f112aaf506690ad43c57a6f87c6488",
+      "sha256": "155c7ce2fee3d61a7753119c1c223dc4e43a02fd8e4313f0fb5b14297a4ff98d",
+      "width": 100,
+      "height": 52,
+      "bytes": 1264
+    },
+    "hi/hills-left.webp": {
+      "fingerprint": "6155d495fd77fce18c5b4724a8a55d43d2de34b914a5cc0e97e89122ec4e18c8",
+      "sha256": "b7d94cc4f21b056c6ea9b06b0c38d9cb97378bc1dfb740473845c6f9cce9a6e6",
+      "width": 3739,
+      "height": 308,
+      "bytes": 18590
+    },
+    "hi/hills-near.webp": {
+      "fingerprint": "1ba71bdae0c9bb214ad02039b94ce1409f6b5a16758b5d2562163c5bae42c1ff",
+      "sha256": "b8ab513b5d3a5b97290581a6c8d455a93849c1dc01d1a85d69c24dd5981ac964",
+      "width": 1760,
+      "height": 62,
+      "bytes": 4706
+    },
+    "hi/hoist-bale.webp": {
+      "fingerprint": "b9131f5633ae0871eaa9d9d47440189e9527ada496a2685d404b0b80e22a2f5d",
+      "sha256": "b40d7359003165bd620fc00a7475a87dce230baf4347d31f515f22d5ae3348da",
+      "width": 210,
+      "height": 176,
+      "bytes": 5746
+    },
+    "hi/hoist-bracket.webp": {
+      "fingerprint": "331595fe9e1c6c7e796204cc18a23ad88cd1da0b95cc2870692701d4795e5213",
+      "sha256": "e8f12006d8b4b902de9076525656a54df4668dbd4df4275022d4114f5d3ddbe6",
+      "width": 260,
+      "height": 143,
+      "bytes": 4898
+    },
+    "hi/hoist-hatch--open-true.webp": {
+      "fingerprint": "657ebfee659e9f130a8e143409388afeb627218a29e5c38e1611d16cd7c0c6de",
+      "sha256": "149b0e1f9ae80d03c0a53c44d7b3b57a95fd8919d6b608f9e0db39d315d2a222",
+      "width": 185,
+      "height": 151,
+      "bytes": 6970
+    },
+    "hi/hoist-hatch.webp": {
+      "fingerprint": "94655d6d823cca32b89d1d79d834087bb2c16eec79c75783936d1fe78fa206e2",
+      "sha256": "244475a6ac6484545be33a06a13ee5fb537e7bcc7e9abdde57c45ffc632eea06",
+      "width": 185,
+      "height": 151,
+      "bytes": 7096
+    },
+    "hi/hoist-toggle.webp": {
+      "fingerprint": "4340da2067616760ede17d91663ed613033d343d5d13874253ee5aed560bf6c8",
+      "sha256": "4d8a1d46b8f2d0735844c67b0f6eb28347ccca3cbe59b6e110d003be3ba4fa8b",
+      "width": 55,
+      "height": 101,
+      "bytes": 1706
+    },
+    "hi/hoist-wheel.webp": {
+      "fingerprint": "a5de1b3164a1ea07e85b2bc4f62ccd21abc91a068a234d529f452e74a604f8d5",
+      "sha256": "2d5b9eb20934aff0b7e6fe99bc80e5d7ceda346f867877ce19bcce31c5d3a12d",
+      "width": 135,
+      "height": 135,
+      "bytes": 5068
+    },
+    "hi/hoofprints.webp": {
+      "fingerprint": "1db551b64ad257661eda81ad7df3ff3be95aca416192241ae8be17fa2568c1d0",
+      "sha256": "79974d10b0c6de4e90f4a143e6ab2baec0e6ecbea23bf3dea6830e2114e2acf0",
+      "width": 2200,
+      "height": 600,
+      "bytes": 8922
+    },
+    "hi/horse.webp": {
+      "fingerprint": "2c1060d4f18a8d864a3611d1a6ff156517d51c02ea2e93fb5c4d8cb52b5d67d9",
+      "sha256": "49939e566d385176c49c3b383de42aaa60789a24a22a10427ab2617b2c8221b1",
+      "width": 252,
+      "height": 216,
+      "bytes": 6274
+    },
+    "hi/island.webp": {
+      "fingerprint": "aefd5bb25cd48e332b03c12b2c0fc2a446feb37dd099540f725888b50fc76f60",
+      "sha256": "b03930965ba8197ff7de4a3c610acf42d27c1d86b80507daa5689da2578587e3",
+      "width": 1121,
+      "height": 193,
+      "bytes": 6308
+    },
+    "hi/islet.webp": {
+      "fingerprint": "8474de0fb9b0bf2428fd8aeeac0a31a1ef908ac6cd2df409f925f5d8fa6a9317",
+      "sha256": "ce5a84e8ac395aa2142aab6bb6f014b8b70722e33fc0d9297fff79ad4d5ab4b0",
+      "width": 504,
+      "height": 182,
+      "bytes": 12774
+    },
+    "hi/lamp-far.webp": {
+      "fingerprint": "96c0db7741be0bd001d91859b7f47de2b07c78279c7c57e9bb8ad01cd3c70850",
+      "sha256": "26fd01d53df5ae90893a8c4beb3e25b430fa8d677225359c8cf656cb555f4dc0",
+      "width": 275,
+      "height": 1100,
+      "bytes": 20028
+    },
+    "hi/lamp-near.webp": {
+      "fingerprint": "96c0db7741be0bd001d91859b7f47de2b07c78279c7c57e9bb8ad01cd3c70850",
+      "sha256": "26fd01d53df5ae90893a8c4beb3e25b430fa8d677225359c8cf656cb555f4dc0",
+      "width": 275,
+      "height": 1100,
+      "bytes": 20028
+    },
+    "hi/lamp-pond.webp": {
+      "fingerprint": "1045d8f6715128fbff64ebf5ec62f77a50a65b73832848e545504035e8042e83",
+      "sha256": "d9453e98eadfbe01e2a27dca6f2726bfd70481d7da47c8510338c4d76a32ee34",
+      "width": 224,
+      "height": 897,
+      "bytes": 19848
+    },
+    "hi/lamp-table.webp": {
+      "fingerprint": "66f63749cac6b81425ecab828f1a132416b0197b670f071db3dabfbc55c7eb40",
+      "sha256": "662675459742eb234a3b85869d4b9ce81bb4f078343622fbd796c25b0df3d922",
+      "width": 250,
+      "height": 450,
+      "bytes": 9064
+    },
+    "hi/lantern.webp": {
+      "fingerprint": "d3dbd5ebaf20d55e5775b8ca5fa89a9ac95799083916ee8fca73ae149ae50246",
+      "sha256": "305f43fe211ee2d5d6e59f310856c835c223765659adf49b971bda05e25f2562",
+      "width": 150,
+      "height": 280,
+      "bytes": 4618
+    },
+    "hi/left-out.webp": {
+      "fingerprint": "35bd6397f6f1484453e68c69c2a56140b88e1b9ca491f47e0275d21a54236b9e",
+      "sha256": "9b41a7a17897764df09089836bea38d405dba2ecbbdeaebcfb9b282481fb598e",
+      "width": 1050,
+      "height": 665,
+      "bytes": 21378
+    },
+    "hi/left.webp": {
+      "fingerprint": "7fbda2f7b08561702df96f067d45994d3733c5b66b31efbfc18db7e97a9fd963",
+      "sha256": "87c6f0b19bb20258cc1f8048ddabeb330b3106143b002693b133b16ecdf2f991",
+      "width": 1050,
+      "height": 665,
+      "bytes": 18862
+    },
+    "hi/lighthouse.webp": {
+      "fingerprint": "0efe3eb9bf6d10aec1f6ac2dc1eb313503d72ab8af5c8e430822927d161127b2",
+      "sha256": "65f32ce2f289f744b0e91cd9c6c56fdc4e60ed90ee12730522c387f225db3c64",
+      "width": 192,
+      "height": 768,
+      "bytes": 17566
+    },
+    "hi/mailbox--open-true.webp": {
+      "fingerprint": "077b5688f9d39f52782ccf943dfa353001e113d284354a89e3c033d4f9d5fd23",
+      "sha256": "4b48ee9d55e5a2b04e4903ee6da95db7b334cbdf03b551416cb25c62a7a3a805",
+      "width": 250,
+      "height": 475,
+      "bytes": 15112
+    },
+    "hi/mailbox.webp": {
+      "fingerprint": "a3ca26bcdf457e99948540c6675477936770fca1eed869083c318530dc459c6c",
+      "sha256": "5f2e78309f97603e907237172914380c0b73643b69c5872407f10b044efa2b58",
+      "width": 250,
+      "height": 475,
+      "bytes": 10662
+    },
+    "hi/outfit-antlers.webp": {
+      "fingerprint": "875c5b219cb093b227c46a9b26d23a18d80daf708a15ed621053adec2e65d03a",
+      "sha256": "7e40822fba77800e7d13a52a9c94608952d72c7110362e6e316ccfc6386d8901",
+      "width": 448,
+      "height": 448,
+      "bytes": 9256
+    },
+    "hi/outfit-beanie.webp": {
+      "fingerprint": "06c430a5f272c0427acc90fb360a6e91f4386f77824922dd4c22f60a5d776e32",
+      "sha256": "3e192e733e6ccf53eec361a8e21e12b19367465896e4d0d803f1d618b2e09bcf",
+      "width": 448,
+      "height": 448,
+      "bytes": 8136
+    },
+    "hi/outfit-beret.webp": {
+      "fingerprint": "47bdd4ad18d24b1b98c63776d3b96ee945116d8e683fafc0b92f3e4089143520",
+      "sha256": "bcd7097577e45905524efe46c0032bf01aed54328561e85c638f4c7de5a84c82",
+      "width": 448,
+      "height": 448,
+      "bytes": 8360
+    },
+    "hi/outfit-bow.webp": {
+      "fingerprint": "586bcb740c82b82d2ccea0f73b2037c97424aa00dc1395d07f05a48651df7360",
+      "sha256": "3820ba994f2f67ca8320a9165df36cb8f6e5a3b9c012b38b78d8aabe7634da02",
+      "width": 448,
+      "height": 269,
+      "bytes": 7232
+    },
+    "hi/outfit-broom.webp": {
+      "fingerprint": "2d200619122aa2ef4903c4b08c05019fa4cfb5ec9b02ef02d8e88e0c8f68c635",
+      "sha256": "ca124221bff1acb86b9ce75773f9dd2cb7e40d906e45c4a1b844cc317afe446e",
+      "width": 768,
+      "height": 384,
+      "bytes": 5824
+    },
+    "hi/outfit-button-nose.webp": {
+      "fingerprint": "bfa6062fb3bf34c19c74f7c53328b0b37afcb8acb0f0a68733390121f8b5e78f",
+      "sha256": "ad710cc90cb97ff89c580eea1e788d2b338e9455ecf3229c6aa928decc59315d",
+      "width": 256,
+      "height": 256,
+      "bytes": 1540
+    },
+    "hi/outfit-candy-cane.webp": {
+      "fingerprint": "0bf432d35ae773fdec3fd8f67014c862c454dbb1d1cb885f502609146f64135d",
+      "sha256": "ef5a13a0e5d21635e6016d3b882cbf6a1fe7de14e180c915899d3cd187b9e45c",
+      "width": 768,
+      "height": 384,
+      "bytes": 3368
+    },
+    "hi/outfit-cape.webp": {
+      "fingerprint": "46a2f788fec991152aed27f174fbd62ce2880f3171f36fb951c2556e4c34d659",
+      "sha256": "9001b5585ec3ad58150dcf9b4f83b4e9cd43e269351b5b8a13062a3ffc90311a",
+      "width": 448,
+      "height": 269,
+      "bytes": 11608
+    },
+    "hi/outfit-carrot.webp": {
+      "fingerprint": "7f69a5a60a419c881f788fd45d34c20d9199eca3fda0fc30fd5e8a0cdbe10aa8",
+      "sha256": "c2d658028f884990a42a67dad4e250192c8577d6edffd17f43989feecb21c48c",
+      "width": 256,
+      "height": 256,
+      "bytes": 1748
+    },
+    "hi/outfit-earmuffs.webp": {
+      "fingerprint": "86abf88f7a9ec2450b990d03bf98b15f8abee33d8f758683af6cf9ab7fee935e",
+      "sha256": "a02ed52261ac9f9f663c247860c1993414c1ab63e752130c565d7982ba9be3a2",
+      "width": 448,
+      "height": 448,
+      "bytes": 7730
+    },
+    "hi/outfit-gift.webp": {
+      "fingerprint": "1b471980ba00e1b2a7e3b7dc6aaaa56cd028ffe753dc8006a98d1d17bd1fb839",
+      "sha256": "c10ebc53928914173d0e867d856d645c04b41051ce745c54605703723c6ea2ea",
+      "width": 768,
+      "height": 384,
+      "bytes": 4072
+    },
+    "hi/outfit-lantern.webp": {
+      "fingerprint": "45517f76176096a1e116ede7cd4d08e420cb27a801df249965c381a8cc35e2d9",
+      "sha256": "ef223f796785dbfdedd9d1fc70ee5c038807da5c3fd26cf1756c197a76505394",
+      "width": 768,
+      "height": 384,
+      "bytes": 3364
+    },
+    "hi/outfit-mittens.webp": {
+      "fingerprint": "852b19f8d997cf655279798ae251891e7618f7431032f03a023491951a981615",
+      "sha256": "93eb814c9436b247f5d9999cb537a4e20fc44cd822d99555798f41eeb0c3196d",
+      "width": 768,
+      "height": 384,
+      "bytes": 7960
+    },
+    "hi/outfit-mustache.webp": {
+      "fingerprint": "6657584fb83c926b9a8230cc32391c072e87266a7c600b99439d36bfd3162edb",
+      "sha256": "842c5ab5be741be56185c87ac810e3246b2887aae59121541f563c18de372a92",
+      "width": 256,
+      "height": 256,
+      "bytes": 1976
+    },
+    "hi/outfit-plaid-scarf.webp": {
+      "fingerprint": "6d3e9655906a20367b0986bdee45209dc985e93077bd02f685162cbbe58b1d9b",
+      "sha256": "32b78aab22dce805f17adb370208e73c2cfd78ed4f77bb8f3cf62337f80cff32",
+      "width": 448,
+      "height": 269,
+      "bytes": 9182
+    },
+    "hi/outfit-red-scarf.webp": {
+      "fingerprint": "4447b8a3634e119d2010dda33219f5a621a358e9799e25970f082966ea5b3c44",
+      "sha256": "c58972838d1204059e1ef6e8a01c222d00c1066b2b2c3caf0eec47906e531952",
+      "width": 448,
+      "height": 269,
+      "bytes": 8344
+    },
+    "hi/outfit-round-glasses.webp": {
+      "fingerprint": "c934e3bfd21f418deb7dda46799fd0a6d2165e7cc04c97f42d52b92a60481f25",
+      "sha256": "11ebfb7d6f4b32d15c08e483280952e6af12acc6c5303a54d22d881c1f09b57a",
+      "width": 256,
+      "height": 256,
+      "bytes": 5824
+    },
+    "hi/outfit-santa-hat.webp": {
+      "fingerprint": "76f12be102ee7bab21857243d7bd93518ef146b97a39877508c7a94a0b6f1796",
+      "sha256": "191d8233f7e7b43624720d671fc674f41783f3fc182651b80578e3c97597fabc",
+      "width": 448,
+      "height": 448,
+      "bytes": 10296
+    },
+    "hi/outfit-sunglasses.webp": {
+      "fingerprint": "1b6f09e03933892a7953a934c3bd4ee5ec1df100b9c4784bfdee1c7caaf6fff8",
+      "sha256": "55e8ff002fb9c4863d2409953b2f8a9ea65e80d07a120d9cb25ee51362161559",
+      "width": 256,
+      "height": 256,
+      "bytes": 3676
+    },
+    "hi/outfit-tie.webp": {
+      "fingerprint": "c84e2568d9384a3d939502416ddd34839f908f50a4e3be8c3434ec9b181dc6b9",
+      "sha256": "d5aa801d1f6cdcedbe8a8ed261ac816d91a0c12d36a9a174271ea6a6f18ada03",
+      "width": 448,
+      "height": 269,
+      "bytes": 4280
+    },
+    "hi/outfit-top-hat.webp": {
+      "fingerprint": "7d9ae73baa3eac6351c085283eec8220e6a7fcecdaa428923e7f240a2de9b971",
+      "sha256": "63eadb052a9c20e9628aa4ff581506e98b93030bceba5222f838b8d07394ace0",
+      "width": 448,
+      "height": 448,
+      "bytes": 12006
+    },
+    "hi/park-path.webp": {
+      "fingerprint": "e4c9d3e65172c2add363622c7064983a32422ec90ff60ffc592c3f7204de1263",
+      "sha256": "be298f6c1213c8aa6cab46b1f70cfceafe16cebb811f68efb30ae626628a8f6a",
+      "width": 3360,
+      "height": 480,
+      "bytes": 14998
+    },
+    "hi/path.webp": {
+      "fingerprint": "f0d40303f30528f3347415c26fc06f3e4c854f9fc254a1c28fe3bed90bf30616",
+      "sha256": "53328d001bb9c28e56a2220189d482c32bff65a994c9ee97aff1c8ac70050742",
+      "width": 4096,
+      "height": 655,
+      "bytes": 15644
+    },
+    "hi/peaks-back.webp": {
+      "fingerprint": "569117897f9866a6ee2fb52cf4eefad1e53cc91d75c8cacabd33b114f7e46487",
+      "sha256": "b5361780775332844870aa8b5b003d4633ec2cf46b7accf6755330df1e4bb7b4",
+      "width": 4096,
+      "height": 478,
+      "bytes": 68216
+    },
+    "hi/peaks-bay.webp": {
+      "fingerprint": "4113d52ee6ef72502e4805f7671038831a4007884e3f289878fc4b521a8912ce",
+      "sha256": "9c8d7659dd77d340077451f79800f0f8b35e9e499f2091267cc41b97e364fec2",
+      "width": 2663,
+      "height": 428,
+      "bytes": 37834
+    },
+    "hi/peaks-left.webp": {
+      "fingerprint": "48ea038e0c1085298ba126ce0be6d83ea59c98c4a52dc04a5c4bc55263318418",
+      "sha256": "b31285cc9c26ed366d17dc1d623b1b5e71143ef0fbf935731aa276a7ba87cf15",
+      "width": 3023,
+      "height": 504,
+      "bytes": 49666
+    },
+    "hi/pond.webp": {
+      "fingerprint": "68f22171feb6798966370d48935de4cc3748e20c982cddb9372a62da2f21e24f",
+      "sha256": "fb3ac85910f5825733c42cf73bc19c28f556af30ed8bb2f942076957b925d87e",
+      "width": 1800,
+      "height": 900,
+      "bytes": 34882
+    },
+    "hi/post-office.webp": {
+      "fingerprint": "62780a432b2602285195741d3f75b03964b9b1f039bda2c023fc033ef68d59d6",
+      "sha256": "1a4da9a2b27b87fb96bdb25c3b49398be58d0f11cdf2db8a74922c98ecea0cf4",
+      "width": 1800,
+      "height": 1300,
+      "bytes": 94536
+    },
+    "hi/postcards.webp": {
+      "fingerprint": "256e961fe4d5f5a19008203d9d74f23ce62ef64b12c5a545f4604eadc1928b70",
+      "sha256": "0e9fa6b5ac8143b81d687aad486b1165a5b3b8d74d63c68185be30bf0039a5d6",
+      "width": 308,
+      "height": 330,
+      "bytes": 16176
+    },
+    "hi/right-out.webp": {
+      "fingerprint": "35bd6397f6f1484453e68c69c2a56140b88e1b9ca491f47e0275d21a54236b9e",
+      "sha256": "9b41a7a17897764df09089836bea38d405dba2ecbbdeaebcfb9b282481fb598e",
+      "width": 1050,
+      "height": 665,
+      "bytes": 21378
+    },
+    "hi/right.webp": {
+      "fingerprint": "86bef9d1fd879da386034fbfc14e498d9ecf77b2f4c933f8941bd21664fb0440",
+      "sha256": "cc37282c6029c2e1784d12d17dfaf0602da8d05d8e74024b0d52434da0987bb7",
+      "width": 1050,
+      "height": 665,
+      "bytes": 16764
+    },
+    "hi/rocks-shore.webp": {
+      "fingerprint": "525fa937446064db4882aa9f0b1a25a5d0b6476637ee8987dc7433e1ddf4dc1e",
+      "sha256": "c77701a7da481c0147a6958c13866bc496e7461659fb84c9eb891d1903942b93",
+      "width": 320,
+      "height": 140,
+      "bytes": 7384
+    },
+    "hi/rocks.webp": {
+      "fingerprint": "525fa937446064db4882aa9f0b1a25a5d0b6476637ee8987dc7433e1ddf4dc1e",
+      "sha256": "c77701a7da481c0147a6958c13866bc496e7461659fb84c9eb891d1903942b93",
+      "width": 320,
+      "height": 140,
+      "bytes": 7384
+    },
+    "hi/roof-in-left.webp": {
+      "fingerprint": "991469904f31ede3262aa20ad25849bf24c15a993554d4b67a31dc8e82c898ac",
+      "sha256": "21a4d86ebc68c3cf4a0e9192bd289d1e0e7ce8d8307006751b0d5ef153a1f9ef",
+      "width": 680,
+      "height": 1050,
+      "bytes": 7000
+    },
+    "hi/roof-in-right.webp": {
+      "fingerprint": "991469904f31ede3262aa20ad25849bf24c15a993554d4b67a31dc8e82c898ac",
+      "sha256": "21a4d86ebc68c3cf4a0e9192bd289d1e0e7ce8d8307006751b0d5ef153a1f9ef",
+      "width": 680,
+      "height": 1050,
+      "bytes": 7000
+    },
+    "hi/roof-out-left.webp": {
+      "fingerprint": "ec3c4a38092f13b8837fed6384463f9ec0ba0de467403314bb06805e8173d8b3",
+      "sha256": "0ed124350ac756a7a1a56bda667eacbab6ba215839e6a9ac6f6ed019773a860a",
+      "width": 792,
+      "height": 1155,
+      "bytes": 38032
+    },
+    "hi/roof-out-right.webp": {
+      "fingerprint": "ec3c4a38092f13b8837fed6384463f9ec0ba0de467403314bb06805e8173d8b3",
+      "sha256": "0ed124350ac756a7a1a56bda667eacbab6ba215839e6a9ac6f6ed019773a860a",
+      "width": 792,
+      "height": 1155,
+      "bytes": 38032
+    },
+    "hi/sea.webp": {
+      "fingerprint": "ef67f4a08df59043ab62251a218f400bb50e807abbe59cd5944d23a87fa6d178",
+      "sha256": "9115559dfa829106a53fc371c9557db1101faec4cb708f2a821c32c9167e00f7",
+      "width": 720,
+      "height": 720,
+      "bytes": 2316
+    },
+    "hi/seal-floe.webp": {
+      "fingerprint": "fffaf33b565215fea25e7ccb4d4a4e6c033d73b2e31a055d0821e0de868ad5ca",
+      "sha256": "a92fc91d5e02e5c4359a3ca9a2261002d9cd117fb2c0a47aee455d3f57fc0243",
+      "width": 340,
+      "height": 160,
+      "bytes": 5034
+    },
+    "hi/sign--stars-1.webp": {
+      "fingerprint": "cb6a768f43ea73d13747014a1b4ef4c1dfd2d2f4d8b52381d2200683672ef1ae",
+      "sha256": "1b8b77018f6444e24e6e34bcd4b560b13adcbe47e08442bd513fb1df4552051b",
+      "width": 1050,
+      "height": 650,
+      "bytes": 88992
+    },
+    "hi/sign--stars-2.webp": {
+      "fingerprint": "e99e1d58454830335067d9a3f13008946a40bd4d1bd709572b9e999a370449ac",
+      "sha256": "8df10c3e839099a93bad383d498cd015b077ffefb2a88ee733f75dfa992c6e90",
+      "width": 1050,
+      "height": 650,
+      "bytes": 89344
+    },
+    "hi/sign--stars-3.webp": {
+      "fingerprint": "a0f723f76570b4b8c96f45f848e4c98e28ddc027612838a337d6b64a30e05a85",
+      "sha256": "b3e0584a750a543363153133d0581788baefc437d8b26c7e944abdab7224fa5c",
+      "width": 1050,
+      "height": 650,
+      "bytes": 89706
+    },
+    "hi/sign--stars-4.webp": {
+      "fingerprint": "34ff63f2d246d6cdddeac52062f46a0ab401f3e3e76aac684fb6aa41b6d396c6",
+      "sha256": "ceee3299401987372da25fa85e0adfdeb7ded2dfd4bcdbded90d1a2f5ddf1fcf",
+      "width": 1050,
+      "height": 650,
+      "bytes": 90050
+    },
+    "hi/sign.webp": {
+      "fingerprint": "722e6991ba2b1a89bc16ec104bb38d357503e01494be9a31ba9331b11b73a375",
+      "sha256": "aa4c27927dffbd7c0dbe75fe7113de876d5762587dcea55400bf0353440ffad4",
+      "width": 1050,
+      "height": 650,
+      "bytes": 88624
+    },
+    "hi/skater-green.webp": {
+      "fingerprint": "f5c8c8ad4fe9eccb841a79d87cd2ea7cc48e1a7ac2296612320a2c2766e7c356",
+      "sha256": "803b60e778fa769d2d26dbe2e58734d0b318ba67940665fb5b59269d255500e0",
+      "width": 125,
+      "height": 193,
+      "bytes": 4550
+    },
+    "hi/skater-red.webp": {
+      "fingerprint": "4421c64ff2730dc335ecbcb05a2d74a407eafc1755521dcba10d0fa45dc7e5d5",
+      "sha256": "4277ef94f1a072dd72e83ddd96414232d64307ec623627d1ba7521af3360e221",
+      "width": 125,
+      "height": 193,
+      "bytes": 4792
+    },
+    "hi/skating-pond.webp": {
+      "fingerprint": "8294dad6e8160594487164b98e17922b94c776481dc8ecd60d8bb75a5c4c67d2",
+      "sha256": "3836cf93b8b8ea214c99a9f9d61fd1c71694629d77570e329ae21042d8f5f4a8",
+      "width": 999,
+      "height": 454,
+      "bytes": 15984
+    },
+    "hi/ski-mountain.webp": {
+      "fingerprint": "1d4c086a351489a8070f37e21acfd828e4f1a0ef50339ec2d3aa41d90b017f5a",
+      "sha256": "db44e437db1f1120a5ae7daa5872637115b61e99372245717ac3c193ae8e1c64",
+      "width": 2793,
+      "height": 904,
+      "bytes": 60576
+    },
+    "hi/skier.webp": {
+      "fingerprint": "639ec668b34cf6dc38265e9834382156e0b979832758327a04a212488399e4fc",
+      "sha256": "6d1d46edc90d0cdc9a59701aba47d2960c05bfe27d6f3817b08a6e10bad41f54",
+      "width": 121,
+      "height": 154,
+      "bytes": 4844
+    },
+    "hi/sled-sacks.webp": {
+      "fingerprint": "c42649ba5364fe5013199265d44816d534b3ddee754b158fbaf73e115e77e9d5",
+      "sha256": "629d79296fa4971ab15cff524979ec9a1641c968834f0681fa2ab228286e3a33",
+      "width": 468,
+      "height": 251,
+      "bytes": 11658
+    },
+    "hi/sleigh.webp": {
+      "fingerprint": "d7d68dc2502c222726df1bc50b9f53b9cd80280c9498bc967a46d9caf54617a2",
+      "sha256": "63c67ad7fedf3595df9a08df7c5d90d7e9c9ca64fdd5955fe1ce0c086064f2d2",
+      "width": 650,
+      "height": 400,
+      "bytes": 20544
+    },
+    "hi/smoke.webp": {
+      "fingerprint": "67487ee7886e6c2561e682ee54f4680d49b78a27f706e2f746af85cb559bd90d",
+      "sha256": "87567d80e6b48e19cda8c0e460a50e440af2077f934078553bb6901f2c7fdba2",
+      "width": 275,
+      "height": 200,
+      "bytes": 1908
+    },
+    "hi/snow-fort.webp": {
+      "fingerprint": "744e2e84edaa01bb84f45497ce15fe7af3a78a003eca965589341130430b3cf8",
+      "sha256": "dd4899a553acaf82f1a91afe2b70ce07800932a0ad1888c02868b8d045def599",
+      "width": 240,
+      "height": 140,
+      "bytes": 3140
+    },
+    "hi/snowman.webp": {
+      "fingerprint": "831bd375cf2166897cdd103384d41a8dbf4b8c8a51c7a841fcdb4a2275689912",
+      "sha256": "b1aaee5c966416ee9bd918d7ff4d0bb49c18d6ccbb60e0cca39200023a315275",
+      "width": 450,
+      "height": 700,
+      "bytes": 15464
+    },
+    "hi/stable.webp": {
+      "fingerprint": "1e4bab76bd68b1eda8cf5b20588037c01e4d329679260cc75243de0201ad2aec",
+      "sha256": "c3a897c49f6451950a601bec336bfe5a12d2828febf9cf5dee942521974bf3b9",
+      "width": 1700,
+      "height": 1350,
+      "bytes": 276686
+    },
+    "hi/stall-cocoa.webp": {
+      "fingerprint": "94148f9651455ad75894839aea4b17a317aad4a933cd0ce7ed8f7fcbd999b3bf",
+      "sha256": "3209db9b12c2abdb96445390a2770df0248efb34497424e0f6911e70414988c3",
+      "width": 399,
+      "height": 437,
+      "bytes": 27954
+    },
+    "hi/stall-cookie.webp": {
+      "fingerprint": "f072fd53f7219b4442617804f270c66c4981fe4f8c8f1a0e63f250d9217a10e3",
+      "sha256": "6200bf6800d0323f176925370fd61b1a66662a689b3c17d69da1a63f5d8d6b94",
+      "width": 431,
+      "height": 472,
+      "bytes": 30612
+    },
+    "hi/ticket-booth.webp": {
+      "fingerprint": "0dea3b7f447a96c5ebd2f20ab41ece336aa82d1c36fc4a71705d378ca6f4850c",
+      "sha256": "0da9c127d3d688cb87e134c276d7e2b0497bc3a40b4bf562b82118bf99b947ce",
+      "width": 220,
+      "height": 380,
+      "bytes": 12840
+    },
+    "hi/toy-crates.webp": {
+      "fingerprint": "40b9060c4f15e07206338aeb0032d64cdf089419c3d0bfac7efcb9c607221689",
+      "sha256": "506e90e81749ca9fa8e563514304b62d4ceb2e836c8e198b1b569e7deee8c498",
+      "width": 850,
+      "height": 550,
+      "bytes": 34838
+    },
+    "hi/tree-lights.webp": {
+      "fingerprint": "c3369f973ad569d9aa6092577a466e30f575a3c2e03fe9f937d58b20ed999fcc",
+      "sha256": "72f2b27b3d6dfed9fdcf5ddf7d7c107e2ecf99e33c596a8921f9501d4e232a87",
+      "width": 370,
+      "height": 680,
+      "bytes": 7690
+    },
+    "hi/tree.webp": {
+      "fingerprint": "98c466750bab0b214454b988f9951585076b6457ee3f7ccc09c51970d90eca7c",
+      "sha256": "6bf2697ca06b2deda74ba211f7d4149619bbe1af2f7596e40289be75038ecc30",
+      "width": 370,
+      "height": 680,
+      "bytes": 36730
+    },
+    "hi/village.webp": {
+      "fingerprint": "186cb96f96cd35d69f8127d44c9166fa75af7b97dc489a81bccf3d14313dceab",
+      "sha256": "30ac8b0b480f88af37269e014bd5a69270080468595f9b266eb84ab0f51e20f2",
+      "width": 780,
+      "height": 144,
+      "bytes": 12642
+    },
+    "hi/wave-mid.webp": {
+      "fingerprint": "ab31202db1e399bf819fe99a3597a987f9f98e4e930a5a260c23e865fcbac244",
+      "sha256": "e659853f6ee086428782d388d35683971fe6c84be62738bd662988b05c6d3124",
+      "width": 4096,
+      "height": 102,
+      "bytes": 29300
+    },
+    "hi/wave-near.webp": {
+      "fingerprint": "279edf2f7a971d633f89417116d32ba1c77b02a8cf5294d1d50f334caf7e48b0",
+      "sha256": "f334df0ebefe07fd19f78e3607f06616fe17457f4a5ac1f978f953217280a8a0",
+      "width": 2812,
+      "height": 97,
+      "bytes": 24012
+    },
+    "hi/wheel-stand.webp": {
+      "fingerprint": "70f2189542dc0294e6370234df6e1f10f163231f8a33a7e417f3f4e099e6b05a",
+      "sha256": "577ca7507c559329bc3db3adfb48510a833bd7d049b4b37e00c2a1ef85fb7fb9",
+      "width": 1009,
+      "height": 765,
+      "bytes": 29454
+    },
+    "hi/wheel.webp": {
+      "fingerprint": "e6be5ce31b99d6032a5ed4529ba8bd4e3b046861cdff0da926953e335ef693f6",
+      "sha256": "2018f8c72ba23c23ae03ef8b8538ccad6b62dbac6013416fccfa51812e8ce76d",
+      "width": 1132,
+      "height": 1132,
+      "bytes": 119168
+    },
+    "hi/wish-board.webp": {
+      "fingerprint": "cec309c6d5e95644e40777fbb7d0fc43103ce61e64cafd4c20aed9e3f96300b1",
+      "sha256": "36a82838e32d19bb8e0085b32d4b84de68f5ef7eac9f8531dc9f7fe1ac1325fb",
+      "width": 423,
+      "height": 423,
+      "bytes": 20978
+    },
+    "hi/wish-gifts.webp": {
+      "fingerprint": "dcaf366a18bd57217d8c6954b91ff38893be7307145d0291da350c0ce2189c4b",
+      "sha256": "bd9eefddbffe860de454a45e3e5268ccba47a70e40d39d7cb6fd8bb900e11ed9",
+      "width": 461,
+      "height": 253,
+      "bytes": 15840
+    },
+    "hi/wish-lamp.webp": {
+      "fingerprint": "92f9dfb510102e721d61dcb2cd1d853e8bfb43937f26c74e5d1923e852e6accd",
+      "sha256": "d94920d15b4e10492f17581d76de6f494e899c7c1e9dde4cef66d5559ae670a9",
+      "width": 341,
+      "height": 1363,
+      "bytes": 32168
+    },
+    "hi/wish-post.webp": {
+      "fingerprint": "0e4ce6cdcad7973e590dd1ae54daeb2d2e368a9fe42fbc477ec74af5a32fb18f",
+      "sha256": "938e8d083a7ff022e940396a1f1780b8b49c4bad9c118c1ba05f394670c9ab26",
+      "width": 364,
+      "height": 793,
+      "bytes": 34030
+    },
+    "hi/wish-tree.webp": {
+      "fingerprint": "ae126e9432e5084036ebe8faad71d438428c2ccf2b0c022ea0ec44cf7f04d4b6",
+      "sha256": "6382c8448553c400be5e7b152a2eb4b83e5e65ba3e6b572058a404a2966fdb53",
+      "width": 632,
+      "height": 1152,
+      "bytes": 62252
+    },
+    "hi/workshop.webp": {
+      "fingerprint": "ed2877fafe1a54714000543685bef08ab915bc6c92ac6255e2c7a2bbc551bb47",
+      "sha256": "e059ac64932c6f4b3ad3c7b8a6d14b227b8ab79b3382f55d46b61f89a4bfd882",
+      "width": 2600,
+      "height": 1600,
+      "bytes": 356984
+    },
+    "hi/world-sign.webp": {
+      "fingerprint": "87111a055534defeebed08160963137aae4ecba14f05d3c686de5922f9db7a48",
+      "sha256": "7bf9e4a1dc276243faea9d201ef57c34fc3f0f28fd645f4d73c4c7a2f8e899b6",
+      "width": 288,
+      "height": 504,
+      "bytes": 14568
+    },
+    "hi/yard-tree.webp": {
+      "fingerprint": "cf1680cddcc9314eff1d1b37906904b81bedbe1bc28006cbd4673e2a4e4c67a0",
+      "sha256": "c2d5258453fe1465912af6182528c717d0c11ca624ade9b5dc8609e06535a0dc",
+      "width": 700,
+      "height": 1400,
+      "bytes": 103790
+    },
     "large/back.webp": {
-      "fingerprint": "8bb9f3784191ec3ca06b53f8fe06ab33799015d3566a5ba99314b2b2440b9d8e",
-      "sha256": "5a03065429c3a4487683e7fc1394be31fa36b639a5ab0f108ea764bab7f1744c",
+      "fingerprint": "2e435824e733df7de9d8995c0b31854e704a78cff1216006b2daceb7bbca78d6",
+      "sha256": "4efc381c488410045dd12640fa8dedf3de7e49d0472e6443a628ff6348fd4c21",
       "width": 840,
-      "height": 788,
-      "bytes": 19632
+      "height": 787,
+      "bytes": 31138
     },
     "large/balloon-green.webp": {
-      "fingerprint": "0e5ba5db1bbdcdbe84ee5108b974565b621c9730cec3bf988302fd4cae01c3ea",
-      "sha256": "995b96c6921a71a88378f036b902cf16cd24667dbbc5421a6a26a198a2eb2900",
+      "fingerprint": "e323e58639e4a1116a10f59b9ab4f4801169c28c50b9f7f5ccfa5e1f5717209e",
+      "sha256": "056e0d883659bd8fde3e2b12909e59330a816db812513971921f133884846c96",
       "width": 180,
       "height": 240,
-      "bytes": 5256
+      "bytes": 7658
     },
     "large/balloon-red.webp": {
-      "fingerprint": "c687f07b4c00e953e2ec34f5a31221d573abe33f11b19d4d5ad24b623f325f68",
-      "sha256": "51d7c9748eca28f71b6302dd74ceffcef8ec4c57b5befe72b8a0be618397cd2f",
+      "fingerprint": "2c64ed1a27bd24f79b88c13c928a3b9138cb16e03dee46e678ad480f3a49f970",
+      "sha256": "01d4f9f3e0ff6253fbb2b3b577dce126f496f711e97d030bba6da0f7699e0296",
       "width": 180,
       "height": 240,
-      "bytes": 5548
+      "bytes": 7976
     },
     "large/barrels.webp": {
-      "fingerprint": "b103b218b2997be8f9f55c0b8643d9f09fc4fd4e0a53be9672bd58c24abb3b0e",
-      "sha256": "07bbab789a5ef0ed9ce6a7b0d263d86e0ebb458c723ad4b1b89a922cc321e96e",
-      "width": 225,
-      "height": 143,
-      "bytes": 3470
+      "fingerprint": "bde30fee4bb6b9deb239bec575cd07b15481129443462b096683e1e1e8df5a9d",
+      "sha256": "ae90c1713bc5e8789d5c5d45ba92b7553ce91826c0cd77fcd8d09c612a5fb16e",
+      "width": 285,
+      "height": 181,
+      "bytes": 7336
     },
     "large/bench-shore.webp": {
-      "fingerprint": "ee2c8c262002246b7f7e33d82654632bbb278648d7d7ff9b292793a872858a78",
-      "sha256": "a70956f73f27b3a1453d5fef8206eac2148acba7942b353194bffdc6f21c75b5",
-      "width": 210,
-      "height": 135,
-      "bytes": 3362
+      "fingerprint": "3f768ad88942d5b4e8a4335d6bfbcbc4943edb8203454799d939fa6a4eed587b",
+      "sha256": "7f86fddbbd43c7fda72efb7c8f315425dd7fe82663f449dd57865792cacc3fa2",
+      "width": 307,
+      "height": 197,
+      "bytes": 7272
     },
     "large/bench.webp": {
-      "fingerprint": "7e7e7a807465abda8ad03492aa1e79689744184d65f94d3a5dbe256e214a6983",
-      "sha256": "52e01fb259d38d21719488d972f92317ba2a10e3bf66058abd297c7c3fdfe131",
+      "fingerprint": "6aa5328c02aabbb648465297878c2794c04747acd0a244adb1ba5f5cbba8c03e",
+      "sha256": "313fa92437cb19eb7ce8cc45de159b0b3f87ddae56b0415fea60b7c1f5ed0860",
       "width": 525,
       "height": 338,
-      "bytes": 6104
+      "bytes": 9644
     },
     "large/bird-feeder.webp": {
-      "fingerprint": "a31f65323044d6d9f0e9b0393a4d3dcdf33bc45db6e893eb628c30e139483d40",
-      "sha256": "8612b2c9428882b35dcb519d8daccea7724b433b0817e5835cad8172cb6105ea",
+      "fingerprint": "5a446ff7b5e96d9bc2838fe0a496959c3d6e0bef3e4d36223bce5422dbf35902",
+      "sha256": "5b399169d3cbf4e3038e2d9910532a8ac5d699b7d286b3ffeaee8bcc6548c7bd",
       "width": 206,
       "height": 563,
-      "bytes": 3006
+      "bytes": 4816
     },
     "large/boat-moored.webp": {
-      "fingerprint": "39d9c7a8c5fbf1e327667d0b287ff5ce80c160182ab152038cef6e24eb0b6e75",
-      "sha256": "6f0c772f044e6f65eff39ae2f14526a5214db2884d1aa0c9ae42034653a8b239",
+      "fingerprint": "e86fb0c3a0a3e45e2d9cbb2a4c5b02ac5d67c6840e6a971b7fb4c3c0d1295cac",
+      "sha256": "ab7628491198c3100328b1100eecba06a52da62ca6d743dd415434ec55ad501e",
       "width": 168,
       "height": 204,
-      "bytes": 3128
+      "bytes": 4620
     },
     "large/boat.webp": {
-      "fingerprint": "39d9c7a8c5fbf1e327667d0b287ff5ce80c160182ab152038cef6e24eb0b6e75",
-      "sha256": "6f0c772f044e6f65eff39ae2f14526a5214db2884d1aa0c9ae42034653a8b239",
+      "fingerprint": "e86fb0c3a0a3e45e2d9cbb2a4c5b02ac5d67c6840e6a971b7fb4c3c0d1295cac",
+      "sha256": "ab7628491198c3100328b1100eecba06a52da62ca6d743dd415434ec55ad501e",
       "width": 168,
       "height": 204,
-      "bytes": 3128
+      "bytes": 4620
     },
     "large/boathouse.webp": {
-      "fingerprint": "162df3725094ab65bb4e308e0c66adad84f88d7638fc63e763d1c853c0455dd3",
-      "sha256": "a60aac4a7937c9553992ca1932ac5b1700cfb67ea0a1dc378e01335374814a31",
+      "fingerprint": "cf18403d91e0de80c8591f512fa4f65ee770fc88ca83e1cf37188465872c0d11",
+      "sha256": "e82c30e585675ffd45820b108f85139a1f35a6189b33151d674723ab74e81467",
       "width": 306,
       "height": 319,
-      "bytes": 7798
+      "bytes": 12896
     },
     "large/bookshelf.webp": {
-      "fingerprint": "eac099a7a1735909ed694685ee93a097d7d20fae7f87599a6dbe7cd80d51aed5",
-      "sha256": "4f9ce09c719bfb053b6d783da81734048190e1837b41a59582f15fe7ff482362",
+      "fingerprint": "84a512bd97a32698e2808ef0b7a74e4c818af7f113178db632f9bca41101833f",
+      "sha256": "89487cfb832374ac046fb77fcb6b1faff3a2bfc943d7202ed4a108c4a80a31fa",
       "width": 206,
       "height": 469,
-      "bytes": 13380
+      "bytes": 23500
     },
     "large/bunting-stalls.webp": {
-      "fingerprint": "e122894c2ade1442bb7afa036f8ce0fda1a5c22a3f16f0335089745965c4a109",
-      "sha256": "e61bf6e1c30129efa0298021a083dc1d185cc9b877ab5f0bb3921362af2ee1b9",
-      "width": 345,
-      "height": 225,
-      "bytes": 7802
+      "fingerprint": "955093e63e60b3631cac42461bd2c92210295630a22742fcea9b3e4cfccf1293",
+      "sha256": "3355355da479df1a971d48077315f186927d8e99d9c37e4b25b318e8f5c737f7",
+      "width": 718,
+      "height": 468,
+      "bytes": 22960
     },
     "large/bunting-wheel.webp": {
-      "fingerprint": "f49cd684b6b64aeb85bfa82553c8bbddd53b24cb0bf37602489bdbc42a19b044",
-      "sha256": "5d3b4d68a07c53f5bc76f59dc18a02b719c7328f55bf0253355842c2652559a6",
-      "width": 405,
-      "height": 216,
-      "bytes": 8522
+      "fingerprint": "84c5561a6cbfec217baf6bbc04a0fb762e656c5cc35ce90e99c6f30bd6c190b3",
+      "sha256": "b5ff9550355ef6a1789974e116072aea4b9cd5ddfbe36b40910c050df307310d",
+      "width": 854,
+      "height": 456,
+      "bytes": 24158
     },
     "large/buoy.webp": {
-      "fingerprint": "29d77796f26c5fd7629f85e3523565e5e6c97d8622903bd4e891c574ed451667",
-      "sha256": "d6b8bc007e93afebbbe9a003c3bca2c2845fdfb60c9b78b072b807a1787ab051",
+      "fingerprint": "bbce5dabc85418af679ee0ed2fed8a768b0a6737b72b872123dd7443ba928d31",
+      "sha256": "741be9b0644060b83c348cbebea70e6207f975a093dff4e686f9ffc086535542",
       "width": 69,
       "height": 116,
-      "bytes": 1482
+      "bytes": 2072
     },
     "large/cane-far.webp": {
-      "fingerprint": "af10a656522ab470fa8251ab8751fd245b5d714d48c3e641fd3e01ec0713a0e4",
-      "sha256": "333de8845357b1c9e63116c610734cad7fe515eb5a33808fd434f31ea57683b7",
+      "fingerprint": "06cf85af8e6b9c36c3449bd6fb4974b3fdb05132532f2824cf2e46dcf076a6d3",
+      "sha256": "79e042e295eb1c83f0e27e0e375d712c98e925932b1d9f288a4399254ab97a46",
       "width": 113,
       "height": 356,
-      "bytes": 2560
+      "bytes": 3518
     },
     "large/cane-left.webp": {
-      "fingerprint": "23227b3118359eb19599d19795a5715a14aa9e9d2635f089c8275fa5654d4a23",
-      "sha256": "3594c42fda900a5a8bd67cf454949ac418b68683ff326c94137bd5c8b659f6b9",
-      "width": 59,
-      "height": 185,
-      "bytes": 1420
+      "fingerprint": "52ac4728ad28b92e78e4a5ca69d56d236e1ea18a548257235dc0856489dda0ed",
+      "sha256": "61e0de2dea2ee2aec2fbea33689a8b9925e582b2b75f99916c3e87b2c75a2d32",
+      "width": 119,
+      "height": 376,
+      "bytes": 3692
     },
     "large/cane-near.webp": {
-      "fingerprint": "af10a656522ab470fa8251ab8751fd245b5d714d48c3e641fd3e01ec0713a0e4",
-      "sha256": "333de8845357b1c9e63116c610734cad7fe515eb5a33808fd434f31ea57683b7",
+      "fingerprint": "06cf85af8e6b9c36c3449bd6fb4974b3fdb05132532f2824cf2e46dcf076a6d3",
+      "sha256": "79e042e295eb1c83f0e27e0e375d712c98e925932b1d9f288a4399254ab97a46",
       "width": 113,
       "height": 356,
-      "bytes": 2560
+      "bytes": 3518
     },
     "large/car-green.webp": {
-      "fingerprint": "08cb7b9785a00a494d0ba57be6698a73cbe611441260059a0b5098d2081f78da",
-      "sha256": "175c7e239477be52c296fb1f0cdad12978bd7def59f05486d31254e98a47fa1f",
+      "fingerprint": "ef3d5766122c984054d75f00b7467daddd86bbd2d13dfd7c0a07eca2ea896aa4",
+      "sha256": "e2e44aff2b6038cacd436e167749c9697689b49d602add25aef125e80c845bd4",
       "width": 135,
       "height": 150,
-      "bytes": 2222
+      "bytes": 3250
     },
     "large/car-red.webp": {
-      "fingerprint": "3bacad511d130730dfe9a092e0d6104663c77ec27b43bf92d08618f9446ba6c8",
-      "sha256": "832ae1b1100fed0f3722167181d8517a46e0e8a3e504feac2f7d62105a7bf6c7",
+      "fingerprint": "45ae4c28cd10854b1e79cad9ad301789b58076fb8176d79211d7edb4b46b224e",
+      "sha256": "48ac7bdf7ec023af2b60a2c5dbcd4fab5e9133cd5291a4317d0df6200806f39e",
       "width": 135,
       "height": 150,
-      "bytes": 2258
+      "bytes": 3278
     },
     "large/carousel-drum.webp": {
-      "fingerprint": "7d45351cd5933c830c300f5e325d3bcc34d1b7848e4dd30415349d9b45247bd7",
-      "sha256": "35d1680477f1c99751e360fe885cd61b4934b1ef575b8ea05018fc03c51fcc7e",
-      "width": 825,
-      "height": 23,
-      "bytes": 3448
+      "fingerprint": "4f7bd542d44b2be861fba3753cfe9d5d93bc2be67ae978ecb82e1845628a2bff",
+      "sha256": "256ab327b9afdce104df6ddaffc8d126e3c110f606bfce8e36303ceb32304bf5",
+      "width": 1731,
+      "height": 47,
+      "bytes": 8872
     },
     "large/carousel-fringe.webp": {
-      "fingerprint": "5001f2625d2a6b883297f5748684c8939b7379a47daf76966e01c6bb8d1ed7d2",
-      "sha256": "556bd42239887788aec9ed3a413cfd43ea8d2a01595b603c9c3196bc8988097d",
-      "width": 945,
-      "height": 26,
-      "bytes": 5966
+      "fingerprint": "5cce5857186cfe9e70dd6b2ab6a51fa18ffbe4c918c489e2ef9885b80622172a",
+      "sha256": "12bec4b7ed6a50041087be24aac351f03b97a1e350f50bf13d511a03e0b704fd",
+      "width": 1983,
+      "height": 54,
+      "bytes": 15656
     },
     "large/carousel-roof.webp": {
-      "fingerprint": "0cfc2ea3afe0fb545c1531fdfad4a5e688c0cc0b4227968e947aa8a4d42201a3",
-      "sha256": "89c688c9e8e77bed3fc690252939ce1c302326d2cc395ebd8743a0b571da6068",
-      "width": 567,
-      "height": 99,
-      "bytes": 2274
+      "fingerprint": "ac48ceda646f94016c8a99f30ceb9c5c9cc4112a2903ba9a2ecfa3f8e46f5e91",
+      "sha256": "fea607446bf17d9c2083ad281b7c1b19a7eb5e71bb760c1ec30640aea78220e3",
+      "width": 1983,
+      "height": 346,
+      "bytes": 9664
     },
     "large/chair-back.webp": {
-      "fingerprint": "68f04b1e9b8fb38d08f156493c36c3930cfda71e80f8060d2f8b5e7890545eec",
-      "sha256": "6e4fc20cfa067200772b8fce23e3da30d5ed691689b65376860050096f7ae0ac",
+      "fingerprint": "b3e67056b6b08a6ba27e598e71d2d9e93a79a28a5104b596a612633f571bdd26",
+      "sha256": "340f2264aa99f04b1517b9bf1b7207fc7e3926e007e9f854452757fe3c72075a",
       "width": 308,
       "height": 420,
-      "bytes": 13562
+      "bytes": 22380
     },
     "large/chair-front.webp": {
-      "fingerprint": "69e9f9119ab043f63fe1f362620e15eccd81991842cbd4e7549745bc84431aaf",
-      "sha256": "9cca29a2596e3a32eddeef0a5dbf03d35adcdba42e8df0110c51812c46d33312",
+      "fingerprint": "3cc064a366ab63227a9af2ecb2e82e7749ac72cf962961d8c800257f1ed46ade",
+      "sha256": "e8a35c40d37a7af9f9bf6e6c964088dfcf9befe2f604d571f52497cf43cb8f83",
       "width": 308,
       "height": 165,
-      "bytes": 3500
+      "bytes": 5244
     },
     "large/chair-left.webp": {
-      "fingerprint": "ec6ab614472f248c73326015c0bb7bfa79a99dcddf6d86871782830a6694e73f",
-      "sha256": "3eddb5e93d75ded4dbd7ef6e7dbfc0f8ca92e64c2213624ec9ba50964e056bec",
+      "fingerprint": "6b28872b4d667b3430a1429cbab86f5bd59ee5510c650a5e70c2c03cd608fa27",
+      "sha256": "9b99fb166ae7bca3d782359d56c297e26821b8fea3615f0c46dbfe6bdb81315d",
       "width": 338,
       "height": 375,
-      "bytes": 7632
+      "bytes": 12450
     },
     "large/chair-right.webp": {
-      "fingerprint": "ec6ab614472f248c73326015c0bb7bfa79a99dcddf6d86871782830a6694e73f",
-      "sha256": "3eddb5e93d75ded4dbd7ef6e7dbfc0f8ca92e64c2213624ec9ba50964e056bec",
+      "fingerprint": "6b28872b4d667b3430a1429cbab86f5bd59ee5510c650a5e70c2c03cd608fa27",
+      "sha256": "9b99fb166ae7bca3d782359d56c297e26821b8fea3615f0c46dbfe6bdb81315d",
       "width": 338,
       "height": 375,
-      "bytes": 7632
+      "bytes": 12450
     },
     "large/coaster-car-a.webp": {
-      "fingerprint": "245dc9a0aa2a94289a06ac08f4ec36a352023b0faa8409b512a8aefe33af4f9d",
-      "sha256": "0534a648ae41f795e804d79207cd85aa34abd1ea9ab803db611ab5f1c9082440",
+      "fingerprint": "6e269a62331bb76021daefaefa31850745ec7365f1afff4f497626158ce51a39",
+      "sha256": "791452b95fc73fd1f5d216483d56cf34120e969d42d1ea6d729956b4270fad07",
       "width": 96,
       "height": 69,
-      "bytes": 1918
+      "bytes": 2638
     },
     "large/coaster-car-b.webp": {
-      "fingerprint": "626218b8cca5167d75fbb5f4d91de24c8eb7cb7e37333c6ef8e44ea3f6c8eb21",
-      "sha256": "2d43a491f2bf4cf6154debc0b70f749df015e16ac11e1a1815fc96b8cc671e7b",
+      "fingerprint": "6360f59c57b19da91491b2109b96bc72bdc411cee537004ed89ec0187be8faca",
+      "sha256": "1823c7ea20ecc9e7976556d62b2eef80ebc993911885ac731f3754dbe63c2963",
       "width": 96,
       "height": 69,
-      "bytes": 1902
+      "bytes": 2598
     },
     "large/coaster-ends.webp": {
-      "fingerprint": "97969afb63f295a2ad47205e08399db1f5122d46886087ebdc86c82f5d00ccaa",
-      "sha256": "8cf9e831f15f06b3e10d4ba96fe9f0b2848ec78788c2780f1d586a99c5f3e75d",
-      "width": 780,
-      "height": 420,
-      "bytes": 3994
+      "fingerprint": "2e8b7077c360230fd7a3a33dd2f83adf1520ffcfb192a7f6848890283b8204e3",
+      "sha256": "859e41b8456f410f4dbe02def2de7ed75dc801b94be654ad4c38977cfaf953fb",
+      "width": 1027,
+      "height": 553,
+      "bytes": 8108
     },
     "large/coaster.webp": {
-      "fingerprint": "f3982532ded23f1d813550fc7f7facb310e23ef76607d759763342e5f17c9495",
-      "sha256": "9984138825e613be563c89458ecfcff00900d10bbb9a693a079042309abfaf85",
-      "width": 780,
-      "height": 420,
-      "bytes": 42500
+      "fingerprint": "aede4428692ff5da15615e63f0041fe874646ae7d3200329b83990561c54dcf4",
+      "sha256": "1720a0fe2cf4742702757361dfe43986f0d1a178f0af675bc5d49a9ec9a77dac",
+      "width": 1027,
+      "height": 553,
+      "bytes": 86376
     },
     "large/corral.webp": {
-      "fingerprint": "7ee3163ac357474ace09bf82baac0f234abecd1c334e09ef4751c16ddbe791e9",
-      "sha256": "f24180dc9960c61a18dd768cd2b4c4f35e9eb8968250214994bf1e1fe9b62c3d",
+      "fingerprint": "b5b68afa263dbb10e7b9af955b66135d0e5d7ad51d3a0d03cbb9fe60d0c5e05a",
+      "sha256": "ebce76429f6e4f692a52634c29402058076725c952a64f24888e78ebdeaeea59",
       "width": 900,
       "height": 263,
-      "bytes": 8074
+      "bytes": 13720
     },
     "large/dinghy.webp": {
-      "fingerprint": "2da24fcf34856c975ae21e54d23620bf91f392a25a13b4b71f627665a48c9e50",
-      "sha256": "452a7bfabd39f669d7dc57bcddd9e7eefcdfcf3363747f1a58bb6c4807d12ff7",
-      "width": 215,
-      "height": 83,
-      "bytes": 2686
+      "fingerprint": "a9dd0267d27413946190f36c472d32883ad4f41f9e8577448e8a6974792d9c93",
+      "sha256": "3013d4d2aab9df2c3cbfdd1d9b51a4b409b15d09a98fdf4b3957fc03ecece227",
+      "width": 224,
+      "height": 86,
+      "bytes": 4258
     },
     "large/dock.webp": {
-      "fingerprint": "1238fc53aa58a86ce576aca6a6d9a0933c1864cbfa59f13170e5e54fc347d833",
-      "sha256": "eb7735220f64078abca33f5ac9e6f532bdf52789daf3cb4662617667dc03c70e",
+      "fingerprint": "82adf814332be2ba4aa21210f1e9aeee14b8a8d28b659976060cc003e6d31781",
+      "sha256": "4f867694bb4d5086cb9e412d94200c4f37825b0a11970795324384d2d99d3661",
       "width": 408,
       "height": 153,
-      "bytes": 5678
+      "bytes": 9192
     },
     "large/door-in.webp": {
-      "fingerprint": "7853abd073c6191c524b1ff5c2759ee09376c6fb790f5ae3120fb690add2422b",
-      "sha256": "20ca33f407adef486735a220e18ec72329ef09225115be9e7ed9ee1b13ab7490",
+      "fingerprint": "98c725ba7a4e5be1a3acd4a1783c199302f4b0de3514b85281163a1e743e5c2d",
+      "sha256": "fcc634e4b06dc8fdfa4472d152d66b6a652b4c30bf63fe9166b987b231a0ed8c",
       "width": 173,
       "height": 394,
-      "bytes": 6258
+      "bytes": 12966
     },
     "large/door-out.webp": {
-      "fingerprint": "3ed015b01f3cb37fa5d5d21d16c5a965fca244b67c63648f3ce05c2e570bf8a4",
-      "sha256": "693d4d2729f82768e2bf7ed8e2f0b7b28203997fd94ab24916332aa3f2972171",
+      "fingerprint": "9fd0384ffa9d0e41b1a0db08c045f6c590d32a9c30ad6f698756b3323a4ecd3f",
+      "sha256": "b706605353e3910394bcb32115f4ca39d8cfcc8f0fbdc04024c309a5ab5b6de5",
       "width": 173,
       "height": 394,
-      "bytes": 7330
+      "bytes": 14714
     },
     "large/door-path.webp": {
-      "fingerprint": "c24e8136d6f87926e2f8b48402fb4975b61fb61aaa71e8489ae6bfea14d9358c",
-      "sha256": "ca5544066d377629bf64165ec8e31f950fdb6e49e49522d2295e14db83725f23",
-      "width": 378,
-      "height": 99,
-      "bytes": 556
+      "fingerprint": "151bc9861fb43cd562e262ade59e0eda1fefce5baed0620ea808bfa83d63d057",
+      "sha256": "a41501160d34769d6a73d9279891e021b78cd2f0ad84ae252c9a3473dda57ecc",
+      "width": 1512,
+      "height": 396,
+      "bytes": 5694
     },
     "large/drift-left-mid.webp": {
-      "fingerprint": "ab0d2f822d431512f3a12ebf374dd57c74c870339052bf179f0fbf5c7cd2fc35",
-      "sha256": "9815fa1695f45f0a94b3d2d747613f5d6060432d64c98af7b11ec310f59d84bd",
-      "width": 162,
-      "height": 54,
-      "bytes": 794
+      "fingerprint": "81538508c14ad6efc1e38b6b09f81869a65a693ddf12e5af0e3e7d57041e8b84",
+      "sha256": "e0bd4ca5dc7ccc8e9b4c3acb05b5c8197f6076463f0ff83c99f0431c73aba238",
+      "width": 648,
+      "height": 216,
+      "bytes": 4048
     },
     "large/drift-left-near.webp": {
-      "fingerprint": "8460dce92f1c67bc818efb635b71983c72a2ab7ad2b8fba7e727984c28543568",
-      "sha256": "18c66f3439e2b5f9997056efc0123e87567208216cf588f7e70a1adec7bd9f1c",
-      "width": 192,
-      "height": 60,
-      "bytes": 888
+      "fingerprint": "74ae748485c2a36f5b4bc28352f3d3b3a56556d9243ba73afbd0a9bd1a016f90",
+      "sha256": "2b6be8fd30a6fed937bce3021a88814ec8b2693ff2e46ca378ea5c3d5bfa7235",
+      "width": 373,
+      "height": 117,
+      "bytes": 2252
     },
     "large/drift-left.webp": {
-      "fingerprint": "ed41279431ef0996a954740f8f5463bcc762e533dc3d6e947bd1d032d28b1aef",
-      "sha256": "44318b9174243dbcd63e7ae94174d2330005647482d238b94e61e97557813cf8",
+      "fingerprint": "9f7fa8388693496b75d8f494885e5de3cabbb65240bc22325111c6e5fc9cec22",
+      "sha256": "3d11d1fea9ac567a4c429650927581d583e2dd74676e1ef67e1aa773e23d0e1d",
       "width": 338,
       "height": 128,
-      "bytes": 1656
+      "bytes": 2084
     },
     "large/drift-right-mid.webp": {
-      "fingerprint": "ab0d2f822d431512f3a12ebf374dd57c74c870339052bf179f0fbf5c7cd2fc35",
-      "sha256": "9815fa1695f45f0a94b3d2d747613f5d6060432d64c98af7b11ec310f59d84bd",
-      "width": 162,
-      "height": 54,
-      "bytes": 794
+      "fingerprint": "a8898ab27c5006f607fcc52898dcefc16b4f25ba49ff938dc31d8b726fee2900",
+      "sha256": "34471b805eb91f2dba6e78cffcd008fea9c52cc5602c8ec39808df8010de2d3d",
+      "width": 327,
+      "height": 109,
+      "bytes": 1878
     },
     "large/drift-right-near.webp": {
-      "fingerprint": "8460dce92f1c67bc818efb635b71983c72a2ab7ad2b8fba7e727984c28543568",
-      "sha256": "18c66f3439e2b5f9997056efc0123e87567208216cf588f7e70a1adec7bd9f1c",
-      "width": 192,
-      "height": 60,
-      "bytes": 888
+      "fingerprint": "c8f27226751a7248fc438b20aecfe74360293cfd435ce14db49d3026aa86e32f",
+      "sha256": "7f2fe810eab1371971b789c9a3821c764d127c1bd45387cd41ad327ec8f502e1",
+      "width": 381,
+      "height": 119,
+      "bytes": 2218
     },
     "large/drift-right.webp": {
-      "fingerprint": "ed41279431ef0996a954740f8f5463bcc762e533dc3d6e947bd1d032d28b1aef",
-      "sha256": "44318b9174243dbcd63e7ae94174d2330005647482d238b94e61e97557813cf8",
+      "fingerprint": "9f7fa8388693496b75d8f494885e5de3cabbb65240bc22325111c6e5fc9cec22",
+      "sha256": "3d11d1fea9ac567a4c429650927581d583e2dd74676e1ef67e1aa773e23d0e1d",
       "width": 338,
       "height": 128,
-      "bytes": 1656
+      "bytes": 2084
     },
     "large/fence-left.webp": {
-      "fingerprint": "c8be3dab9410a8de653db1f1ee48c229e1fd656704583b32de973b95d21dfd45",
-      "sha256": "817f4ba41c42b864f48ae4033a3733b413903813209b0abea0c183f0d0fd740f",
-      "width": 360,
-      "height": 105,
-      "bytes": 4266
+      "fingerprint": "0c8da1db75fdce3d4295588106a95fd8abfa68a0a5114f99953ed382b1ccea1f",
+      "sha256": "631b66a74380dac4eccbea7fed3386f9e810287b096295feacc8263237ae7b8a",
+      "width": 741,
+      "height": 216,
+      "bytes": 14614
     },
     "large/fence.webp": {
-      "fingerprint": "7ee3163ac357474ace09bf82baac0f234abecd1c334e09ef4751c16ddbe791e9",
-      "sha256": "f24180dc9960c61a18dd768cd2b4c4f35e9eb8968250214994bf1e1fe9b62c3d",
+      "fingerprint": "b5b68afa263dbb10e7b9af955b66135d0e5d7ad51d3a0d03cbb9fe60d0c5e05a",
+      "sha256": "ebce76429f6e4f692a52634c29402058076725c952a64f24888e78ebdeaeea59",
       "width": 900,
       "height": 263,
-      "bytes": 8074
+      "bytes": 13720
     },
     "large/fir-a.webp": {
-      "fingerprint": "e6219512a172c5e2e9b70b602187fed9c8367b5c7e69142683c70f7388002594",
-      "sha256": "0e14cf734e71f0a60d5c617c4e31ce867caa89633f136fdeafa9f0869be95ff1",
+      "fingerprint": "93dddc78d5d2e5958af3281615df8a0c7e342c63731b26ab11ad3049b5ab0dd3",
+      "sha256": "dc9980f8933aa5a651535e4d7993a302657aa3ec68d1bbd5f8f2e2bbb2e591c7",
       "width": 375,
       "height": 750,
-      "bytes": 18392
+      "bytes": 32124
     },
     "large/fir-b.webp": {
-      "fingerprint": "ce3c8d98e7d235d900888ffc61ffa93d2415155868d2c72bd8ea96ab9aaf7ca8",
-      "sha256": "d0b6220af121f9c0a1e3855af74519b09ff14f5387054b7a15bc70c288e86ce1",
+      "fingerprint": "ae2b249bda898d541bfe5104671c9b71002c30e60874605fceaad650b03e846f",
+      "sha256": "eae6c7f61d8708eac2c5ef9120d0ac3712b1270ef6004cabd346bd32961e4860",
       "width": 375,
       "height": 750,
-      "bytes": 19296
+      "bytes": 33242
     },
     "large/fir-c.webp": {
-      "fingerprint": "3d74429360d0cde5992028825e880d3af6a1fcd1c91c28eaa2ccdfb704b95743",
-      "sha256": "75c57744dde8bca317c68f8ac5f6d3264db7a8938c03f819b9ef766348f6a4be",
+      "fingerprint": "667561a94990c0bb556c82dada77a55006bfc56ed0eea5dc384818b85efc3e0e",
+      "sha256": "7d301ebc058560ce1d19d9d38d040514de73de4bc1ff1301614729bdf36efb4b",
       "width": 375,
       "height": 750,
-      "bytes": 17550
+      "bytes": 30964
     },
     "large/fireplace.webp": {
-      "fingerprint": "a7fa5cd425ceefbcf21661b6abe7f89b6dc8262700dc26dcf231972cb8eeecbc",
-      "sha256": "be3ece373832178561dc79b5d38cf1f4428e7ddc02cf6831d159a50fdb640415",
+      "fingerprint": "1a8a9fe60031243e1cb225be0ebb0efa98cc65b92af264171f45fdbed6c4a4f9",
+      "sha256": "2dff68cf7d6a981f60551fe1dad971e63dad7b487b2fe46bd5dc9e844f6d2043",
       "width": 394,
       "height": 428,
-      "bytes": 14972
+      "bytes": 24748
     },
     "large/flames.webp": {
-      "fingerprint": "7547bea6f4e3a5feccd907f77d41d5104361c72d85447f34b9de49c31eb124f1",
-      "sha256": "49b838f9219e234251c99b38351383d5efc576be99995cff7b674f603fc16dad",
+      "fingerprint": "e30f1a0b12e982be01f1b90337c202455b412f597acaf68e5e7b9182b77a9061",
+      "sha256": "fd8147ad11230bd4d534aacc58f9130db625a65c38f685d2bb69f16c155ed837",
       "width": 135,
       "height": 105,
-      "bytes": 1866
+      "bytes": 2520
     },
     "large/floor.webp": {
-      "fingerprint": "9a0521e474fc72e415f6cefe64ccdd11d557cff6537dcca0d3d507920849a3cb",
-      "sha256": "8fa55390d3b6a1babdc6ff6ec51b9b0390ee7796d527f7b4669ae52b816f8408",
+      "fingerprint": "2b1e75bf7a6621c709b37606f786df2fe884bd6e6a54d1d7ec935c8ae5c37eab",
+      "sha256": "d07142acdca619e627a4e4092a29de1fec306435bab441bedb918286ae9a3bbf",
       "width": 840,
-      "height": 788,
-      "bytes": 17380
+      "height": 787,
+      "bytes": 25752
     },
     "large/front-in.webp": {
-      "fingerprint": "d56afe625e50fcdcb1a2abdb412ab9d883e06e9ccde074365051dd8c5644be13",
-      "sha256": "1cb8aff12305700f64fc17c37be2927d7117f806f9461db495f69cb752cbc76e",
+      "fingerprint": "17139e2f03917e6bbf77b99f1a29250fcc8821b1b1ca01ce117afdebf9844c33",
+      "sha256": "7e1972d3a3ab97d01e5e812b7477d809ec5c16df19e5673cb7ad77ecffcc2a3e",
       "width": 840,
-      "height": 788,
-      "bytes": 22060
+      "height": 787,
+      "bytes": 35166
     },
     "large/front-out.webp": {
-      "fingerprint": "66ed14655490a062f65aaace6369a29986642ee299e344128b83a67fc5d6fcd4",
-      "sha256": "96b352a605d2528eef2be81f2d1ca6e885567258c192f191330e8d6b03de64ba",
-      "width": 893,
-      "height": 788,
-      "bytes": 27194
+      "fingerprint": "2584195d0d3d92aaf878a6164bf7bff016ce39a1c3825f0de6c8362e73141c92",
+      "sha256": "ee18615f05beed2d5367a31cc878f5e4c0bc922419593f049536cefe001cf51b",
+      "width": 892,
+      "height": 787,
+      "bytes": 43774
     },
     "large/game-sign.webp": {
-      "fingerprint": "4fd607954cd165bee9f271008952fa3a71b26f7476d1782074b11aa2f4b1340b",
-      "sha256": "1226aa4ce5a4ef01c80a25e2ca9176696d65e8ee2ff601f1b40188c5e719c1c1",
+      "fingerprint": "fc3e056133a4c03055923e812bf106d0aee2a7e8bf781174c9b75784ba375a98",
+      "sha256": "723be87ddcc963d24270d90d7b1074aefa0d0194e7be0907d09e90e20cd54291",
       "width": 270,
       "height": 248,
-      "bytes": 6596
+      "bytes": 10014
     },
     "large/garland.webp": {
-      "fingerprint": "78a8e13199fc0cc11ad8c74e0cc7c3683edde2113f3dee1151fef8e465f37c05",
-      "sha256": "115a9f979aec01466e3dec9673e70194095f5a36632364e740a13e72a6d55274",
+      "fingerprint": "72013bf0f1cc6ee644192298e462c272d3a02acee15e297adc346681fdd210fb",
+      "sha256": "059642d2ca393d7ac688e061d325243f9bb1386ee8d42c4bacbabdd4e0be1954",
       "width": 1512,
       "height": 533,
-      "bytes": 30852
+      "bytes": 42162
     },
     "large/gondola.webp": {
-      "fingerprint": "bda7e9886e508659aabe234976f7e092ea5907867f3f8caa29b030054f112c07",
-      "sha256": "7584493074791830dac0e559af51522593aa98f2f4f009eac737a7e348a6fe8e",
+      "fingerprint": "d11e8e24eac991b8e3248f1ce52a858fa345e4616684d4aefb96c1646a5a42b3",
+      "sha256": "dc6d6c8dab663a2cb4bc198c146835fddbd65694d7f6aba28dedb3ba89293450",
       "width": 69,
       "height": 91,
-      "bytes": 1212
+      "bytes": 1768
     },
     "large/grass-far.webp": {
-      "fingerprint": "8275548be26bff3faa204dd930773e438d31501ee0de8bc6c45eaf4dc9687bf8",
-      "sha256": "c642ccf33549265ab075777664b43a7391b899d1b029f885f25ae2c39f9889c7",
+      "fingerprint": "6ad6b63a3fbf9c97437393884797af71a8d529608a1ed65d9b1bde5e7bb7aaf3",
+      "sha256": "7e354ca14840f0b5a55b08a2292d8ba7d56a9f082ee1412442ffecf219c82bec",
       "width": 180,
       "height": 90,
-      "bytes": 4552
+      "bytes": 5800
     },
     "large/grass-near.webp": {
-      "fingerprint": "8275548be26bff3faa204dd930773e438d31501ee0de8bc6c45eaf4dc9687bf8",
-      "sha256": "c642ccf33549265ab075777664b43a7391b899d1b029f885f25ae2c39f9889c7",
-      "width": 180,
-      "height": 90,
-      "bytes": 4552
+      "fingerprint": "b324fe68e644f68c1942d2ebcf46b32a7b606f52dc3bca289cbc2cbba3a81e9b",
+      "sha256": "41544b136e81ab9d3cc71e9bf08db9a7677a6c73cc917cec6cf0d2f7801faf17",
+      "width": 299,
+      "height": 149,
+      "bytes": 9798
     },
     "large/gull.webp": {
-      "fingerprint": "f13c1ca21fbe7048d0ff07923e629e1954616be13e0b8bbc07d3c57c09574f0e",
-      "sha256": "25b2a3741376f2462e8e64bbb8946edc289877abd68c07f0a54f463c317e0388",
+      "fingerprint": "3d9a70b11cdb734a68928d961eee43685c9cdb4c544c93a26fb5f4ccdf3d9ecf",
+      "sha256": "3b662ef389e3ab7f84c0a9d8f2c4e0755832a08d1f853f65257440effc2b9e24",
       "width": 75,
       "height": 39,
-      "bytes": 746
+      "bytes": 940
     },
     "large/hills-left.webp": {
-      "fingerprint": "ed3f7eb2d96f39a296dd384cdaa4237ecb54f1ed54850cebf030eeb2cfead376",
-      "sha256": "a98de86fac308d671a18b28a587c9985b37981180060e481cb6f76e0d385cdb3",
-      "width": 756,
-      "height": 62,
-      "bytes": 2022
+      "fingerprint": "7163ed29dd192beee49e2659c329b59018e712220e6eee402c0e59aacf027c1c",
+      "sha256": "cec31a96ecc130e8e0c799bffc136275c9deb2f62d65e21251e864e15e196bf0",
+      "width": 2805,
+      "height": 231,
+      "bytes": 12794
     },
     "large/hills-near.webp": {
-      "fingerprint": "c7e677ccb9e7ef4a77566ec361d89fdce187f07309b48360a0885c746ea8d1c1",
-      "sha256": "7e366a4c784f15da76bda7205842521cde59aaf1b1a5a4e838765ac74be9bcb5",
+      "fingerprint": "b9cd90ffb210b5081be82f7a5581b1992f59da86e87ab7f487058defe5665483",
+      "sha256": "837b345197a8aeecda0b439aa07a30d30b1ee68775e2871847badef746fb94ed",
       "width": 1320,
       "height": 47,
-      "bytes": 2850
+      "bytes": 3544
     },
     "large/hoist-bale.webp": {
-      "fingerprint": "fba5370ed8f4c1306cbbe8bfd38f6bd02151d7394a75c3ff456605055823f6d7",
-      "sha256": "1c71d14a5cec64f51c70a581be493edff8b1190cdc98b0d7e095c89ce3d1c1c0",
+      "fingerprint": "b264b7d7cc6357e8bf23a9bd911413db90ab138afd9b9cfcd1028db0f1923838",
+      "sha256": "3815b722913fc1d233e58c6131576cf1078cb248a88f37b1e3823990724e013b",
       "width": 158,
       "height": 132,
-      "bytes": 2800
+      "bytes": 4022
     },
     "large/hoist-bracket.webp": {
-      "fingerprint": "901ab110c206b68b4015ed8d8ba0d28b43e94fce244d6cd8a57842e86b473cd3",
-      "sha256": "539b0648b79e77075dd6ce875b377553ef1dd88571258369a86ed0f87978b89e",
+      "fingerprint": "3ee40dd1776c2214b94fa6b0e8a7a4c533332fb4d1889753938a02235e6e305b",
+      "sha256": "e54a2548df3cd2a42a2228d29046b1712e27045f9e4b5f241697bc1feac99041",
       "width": 195,
       "height": 107,
-      "bytes": 2506
+      "bytes": 3560
     },
     "large/hoist-hatch--open-true.webp": {
-      "fingerprint": "e7609906bdae692e94aeb354aee9be9a5941e15648586026b902d20e68dee153",
-      "sha256": "32ba5333f204b3557f77a5e99ca881e56cc31c22717e703ab3a742e5e62b40aa",
+      "fingerprint": "3984c6b571fac8793d6c15d0a926543546b539294448fd11040c79459e1d45f5",
+      "sha256": "f226ca0427c2dfef5c1756b844a387badf3d27eb44d8d050a13d0a6d7d2dcd26",
       "width": 139,
       "height": 113,
-      "bytes": 2792
+      "bytes": 4350
     },
     "large/hoist-hatch.webp": {
-      "fingerprint": "7d9887538bd45ad0602ac038b9ae8472022ef41cbde601b890d1ff3099161d92",
-      "sha256": "34db80f3e5f292c02a02c2f175fb5b1147df97e7b7e2f993df46f33149e48786",
+      "fingerprint": "94c3485b9510bdce450588c54d81b556d35f09ff09546c48e4034029c6c071b2",
+      "sha256": "1bf54c34988b9103a23b1d56b7c3b3ad90fffa1094ea358eed5227fbed40b747",
       "width": 139,
       "height": 113,
-      "bytes": 2772
+      "bytes": 4418
     },
     "large/hoist-toggle.webp": {
-      "fingerprint": "78ed3dab4f87b61365019abee3422cded539a4adbfc0ddaa0803c972433e2289",
-      "sha256": "c2eac312c898cdf7c380f785155aec7c349f1115bb80039ef1c33bcd80e99943",
+      "fingerprint": "84a82f71efd6cac1fb1c69e93563eff2a7039edd7816ac561490ec0a6726b9ae",
+      "sha256": "e4978be7f8ed62420d857120df42c4b9cb80bf2f82ffe8adc1737a676fb99fb5",
       "width": 41,
       "height": 76,
-      "bytes": 954
+      "bytes": 1280
     },
     "large/hoist-wheel.webp": {
-      "fingerprint": "c7a3fada1731997481d99bcf9261a54fded4b8056a86561b63be7d27180d3806",
-      "sha256": "b1d9b153106972512c7e513ff14e4c198c263eaf58ae73761192cb0e3e85e9c6",
+      "fingerprint": "ecd52c6cc4667524123f588553a31849265ff780f68f9d52abea925472aef450",
+      "sha256": "88bfef044bcc0715754fae3ddefaaeaabd6358a5c822b87b6542accb3925b223",
       "width": 101,
       "height": 101,
-      "bytes": 2528
+      "bytes": 3626
     },
     "large/hoofprints.webp": {
-      "fingerprint": "b85d69b873c047d8de0cfcd9f9456f976146a629aaa5c304510988c232b0dbac",
-      "sha256": "294f9a3e7ae8b8601dc2b0f78ad7ce2516524398d61413d7b26836927712a2c6",
+      "fingerprint": "718ec56ff16acd150ff6a4392d7d84c61472ecdcdde80813f36e6be361844e74",
+      "sha256": "233539472861a49e99c78206aa5413299bd3881502eb9ea17b8d0c593735adee",
       "width": 1650,
       "height": 450,
-      "bytes": 5382
+      "bytes": 6430
     },
     "large/horse.webp": {
-      "fingerprint": "444880fb431f249f944f2cdbc26cf078f0d8b7e11071e8c9deff5fd8925544fb",
-      "sha256": "9712a47ac81e7163548eb6b878b1b6d968361c2a8d10df4e1292403a1798f5fb",
+      "fingerprint": "62d4adfcd9cd45eec1824f5589a3193968d720960109d6363f5deaddbe075047",
+      "sha256": "803853df97a1e7adbf5d9bd7b819f38f8070337c98905fc8c52451c5b4b8cc5d",
       "width": 189,
       "height": 162,
-      "bytes": 3658
+      "bytes": 4806
     },
     "large/island.webp": {
-      "fingerprint": "3666dc3d9e33cb78cce7553a5576397ecee8a2f81b712a755a3fa669f96ade28",
-      "sha256": "fffff72bfd409262d9e534ccbeb205ae345a8a29a2bdb09088fb3b61f174c034",
-      "width": 231,
-      "height": 40,
-      "bytes": 996
+      "fingerprint": "e6a62a68db38ffb8a12054a3b9cbf68a2d11758ba707cf93ee42e788d8873477",
+      "sha256": "f7571fd261ef6d2bd4821cb5b0ed9356e5276963259737297e6a599e3878a1d9",
+      "width": 841,
+      "height": 145,
+      "bytes": 4650
     },
     "large/islet.webp": {
-      "fingerprint": "b74c9993a674ea11259dc424be759754f741ffbab6673acda77b4eeaa5eeb4bc",
-      "sha256": "91f10c1e89a7d32582e40273459d767233a59c401123f68c96d5a4e2af2a0ff6",
+      "fingerprint": "55d4ce86c790170e868af2d05a087f70945601a444a5933fdd56eda47f2a3cee",
+      "sha256": "5a3711c284bf2552cc8d5a9684b454b43a004cade02ab8c8b68d5b759b026737",
       "width": 378,
       "height": 137,
-      "bytes": 5038
+      "bytes": 8538
     },
     "large/lamp-far.webp": {
-      "fingerprint": "3ef683e9753e1777f07de654ce998167c86de975b3c3d40775c1c67d7cec95c9",
-      "sha256": "918bfa3fe0b0d5ab1c0e853b950c6cc191cfc043ac97db16ff1f84c6945e4ab7",
+      "fingerprint": "852c4789c59595c7d5a2fd72c967e7d0efe16f3614ebf824458f55154d5ed177",
+      "sha256": "ad75fb36737a2ef186c27a855fb26cd10a67dc94e09f3040091726c8fe54dd9c",
       "width": 206,
       "height": 825,
-      "bytes": 10064
+      "bytes": 14200
     },
     "large/lamp-near.webp": {
-      "fingerprint": "3ef683e9753e1777f07de654ce998167c86de975b3c3d40775c1c67d7cec95c9",
-      "sha256": "918bfa3fe0b0d5ab1c0e853b950c6cc191cfc043ac97db16ff1f84c6945e4ab7",
+      "fingerprint": "852c4789c59595c7d5a2fd72c967e7d0efe16f3614ebf824458f55154d5ed177",
+      "sha256": "ad75fb36737a2ef186c27a855fb26cd10a67dc94e09f3040091726c8fe54dd9c",
       "width": 206,
       "height": 825,
-      "bytes": 10064
+      "bytes": 14200
     },
     "large/lamp-pond.webp": {
-      "fingerprint": "5b79dcfd6527c62f43f830d50c00b9660b7e01b4d875dcddc6a206aac0cf1a01",
-      "sha256": "5f340955ab198796c67a3cd7067d746d24f7fcd85cf017565cc7587875a7b39e",
-      "width": 99,
-      "height": 396,
-      "bytes": 5654
+      "fingerprint": "4c34ffb55cb839c8df27cca1b6779e7bd3b6c93f194933b3e3662ccba8ddc30a",
+      "sha256": "22966b58b520a7d93aa3392147b99ea66d028b4c485dd067b327d32e5e9724a4",
+      "width": 168,
+      "height": 673,
+      "bytes": 14666
     },
     "large/lamp-table.webp": {
-      "fingerprint": "767cc799d150f90006696b3bdf4777dc0b8f6138b7e66a429f10beee1d501bdf",
-      "sha256": "b01ca28601c2cd4102de14580d8bc105b76f21f23411f053489305e7aed41814",
+      "fingerprint": "94ac3ff6da86272f1295672efb5200d37c88b5b39eb0bb3f162282d0572ed7c3",
+      "sha256": "bcdb1dfb1104a2b39dd527e5a1a458496c38369aa0d8076f448a86f646032eec",
       "width": 188,
       "height": 338,
-      "bytes": 4288
+      "bytes": 6352
     },
     "large/lantern.webp": {
-      "fingerprint": "834619885943ea716370f7518ae2867dc70ee9d194e60b3ba890f893ce898e88",
-      "sha256": "1181bbbf61cb53219b14b69ead9fa9c9c948defaf7046e9a212fa9272bcb8968",
+      "fingerprint": "1d16dec653bab96404042ae562c3b6cbe0260e88c46db6c2b542a5fa91454d02",
+      "sha256": "82bdc2ea31ebd7bde4e0096bdb95685313c0d9741b3e5521688686feb86dd08d",
       "width": 113,
       "height": 210,
-      "bytes": 2424
+      "bytes": 3384
     },
     "large/left-out.webp": {
-      "fingerprint": "3004e832bd5aaabf5babcd05616fd554ec8eca9c7e0bd23232f87582dfd2d961",
-      "sha256": "7268259fe1616d5a00fe1ecd633af4c3fc787edc359985cd5c727580512084d1",
-      "width": 788,
+      "fingerprint": "0c4c9bc7934382d4fd1e5852b8f26a37935a51d055f5d43dc1aada70ac7ba788",
+      "sha256": "e68e55bcdef27011ab6b3d3a5acfcc7f562ef0ec5e9fd355fac698a9b9a96d07",
+      "width": 787,
       "height": 499,
-      "bytes": 10224
+      "bytes": 15968
     },
     "large/left.webp": {
-      "fingerprint": "e01a774341faec491c104a0c8eaad9b935e31d9efe07bae5df10fd329778c3e2",
-      "sha256": "5ce147dcc18bfc0df50169d2612200b10a506ebc79d2281fd334537d9d75ea10",
-      "width": 788,
+      "fingerprint": "31da3726c23ccc68371d750ec18f6197aec8f214d72aff04af1a92a24370ebf7",
+      "sha256": "680c99e92eba091b4856b1560f4875b20d332a917b2547b86123257756874c31",
+      "width": 787,
       "height": 499,
-      "bytes": 8178
+      "bytes": 13412
     },
     "large/lighthouse.webp": {
-      "fingerprint": "74c734e086b478eafbdfe8545386a48fbc4623d95ef1fb307b77fa5ad4d62c3c",
-      "sha256": "39000351d13cbb7565e652c2ca1981f6506c7d472c9e2745678c66df622f3d54",
+      "fingerprint": "4f849d90b30be5cdcd08a9892c4c87595bc1885c26306ca740b2f50b69dbbc38",
+      "sha256": "83573dcd5380bd60c8437196ad830ef692da87e33378213e11ea9276393d4e5b",
       "width": 144,
       "height": 576,
-      "bytes": 7794
+      "bytes": 11904
     },
     "large/mailbox--open-true.webp": {
-      "fingerprint": "fec189336054eea9f8962a330dd68cdc181866c1f430319361617dd26522bcdb",
-      "sha256": "3d711645177aee32e099321518c2219495807e8830fa55dbb35bea90602b65b3",
+      "fingerprint": "c3a7ec1d2356d155ec24502f8113ee0383295a1ab3d3b73ebdd899b392abbae6",
+      "sha256": "d3b130dc1e40060a4cbdd8763fead35d54d0b9c7aa81a627ac63f18b6f11bcd1",
       "width": 188,
       "height": 356,
-      "bytes": 6164
+      "bytes": 9830
     },
     "large/mailbox.webp": {
-      "fingerprint": "8556e6f86f87a8626cfd9d5afe26fd20d79ac46cd83ad42403ebb5b36176630b",
-      "sha256": "cf197257bbc3079309531a7403e7b344de3735ed2450313733384276280ce4a6",
+      "fingerprint": "13be5852c803eecee9e3c3a95ee2f981754a56b48b35cb71572f86cf63bad4c1",
+      "sha256": "031789b2401636093ec185679a7da82589e7d34bf8f084a3b4378c35fb52411e",
       "width": 188,
       "height": 356,
-      "bytes": 4162
+      "bytes": 7018
     },
     "large/outfit-antlers.webp": {
-      "fingerprint": "9b6ce7355c918d5c75f4a0b62a629f69a063c7cabd0f8a76c886c3ac8356720b",
-      "sha256": "93e4740a1d1c0cc8f63e24e212327a32191a4878ad7c3e60c8245150e3b9c8c0",
+      "fingerprint": "09f6dd30ea8a5107c947c26182bb8d90f320cc5d5a7a9b3a7819bf94c10889bd",
+      "sha256": "9e5de2701d552bf6b1b6c758c18392d405ac82a1ff51388755e789c2b896943d",
       "width": 336,
       "height": 336,
-      "bytes": 4922
+      "bytes": 6584
     },
     "large/outfit-beanie.webp": {
-      "fingerprint": "49832ed83d6679cbd3e8cedef3bdf29319bba04541d22c1b5e658d9a50fe8cac",
-      "sha256": "1008e3e85a9b993288070ce42fdeb0dfd8d75f009fc1671c7f6cb8ce8dc9ca29",
+      "fingerprint": "c89102118142a90fcb22a3c5e146e1338e078e447f43c3035c59ec640bcd2814",
+      "sha256": "b45a37faab98a2c92b85c40d9b521b3ad6af858a284cd8b2cc7423a3675ca248",
       "width": 336,
       "height": 336,
-      "bytes": 3618
+      "bytes": 5520
     },
     "large/outfit-beret.webp": {
-      "fingerprint": "4c2ee32f3ea33ab1ef73df574712d22b5034f4bd2137a1261ceaa74c1b7c9398",
-      "sha256": "ccf6a9d8060f8aaa3b5fba84554a492bea39ab0ee55ebec317226f30aa097bee",
+      "fingerprint": "cbecc0006dcb0f24fc6d0cef5cac5335a91cc086b76f220d170fc9a70661c70c",
+      "sha256": "312069173da2233d136aec470fa1176f85e72ab2c661807f18365d8306777bb1",
       "width": 336,
       "height": 336,
-      "bytes": 3500
+      "bytes": 5590
     },
     "large/outfit-bow.webp": {
-      "fingerprint": "0f7d117645894bbee4909f195a77c3b4ee8c4331326d4600a895d51d3b0e9615",
-      "sha256": "6e917b6d6c9870a3310c6fdd1ec6db8e4e61a75290307238e1ea32823e3f96d1",
+      "fingerprint": "465f4d6c7d36735a8462dba6a696fed971d097ac09361cd309e1c0ad7b070cab",
+      "sha256": "13109ffabf3775c23c43f83a27a2fdf05f9b6ea1335da614179aa2cdf9a97c76",
       "width": 336,
       "height": 202,
-      "bytes": 3536
+      "bytes": 5182
     },
     "large/outfit-broom.webp": {
-      "fingerprint": "7a140216dce8a8426f4457c5e4a367e3ee448aeff646228c7107439cd7fb62a9",
-      "sha256": "5688443e7c684e9f3b21b11231a233fb24700e3128968cdcc3a2caa18d0bd3ba",
+      "fingerprint": "b341ecb845c842e9711704aaf5bfa0646f4050d363172fd2393d39986b61750a",
+      "sha256": "8ed5099435dbee87223406435e4fdcb1ea2f5b7724bc0a6e964f93b4a0a710f0",
       "width": 576,
       "height": 288,
-      "bytes": 3252
+      "bytes": 4224
     },
     "large/outfit-button-nose.webp": {
-      "fingerprint": "604ae5e76b9b4fd815427926cc2025bccca0d5bf23a8fe292b27522b4edc6ada",
-      "sha256": "091b3c718e717b5f630a8fd34c953b0ce99bea68bcaa411a3c030e574fac12b7",
+      "fingerprint": "95096c77e71fd224e45543242639beb66e8e7651034f1e952c08cfa91037f997",
+      "sha256": "c011a1f38e7bffd5ce6a48059f7bae06ee8de18fa345e78208e525a2a76e8064",
       "width": 192,
       "height": 192,
-      "bytes": 918
+      "bytes": 1184
     },
     "large/outfit-candy-cane.webp": {
-      "fingerprint": "c30a645cc6ce1e929cf2334f66a9b475d1c8cc5ea06470baed4415ec7745e17d",
-      "sha256": "793af4f93d37b05d6d2d1e5bb711ce0abfb0e04da5f297eefcd3444fa4c80f4d",
+      "fingerprint": "45ded27cc2cafb8dcd4627d0815dd0d2028b72759565c3540185ebcf523e817e",
+      "sha256": "c9cfbabd9c7b74c6c409c2fbcef4fd77ba845dd8af37c717a0d1dd4ffe134905",
       "width": 576,
       "height": 288,
-      "bytes": 1968
+      "bytes": 2514
     },
     "large/outfit-cape.webp": {
-      "fingerprint": "954618bd8cc13bb02fdea8014c559a4e4878adc5b53ca337a60db5f28b5b3ea7",
-      "sha256": "67722393a1a74e476860e5bdca58069eacedae33966ba0433e6ab8f36c7ecb2b",
+      "fingerprint": "cae18dae8071db287c197976e4b364c9ba5a123df4d8063c77d7230d2ecc65bb",
+      "sha256": "97c6b56e3885090ea8ac50cfe72083a77dfdb5f544c40e1a5a0b96d5939003e3",
       "width": 336,
       "height": 202,
-      "bytes": 5380
+      "bytes": 7982
     },
     "large/outfit-carrot.webp": {
-      "fingerprint": "dee1d499a5265267892fd6d933e250afaf46b8fb21e6c1b89cc10f5b5bbc0cd3",
-      "sha256": "cba758489eaa892eff6c82e089aa2f6f1c2fb01ef716f6fbf947fc66fedeb8f7",
+      "fingerprint": "8018fa707969ee7a51ac160795b7bfcfc3047410c3dee7d274c4dcc3940b7a2c",
+      "sha256": "cfcbf4b8915c00f6e0fdc1eb70ba16ddfdc81fa0efcbabd737a579818202011c",
       "width": 192,
       "height": 192,
-      "bytes": 952
+      "bytes": 1200
     },
     "large/outfit-earmuffs.webp": {
-      "fingerprint": "4fef06c070d036f4cebab81559c98ce05d8379365f95e054d829adc4fe60c031",
-      "sha256": "f48bfef616549fddfd531aa0404906d435cc191a9ee4bcf003525d394b7afd88",
+      "fingerprint": "fb9d7c8eb69a3677e3c59a3fa4132bc6b0239be34729fef1b52ae2753c84743d",
+      "sha256": "ad577945ed3c2650bfe90a7ec1f665abbac7699809abc3489fa704d170679775",
       "width": 336,
       "height": 336,
-      "bytes": 4292
+      "bytes": 5626
     },
     "large/outfit-gift.webp": {
-      "fingerprint": "5c0b00a17f920f8cf06a28640f848e13c9b3f0d55d090cb3eb51232ffb0ea4dc",
-      "sha256": "e4ace5c2de5444bfb1e7ffddb13eeaa1883d483f0e4ec6f1285dc245a48833f2",
+      "fingerprint": "fa1625df80e673b2d34bc1cab3bb5312116723fd3b58270b562673884cfba2c2",
+      "sha256": "54ce101f359678c13ff557991e4358349b97dfe8dd048767fdfda6ba71c42ef4",
       "width": 576,
       "height": 288,
-      "bytes": 2172
+      "bytes": 2996
     },
     "large/outfit-lantern.webp": {
-      "fingerprint": "5bb4fb062e98686807ad186ea35d92c1171220b558eb1b53584583c5d840cb37",
-      "sha256": "c2d7aca5fe49f87441910c6bfc638a3427e516eb8d7927e0f99d39a1c23eb8b8",
+      "fingerprint": "e960528b3d68f1efa6135cdbde3801e8270845775c1ea939ed1021b2ac3a2588",
+      "sha256": "a3389c8fbc728a80fa8678017ff3d951d61f04d569bca2bd2e03162c22e89ce9",
       "width": 576,
       "height": 288,
-      "bytes": 1836
+      "bytes": 2416
     },
     "large/outfit-mittens.webp": {
-      "fingerprint": "83d36485b54db9bb05654b790b1f4c209e02fbf011cf6ef7e87bccd8ea28fdaf",
-      "sha256": "1073ba803972e1a6fe021f4b52a6c77c614d5b2fbf9c62e26384d4913808cf1a",
+      "fingerprint": "ad22e400a8659ea913ceefc62f82b5acfb6c3c2f47e27fbf657eccf6f3bc90e5",
+      "sha256": "503528ba3536c573613a71f8bcdbc849d15d6da3259038c9d7318b6279693cfd",
       "width": 576,
       "height": 288,
-      "bytes": 3982
+      "bytes": 5462
     },
     "large/outfit-mustache.webp": {
-      "fingerprint": "bf2a91da867b9ab8aa69130ca730e83adc6b3bb93ed4ee7ab7a4f1fa6ad87dd6",
-      "sha256": "16ef5bc928f256b6d1f3b6070818ca868ab6e36cacc93de806f42776cb876d63",
+      "fingerprint": "26291243db3902e659786186967623c72894ace5f4f5a3ca02a549a272456a56",
+      "sha256": "f3bfd6dcf0b1e4896e11620794b5d6e70d0bd7c8f7be1fc2eeb1d903e0d30afc",
       "width": 192,
       "height": 192,
-      "bytes": 1130
+      "bytes": 1494
     },
     "large/outfit-plaid-scarf.webp": {
-      "fingerprint": "9f0873b4eada1428fc3957f5bb004fe609e9ac1afe79a0b0402e85f60948b98b",
-      "sha256": "d801062ab36759e82fa85363eee6405f8decb6fc2f4433d24742f08d88ab5bbb",
+      "fingerprint": "5a7f7bda30ac13d2196d9d5280bd1c682e5179037b7848c49458b354b2051588",
+      "sha256": "de4a34fe704216bf2b9780222e66f7a2a1b51040bb227fff120738377527b05b",
       "width": 336,
       "height": 202,
-      "bytes": 4472
+      "bytes": 6538
     },
     "large/outfit-red-scarf.webp": {
-      "fingerprint": "5604c94400007487fa95f48c14d66de016f58799d882d46508f5dac7d7255efd",
-      "sha256": "2c847a6099065b271f00aaeed0f79d03d045721c84152c5d7c127648188c4a34",
+      "fingerprint": "9bf51ceb2f4897f04c512feeefe3d5aae45f1e7849cbed6bdfcb6576a6509bde",
+      "sha256": "5bffc1e4ce8d349edd2fd12e3ce3dbe00832c3a8c2f7b617e61c1b6aae37d05d",
       "width": 336,
       "height": 202,
-      "bytes": 3978
+      "bytes": 5964
     },
     "large/outfit-round-glasses.webp": {
-      "fingerprint": "f3a2c4c4cbc37d0f2fe606c45f1f517673d1afebdf7c2247b1204e4db5459549",
-      "sha256": "eb04c587f8eb28872175aa04f6eba4462d5ec0c8863d3255c43706e9fe3c3f96",
+      "fingerprint": "08927e4df1def40fbb8cfeb838d9ecd451363b896c4b7a52c7f2d2e84edb9a69",
+      "sha256": "8b28e8971ec3d42ead3ac86b621a0b54bc5fe880b1b2ad5ea3c8eec85e31c9d0",
       "width": 192,
       "height": 192,
-      "bytes": 3388
+      "bytes": 4088
     },
     "large/outfit-santa-hat.webp": {
-      "fingerprint": "3acf769124ba1caddb5b7b48c379f8604b7a88da96abc7fb767fa3c938d19c21",
-      "sha256": "0a1ff21095402b39fee0ffa5e3e7e2a029f0e95fd794af6085aaf3ab48b57ccf",
+      "fingerprint": "24d2c6818e5cfea62e18cf7d5a5a001156a20aecb4190a211bcb19ae2aa4dceb",
+      "sha256": "a7ce4c7cf2ba51ce41ea06866ea90b4a21b9222f1f96e6e824a8bbb38df82d2c",
       "width": 336,
       "height": 336,
-      "bytes": 4532
+      "bytes": 7178
     },
     "large/outfit-sunglasses.webp": {
-      "fingerprint": "4ec205e740f6d0e0feeed61fb4f5968fec7008fc49e333d554132f7e19eea1a4",
-      "sha256": "87142d1474f480e1adcbc39e92b094086e323833e8424b98d0c67ab717110a68",
+      "fingerprint": "908e9a9df13197f949a38704b2e22ad82151be1a27882f6f97185d592e2041fc",
+      "sha256": "75014acfe841842c23e3b0078d25de7bc0f05b5d40430c91a6302e5b7785c5ab",
       "width": 192,
       "height": 192,
-      "bytes": 1918
+      "bytes": 2584
     },
     "large/outfit-tie.webp": {
-      "fingerprint": "ff393860651a60784baee1c5fa1627c43b492bd2b368a0458eb776ae691cb064",
-      "sha256": "7e3e209eceff9e060cf9303e3bb800ce420cbf88633d08c42ca1fff82da926c6",
+      "fingerprint": "9e7ecf96ec59ca4249c6bff6fe0179b9bbae1f012dcd68a3a6a0a4431c7c8a77",
+      "sha256": "abe76461150212f01ec3da21bca955ff651949dc3b2216952d0b1bf65e900738",
       "width": 336,
       "height": 202,
-      "bytes": 2394
+      "bytes": 3234
     },
     "large/outfit-top-hat.webp": {
-      "fingerprint": "dfa16f12d46b77c4be214a621ba5ceaaa881df1a7be01fa4cb310179d0c4d7fc",
-      "sha256": "691b236aa51dd863c3ad6f573a11cfc16c6ef07ea1231d1a981dd8bf3fb95c04",
+      "fingerprint": "ed6edb974cf7ddec9ef28dcdbc694d35ca852924110e34dbbd84b54b9392a355",
+      "sha256": "4c6e85850ff230d8dbf4cd26e439809fb313b673138d94b7bb6b1f0b125720a3",
       "width": 336,
       "height": 336,
-      "bytes": 4966
+      "bytes": 7874
     },
     "large/park-path.webp": {
-      "fingerprint": "bffa687f414b19400f854555ba33413b2c26f3b3d98376b6f655170e312c1688",
-      "sha256": "d7c27f086599415ee760495103839f39609b71f6a34619b2e0e5acced6d13c48",
-      "width": 630,
-      "height": 90,
-      "bytes": 912
+      "fingerprint": "0c04568e1f64d8073af3812ed3e8a3cfdd64f98f75e6cf0d347a9cb509a4a379",
+      "sha256": "c94feed1117fa26673196cbb51c08d86be73d63fbafb84502fe8a138a0dcb8bb",
+      "width": 2520,
+      "height": 360,
+      "bytes": 8778
     },
     "large/path.webp": {
-      "fingerprint": "d83424cd49e6fe80852a5411206d655fa877c879ba2b32cc2e3f56f0ff6b64bb",
-      "sha256": "0d75e8cb15fe1877238fae151fb0358c775250be51ed12afe07119355023da15",
+      "fingerprint": "d3b52ad61e54fd43969505d483a4144eb0c5bb53e647e2c43b9526a6e88c9e81",
+      "sha256": "8b681530ee3116c730ce119ebd200a0cc91a26bbd5a5ba05c68c80e3db748feb",
       "width": 3750,
       "height": 600,
-      "bytes": 10126
+      "bytes": 13434
     },
     "large/peaks-back.webp": {
-      "fingerprint": "bdcafb91b5f39a941dc3a8f3be260ffba69c12e2499551e94f6b7ad45823390e",
-      "sha256": "74e00f5b4f594893c582d2ba7d67f91cf721647057cc1cdf47bae643679b2ce3",
-      "width": 1080,
-      "height": 126,
-      "bytes": 9212
+      "fingerprint": "0dd6df48a712ce96306b3f8d6b5fbc815d9398a6413558d583866924fd29e7e7",
+      "sha256": "ac6447d994d15635d9ba42f08f1201dbb5def6e9ec65f971e0fba544860d1377",
+      "width": 3614,
+      "height": 422,
+      "bytes": 59288
     },
     "large/peaks-bay.webp": {
-      "fingerprint": "a34fc598991d5312ec049da2cb08055fe6baf3bb1dc9ee181c0f127cab6ab159",
-      "sha256": "b878111b2df88d574aa09efe7962c479b501f67e48ccade86f1988790b660c64",
-      "width": 588,
-      "height": 95,
-      "bytes": 4328
+      "fingerprint": "6879746d17decf922117ecad0c33173ddcd45c0df59f9aa0b4de27168eff889d",
+      "sha256": "5b537f5cb129479ee21596cabe8c3bbba29f45bd388424bcbdb7de71e3d912f6",
+      "width": 1997,
+      "height": 321,
+      "bytes": 26856
     },
     "large/peaks-left.webp": {
-      "fingerprint": "8b3463196f0d9cc9e851d735cc518d2e88d342cdc94f3085fe925811e55decde",
-      "sha256": "fe9f3bfc26ced1b130b3a5ca765bb18624515fa028eb3e847707aaa6f3ea2b3d",
-      "width": 630,
-      "height": 105,
-      "bytes": 5234
+      "fingerprint": "02a4aefc36fb596b897c6765eb46b0202c5c831d5a4a10eff4f74f828dc88c27",
+      "sha256": "5b45c97db153dd683826c1f39d3e8bd4c86b2e7d24dc2f4ed476f52d067b597d",
+      "width": 2267,
+      "height": 378,
+      "bytes": 33750
     },
     "large/pond.webp": {
-      "fingerprint": "e5766966ac5324871773e4aff4f5461fa55b7d6c589035e37089cca460e6726f",
-      "sha256": "6a35b8f53e59ea4206bd9b738ae0dc44e42934bf7825c1ca0c9980afb82cb2dd",
+      "fingerprint": "51b012abdfc52692fe168bfc510c9570c08cea1b8efc69764ec9eecde7d7bb61",
+      "sha256": "bd9b295a0cd2d1daa9e10341b2d2b05e504528256ee7b980db00bcf4d1f45f75",
       "width": 1350,
       "height": 675,
-      "bytes": 17242
+      "bytes": 24214
     },
     "large/post-office.webp": {
-      "fingerprint": "a89073c5d9bcf54f468c923e908cbb99c087f01c2066cdb00fe5c4d3e6082d38",
-      "sha256": "807053b196a8ed48916f9466bcdf8775a9865c389ee2d7cc4c83f4cb62576126",
+      "fingerprint": "d238ed9560fa37f6068dee3a70e247eff22f3143896013b5dd118933bcd19d1c",
+      "sha256": "72431daad8c89d73de792e5d2c86c686c4efe15bbc77c14478735d13a9e3d492",
       "width": 1350,
       "height": 975,
-      "bytes": 29072
+      "bytes": 57562
     },
     "large/postcards.webp": {
-      "fingerprint": "c48fc4101f348f5a3d0dbaac565a24c6805cff0b556b84f53a8d8be9fa5fcd82",
-      "sha256": "eb02f998916e68879e5ede6b88e16c356dcb7a5173c268785ecfc1a1dbd09807",
+      "fingerprint": "5be3807dc9c3206fe3fad7d3c05a7de07a514b8cb158b856a16e4a63dec69628",
+      "sha256": "856a11019c1d332a692cd277556b755fda99ee9132f738550b067ff37be0abab",
       "width": 231,
       "height": 248,
-      "bytes": 7128
+      "bytes": 10716
     },
     "large/right-out.webp": {
-      "fingerprint": "3004e832bd5aaabf5babcd05616fd554ec8eca9c7e0bd23232f87582dfd2d961",
-      "sha256": "7268259fe1616d5a00fe1ecd633af4c3fc787edc359985cd5c727580512084d1",
-      "width": 788,
+      "fingerprint": "0c4c9bc7934382d4fd1e5852b8f26a37935a51d055f5d43dc1aada70ac7ba788",
+      "sha256": "e68e55bcdef27011ab6b3d3a5acfcc7f562ef0ec5e9fd355fac698a9b9a96d07",
+      "width": 787,
       "height": 499,
-      "bytes": 10224
+      "bytes": 15968
     },
     "large/right.webp": {
-      "fingerprint": "1686b76e8585830115df47e6f883024d8e9d62b7e0834d3f491beab488af726f",
-      "sha256": "c4ab258fcce9c8452582b98f90d57a54eb7b11107cdf58dec1637faa9ee282a5",
-      "width": 788,
+      "fingerprint": "e405629a9a1d6d009d13da5280588f2f96489117d038ac8cc51f891e8e638240",
+      "sha256": "ad6946a752dcd1b92562dec42283f0e76edb1cb65b81016946e5d3759b61a039",
+      "width": 787,
       "height": 499,
-      "bytes": 7786
+      "bytes": 12694
     },
     "large/rocks-shore.webp": {
-      "fingerprint": "edf3775131725de2f6ddad22f63a0fd09c3d864973d37fba1827387c8d5e4848",
-      "sha256": "42817cd3396d1733cc930db7c5447e63c2cfc84a2556fda993d8cb171698142e",
+      "fingerprint": "909465585952541caf1a5146733a310c9e0f387bafcb9121669e7156f64d4579",
+      "sha256": "cd79c07dc823fa4944f29d152140dc34e38252d5e5ccd6d74f294f9436be0bfe",
       "width": 240,
       "height": 105,
-      "bytes": 3352
+      "bytes": 5022
     },
     "large/rocks.webp": {
-      "fingerprint": "edf3775131725de2f6ddad22f63a0fd09c3d864973d37fba1827387c8d5e4848",
-      "sha256": "42817cd3396d1733cc930db7c5447e63c2cfc84a2556fda993d8cb171698142e",
+      "fingerprint": "909465585952541caf1a5146733a310c9e0f387bafcb9121669e7156f64d4579",
+      "sha256": "cd79c07dc823fa4944f29d152140dc34e38252d5e5ccd6d74f294f9436be0bfe",
       "width": 240,
       "height": 105,
-      "bytes": 3352
+      "bytes": 5022
     },
     "large/roof-in-left.webp": {
-      "fingerprint": "c5c27c4cd331d1a4bbf221279112cbea0a0c7da433cb80bb9d47cfd1dfde1e0e",
-      "sha256": "c6a3f7bd3fb40530563ac1d03d2e451c92058656a6a2db001dc5e55f4db0cfdc",
+      "fingerprint": "7d26c0edc664b8547bb91171e9b4fe18285cf973c9b06dca225bdc4f328260cb",
+      "sha256": "cf4e0f379ab09efb61614f4d9fdbc213162bb0eaf647345a9c5c96215cc334a5",
       "width": 510,
-      "height": 788,
-      "bytes": 4346
+      "height": 787,
+      "bytes": 5346
     },
     "large/roof-in-right.webp": {
-      "fingerprint": "c5c27c4cd331d1a4bbf221279112cbea0a0c7da433cb80bb9d47cfd1dfde1e0e",
-      "sha256": "c6a3f7bd3fb40530563ac1d03d2e451c92058656a6a2db001dc5e55f4db0cfdc",
+      "fingerprint": "7d26c0edc664b8547bb91171e9b4fe18285cf973c9b06dca225bdc4f328260cb",
+      "sha256": "cf4e0f379ab09efb61614f4d9fdbc213162bb0eaf647345a9c5c96215cc334a5",
       "width": 510,
-      "height": 788,
-      "bytes": 4346
+      "height": 787,
+      "bytes": 5346
     },
     "large/roof-out-left.webp": {
-      "fingerprint": "725a08e3c18d801197c73eb8831d11cfd86faaf45dcc2a72ca551c9014189b20",
-      "sha256": "1c33c267d6a2428906f1056db5cd6cb7f4751ea8ea25aedada044b2a173b5bde",
+      "fingerprint": "1ad75ea3003c8b03bad3b1efceb2f1b0976f5d78a8aab13c95641845bf014401",
+      "sha256": "478e7c5d66425116039726d1dac64e5340ac45c99ef76cfd29d809158c45754a",
       "width": 594,
       "height": 866,
-      "bytes": 20074
+      "bytes": 28534
     },
     "large/roof-out-right.webp": {
-      "fingerprint": "725a08e3c18d801197c73eb8831d11cfd86faaf45dcc2a72ca551c9014189b20",
-      "sha256": "1c33c267d6a2428906f1056db5cd6cb7f4751ea8ea25aedada044b2a173b5bde",
+      "fingerprint": "1ad75ea3003c8b03bad3b1efceb2f1b0976f5d78a8aab13c95641845bf014401",
+      "sha256": "478e7c5d66425116039726d1dac64e5340ac45c99ef76cfd29d809158c45754a",
       "width": 594,
       "height": 866,
-      "bytes": 20074
+      "bytes": 28534
     },
     "large/sea.webp": {
-      "fingerprint": "40564478a7f7db11f3b8fbaa16770205964b14c50504278d160ed35c3f58a49a",
-      "sha256": "c17340d84d918c1c3782b1d3567c0f72fe44094b765e2b771ca6046d895a85ea",
+      "fingerprint": "36cbafd21c9a2a8db7131d208875a3b199f5cb57f820ee4b2dd3481c0f933ec6",
+      "sha256": "cdec6a273e5b8b4e95628594569f216018aae54aeabd81136d94d5380a7d016e",
       "width": 540,
       "height": 540,
-      "bytes": 1300
+      "bytes": 1646
     },
     "large/seal-floe.webp": {
-      "fingerprint": "567c880a04cebec8b87eef1c3fa8411f11fba464447e28e8d533eeec00673a9c",
-      "sha256": "7827b3decebbe4729f1ae0de7d46dc8107c03c6c25e2aeaf55ed62ca46a39bcc",
+      "fingerprint": "fb975ca49531aa5190a69f3f4873d19c6b3e9e5636b59075ca3c36b4ed116c65",
+      "sha256": "a86ed48d4f25ecdd526497c45c283f6df29ec26adfa511e7ae8b76edea03fd17",
       "width": 255,
       "height": 120,
-      "bytes": 2542
+      "bytes": 3758
     },
     "large/sign--stars-1.webp": {
-      "fingerprint": "67cc46ac70511e4456738039e08575b9cb95649225a8d4b74107c964cb3fdef0",
-      "sha256": "c9e8d352ed6de5c46bca89f2a7005d14bdc8b009533230b4792324f4b0231aad",
+      "fingerprint": "cf1579cae5981b7b0a1b686ab59037a4d26feb8195caed55d24c5182efe5ac28",
+      "sha256": "c205ccbf59401bafc56a5f778b038f57e45e80ab97ba582356121a36d5a7d5d7",
       "width": 788,
       "height": 488,
-      "bytes": 32032
+      "bytes": 57994
     },
     "large/sign--stars-2.webp": {
-      "fingerprint": "9d6d3cd9dc8a9ba9b30c7b9da4940177f159cc75ce7ac448204ed45d3b5eec68",
-      "sha256": "8f7ccec799715d77f3e0345786a581d4f1299c31bf3d8beddf0acd1d564cec26",
+      "fingerprint": "e7b12322f4ce0655e9ce535ffbe624c0a7eb23b9933aea98500e3ea3d0a1a62b",
+      "sha256": "cb57943ec7a8b58f4194e6b2474acca3ec6a6c0420a8bee830639117c5e1750e",
       "width": 788,
       "height": 488,
-      "bytes": 32218
+      "bytes": 58230
     },
     "large/sign--stars-3.webp": {
-      "fingerprint": "4a5082be504ae497db951ecd798eafe52838c33bc7a0d7bbe2fbaf8d0fdcf4dd",
-      "sha256": "8432184f9a81ed6fe94a90e3f7366c65a20926b08ccd2e8292114b7b1c2b4ac4",
+      "fingerprint": "d0a1d56061cfaad7da8ceac3307d0ab9a4a5ae23c9873ab28f0e1ceff99cdd05",
+      "sha256": "fd614961a65e1685eb4b8ee7bf617517342006d18a8901d5028352416e91124c",
       "width": 788,
       "height": 488,
-      "bytes": 32454
+      "bytes": 58498
     },
     "large/sign--stars-4.webp": {
-      "fingerprint": "c9e31f289295cbd9f0a38ad22f373ba58a99944dcc7206d7841455a57b6e8f7a",
-      "sha256": "bbe947b1f464da84b9d0b6f73fe0f8a2902366051d9a0368ebe86ec123491bb4",
+      "fingerprint": "b3ad60fbe16cf58a257581d0dafa61d048e165508ea6761704a608a2ad9ef110",
+      "sha256": "9c4b969799fbdeececc45c43dbd3324804eeb22cf6063c12ee5b0df52e114486",
       "width": 788,
       "height": 488,
-      "bytes": 32628
+      "bytes": 58740
     },
     "large/sign.webp": {
-      "fingerprint": "968011f2eef674bf89ec59b585cea9f6a0b9023ac9cd8295abf23c4e79c3d4ae",
-      "sha256": "759b36dfcd6ae2c0b7d3fddf8900014d578d2a3860155c0836a202f67d30d5e1",
+      "fingerprint": "2b204552696e8ec8884a77493fcde24451213923dc88aa355964bd0d2c8c9370",
+      "sha256": "17ac55a8d82a8ffcf0f066d3c55fc9901ea67162b4418a6e39000f79c63faeae",
       "width": 788,
       "height": 488,
-      "bytes": 31866
+      "bytes": 57726
     },
     "large/skater-green.webp": {
-      "fingerprint": "ccc0017488fbbdb03e7b5dafa6a12f8ccfd3bf111fdc18ad0487c5f58d8e5f1b",
-      "sha256": "78857f74b33098f3324d945fadb713169251b653271d1cf1d3e0299f2677d8ef",
-      "width": 91,
-      "height": 140,
-      "bytes": 2450
+      "fingerprint": "0cf9cd48d44550f5a19397272ed3084792366cda2bd8f33c71381491364c5539",
+      "sha256": "960a149219e9329ff003432850cf021a870dea60deca21a5c3639160aad13453",
+      "width": 94,
+      "height": 145,
+      "bytes": 3262
     },
     "large/skater-red.webp": {
-      "fingerprint": "dc06d7f73314763f78dbbf4da77aefadfdf94a04dbcf50df7b12394e85180205",
-      "sha256": "f165218416937b3c6e129cb56c10507ca3cf17e005b918c2d59149ae42025c5e",
-      "width": 91,
-      "height": 140,
-      "bytes": 2554
+      "fingerprint": "7027e77947c8b5574c01c1ed787078242e351656bc4402bcfa780a0a67432a11",
+      "sha256": "9360f2504767644d1cc8d1593303f0a03daba52afaaf12bbfd329a77272d62b5",
+      "width": 94,
+      "height": 145,
+      "bytes": 3386
     },
     "large/skating-pond.webp": {
-      "fingerprint": "6e22c6049f094e8f49c77e116877df932fe510deddb95b22d72f2c5b02d058aa",
-      "sha256": "6f1a251219e92475dbe6ad2c8c37285ca0e975efa52648826f2f9ea14203fd8b",
-      "width": 264,
-      "height": 120,
-      "bytes": 2770
+      "fingerprint": "e68a0a33e76061dfb4be988e8bf8a96fe42682bdb79bc81e8c648d916e8c01c5",
+      "sha256": "88098f68cb05ee638ced6936b4ced88ed8e605367274044866a5997be258ad0a",
+      "width": 749,
+      "height": 340,
+      "bytes": 11402
     },
     "large/ski-mountain.webp": {
-      "fingerprint": "faefa8373a3c4d8b4d9dc74f4ed360c149a644157d49dfa893b925843a8ca59d",
-      "sha256": "c95c5a4ffc71105fd29ad51ec1877503aab2f15a0ce79343aeb43e3836a7683f",
-      "width": 1275,
-      "height": 413,
-      "bytes": 15168
+      "fingerprint": "a612d02a56c502991954bdcbe05a3598c42c3cf2a5bbf940a3dba39243fcdac6",
+      "sha256": "c4f4234e37102e00fe1cfbb4acac0b4171b0f0a9de6634fdfaa176b0dee61a4a",
+      "width": 2095,
+      "height": 678,
+      "bytes": 41754
     },
     "large/skier.webp": {
-      "fingerprint": "9b93eae77335dcb0f6b0134bcd09acbd00baf52e7c58ae9d49168c956b4517ee",
-      "sha256": "66306b63d100f0351154b19cf707d489ff738a6c767bb5ca543d567bdab60798",
+      "fingerprint": "bd6f9ce45adaa6fec81fcb71f7416c62985fccdacedd6cd927af67eec8a87f15",
+      "sha256": "51f06738615e5e68e9b290c319217480c2a903f2c4c2ccff6be55d8157d4b8e5",
       "width": 91,
       "height": 116,
-      "bytes": 2826
+      "bytes": 3640
     },
     "large/sled-sacks.webp": {
-      "fingerprint": "1f055347478615a595f6a89007cf2a803974beb21ef0dd5ee8e6fc236685d0a2",
-      "sha256": "286eb9fcd70915566d13fbb906092478f8e590a80e286657e4977fcc3aaa9535",
-      "width": 210,
-      "height": 113,
-      "bytes": 3524
+      "fingerprint": "9c6dbaed6da6ab63639dfbb3b878319723818cd2faa9f0936282cf744bd7ea6d",
+      "sha256": "cda3fac4408bf42f393fd84621188049750d3bbfd1770f01f390b2b240f20bc8",
+      "width": 351,
+      "height": 188,
+      "bytes": 8058
     },
     "large/sleigh.webp": {
-      "fingerprint": "683b5320abd45093a52dacf45a5c477ff50a5a0594958a5339c86966f4ca039b",
-      "sha256": "9b5d6f4222614e42828b363dd7253c5b1fe2efad9b433addf5f5a99f2e5e679a",
+      "fingerprint": "3f4893bae4a32a063d5f5dec1bfaf2456717871261b9fe59c2c99a41ba1ada23",
+      "sha256": "889bfd67b6acb646533ad52878de0738669251c8e472be26adaccd3b671344ed",
       "width": 488,
       "height": 300,
-      "bytes": 8646
+      "bytes": 14160
     },
     "large/smoke.webp": {
-      "fingerprint": "62605d4ccb2bce93a4c4c3cbb5c780c1ced3938f0990e7a6ebebec6aff712795",
-      "sha256": "e14fee4dca24d2215a34b1b97524d3b1a89bd5aa21852b565eb0d64406f673ff",
+      "fingerprint": "2ef2aa20e7e64e5c05ce59ac356d00f96f92a09d9ccbac70850a9b2027604625",
+      "sha256": "0a0c821e850853d0698f29ec8fca2483454cec8616376ec85d16d9814611f4c7",
       "width": 206,
       "height": 150,
-      "bytes": 1174
+      "bytes": 1410
     },
     "large/snow-fort.webp": {
-      "fingerprint": "40f02667219c0aa9576736a6f6f3fae3d5ad56de19c928678c19a124a4878488",
-      "sha256": "c721f832706011925559c456661dd288a0fabde968acc0945e807e0603c994e0",
+      "fingerprint": "e4230ebc8e2e96fa04f5650857d23cfff9072ea5862eb9002b1b55e04ab045bc",
+      "sha256": "71e62720ff0887c0f51812458ae034edbf8179df71672fe748a9c91f5f7a397b",
       "width": 180,
       "height": 105,
-      "bytes": 1880
+      "bytes": 2512
     },
     "large/snowman.webp": {
-      "fingerprint": "da14b5bb65d84966ba18c9de7a39ec60b48f5546e2e2dc2ed213dc22c9959d5e",
-      "sha256": "2c50fbf1c5f75a8a07090f8f35c1dd986e2f135b77f3582dc93eb224633d7e00",
+      "fingerprint": "fb0fc66ffaddc8b4448f834a22e73ddb4ea3ca6b68afb3034eca854da0ee9ec5",
+      "sha256": "f4c4524072b1192baf33faa3dd91ca52a3a5f2aaa27a3f054b37eda10e8273d5",
       "width": 338,
       "height": 525,
-      "bytes": 8866
+      "bytes": 11458
     },
     "large/stable.webp": {
-      "fingerprint": "3bcd6f3c80974e3a545495b1a211744698fa0c7c4c23aa378d4a45f4bd046f8a",
-      "sha256": "de1e023c3e655f3863da58f5c3bcb6bd7be47b4da1a6b090fcb90718ae972027",
+      "fingerprint": "4a885c203a4c78edf50a29aa8cd89a3c6d57d6188de3d1b4fa9edd237bc04603",
+      "sha256": "bbac1a4663fcd6890f77c63e1a4c345a8aeaee06c8dba37a2ecf9b1dae683039",
       "width": 1275,
       "height": 1013,
-      "bytes": 90950
+      "bytes": 170732
     },
     "large/stall-cocoa.webp": {
-      "fingerprint": "6e86c2467140b6822d759067232ee18b831acb68852c35a57def531b87ecf627",
-      "sha256": "a2a23a0051732668e5a6790e875f9e63a42922337a8d6d52e07bb25a3957ae89",
+      "fingerprint": "6f0d517ecbdca8dc92037ba59be9523ad062b6120b2e0d9e4fc4f0477162f4e5",
+      "sha256": "925d3332d15f7f85f97995da3c2acdaf2d5cff11270fc72c68bb9614ab75c07f",
       "width": 299,
       "height": 328,
-      "bytes": 11656
+      "bytes": 18570
     },
     "large/stall-cookie.webp": {
-      "fingerprint": "f8b6e8a8dff46363ecf9349d0130401720f839a006f3f8189dc6c5b8986d13da",
-      "sha256": "b3929e3d1f056d16cecf5746f8f34e99eb504e5e4ad9b4fc04215434a5bec21b",
-      "width": 299,
-      "height": 328,
-      "bytes": 11180
+      "fingerprint": "16e89ef6cc5ebbc1911f6fde314f5e9311fd896aaf8f7c2c11df96fce05ec7e2",
+      "sha256": "4163e8f5344c93561816c7b4088da12c784cf9f2ea2181cad96cc5df96696ed2",
+      "width": 323,
+      "height": 354,
+      "bytes": 20566
     },
     "large/ticket-booth.webp": {
-      "fingerprint": "dc7db1dbee53481b41f2d6b17971290866c64112000d3b63ca17892c999f30b4",
-      "sha256": "318804f7f834ae7d957dfc374d856810dbd0a15cb5debf69183abfd2ed2fba99",
+      "fingerprint": "972aa20b4b825002ba6669d758604b43d4eaf1cc87ab56eced87e1d3486808a8",
+      "sha256": "7f42039ef7c834dbc5b1c55b4aa0d1153a4ca5b6f2d353997bf7cca83b993658",
       "width": 165,
       "height": 285,
-      "bytes": 6090
+      "bytes": 9214
     },
     "large/toy-crates.webp": {
-      "fingerprint": "0a3cc3998401478bedbc296ca0cff6969a394083b516aba99df613f8ffd10834",
-      "sha256": "49a8d7c0cfd8f51d4097faed6874cd971d9237274c87c27b10f3b4a1393144e9",
+      "fingerprint": "12651056149e7e20ef541722a3f70fdc7a82ae8f9f87e2655da44145c60befae",
+      "sha256": "ebeb6ef6fda2e816889d9c3362aaa6180a8735158e367708f92db983fb14244e",
       "width": 638,
       "height": 413,
-      "bytes": 10808
+      "bytes": 22966
     },
     "large/tree-lights.webp": {
-      "fingerprint": "6399546fe0670cbb54aa992d04e65e6467fd261ed2ce75018ae1df0fbf5ff0f2",
-      "sha256": "34fe1a4a9ae59ccdea28d0090d0670bb93c30f3079caccef7b5069574a064647",
+      "fingerprint": "e77ca0d3a8b367bf893922f5484ceb6544dabcb48d86ad029510879c6e145574",
+      "sha256": "62035de5b9d78e24826f0aa1296c93086df8c8af17de945139a72c40810e7ca8",
       "width": 278,
       "height": 510,
-      "bytes": 4666
-    },
-    "large/tree.webp": {
-      "fingerprint": "aed290355225752d001b580af055d6862a0bcfac1810def34ec95f82d6fd3554",
-      "sha256": "10f1c34556b5f0f1913607b08a7f38ded07a031f169690846af11577b805741d",
-      "width": 278,
-      "height": 510,
-      "bytes": 16204
-    },
-    "large/village.webp": {
-      "fingerprint": "bc89ad2f5ca33957e992bac5182ce3159710b58637e246786dee79d624da8bfa",
-      "sha256": "0bd91f7ecf0ae0dd6adb4d5d7d6cee5a9de84a4149167cf4a828ede3fa58e76b",
-      "width": 585,
-      "height": 108,
-      "bytes": 6512
-    },
-    "large/wave-mid.webp": {
-      "fingerprint": "24ddbfeda115532b23887695bad4392723df38a705502b83a010916fbd89cfeb",
-      "sha256": "c08486513951e8e0fd216d875f763021742b0e855f463771b053128cc2c145df",
-      "width": 1440,
-      "height": 36,
       "bytes": 5872
     },
+    "large/tree.webp": {
+      "fingerprint": "d7a6d61a43d45e6a220aa7417ea1dcc09be1cbfb7d0ab412ad4896b6ad3fab1f",
+      "sha256": "c72693325f466de136214c056a84a0133c949e934e77cf7beeba184d39f07ae1",
+      "width": 278,
+      "height": 510,
+      "bytes": 24658
+    },
+    "large/village.webp": {
+      "fingerprint": "0bb1fc0c8db31adefde36c02787506b0daae122600a3157deb1c78e126d48dfc",
+      "sha256": "e1317746766e9fe88e98b7c79b474e505be6555897e994cbbf723576214358df",
+      "width": 585,
+      "height": 108,
+      "bytes": 8876
+    },
+    "large/wave-mid.webp": {
+      "fingerprint": "2e6d8925d721b4da4a8ace374cc1375733435f2bde2511c323dadca0cdf35cb8",
+      "sha256": "a8beb325448df4572d488e70d4b4c00ce9dd1cd6fc749909cf5e1de6b8e7503e",
+      "width": 3325,
+      "height": 83,
+      "bytes": 22860
+    },
     "large/wave-near.webp": {
-      "fingerprint": "a72f7482b763f3d62bfaaad11324f4a58102f5116c62c9543ded3dcfcaadf841",
-      "sha256": "6fb0c064b1430309292f85c545b0a823be1579a81dd12bba2526c3edc3458f79",
-      "width": 1200,
-      "height": 41,
-      "bytes": 5880
+      "fingerprint": "4eadbf016a7de633162b304b4abaca4a23bf7518616b976c7b57de4aee6b9780",
+      "sha256": "8ab3eff28cb2dff173d61395256839d80b02d40d9ab3d7dbec5d8dd7e6fe277d",
+      "width": 2109,
+      "height": 73,
+      "bytes": 15794
     },
     "large/wheel-stand.webp": {
-      "fingerprint": "bf19fad63b90889ca6291b24c76fd44c262a96ba6f6e22fc58bcb9615ffe3cf6",
-      "sha256": "e843a37f640e160814b2e39f4ead91d756d0a24d75ab1510a2c0a36307dba991",
-      "width": 495,
-      "height": 375,
-      "bytes": 8904
+      "fingerprint": "781b86a04c65868b44d065adc6ac3e05a588f0644e38b0f9bc1170b451a74eb2",
+      "sha256": "1e9f7e3bc888e273d1bfad484b8b192b91d0a656128310d33163c13c10abcb27",
+      "width": 757,
+      "height": 574,
+      "bytes": 20858
     },
     "large/wheel.webp": {
-      "fingerprint": "f7e631f05af3781d40e46ffda5fa287e54444f4b58609d565c06b972be0a0cc5",
-      "sha256": "09c19573995a3c23f56df11ba7a5e8cad33fcfb3c77befd4ea923101c5e711c6",
-      "width": 611,
-      "height": 611,
-      "bytes": 46370
+      "fingerprint": "e75f9f1a89f7325ed42372e736a6edee5e13a6232da819094caccefb8d6a513b",
+      "sha256": "d6ba75b6ec10f04496c41239450ea9a29d1802add4f1926d5fce1a92ab162052",
+      "width": 849,
+      "height": 849,
+      "bytes": 88780
     },
     "large/wish-board.webp": {
-      "fingerprint": "a306396ded68a6eeab9c3bb5cb1e46a880c449582e47b32ec66bc0644814a6a2",
-      "sha256": "473fb2527880b13174b44fff63bdd1ff49eb798c6959a863ed20a37b6a09d0ed",
-      "width": 242,
-      "height": 242,
-      "bytes": 7410
+      "fingerprint": "4b0747540207649a61f06d8fed94b0d5df93bfb10cfd187111396512891c6bf3",
+      "sha256": "04927e3e13882aa1aacdb0f7c69eebd213d8da4ede8e09a13f6d2bba5ad88f30",
+      "width": 317,
+      "height": 317,
+      "bytes": 15044
     },
     "large/wish-gifts.webp": {
-      "fingerprint": "361a56c49ad95058576bdd322ad3e9fafb3e30b5e2c12f297b72e109532583a6",
-      "sha256": "a46c678a1f24ad4f7052dadbbaf27ae0026c8b1eeaa5a17567f462d61bff3ddc",
-      "width": 180,
-      "height": 99,
-      "bytes": 3038
+      "fingerprint": "27c5df4a67459d3535f0393896ce287747e8345e2017b702b46156c6fdc86350",
+      "sha256": "62c96e88b839a96b6e6c41f01b43931fa7a379d55122d8b67a08f0761e6f8de1",
+      "width": 345,
+      "height": 190,
+      "bytes": 10704
     },
     "large/wish-lamp.webp": {
-      "fingerprint": "5b79dcfd6527c62f43f830d50c00b9660b7e01b4d875dcddc6a206aac0cf1a01",
-      "sha256": "5f340955ab198796c67a3cd7067d746d24f7fcd85cf017565cc7587875a7b39e",
-      "width": 99,
-      "height": 396,
-      "bytes": 5654
+      "fingerprint": "10270c5bb30a15244ae9e8eaefdd9948757924ae4da8aa2d612e3880ee838df9",
+      "sha256": "d6c913e74788b70fd19fcd1ccfc26e6e85709b1b847768e063ea95542763b7c9",
+      "width": 255,
+      "height": 1022,
+      "bytes": 23428
     },
     "large/wish-post.webp": {
-      "fingerprint": "9832cb8cf7cadcddefe400c6bd47efc256a65518c241cb144ef9bf490dfd6be6",
-      "sha256": "118f7279080a83fc10d10e61d7513c7900d5721e983c2f82faf240500c889dd7",
-      "width": 121,
-      "height": 263,
-      "bytes": 4484
+      "fingerprint": "42d9206298291f5972bcec30478c6c14df5235033655a90457f726e7ff78810b",
+      "sha256": "214dcfe8e14226881dc0ffea139f36c91d8ce7fdd163111f334c36d807ab4cb0",
+      "width": 273,
+      "height": 595,
+      "bytes": 23102
     },
     "large/wish-tree.webp": {
-      "fingerprint": "429fcc2e9b803fbaf0f62f320ef6535437c03efe656cfda7ca9be55f7539ae00",
-      "sha256": "9dabe98f2a34e6cb59c42f34bccb892cbca3c62ff748c8342a94d5ec987652b6",
-      "width": 281,
-      "height": 512,
-      "bytes": 13790
+      "fingerprint": "cd6b9724f0208ebf3d3cd49bed9523170220d596806db42e7641d5e6b62b3124",
+      "sha256": "daf2a957f6f1fe2b1952018bbfe18f0111e9ae342ce39b2393f5d02adb2f213d",
+      "width": 474,
+      "height": 864,
+      "bytes": 43156
     },
     "large/workshop.webp": {
-      "fingerprint": "a0dc0f14607da512c48418b133b6e22024ae9b68fb81af43bdae372716e1296d",
-      "sha256": "d04c954e04b7bfe0ad36942fb1e6accc419b2714d4866086b20bb7c55435af43",
+      "fingerprint": "4037f5dcff72f8500b54067687f320e9c2d094edbaa126cc7e687dcd26b6cb82",
+      "sha256": "f96a31253af32c8e5788c362d0ddc5c558561737780f581e5db495c40040e290",
       "width": 1950,
       "height": 1200,
-      "bytes": 86018
+      "bytes": 210578
     },
     "large/world-sign.webp": {
-      "fingerprint": "39bb94526713e05b2473e5a87c8d78057ce717702d142f6caac4535c71a5777e",
-      "sha256": "36be67497e0e839b33ca47343951ea7604f85bf367a6b82f4531a7f247a562f2",
+      "fingerprint": "d9b54482f4ba522be3115178e1bf166d19c7f3438b58917668c5ff5a9e9abf55",
+      "sha256": "951e576ad762946892fc466548f02be3bb4cce1fb40a1ed0bcad32414d68fce7",
       "width": 216,
       "height": 378,
-      "bytes": 6664
+      "bytes": 10078
     },
     "large/yard-tree.webp": {
-      "fingerprint": "c3385849c0591f891b7f40396872fe0a0c67734fc38a8d2c1c3911f686fc1fea",
-      "sha256": "b9494719b9744c556c8a769728681e9d43af237b30a380de7a7f0dc6efb9d7b2",
+      "fingerprint": "734f38dd7d061b75cdd908b67ea27888765cd0e1ca66f4dd26fbc9857df022e8",
+      "sha256": "12e4ad825d9be14eefc4958860a3673c5e4dd564f5655fb27c250af8739cc2ac",
       "width": 525,
       "height": 1050,
-      "bytes": 35424
+      "bytes": 66844
     },
     "small/back.webp": {
-      "fingerprint": "048245f612416a6a8f2cd09ef40031929c7956694c910f93cf056afcb48725cc",
+      "fingerprint": "687d54316e43c485b6d24ab49243a24df9ad2e1d868d6c2380575a9468c8ede9",
       "sha256": "19fe4f5ee451fe453106edca2e291aa881d360eb1781602dd8d9cb78943363cb",
       "width": 560,
       "height": 525,
       "bytes": 11746
     },
     "small/balloon-green.webp": {
-      "fingerprint": "28013048e632d9d6b22233bc504952c6941956c4dd0751739d3ef2186e293741",
+      "fingerprint": "00fec8028b7542a340a17274d2a292ca67be0b6f7b08f35eb64f9c7336984cbb",
       "sha256": "104312bb21b65bdfc0ac2d3da75e2592d51eb0919c8b2dab153c3885024abd17",
       "width": 120,
       "height": 160,
       "bytes": 3238
     },
     "small/balloon-red.webp": {
-      "fingerprint": "2e5bc7e35ffd053ea77edba83a629bfaca1c891db9d0b6f87e35fc5d60b7f098",
+      "fingerprint": "ce747448f086a993b55fd295a42d793c37e410500f6a494bce46628189e92a66",
       "sha256": "a0de0d00bce4fde0eaa1e9ef41fa9198f39f3f14f467dbb545eabe1b6a761298",
       "width": 120,
       "height": 160,
       "bytes": 3376
     },
     "small/barrels.webp": {
-      "fingerprint": "8aa3573b9749d884dd45577a37df39068862be0300e76ff37af3c7afa446c436",
-      "sha256": "ed2593213e15790e2478451dec40c26d59f3b8e5f3b5b2b0f33b1a5e1b0fb5b0",
-      "width": 150,
-      "height": 95,
-      "bytes": 1966
+      "fingerprint": "464df9c19823d675c02b46c79cc7f7d721e0e2ee00370be731d03611ccd1404e",
+      "sha256": "7980f41a686f1c6239653948b47accf4546808639ce956b5216ecbc3bc2556cc",
+      "width": 190,
+      "height": 120,
+      "bytes": 2942
     },
     "small/bench-shore.webp": {
-      "fingerprint": "5d8c39903ee0e0d126ed29e526c774ecc41ea1ed48b796dda92f0d109019b4f9",
-      "sha256": "9048d2ee735f2763881015f843d81ddac7c9952deccbb64f925030d3aa357ab2",
-      "width": 140,
-      "height": 90,
-      "bytes": 1954
+      "fingerprint": "fcd17e0c1af0c3600bd916ef4403952e50bd4e8ea6c7585a5e8d84d55e2ebc85",
+      "sha256": "b87cdfdfd8647739fb894a6c75d25c34e5b7c661a2223c02a0351f90c71831fe",
+      "width": 205,
+      "height": 131,
+      "bytes": 3242
     },
     "small/bench.webp": {
-      "fingerprint": "abeaf8ce31625882fc4dc06d2cb323b56c40c76d77792c2ed70d3ed5ae6158a7",
+      "fingerprint": "03c19f226937d92804cfa012c80fcec10d639e5a6bd2449f30ce1f59f4893ba9",
       "sha256": "5fa4f77907bf682c8675fb585b590f34c1019500fcafe70ccedb38854d3fe0a8",
       "width": 350,
       "height": 225,
       "bytes": 3194
     },
     "small/bird-feeder.webp": {
-      "fingerprint": "d40c716509f62f0d290467ccc0a28441140dfe2c3571a2ecaaf8c97a87a9ea88",
+      "fingerprint": "57abe4dc8ed5ddf0ab97d055b2846f85310ae44042efc24a58bbcd31c5498071",
       "sha256": "4c3a1000b4dbfc834ae5be1ae59ea1986c583b3db867a23946ed368021b3d5a5",
       "width": 138,
       "height": 375,
       "bytes": 1774
     },
     "small/boat-moored.webp": {
-      "fingerprint": "959dd6a17a247d1c8581ae035bdc4d0a954ecbaac82561899faf3813c8618a15",
+      "fingerprint": "7b79fb243a10e09f71e22a2d22737bbe3224e929c14df567ff7190d5b9ebeeb8",
       "sha256": "62ee1dd232ad9764f59f4f55b74c7836bedb6c8f6815367ddedff250e658e2ad",
       "width": 112,
       "height": 136,
       "bytes": 1896
     },
     "small/boat.webp": {
-      "fingerprint": "959dd6a17a247d1c8581ae035bdc4d0a954ecbaac82561899faf3813c8618a15",
+      "fingerprint": "7b79fb243a10e09f71e22a2d22737bbe3224e929c14df567ff7190d5b9ebeeb8",
       "sha256": "62ee1dd232ad9764f59f4f55b74c7836bedb6c8f6815367ddedff250e658e2ad",
       "width": 112,
       "height": 136,
       "bytes": 1896
     },
     "small/boathouse.webp": {
-      "fingerprint": "ba1407838d49d3b0ed0369a62a4c8582164ddb07d60a9b171acefb0583579d4c",
+      "fingerprint": "46d897eab6d2a0aecf4dccfc1892d5b09381428bac05e8637950140f4a3b5f14",
       "sha256": "eee60378f3ea131a26c341dc50b85723efa0752246f781451f1d1cb54c25cef4",
       "width": 204,
       "height": 213,
       "bytes": 4722
     },
     "small/bookshelf.webp": {
-      "fingerprint": "2e7982679f39fa8d84642ff7f9b2f85ce4a91718efd21b831af7cb7a7396b766",
+      "fingerprint": "fdae0fc22132f54560db869cc5e1ad486bc3dd87fd90575d42defd02d31d34aa",
       "sha256": "ed5687ce7ed8be57068278db10f6e084bfb57ce03e3c3c288fdb89ec24d7bcbc",
       "width": 138,
       "height": 313,
       "bytes": 7482
     },
     "small/bunting-stalls.webp": {
-      "fingerprint": "3a391dfde82ece1ddd38d5f5d182796d1545fb0f7956d1a156907880ea6bbcdf",
-      "sha256": "6b483c65d14741ef52fd73915885751b0f3a987e7407b8c24e86c1b746f1f3ed",
-      "width": 230,
-      "height": 150,
-      "bytes": 4618
+      "fingerprint": "72e789302667b721ede6f6a02b1238d4d8a8d90b768510b1d3b199b1dc92dbb4",
+      "sha256": "0ef2526f575415a4c3cec23ae1fa765e174e5933be192751a0fd277b9ed8b2ba",
+      "width": 479,
+      "height": 312,
+      "bytes": 11456
     },
     "small/bunting-wheel.webp": {
-      "fingerprint": "fa0134323586dc059861d38a481f32252cbe294236c67f5609d3bf10a7efafd3",
-      "sha256": "b38f3dd2f063c26b449559a0ff7ab56f792e7e75ab379b3291f7c2426d84cf85",
-      "width": 270,
-      "height": 144,
-      "bytes": 4938
+      "fingerprint": "426f6e2ca4bcf66a6bbdf8c5cc9bf36485a25595b1cefd8e52f95557a04eb5ab",
+      "sha256": "9ec3503abbfc7ec49a10c0013014ebccae4419a02099f5357f9b6132a7b7264a",
+      "width": 569,
+      "height": 304,
+      "bytes": 12188
     },
     "small/buoy.webp": {
-      "fingerprint": "cf2a785982021b90104bcb53fd6ee911e38a40ec193ba979a4fa4a6ce5b4713e",
+      "fingerprint": "10e4139292962347d0923744d908b7f9ac1978b833567b3b71d57a9aabc704df",
       "sha256": "ab22730227d866f485aed2e57b3eab71af68ee26ffde9859249a9bbc8efb0455",
       "width": 46,
       "height": 77,
       "bytes": 888
     },
     "small/cane-far.webp": {
-      "fingerprint": "c057106cc20098a3f41cd2e81c7555feb9c2d177ee34529c0dc6df80d2b79d4f",
+      "fingerprint": "b3b9d9588bb1d964f2b9b1c7542e5f7b4a726def03bd9a31c63e4182dbf6e06c",
       "sha256": "5e1427cab3e3931147628d3ab2da52a1ede21d7791a4b4726596044ae06f03c9",
       "width": 75,
       "height": 238,
       "bytes": 1536
     },
     "small/cane-left.webp": {
-      "fingerprint": "63480645ae60714c32b0b971fca5820a873e00f473e44dfb525d7e27c6a8042e",
-      "sha256": "d391b266dc35c630fa5a885b6def808fcf2f4ece25256d051f7e37c1121b5bbb",
-      "width": 39,
-      "height": 124,
-      "bytes": 1004
+      "fingerprint": "22354df8c321ef92167afc93cd4ba279926c6785accc6dff7805279573bcf983",
+      "sha256": "eda8290e4de7a0a89927d8b1835a345fc7af262c43f986ab1ed9a2d05f5d58c9",
+      "width": 79,
+      "height": 251,
+      "bytes": 1928
     },
     "small/cane-near.webp": {
-      "fingerprint": "c057106cc20098a3f41cd2e81c7555feb9c2d177ee34529c0dc6df80d2b79d4f",
+      "fingerprint": "b3b9d9588bb1d964f2b9b1c7542e5f7b4a726def03bd9a31c63e4182dbf6e06c",
       "sha256": "5e1427cab3e3931147628d3ab2da52a1ede21d7791a4b4726596044ae06f03c9",
       "width": 75,
       "height": 238,
       "bytes": 1536
     },
     "small/car-green.webp": {
-      "fingerprint": "14db6f4c2cfd766dd9202358ecc0727dd8d7416e52f3642dc18eee26a4f10919",
+      "fingerprint": "9738bfb223a2a5d0779f916414cd058aa71cfae1c5a32db2384e1009808631fb",
       "sha256": "c6f53b628bb5e707a536bea149a3308c60063ceaaee946df6ee81a37ca505e09",
       "width": 90,
       "height": 100,
       "bytes": 1286
     },
     "small/car-red.webp": {
-      "fingerprint": "f4aa659e7268a8a571f3c5d966aea17597e3a9e68268431e9ed89226c5d0228c",
+      "fingerprint": "10e4695ef0608b32aad2b467165e67c21097c6256214a6203fdf478d25c6fefc",
       "sha256": "d439046efb083fb3cb3e8057b88a3816153e25a50499598c255649a4ab9fa2f1",
       "width": 90,
       "height": 100,
       "bytes": 1298
     },
     "small/carousel-drum.webp": {
-      "fingerprint": "24c14b1a75248a567bec61b19dde0b08ca90d56331c84d6681ae0dbc96ec0ace",
-      "sha256": "d5583605d3a59221cf079444890c0e7a7aa02c4ad110471660caff1ebf067d85",
-      "width": 550,
-      "height": 15,
-      "bytes": 2216
+      "fingerprint": "6f24eb25a5e0241c6705b0e8c1c8d1b88ecd2a29f26ff8ed99a32b6d94f6a58a",
+      "sha256": "bd04cff786f0a830f5c2d4332952f19c7ce4af84634ba4bb1c1f5c0d5c91240b",
+      "width": 1154,
+      "height": 31,
+      "bytes": 4670
     },
     "small/carousel-fringe.webp": {
-      "fingerprint": "302ded91a87f09bdb7b942c43c127b004bcd50c56182d10a895485cabb7cad39",
-      "sha256": "260233a03ae43ce438011721485998aa1a80e6c910f96282bce20cc128a4254a",
-      "width": 630,
-      "height": 17,
-      "bytes": 3618
+      "fingerprint": "f49edaed64045ed3f7cd249c6f337cb78b65c5ba002bbb627bd4a94631ce552e",
+      "sha256": "c3281ba2d375f011e707bd991da33ccb271cd6fbdc765944238644fc131065c1",
+      "width": 1322,
+      "height": 36,
+      "bytes": 6542
     },
     "small/carousel-roof.webp": {
-      "fingerprint": "132fb82419773ef6868c360987b9eea2e6604ead6dc44cb2017e96aada9a6706",
-      "sha256": "bbfce307bf500628ea1423b141e2c0d96de27487da4a5153cee9add7d4447371",
-      "width": 378,
-      "height": 66,
-      "bytes": 1882
+      "fingerprint": "0110fccb83d9fb16026b0e02e3443f4fbe43bcac006ca809d7b085de4c704ed7",
+      "sha256": "fc09c49d39856b32d25c6f53a685203bc35beb5a8627f5103b904253c85bd125",
+      "width": 1322,
+      "height": 231,
+      "bytes": 4890
     },
     "small/chair-back.webp": {
-      "fingerprint": "32693e8d38e47445ef116650d5b7b5330a1fff2160ff553e9887bd08ec3c9e4e",
+      "fingerprint": "3375453e746de653599796d03e9543ccdbfeca9a538887c39e42a3fc3d81ef62",
       "sha256": "bcab6659bfcf4a3c71a92eb8e1be9f156893e63c7560a12ec801b05be3af8bee",
       "width": 205,
       "height": 280,
       "bytes": 7180
     },
     "small/chair-front.webp": {
-      "fingerprint": "2c0125d0748e8a326452c8be7c0c636efeb2c3f2f7102f0b768a6c3c9e4afd86",
+      "fingerprint": "41adf12d24125cc182cb06fe48f0d065584a3341bd14debb555601770b03a9af",
       "sha256": "3ff4787bbee4315c47e2e56fd0c531fc4a7e9e6f41e3cb90f6f727a6aa47b707",
       "width": 205,
       "height": 110,
       "bytes": 1970
     },
     "small/chair-left.webp": {
-      "fingerprint": "a5c728c34c100cecf3296274d868a36a57cc5410b47e9f2735347116be37b7d3",
+      "fingerprint": "77ec3d49652bc18f3df7b049ce8208afc24d3c7431f2ae85abb234a811f9ecf2",
       "sha256": "56611b3d68df30c36fb14d98ae690f676acfaf172e3924edbd6c1662e786b926",
       "width": 225,
       "height": 250,
       "bytes": 4570
     },
     "small/chair-right.webp": {
-      "fingerprint": "a5c728c34c100cecf3296274d868a36a57cc5410b47e9f2735347116be37b7d3",
+      "fingerprint": "77ec3d49652bc18f3df7b049ce8208afc24d3c7431f2ae85abb234a811f9ecf2",
       "sha256": "56611b3d68df30c36fb14d98ae690f676acfaf172e3924edbd6c1662e786b926",
       "width": 225,
       "height": 250,
       "bytes": 4570
     },
     "small/coaster-car-a.webp": {
-      "fingerprint": "a913124015e5458077b4fe526ca789474b4b4e1d4208984b380e89949afa2210",
+      "fingerprint": "b4d09bd8bfa006060c0399f4f8931561e274f2ed5ca6df405524fcf50adf00d7",
       "sha256": "78eb15945e7e11ae1ab7ffda6de226e10f17c46d347187712f2fc239a0c001ef",
       "width": 64,
       "height": 46,
       "bytes": 1138
     },
     "small/coaster-car-b.webp": {
-      "fingerprint": "d15355f7b43232f19c5db8fbd9c1558473b379b457a638de470225981b8db8fa",
+      "fingerprint": "8a2a335b1f8d11ed67ae59f6c491ddf17d67b6364b06e96a544d20a53e121070",
       "sha256": "8ca3576eba5c61d9c8c18612a70168983c585cec9653788faf12adeeb0904105",
       "width": 64,
       "height": 46,
       "bytes": 1120
     },
     "small/coaster-ends.webp": {
-      "fingerprint": "87220614ca182c1f3ca88369f2caeb0b553e35d3833ffd9b10d3f32022d7a803",
-      "sha256": "00b245e3afe17cc1f8bafda73edede2d9e16010f6315f89580997051f6c807a3",
-      "width": 520,
-      "height": 280,
-      "bytes": 2368
+      "fingerprint": "9cc9806f055e2458152f60c55957641ddbdc8c65350db11f454e6d220ea06670",
+      "sha256": "cfe0e33cf357acc3d0ec2c71ac8b62aad55d38872cd4549254317973007e66cd",
+      "width": 684,
+      "height": 369,
+      "bytes": 3434
     },
     "small/coaster.webp": {
-      "fingerprint": "3385b8abb2cf23a23ab16ef7287a206dfad167dcb137dfe0846cf2c59f91775e",
-      "sha256": "a566e9180197f9737502d3f544a2266b22afc3fbc43605854cbeaed0cb82f7be",
-      "width": 520,
-      "height": 280,
-      "bytes": 24126
+      "fingerprint": "cf1e09f51f444a22b823fa71025c128e8e65ee07364223ad3ff57a9ad41f23c2",
+      "sha256": "485c136b2963e8537492bee8498d53e5719f793eb01f2e7e73c3a7ec79f2f3cf",
+      "width": 684,
+      "height": 369,
+      "bytes": 40702
     },
     "small/corral.webp": {
-      "fingerprint": "d0066c1b7ecb73d951a67c26abed66d04b653b91d8eb7b0a2af2d8c78c915224",
+      "fingerprint": "8e8eaa19afc6a82b3088297a1bb8e1a70fe553a374d4e81567da8d5fa2a8b033",
       "sha256": "94a3555d3759e1eb069f860e5bf2dd900067198cd7a98a7623297c40f596f065",
       "width": 600,
       "height": 175,
       "bytes": 4120
     },
     "small/dinghy.webp": {
-      "fingerprint": "5c3e8c0348eac7cf3b9a75d337bd37aae6ef4ecc8996f95f03bdd75c8bf8547c",
-      "sha256": "9f4cd906f61bc635c285f96b6e1a345a28faabc15e92e4c21cc4261ca647420d",
-      "width": 143,
-      "height": 55,
-      "bytes": 1656
+      "fingerprint": "97d59e4d0af5b369b7d28dc6e9c136d6d89b3763a58ccfa480facc5fd88ef919",
+      "sha256": "1daefbce65cc94600728888b29fa71a2da26ee104502e9312ef1f589604c8008",
+      "width": 149,
+      "height": 57,
+      "bytes": 1660
     },
     "small/dock.webp": {
-      "fingerprint": "6e45c6602b480c020cd4a480f3d6eef3899f93ac17c7e980d3392d8df2180ce5",
+      "fingerprint": "235ba919aa5c678205659d72785355744c0f42894bca94fd38fb3434a7b7ee94",
       "sha256": "597814479a999e787326b5e8ab94dceaa229d5cf02817a0641866a82761c9e05",
       "width": 272,
       "height": 102,
       "bytes": 3210
     },
     "small/door-in.webp": {
-      "fingerprint": "65ac3c9b292d5af5a6eadebe9997bc8208719541017d8e13a7e9e28bf2fccf15",
+      "fingerprint": "a51e12b304387e566df42c9059a57c29d311505e98b4936cfaea2a3c8876e343",
       "sha256": "be1f96b7f7b6c2f96d53d63322fa1c76338bcd273ee2b8dac90d41903b98e7c3",
       "width": 115,
       "height": 263,
       "bytes": 3612
     },
     "small/door-out.webp": {
-      "fingerprint": "56fec8156792daa0cf64fc57816ff2e87cb37d8b4377585a1eeb1fb643a14a63",
+      "fingerprint": "ec38f3b9f235d73bc9ebf3d0f83a1ebadea5b81ffbce2ad04b24ae6dfad20684",
       "sha256": "740a53e4d8f2fd9c011cf55c9d0f2f0758245c2e6a992416e7f9e3b4ccc38f16",
       "width": 115,
       "height": 263,
       "bytes": 3882
     },
     "small/door-path.webp": {
-      "fingerprint": "c039e769f9a3a7b5568f8d1c6fc0e17e5ee1a7a4082678581557f29963c30f0f",
-      "sha256": "5f0aa2dcb5417c08cb67acdbab3ee988ee6c842092822759f26f4cee84b1011d",
-      "width": 252,
-      "height": 66,
-      "bytes": 418
+      "fingerprint": "5876cea2f64810f17fc7d00f078464b865a1ae6e45d755e2b9f7987cc3c609d2",
+      "sha256": "dcec7aa4b1f6e175b581bfe78a405825f07a5aeca929025864750dd41face555",
+      "width": 1008,
+      "height": 264,
+      "bytes": 1632
     },
     "small/drift-left-mid.webp": {
-      "fingerprint": "9b10ac3fdca46f3ed65719f652de83b5b3aa1227ab576216fe89e89df7e4abc4",
-      "sha256": "b8666a96c457e1f49ccd930f8adf138bb0f1eff7bb068cf60ebe4587451cc85a",
-      "width": 108,
-      "height": 36,
-      "bytes": 544
+      "fingerprint": "e356e13431841f18a3a8701a8de55536ffeb015752c0ecac54f6160b53344a2f",
+      "sha256": "2ddfb7f1ccc021474c9adc959d6f487cca0f891d71e13588331352b601e16d45",
+      "width": 432,
+      "height": 144,
+      "bytes": 1854
     },
     "small/drift-left-near.webp": {
-      "fingerprint": "d783898188bb8da7bdb3000e4de64ed9d9731459a1ea0eb928a63645143b949c",
-      "sha256": "d6d5e1ef5af55148dcb55c74bb9ee874ede3299e9f5b464cdef2e1bb4e7b3268",
-      "width": 128,
-      "height": 40,
-      "bytes": 596
+      "fingerprint": "8fb80f3bd36de25900208f5d1dc8ada920ee10b7234ee9e614a322f8fce444b6",
+      "sha256": "1a2e2c5ebf29f2c1ded31a8b5b7dd7d4a9dd9b17b833c3aa47b24b5024a20baf",
+      "width": 249,
+      "height": 78,
+      "bytes": 1114
     },
     "small/drift-left.webp": {
-      "fingerprint": "e7b4ed65b3f8ceaf4e2a7f9b498266553eb91767ea630551b4713835ebd8ebe8",
+      "fingerprint": "7c0a50621c8f212c2679a06d5951244d7394d9169f8e375a6ac90d1800586985",
       "sha256": "95dcdf2eee8df331ce1085b4a53141c1af0607d30d47578467e1f5779c2df62c",
       "width": 225,
       "height": 85,
       "bytes": 1136
     },
     "small/drift-right-mid.webp": {
-      "fingerprint": "9b10ac3fdca46f3ed65719f652de83b5b3aa1227ab576216fe89e89df7e4abc4",
-      "sha256": "b8666a96c457e1f49ccd930f8adf138bb0f1eff7bb068cf60ebe4587451cc85a",
-      "width": 108,
-      "height": 36,
-      "bytes": 544
+      "fingerprint": "431ebef9a8753156d6b383bdbce8d10f0e981261259918b09558d5bbb322b74b",
+      "sha256": "70678895466c66ce42a3eaf4d5225a0414f2baa7c81664beaa2c026968e04bdf",
+      "width": 218,
+      "height": 73,
+      "bytes": 1036
     },
     "small/drift-right-near.webp": {
-      "fingerprint": "d783898188bb8da7bdb3000e4de64ed9d9731459a1ea0eb928a63645143b949c",
-      "sha256": "d6d5e1ef5af55148dcb55c74bb9ee874ede3299e9f5b464cdef2e1bb4e7b3268",
-      "width": 128,
-      "height": 40,
-      "bytes": 596
+      "fingerprint": "a901cf474229ac48264c67dfe1b1f614e7c2010ffd47451b3e1c93ecb4c7c1be",
+      "sha256": "8f90171c9d083f90fb566ecfcfee1615cf398d29c45dab4905256cff0c144576",
+      "width": 254,
+      "height": 79,
+      "bytes": 1146
     },
     "small/drift-right.webp": {
-      "fingerprint": "e7b4ed65b3f8ceaf4e2a7f9b498266553eb91767ea630551b4713835ebd8ebe8",
+      "fingerprint": "7c0a50621c8f212c2679a06d5951244d7394d9169f8e375a6ac90d1800586985",
       "sha256": "95dcdf2eee8df331ce1085b4a53141c1af0607d30d47578467e1f5779c2df62c",
       "width": 225,
       "height": 85,
       "bytes": 1136
     },
     "small/fence-left.webp": {
-      "fingerprint": "d44789a9dd48f05ef05e069769df90f6dfebcfd1dbc178b61e4a5c60ea0dc551",
-      "sha256": "4d425748249b62f4b99319926c7c7ae422ae0ff5521d6f73872cf50d04404f19",
-      "width": 240,
-      "height": 70,
-      "bytes": 2210
+      "fingerprint": "3f168022f90c364d2054b8494df49cf836275ae4b22b371f6ee4b9fe1098b7f5",
+      "sha256": "cd508e661637d8cc465f14e05ebdbf2b89ba72be7d8e6467f44ac00ece80829d",
+      "width": 494,
+      "height": 144,
+      "bytes": 5526
     },
     "small/fence.webp": {
-      "fingerprint": "d0066c1b7ecb73d951a67c26abed66d04b653b91d8eb7b0a2af2d8c78c915224",
+      "fingerprint": "8e8eaa19afc6a82b3088297a1bb8e1a70fe553a374d4e81567da8d5fa2a8b033",
       "sha256": "94a3555d3759e1eb069f860e5bf2dd900067198cd7a98a7623297c40f596f065",
       "width": 600,
       "height": 175,
       "bytes": 4120
     },
     "small/fir-a.webp": {
-      "fingerprint": "f8a34f18133b34e2dc173fda05c9b8b1551b696e2db778537b5cb675a587ea34",
+      "fingerprint": "bb553e5331285128fdeee9db8c3ed723cf0110efba0a9eba08bd7a7e6949b53c",
       "sha256": "7fe44ffdcaefa8b2ef18d2e6b4c777491e449b70d3af1f354354f336a5d430fd",
       "width": 250,
       "height": 500,
       "bytes": 10652
     },
     "small/fir-b.webp": {
-      "fingerprint": "01f1905a68216a67233fa372db950d691cf8cac743439ce9542e6681188c6ce2",
+      "fingerprint": "88ae0d0eb233fd534353df993e09f96f23691f37e2efe93a326443b2ac9db070",
       "sha256": "f293052970a624bda089f677d453b57ae9c6cfd5c846790ee29a256f6269f4bb",
       "width": 250,
       "height": 500,
       "bytes": 11006
     },
     "small/fir-c.webp": {
-      "fingerprint": "f4a980d3774fa4bf8c735c96596b841f759c282bfe6d92c41cb70462d574481e",
+      "fingerprint": "6a5df8455b10ddfc74f729b906903799d87b26f9c225b164f0b3b776afe5cf11",
       "sha256": "c343f803896cc62645ef9817ef165b97c637defc6a9a5943bb4d2903de3fc5c0",
       "width": 250,
       "height": 500,
       "bytes": 10182
     },
     "small/fireplace.webp": {
-      "fingerprint": "f319c1ed590ffa1ae0e192cf37cbc33f294d24f7e12ee519f38de7e5cb685b01",
+      "fingerprint": "fb1b529e3a74a127028d2dba5d00b0061e360c7536667fd694482588e14937f5",
       "sha256": "518285a8f932e61a770eb2c314def71276e362d794e40b48c59374ee1aae34b9",
       "width": 263,
       "height": 285,
       "bytes": 8452
     },
     "small/flames.webp": {
-      "fingerprint": "6cd61a9a4ecb0e42b452c4e53057cedfe2d47f792d3532a924c6b98e1611f4ce",
+      "fingerprint": "5812ab1c87210f75adad4961ef56c84f79c6f2a98310059b2b1e18ffd78a227f",
       "sha256": "c5a887101344606f6098f575f87bce23673a1fab891a128b23f3b9aee867ec0a",
       "width": 90,
       "height": 70,
       "bytes": 1242
     },
     "small/floor.webp": {
-      "fingerprint": "6745c53e75601dd3941b2e83ba119734e54819a3cef24210f57dfca6dece089e",
+      "fingerprint": "b5e525fcb89a8261089d00a521bb683714112bbe0b0fc95e2844553b20d10e19",
       "sha256": "ca8328224961ab03d9b2d2840e9e6ca8061e38ab7c68cfec0b7263fb89749b47",
       "width": 560,
       "height": 525,
       "bytes": 10084
     },
     "small/front-in.webp": {
-      "fingerprint": "d8854a5b61141c22624c0ca5b72dd4a41238a661dc613870c1384d1ad3e923c4",
+      "fingerprint": "42a713df8d8e1ccac88f722deefb90fa9ef70cc3a786ba28f3da54616685b31b",
       "sha256": "9642e30ca6f295b8c03e228206d4577a031adf1affcaf192a13603a6acb7cb9c",
       "width": 560,
       "height": 525,
       "bytes": 12126
     },
     "small/front-out.webp": {
-      "fingerprint": "7ac274bfcc807d49cbb4f5deca36a442dd760ae276527be065a6fcb001baf104",
+      "fingerprint": "3bdf8d8ba23dedb7f06362468dd7b065b1fcadcd9f524238782bb621d98133dd",
       "sha256": "30504922f622c61739dcfcb742a578843a1b448eef111fcc83a0516cf1f3b08d",
       "width": 595,
       "height": 525,
       "bytes": 16156
     },
     "small/game-sign.webp": {
-      "fingerprint": "0442e28426a239b91108e0416066ea239cd9ff9a49d459c6469be7bd2dc8aa53",
+      "fingerprint": "8e9df017c08839a93b4711c13a7e2528d778b9d7defba6097f8cb81b2b1015ad",
       "sha256": "4707da62dd07fe4807db58ca1b473381163c144ea528f28a28bbe71b045dd60a",
       "width": 180,
       "height": 165,
       "bytes": 3774
     },
     "small/garland.webp": {
-      "fingerprint": "3d1a209e8722d3eace8f73c88e17e2a51f720f0ff4d5e11ee3f9a29cb716faf1",
+      "fingerprint": "1676f1363fbaac7f2e74e1aba407e8c79697e25448a9d89705e62b04b96367dd",
       "sha256": "a4592682b74984982a8ba64f41696e3a03b40c3e568ff2969a41345c8f5807c2",
       "width": 1008,
       "height": 355,
       "bytes": 18858
     },
     "small/gondola.webp": {
-      "fingerprint": "6ca160db9971cac23e9529127ba8b4fcf340d978a53eb858ee1f674357c7973d",
+      "fingerprint": "919b27168b1188b2b3ee3368fc8cc9fd94a671f186cff6b893c3d1848aa88d6f",
       "sha256": "b91b26c3989d53997f5369fde1cc21b0bec116e48d8db822407069aeaee4d96b",
       "width": 46,
       "height": 61,
       "bytes": 760
     },
     "small/grass-far.webp": {
-      "fingerprint": "2a25fe7ab837c644cd49856c866736a97783d53f55134b8f79ba0c1013a49605",
+      "fingerprint": "b1a032227eae7c6848ab1c7ea5e3d3c622052b9278ab9dc0976970eaf94c1a84",
       "sha256": "864ea3836cc19bea897b94950a750a8c97452b71e0c2bcc4a0f443a2861f51de",
       "width": 120,
       "height": 60,
       "bytes": 2740
     },
     "small/grass-near.webp": {
-      "fingerprint": "2a25fe7ab837c644cd49856c866736a97783d53f55134b8f79ba0c1013a49605",
-      "sha256": "864ea3836cc19bea897b94950a750a8c97452b71e0c2bcc4a0f443a2861f51de",
-      "width": 120,
-      "height": 60,
-      "bytes": 2740
+      "fingerprint": "67ac72da6775ad118952906472c7f3cf6e6f4fde12b1dae8399babfda147d7df",
+      "sha256": "e1699c4e5eaf01246714dbe69a4d891a06894e77a7a79f33cfd7bac68aff8788",
+      "width": 199,
+      "height": 100,
+      "bytes": 4762
     },
     "small/gull.webp": {
-      "fingerprint": "f1a4fe3772c83bd3480341956f4c6f630dbec70ba0d2a793a1e7afef9cb4d77a",
+      "fingerprint": "dd9f498d37c3c988e580b8d43054e62d7fd93af7128f1d8d6780752dda0c7e1f",
       "sha256": "0c723c173e70f6730559c5a6d4e08556727aa9ac38325c0e946981b7d414e381",
       "width": 50,
       "height": 26,
       "bytes": 542
     },
     "small/hills-left.webp": {
-      "fingerprint": "f6ab7c01103f2be757f02844ac92b3472d7f947246417d963cdb9a2d2bf6bad3",
-      "sha256": "9980ea051f2b5309d1176cd1d5002147078ebc29885b436a2e5336bc6a4feaa4",
-      "width": 504,
-      "height": 42,
-      "bytes": 1450
+      "fingerprint": "46a43efd55e944154157afc0df273671d753d5c570f094ec1db17bdaebdd269e",
+      "sha256": "5eadd7ec84017bb21e3e4c652a0d3d57b3ea334b4996ade581fbc0beb1140baa",
+      "width": 1870,
+      "height": 154,
+      "bytes": 5568
     },
     "small/hills-near.webp": {
-      "fingerprint": "54586433727b0662bdefaf48eca20e020198e780ea500b26a44fc5a98c494b4c",
+      "fingerprint": "89e2c6a81ad5f4886112c42f6f4671e0be6f78edde8fe0c027fcbab5fe04e1bf",
       "sha256": "45b39bfbc700ef0e509b128945e58594da92eb68d35051d6ef6b77cf58c54951",
       "width": 880,
       "height": 31,
       "bytes": 1788
     },
     "small/hoist-bale.webp": {
-      "fingerprint": "5ffe330b6f6fe42323dbd3c6638ce49715cc22e4dbf8739e6473296a5e8dbf47",
+      "fingerprint": "f65370466c2318f3170dbaffed3c91e063c89620fcfc1724bfc3291f9265b991",
       "sha256": "36c80bda0a65622535d99da286690b93cc15c7d773eb4bdf8b44ac312118c981",
       "width": 105,
       "height": 88,
       "bytes": 1608
     },
     "small/hoist-bracket.webp": {
-      "fingerprint": "d49b4e7c2f0336192aa351d4d48cc23b45f0827c72c492924dcabca9f5d28f66",
+      "fingerprint": "df012bfb5414180577d50f4e96c37b9bf51110c8bfac7533c1ce4454392c790a",
       "sha256": "88897d9af05d54830af03b491626d779136f0f2250524eebc2df0feca6ab0c68",
       "width": 130,
       "height": 72,
       "bytes": 1620
     },
     "small/hoist-hatch--open-true.webp": {
-      "fingerprint": "22c23145907a05e9e62123f647fab7d77285e0d353c7b1e2a73ecffc5725e3ce",
+      "fingerprint": "f9bc860219fbe807930846705f5f62fbb330e3b5b5de99d5f619994cc56e59df",
       "sha256": "89abe5786ec98d625093c7f39f5b10a13348d2ea825f0c256d57d530785a1fb8",
       "width": 93,
       "height": 76,
       "bytes": 1554
     },
     "small/hoist-hatch.webp": {
-      "fingerprint": "164dd5929149b713e53734f5acc865f0d5db95c1e066a3859c6b115aacf29427",
+      "fingerprint": "7ac1ad126de1b6926994d8f80fe517f2208a873968b899b90f7b9f1a35479d99",
       "sha256": "3e4b73c6e7ed93ae8f27052bba21e9b8ff6c6452dbca793f6fd996798b21ae71",
       "width": 93,
       "height": 76,
       "bytes": 1534
     },
     "small/hoist-toggle.webp": {
-      "fingerprint": "31d125e730c5707b80d17dac592205ed95f3aec3eb592bc13880417d91b28151",
+      "fingerprint": "666313d41d520d2d2f90ca4c10bd3f977a5be15651e8201e575955c1be0f1f4a",
       "sha256": "14d5962fcedf44f5820c77be893d420bd88e9e5eef03f419acf7f1538e44d1ca",
       "width": 28,
       "height": 51,
       "bytes": 632
     },
     "small/hoist-wheel.webp": {
-      "fingerprint": "f94dc4d4ad90cca350431b55423f7097649db9462c0f18520aee0df7c5b62061",
+      "fingerprint": "b6b13426be5d8dca430561665ad27ccecddf641199a712fafc5db673def662a1",
       "sha256": "dc50136b06dffa202e3b9ec50cb8f3ae5d29ed2fde0377a8229cdb7fc42eac17",
       "width": 68,
       "height": 68,
       "bytes": 1618
     },
     "small/hoofprints.webp": {
-      "fingerprint": "ff2888ade3c34c70256fd17876e1850338ecabf87654a82d4e3d45004dc214a7",
+      "fingerprint": "2c0ef08a38a9cca24ea168a654b8ba98d5b3049d60b250041024b6c62d8bbb32",
       "sha256": "586d2266d1d28785cccc7bc0021a397a13224710ba50f205140c8f57c6e76bf3",
       "width": 1100,
       "height": 300,
       "bytes": 3172
     },
     "small/horse.webp": {
-      "fingerprint": "7e1bc488b768743ef52fcf281978350062df542c687800ef3b474cd0faeea4e3",
+      "fingerprint": "f4bb86ecbcecf6b9ab2294ebf9596c433a98f0714c499b43398a2258ade00389",
       "sha256": "2224927a70fe78f5be35032dc0520c221b9e851b128cb0bc158018a2f411e093",
       "width": 126,
       "height": 108,
       "bytes": 2352
     },
     "small/island.webp": {
-      "fingerprint": "b7e019daf32bfddfb6350f6ef98f8ea5c0f584a54d9d00e82731fc93b978059a",
-      "sha256": "a39bcab8130908810bbd86d003e89b921885008251639a73cab18df8b9bc3fc1",
-      "width": 154,
-      "height": 27,
-      "bytes": 718
+      "fingerprint": "73e94f449a3b53dc445e8b1216ba7b5d13be9f26baeccb6d9e8f985acbd654ee",
+      "sha256": "9389cc62e39f23ecc4086a973afced00cf3172d077fad94f68c2b52f6554032f",
+      "width": 561,
+      "height": 96,
+      "bytes": 2142
     },
     "small/islet.webp": {
-      "fingerprint": "cfdef3751d4479c66991d5fe07b1e1e3c9737227bbdba6f7605ed8b18dca947e",
+      "fingerprint": "90431901d2f368cb2ffdfbccb896e6dbc70818c4277ccff13d63496a069d3f6d",
       "sha256": "a4b01eba8abf7cdc90d89a5584e8cfd82ca236130f85f9469c22ef68d3544d73",
       "width": 252,
       "height": 91,
       "bytes": 3020
     },
     "small/lamp-far.webp": {
-      "fingerprint": "5ac780f722561434700e62e54c6c1ae627f913ee614c4ba9e0561b6f59dc3146",
+      "fingerprint": "f831a7fd2203cb6ce3630f628027a874af90aa5a58602ea32b73d5d520302a88",
       "sha256": "53bfa2591952172b1541ec09d913944b3e19e6eea6b12d88201d47a81a549355",
       "width": 138,
       "height": 550,
       "bytes": 5804
     },
     "small/lamp-near.webp": {
-      "fingerprint": "5ac780f722561434700e62e54c6c1ae627f913ee614c4ba9e0561b6f59dc3146",
+      "fingerprint": "f831a7fd2203cb6ce3630f628027a874af90aa5a58602ea32b73d5d520302a88",
       "sha256": "53bfa2591952172b1541ec09d913944b3e19e6eea6b12d88201d47a81a549355",
       "width": 138,
       "height": 550,
       "bytes": 5804
     },
     "small/lamp-pond.webp": {
-      "fingerprint": "298647373e3829d1a5eef9710dfcdd2aa353b85dd61634fa4af85d3071edad9e",
-      "sha256": "7fdf195f0e1a81c5e0c0c77713b3c3234b45a673082c490ad8f5df02c60e28b7",
-      "width": 66,
-      "height": 264,
-      "bytes": 3364
+      "fingerprint": "f7bb462110142e5b09ec84a27cc836416ec5f76f5417b51f19e9a1714b711075",
+      "sha256": "ed50d7b54ef2b9ac1bcab7e7f1883406fbd6c58ad06ad231f4472a4f641dfa62",
+      "width": 112,
+      "height": 449,
+      "bytes": 6428
     },
     "small/lamp-table.webp": {
-      "fingerprint": "8c4cbf2c27a28da01deae1a66e92592d59e037e3373eb02191698a1374e4182f",
+      "fingerprint": "df6327bf7c38d4f4f893f29ab1b021226e0b22efc807097cf40b8bb958356300",
       "sha256": "04a833434fedb6134125c94f8c56c1b0361c74fa93157a3ab2996aff32b64d1a",
       "width": 125,
       "height": 225,
       "bytes": 2638
     },
     "small/lantern.webp": {
-      "fingerprint": "bf3047b7e71695586faa638f0b49dc68eec772c8e9f792e9df0edfe93e80c1f9",
+      "fingerprint": "25415d6d1d8d672bf193d7e652c5152ea64b2e61936a9f1c2122470f2d22de4b",
       "sha256": "a0f7c14f4dc5076562c109d6781e0bbf2b629521c99034c1550f49594f4e6ccd",
       "width": 75,
       "height": 140,
       "bytes": 1328
     },
     "small/left-out.webp": {
-      "fingerprint": "6f4f4b6b3c58f344cfdbc5e45180df47015ec4e596932a6a7e646a7073c9161b",
+      "fingerprint": "f8135f269cee57a705d184f58075018d0ece919f3035ae00aa73a961a71c2092",
       "sha256": "71aa801c04060814303c59d4bcb9daba38aedee942e668e7c164566b77739468",
       "width": 525,
       "height": 333,
       "bytes": 6046
     },
     "small/left.webp": {
-      "fingerprint": "95f3d4d4bf2445e9e4000eb3781b105390aea3c2828d12bb7d0f96ad4cc6c9b3",
+      "fingerprint": "1506978fbe3d0b4ba2528bd34f1f714621f271f61e97388086376abc7ac26b68",
       "sha256": "752076b9d1533932e3a9a21a474b749e66f7d5b41476b42e2968dd3aa0eef45a",
       "width": 525,
       "height": 333,
       "bytes": 5136
     },
     "small/lighthouse.webp": {
-      "fingerprint": "685a3df2f45cd01319fd0a53c4756277d7b9c561f0db90eaf2e553611a6961d7",
+      "fingerprint": "cb6ee4bf981c16bf81c8de14fb04fa595c5d1d81cafeb2b7f1db0e3a1bcf851f",
       "sha256": "7c32c98d59f31d442aa7db0cd699095a7a9e89b47aedb986b59e870ac93864e9",
       "width": 96,
       "height": 384,
       "bytes": 4726
     },
     "small/mailbox--open-true.webp": {
-      "fingerprint": "90d8368475636f4a178f8c519b97f134b0da738c5ce436fcbbec1b594d2d359c",
+      "fingerprint": "30ae9d8e050827eab0f351907fb7ad04985a815ec8d8e95beb27caeb516051af",
       "sha256": "f2d6f2fac23ca78afb4f4294848875f0ccf37b77feb65cf3514c7cf023ae20bd",
       "width": 125,
       "height": 238,
       "bytes": 3388
     },
     "small/mailbox.webp": {
-      "fingerprint": "555598bdde212f08fae11ac55e3c634a0a29b196db456c767a922e72c4bb284d",
+      "fingerprint": "9410cead26525ea632a5229c2ef1061d6b7e02a5e887c81fe7d3a47cca210b42",
       "sha256": "f0ceaa2e44d9fba0a6d818b39ca8c224e02cb717e45a487853a610493fd1e7d0",
       "width": 125,
       "height": 238,
       "bytes": 2214
     },
     "small/outfit-antlers.webp": {
-      "fingerprint": "683c4e3073a69e2ba811adec13f6a75d9a3f044fbc8ba412b9e3161c6a2f6a8d",
+      "fingerprint": "e858484def36aaee7e060c1b5bb4a10ccc6c4dc5d7c5beadf26aee69bd696260",
       "sha256": "53998369730de18bd6e4499a2740720a9a1e428f8f23c3b34f315f37e40978be",
       "width": 224,
       "height": 224,
       "bytes": 3188
     },
     "small/outfit-beanie.webp": {
-      "fingerprint": "52de256a2f05a59c106fe97d4059386ac3f59e70f9f1b288eb47876c09f64990",
+      "fingerprint": "47bae1cf8601f4a50cbe1388ea0666b9a63750d6adb46b98ed9b5dd6f7c35ded",
       "sha256": "9bb082157c646c37a511a9b40649d2593f45a34d70712fd1614c8afd98df8034",
       "width": 224,
       "height": 224,
       "bytes": 2054
     },
     "small/outfit-beret.webp": {
-      "fingerprint": "29675df74f174f236a555f2d473b539f84a78311dd44f64ce922cc280175e574",
+      "fingerprint": "33c81019d5ba7622d710d9d7b0e301414b9183d271b28783c9740c0b6575e706",
       "sha256": "ad0037e7f8c2b03c63cae9da0cc83453d3713f098be2979cfd14f2b307a85675",
       "width": 224,
       "height": 224,
       "bytes": 2120
     },
     "small/outfit-bow.webp": {
-      "fingerprint": "65bc4f9e84095d04e9fc444bd0213198c032b0442e6306da652f9f50bbb7fb9b",
+      "fingerprint": "6061ecd0acddd4b2286ed1a376a6deea31c8e234a350adc11dad31ec5974c599",
       "sha256": "fb9db6cbc816eeec365ff9974a58a7e160c10828c1ba3576ba12e021c1a8660f",
       "width": 224,
       "height": 135,
       "bytes": 2168
     },
     "small/outfit-broom.webp": {
-      "fingerprint": "ac8b08f4b36ec40ea766f85826588d5b1ef695d30450cfd2a6816909bf639fef",
+      "fingerprint": "caecaa04f3feeb061aa0692c736883dd4b85b09270b9775bd9bbc7c0c2e68728",
       "sha256": "54f57a9c3c063adbe7124dc86d7f6ba50a0bf477bcd2538964f7765058e51019",
       "width": 384,
       "height": 192,
       "bytes": 2076
     },
     "small/outfit-button-nose.webp": {
-      "fingerprint": "5c216b68cf7c8f780626d56e877c1935a677cb81afcd858378a232cd4978cfed",
+      "fingerprint": "dfb06cadba1df4fadadd2826c314c9b973e003584065bf954de5360b03bdc0d1",
       "sha256": "e06a1db157a97979040963215364458aa31503960434a067fca36a7495e8eac0",
       "width": 128,
       "height": 128,
       "bytes": 612
     },
     "small/outfit-candy-cane.webp": {
-      "fingerprint": "cdd17f978f42499ae4bcd7757afb0f8065c4e44c8e7838279b27b2fbaa859cbe",
+      "fingerprint": "ee6dfad330b171a2daafb1ee269eee595b09614ca01bd676be833f3e192f96a9",
       "sha256": "8796e31285638ccccb20b80640fe51b2840ebf68e430f9beca55a622a106fdf2",
       "width": 384,
       "height": 192,
       "bytes": 1224
     },
     "small/outfit-cape.webp": {
-      "fingerprint": "08cdee75d51eb8eb5c2528d73d4ce3d60d5d5ad1d4fe9641922f46bf7a0de70b",
+      "fingerprint": "94d5378a63c295000f12e5890bf1bd451e96a89329c5153a449a56b15066cd2b",
       "sha256": "bd92a678c2bdd118efac6e08d5d6924968c9d49b42361fa95c5c407d534e3d8c",
       "width": 224,
       "height": 135,
       "bytes": 3372
     },
     "small/outfit-carrot.webp": {
-      "fingerprint": "ffdf90fc84f30327d4d60b8856d2a66cbb1e6a8ed22d79077ff3374e44bb746c",
+      "fingerprint": "bb06ebee5a5320f16ecd4b5e1c9e04b70bc01c603b144d3d42cd09e93e5fe47b",
       "sha256": "35a04bd33872c1a1bc765c02b949b9ddc98ed997f591a1588e40ec99e980ab2b",
       "width": 128,
       "height": 128,
       "bytes": 682
     },
     "small/outfit-earmuffs.webp": {
-      "fingerprint": "e2a406f2d34315ecf44d0416a085d97aeae5df4686611b0b6fb43da2f69e30a9",
+      "fingerprint": "80309149ee7af4c5f882acb90aae6cdcd0d11c947a25a3fcb254c534906800ff",
       "sha256": "5661fb187a440395e0a8f697b4f09ea06cf6f2ee8ab21f48f75da8033ba1b8c5",
       "width": 224,
       "height": 224,
       "bytes": 2730
     },
     "small/outfit-gift.webp": {
-      "fingerprint": "4b5c44c467f31fc4fd24dd4c9e3ea94b3a6df779dbd7546281b84c56829be717",
+      "fingerprint": "fd1dafe2c7a09162541d53d33eb3d6b8cc6cb2b549349d9de89ef5ffe3fae119",
       "sha256": "6b54b1b6382d398a9f1a416ba97ca238c12386a63fc691b35a2c89a27194611d",
       "width": 384,
       "height": 192,
       "bytes": 1288
     },
     "small/outfit-lantern.webp": {
-      "fingerprint": "4b8d00b30f15d0318a3fdaba2f650ac865fa93941ce7ebb4b4b47b08fc63f1e7",
+      "fingerprint": "05178d99b59c3eaa13702acc52b8c68dd81a341f02a1abf2d5e8b077e281dae8",
       "sha256": "82d9c4f37021013088b012683b494fd7e909d00f23154a65a3014103f792c8ae",
       "width": 384,
       "height": 192,
       "bytes": 1112
     },
     "small/outfit-mittens.webp": {
-      "fingerprint": "5daa951c981dfd3dc13dccba682f831414c45c05735cb880de4d9f3d0afb93c3",
+      "fingerprint": "264d10398188a76b3d48f71a99b3902147c5dedbe6f8f02cf258cae1812db870",
       "sha256": "abe948303d9e1b095c5449e14165e0b1974a7826302e1c110112b7c397c50906",
       "width": 384,
       "height": 192,
       "bytes": 2472
     },
     "small/outfit-mustache.webp": {
-      "fingerprint": "e67bd06f3c30d952b57fe3bbc0f4eee193bbaf67ab65df89d75d64c522e1487f",
+      "fingerprint": "c74e6c0b1c1123c098722b305387197f97cfb8c6bf66e77f3afec7866d76839d",
       "sha256": "300687cd126e4cf7692a19ff2131dda0b08a1492a4ec6edfccd10b9ac73181c3",
       "width": 128,
       "height": 128,
       "bytes": 660
     },
     "small/outfit-plaid-scarf.webp": {
-      "fingerprint": "e2346c25ac23ac2cf2fa9920727c5ee7aead04a307161fdfe558752aa181e648",
+      "fingerprint": "56f1113d15dd155ad78024e1addf5d431c99146b23b688547ffaf55e2951b08d",
       "sha256": "4e5c90f8d6293185b545a1248cde1e2491ded4e1ac4e22cceac97269d9760289",
       "width": 224,
       "height": 135,
       "bytes": 2980
     },
     "small/outfit-red-scarf.webp": {
-      "fingerprint": "ec860c2a7c7d19b21e174398f1077c1fffde0bec9780a68e187a3d69d91ef430",
+      "fingerprint": "02965e67974a07885d5a9379bec3074294a93544cf01756da493d82951afe4c0",
       "sha256": "a188e73c06d086767a777a88e0a84dd313c0db4a88f16dc2188b0cb4bba6f508",
       "width": 224,
       "height": 135,
       "bytes": 2602
     },
     "small/outfit-round-glasses.webp": {
-      "fingerprint": "2929756e805d2159dead9a36af96067aa0f6d343bfe14574a3eff772f8353d6a",
+      "fingerprint": "9b5572de4f958d5120013b6ea294620c37abcaa1897244709f8e6e59131fd4c0",
       "sha256": "ed9a51756abf367ef2367b9b109919900d772a1bf781bb08bef5420f7fe2f63c",
       "width": 128,
       "height": 128,
       "bytes": 2142
     },
     "small/outfit-santa-hat.webp": {
-      "fingerprint": "a042a70f216f2b231a234fc3dffe6aa03441121fcf9ee911cfc4ec19474a4e41",
+      "fingerprint": "05e836c297af63b79dbe81f1081699cf611abd488f8f78b4a08bfc512bdcbce3",
       "sha256": "091f57d803d4332cd2d5790f53c3d834b476fe1ab5a7540d15b11bdd7b28d653",
       "width": 224,
       "height": 224,
       "bytes": 2752
     },
     "small/outfit-sunglasses.webp": {
-      "fingerprint": "cda3896ef5ca9cad6ac5edc6dcb9ad7cab8cc46eb27646b81ecda62897c35472",
+      "fingerprint": "4cf4d9af83638d5c8486757acf95d8ca42eab01117f9b2d55f241a8937eb486d",
       "sha256": "c8edb59d33bdc79849dbf88a0891296e3e3c5ef58da30daff879f06bc94dbdd6",
       "width": 128,
       "height": 128,
       "bytes": 1220
     },
     "small/outfit-tie.webp": {
-      "fingerprint": "34445cfc86da6e1e42202d756117c9cbe68115670524bf78392a627c56472cbf",
+      "fingerprint": "9a61c0556c2916ddae15dbc853c90dc15a22d7181e4b7c14e327eb1ad0484d7f",
       "sha256": "02dc793f28e67ebc2acf070f37f4e8395fab792b49943a929ac05d5ca77e0e1a",
       "width": 224,
       "height": 135,
       "bytes": 1486
     },
     "small/outfit-top-hat.webp": {
-      "fingerprint": "8a117cd8e108700aca839ce0c8b18fdf53c29961249107e412cd250c6d657915",
+      "fingerprint": "904f26537799a2481660ba40808a82808476d7aef7b318e65ba2f573ebc888fc",
       "sha256": "7bfb8045e83ee363ccb113263e7d00b1e6543be23c718924724fe17409ed6aac",
       "width": 224,
       "height": 224,
       "bytes": 2680
     },
     "small/park-path.webp": {
-      "fingerprint": "b43d7e070b028e29f98f01711cd43cdbb89d654dde45efd00d572f4361f865a3",
-      "sha256": "bb549779835a7cbd6c39605084eb2d25953df359d536827c578609b102d87cae",
-      "width": 420,
-      "height": 60,
-      "bytes": 474
+      "fingerprint": "6a343e1ecd3c93ce2a70852d537f4561ed385e61da12c5764d865f282e7e5d9f",
+      "sha256": "d6e31d22abc7d9614a0a8f8f40e60bae78e4517d1d41818875a7cc873a6bac78",
+      "width": 1680,
+      "height": 240,
+      "bytes": 2720
     },
     "small/path.webp": {
-      "fingerprint": "107018009716e4bd7736d027f58169c3ca17ec2152247fc76c0b1fa28719d4c0",
+      "fingerprint": "c0a592e3353805def31f30fe0d7140e2e6908c3c681a3cc8c9012679d6e0e91e",
       "sha256": "016483223f9b2c33162f0aabeab291df5a49716410107d6dc846eb8018339bfe",
       "width": 2500,
       "height": 400,
       "bytes": 5670
     },
     "small/peaks-back.webp": {
-      "fingerprint": "50254155c796f98fdc3cf6d673dfa899da367b3aa30f5933a4f7b0274adac237",
-      "sha256": "35996e8c21ffd3ff1998ce627fc2015d1d7265eb64a9d160313945f8883bad4d",
-      "width": 720,
-      "height": 84,
-      "bytes": 6144
+      "fingerprint": "86251c745a8bf5a7d71e8a4937a9070a2d5b34e55ac6e0e3cc4c82267c2964ef",
+      "sha256": "c609327a8e57c9f584b0d58db7ddb97fd0b74bcf69b6d8335108c7ca84ade139",
+      "width": 2410,
+      "height": 281,
+      "bytes": 23188
     },
     "small/peaks-bay.webp": {
-      "fingerprint": "363e1ab10db31cab3fca4c5eb6078fd9af8780f73d75ec261b948450c1e06542",
-      "sha256": "50c3038396605d17a916d1fd0a2b78442a21e14b3279dc59660b4f8e70b217bb",
-      "width": 392,
-      "height": 63,
-      "bytes": 2716
+      "fingerprint": "a94e1b4d4d100967a1e5aba1290cb06b24407b7e7c9df78d160855b0f1c4c6f7",
+      "sha256": "c04c2821fa8b2a534e38b92b53bba14674d949ba1ddf9152ec91b8c2547913d3",
+      "width": 1331,
+      "height": 214,
+      "bytes": 11194
     },
     "small/peaks-left.webp": {
-      "fingerprint": "aef4cf16c27dfaf281e4e0b27d639dc0311407a823ae84164bbce91fa2bb431e",
-      "sha256": "4a1ddac25e9ca32f9a91145a6ae62f5d2c5f646cdd387a18b889e5704a390406",
-      "width": 420,
-      "height": 70,
-      "bytes": 3472
+      "fingerprint": "09b7ab3615ea32701c38a4cf9ba775b95dc8775c2818033d9c5bc10e79fdd85d",
+      "sha256": "30f29f0327153cf8242a42def1c9cc16e520a8aca64ec24213999ca9449b184e",
+      "width": 1511,
+      "height": 252,
+      "bytes": 13730
     },
     "small/pond.webp": {
-      "fingerprint": "baa25aad96755e418adac7bc7e1334da425ec8535077d234a28f7938083f1f4e",
+      "fingerprint": "7c3e0056489ccaa0b9789699f7c0c53ec66dcf358e22b7e4add9b3379fa7d577",
       "sha256": "956e4c702844d7b516f15012487bb8a58ed90b392a42288ae5c65bd18b9f0f27",
       "width": 900,
       "height": 450,
       "bytes": 10566
     },
     "small/post-office.webp": {
-      "fingerprint": "1a4dede2ba1d05d25b9495bf0311f52bd136f130c6ee756d1eb251614a5a5b12",
+      "fingerprint": "ebcb401c28b69510ede526e421f324438033b45aaf9c9e5110738c98edd564e3",
       "sha256": "322d2a7cf708880cfd8d3737212797f1e23624591f6391669c5df68cecccee46",
       "width": 900,
       "height": 650,
       "bytes": 15152
     },
     "small/postcards.webp": {
-      "fingerprint": "b16f01d0e4b3d60aeed558a49fe99950ce0687e97990227073a0945fd249d213",
+      "fingerprint": "2346c88a4da0fb1519ace44751fac80c421c4b3ed5e3dc186f8e1c577e2dc69b",
       "sha256": "8bcdcd60c173e24de553fdf66afbb75c46728ae7780b4fadff6e45896ee57840",
       "width": 154,
       "height": 165,
       "bytes": 3922
     },
     "small/right-out.webp": {
-      "fingerprint": "6f4f4b6b3c58f344cfdbc5e45180df47015ec4e596932a6a7e646a7073c9161b",
+      "fingerprint": "f8135f269cee57a705d184f58075018d0ece919f3035ae00aa73a961a71c2092",
       "sha256": "71aa801c04060814303c59d4bcb9daba38aedee942e668e7c164566b77739468",
       "width": 525,
       "height": 333,
       "bytes": 6046
     },
     "small/right.webp": {
-      "fingerprint": "74c30d7f85b059f599fa3caa2e2654db348975055527b814c31298e2bad83d74",
+      "fingerprint": "9dd40428b0839347bf73460a7385f3e7079ab09edaa432fe5a956d1ed6c37717",
       "sha256": "c05f3f82d813c968502adaa00c8f1dbc4091fa8e432109d7c8d312ce902e9706",
       "width": 525,
       "height": 333,
       "bytes": 4696
     },
     "small/rocks-shore.webp": {
-      "fingerprint": "7f7f1b40f87c0f7d25824af007d3b0ff0ec65e741757f918c294d6b0b9e90d9f",
+      "fingerprint": "494863bae4aca770ae3bfd91953d623b62463a0215c72ad89f10f79ca0e49589",
       "sha256": "ee6341405774eca2b85170521187bcd57fc0aacbc932ab434170bfe9760bd0b7",
       "width": 160,
       "height": 70,
       "bytes": 2034
     },
     "small/rocks.webp": {
-      "fingerprint": "7f7f1b40f87c0f7d25824af007d3b0ff0ec65e741757f918c294d6b0b9e90d9f",
+      "fingerprint": "494863bae4aca770ae3bfd91953d623b62463a0215c72ad89f10f79ca0e49589",
       "sha256": "ee6341405774eca2b85170521187bcd57fc0aacbc932ab434170bfe9760bd0b7",
       "width": 160,
       "height": 70,
       "bytes": 2034
     },
     "small/roof-in-left.webp": {
-      "fingerprint": "c53612ff39f919a92a249f2316cfe7b46347effa6629f9019844f4075ba49dd4",
+      "fingerprint": "092c3b36fdb0e29855637f8eb743700f885806165c3db6d9e5da34b02e098651",
       "sha256": "3977de22063e9f9f66d55993bb27ac91460aa23464b244e918187968a4a163cc",
       "width": 340,
       "height": 525,
       "bytes": 3186
     },
     "small/roof-in-right.webp": {
-      "fingerprint": "c53612ff39f919a92a249f2316cfe7b46347effa6629f9019844f4075ba49dd4",
+      "fingerprint": "092c3b36fdb0e29855637f8eb743700f885806165c3db6d9e5da34b02e098651",
       "sha256": "3977de22063e9f9f66d55993bb27ac91460aa23464b244e918187968a4a163cc",
       "width": 340,
       "height": 525,
       "bytes": 3186
     },
     "small/roof-out-left.webp": {
-      "fingerprint": "eabbf312a3e5a765fda07aec5a0113332016ab8f3786dceb341f59f61e1e0adf",
+      "fingerprint": "20b2596c4e7789545f9c680535aeeae5de447a1035c363500e8b9d91f5041d62",
       "sha256": "b57448af6d5eb6b9876b1b5e3ef4ae7542f60d26863fc1d1d2753bccbf53ffca",
       "width": 396,
       "height": 578,
       "bytes": 13240
     },
     "small/roof-out-right.webp": {
-      "fingerprint": "eabbf312a3e5a765fda07aec5a0113332016ab8f3786dceb341f59f61e1e0adf",
+      "fingerprint": "20b2596c4e7789545f9c680535aeeae5de447a1035c363500e8b9d91f5041d62",
       "sha256": "b57448af6d5eb6b9876b1b5e3ef4ae7542f60d26863fc1d1d2753bccbf53ffca",
       "width": 396,
       "height": 578,
       "bytes": 13240
     },
     "small/sea.webp": {
-      "fingerprint": "d19cf4965526e0eb70a98fdc3663587f5ee4f8ead632f9fe772bfba81e4e51f2",
+      "fingerprint": "e5170ed0f03ae74437fa4acf0d9a6076c2b51e631f9e0b6f3c3b337d96e448ee",
       "sha256": "e85c1959315f90aeb384fa0910a6fa92271ca6f31b40ea4b2116eadeffffa0f4",
       "width": 360,
       "height": 360,
       "bytes": 800
     },
     "small/seal-floe.webp": {
-      "fingerprint": "68323d294c0202e34b7ea613c05c8d78f9e49171d519303b07a819831cab8de8",
+      "fingerprint": "1cbbe198e68c8bfa0e127eb66be72ac9f2f04339c2f3621ba59f9a74aa3fc793",
       "sha256": "673f2681847c451ea260ec3330d8f1763501a0421ef85331f3f693775b853fb8",
       "width": 170,
       "height": 80,
       "bytes": 1484
     },
     "small/sign--stars-1.webp": {
-      "fingerprint": "adc920140ed616e173ce4482b5a3449c809fb66c3f2a755da0f2fbc7ec5b5d23",
+      "fingerprint": "bfa9e6d1e88d8e19239004679a16a9db46cff57c2b9fe2cf41236ba71b347775",
       "sha256": "5d707c9c3520c96024bef90154ba2d7bb81c43b9f16ee005a5901b5353dd0bfa",
       "width": 525,
       "height": 325,
       "bytes": 17772
     },
     "small/sign--stars-2.webp": {
-      "fingerprint": "2a33edd9cdc555d6f71201343e9faa469d40b9fb15d3c24d665caf053bde54dd",
+      "fingerprint": "5ae86853e62286319818fc583b058ca9e4dbded9ca3d1f0947694b66abf88753",
       "sha256": "f291c5ab0fdd7a02016c2a2ed537fa42215732a02aa140943fd3af51588c9e6e",
       "width": 525,
       "height": 325,
       "bytes": 17888
     },
     "small/sign--stars-3.webp": {
-      "fingerprint": "e39445529926ee9e01645b26eeff017d2b0a4c03409d1547e5663932867e0d30",
+      "fingerprint": "c1b9a6a10b4b66af8197e2bed7980461dd83f0313f0b096537b40b17833e1e3f",
       "sha256": "e303c11715bd513c343edc34a40fe24cc8ab023b8baf3df42976b610d0446bca",
       "width": 525,
       "height": 325,
       "bytes": 17720
     },
     "small/sign--stars-4.webp": {
-      "fingerprint": "0afff418d6ecb49f386da9c59ec129f9097ac4b4e8f02d8724af107e85d95316",
+      "fingerprint": "4827dff08a56863f873f0d73835a031fe9b55d224dcca1d8208ebc4d5502ed36",
       "sha256": "bfba111b22ee425552204a1d95d903e68be4e3ea890ae797a56d72f9702ca108",
       "width": 525,
       "height": 325,
       "bytes": 17862
     },
     "small/sign.webp": {
-      "fingerprint": "71c34003621544ecd01d1e7f6f854e63032cb198e7caff577fc0fdb48e2522bf",
+      "fingerprint": "a2ec901d2c4fc7cbe6768788476ea5f4e7459b0f8a9986ce71efbd733d3bd757",
       "sha256": "4faac268ac6551670c37a32aff15263975dfea32c5278499c74005f1d9748f0b",
       "width": 525,
       "height": 325,
       "bytes": 17636
     },
     "small/skater-green.webp": {
-      "fingerprint": "79c1fa8547ad3fedf9877cca20fd95dd78b6785657e53b61fe4927e513f27295",
-      "sha256": "66b636a0f0d7d21414c4c52704aadca4fadf677232ab0550b1a2771f90f7e9e6",
-      "width": 61,
-      "height": 94,
-      "bytes": 1664
+      "fingerprint": "f4474f2df6e0ccc657c20806b42276302dc14a9290e9e4e5447d3bbe596eb273",
+      "sha256": "704cac981b29c21d5b900f63610bd3e54bba8a4b96fef711b9dca845e18d975c",
+      "width": 62,
+      "height": 96,
+      "bytes": 1660
     },
     "small/skater-red.webp": {
-      "fingerprint": "cc67c6f150ed5713a4a442101f1ab5b1935235cec1c5eb36e922c7b437503ed6",
-      "sha256": "b21ab7757f6a9c9e2d2c11bd3632b3adb381fd3de34ecd876f71ec5aa911d4e4",
-      "width": 61,
-      "height": 94,
-      "bytes": 1750
+      "fingerprint": "600d34add07ecd36a51dd5998506e0fceb0aa547bb78014697a35f9c6d7bd935",
+      "sha256": "56840754b665421c5b3ebf73f13209d418e0d4d345fd562eccd7abf4d49575cb",
+      "width": 62,
+      "height": 96,
+      "bytes": 1708
     },
     "small/skating-pond.webp": {
-      "fingerprint": "74b7989c2d28ff5e16b423883a91ab05f256f0676bd72dcf35e8ac821cfe656e",
-      "sha256": "e7eceee0a67b587ddef7f472cbb168eedc1d9ba411617d63e3272ac60f2e237a",
-      "width": 176,
-      "height": 80,
-      "bytes": 1800
+      "fingerprint": "022580993a2e4b0cbaa0b57a0f9b518b762f22d7dff94116c0ca5e0faef7928a",
+      "sha256": "bc47423a41c9b3366d4ca52ada47a0ac143177f87054946f196f73380232134a",
+      "width": 499,
+      "height": 227,
+      "bytes": 5056
     },
     "small/ski-mountain.webp": {
-      "fingerprint": "6e4a7a50290289e698b7acf9e76051a908bbd12957c33168c90af825a3905338",
-      "sha256": "2fefe44cca94a3f405bce5421cf532eeba4ca05402798e1f5c61b338162ab54c",
-      "width": 850,
-      "height": 275,
-      "bytes": 9586
+      "fingerprint": "c940518406b01a15b6bbdfde3f1bb964d886484406c9fdbf51f1f6c83a07a5e3",
+      "sha256": "d31e6bb34be5b1ef95cba102739cb29a4acbc8d0b567ea969b7e1b506387142c",
+      "width": 1397,
+      "height": 452,
+      "bytes": 16886
     },
     "small/skier.webp": {
-      "fingerprint": "abfd8bf7aff95d0ebc9e8e479d31fa866d75092f863fddd199196c75529ccaff",
+      "fingerprint": "209d335a85201f6fd3ae548e45d846977792ca4d3581ffdd75c04eb3b574deea",
       "sha256": "bdee43d9ffd182b6b4f306a9410a1aa22440a9da0991ec8f1f3a680ba6d7fec4",
       "width": 61,
       "height": 77,
       "bytes": 1714
     },
     "small/sled-sacks.webp": {
-      "fingerprint": "05a4d7736d0e3965a744b401a35ed041e373bd6686cbff4c2be2ad02852d4cd2",
-      "sha256": "c2752f23b01780908b0f1f5fd2712138be3976ab6e3eb61c6f87a22c37c020f8",
-      "width": 140,
-      "height": 75,
-      "bytes": 2036
+      "fingerprint": "b5ed4b4ee1241a46263545c9651d01faf01bff9683b7987ea7b1d826b82447c5",
+      "sha256": "37ed6b097484c09d746164453b2cf20b9f906b01a58a195978ca04c6bf4a50cd",
+      "width": 234,
+      "height": 125,
+      "bytes": 3658
     },
     "small/sleigh.webp": {
-      "fingerprint": "22e7936af861f6cd42a60f7b79dd8fa4f53f9b78969d415bb65579f1806de2cb",
+      "fingerprint": "4831fb1cae3c713f21c08058e7326e692d3b45094e4758ce0bf573cc5b5b3f72",
       "sha256": "a679a0a1ebee2848127c2444da41630568cf0fd35cb83d42d3261dfbff689e0d",
       "width": 325,
       "height": 200,
       "bytes": 4922
     },
     "small/smoke.webp": {
-      "fingerprint": "23483af5ed44897a717c2527b1f3861178eb449f58e5cd425749d28a95c9a272",
+      "fingerprint": "ef40c4482aaa4f9908f39f00b735c134f469a63db6f66de616587e5aebdb75fa",
       "sha256": "da7cd0507727544a4c799ace7e38f296c2c0081bf94c6f7188cd63e24e9c2eba",
       "width": 138,
       "height": 100,
       "bytes": 784
     },
     "small/snow-fort.webp": {
-      "fingerprint": "5feba420e743c38b83e18df4e308181ebbaa18015e8366f391101afd61dd7cb4",
+      "fingerprint": "c55f86f238aa03fb5ac9d3587d9812a916f5f7da2f90c21bb29c4d8c2d958c70",
       "sha256": "825242440e5782f8725340c0abd7900ede33da5aa9ab1b64a6a85cd20f45fbd9",
       "width": 120,
       "height": 70,
       "bytes": 1158
     },
     "small/snowman.webp": {
-      "fingerprint": "df95a3d8bb22922cd431ecfa932a924503e4cd7bfdcd7806774af693cfb6f1eb",
+      "fingerprint": "fd94c4b812ec1194b4ced8b55880fd9c4e00cff0ff7a82c34ffd1a980fee1b27",
       "sha256": "251685e439b8c39a377781998c59b6b887ef71ae781f3b70e795d4889d976e61",
       "width": 225,
       "height": 350,
       "bytes": 5670
     },
     "small/stable.webp": {
-      "fingerprint": "6acadad2977b9f694a559007040595dbe5fe757f8de35d83cd17f8c96fbf4f71",
+      "fingerprint": "9517d3704c99a0cf6d6f7d0171484dc9b51f3bb071569ff292a56abd6d760cff",
       "sha256": "380f5692634f0e5885f63c83626070243965ddf9ea20564cd769fe623db49ab3",
       "width": 850,
       "height": 675,
       "bytes": 46282
     },
     "small/stall-cocoa.webp": {
-      "fingerprint": "2c4603b54caa1be398895504756141d4216e87385598193cff8fa9cb00aa57f3",
+      "fingerprint": "1e3be9cd85eb2fb40305dc943f915a5e824c1e6ce690b3e89e8e3cc4a3a0ac74",
       "sha256": "74649991438ae03f53c09d723fce218fbbf42977623232426f46d7edd606ccf2",
       "width": 200,
       "height": 219,
       "bytes": 6570
     },
     "small/stall-cookie.webp": {
-      "fingerprint": "c56b783cff4fb0b78a00b49af4389e767785dc5f30c50701c1acf86fb229d42c",
-      "sha256": "954ee6202e31c8d5cfe872da83b71baf731b8a510a8dbb15fd970cb4ddf6565e",
-      "width": 200,
-      "height": 219,
-      "bytes": 6488
+      "fingerprint": "fdeecb180ab9fdeb586abe258c5c021ddb663dc1f50c4a0f612e08da14b1476b",
+      "sha256": "c8c3c458a00fa1ccf51675eca0d1fccaabc2446ff3b6d81bb78069dbf72a955a",
+      "width": 215,
+      "height": 236,
+      "bytes": 6826
     },
     "small/ticket-booth.webp": {
-      "fingerprint": "4f1703ca0137aa6f21d5eb842a8bf112766ea10b0935b869f5f4f6f5af83d5cb",
+      "fingerprint": "b5ca70f5b3aa53e38fe953d755f4c4cc133160227131d26e6b23d91df3b9c226",
       "sha256": "dc0edc8266d128de42b3d95d6d4e4eac38576a0473673491f233f46798b10246",
       "width": 110,
       "height": 190,
       "bytes": 3266
     },
     "small/toy-crates.webp": {
-      "fingerprint": "2a3738c9d35f74354ed5d55646f640cd0c2e9180a5084d7a369f427b0dbc8055",
+      "fingerprint": "98eaa84d7209c2a5f20e23eda0cba749099d9c6edd752465888e8573fae40b69",
       "sha256": "a4d04bfb3b5e566661c39a5ce5af27a51b5309fc5189a6947fc4a0df1f1ab98e",
       "width": 425,
       "height": 275,
       "bytes": 5968
     },
     "small/tree-lights.webp": {
-      "fingerprint": "5bedfb3c3aa20a49ea3eb0d4656320bc3cd853ee043da232ceb44a1a8a3e2f89",
+      "fingerprint": "81fc8ad0dcadb62cdde21b63f78e009262be2c4301c190f4e40b8fd8c279b0f5",
       "sha256": "e35b703cabde4b46ad35409ef6ab2e22c51ef9d80ab944ec1cc528f081de9ef4",
       "width": 185,
       "height": 340,
       "bytes": 3232
     },
     "small/tree.webp": {
-      "fingerprint": "843728a57e878bda3b115c5457d757e3689895e7da7e1eb0ae80e401bb1f6203",
+      "fingerprint": "291b70f017bb03f4057dc3a584cdc88b3bb17288fdb455ac29bfb45c4a19802f",
       "sha256": "8307a609f8a5237fa955132e10ca3fba2b61d84bdedb2ecef1ad7604253698e3",
       "width": 185,
       "height": 340,
       "bytes": 9638
     },
     "small/village.webp": {
-      "fingerprint": "619e8a030ddbe7084c61ab07fc6ffec183183043ae0c8f2471245ec57684c323",
+      "fingerprint": "e975d18181ba7a8c3ec3b2a26a9db1cda77a21fd1bc00472dafe54f207fb6c0f",
       "sha256": "6d4f0c90f94f48f810198d42666f06d8bebe62cfc657ccaf0ce542049f69fbde",
       "width": 390,
       "height": 72,
       "bytes": 4310
     },
     "small/wave-mid.webp": {
-      "fingerprint": "73bf08e68677bc9b6eeec4d1c112c08a71742201c40d55ea57c9e3e890eb288f",
-      "sha256": "595ec39ac81d74b51e30e327e2417da58d2a5b5919d93be50c8ff29f987fb607",
-      "width": 960,
-      "height": 24,
-      "bytes": 3562
+      "fingerprint": "e073ef8ec8c68cf97b1580424a70ad6e5822c81493286cf3c3c3320e61bbfe8b",
+      "sha256": "e03dc1f9a7cb739138e5bbeddf25018668a46b0e857a24b8b375c3ad830ec08b",
+      "width": 2217,
+      "height": 55,
+      "bytes": 9800
     },
     "small/wave-near.webp": {
-      "fingerprint": "6278cc493b91d62520694481180cf5257bcb987f0a3bb4e50737626d9843ac2f",
-      "sha256": "5c381900707ca08b33671878e3242e2ac4fc8abd0a49f13d06c42fbb49fd90fd",
-      "width": 800,
-      "height": 28,
-      "bytes": 3720
+      "fingerprint": "383be384ad878ae790b310ae1ad7e19ac8ad9d1dd3f221910215f6eaed6112f0",
+      "sha256": "f6b0bfbffbb95bf7ca386addcae340325f6d57e8ea2a7e9d1f2e756e0b57209e",
+      "width": 1406,
+      "height": 48,
+      "bytes": 5868
     },
     "small/wheel-stand.webp": {
-      "fingerprint": "c963e8b15305bf819b46b4f4b490771d7126e95d08c039b8fb66b8e2f53892f5",
-      "sha256": "5f8ec28f60499abc98856af2c339af8cbf49f7fd38d7318e6007461517a54dc5",
-      "width": 330,
-      "height": 250,
-      "bytes": 5102
+      "fingerprint": "21d64b658a0b10b2670648721c0060bb4fc6940bc2850dd810ee723a0ebaec0d",
+      "sha256": "a5b10f46e33e4f43aa20ca231d2533adc33f15ae8607152fdefc4e63e0e95acd",
+      "width": 505,
+      "height": 382,
+      "bytes": 8876
     },
     "small/wheel.webp": {
-      "fingerprint": "25bede35b8e430ad729119e32174bb35e51da14e9e07c270abebaf3885239623",
-      "sha256": "ee987f079e9e3e805b53035a453aaa655da01ad6b842ede738f802d5a0fc8ff4",
-      "width": 407,
-      "height": 407,
-      "bytes": 27356
+      "fingerprint": "0ebd5aa979d525b5fd4cf0b32f6da612748287c5dad20a1e27ddef7fa3fe1650",
+      "sha256": "422ff667e606d0cb712f8728ce0375643299a6afed67ee59fbb5ff44f8edd3dc",
+      "width": 566,
+      "height": 566,
+      "bytes": 42056
     },
     "small/wish-board.webp": {
-      "fingerprint": "9d480c44770d04fb0601bbe1fda7784b0fb96059fc6084be0a78c062df54b560",
-      "sha256": "9a55ef7405fe77286aa41e5b128289d1b9d43a1541d8cd3d8acc1e26b8d07020",
-      "width": 161,
-      "height": 161,
-      "bytes": 4244
+      "fingerprint": "94341815ad5b095c705275548d0b8833b51ba228855e6e6716ac34f7e5dc390e",
+      "sha256": "ab8e216704e13c3446052a3f27cb4abba3408b6e29696869f83fa20e31150d79",
+      "width": 211,
+      "height": 211,
+      "bytes": 6192
     },
     "small/wish-gifts.webp": {
-      "fingerprint": "b4c065d2c27d51133f32f5b5e21e9f9f8c3e8d1b4b9132292f02a22b6f4d7469",
-      "sha256": "68fab740c8a415f5b1faf638e2901e9bc1844269212cce6b998a0eb44b1bda30",
-      "width": 120,
-      "height": 66,
-      "bytes": 1770
+      "fingerprint": "e69d5ffaa693d1db4e8de881b7be0fae449788734277ce59e5c3401e83d43303",
+      "sha256": "14916e9b6f31f34549226b08ed739c822ca944cc40bc5312bcab1d927498a5ce",
+      "width": 230,
+      "height": 127,
+      "bytes": 4288
     },
     "small/wish-lamp.webp": {
-      "fingerprint": "298647373e3829d1a5eef9710dfcdd2aa353b85dd61634fa4af85d3071edad9e",
-      "sha256": "7fdf195f0e1a81c5e0c0c77713b3c3234b45a673082c490ad8f5df02c60e28b7",
-      "width": 66,
-      "height": 264,
-      "bytes": 3364
+      "fingerprint": "adcf6dd1410e5e917a8b73e12a03015075dd0540fd4c60ea0ae24696cd45b2a4",
+      "sha256": "9189be4e1d8027cdcf84570538f4bdcf9aa589e144521dc7f2c1e40450ded1d2",
+      "width": 170,
+      "height": 681,
+      "bytes": 9990
     },
     "small/wish-post.webp": {
-      "fingerprint": "2fce581d22a824e47c6783d93916a640377c759f97b5c3ed068a0ede2f6f1527",
-      "sha256": "9deaa3ce1fea070df6a7bae1be1df803ddd44cbcb185fd7e1020114baae77392",
-      "width": 81,
-      "height": 176,
-      "bytes": 2380
+      "fingerprint": "e4cd41386f344d2ad9818b41cb67d3f6ad8c6915a1777c1d06ea9e36b6ad144d",
+      "sha256": "0b54bf76918c7d940f2b3853846ee5e89489ea2f5e85b39d0299fae7bece434c",
+      "width": 182,
+      "height": 397,
+      "bytes": 8180
     },
     "small/wish-tree.webp": {
-      "fingerprint": "cb95c5e9b053cadc972505e6d4d0bc530c403c3c47b7b72eeee71e57530090d4",
-      "sha256": "68c4b86b817e2cb962624f37447880b7fa805223eff5e836f56578bce2604e48",
-      "width": 187,
-      "height": 341,
-      "bytes": 7992
+      "fingerprint": "9c6676e56b90cb422801f09061b327aac18637dcac602feb9911915fd0c7b228",
+      "sha256": "ba13b7ae19c3f4746849738dc45693314544fcf4bdba230f74ea4dbff86eca53",
+      "width": 316,
+      "height": 576,
+      "bytes": 15346
     },
     "small/workshop.webp": {
-      "fingerprint": "9dd02079d1c1e4416b778d0599db64111c68f3eb02fbfa8edcae5e25028e37ef",
+      "fingerprint": "15665b130365943292f20f71050eba0301b7dfaff07f3d2b77d6ef735f9dda97",
       "sha256": "f47b761c6ce9965aa4aaa07b8072235f7ff17a0ceb2d0eda76572156fbb2eb03",
       "width": 1300,
       "height": 800,
       "bytes": 42140
     },
     "small/world-sign.webp": {
-      "fingerprint": "38c5e50147ea9757c7ffbbef2c63c13207e77c59e399d79286d2119bed1ae645",
+      "fingerprint": "7d2bc7c4cb49dc72e92f22faee9bfe5d5cd732de132f194addc6bfaf7225c2ff",
       "sha256": "9a1d673ee6fb9748cf7fbcb492048f12ae97858622957b9cfc3b60e43c5f69f6",
       "width": 144,
       "height": 252,
       "bytes": 3958
     },
     "small/yard-tree.webp": {
-      "fingerprint": "b8fedcc147ece22ea525c3c1b3393ab3e50ceee7b25a3576c7ea4f888fab55d5",
+      "fingerprint": "ebd97415f6a73d99cfaada3907976f8cd98f3da86e325ba27bb24198d85ad9f8",
       "sha256": "a7fd3ac5920a15fd20810d1899d26958c3156d04d91d1f04a4d6d87b996c4d96",
       "width": 350,
       "height": 700,
