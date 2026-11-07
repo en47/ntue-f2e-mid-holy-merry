@@ -159,6 +159,8 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 @keyframes toy-wiggle { 0%, 82%, 100% { rotate: 0deg; } 86% { rotate: -2.4deg; } 90% { rotate: 2.4deg; } 94% { rotate: -1.4deg; } 97% { rotate: 1deg; } }
 .toy-scrap { position: absolute; left: 50%; bottom: 58px; width: 9px; height: 12px; margin-left: -4px; pointer-events: none; }
 .toy-wish { --toy: clamp(240px, 30vw, 420px); bottom: 34%; }
+.toy-santa { --toy: clamp(86px, 9vw, 132px); --toy-ratio: 1; bottom: 9%; }
+.toy-bell { transform-origin: 50% 14%; animation: toy-wiggle 4.2s ease-in-out infinite; }
 .toy-sky { position: absolute; left: 0; bottom: -40px; width: 100%; aspect-ratio: 300 / 120; }
 .toy-sky .art-layer { animation: toy-twinkle 2.6s ease-in-out infinite alternate; }
 .toy-wish.is-wishing .toy-sky .art-layer { animation: toy-burst .9s ease-out 2; }
@@ -178,7 +180,7 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 @keyframes foreground-bob { from { translate: 0 0; } to { translate: 0 -3px; } }
 @keyframes foreground-flake { 0% { translate: 0 -10px; opacity: 0; } 12% { opacity: .9; } 80% { opacity: .9; } 100% { translate: 34px 170px; opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .foreground-sway, .foreground-bob, .toy-sled, .toy-star, .toy-sky .art-layer, .toy-box, .toy-lid { animation: none !important; }
+  .foreground-sway, .foreground-bob, .toy-sled, .toy-star, .toy-sky .art-layer, .toy-box, .toy-lid, .toy-bell { animation: none !important; }
   .foreground-flake { display: none; }
   .foreground-scene { transition: none; }
 }
@@ -216,8 +218,8 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 
 .brand { position: relative; top: 8px; }
 .site-nav.is-strung { --tag-width: 96px; --tag-height: 41px; gap: .4rem; }
-/* 701–780px 的電腦版：四張吊牌縮小一點，才放得進網站標誌旁邊，不會擠出畫面右緣。 */
-@media (min-width: 701px) and (max-width: 780px) { .site-nav.is-strung { --tag-width: 84px; gap: .3rem; } }
+/* 701–780px 的電腦版：五張吊牌縮小一點，才放得進網站標誌旁邊，不會擠出畫面右緣。 */
+@media (min-width: 701px) and (max-width: 780px) { .site-nav.is-strung { --tag-width: 70px; gap: .3rem; } }
 .site-nav.is-strung a, .site-nav.is-strung a:hover, .site-nav.is-strung a[aria-current='page'], .site-nav.is-strung a[aria-current='page']:hover { display: block; padding: 0; color: var(--ink); background: none; border-radius: 0; transform: none; outline: none; }
 .nav-tag { position: relative; display: block; width: var(--tag-width); height: var(--tag-height); transform-origin: 50% calc(var(--cord, 12px) * -1); }
 .nav-cord { position: absolute; left: calc(50% - .75px); top: calc(var(--cord, 12px) * -1); width: 1.5px; height: calc(var(--cord, 12px) + 7px); background: #4f6a62; transform-origin: top; transition: scale .14s ease-out; }
@@ -237,13 +239,15 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 @keyframes nav-fall { from { opacity: 0; translate: 0 -30px; } }
 @media (max-width: 700px) {
   .brand { top: 3px; }
-  .site-nav.is-strung { --tag-width: 78px; --tag-height: 34px; position: relative; padding-top: 12px; }
+  /* 手機選單一排掛五張：寬度跟著螢幕縮，至少留 4px 間隔。 */
+  .site-nav.is-strung { --tag-width: min(78px, calc((100vw - 2rem - 16px) / 5)); --tag-height: 34px; position: relative; padding-top: 12px; }
   .site-nav.is-strung::before { content: ''; position: absolute; inset: 0 0 auto; height: 1.6px; background: #4f6a62; }
   .site-nav.is-strung a { --cord: 12px; }
   .site-nav.is-open .nav-tag { animation: nav-fall .45s cubic-bezier(.3, 1.4, .5, 1) backwards; }
   .site-nav.is-open a:nth-child(2) .nav-tag { animation-delay: .07s; }
   .site-nav.is-open a:nth-child(3) .nav-tag { animation-delay: .14s; }
   .site-nav.is-open a:nth-child(4) .nav-tag { animation-delay: .21s; }
+  .site-nav.is-open a:nth-child(5) .nav-tag { animation-delay: .28s; }
   .nav-label { font-size: var(--fs-small); }
   .nav-bulb { width: 6px; height: 9px; margin-left: -3px; }
   /* 手機選單鈕：同一張紙吊牌掛在燈串上，打開時換成紅紙、三條線收成叉。 */
@@ -265,7 +269,7 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 @media (max-width: 359px) {
   .header-inner { gap: .25rem; }
   .menu-toggle.is-strung { --tag-width: 46px; }
-  .site-nav.is-strung { --tag-width: 66px; }
+  .site-nav.is-strung { --tag-width: min(66px, calc((100vw - 2rem - 16px) / 5)); }
   .menu-toggle.is-strung .menu-label > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .nav-bulb::before { left: 1px; }
 }

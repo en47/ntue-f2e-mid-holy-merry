@@ -82,7 +82,7 @@ export function environment(overrides = {}) {
 const results = [];
 async function test(name, run) { await run(); results.push(name); console.log(`PASS ${name}`); }
 
-await test('全部模組語法、HTML 本機資源及四頁導覽', async () => {
+await test('全部模組語法、HTML 本機資源及五頁導覽', async () => {
   async function walk(dir) {
     for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
       const filename = path.join(dir, entry.name);
@@ -91,9 +91,9 @@ await test('全部模組語法、HTML 本機資源及四頁導覽', async () => 
     }
   }
   await walk(path.join(project, 'js'));
-  for (const page of ['index.html', 'intro.html', 'game.html', 'wish.html']) {
+  for (const page of ['index.html', 'intro.html', 'game.html', 'wish.html', 'santa.html']) {
     const html = await fs.readFile(path.join(project, page), 'utf8');
-    for (const target of ['index.html', 'intro.html', 'game.html', 'wish.html']) assert.ok(html.includes(`href="${target}"`));
+    for (const target of ['index.html', 'intro.html', 'game.html', 'wish.html', 'santa.html']) assert.ok(html.includes(`href="${target}"`));
     assert.equal((html.match(/aria-current="page"/g) ?? []).length, 1);
     for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
       const file = localRef(match[1]);
@@ -142,6 +142,22 @@ await test('Wish 壓縮模型：網頁載入壓縮檔、雜湊正確、原始 GL
   const elf = await fs.readFile(path.join(project, 'assets/models/wish-elf-web.glb')), data = JSON.parse(elf.toString('utf8', 20, 20 + elf.readUInt32LE(12)).trim());
   assert.equal(data.skins[0].joints.length, 65); assert.equal(data.animations.length, 1);
 });
+await test('Santa 小屋：壓縮坐姿模型、紙雕立體盒、排隊 Loading 跟著真實進度', async () => {
+  const gltf = async name => { const glb = await fs.readFile(path.join(project, `assets/models/${name}.glb`)); return { bytes: glb, data: JSON.parse(glb.toString('utf8', 20, 20 + glb.readUInt32LE(12)).trim()) }; };
+  const source = await gltf('santa-seated'), web = await gltf('santa-seated-web'), meta = JSON.parse(await fs.readFile(path.join(project, 'assets/models/santa-seated-web.json'), 'utf8'));
+  assert.equal(createHash('sha256').update(web.bytes).digest('hex'), meta.sha256); assert.ok(web.bytes.length < 2e6 && web.bytes.length < source.bytes.length / 5);
+  assert.deepEqual(web.data.skins[0].joints.map(index => web.data.nodes[index].name), source.data.skins[0].joints.map(index => source.data.nodes[index].name), 'The skeleton the code turns must survive compression');
+  const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), art = await fs.readFile(path.join(project, 'js/components/cabin-art.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8');
+  assert.ok(scene.includes('santa-seated-web.glb') && !scene.includes("santa-seated.glb'") && scene.includes('setMeshoptDecoder'));
+  assert.ok(scene.includes('maxYaw: .24') && scene.includes('maxPitch: .1'), 'Head turns stay small: larger angles crease the beard');
+  assert.ok(scene.includes('prefers-reduced-motion') && scene.includes('forceContextLoss') && scene.includes('IntersectionObserver') && !scene.includes('innerHTML'));
+  assert.ok(entry.includes("'pagehide'") && entry.includes('event.persisted') && entry.includes('dataset.progress'));
+  assert.ok(art.includes('export const BOARDS') && art.includes('paper-props.js') && !art.includes('innerHTML'));
+  const html = await fs.readFile(path.join(project, 'santa.html'), 'utf8'), loader = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8');
+  assert.ok(html.includes(">Santa's Cabin</h1>") && html.includes('class="cabin-gesture" type="button" aria-label=') && html.includes('data-santa-placeholder'));
+  assert.ok(loader.includes("'#cabin-stage'") && loader.includes('dataset.progress') && loader.includes('prefers-reduced-motion'), 'The queue walks with the real download and stays still under reduced motion');
+  assert.ok((await fs.readFile(path.join(project, 'js/data/heading-glyphs.js'), 'utf8')).includes('santas-cabin'));
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));
@@ -163,13 +179,13 @@ await test('Wish 小屋與郵票：白煙、開門人物、郵票只留本機、
   assert.ok(js.includes('setTimeout(connectCloud,retryDelay)'));
   assert.ok(!/\bstamp\b/.test(repo), 'Stored letter fields must stay exactly what the rules allow');
 });
-await test('頁尾互動主角：四頁各一個，遵守減少動態，全頁只留一個重點', async () => {
+await test('頁尾互動主角：五頁各一個，遵守減少動態，全頁只留一個重點', async () => {
   const toys = await fs.readFile(path.join(project, 'js/components/foreground-toys.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/shared.css'), 'utf8');
-  assert.ok(/const TOYS = \{ home: sled, intro: globe, game: surpriseBox, wish: wishingStar \}/.test(toys));
+  assert.ok(/const TOYS = \{ home: sled, intro: globe, game: surpriseBox, wish: wishingStar, santa: jingleBell \}/.test(toys));
   assert.ok((toys.match(/motion\(\)\.matches/g) ?? []).length >= 3); assert.ok(css.includes('.toy-button:focus-visible'));
-  for (const page of ['index', 'intro', 'game', 'wish']) assert.ok((await fs.readFile(path.join(project, `${page}.html`), 'utf8')).includes('data-foreground='), page);
+  for (const page of ['index', 'intro', 'game', 'wish', 'santa']) assert.ok((await fs.readFile(path.join(project, `${page}.html`), 'utf8')).includes('data-foreground='), page);
 });
-await test('導覽燈串：四頁共用、等 Loading 結束才跑光、沒有 JS 時仍是一般連結', async () => {
+await test('導覽燈串：五頁共用、等 Loading 結束才跑光、沒有 JS 時仍是一般連結', async () => {
   const shared = await fs.readFile(path.join(project, 'js/shared.js'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/nav-lights.js'), 'utf8');
   const loader = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/shared.css'), 'utf8');
   assert.ok(shared.includes('mountNavLights(nav)') && shared.includes("'pagehide'") && shared.includes('event.persisted'));
@@ -189,9 +205,9 @@ await test('首頁壓縮模型：骨架與動畫和原檔一致，體積明顯�
   const scene = await fs.readFile(path.join(project, 'js/components/characters-scene.js'), 'utf8');
   assert.ok(scene.includes('santa-dance-web.glb') && scene.includes('reindeer-web.glb') && scene.includes('setMeshoptDecoder'));
 });
-await test('背景音樂：四頁選單一致、不寫死 autoplay、壓縮音檔與清單相符、原檔保留', async () => {
-  const blocks = []; for (const page of ['index', 'intro', 'game', 'wish']) { const html = await fs.readFile(path.join(project, `${page}.html`), 'utf8'); blocks.push(html.match(/<div class="music-widget">[\s\S]*?<\/audio>\s*<\/div>/)[0]); assert.ok(!html.includes('music-file') && !/<audio[^>]*autoplay/.test(html), page); }
-  assert.equal(new Set(blocks).size, 1, 'The widget markup must stay identical on all four pages');
+await test('背景音樂：五頁選單一致、不寫死 autoplay、壓縮音檔與清單相符、原檔保留', async () => {
+  const blocks = []; for (const page of ['index', 'intro', 'game', 'wish', 'santa']) { const html = await fs.readFile(path.join(project, `${page}.html`), 'utf8'); blocks.push(html.match(/<div class="music-widget">[\s\S]*?<\/audio>\s*<\/div>/)[0]); assert.ok(!html.includes('music-file') && !/<audio[^>]*autoplay/.test(html), page); }
+  assert.equal(new Set(blocks).size, 1, 'The widget markup must stay identical on every page');
   const manifest = JSON.parse(await fs.readFile(path.join(project, 'docs/AUDIO-ASSETS.json'), 'utf8'));
   assert.equal(manifest.tracks.length, 5);
   for (const track of manifest.tracks) {
@@ -230,9 +246,9 @@ await test('讀信：信封開啟動畫、同款信紙、保留原生對話框�
   assert.ok(reader.includes("'cancel'") && reader.includes('prefers-reduced-motion') && reader.includes('airmailLetter') && !reader.includes('innerHTML'));
   assert.ok(/@media \(prefers-reduced-motion: no-preference\)[\s\S]*\.is-opening/.test(css), 'The letter must stay readable without animation');
 });
-await test('Loading：四頁各自主題、有時間上限、頁面動畫等它結束、畫面不依賴下載', async () => {
+await test('Loading：五頁各自主題、有時間上限、頁面動畫等它結束、畫面不依賴下載', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
-  for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish']]) {
+  for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish'], ['santa', 'santa']]) {
     const html = await fs.readFile(path.join(project, `${page}.html`), 'utf8');
     assert.ok(html.includes(`data-loader="${kind}"`), page); assert.match(html, /<body[^>]*>\s*<script src="js\/site-loader\.js/, 'Runs before the page paints');
     assert.ok(new RegExp(`\\b${kind}: (function|')`).test(js), kind);
@@ -801,7 +817,7 @@ await test('最終紙雕清理：新素材完整性、單一村落、三種樹�
   assert.ok(/<a class="paper-button" href="intro\.html">Explore the Story/.test(html)); assert.ok(/<a class="paper-button cream" href="wish\.html">Make a Wish/.test(html));
   assert.ok(html.includes('聖誕老人的小信')&&html.includes('麋鹿的小信')); assert.ok(homeScene.includes('buttonArt(')&&homeScene.includes('airmailLetter('));
   assert.ok(css.includes('.paper-button:hover')&&css.includes('.paper-button:active')&&css.includes('.paper-button:focus-visible'));
-  for (const page of ['index.html', 'intro.html', 'game.html', 'wish.html']) { const text = (await fs.readFile(path.join(project, page), 'utf8')); assert.ok(text.includes("Holy Moly! It's Christmas!"), page); assert.ok(!/HANDMADE/.test(text), page); }
+  for (const page of ['index.html', 'intro.html', 'game.html', 'wish.html', 'santa.html']) { const text = (await fs.readFile(path.join(project, page), 'utf8')); assert.ok(text.includes("Holy Moly! It's Christmas!"), page); assert.ok(!/HANDMADE/.test(text), page); }
   assert.ok(homeScene.includes('mountTagline(') && html.includes('data-tagline-art'));
   // 遊戲框只是外圍裝飾：不擋點擊，也不能改動面板內距。
   const gameCss=await fs.readFile(path.join(project,'css/game.css'),'utf8');

@@ -1,0 +1,24 @@
+/* Santa's Cabin：紙雕立體盒，可以拖著轉；版面跟其他頁一樣置中。 */
+.santa-main { padding-block: 2rem 1rem; }
+.cabin { display: grid; justify-items: center; gap: 1rem; }
+.cabin-heading { display: grid; justify-items: center; gap: .3rem; text-align: center; }
+.cabin-heading h1 { margin: 0; color: var(--red); }
+.cabin-heading .title-art { width: clamp(260px, 34vw, 440px); }
+.cabin-lead { margin: 0; color: var(--muted); }
+.cabin-stage { position: relative; width: 100%; aspect-ratio: 16 / 10; max-height: 76svh; }
+.cabin-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.cabin-gesture { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 24px; background: none; cursor: grab; touch-action: pan-y; }
+.cabin-stage.is-turning .cabin-gesture { cursor: grabbing; }
+.cabin-gesture:focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
+/* 紙雕聖誕老人替身：3D 小屋準備好之前先坐在畫面中間。 */
+.cabin-stage .santa-placeholder-host { position: absolute; left: 50%; bottom: 14%; width: min(220px, 34%); aspect-ratio: 300 / 270; translate: -50% 0; transition: opacity .4s ease; pointer-events: none; }
+.cabin-stage:not([data-state='loading']) .santa-placeholder-host { opacity: 0; }
+.cabin-away { position: absolute; left: 50%; top: 42%; max-width: 15rem; margin: 0; padding: .7rem 1rem; translate: -50% 0; rotate: -3deg; color: var(--ink); background: var(--cream); border: 2px dashed #ad3c3b73; border-radius: 12px; box-shadow: 0 6px 0 -2px #dccaa9; text-align: center; pointer-events: none; }
+.cabin-error { display: none; }
+.cabin-stage[data-state='error'] .cabin-error { position: absolute; inset: 0; display: grid; place-content: center; padding: 2rem; color: var(--muted); text-align: center; }
+.cabin-hint { margin: 0; color: var(--muted); font-size: var(--fs-small); text-align: center; }
+.cabin-hint span { display: inline-block; padding: .2rem .8rem; border-radius: 999px; background: var(--cream); box-shadow: 0 3px 0 #dccaa9; }
+@media (max-width: 700px) {
+  .santa-main { padding-top: 1.2rem; }
+  .cabin-stage { aspect-ratio: 1; max-height: 72svh; }
+}

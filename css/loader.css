@@ -41,5 +41,15 @@ html.is-loading body > :not(.site-loader), html.is-loading body > :not(.site-loa
 @keyframes loader-fly { from { offset-distance: 0%; rotate: -8deg; } to { offset-distance: 100%; rotate: 8deg; } }
 .loader-stars path { animation: loader-breathe 1.3s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
 .loader-stars path:nth-child(2n) { animation-delay: .6s; }
+/* Santa：排隊進小屋。隊伍位置由 site-loader.js 依真實進度設定，這裡只負責走路的過場。 */
+.loader-queue { width: min(440px, 90vw); }
+.loader-queue .q { transition: transform .8s cubic-bezier(.4, .1, .3, 1), opacity .45s ease .35s; }
+.loader-queue .q.is-in { opacity: 0; }
+.loader-queue .q-body { transform-box: fill-box; transform-origin: 50% 100%; animation: loader-waddle .5s ease-in-out infinite alternate; }
+.loader-queue .q:nth-of-type(2n) .q-body { animation-delay: -.25s; }
+@keyframes loader-waddle { from { rotate: -4deg; } to { rotate: 4deg; } }
+.loader-door { transform-box: view-box; transform-origin: 314px 118px; transition: transform .35s ease; }
+.loader-door.is-open { transform: scaleX(.18); }
+.loader-ticket { display: inline-block; margin-left: .6rem; padding: .05rem .55rem; color: #fbf3df; background: #a84a42; border-radius: 6px; box-shadow: 0 3px 0 #87302f; letter-spacing: .04em; rotate: -4deg; }
 @media (max-width: 480px) { .cradle, .loader-word { scale: .78; } }
-@media (prefers-reduced-motion: reduce) { .site-loader * { animation: none !important; } .loader-envelope { offset-distance: 50%; } }
+@media (prefers-reduced-motion: reduce) { .site-loader * { animation: none !important; } .loader-envelope { offset-distance: 50%; } .loader-queue .q, .loader-door { transition: none; } }

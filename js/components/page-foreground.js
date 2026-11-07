@@ -1,4 +1,4 @@
-// Paper-cut ground shared by all four pages: same hills and layout, different objects and one toy per page.
+// Paper-cut ground shared by all five pages: same hills and layout, different objects and one toy per page.
 import { holly, paperLayer, pauseOffscreen, pine, shape } from './paper-art.js';
 import { mountToy } from './foreground-toys.js';
 
@@ -99,6 +99,30 @@ function stocking(parent, x, y, fill) {
   shape('rect', { x: x - 28, y: y - 14, width: 52, height: 24, rx: 7, fill: '#f7efe0' }, parent);
 }
 
+// Santa's Cabin: firewood stacked by the door and the striped North Pole marker.
+function woodpile(parent, x, base) {
+  const r = 17;
+  [[0, 3], [1, 2], [2, 1]].forEach(([row, count]) => {
+    for (let i = 0; i < count; i++) {
+      const cx = x + (i - (count - 1) / 2) * r * 2.1, cy = base - r - row * r * 1.8;
+      shape('circle', { cx, cy, r, fill: '#a8774d' }, parent);
+      shape('circle', { cx, cy, r: r * .62, fill: '#e2c39a' }, parent);
+      shape('circle', { cx, cy, r: r * .28, fill: 'none', stroke: '#b98a5a', 'stroke-width': 2 }, parent);
+    }
+  });
+  shape('path', { d: `M${x - r * 1.5} ${base - r * 5.1}C${x - r} ${base - r * 6.3} ${x + r} ${base - r * 6.3} ${x + r * 1.5} ${base - r * 5.1}Z`, fill: '#fbf8f1' }, parent);
+}
+
+function northPole(parent, x, base) {
+  const top = base - 170;
+  shape('rect', { x: x - 9, y: top, width: 18, height: 170, fill: '#fbf3df' }, parent);
+  for (let y = top + 8; y < base - 10; y += 26) shape('path', { d: `M${x - 9} ${y}L${x + 9} ${y - 12}V${y - 2}L${x - 9} ${y + 10}Z`, fill: '#b5544c' }, parent);
+  shape('circle', { cx: x, cy: top - 8, r: 13, fill: '#e0b04f' }, parent);
+  shape('path', { d: `M${x + 6} ${top + 34}H${x + 92}L${x + 110} ${top + 50}L${x + 92} ${top + 66}H${x + 6}Z`, fill: '#a8774d' }, parent);
+  holly(parent, x + 54, top + 50, .45);
+  shape('ellipse', { cx: x, cy: base, rx: 28, ry: 8, fill: '#fbf8f1' }, parent);
+}
+
 function line(parent, d) {
   shape('path', { d, stroke: '#a9845b', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, parent);
 }
@@ -123,6 +147,10 @@ const THEMES = {
   game: {
     left: ({ tree, bob }) => { tree(100, 214, 170, 0); tree(172, 222, 112, -1.6); bob(0, parent => gift(parent, 186, 166, 118, 66, '#b5625a', '#efdcae')); bob(-2, parent => gift(parent, 306, 184, 84, 48, '#e9d9b8', '#b5625a')); },
     right: ({ tree, bob, still }) => { tree(212, 186, 150, -2.4); bob(-1, parent => gift(parent, 84, 142, 94, 54, '#8aa9ad', '#f3e7cf')); still(parent => holly(parent, 50, 180, .9)); },
+  },
+  santa: {
+    left: ({ tree, still }) => { tree(86, 216, 150, -.8); tree(168, 224, 96, -2.2); still(parent => woodpile(parent, 300, 228)); },
+    right: ({ tree, still }) => { tree(246, 190, 124, -1.4); still(parent => northPole(parent, 96, 200)); },
   },
   wish: {
     left: ({ tree, still, bob }) => { tree(70, 216, 130, -1); still(parent => mailbox(parent, 226, 228)); bob(-.6, parent => envelope(parent, 350, 96, 9)); bob(-2.2, parent => envelope(parent, 118, 86, -11)); },

@@ -1,5 +1,5 @@
 // One interactive centrepiece per page footer. Each sheet is cut once; only compositor layers move.
-import { paperLayer, shape } from './paper-art.js';
+import { holly, paperLayer, shape } from './paper-art.js';
 import { star } from './paper-props.js';
 
 const PAPER = { scale: .8, grain: .5, shadow: .2 };
@@ -139,7 +139,28 @@ function wishingStar(host) {
   });
 }
 
-const TOYS = { home: sled, intro: globe, game: surpriseBox, wish: wishingStar };
+// Santa's Cabin: a sleigh bell that swings and throws paper confetti when rung.
+function jingleBell(host) {
+  const button = toyButton(host, '搖響雪橇鈴鐺');
+  const bell = paperLayer(button, '0 0 200 200', 'toy-bell', parent => {
+    shape('path', { d: 'M72 30C72 6 128 6 128 30', stroke: '#87302f', 'stroke-width': 12, fill: 'none', 'stroke-linecap': 'round' }, parent);
+    shape('path', { d: 'M100 32C62 32 50 68 48 106 46 130 36 142 28 150H172C164 142 154 130 152 106 150 68 138 32 100 32Z', fill: '#e0b04f' }, parent);
+    shape('path', { d: 'M100 32C126 32 140 62 144 102 146 128 156 142 166 150H140C134 134 132 112 128 86 124 58 116 38 100 32Z', fill: '#c08a3e', opacity: .55 }, parent);
+    shape('ellipse', { cx: 80, cy: 74, rx: 10, ry: 22, fill: '#f6dc96', opacity: .85 }, parent);
+    shape('rect', { x: 24, y: 148, width: 152, height: 16, rx: 8, fill: '#c08a3e' }, parent);
+    shape('circle', { cx: 100, cy: 174, r: 14, fill: '#a9782a' }, parent);
+    holly(parent, 100, 40, .8);
+  }, { paper: PAPER, eager: true });
+  let run = null;
+  button.addEventListener('click', async () => {
+    if (run || motion().matches) return;
+    for (let scrap = 0; scrap < 12; scrap++) throwScrap(host, scrap + 2);
+    run = bell.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(-16deg)', offset: .2 }, { transform: 'rotate(13deg)', offset: .45 }, { transform: 'rotate(-8deg)', offset: .68 }, { transform: 'rotate(4deg)', offset: .85 }, { transform: 'rotate(0deg)' }], { duration: 1100, easing: 'ease-out' });
+    await run.finished.catch(() => {}); run = null;
+  });
+}
+
+const TOYS = { home: sled, intro: globe, game: surpriseBox, wish: wishingStar, santa: jingleBell };
 export function mountToy(root, kind) {
   const draw = TOYS[kind]; if (!draw) return;
   const host = element('div', `foreground-scene foreground-toy toy-${kind}`, root);
