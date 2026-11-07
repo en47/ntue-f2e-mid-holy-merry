@@ -1,5 +1,6 @@
 // Paper-cut ground shared by all five pages: same hills and layout, different objects and one toy per page.
 import { holly, paperLayer, pauseOffscreen, pine, shape } from './paper-art.js';
+import { snowyFir } from './paper-props.js';
 import { mountToy } from './foreground-toys.js';
 
 const LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220';
@@ -7,7 +8,8 @@ const LEFT_GROUND = 'M0 250C20 232 70 210 150 216 170 218 200 224 220 228S360 22
 const RIGHT_GROUND = 'M0 220C40 196 120 192 170 200S260 190 300 204 330 214 340 220Z';
 
 // Wish sits at night, so its ground and hills take the night tones.
-const TONES = { day: { far: '#cfe1e7', near: '#e6eeee', snow: '#fff9eb', rim: '#fbf3e3' }, night: { far: '#2f4c68', near: '#274059', snow: '#1c2f43', rim: '#46637f' } };
+// Santa's page continues its snowfield: drifts of white with only a hint of blue shade.
+const TONES = { day: { far: '#cfe1e7', near: '#e6eeee', snow: '#fff9eb', rim: '#fbf3e3' }, night: { far: '#2f4c68', near: '#274059', snow: '#1c2f43', rim: '#46637f' }, snow: { far: '#eef3f3', near: '#f6f6f1', snow: '#fff9eb', rim: '#fffdf6' } };
 let tones = TONES.day;
 
 function hills(root) {
@@ -123,6 +125,11 @@ function northPole(parent, x, base) {
   shape('ellipse', { cx: x, cy: base, rx: 28, ry: 8, fill: '#fbf8f1' }, parent);
 }
 
+// A soft bluish shadow on the snow, thrown to the right of whatever stands there (the sun is low on the left).
+function groundShadow(parent, x, base, width) {
+  shape('ellipse', { cx: x + width * .28, cy: base - 2, rx: width * .62, ry: width * .12, fill: '#c9d7e1', opacity: .7 }, parent);
+}
+
 function line(parent, d) {
   shape('path', { d, stroke: '#a9845b', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, parent);
 }
@@ -149,8 +156,14 @@ const THEMES = {
     right: ({ tree, bob, still }) => { tree(212, 186, 150, -2.4); bob(-1, parent => gift(parent, 84, 142, 94, 54, '#8aa9ad', '#f3e7cf')); still(parent => holly(parent, 50, 180, .9)); },
   },
   santa: {
-    left: ({ tree, still }) => { tree(86, 216, 150, -.8); tree(168, 224, 96, -2.2); still(parent => woodpile(parent, 300, 228)); },
-    right: ({ tree, still }) => { tree(246, 190, 124, -1.4); still(parent => northPole(parent, 96, 200)); },
+    left: ({ still }) => { still(parent => {
+      groundShadow(parent, 86, 218, 60); groundShadow(parent, 170, 226, 40); groundShadow(parent, 300, 230, 56);
+      snowyFir(parent, 86, 218, 170, 0, .62); snowyFir(parent, 170, 226, 110, 2, .62); woodpile(parent, 300, 228);
+    }); },
+    right: ({ still }) => { still(parent => {
+      groundShadow(parent, 246, 192, 52); groundShadow(parent, 96, 200, 30);
+      snowyFir(parent, 246, 192, 140, 1, .62); northPole(parent, 96, 200);
+    }); },
   },
   wish: {
     left: ({ tree, still, bob }) => { tree(70, 216, 130, -1); still(parent => mailbox(parent, 226, 228)); bob(-.6, parent => envelope(parent, 350, 96, 9)); bob(-2.2, parent => envelope(parent, 118, 86, -11)); },

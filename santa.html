@@ -9,10 +9,10 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/shared.css?v=3ad69e02d2">
   <link rel="stylesheet" href="css/loader.css?v=cd36316b47">
-  <link rel="stylesheet" href="css/santa.css?v=9f128ab6c5">
-  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/components/back-to-top.js":"./js/components/back-to-top.js?v=0f43fbd21d","./js/components/cabin-art.js":"./js/components/cabin-art.js?v=778a60b059","./js/components/cabin-backdrop.js":"./js/components/cabin-backdrop.js?v=4f094d8e44","./js/components/cabin-scene.js":"./js/components/cabin-scene.js?v=47d5a144cf","./js/components/foreground-toys.js":"./js/components/foreground-toys.js?v=565e8d20ba","./js/components/info-dialog.js":"./js/components/info-dialog.js?v=6ea5fbc23b","./js/components/music-player.js":"./js/components/music-player.js?v=bcb3ab1242","./js/components/nav-lights.js":"./js/components/nav-lights.js?v=de2c05f127","./js/components/page-foreground.js":"./js/components/page-foreground.js?v=a416646c1d","./js/components/paper-art.js":"./js/components/paper-art.js?v=f0722c5277","./js/components/paper-props.js":"./js/components/paper-props.js?v=392e4ad20e","./js/components/santa-head.js":"./js/components/santa-head.js?v=b3456004fc","./js/components/santa-placeholder.js":"./js/components/santa-placeholder.js?v=8c938caad4","./js/components/title-art.js":"./js/components/title-art.js?v=b005d8b41d","./js/data/contact.js":"./js/data/contact.js?v=1e249d29e2","./js/data/faq.js":"./js/data/faq.js?v=05dd1e4623","./js/data/heading-glyphs.js":"./js/data/heading-glyphs.js?v=a6684c612a","./js/data/music-tracks.js":"./js/data/music-tracks.js?v=00ef109c3c","./js/data/nav-string.js":"./js/data/nav-string.js?v=23b0fc3b7d","./js/data/paper-envelope-style.js":"./js/data/paper-envelope-style.js?v=c5c7ce17e7"}}</script>
+  <link rel="stylesheet" href="css/santa.css?v=d792826745">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/components/back-to-top.js":"./js/components/back-to-top.js?v=0f43fbd21d","./js/components/cabin-art.js":"./js/components/cabin-art.js?v=3535f01222","./js/components/cabin-backdrop.js":"./js/components/cabin-backdrop.js?v=54beef7f22","./js/components/cabin-scene.js":"./js/components/cabin-scene.js?v=a11ed1c2eb","./js/components/foreground-toys.js":"./js/components/foreground-toys.js?v=f776e6dd90","./js/components/info-dialog.js":"./js/components/info-dialog.js?v=6ea5fbc23b","./js/components/music-player.js":"./js/components/music-player.js?v=bcb3ab1242","./js/components/nav-lights.js":"./js/components/nav-lights.js?v=de2c05f127","./js/components/page-foreground.js":"./js/components/page-foreground.js?v=c5f8b6163f","./js/components/paper-art.js":"./js/components/paper-art.js?v=f0722c5277","./js/components/paper-props.js":"./js/components/paper-props.js?v=451f560414","./js/components/santa-head.js":"./js/components/santa-head.js?v=b3456004fc","./js/components/santa-placeholder.js":"./js/components/santa-placeholder.js?v=8c938caad4","./js/data/contact.js":"./js/data/contact.js?v=1e249d29e2","./js/data/faq.js":"./js/data/faq.js?v=05dd1e4623","./js/data/heading-glyphs.js":"./js/data/heading-glyphs.js?v=a6684c612a","./js/data/music-tracks.js":"./js/data/music-tracks.js?v=00ef109c3c","./js/data/nav-string.js":"./js/data/nav-string.js?v=23b0fc3b7d","./js/data/paper-envelope-style.js":"./js/data/paper-envelope-style.js?v=c5c7ce17e7"}}</script>
   <script type="module" src="js/shared.js?v=d2805c572c"></script>
-  <script type="module" src="js/santa.js?v=16ec4860ad"></script>
+  <script type="module" src="js/santa.js?v=a93df9c314"></script>
 </head>
 <body class="santa-page" data-loader="santa">
   <script src="js/site-loader.js?v=02f85ff65f"></script>
@@ -25,7 +25,8 @@
 <main class="santa-main" id="main">
 <section class="cabin" aria-labelledby="cabin-title">
   <div class="cabin-backdrop" aria-hidden="true"></div>
-  <header class="cabin-sign"><h1 id="cabin-title" lang="en">Santa's Cabin</h1></header>
+  <!-- The visible title is the name board hanging at the house's front-left corner; this heading names the page for screen readers. -->
+  <h1 class="sr-only" id="cabin-title" lang="en">Santa's Cabin</h1>
   <div class="cabin-stage" id="cabin-stage" data-state="loading" data-progress="0" data-view="outside" aria-busy="true">
     <span class="santa-placeholder-host" data-santa-placeholder aria-hidden="true"></span>
     <button class="cabin-gesture" type="button" aria-label="聖誕老人的小屋：左右拖曳轉動，按 Enter 進屋或回到屋外" aria-describedby="cabin-hint cabin-status"></button>
@@ -41,7 +42,7 @@
   <noscript><p class="cabin-noscript">請啟用 JavaScript，才能走進聖誕老人的小屋。</p></noscript>
 </section>
 </main>
-<div class="page-foreground" data-foreground="santa" aria-hidden="true"></div>
+<div class="page-foreground" data-foreground="santa" data-tone="snow" aria-hidden="true"></div>
 <footer class="site-footer"><div class="shell footer-inner"><div class="footer-links"><button class="text-button" data-info="accessibility">Site Accessibility</button><span>/</span><button class="text-button" data-info="faq">FAQ</button></div><p>© 2026 Holy Merry! <span aria-hidden="true">✧</span></p><div><button class="text-button" data-info="contact">Contact us</button></div></div></footer>
 <div class="music-widget">
     <section class="music-panel" id="music-panel" hidden aria-labelledby="music-title">

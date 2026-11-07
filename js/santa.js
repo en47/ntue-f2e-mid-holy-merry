@@ -1,10 +1,8 @@
-import { mountTitleArt } from './components/title-art.js';
 import { mountCabinBackdrop } from './components/cabin-backdrop.js';
 
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
 const enter = document.querySelector('#cabin-enter'), leave = document.querySelector('#cabin-leave'), hint = document.querySelector('#cabin-hint-text');
-mountTitleArt(document.querySelector('#cabin-title'), 'santas-cabin');
 mountCabinBackdrop(document.querySelector('.cabin-backdrop'));
 // Outside sees the whole house; inside moves up to Santa. The buttons are the keyboard and screen-reader way in and out.
 function showView(view) {

@@ -2,19 +2,16 @@
 .santa-main { padding: 0; }
 .cabin { position: relative; height: max(580px, calc(100svh - 108px)); overflow: hidden; background: linear-gradient(#c9dfeb, #dfeaf0 42%, #f6e4d8 70%, #fbefe4); }
 .cabin-backdrop { position: absolute; inset: 0; pointer-events: none; }
-.cabin-sun { position: absolute; left: 70%; top: 30%; width: 24vmin; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(#fdf0c8 0 26%, #fbe3b8aa 42%, transparent 70%); }
-.cabin-backdrop .cabin-hills { inset: auto 0 0; height: 48%; }
+/* 太陽低掛在左上：光線、影子方向（往右後）都跟著它。 */
+.cabin-sun { position: absolute; left: 6%; top: 6%; width: 26vmin; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(#fdf0c8 0 24%, #fbe3b8aa 40%, transparent 70%); }
 .cabin-flake { position: absolute; top: -12px; width: 7px; height: 7px; border-radius: 50%; background: #fffdf6; box-shadow: 0 0 0 1px #d6e3e966; animation: cabin-snow 11s linear infinite; }
-@keyframes cabin-snow { 0% { translate: 0 0; opacity: 0; } 8% { opacity: .9; } 92% { opacity: .9; } 100% { translate: 40px calc(min(100svh, 900px)); opacity: 0; } }
+/* 雪花和煙囪的煙都往右飄：同一陣風。 */
+@keyframes cabin-snow { 0% { translate: 0 0; opacity: 0; } 8% { opacity: .9; } 92% { opacity: .9; } 100% { translate: 60px calc(min(100svh, 900px)); opacity: 0; } }
 .cabin-stage { position: absolute; inset: 0; }
 .cabin-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .cabin-gesture { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 0; background: none; cursor: grab; touch-action: pan-y; }
 .cabin-stage.is-turning .cabin-gesture { cursor: grabbing; }
 .cabin-gesture:focus-visible { outline: 3px solid var(--red); outline-offset: -8px; }
-.cabin-sign { position: absolute; z-index: 2; top: 1.4rem; left: 50%; translate: -50% 0; pointer-events: none; transition: opacity .5s ease; }
-.cabin-sign h1 { margin: 0; color: var(--red); }
-.cabin-sign .title-art { width: clamp(210px, 21vw, 310px); }
-.cabin:has([data-view='inside']) .cabin-sign { opacity: 0; }
 .cabin-actions { position: absolute; z-index: 2; left: 50%; bottom: 1.3rem; translate: -50% 0; display: flex; align-items: center; gap: .8rem; max-width: calc(100% - 2rem); pointer-events: none; }
 .cabin-hint { margin: 0; padding: .3rem 1rem; color: var(--ink); background: var(--cream); border-radius: 999px; box-shadow: 0 3px 0 #dccaa9; font-size: var(--fs-small); white-space: nowrap; }
 .cabin-lead::after { content: '　'; }
@@ -29,13 +26,10 @@
 .cabin-error { display: none; }
 .cabin-stage[data-state='error'] .cabin-error { position: absolute; inset: 0; display: grid; place-content: center; padding: 2rem; color: var(--muted); text-align: center; }
 .cabin-noscript { position: absolute; left: 50%; bottom: 30%; translate: -50% 0; padding: .7rem 1rem; background: var(--cream); border-radius: 12px; }
-/* 頁尾接著小屋前的雪地：不畫遠方的山，地面直接延續同一個雪色。 */
+/* 頁尾接著小屋前的雪地：同一個雪色，起伏的雪丘只帶一點藍色陰影。 */
 .santa-page .page-foreground { margin-top: 0; background: #fff9eb; }
-.santa-page .foreground-hills { display: none; }
 @media (max-width: 700px) {
   .cabin { height: max(560px, calc(100svh - 86px)); }
-  .cabin-sign { top: 1rem; }
-  .cabin-sign .title-art { width: min(230px, 60vw); }
   .cabin-lead { display: none; }
   .cabin-actions { bottom: 1rem; flex-direction: column; gap: .5rem; }
 }
