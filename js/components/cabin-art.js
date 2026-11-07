@@ -468,24 +468,14 @@ export function stable({ paper }, { width, height }, state = {}) {
     shape('path', { d: `M${x + 6} ${y + 14}h52M${x + 6} ${y + 28}h52`, stroke: '#b98f48', 'stroke-width': 4 }, paper);
   }
 }
-export function snowman({ paper }, { width, height }, state = {}) {
-  // Visitors finish him: the carrot nose, the hat and the scarf are added by the dress-up game (state).
+export function snowman({ paper }, { width, height }) {
+  // Only the snowman himself: what he wears is laid over him in four places by the wardrobe game (cabin-wardrobe.js).
   const cx = width / 2, ground = height - 8, ball = (cy, r) => { shape('circle', { cx, cy, r, fill: SNOW }, paper); shape('path', { d: `M${cx + r * .3} ${cy - r * .95}A${r} ${r} 0 0 1 ${cx + r * .3} ${cy + r * .95}A${r * 1.3} ${r * 1.3} 0 0 0 ${cx + r * .3} ${cy - r * .95}Z`, fill: '#d9e5ec' }, paper); };
   const r1 = width * .36, r2 = width * .27, r3 = width * .2, y1 = ground - r1, y2 = y1 - r1 - r2 * .7, y3 = y2 - r2 - r3 * .7;
   for (const side of [-1, 1]) shape('path', { d: `M${cx + side * r2 * .8} ${y2}l${side * width * .28} ${-height * .1}m${-side * width * .1} ${height * .04}l${side * width * .06} ${-height * .05}`, stroke: '#6b4a33', 'stroke-width': 7, 'stroke-linecap': 'round', fill: 'none' }, paper);
   ball(y1, r1); ball(y2, r2); ball(y3, r3);
-  if (state.scarf) {
-    shape('path', { d: `M${cx - r2} ${y2 - r2 * .55}C${cx - r2 * .3} ${y2 - r2 * .3} ${cx + r2 * .3} ${y2 - r2 * .3} ${cx + r2} ${y2 - r2 * .55}L${cx + r2} ${y2 - r2 * .3}C${cx + r2 * .3} ${y2} ${cx - r2 * .3} ${y2} ${cx - r2} ${y2 - r2 * .3}Z`, fill: RED }, paper);
-    shape('path', { d: `M${cx + r2 * .4} ${y2 - r2 * .3}l${r2 * .35} ${r2 * 1.1}h-${r2 * .4}Z`, fill: '#87302f' }, paper);
-  }
-  if (state.nose) shape('path', { d: `M${cx} ${y3}l${r3 * 1.1} ${r3 * .18}-${r3 * 1.1} ${r3 * .2}Z`, fill: '#e8873c' }, paper);
   for (const dx of [-.35, .3]) shape('circle', { cx: cx + r3 * dx, cy: y3 - r3 * .3, r: r3 * .1, fill: '#3b2a24' }, paper);
   for (const dy of [-.45, 0, .45]) shape('circle', { cx, cy: y1 + r1 * dy - r1 * .1, r: r1 * .08, fill: '#3b2a24' }, paper);
-  if (state.hat) {
-    shape('rect', { x: cx - r3 * .85, y: y3 - r3 * 1.05, width: r3 * 1.7, height: r3 * .2, rx: 4, fill: '#3b2a24' }, paper);
-    shape('rect', { x: cx - r3 * .6, y: y3 - r3 * 1.9, width: r3 * 1.2, height: r3 * .9, rx: 4, fill: '#3b2a24' }, paper);
-    shape('rect', { x: cx - r3 * .6, y: y3 - r3 * 1.3, width: r3 * 1.2, height: r3 * .18, fill: RED }, paper);
-  }
 }
 export function lampPost({ paper }, { width, height }) {
   const cx = width / 2, ground = height - 6, head = 70;
@@ -815,7 +805,7 @@ export const BOARDS = [
   { id: 'lamp-far', w: .55, h: 2.2, at: [5.3, GROUND, -4.9], turn: -.45, draw: lampPost },
   { id: 'cane-near', w: .3, h: .95, at: [5, GROUND, -3], turn: -.4, draw: candyCane },
   { id: 'cane-far', w: .3, h: .95, at: [5.9, GROUND, -6.1], turn: -.45, draw: candyCane },
-  { id: 'snowman', w: .9, h: 1.4, at: [-5.4, GROUND, -1.2], turn: .35, draw: snowman, state: {} },
+  { id: 'snowman', w: .9, h: 1.4, at: [-5.4, GROUND, -1.2], turn: .35, draw: snowman },
   { id: 'workshop', w: 5.2, h: 3.2, at: [-8.4, GROUND, -13.5], turn: .35, draw: workshop },
   { id: 'yard-tree', w: 1.4, h: 2.8, at: [-9.6, GROUND, -6.8], turn: .4, draw: yardTree },
   { id: 'bench', w: 1.4, h: .9, at: [-7.6, GROUND, -3.4], turn: .5, draw: bench },
@@ -833,7 +823,7 @@ export const SMOKE = { w: .55, h: .4, draw: smokePuff };
 export const SPOTS = [
   { id: 'mailbox', name: '郵筒', box: [[SIGN.x, .45, SIGN.z + .45], [.8, 1.1, .6]], view: { target: [SIGN.x, .75, SIGN.z + .45], distance: 3, pitch: .1, yaw: .28 } },
   { id: 'reindeer', name: '麋鹿', box: [[REINDEER.x, .55, REINDEER.z], [1.3, 1.4, 1.2]], view: { target: [REINDEER.x, .8, REINDEER.z], distance: 3.2, pitch: .1, yaw: -.3 } },
-  { id: 'snowman', name: '雪人', box: [[-5.4, .55, -1.2], [1.1, 1.5, .8]], view: { target: [-5.4, .7, -1.2], distance: 3.1, pitch: .08, yaw: .32 } },
+  { id: 'snowman', name: '雪人', box: [[-5.4, .55, -1.2], [1.1, 1.5, .8]], view: { target: [-5.4, .82, -1.2], distance: 3.5, pitch: .06, yaw: .32, aside: .42, tallDrop: .5, tallDistance: 5.6 } },
   { id: 'stable', name: '馴鹿小屋', box: [[7.4, 1.2, -7], [3.6, 2.8, 1.4]], view: { target: [7.2, 1.25, -6.8], distance: 6, pitch: .1, yaw: -.38 } },
 ];
 

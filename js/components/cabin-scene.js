@@ -7,6 +7,7 @@ import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_dec
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
 import { BOARDS, CHAIR, DOOR, FIRE, GROUND, HOUSE, INSIDE, LANTERN, PX, REINDEER, ROOM_PROPS, SIGN, SMOKE, SPOTS } from './cabin-art.js';
 import { CAROUSEL, LIFT, LIGHTHOUSE, PROPS, RIGS, RUNS, SHORE, WHEEL, WORLD } from './cabin-world.js';
+import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { paperFilter, shape } from './paper-art.js';
 import { createHeadTracker } from './santa-head.js';
 
@@ -23,10 +24,11 @@ const VIEWS = {
   outside: { eye: [0, 2.2, 11.5], heading: 0, tallHeading: .12, pitch: .05, span: 56, fov: 36, tallFov: 76, turn: Math.PI / 2, minPitch: -.12, maxPitch: .3 },
   inside: { eye: INSIDE.eye, heading: INSIDE.heading, pitch: INSIDE.pitch, span: 92, fov: 58, tallFov: 80, turn: Infinity, minPitch: -1.1, maxPitch: 1.1 },
 };
-// Each corner of the yard is a view of its own: the camera steps up to it and only turns a little while you play there.
+// Each corner of the yard is a view of its own: the camera steps up to it and holds still while you play there. `aside`
+// moves the subject left of centre on a wide screen, to leave room for the tray of things to play with on the right.
 for (const spot of SPOTS) {
-  const { target, distance, pitch, yaw } = spot.view;
-  VIEWS[spot.id] = { target, distance, tallDistance: distance * 1.35, fov: 34, pitch, heading: yaw, turn: .12, minPitch: pitch - .08, maxPitch: pitch + .15 };
+  const { target, distance, pitch, yaw, aside = 0, tallDrop = 0, tallDistance = distance * 1.35 } = spot.view;
+  VIEWS[spot.id] = { target, distance, tallDistance, fov: 34, pitch, heading: yaw, aside, tallDrop, turn: 0, minPitch: pitch, maxPitch: pitch };
 }
 // Where the arrival starts: high over the village, off to the left, looking down at the house.
 const ARRIVAL = { eye: [-9, 20, 26], heading: -.33, pitch: .63, fov: 44 };
@@ -307,7 +309,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const roomTargets = ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }));
   const glint = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: keep(textures, radialTexture([[0, 'rgba(255,255,240,1)'], [.25, 'rgba(255,230,150,.8)'], [1, 'rgba(255,220,120,0)']], 64)), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })));
   glint.visible = false; world.add(glint);
-  let found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null;
+  let snowmanMove = null, found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null;
   const wiggles = new Map(), runs = RUNS.map(points => new THREE.SplineCurve(points.map(([x, y]) => new THREE.Vector2(x, y))));
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const fitModel = (model, height) => {
@@ -337,6 +339,24 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     .finally(() => { reindeerShare = 1; report(); });
 
   const [, , santaReady] = await Promise.all([Promise.all(boards), smokeReady, santa, reindeer]);
+  // The snowman's wardrobe: a small sheet for each place, laid just in front of him so it moves, turns and bows with him.
+  // Each accessory is cut the first time it is worn and kept, so trying it on again is instant.
+  const snowman = sheets.get('snowman'), worn = new Map(), outfits = new Map();
+  if (snowman) {
+    snowman.holder.rotation.order = 'YXZ';
+    for (const [place, { at: [x, y], size: [w, h], nudge }] of Object.entries(PLACES)) {
+      const mesh = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(w, h)), keep(materials, new THREE.MeshBasicMaterial({ transparent: true, alphaTest: .4, toneMapped: false })));
+      mesh.position.set(x, y, nudge); mesh.visible = false; snowman.holder.add(mesh); worn.set(place, { mesh, id: null });
+    }
+  }
+  function outfitTexture(item) {
+    if (!outfits.has(item.id)) {
+      const { size: [w, h], box } = PLACES[item.place];
+      const board = { w, h, px: 640, draw: ({ paper }, { width, height }) => item.draw(shape('g', { transform: `scale(${width / 100} ${height / box})` }, paper)) };
+      outfits.set(item.id, paintBoard(board, quality).then(image => texture(image)));
+    }
+    return outfits.get(item.id);
+  }
   if (!isCurrent()) { release3d(); return null; }
   stage.prepend(renderer.domElement);
 
@@ -349,6 +369,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       return { eye: new THREE.Vector3(...settings.eye), heading: lerp(settings.tallHeading ?? settings.heading, settings.heading, t), pitch: settings.pitch, fov: THREE.MathUtils.clamp(lens, settings.fov, settings.tallFov) };
     }
     const aim = new THREE.Vector3(...settings.target), reach = lerp(settings.tallDistance, settings.distance, t);
+    // On a tall phone the tray sits along the bottom instead, so the subject is raised into the space above it.
+    if (settings.tallDrop) aim.y -= settings.tallDrop * (1 - t);
+    if (settings.aside) aim.add(new THREE.Vector3(Math.cos(settings.heading), 0, -Math.sin(settings.heading)).multiplyScalar(settings.aside * t));
     const turn = settings.heading ?? 0, tip = settings.pitch;
     return { eye: aim.add(new THREE.Vector3(Math.sin(turn) * Math.cos(tip), Math.sin(tip), Math.cos(turn) * Math.cos(tip)).multiplyScalar(reach)), heading: turn, pitch: tip, fov: settings.fov };
   }
@@ -407,6 +430,16 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const sparkle = glintSpot && view === 'outside' && !still ? (t - glintAt) / 1.4 : 1;
     glint.visible = sparkle < 1;
     if (glint.visible) { const [[x, y, z], [, h]] = glintSpot.box; glint.position.set(x, y + h * .45, z + .1); glint.scale.setScalar(Math.sin(sparkle * Math.PI) * .9); }
+    // The snowman's little performances: a hop, a spin when he is all dressed, a gentleman's bow, a reindeer's prance.
+    if (snowman && snowmanMove) {
+      const { kind, start: begun } = snowmanMove, length = { hop: 1.2, spin: 1.4, bow: 1.6, prance: 1.5 }[kind], u = Math.min(1, (t - begun) / length), holder = snowman.holder;
+      const hop = kind === 'hop' ? Math.abs(Math.sin(u * Math.PI * 2)) * .2 * (1 - u * .5) : kind === 'prance' ? Math.abs(Math.sin(u * Math.PI * 3)) * .14 : kind === 'spin' ? Math.sin(u * Math.PI) * .22 : 0;
+      holder.position.y = snowman.home.y + hop;
+      holder.rotation.y = snowman.board.turn + (kind === 'spin' ? ease(u) * Math.PI * 2 : 0);
+      holder.rotation.x = kind === 'bow' ? Math.sin(u * Math.PI) * .32 : 0;
+      if (kind === 'prance') holder.rotation.z = Math.sin(u * Math.PI * 6) * .08 * (1 - u);
+      if (u >= 1) { holder.position.y = snowman.home.y; holder.rotation.set(0, snowman.board.turn, 0); snowmanMove = null; }
+    }
     for (const [id, started] of wiggles) {
       const sheet = sheets.get(id), u = (t - started) / 1.6;
       if (!sheet) continue;
@@ -653,8 +686,11 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   on(gesture, 'pointerleave', () => { stage.classList.remove('is-pointing'); setHover(null); });
   // Any touch or key during the arrival lands at once: nobody has to wait for the flight to start looking round.
   const land = () => { if (trip?.direction === 'fly') finishTrip(); };
+  // At a corner of the yard the view holds still: the game laid over it gets every drag.
+  const playing = () => SPOTS.some(spot => spot.id === view);
   on(gesture, 'pointerdown', event => {
     land();
+    if (playing()) return;
     if (pointer || trip || (event.pointerType === 'mouse' && event.button !== 0)) return;
     pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, heading: goalHeading, pitch: goalPitch, moved: false, lastX: event.clientX, lastTime: performance.now(), speed: 0 };
     gesture.setPointerCapture?.(event.pointerId); dragging = true; spin = 0; clearTimeout(returnTimer); stage.classList.add('is-turning'); wake();
@@ -684,7 +720,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   on(gesture, 'keydown', event => {
     land();
     const step = { ArrowLeft: [.15, 0], ArrowRight: [-.15, 0], ArrowUp: [0, -.06], ArrowDown: [0, .06] }[event.key];
-    if (step && !trip) { event.preventDefault(); spin = 0; goalHeading = clampTurn(goalHeading + step[0]); goalPitch = clampPitch(goalPitch + step[1]); scheduleReturn(); wake(); }
+    if (step && !trip && !playing()) { event.preventDefault(); spin = 0; goalHeading = clampTurn(goalHeading + step[0]); goalPitch = clampPitch(goalPitch + step[1]); scheduleReturn(); wake(); }
     else if (event.key === 'Escape' && view !== 'outside') setView('outside');
     else if (event.key === 'Home' && !trip) { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }
   });
@@ -725,6 +761,28 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // Fly down from over the village to the front of the house; resolves once landed (at once when there is no flight).
     arrive() { if (!perched) return Promise.resolve(); perched = false; return new Promise(done => walk('fly', done)); },
     wave(id) { if (!motion.matches) { wiggles.set(id, clock); wake(); } },
+    // Put an accessory on the snowman (null takes that place's off). Resolves once it shows.
+    async dress(place, id) {
+      const slot = worn.get(place), item = id && itemFor(id);
+      if (!slot) return;
+      slot.id = item ? id : null;
+      if (!item) { slot.mesh.visible = false; wake(); if (motion.matches || frame === undefined) draw(); return; }
+      const map = await outfitTexture(item);
+      if (disposed || slot.id !== id) return;
+      slot.mesh.material.map = map; slot.mesh.material.needsUpdate = true; slot.mesh.visible = true; wake(); if (motion.matches || frame === undefined) draw();
+    },
+    // Where a place on the snowman is on screen (stage pixels), for the tray's drop targets.
+    placeRect(place) {
+      const slot = worn.get(place); if (!slot) return null;
+      const rect = stage.getBoundingClientRect(), { size: [w, h] } = PLACES[place], xs = [], ys = [];
+      slot.mesh.updateWorldMatrix(true, false);
+      for (const [dx, dy] of [[-.5, -.5], [.5, -.5], [-.5, .5], [.5, .5]]) {
+        const point = new THREE.Vector3(dx * w, dy * h, 0).applyMatrix4(slot.mesh.matrixWorld).project(camera);
+        xs.push((point.x + 1) / 2 * rect.width); ys.push((1 - point.y) / 2 * rect.height);
+      }
+      return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+    },
+    snowmanAct(kind) { if (motion.matches || !snowman) return; snowmanMove = { kind, start: clock }; wake(); },
     // Turn to face one side of the village: 'left' (the fair), 'right' (the coast) or 'back' (the house and the mountain).
     look(direction) {
       const turn = { left: 1.2, right: -1.2 }[direction] ?? lerp(VIEWS.outside.tallHeading, 0, blend());
