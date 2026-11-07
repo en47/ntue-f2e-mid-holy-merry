@@ -635,3 +635,10 @@ node --experimental-vm-modules tests/smoke.mjs
 - `npm test` 59 項通過，smoke 40 組通過；清單 27 個檔案、20.8MB，都存在且會上傳到 Firebase 備用網址。
 - 以送出 `Cache-Control: max-age=600` 的本機伺服器模擬 GitHub Pages，1440×900：首頁開啟後 11.1 秒內 14 張卡片圖全部下載完；同一分頁換到 Game、按下 Christmas Matching 開始，第一關用到的蓋子、盒子與 4 張禮物圖 `transferSize` 都是 0（由快取提供，1～13ms），8 張卡片立即顯示。
 - 實測當晚網路約 3.7Mbps：GitHub Pages 首頁兩個模型共 3.2MB 需 7～13 秒；剛推送後第一次開啟較慢，之後首頁 6 秒就緒。
+
+## 2026-11-07：期中版基準數字
+
+- 量測正式網站（`midterm` 標籤 `7b5908d`），結果寫在 `docs/BASELINE-MIDTERM.md` 與 `docs/baseline-midterm.json`，供期末比較。
+- Lighthouse 13.6.0 手機效能：Home 55、Intro 98、Game 40、Wish 50；電腦：96、100、98、94。無障礙 93～96，最佳做法與 SEO 皆 100。
+- 實測就緒時間（電腦，約 49Mbps、冷快取）：Home 4.1s、Intro 1.7s、Game 3.8s、Wish 6.7s。只讀取正式網站，未寫入任何資料。
+
