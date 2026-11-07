@@ -623,8 +623,16 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       cabin.position.set(lerp(LIFT.from[0], LIFT.to[0], u), lerp(LIFT.from[1], LIFT.to[1], u), .07);
     });
   }
+  // The two skinned models cost far more to draw than all the paper together: Santa is drawn only on the way in, inside
+  // and on the way out (from outside the walls hide him), the reindeer only while he is in view.
+  const frustum = new THREE.Frustum(), viewProjection = new THREE.Matrix4(), reindeerBounds = new THREE.Sphere(new THREE.Vector3(REINDEER.x, GROUND + .7, REINDEER.z), 1.2);
   function draw() {
     place();
+    chair.visible = view === 'inside' || trip?.direction === 'in' || trip?.direction === 'out';
+    if (reindeerHolder) {
+      camera.updateMatrixWorld(); frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+      reindeerHolder.visible = frustum.intersectsSphere(reindeerBounds);
+    }
     for (const item of billboards) item.rotation.y = Math.atan2(camera.position.x - item.position.x, camera.position.z - item.position.z);
     renderer.render(scene, camera);
   }

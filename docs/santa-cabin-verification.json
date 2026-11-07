@@ -78,5 +78,45 @@
    "smoke": "42 組通過",
    "node:test": "66 項通過"
   }
+ },
+ "mobile": {
+  "date": "2026-11-08",
+  "branch": "santa-mobile（從 final）",
+  "touchTargets": {
+   "before": {
+    "portrait390x844": 4,
+    "landscape844x390": "食物籃、衣櫃、輸入列超出畫面；分頁、鬆開、收起小於 44px"
+   },
+   "after": {
+    "portrait390x844": 0,
+    "landscape844x390": 0
+   }
+  },
+  "musicOverlap": {
+   "desktop1440x900": false,
+   "landscape844x390": false,
+   "portrait390x844": false
+  },
+  "trianglesPerFrame": {
+   "front": [
+    39754,
+    20833
+   ],
+   "turnedLeft": [
+    40524,
+    1909
+   ],
+   "walkingIn": 39702,
+   "inside": 18997
+  },
+  "checks": [
+   "桌機四個角落遊戲全部玩完無錯誤",
+   "限速手機開場立刻進屋：聖誕老人在",
+   "開場立刻左轉：遊樂場完整"
+  ],
+  "tests": {
+   "smoke": "43 組通過",
+   "node:test": "66 項通過"
+  }
  }
 }
