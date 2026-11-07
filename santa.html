@@ -9,8 +9,8 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/shared.css?v=3ad69e02d2">
   <link rel="stylesheet" href="css/loader.css?v=cd36316b47">
-  <link rel="stylesheet" href="css/santa.css?v=2d29e63ef9">
-  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/components/back-to-top.js":"./js/components/back-to-top.js?v=0f43fbd21d","./js/components/cabin-art.js":"./js/components/cabin-art.js?v=47b38897b8","./js/components/cabin-scene.js":"./js/components/cabin-scene.js?v=fdd4ea6d46","./js/components/foreground-toys.js":"./js/components/foreground-toys.js?v=565e8d20ba","./js/components/info-dialog.js":"./js/components/info-dialog.js?v=6ea5fbc23b","./js/components/music-player.js":"./js/components/music-player.js?v=bcb3ab1242","./js/components/nav-lights.js":"./js/components/nav-lights.js?v=de2c05f127","./js/components/page-foreground.js":"./js/components/page-foreground.js?v=a416646c1d","./js/components/paper-art.js":"./js/components/paper-art.js?v=f0722c5277","./js/components/paper-props.js":"./js/components/paper-props.js?v=392e4ad20e","./js/components/santa-head.js":"./js/components/santa-head.js?v=b3456004fc","./js/components/santa-placeholder.js":"./js/components/santa-placeholder.js?v=8c938caad4","./js/components/title-art.js":"./js/components/title-art.js?v=b005d8b41d","./js/data/contact.js":"./js/data/contact.js?v=1e249d29e2","./js/data/faq.js":"./js/data/faq.js?v=05dd1e4623","./js/data/heading-glyphs.js":"./js/data/heading-glyphs.js?v=a6684c612a","./js/data/music-tracks.js":"./js/data/music-tracks.js?v=00ef109c3c","./js/data/nav-string.js":"./js/data/nav-string.js?v=23b0fc3b7d","./js/data/paper-envelope-style.js":"./js/data/paper-envelope-style.js?v=c5c7ce17e7"}}</script>
+  <link rel="stylesheet" href="css/santa.css?v=b5c33553c1">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/components/back-to-top.js":"./js/components/back-to-top.js?v=0f43fbd21d","./js/components/cabin-art.js":"./js/components/cabin-art.js?v=dda9785a17","./js/components/cabin-scene.js":"./js/components/cabin-scene.js?v=a6688fd60e","./js/components/foreground-toys.js":"./js/components/foreground-toys.js?v=565e8d20ba","./js/components/info-dialog.js":"./js/components/info-dialog.js?v=6ea5fbc23b","./js/components/music-player.js":"./js/components/music-player.js?v=bcb3ab1242","./js/components/nav-lights.js":"./js/components/nav-lights.js?v=de2c05f127","./js/components/page-foreground.js":"./js/components/page-foreground.js?v=a416646c1d","./js/components/paper-art.js":"./js/components/paper-art.js?v=f0722c5277","./js/components/paper-props.js":"./js/components/paper-props.js?v=392e4ad20e","./js/components/santa-head.js":"./js/components/santa-head.js?v=b3456004fc","./js/components/santa-placeholder.js":"./js/components/santa-placeholder.js?v=8c938caad4","./js/components/title-art.js":"./js/components/title-art.js?v=b005d8b41d","./js/data/contact.js":"./js/data/contact.js?v=1e249d29e2","./js/data/faq.js":"./js/data/faq.js?v=05dd1e4623","./js/data/heading-glyphs.js":"./js/data/heading-glyphs.js?v=a6684c612a","./js/data/music-tracks.js":"./js/data/music-tracks.js?v=00ef109c3c","./js/data/nav-string.js":"./js/data/nav-string.js?v=23b0fc3b7d","./js/data/paper-envelope-style.js":"./js/data/paper-envelope-style.js?v=c5c7ce17e7"}}</script>
   <script type="module" src="js/shared.js?v=d2805c572c"></script>
   <script type="module" src="js/santa.js?v=2ebd2ca0f2"></script>
 </head>
@@ -22,18 +22,18 @@
   <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="site-nav">選單 ☰</button>
   <nav class="site-nav" id="site-nav" aria-label="主要導覽"><a href="index.html">Home</a><a href="intro.html">Intro</a><a href="game.html">Game</a><a href="wish.html">Wish</a><a href="santa.html" aria-current="page">Santa</a></nav>
 </div></header>
-<main class="shell santa-main" id="main">
+<main class="santa-main" id="main">
 <section class="cabin" aria-labelledby="cabin-title">
-  <header class="cabin-heading"><h1 id="cabin-title" lang="en">Santa's Cabin</h1><p class="cabin-lead">敲門進來坐坐吧！聖誕老人正坐在搖椅上烤火。</p></header>
+  <header class="cabin-sign"><h1 id="cabin-title" lang="en">Santa's Cabin</h1></header>
   <div class="cabin-stage" id="cabin-stage" data-state="loading" data-progress="0" aria-busy="true">
     <span class="santa-placeholder-host" data-santa-placeholder aria-hidden="true"></span>
-    <button class="cabin-gesture" type="button" aria-label="旋轉小屋：左右拖曳，或使用方向鍵" aria-describedby="cabin-hint cabin-status"></button>
+    <button class="cabin-gesture" type="button" aria-label="環顧小屋：左右拖曳，或使用方向鍵" aria-describedby="cabin-hint cabin-status"></button>
     <p class="cabin-away" id="cabin-away" hidden>我去餵麋鹿了，馬上回來！</p>
     <p class="cabin-error">3D 小屋暫時無法顯示。</p>
   </div>
-  <p class="cabin-hint" id="cabin-hint"><span>拖曳小屋轉轉看，放開會慢慢轉回來</span></p>
+  <p class="cabin-hint" id="cabin-hint"><span><span class="cabin-lead">聖誕老人正坐在搖椅上烤火。</span>拖曳看看小屋四周，放開會慢慢轉回來</span></p>
   <p class="sr-only" id="cabin-status" role="status" aria-live="polite"></p>
-  <noscript><p>請啟用 JavaScript，才能走進聖誕老人的小屋。</p></noscript>
+  <noscript><p class="cabin-noscript">請啟用 JavaScript，才能走進聖誕老人的小屋。</p></noscript>
 </section>
 </main>
 <div class="page-foreground" data-foreground="santa" aria-hidden="true"></div>
