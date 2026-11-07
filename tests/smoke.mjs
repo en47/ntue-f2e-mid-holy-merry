@@ -168,6 +168,8 @@ await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村�
   assert.ok(sounds.includes("dataset.music === 'playing'") && !sounds.includes('.mp3'), 'Yard sounds are made on the spot and stay silent while the music is off');
   const feeding = await fs.readFile(path.join(project, 'js/components/cabin-feed.js'), 'utf8');
   assert.ok(feeding.includes('cabin.mouthRect()') && feeding.includes("'refuse'") && feeding.includes('full(progress)') && feeding.includes('events.abort()') && !feeding.includes('innerHTML') && scene.includes('const MOUTH') && !scene.includes("kind === 'sleep'"), 'Food goes to his mouth, gingerbread is refused, five meals fill him until tomorrow; he never droops off to sleep');
+  const santaCss = await fs.readFile(path.join(project, 'css/santa.css'), 'utf8'), paperUi = await fs.readFile(path.join(project, 'js/components/cabin-paper.js'), 'utf8');
+  assert.ok(entry.includes('mountCabinPaper(') && paperUi.includes('paperFilter') && ['note', 'tag', 'letter', 'wood'].every(name => santaCss.includes(`var(--paper-${name}) 30 fill`)) && santaCss.includes('.cabin[data-paper] :where('), 'Every box of words in the yard is cut from paper, with a plain fallback until the paper is ready');
   const village = await fs.readFile(path.join(project, 'js/components/cabin-world.js'), 'utf8');
   for (const id of ['wish-post', 'wheel', 'horse', 'lighthouse', 'world-sign', 'ski-mountain', 'game-sign']) assert.ok(village.includes(`id: '${id}'`), `The village has its ${id}`);
   assert.ok(!village.includes('innerHTML') && !village.includes("from 'three'"), 'The village is paper art only; the scene builds it');

@@ -99,6 +99,31 @@
 .cabin-stage[data-state='error'] .cabin-error { position: absolute; inset: 0; display: grid; place-content: center; padding: 2rem; color: var(--muted); text-align: center; }
 .cabin-noscript { position: absolute; left: 50%; bottom: 30%; translate: -50% 0; padding: .7rem 1rem; background: var(--cream); border-radius: 12px; }
 /* 頁尾接著小屋前的雪地：同一個雪色，起伏的雪丘只帶一點藍色陰影。 */
+/* 紙雕文字框：提示、對話框、按鈕、抽屜、籃子、信都是同一種撕紙邊、帶紙紋與落影的紙片（cabin-paper.js 畫成九宮格交給
+   border-image），不是平整的圓角方塊；框多大，紙角都保持原樣。JavaScript 沒跑時維持上面的樸素樣式。 */
+/* 先把原本的底色、圓角、陰影清掉（:where 權重最低，下面每種紙片都蓋得過它）。 */
+.cabin[data-paper] :where(.cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore:focus-within, .play-pile, .cabin-letter, .cabin-back, .cabin-letter-close, .wardrobe-reset, .wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .feed-basket, .play-basket) { background: none; border: 1px solid transparent; border-radius: 0; box-shadow: none; }
+.cabin[data-paper] :is(.cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore:focus-within, .play-pile) { border-image: var(--paper-note) 30 fill / 24px round; }
+.cabin[data-paper] :is(.cabin-back, .cabin-letter-close, .wardrobe-reset, .wardrobe-tabs button[aria-pressed="true"]) { color: var(--cream); border-image: var(--paper-tag) 30 fill / 20px round; }
+.cabin[data-paper] :is(.wardrobe-tabs button:not([aria-pressed="true"]), .wardrobe-item, .cabin-explore button) { border-image: var(--paper-pale) 30 fill / 18px round; }
+.cabin[data-paper] .wardrobe-item[aria-pressed="true"] { border-image: var(--paper-picked) 30 fill / 18px round; }
+.cabin[data-paper] :is(.feed-basket, .play-basket) { border-image: var(--paper-wood) 30 fill / 24px round; }
+.cabin[data-paper] .cabin-letter { border-image: var(--paper-letter) 30 fill / 30px round; padding: 2rem 2.2rem 1.6rem; }
+/* 紙片的邊與縫線佔了一圈，文字往內收一點；每張紙微微歪一點，像是隨手貼上去的。 */
+.cabin[data-paper] .cabin-caption { padding: .8rem 1.5rem; rotate: -.6deg; }
+.cabin[data-paper] .cabin-tip { padding: .8rem 1.6rem; rotate: .8deg; }
+.cabin[data-paper] .cabin-away { padding: 1rem 1.3rem; }
+.cabin[data-paper] .reindeer-bubble { padding: .7rem 1.1rem; rotate: -2deg; overflow: visible; }
+.cabin[data-paper] .reindeer-bubble::after { content: ''; position: absolute; right: 8px; bottom: -14px; width: 24px; height: 18px; background: var(--paper-tail) center / 100% 100% no-repeat; }
+.cabin[data-paper] .feed-meter { padding: .5rem .95rem; }
+.cabin[data-paper] .cabin-back { padding: .6rem 1.25rem; }
+.cabin[data-paper] .cabin-letter-close { padding: .55rem 1.25rem; }
+.cabin[data-paper] .wardrobe { padding: 1rem .95rem; }
+.cabin[data-paper] .wardrobe-tabs button { padding: .5rem 0; }
+.cabin[data-paper] .wardrobe-reset { padding: .6rem; }
+.cabin[data-paper] .cabin-explore:focus-within { padding: 1rem; }
+.cabin[data-paper] .cabin-explore button { padding: .45rem .9rem; }
+.cabin[data-paper] :is(.feed-basket, .play-basket) { padding: .7rem 1.1rem; }
 .santa-page .page-foreground { margin-top: 0; background: #fff9eb; }
 @media (max-width: 700px) {
   .cabin { height: max(560px, calc(100svh - 86px)); }
