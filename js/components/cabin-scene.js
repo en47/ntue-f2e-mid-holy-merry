@@ -321,8 +321,14 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const speed = i => i <= crest ? CHAIN : Math.max(.9, Math.sqrt(CHAIN * CHAIN + 2 * G * (points[crest].y - points[i].y) - FRICTION * (i - crest) * step));
     const times = [0];
     for (let i = 1; i <= STEPS; i++) times.push(times[i - 1] + step / ((speed(i - 1) + speed(i)) / 2));
-    // Where the front of the train is (0–1 along the track) after `time` seconds of the ride; past the end it waits unseen.
-    return { length: times[STEPS] + 2.5, at(time) { let low = 0, high = STEPS; while (high - low > 1) { const mid = (low + high) >> 1; if (times[mid] <= time) low = mid; else high = mid; } return Math.min(1, (low + (time - times[low]) / ((times[high] - times[low]) || 1)) / STEPS); } };
+    // Where the front of the train is (0–1 along the track) after `time` seconds of the ride. Past the tunnel mouth it keeps
+    // going at its last speed, beyond 1, so every car runs on into the tunnel instead of the train stopping short of it.
+    const end = times[STEPS], last = speed(STEPS), length = track.getLength();
+    return { length: end + 2.5, at(time) {
+      if (time >= end) return 1 + (time - end) * last / length;
+      let low = 0, high = STEPS; while (high - low > 1) { const mid = (low + high) >> 1; if (times[mid] <= time) low = mid; else high = mid; }
+      return (low + (time - times[low]) / ((times[high] - times[low]) || 1)) / STEPS;
+    } };
   })();
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const fitModel = (model, height) => {
@@ -559,11 +565,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       skier.position.set(at.x, at.y + .3, .05); skier.scale.x = next.x < at.x ? -1 : 1; skier.visible = u < .985;
     });
     // The coaster train runs its timetable: out of the station, up the chain, down the drop, over the two lower hills and into
-    // the tunnel, then a short wait out of sight. The cars keep a fixed spacing along the rail, just above it, tilted with it.
+    // the tunnel, then a short wait out of sight. The station and the tunnel hill are a sheet in front of the cars, so a car is
+    // hidden by them as it comes and goes; it is switched off only once it is fully inside. The cars keep a fixed spacing
+    // along the rail, just above it, tilted with it.
     const train = [clones.get('coaster-car-a')?.[0], sheets.get('coaster-car-b')?.holder, clones.get('coaster-car-a')?.[1]].filter(Boolean), front = still ? .3 : ride.at(t % ride.length);
     train.forEach((car, i) => {
-      const u = front - i * .032, x = u > 0 ? track.getPointAt(u).x : -9;
-      car.visible = u > 0 && x > -5.3 && x < 5.85; if (!car.visible) return;
+      const u = front - i * .034, x = u > 0 && u < 1 ? track.getPointAt(u).x : 9;
+      car.visible = u > 0 && x < 6.25; if (!car.visible) return;
       const at = track.getPointAt(u), along = track.getTangentAt(u);
       car.position.set(at.x - along.y * .2, at.y + along.x * .2, .06); car.rotation.z = Math.atan2(along.y, along.x);
     });

@@ -269,9 +269,11 @@ export function coaster({ paper }, { width, height }) {
   const [from, to] = COASTER.lift, chain = smooth(line.filter(([x]) => x >= X(from) && x <= X(to)));
   shape('path', { d: chain, stroke: '#3b302a', 'stroke-width': 2.4, fill: 'none', 'stroke-dasharray': '4 3' }, paper);
   shape('path', { d, stroke: SNOW, 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round', transform: 'translate(0 -5)' }, paper);
-  lights(paper, [X(-1.9), Y(5.7) - 14], [X(-.4), Y(5.2) - 14], -16, 6, 5);
-  // The station the train leaves from, and the snowy tunnel it disappears into.
-  const sx = X(-5.95);
+}
+// The station the train leaves from and the snowy hill with the tunnel it runs into, on their own sheet in front of the cars
+// (same units as the track), so the train rolls out from behind the station wall and disappears into the tunnel mouth.
+export function coasterEnds({ paper }, { width, height }) {
+  const unit = width / COASTER.w, X = x => (x + COASTER.w / 2) * unit, Y = y => height - y * unit, sx = X(-5.95);
   shape('rect', { x: sx - 62, y: Y(1.7), width: 124, height: Y(0) - Y(1.7), fill: '#e9d9b8' }, paper);
   shape('path', { d: `M${sx - 78} ${Y(1.65)}L${sx} ${Y(2.5)}L${sx + 78} ${Y(1.65)}Z`, fill: RED }, paper);
   snowCap(paper, sx - 72, Y(1.85), 144, 14);
@@ -689,6 +691,7 @@ export const WORLD = [
   { id: 'carousel-fringe', w: 12.6, h: .34, px: 100, texture: true, draw: carouselFringe },
   { id: 'carousel-drum', w: 11, h: .3, px: 100, texture: true, draw: carouselDrum },
   { id: 'coaster', w: COASTER.w, h: COASTER.h, px: 80, rig: 'coaster', at: [0, 0, 0], draw: coaster },
+  { id: 'coaster-ends', w: COASTER.w, h: COASTER.h, px: 80, rig: 'coaster', at: [0, 0, .1], draw: coasterEnds },
   { id: 'coaster-car-a', w: .64, h: .46, px: 200, rig: 'coaster', at: [0, 0, .06], center: true, clones: 2, draw: coasterCar(0) },
   { id: 'coaster-car-b', w: .64, h: .46, px: 200, rig: 'coaster', at: [0, 0, .06], center: true, draw: coasterCar(1) },
   { id: 'balloon-red', w: 1.5, h: 2, px: 160, center: true, billboard: true, clones: 2, draw: balloon([RED, CREAM, GOLD]) },
