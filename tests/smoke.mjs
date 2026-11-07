@@ -160,6 +160,12 @@ await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村�
   assert.equal((art.match(/\{ id: '(mailbox|reindeer|snowman|stable)', name:/g) ?? []).length, 4, 'Four corners to explore');
   assert.ok(!/\bELF\b|flyElf|id: 'elf'/.test(art + scene + play) && !html.includes('data-spot="elf"'), 'The Santa page has no elf; the Wish elf is untouched');
   assert.ok(play.includes('onFound') && play.includes("event.detail === 0") && !play.includes('innerHTML'), 'Every game can also be played with Enter, and never writes HTML');
+  const { WARDROBE, PLACES: WARDROBE_PLACES, COMBOS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-wardrobe.js')).href);
+  assert.equal(WARDROBE.length, 21, 'Twenty-one accessories'); assert.deepEqual(Object.keys(WARDROBE_PLACES), ['head', 'neck', 'face', 'hand']);
+  assert.ok(WARDROBE.every(item => WARDROBE_PLACES[item.place] && item.thumb && typeof item.draw === 'function') && COMBOS.every(combo => Object.entries(combo.needs).every(([place, id]) => WARDROBE.some(item => item.id === id && item.place === place))), 'Every accessory has a place and a picture; every party piece uses real accessories');
+  const dressing = await fs.readFile(path.join(project, 'js/components/cabin-snowman.js'), 'utf8'), sounds = await fs.readFile(path.join(project, 'js/components/cabin-sound.js'), 'utf8');
+  assert.ok(dressing.includes('setPointerCapture') && dressing.includes("'click'") && dressing.includes('ResizeObserver') && dressing.includes('events.abort()') && !dressing.includes('innerHTML'), 'Dress-up works by drag, tap or Enter, keeps its targets on the snowman and lets go of every listener');
+  assert.ok(sounds.includes("dataset.music === 'playing'") && !sounds.includes('.mp3'), 'Yard sounds are made on the spot and stay silent while the music is off');
   const village = await fs.readFile(path.join(project, 'js/components/cabin-world.js'), 'utf8');
   for (const id of ['wish-post', 'wheel', 'horse', 'lighthouse', 'world-sign', 'ski-mountain', 'game-sign']) assert.ok(village.includes(`id: '${id}'`), `The village has its ${id}`);
   assert.ok(!village.includes('innerHTML') && !village.includes("from 'three'"), 'The village is paper art only; the scene builds it');

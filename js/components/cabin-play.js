@@ -1,6 +1,11 @@
-// The five little games in Santa's yard. Once the camera has stepped up to a corner, paper props are laid over the
-// scene: drag them (or press Enter on them) to finish the job. Each finished corner lights a star on the name board.
+// The little games in Santa's yard. Once the camera has stepped up to a corner, paper props are laid over the scene: drag
+// them (or press Enter on them) to finish the job. Each finished corner lights a star on the name board. Only one game is
+// open at a time; leaving one clears its props, timers and listeners. The bigger games live in their own files.
 import { paperLayer, shape } from './paper-art.js';
+import { createSound } from './cabin-sound.js';
+import { snowmanGame } from './cabin-snowman.js';
+import { PLACES, known } from './cabin-wardrobe.js';
+import { readProgress, writeProgress } from '../services/cabin-progress.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -14,6 +19,10 @@ const ART = {
   scarf: parent => { shape('path', { d: 'M10 30C36 42 64 42 90 30V48C64 60 36 60 10 48Z', fill: '#a84a42' }, parent); shape('path', { d: 'M58 48L70 90H54L48 50Z', fill: '#87302f' }, parent); shape('path', { d: 'M20 40v10M34 43v10M66 43v10M80 40v10', stroke: '#fbf3df', 'stroke-width': 4 }, parent); },
   hay: parent => { shape('rect', { x: 8, y: 26, width: 84, height: 54, rx: 16, fill: '#d9b36a' }, parent); shape('path', { d: 'M14 44h72M14 62h72', stroke: '#b98f48', 'stroke-width': 4 }, parent); shape('path', { d: 'M36 26v54M64 26v54', stroke: '#a8774d', 'stroke-width': 5 }, parent); },
   lichen: parent => { for (const [x, y, r] of [[34, 56, 18], [54, 46, 20], [70, 60, 16], [48, 66, 16]]) shape('circle', { cx: x, cy: y, r, fill: '#b9cfa8' }, parent); for (const [x, y] of [[40, 50], [58, 40], [66, 58]]) shape('circle', { cx: x, cy: y, r: 5, fill: '#e3edd8' }, parent); },
+  // The little signs that float up: a paper heart, a sleepy Z, a star.
+  heart: parent => shape('path', { d: 'M50 86C20 64 8 46 14 30 20 16 40 14 50 30 60 14 80 16 86 30 92 46 80 64 50 86Z', fill: '#d9614f', stroke: '#fbf3df', 'stroke-width': 6 }, parent),
+  z: parent => shape('path', { d: 'M26 24H76L34 76H78', fill: 'none', stroke: '#7fa3a8', 'stroke-width': 13, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, parent),
+  star: parent => shape('path', { d: 'M50 8L61 36 92 38 68 58 76 90 50 72 24 90 32 58 8 38 39 36Z', fill: '#e0b04f', stroke: '#fbf3df', 'stroke-width': 5, 'stroke-linejoin': 'round' }, parent),
   gingerbread: parent => { shape('path', { d: 'M50 12C62 12 66 22 62 30 74 30 86 34 86 42 86 48 74 48 66 46L72 80C72 88 62 90 58 84L50 70 42 84C38 90 28 88 28 80L34 46C26 48 14 48 14 42 14 34 26 30 38 30 34 22 38 12 50 12Z', fill: '#b97a4a' }, parent); for (const [x, y] of [[44, 22], [56, 22]]) shape('circle', { cx: x, cy: y, r: 3, fill: '#fbf3df' }, parent); for (const y of [44, 56]) shape('circle', { cx: 50, cy: y, r: 4, fill: '#a84a42' }, parent); },
 };
 
@@ -21,7 +30,10 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const layer = element('div', 'cabin-play', stage), caption = element('p', 'cabin-caption', layer);
   caption.setAttribute('aria-hidden', 'true'); caption.hidden = true;
   const timers = new Set(), later = (ms, run) => { const id = setTimeout(() => { timers.delete(id); run(); }, ms); timers.add(id); };
-  const memory = { snowman: {}, hay: 0, fed: 0 };
+  const memory = { hay: 0, fed: 0 };
+  // What lasts between visits (the snowman's outfit and his party pieces), and the yard's small sounds.
+  let storage = null; try { storage = localStorage; } catch { /* this visit only */ }
+  const progress = readProgress(storage, known), save = () => writeProgress(progress, storage), sound = createSound();
   let cleanup = () => {};
   function say(text) { caption.textContent = text; caption.hidden = !text; if (text) announce(text); }
   const point = event => { const rect = stage.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; };
@@ -52,12 +64,23 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     button.addEventListener('pointerup', drop); button.addEventListener('pointercancel', drop);
     button.addEventListener('click', event => { if (event.detail === 0 && use(null)) button.remove(); });
   }
-  function burst(rect, glyph, count = 3) {
+  function burst(rect, kind, count = 3) {
     if (!rect) return;
     for (let i = 0; i < count; i++) {
-      const mark = element('span', 'play-burst', layer); mark.textContent = glyph; mark.setAttribute('aria-hidden', 'true');
+      const mark = element('span', 'play-burst', layer); mark.setAttribute('aria-hidden', 'true'); paperLayer(mark, '0 0 100 100', '', ART[kind], PAPER);
       mark.style.left = `${rect.left + rect.width * (.3 + Math.random() * .4)}px`; mark.style.top = `${rect.top + rect.height * .2}px`;
       mark.style.animationDelay = `${i * .15}s`; later(1800, () => mark.remove());
+    }
+  }
+  // A handful of paper confetti thrown up from a rectangle on the stage.
+  function confetti(rect, count = 14) {
+    if (!rect || still()) return;
+    for (let i = 0; i < count; i++) {
+      const bit = element('span', 'play-confetti', layer); bit.setAttribute('aria-hidden', 'true');
+      bit.style.left = `${rect.left + rect.width * (.25 + Math.random() * .5)}px`; bit.style.top = `${rect.top + rect.height * .35}px`;
+      bit.style.background = ['#a84a42', '#e0b04f', '#4f7d68', '#7cb8ec', '#fbf3df'][i % 5];
+      bit.style.setProperty('--dx', `${(Math.random() - .5) * 220}px`); bit.style.setProperty('--dy', `${-60 - Math.random() * 120}px`); bit.style.setProperty('--spin', `${(Math.random() - .5) * 720}deg`);
+      later(1700, () => bit.remove());
     }
   }
 
@@ -90,9 +113,9 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
           use: spot => {
             if (spot && !inside(spot, head(), 20)) return false;
             if (kind === 'gingerbread') { cabin.reindeerAct('shake'); say('麋鹿搖搖頭：這是聖誕老人的點心啦！'); later(10, () => draggable(give(), options)); return true; }
-            cabin.reindeerAct('nod'); burst(head(), '♥', kind === 'lichen' ? 5 : 3); memory.fed++;
+            cabin.reindeerAct('nod'); burst(head(), 'heart', kind === 'lichen' ? 5 : 3); memory.fed++;
             say(kind === 'lichen' ? '是地衣！麋鹿真正最愛吃的就是它。' : '喀滋喀滋，好吃！');
-            if (memory.fed >= 3) later(1500, () => { cabin.reindeerAct('sleep'); basket.remove(); say('吃飽了！麋鹿打了個嗝，靠著雪橇打起瞌睡……Zzz'); burst(head(), 'Z', 3); onFound('reindeer'); });
+            if (memory.fed >= 3) later(1500, () => { cabin.reindeerAct('sleep'); basket.remove(); say('吃飽了！麋鹿打了個嗝，靠著雪橇打起瞌睡……Zzz'); burst(head(), 'z', 3); onFound('reindeer'); });
             else later(10, () => draggable(give(), options));
             return true;
           },
@@ -101,25 +124,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       }
       return () => { cabin.reindeerLook(null); if (memory.fed < 3) cabin.reindeerAct(null); };
     },
-    snowman() {
-      const left = ['nose', 'hat', 'scarf'].filter(item => !memory.snowman[item]);
-      if (!left.length) { say('雪人打扮好了，正對你揮手！'); cabin.wave('snowman'); return; }
-      say('雪人還沒打扮好：把紅蘿蔔鼻子、帽子和圍巾拖到他身上。');
-      const basket = element('div', 'play-basket', layer);
-      for (const item of left) {
-        const [kind, label] = { nose: ['carrot', '紅蘿蔔鼻子'], hat: ['hat', '帽子'], scarf: ['scarf', '圍巾'] }[item];
-        draggable(prop(kind, basket, `幫雪人戴上${label}`), {
-          use: spot => {
-            if (spot && !inside(spot, cabin.rect('snowman'), 30)) return false;
-            memory.snowman[item] = true; cabin.repaint('snowman', { [item]: true });
-            const done = ['nose', 'hat', 'scarf'].every(key => memory.snowman[key]);
-            say(done ? '雪人完成了！他開心地對你揮揮手。' : `戴上${label}了！`);
-            if (done) { cabin.wave('snowman'); basket.remove(); onFound('snowman'); }
-            return true;
-          },
-        });
-      }
-    },
+    snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti }),
     stable() {
       if (memory.hay >= 4) { say('乾草都堆好了，麋鹿今晚有得吃了。'); return; }
       say(`把乾草一捆捆拖上閣樓（${memory.hay}/4）`);
@@ -144,13 +149,13 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     leave,
     // A line about something tapped in the village or the room; it fades on its own and never covers a game.
     note(text) { if (layer.dataset.game) return; timers.forEach(clearTimeout); timers.clear(); say(text); later(4200, () => { if (!layer.dataset.game) say(''); }); },
-    // A visit to a finished corner after reload shows it finished.
+    // Coming back shows the yard as it was left: the snowman in his outfit, finished corners finished.
     restore(ids) {
-      if (ids.includes('snowman')) { memory.snowman = { nose: true, hat: true, scarf: true }; cabin.repaint('snowman', memory.snowman); }
+      for (const place of Object.keys(PLACES)) cabin.dress(place, progress.outfit[place]);
       if (ids.includes('stable')) { memory.hay = 4; cabin.repaint('stable', { hay: 4 }); }
       if (ids.includes('reindeer')) memory.fed = 3;
       if (ids.includes('mailbox')) cabin.repaint('mailbox', { open: true });
     },
-    destroy() { leave(); layer.remove(); },
+    destroy() { leave(); sound.destroy(); layer.remove(); },
   };
 }

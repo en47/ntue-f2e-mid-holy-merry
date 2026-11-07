@@ -21,6 +21,7 @@ function onFound(id) {
   status.textContent = found.size === SPOTS.length ? '招牌上的星星全亮了！院子裡的秘密你全找到了。' : `發現了一個角落（${found.size}/${SPOTS.length}），招牌上又亮了一顆星。`;
 }
 function onView(view) {
+  if (view !== 'outside') tip.classList.add('is-gone');
   back.hidden = view === 'outside'; back.textContent = view === 'inside' ? '← 走出門外' : '← 回到小屋前'; clearTimeout(enterTimer); play?.leave();
   if (SPOTS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : 1000);
   if (view === 'inside') status.textContent = '推開門走進屋裡：聖誕老人坐在火爐邊。拖曳可以環顧整個房間，點門口就能出去。';
@@ -53,7 +54,8 @@ async function mountCabin(fly = true) {
     if (!result || run !== generation) { result?.destroy(); return; }
     cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; } });
     cabin.setFound([...found]);
-    if (found.size) { cabin.repaint('sign', { stars: found.size }); play.restore([...found]); }
+    if (found.size) cabin.repaint('sign', { stars: found.size });
+    play.restore([...found]);
     stage.dataset.state = 'ready'; stage.dataset.santa = result.santa ? 'home' : 'away';
     away.hidden = result.santa; progress(1);
     const arrive = () => cabin?.arrive().then(showTip);
