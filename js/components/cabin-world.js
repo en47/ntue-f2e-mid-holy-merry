@@ -626,22 +626,6 @@ export function gondola({ paper }, { width, height }) {
 }
 
 // ——— Signs that tie the village together. ———
-// By the house, a fingerpost with pictures for each way to turn: the fair, the mountain, the sea.
-export function waySign({ paper }, { width, height }) {
-  const cx = width / 2;
-  shape('rect', { x: cx - 11, y: 30, width: 22, height: height - 30, fill: WOOD }, paper);
-  const arrow = (y, dir, fill) => shape('path', { d: dir ? `M${cx - dir * 20} ${y}H${cx + dir * 90}L${cx + dir * 108} ${y + 22}L${cx + dir * 90} ${y + 44}H${cx - dir * 20}Z` : `M${cx - 34} ${y + 50}V${y + 6}H${cx - 50}L${cx} ${y - 30}L${cx + 50} ${y + 6}H${cx + 34}V${y + 50}Z`, fill }, paper);
-  arrow(70, 0, CORK);
-  shape('path', { d: `M${cx - 22} ${110}L${cx - 4} ${84}L${cx + 4} ${94}L${cx + 12} ${86}L${cx + 26} ${110}Z`, fill: '#eef2f4' }, paper);
-  arrow(140, -1, WOOD_LIT);
-  shape('circle', { cx: cx - 52, cy: 162, r: 15, fill: 'none', stroke: '#c8574c', 'stroke-width': 4 }, paper);
-  for (let i = 0; i < 4; i++) { const a = i * Math.PI / 4; shape('path', { d: `M${cx - 52 - Math.cos(a) * 15} ${162 - Math.sin(a) * 15}L${cx - 52 + Math.cos(a) * 15} ${162 + Math.sin(a) * 15}`, stroke: '#c8574c', 'stroke-width': 2 }, paper); }
-  arrow(204, 1, CORK);
-  shape('path', { d: `M${cx + 46} ${238}L${cx + 50} ${210}H${cx + 58}L${cx + 62} ${238}Z`, fill: '#c8574c' }, paper);
-  shape('rect', { x: cx + 48, y: 220, width: 12, height: 6, fill: CREAM }, paper);
-  shape('path', { d: `M${cx + 64} ${244}q8 -6 16 0t16 0`, stroke: SEA, 'stroke-width': 4, fill: 'none' }, paper);
-  snowCap(paper, cx - 16, 30, 32, 12);
-}
 // Toward the mountain, a big painted board: a flying sleigh with a gift and two matching cards, the Game page's two games.
 export function gameSign({ paper }, { width, height }) {
   for (const x of [40, width - 64]) shape('rect', { x, y: 60, width: 24, height: height - 60, fill: WOOD }, paper);
@@ -752,8 +736,6 @@ export const WORLD = [
   { id: 'lamp-pond', w: .55, h: 2.2, px: 240, at: at(-4.6, 13.2), turn: face(-4.6, 13.2), draw: lampPost },
   // The centre: the path to the door and the signs pointing everywhere else.
   { id: 'door-path', w: 4.2, h: 1.1, px: 120, at: at(0, 3.75), flat: 'ground', turn: Math.PI / 2, draw: doorPath },
-  // Just off the house's front-left corner, clear of the snowman and the mailbox from where the visitor stands.
-  { id: 'way-sign', w: .9, h: 1.7, px: 260, at: at(-1.85, 2.7), turn: face(-1.85, 2.7), draw: waySign },
   { id: 'game-sign', w: 2.4, h: 2.2, px: 150, at: at(5.4, -16), turn: face(5.4, -16), draw: gameSign },
 ];
 

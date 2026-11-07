@@ -22,7 +22,7 @@ const RETURN_AFTER = 1600, PAPER_EDGE = 0xefe1c4, STONE = 0xd9d1c3, SNOWFIELD = 
 // turns all the way round, up to the rafters and down to the rug.
 const VIEWS = {
   outside: { eye: [0, 2.2, 11.5], heading: 0, tallHeading: .12, pitch: .05, span: 56, fov: 36, tallFov: 76, turn: Math.PI / 2, minPitch: -.12, maxPitch: .3 },
-  inside: { eye: INSIDE.eye, heading: INSIDE.heading, pitch: INSIDE.pitch, span: 92, fov: 58, tallFov: 80, turn: Infinity, minPitch: -1.1, maxPitch: 1.1 },
+  inside: { eye: INSIDE.eye, heading: INSIDE.heading, tallHeading: INSIDE.tallHeading, pitch: INSIDE.pitch, tallPitch: INSIDE.tallPitch, span: 92, fov: 58, tallFov: 80, turn: Infinity, minPitch: -1.1, maxPitch: 1.1 },
 };
 // Each corner of the yard is a view of its own: the camera steps up to it and holds still while you play there. `aside`
 // moves the subject left of centre on a wide screen, to leave room for the tray of things to play with on the right.
@@ -103,7 +103,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // where the visitor was looking outside, so coming back out faces the same way again.
   // `perched` holds the camera up at the start of the arrival until the loader has gone.
   let spin = 0, trip = null, pending = null, hovered = null, pointer = null, perched = false, away = { heading: 0, pitch: VIEWS.outside.pitch };
-  const eye = new THREE.Vector3(0, 3.7, 8.6), goalEye = eye.clone(), look = new THREE.Vector3(), shell = stage.parentElement;
+  const eye = new THREE.Vector3(0, 3.7, 8.6), goalEye = eye.clone(), look = new THREE.Vector3();
 
   const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(fov, 1, .05, 110);
   const room = new RoomEnvironment(), pmrem = new THREE.PMREMGenerator(renderer);
@@ -294,6 +294,17 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const glow = (position, size, parent = indoors) => { const sprite = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: warm, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }))); sprite.position.copy(position); sprite.scale.setScalar(size); parent.add(sprite); return sprite; };
   const fireGlow = glow(new THREE.Vector3(FIRE.x, .28, FIRE.z - .05), 1), lanternGlow = glow(new THREE.Vector3(LANTERN.x, 2.68, LANTERN.z + .02), .7);
   glow(new THREE.Vector3(-.88, .78, .36), .5);
+  // The morning sun, just risen: half hidden behind the far range's second peak, up and to the left of the house, where the
+  // scene's light comes from. It is part of the 3D world, so it keeps its place among the mountains as the view turns.
+  (() => {
+    const canvas = document.createElement('canvas'); canvas.width = canvas.height = 256;
+    const context = canvas.getContext('2d'), halo = context.createRadialGradient(128, 128, 0, 128, 128, 128);
+    for (const [at, colour] of [[0, 'rgba(255,246,214,1)'], [.3, 'rgba(253,234,176,1)'], [.34, 'rgba(250,218,160,.8)'], [.6, 'rgba(250,222,170,.3)'], [1, 'rgba(250,222,170,0)']]) halo.addColorStop(at, colour);
+    context.fillStyle = halo; context.fillRect(0, 0, 256, 256);
+    const map = keep(textures, new THREE.CanvasTexture(canvas)); map.colorSpace = THREE.SRGBColorSpace;
+    const sprite = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false, toneMapped: false, fog: false })));
+    sprite.position.set(-27.5, 8.45, -62); sprite.scale.setScalar(20); world.add(sprite);
+  })();
   const doorGlow = glow(new THREE.Vector3(0, DOOR.height * .6, front + .3), 1.5, world), lampGlow = glow(new THREE.Vector3(LIGHTHOUSE.x, LIGHTHOUSE.lamp, LIGHTHOUSE.z + .15), 1.3, world);
   const beam = new THREE.Group(), beamMaterial = keep(materials, new THREE.MeshBasicMaterial({ map: keep(textures, beamTexture()), transparent: true, opacity: .42, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, toneMapped: false, fog: false }));
   const beamGeometry = keep(geometries, new THREE.PlaneGeometry(7, 1).translate(3.5, 0, 0));
@@ -413,7 +424,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const settings = VIEWS[name], t = blend(), aspect = (stage.clientWidth || 1) / (stage.clientHeight || 1);
     if (settings.eye) {
       const lens = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(settings.span / 2)) / aspect));
-      return { eye: new THREE.Vector3(...settings.eye), heading: lerp(settings.tallHeading ?? settings.heading, settings.heading, t), pitch: settings.pitch, fov: THREE.MathUtils.clamp(lens, settings.fov, settings.tallFov) };
+      return { eye: new THREE.Vector3(...settings.eye), heading: lerp(settings.tallHeading ?? settings.heading, settings.heading, t), pitch: lerp(settings.tallPitch ?? settings.pitch, settings.pitch, t), fov: THREE.MathUtils.clamp(lens, settings.fov, settings.tallFov) };
     }
     const aim = new THREE.Vector3(...settings.target), reach = lerp(settings.tallDistance, settings.distance, t);
     // On a tall phone the tray sits along the bottom instead, so the subject is raised into the space above it.
@@ -450,9 +461,6 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const lift = Math.max(0, eye.y - 4); scene.fog.near = 16 + lift * 1.2; scene.fog.far = 52 + lift * 1.8;
     camera.position.copy(eye);
     camera.lookAt(look.set(-Math.sin(heading) * Math.cos(pitch), -Math.sin(pitch), -Math.cos(heading) * Math.cos(pitch)).add(eye));
-    // The low sun is painted behind the canvas: it slides across as the view turns, so it keeps its place in the sky.
-    const span = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(fov / 2)) * camera.aspect);
-    shell?.style.setProperty('--cabin-turn', (heading / span).toFixed(3));
   }
 
   // Idle life: the chair rocks, Santa breathes, the fire flickers, the lantern sways, smoke drifts up, the fair turns, the
@@ -839,7 +847,6 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
 
   function destroy() {
     stop(); clearTimeout(returnTimer); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
-    shell?.style.removeProperty('--cabin-turn');
     release3d();
   }
   // What the games may do to the scene.

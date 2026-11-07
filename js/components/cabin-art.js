@@ -15,7 +15,7 @@ export const CHAIR = { x: -.45, z: .05 };
 export const GROUND = -.14;
 // The reindeer waits by the sleigh on the right, turned toward where the visitor stands; the name sign hangs from an iron bracket at the front-left corner, over the mailbox.
 export const REINDEER = { x: 2.9, z: 2.3, turn: -.3, height: 1.3 };
-export const SIGN = { x: -2.7, top: 1.93, z: HOUSE.depth / 2 + HOUSE.thick, arm: 1.9 };
+export const SIGN = { x: -2.8, top: 2.13, z: HOUSE.depth / 2 + HOUSE.thick, arm: 2.2 };
 export const LANTERN = { x: .3, z: .05 };
 // The fireplace on the back wall; its chimney rises out of the right slope of the roof.
 const BACK = -HOUSE.depth / 2;
@@ -23,8 +23,10 @@ export const FIRE = { x: .88, z: BACK + .25 };
 // The front door, cut through both faces of the front wall. It hangs on its left post and swings out into the snow, so it
 // never sweeps across the camera walking through it (cabin-scene.js).
 export const DOOR = { width: .66, height: 1.5, swing: 1.75, hinge: -.33, z: HOUSE.depth / 2 + HOUSE.thick / 2 };
-// Where you stand once inside: a few steps in from the door, turned toward Santa in his chair.
-export const INSIDE = { eye: [.45, 1.15, .9], heading: .78, pitch: .32 };
+// Where you stand once inside: a few steps in from the door, turned toward Santa in his chair. On a wide screen the view
+// turns a little right of him, so he sits on the left and the letter-paper chat (santa.html) has the right; on a tall
+// phone he is centred and looked down on a little, above the chat sheet along the bottom.
+export const INSIDE = { eye: [.45, 1.15, .9], heading: .44, tallHeading: .78, pitch: .27, tallPitch: .46 };
 const CREAM = '#fbf3df', SNOW = '#fbf8f1', RED = '#a84a42', GREEN = '#4f7d68', DEEP_GREEN = '#3f6653', GOLD = '#e0b04f';
 const WOOD = '#8f5a3c', WOOD_LIT = '#a86b47', TIMBER = '#6b4a33', PLASTER = '#f1e4c8';
 // Stable "random" numbers, so every visit cuts the same cabin.
@@ -835,7 +837,7 @@ export const BOARDS = [
   { id: 'fir-a', w: 1, h: 2, draw: fir(0), copies: [[-3.9, -3.2, 3.1], [4.4, -3.6, 3.3], [-11, -11, 4.2], [-20.5, -5.5, 4.6], [-23, 7, 5], [-6.9, 10.6, 2.3], [9.6, 1.4, 3.2], [-17.5, 22, 4.6]] },
   { id: 'fir-b', w: 1, h: 2, draw: fir(1), copies: [[-5.1, -4.4, 2.4], [12, -14, 4.4], [-4.6, -10, 4.6], [-13.4, -4.4, 3.6], [-25, 2, 4.4], [7.6, 16.8, 3.4], [-10.4, 19.4, 3.2]] },
   { id: 'fir-c', w: 1, h: 2, draw: fir(2), copies: [[3.2, -4.9, 2.2], [-6.6, -2.2, 2], [9, -7, 3], [-7.6, -.6, 2.4], [-12.5, 19.5, 4.2], [6.8, 6.2, 2.4]] },
-  { id: 'sign', w: 1.8, h: 1.12, at: [SIGN.x, SIGN.top, SIGN.z], hang: true, sway: true, draw: nameSign, state: { stars: 0 } },
+  { id: 'sign', w: 2.1, h: 1.3, at: [SIGN.x, SIGN.top, SIGN.z], hang: true, sway: true, draw: nameSign, state: { stars: 0 } },
   { id: 'mailbox', w: .5, h: .95, at: [SIGN.x, GROUND, SIGN.z + .45], draw: mailbox, state: {} },
   { id: 'sleigh', w: 1.3, h: .8, at: [3.15, GROUND, -.2], turn: -.35, draw: sleigh },
   { id: 'fence', w: 2.4, h: .7, at: [-5, GROUND, -2.5], turn: .3, draw: fence },
