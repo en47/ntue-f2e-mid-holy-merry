@@ -1,27 +1,35 @@
-// Santa's Cabin in Three.js: a paper dollhouse with its front cut away, standing in a snowfield that runs out to the hills.
-// Two views share one scene: "outside" sees the whole house and turns it; "inside" moves the camera up to Santa.
+// Santa's Cabin in Three.js: a closed paper cottage in the middle of a snowy Christmas village. Outside, the visitor stands
+// still and turns on the spot: a fair and a wishing corner to the left, a winter coast to the right, a ski mountain behind.
+// Tapping the house walks the camera up to the front door and through it; inside, the view turns all the way round.
 import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, CHAIR, FIRE, GROUND, HOUSE, LANTERN, PX, REINDEER, SIGN, SMOKE, SPOTS } from './cabin-art.js';
+import { BOARDS, CHAIR, DOOR, FIRE, GROUND, HOUSE, INSIDE, LANTERN, PX, REINDEER, ROOM_PROPS, SIGN, SMOKE, SPOTS } from './cabin-art.js';
+import { CAROUSEL, LIFT, LIGHTHOUSE, PROPS, RIGS, RUNS, SHORE, WHEEL, WORLD } from './cabin-world.js';
 import { paperFilter, shape } from './paper-art.js';
 import { createHeadTracker } from './santa-head.js';
 
 // Head turns stay small and are shared with the neck: larger angles crease the beard (see docs/SANTA-CABIN.md).
 const HEAD = { maxYaw: .24, maxPitch: .1 };
 // The snow is the footer's own colour, so the page runs on into it; far away it fades into the morning haze.
-const RETURN_AFTER = 1600, PAPER_EDGE = 0xefe1c4, CUT = 0xf5ecdc, SNOWFIELD = 0xfff9eb, HAZE = 0xf3e7dd;
-// What each view looks at, how far it stands back (or what it must fit), its lens, and how far it may turn (radians).
+const RETURN_AFTER = 1600, PAPER_EDGE = 0xefe1c4, STONE = 0xd9d1c3, SNOWFIELD = 0xfff9eb, HAZE = 0xf3e7dd, SEA = 0x7fa6bf;
+// Where each view stands and looks. `heading` turns the view left, `pitch` tips it down (radians). Outside, the eye stands
+// in the same spot on every screen, so the fair and the coast lie the same way round on a phone as on a desktop; a narrow
+// screen gets a wider lens instead (`span` is the least it must see across, between `fov` and `tallFov`), and looks a touch
+// left to keep the name sign in. It may turn a quarter circle either way. Inside, it stands a few steps in from the door and
+// turns all the way round, up to the rafters and down to the rug.
 const VIEWS = {
-  outside: { target: [0, 1.7, .3], tallTarget: [-.85, 1.7, .3], fit: [8.8, 5.6], tallFit: [6, 5.6], fov: 36, pitch: .24, maxYaw: .55, minPitch: .1, maxPitch: .44 },
-  inside: { target: [CHAIR.x + .15, .62, CHAIR.z], distance: 2.5, tallDistance: 3.2, fov: 34, pitch: .12, maxYaw: .32, minPitch: .02, maxPitch: .28 },
+  outside: { eye: [0, 3.75, 8.65], heading: 0, tallHeading: .12, pitch: .24, span: 56, fov: 36, tallFov: 76, turn: Math.PI / 2, minPitch: .02, maxPitch: .42 },
+  inside: { eye: INSIDE.eye, heading: INSIDE.heading, pitch: INSIDE.pitch, span: 92, fov: 58, tallFov: 80, turn: Infinity, minPitch: -1.1, maxPitch: 1.1 },
 };
 // Each corner of the yard is a view of its own: the camera steps up to it and only turns a little while you play there.
 for (const spot of SPOTS) {
   const { target, distance, pitch, yaw } = spot.view;
-  VIEWS[spot.id] = { target, distance, tallDistance: distance * 1.35, fov: 34, pitch, yaw, maxYaw: .12, minPitch: 0, maxPitch: .25 };
+  VIEWS[spot.id] = { target, distance, tallDistance: distance * 1.35, fov: 34, pitch, heading: yaw, turn: .12, minPitch: pitch - .08, maxPitch: pitch + .15 };
 }
+const ease = u => u * u * (3 - 2 * u), between = (u, from, to) => ease(THREE.MathUtils.clamp((u - from) / (to - from), 0, 1));
+const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle)), lerp = THREE.MathUtils.lerp;
 let paperCount = 0;
 
 // Each board is cut once into an image; nothing in the SVG animates afterwards.
@@ -38,7 +46,7 @@ async function paintBoard(board, quality) {
   return image;
 }
 
-// A cream copy of a board's silhouette, set just behind it, shows as the paper's cut edge when the house turns.
+// A cream copy of a board's silhouette, set just behind it, shows as the paper's cut edge when seen at an angle.
 function edgeMaterial(texture) {
   const material = new THREE.MeshBasicMaterial({ color: PAPER_EDGE, map: texture, alphaTest: .4, toneMapped: false });
   material.onBeforeCompile = shader => { shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', '#ifdef USE_MAP\n\tdiffuseColor.a *= texture2D( map, vMapUv ).a;\n#endif'); };
@@ -50,6 +58,16 @@ function radialTexture(stops, size = 128) {
   const context = canvas.getContext('2d'), gradient = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
   for (const [at, colour] of stops) gradient.addColorStop(at, colour);
   context.fillStyle = gradient; context.fillRect(0, 0, size, size);
+  const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; return texture;
+}
+// The lighthouse beam: bright at the lamp, fading along its length and softly to either side.
+function beamTexture() {
+  const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 64;
+  const context = canvas.getContext('2d'), along = context.createLinearGradient(0, 0, 256, 0), across = context.createLinearGradient(0, 0, 0, 64);
+  along.addColorStop(0, 'rgba(255,244,210,.9)'); along.addColorStop(1, 'rgba(255,244,210,0)');
+  context.fillStyle = along; context.fillRect(0, 0, 256, 64);
+  for (const [at, alpha] of [[0, 0], [.5, 1], [1, 0]]) across.addColorStop(at, `rgba(0,0,0,${alpha})`);
+  context.globalCompositeOperation = 'destination-in'; context.fillStyle = across; context.fillRect(0, 0, 256, 64);
   const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; return texture;
 }
 
@@ -65,7 +83,7 @@ function roofFrame(side, layer) {
   return { up, outward, eave, start, end, quaternion: new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(up, along, normal)), center: start.clone().add(end).multiplyScalar(.5) };
 }
 
-export async function mountCabin(stage, { onProgress = () => {}, onView = () => {}, isCurrent = () => true } = {}) {
+export async function mountCabin(stage, { onProgress = () => {}, onView = () => {}, onTouch = () => {}, isCurrent = () => true } = {}) {
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
   renderer.setClearColor(0x000000, 0);
@@ -75,12 +93,14 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const textures = new Set(), materials = new Set(), geometries = new Set(), models = [], events = new AbortController();
   const keep = (set, value) => { set.add(value); return value; };
   // All state lives up here: the head tracker can call wake() while the boards are still being cut.
-  let view = 'outside', yaw = 0, pitch = VIEWS.outside.pitch, goalYaw = 0, goalPitch = VIEWS.outside.pitch, ready = false;
+  let view = 'outside', heading = 0, goalHeading = 0, pitch = VIEWS.outside.pitch, goalPitch = pitch, fov = VIEWS.outside.fov, goalFov = fov, ready = false, disposed = false;
   let frame, lastTick = 0, lastDraw = 0, clock = 0, inView = true, dragging = false, returnTimer = 0, settling = false, resize, visible;
-  const target = new THREE.Vector3(...VIEWS.outside.target), goalTarget = target.clone();
-  let distance = 9, goalDistance = 9, fov = VIEWS.outside.fov, goalFov = fov;
+  // A flick keeps turning a moment after the finger lifts; a trip is the walk through the front door, in or out. `away` is
+  // where the visitor was looking outside, so coming back out faces the same way again.
+  let spin = 0, trip = null, pending = null, hovered = null, pointer = null, away = { heading: 0, pitch: VIEWS.outside.pitch };
+  const eye = new THREE.Vector3(0, 3.7, 8.6), goalEye = eye.clone(), look = new THREE.Vector3(), shell = stage.parentElement;
 
-  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(fov, 1, .05, 80);
+  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(fov, 1, .05, 110);
   const room = new RoomEnvironment(), pmrem = new THREE.PMREMGenerator(renderer);
   let environment;
   try { environment = pmrem.fromScene(room, .04); } finally { room.dispose(); pmrem.dispose(); }
@@ -89,125 +109,195 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // Morning sun low in the upper left, as on every page; the snow bounces a cool light back up.
   scene.add(new THREE.HemisphereLight(0xeaf2f7, 0xd9e2ea, 1.05));
   const sun = new THREE.DirectionalLight(0xfff1dc, 1.5); sun.position.set(-6, 7, 5); scene.add(sun);
-  const fire = new THREE.PointLight(0xff9a4a, 2.2, 3, 1.6); fire.position.set(FIRE.x, .45, -.5); scene.add(fire);
+  const fire = new THREE.PointLight(0xff9a4a, 2.2, 3, 1.6); fire.position.set(FIRE.x, .45, FIRE.z + .55); scene.add(fire);
   const lanternLight = new THREE.PointLight(0xffd59a, 1.1, 3.6, 1.4); lanternLight.position.set(LANTERN.x, 2.2, LANTERN.z); scene.add(lanternLight);
 
-  const house = new THREE.Group(), chair = new THREE.Group();
-  chair.position.set(CHAIR.x, 0, CHAIR.z); house.add(chair); scene.add(house);
-  const solid = (geometry, colour, position) => {
+  // Two groups: the room is always there (its closed walls hide it from outside); the village and the house's outer shell
+  // are hidden once the visitor is indoors with the door shut, so nothing outside is drawn behind the walls.
+  const world = new THREE.Group(), indoors = new THREE.Group(), chair = new THREE.Group();
+  chair.position.set(CHAIR.x, 0, CHAIR.z); indoors.add(chair); scene.add(world, indoors);
+  const solid = (geometry, colour, position, parent = world) => {
     const mesh = new THREE.Mesh(keep(geometries, geometry), keep(materials, new THREE.MeshStandardMaterial({ color: colour, roughness: 1, metalness: 0 })));
-    mesh.position.copy(position); house.add(mesh); return mesh;
+    mesh.position.copy(position); parent.add(mesh); return mesh;
   };
+  const flat = (colour, options = {}) => keep(materials, new THREE.MeshBasicMaterial({ color: colour, toneMapped: false, ...options }));
 
   // The snowfield, flat-coloured like the footer below; fog turns it to haze toward the hills.
-  const field = new THREE.Mesh(keep(geometries, new THREE.CircleGeometry(70, 64)), keep(materials, new THREE.MeshBasicMaterial({ color: SNOWFIELD, toneMapped: false })));
-  field.rotation.x = -Math.PI / 2; field.position.y = GROUND; scene.add(field);
-  // The foundation slab and the cream cut edges that make it read as a house sliced open. Every cut face sits a hair inside
-  // the boards around it: two faces in exactly the same plane flicker as the camera turns.
-  const gap = .004;
-  solid(new THREE.BoxGeometry(HOUSE.width + HOUSE.thick * 2, -GROUND - gap, HOUSE.depth + HOUSE.thick), CUT, new THREE.Vector3(0, (GROUND - gap) / 2, -HOUSE.thick / 2));
-  for (const sign of [-1, 1]) solid(new THREE.BoxGeometry(HOUSE.thick - gap * 2, HOUSE.wall, .03), CUT, new THREE.Vector3(sign * (HOUSE.width + HOUSE.thick) / 2, HOUSE.wall / 2, HOUSE.depth / 2 + .015));
+  const field = new THREE.Mesh(keep(geometries, new THREE.CircleGeometry(70, 64)), flat(SNOWFIELD));
+  field.rotation.x = -Math.PI / 2; field.position.y = GROUND; world.add(field);
+  // The stone footing the cottage stands on and a wooden step up to the door. Faces that meet sit a hair apart: two faces in
+  // exactly the same plane flicker as the camera turns.
+  const gap = .004, front = HOUSE.depth / 2 + HOUSE.thick;
+  solid(new THREE.BoxGeometry(HOUSE.width + HOUSE.thick * 2, -GROUND - gap, HOUSE.depth + HOUSE.thick * 2), STONE, new THREE.Vector3(0, (GROUND - gap) / 2, 0));
+  solid(new THREE.BoxGeometry(DOOR.width + .44, -GROUND - gap, .38), 0xa86b47, new THREE.Vector3(0, (GROUND - gap) / 2, front + .19));
   for (const side of ['left', 'right']) {
-    // The roof's cut edge is a band of dark shingles with snow lying along its top.
-    const roof = roofFrame(side, 'outer'), length = HOUSE.slope + HOUSE.eaves, angle = Math.atan2(roof.up.y, roof.up.x), front = HOUSE.depth / 2 + HOUSE.overhang / 2 - gap;
-    const cut = solid(new THREE.BoxGeometry(length, HOUSE.roof - gap * 2, HOUSE.overhang - gap), 0x4a3f3a, roof.center.clone().addScaledVector(roof.outward, -HOUSE.roof / 2).setZ(front));
+    // The roof's front edge is a band of dark shingles with snow lying along its top.
+    const roof = roofFrame(side, 'outer'), length = HOUSE.slope + HOUSE.eaves, angle = Math.atan2(roof.up.y, roof.up.x), edge = HOUSE.depth / 2 + HOUSE.overhang / 2 - gap;
+    const cut = solid(new THREE.BoxGeometry(length, HOUSE.roof - gap * 2, HOUSE.overhang - gap), 0x4a3f3a, roof.center.clone().addScaledVector(roof.outward, -HOUSE.roof / 2).setZ(edge));
     cut.rotation.z = angle;
-    // Only a lip of snow along the front edge: the rest of the roof shows its shingles with the snow painted on them.
     const snow = solid(new THREE.BoxGeometry(length * .9, .03, .2), 0xfbf8f1, roof.center.clone().addScaledVector(roof.outward, .026).addScaledVector(roof.up, -.02).setZ(HOUSE.depth / 2 + HOUSE.overhang - .1));
     snow.rotation.z = angle;
   }
+  // The doorway's reveal: thin jambs and a lintel close the gap between the wall's two paper faces.
+  for (const sign of [-1, 1]) solid(new THREE.BoxGeometry(.03, DOOR.height, HOUSE.thick - gap * 2), 0x8f5a3c, new THREE.Vector3(sign * (DOOR.width / 2 + .015), DOOR.height / 2, DOOR.z), indoors);
+  solid(new THREE.BoxGeometry(DOOR.width + .06, .03, HOUSE.thick - gap * 2), 0x8f5a3c, new THREE.Vector3(0, DOOR.height + .015, DOOR.z), indoors);
   // The iron bracket the name sign hangs from, fixed to the front-left corner of the house.
   const iron = 0x3b302a, armStart = -HOUSE.width / 2 - HOUSE.thick, armEnd = SIGN.x - SIGN.arm / 2;
   solid(new THREE.BoxGeometry(armStart - armEnd, .05, .05), iron, new THREE.Vector3((armStart + armEnd) / 2, SIGN.top + .02, SIGN.z + .03));
   const strut = solid(new THREE.BoxGeometry(.62, .04, .04), iron, new THREE.Vector3(armStart - .2, SIGN.top - .2, SIGN.z + .03)); strut.rotation.z = -.78;
   solid(new THREE.BoxGeometry(.34, .14, HOUSE.depth + HOUSE.overhang * 2), 0xfbf8f1, new THREE.Vector3(0, HOUSE.ridge + HOUSE.roof * 1.05, 0));
   // The chimney rises out of the right slope over the fireplace, capped with snow.
-  solid(new THREE.BoxGeometry(.34, 1.1, .34), 0xc9bba6, new THREE.Vector3(FIRE.x, 2.72, -.75));
-  solid(new THREE.BoxGeometry(.42, .09, .42), 0xfbf8f1, new THREE.Vector3(FIRE.x, 3.3, -.75));
+  solid(new THREE.BoxGeometry(.34, 1.1, .34), 0xc9bba6, new THREE.Vector3(FIRE.x, 2.72, FIRE.z));
+  solid(new THREE.BoxGeometry(.42, .09, .42), 0xfbf8f1, new THREE.Vector3(FIRE.x, 3.3, FIRE.z));
 
   // Cut the boards at a resolution the screen can show; phones get smaller textures.
   const quality = Math.min(1, Math.max(.5, stage.clientWidth * Math.min(devicePixelRatio || 1, 2) / 2000));
   let painted = 0, santaShare = 0, reindeerShare = 0;
   const report = () => onProgress(Math.min(1, painted / (BOARDS.length + 1) * .35 + santaShare * .45 + reindeerShare * .2));
-  // Sheets by id, so a game can redraw one (the snowman's hat, the hay in the loft).
-  const flames = [], twinkles = [], swings = [], smoke = [], billboards = [], sheets = new Map();
+  // Sheets by id, so a game can redraw one (the snowman's hat, the hay in the loft) and a tap can wiggle one.
+  const flames = [], twinkles = [], swings = [], smoke = [], billboards = [], sheets = new Map(), lifting = new Map();
   // Soft bluish shadows on the snow, thrown right and back, away from the low sun on the left.
   const shade = keep(textures, radialTexture([[0, 'rgba(110,140,170,.42)'], [1, 'rgba(110,140,170,0)']], 64));
-  const shadowMaterial = keep(materials, new THREE.MeshBasicMaterial({ map: shade, transparent: true, depthWrite: false, toneMapped: false }));
+  const shadowMaterial = flat(0xffffff, { map: shade, transparent: true, depthWrite: false });
   const shadowGeometry = keep(geometries, new THREE.PlaneGeometry(1, 1));
   function shadow(x, z, width, depth, height = 1) {
     const mesh = new THREE.Mesh(shadowGeometry, shadowMaterial);
     mesh.rotation.x = -Math.PI / 2; mesh.position.set(x + height * .28, GROUND + .003, z - height * .12); mesh.scale.set(width, depth, 1);
-    house.add(mesh); return mesh;
+    world.add(mesh); return mesh;
   }
   shadow(1, -.6, 4.8, 3.6, 1.2);
   // The snow surface isn't one flat white: a few broad, faint drifts shade it, far apart so they never form a pattern.
   for (const [x, z, w, d] of [[-7, -5, 9, 4], [6, 3.5, 8, 3.4], [-2, -9, 12, 4], [10, -3, 7, 3], [-10, 3, 8, 3.2]]) {
-    const drift = new THREE.Mesh(shadowGeometry, shadowMaterial); drift.rotation.x = -Math.PI / 2; drift.position.set(x, GROUND + .002, z); drift.scale.set(w, d, 1); drift.material = shadowMaterial; house.add(drift);
+    const drift = new THREE.Mesh(shadowGeometry, shadowMaterial); drift.rotation.x = -Math.PI / 2; drift.position.set(x, GROUND + .002, z); drift.scale.set(w, d, 1); world.add(drift);
   }
   const texture = image => { const value = keep(textures, new THREE.Texture(image)); value.colorSpace = THREE.SRGBColorSpace; value.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); value.needsUpdate = true; return value; };
-  const boards = BOARDS.map(async board => {
-    const map = texture(await paintBoard(board, quality));
-    const material = keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false, side: board.mirror || board.chair && board.turn ? THREE.DoubleSide : THREE.FrontSide }));
+
+  // Rigs carry a set of boards together: the door on its hinge, the big wheel, the carousel, the ski mountain.
+  const rigs = new Map([['door', new THREE.Group()]]), clones = new Map(), skins = new Map();
+  rigs.get('door').position.set(DOOR.hinge, 0, DOOR.z); indoors.add(rigs.get('door'));
+  for (const [id, { at, turn = 0 }] of Object.entries(RIGS)) { const rig = new THREE.Group(); rig.position.set(...at); rig.rotation.y = turn; rigs.set(id, rig); world.add(rig); }
+  function standBoard(board, map) {
+    const material = keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false, fog: board.fog !== false, side: board.mirror || board.chair && board.turn || board.billboard || board.clones ? THREE.DoubleSide : THREE.FrontSide }));
     const geometry = keep(geometries, new THREE.PlaneGeometry(board.w, board.h));
-    const holder = new THREE.Group(), mesh = new THREE.Mesh(geometry, material);
-    holder.add(mesh);
     if (board.copies) {
       // One painted sheet, planted at every [x, z, height]; each copy turns about its trunk to face the camera.
       material.side = THREE.DoubleSide;
       geometry.translate(0, board.h / 2, 0);
       for (const [x, z, size] of board.copies) {
-        const tree = new THREE.Group(), scale = size / board.h;
+        const tree = new THREE.Group();
         tree.add(new THREE.Mesh(geometry, material));
-        tree.position.set(x, GROUND, z); tree.scale.setScalar(scale); billboards.push(tree);
-        house.add(tree); shadow(x, z, size * .55, size * .3, size);
+        tree.position.set(x, GROUND, z); tree.scale.setScalar(size / board.h); billboards.push(tree);
+        world.add(tree); shadow(x, z, size * .55, size * .3, size);
       }
-      painted++; report(); return;
+      return;
     }
-    if (board.roof) {
-      const roof = roofFrame(board.roof, board.layer);
-      holder.position.copy(roof.center); holder.quaternion.copy(roof.quaternion);
-    } else {
-      geometry.translate(0, board.flat ? 0 : board.hang ? -board.h / 2 : board.h / 2, 0);
-      holder.position.set(...board.at);
-      if (board.flat === 'floor') { holder.rotation.x = -Math.PI / 2; holder.position.y = .002; }
-      if (board.flat === 'ground') { holder.rotation.set(-Math.PI / 2, 0, board.turn ?? 0); holder.position.y = GROUND + .006; }
-      else if (board.turn) holder.rotation.y = board.turn;
-      if (board.mirror) holder.scale.x = -1;
-      if (!board.kind && !board.flat) { const edge = new THREE.Mesh(geometry, keep(materials, edgeMaterial(map))); edge.position.z = -.012; holder.add(edge); sheets.set(board.id, { board, material, edge, holder, home: holder.position.clone() }); }
-      if (!board.kind && !board.flat && !board.hang && !board.chair && board.at[1] === GROUND) shadow(board.at[0], board.at[2], board.w * 1.1, board.w * .5, board.h);
-    }
+    const parent = board.rig ? rigs.get(board.rig) : board.chair ? chair : board.room ? indoors : world;
+    const edges = !board.kind && !board.flat ? keep(materials, edgeMaterial(map)) : null;
+    if (edges) edges.fog = board.fog !== false;
+    if (!board.roof) geometry.translate(0, board.flat || board.center ? 0 : board.hang ? -board.h / 2 : board.h / 2, 0);
+    const holders = Array.from({ length: board.clones ?? 1 }, () => {
+      const holder = new THREE.Group(), mesh = new THREE.Mesh(geometry, material);
+      mesh.position.z = board.nudge ?? 0; holder.add(mesh);
+      if (edges) { const edge = new THREE.Mesh(geometry, edges); edge.position.z = -.012; holder.add(edge); }
+      if (board.roof) {
+        const roof = roofFrame(board.roof, board.layer);
+        holder.position.copy(roof.center); holder.quaternion.copy(roof.quaternion);
+      } else {
+        holder.position.set(...board.at ?? [0, 0, 0]);
+        if (board.flat === 'floor') { holder.rotation.x = -Math.PI / 2; holder.position.y = .002; }
+        if (board.flat === 'ground') { holder.rotation.set(-Math.PI / 2, 0, board.turn ?? 0); holder.position.y = GROUND + .006; }
+        else if (board.turn) holder.rotation.y = board.turn;
+        if (board.mirror) holder.scale.x = -1;
+      }
+      if (board.billboard) billboards.push(holder);
+      if (board.hang) swings.push([holder, board.sway ? .02 : .05]);
+      parent.add(holder); return holder;
+    });
+    if (board.clones) clones.set(board.id, holders);
+    const [holder] = holders;
+    sheets.set(board.id, { board, material, edges, holder, home: holder.position.clone(), base: holder.scale.clone(), lift: 1 });
+    if (edges && !board.rig && !board.hang && !board.chair && !board.room && board.at?.[1] === GROUND) shadow(board.at[0], board.at[2], board.w * 1.1, board.w * .5, board.h);
     if (board.flame) flames.push(holder);
     if (board.twinkle) twinkles.push(material);
-    if (board.hang) swings.push([holder, board.sway ? .02 : .05]);
-    (board.chair ? chair : house).add(holder);
-    painted++; report();
-  });
+  }
+  // A painted pattern that wraps round a 3D shape (the sea, the carousel) instead of standing as a board.
+  const skinTargets = new Map();
+  const skinned = (id, colour, options = {}) => { const material = flat(colour, options); skinTargets.set(id, material); return material; };
+  function skin(board, map) {
+    map.wrapS = map.wrapT = THREE.RepeatWrapping; if (board.repeat) map.repeat.set(...board.repeat);
+    skins.set(board.id, map);
+    const material = skinTargets.get(board.id);
+    if (material) { material.map = map; material.color.set(0xffffff); material.needsUpdate = true; }
+  }
+
+  // The carousel is the one ride built round: a paper drum, roof and fringe that turn as one, horses rising and falling.
+  const carousel = rigs.get('carousel'), gold = flat(0xe0b04f), cream = flat(0xf1e4c8);
+  const part = (geometry, material, y) => { const mesh = new THREE.Mesh(keep(geometries, geometry), material); mesh.position.y = y; carousel.add(mesh); return mesh; };
+  const canopy = CAROUSEL.radius + .25, pole = keep(geometries, new THREE.CylinderGeometry(.03, .03, CAROUSEL.top - .3, 8));
+  part(new THREE.CylinderGeometry(CAROUSEL.radius, CAROUSEL.radius + .05, .3, 48), [skinned('carousel-drum', 0xa84a42), cream, cream], .15);
+  part(new THREE.CylinderGeometry(.1, .1, CAROUSEL.top - .3, 12), gold, .15 + CAROUSEL.top / 2);
+  part(new THREE.ConeGeometry(canopy, 1.05, 48, 1, true), skinned('carousel-roof', 0xa84a42, { side: THREE.DoubleSide }), CAROUSEL.top + .525);
+  part(new THREE.CylinderGeometry(canopy, canopy, .34, 48, 1, true), skinned('carousel-fringe', 0xa84a42, { side: THREE.DoubleSide, transparent: true, alphaTest: .4 }), CAROUSEL.top - .17);
+  part(new THREE.CircleGeometry(canopy, 48), cream, CAROUSEL.top).rotation.x = Math.PI / 2;
+  part(new THREE.SphereGeometry(.14, 16, 12), gold, CAROUSEL.top + 1.12);
+  for (let i = 0; i < CAROUSEL.horses; i++) {
+    const angle = i / CAROUSEL.horses * Math.PI * 2, mesh = new THREE.Mesh(pole, gold);
+    mesh.position.set(Math.sin(angle) * CAROUSEL.ring, .15 + CAROUSEL.top / 2, Math.cos(angle) * CAROUSEL.ring); carousel.add(mesh);
+  }
+  shadow(CAROUSEL.x, CAROUSEL.z, 4.4, 2.4, 3);
+  shadow(WHEEL.x, WHEEL.z, 5.4, 2.2, 5);
+
+  // The bay: one flat sheet of sea beyond the shoreline, a band of wet sand on the land side and a lip of foam that laps.
+  const shoreLine = new THREE.SplineCurve(SHORE.map(([x, z]) => new THREE.Vector2(x, -z))).getPoints(72);
+  const seaGeometry = keep(geometries, new THREE.ShapeGeometry(new THREE.Shape([...shoreLine, new THREE.Vector2(95, shoreLine.at(-1).y), new THREE.Vector2(95, shoreLine[0].y)])));
+  seaGeometry.rotateX(-Math.PI / 2);
+  const sea = new THREE.Mesh(seaGeometry, skinned('sea', SEA, { side: THREE.DoubleSide })); sea.position.y = GROUND + .012; world.add(sea);
+  function ribbon(from, to, colour, y, opacity = 1) {
+    const positions = [], index = [];
+    shoreLine.forEach((point, i) => {
+      const a = shoreLine[Math.max(0, i - 1)], b = shoreLine[Math.min(shoreLine.length - 1, i + 1)], dx = b.x - a.x, dz = a.y - b.y, length = Math.hypot(dx, dz) || 1;
+      const nx = dz / length, nz = -dx / length, x = point.x, z = -point.y;
+      positions.push(x + nx * from, y, z + nz * from, x + nx * to, y, z + nz * to);
+      if (i) index.push(i * 2 - 2, i * 2 - 1, i * 2, i * 2 - 1, i * 2 + 1, i * 2);
+    });
+    const geometry = keep(geometries, new THREE.BufferGeometry()); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); geometry.setIndex(index);
+    const mesh = new THREE.Mesh(geometry, flat(colour, { side: THREE.DoubleSide, transparent: opacity < 1, opacity, depthWrite: opacity === 1 })); world.add(mesh); return mesh;
+  }
+  ribbon(-.9, .02, 0xe4ded2, GROUND + .006);
+  const foam = ribbon(-.05, .45, 0xf4f8f8, GROUND + .02, .85);
+
   const smokeReady = paintBoard(SMOKE, quality).then(image => {
     const map = texture(image);
     for (let i = 0; i < 3; i++) {
       const puff = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false, toneMapped: false })));
-      puff.userData.phase = i / 3; smoke.push(puff); house.add(puff);
+      puff.userData.phase = i / 3; smoke.push(puff); world.add(puff);
     }
     painted++; report();
   });
+  const boards = BOARDS.map(async board => { standBoard(board, texture(await paintBoard(board, quality))); painted++; report(); });
 
-  // Warm glows: the fire on the hearth, the lantern and the reading lamp. Sprites always face the camera.
+  // Warm glows: the fire, the lantern, the reading lamp, the porch and the lighthouse lamp. Sprites always face the camera.
   const warm = keep(textures, radialTexture([[0, 'rgba(255,190,110,.8)'], [.45, 'rgba(255,150,70,.28)'], [1, 'rgba(255,140,60,0)']]));
-  const glow = (position, size) => { const sprite = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: warm, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }))); sprite.position.copy(position); sprite.scale.setScalar(size); house.add(sprite); return sprite; };
-  const fireGlow = glow(new THREE.Vector3(FIRE.x, .28, -.7), 1), lanternGlow = glow(new THREE.Vector3(LANTERN.x, 2.68, LANTERN.z + .02), .7);
+  const glow = (position, size, parent = indoors) => { const sprite = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: warm, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }))); sprite.position.copy(position); sprite.scale.setScalar(size); parent.add(sprite); return sprite; };
+  const fireGlow = glow(new THREE.Vector3(FIRE.x, .28, FIRE.z - .05), 1), lanternGlow = glow(new THREE.Vector3(LANTERN.x, 2.68, LANTERN.z + .02), .7);
   glow(new THREE.Vector3(-.88, .78, .36), .5);
-  const blob = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(1.1, .75)), keep(materials, new THREE.MeshBasicMaterial({ map: keep(textures, radialTexture([[0, 'rgba(60,35,20,.4)'], [1, 'rgba(60,35,20,0)']], 64)), transparent: true, depthWrite: false, toneMapped: false })));
-  blob.rotation.x = -Math.PI / 2; blob.position.set(CHAIR.x, .006, CHAIR.z + .05); house.add(blob);
+  const doorGlow = glow(new THREE.Vector3(0, DOOR.height * .6, front + .3), 1.5, world), lampGlow = glow(new THREE.Vector3(LIGHTHOUSE.x, LIGHTHOUSE.lamp, LIGHTHOUSE.z + .15), 1.3, world);
+  const beam = new THREE.Group(), beamMaterial = keep(materials, new THREE.MeshBasicMaterial({ map: keep(textures, beamTexture()), transparent: true, opacity: .42, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, toneMapped: false, fog: false }));
+  const beamGeometry = keep(geometries, new THREE.PlaneGeometry(7, 1).translate(3.5, 0, 0));
+  for (const tilt of [0, Math.PI / 2]) { const ray = new THREE.Mesh(beamGeometry, beamMaterial); ray.rotation.x = tilt; beam.add(ray); }
+  beam.position.set(LIGHTHOUSE.x, LIGHTHOUSE.lamp, LIGHTHOUSE.z); world.add(beam);
+  const blob = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(1.1, .75)), flat(0xffffff, { map: keep(textures, radialTexture([[0, 'rgba(60,35,20,.4)'], [1, 'rgba(60,35,20,0)']], 64)), transparent: true, depthWrite: false }));
+  blob.rotation.x = -Math.PI / 2; blob.position.set(CHAIR.x, .006, CHAIR.z + .05); indoors.add(blob);
 
-  const hitTargets = SPOTS.map(spot => {
-    const [[x, y, z], [w, h, d]] = spot.box, mesh = new THREE.Mesh(keep(geometries, new THREE.BoxGeometry(w, h, d)), keep(materials, new THREE.MeshBasicMaterial({ visible: false })));
-    mesh.position.set(x, y, z); mesh.userData.spot = spot.id; house.add(mesh); return mesh;
-  });
+  // What can be tapped: the yard's corners, the house itself and a few things in the village; furniture once inside.
+  const unseen = flat(0xffffff, { visible: false }), unit = keep(geometries, new THREE.BoxGeometry(1, 1, 1));
+  const target = ([[x, y, z], [w, h, d]], data) => { const mesh = new THREE.Mesh(unit, unseen); mesh.position.set(x, y, z); mesh.scale.set(w, h, d); mesh.userData = data; scene.add(mesh); return mesh; };
+  const yardTargets = [...SPOTS.map(spot => target(spot.box, { spot: spot.id })), target([[0, 1.5, 0], [HOUSE.width + .4, 3.3, HOUSE.depth + .3]], { house: true }), ...PROPS.map(prop => target(prop.box, { prop }))];
+  const roomTargets = ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }));
   const glint = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: keep(textures, radialTexture([[0, 'rgba(255,255,240,1)'], [.25, 'rgba(255,230,150,.8)'], [1, 'rgba(255,220,120,0)']], 64)), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })));
-  glint.visible = false; house.add(glint);
+  glint.visible = false; world.add(glint);
   let found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null;
-  const wiggles = new Map();
+  const wiggles = new Map(), runs = RUNS.map(points => new THREE.SplineCurve(points.map(([x, y]) => new THREE.Vector2(x, y))));
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const fitModel = (model, height) => {
     const bounds = new THREE.Box3().setFromObject(model), size = bounds.getSize(new THREE.Vector3()), center = bounds.getCenter(new THREE.Vector3());
@@ -228,7 +318,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // The reindeer from the Home page waits outside; most visitors already have this file cached.
   const reindeer = loader.loadAsync(new URL('../../assets/models/reindeer-web.glb', import.meta.url).href, event => { if (event.total) { reindeerShare = event.loaded / event.total; report(); } })
     .then(gltf => {
-      const holder = fitModel(gltf.scene, REINDEER.height); holder.position.set(REINDEER.x, GROUND, REINDEER.z); holder.rotation.y = REINDEER.turn; house.add(holder); shadow(REINDEER.x, REINDEER.z, 1.2, .6, 1);
+      const holder = fitModel(gltf.scene, REINDEER.height); holder.position.set(REINDEER.x, GROUND, REINDEER.z); holder.rotation.y = REINDEER.turn; world.add(holder); shadow(REINDEER.x, REINDEER.z, 1.2, .6, 1);
       reindeerHolder = holder; gltf.scene.traverse(node => { if (node.isBone && /Head_0$/.test(node.name)) reindeerHead = node; }); reindeerRest = reindeerHead?.quaternion.clone();
       return true;
     })
@@ -240,33 +330,50 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   stage.prepend(renderer.domElement);
 
   // Each view blends its lens and distance between portrait and landscape screens.
+  const blend = () => THREE.MathUtils.clamp(((stage.clientWidth || 1) / (stage.clientHeight || 1) - .7) / .5, 0, 1);
   function goalFor(name) {
-    const settings = VIEWS[name], width = stage.clientWidth || 1, height = stage.clientHeight || 1, aspect = width / height;
-    const t = THREE.MathUtils.clamp((aspect - .7) / (1.2 - .7), 0, 1), half = Math.tan(THREE.MathUtils.degToRad(settings.fov / 2));
-    const aim = settings.tallTarget ? new THREE.Vector3(...settings.tallTarget).lerp(new THREE.Vector3(...settings.target), t) : new THREE.Vector3(...settings.target);
-    let reach;
-    if (settings.fit) {
-      const [fitWidth, fitHeight] = settings.fit.map((value, index) => THREE.MathUtils.lerp(settings.tallFit[index], value, t));
-      reach = Math.max(fitHeight / 2 / half, fitWidth / 2 / (half * aspect));
-    } else reach = THREE.MathUtils.lerp(settings.tallDistance, settings.distance, t);
-    return { target: aim, distance: reach, fov: settings.fov };
+    const settings = VIEWS[name], t = blend(), aspect = (stage.clientWidth || 1) / (stage.clientHeight || 1);
+    if (settings.eye) {
+      const lens = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(settings.span / 2)) / aspect));
+      return { eye: new THREE.Vector3(...settings.eye), heading: lerp(settings.tallHeading ?? settings.heading, settings.heading, t), pitch: settings.pitch, fov: THREE.MathUtils.clamp(lens, settings.fov, settings.tallFov) };
+    }
+    const aim = new THREE.Vector3(...settings.target), reach = lerp(settings.tallDistance, settings.distance, t);
+    const turn = settings.heading ?? 0, tip = settings.pitch;
+    return { eye: aim.add(new THREE.Vector3(Math.sin(turn) * Math.cos(tip), Math.sin(tip), Math.cos(turn) * Math.cos(tip)).multiplyScalar(reach)), heading: turn, pitch: tip, fov: settings.fov };
   }
+  const home = () => { const settings = VIEWS[view]; return lerp(settings.tallHeading ?? settings.heading ?? 0, settings.heading ?? 0, blend()); };
+  const turnLimit = () => VIEWS[view].turn;
+  // Past the edge of the village the view gives a little, like paper, and springs back once let go.
+  function clampTurn(value, soft = false) {
+    const limit = turnLimit(), low = home() - limit, high = home() + limit;
+    if (!Number.isFinite(limit)) return value;
+    if (soft && value > high) return high + Math.min(.1, (value - high) * .3);
+    if (soft && value < low) return low - Math.min(.1, (low - value) * .3);
+    return THREE.MathUtils.clamp(value, low, high);
+  }
+  const clampPitch = value => THREE.MathUtils.clamp(value, VIEWS[view].minPitch, VIEWS[view].maxPitch);
   function frameView() {
     const width = stage.clientWidth, height = stage.clientHeight;
     if (!width || !height) return;
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(width, height, false);
     camera.aspect = width / height;
-    const goal = goalFor(view); goalTarget.copy(goal.target); goalDistance = goal.distance; goalFov = goal.fov;
-    if (!ready) { target.copy(goalTarget); distance = goalDistance; fov = goalFov; }
+    if (trip) return;
+    const goal = goalFor(view); goalEye.copy(goal.eye); goalFov = goal.fov;
+    if (!ready) { eye.copy(goalEye); fov = goalFov; heading = goalHeading = goal.heading; pitch = goalPitch = goal.pitch; }
+    goalHeading = clampTurn(goalHeading);
   }
   function place() {
-    // A near plane that follows the distance keeps depth precise, so nothing shimmers far from the camera.
-    camera.fov = fov; camera.near = Math.max(.05, distance * .03); camera.updateProjectionMatrix();
-    camera.position.set(target.x + Math.sin(yaw) * Math.cos(pitch) * distance, target.y + Math.sin(pitch) * distance, target.z + Math.cos(yaw) * Math.cos(pitch) * distance);
-    camera.lookAt(target);
+    // A near plane that follows the distance from the house keeps depth precise, so nothing shimmers far from the camera.
+    camera.fov = fov; camera.near = THREE.MathUtils.clamp(eye.length() * .03, .03, .3); camera.updateProjectionMatrix();
+    camera.position.copy(eye);
+    camera.lookAt(look.set(-Math.sin(heading) * Math.cos(pitch), -Math.sin(pitch), -Math.cos(heading) * Math.cos(pitch)).add(eye));
+    // The low sun is painted behind the canvas: it slides across as the view turns, so it keeps its place in the sky.
+    const span = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(fov / 2)) * camera.aspect);
+    shell?.style.setProperty('--cabin-turn', (heading / span).toFixed(3));
   }
 
-  // Idle life: the chair rocks, Santa breathes, the fire flickers, the lantern sways, smoke drifts up. Reduced motion stills all of it.
+  // Idle life: the chair rocks, Santa breathes, the fire flickers, the lantern sways, smoke drifts up, the fair turns, the
+  // sea moves. Reduced motion stills all of it.
   const tilt = new THREE.Quaternion(), side = new THREE.Vector3(1, 0, 0);
   function pose() {
     const still = motion.matches, t = clock;
@@ -276,26 +383,33 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     for (const holder of flames) { holder.scale.y = 1 + flicker * .07; holder.scale.x = 1 + (still ? 0 : Math.sin(t * 7.3) * .025); }
     fireGlow.material.opacity = .85 + flicker * .12; fire.intensity = 2.2 + flicker * .4;
     for (const [index, material] of twinkles.entries()) material.opacity = still ? 1 : .72 + Math.sin(t * 2.6 + index) * .28;
-    for (const [holder, swing] of swings) holder.rotation.z = still ? 0 : Math.sin(t * 1.1) * swing;
+    for (const [holder, swing] of swings) holder.rotation.z = still ? 0 : Math.sin(t * 1.1 + holder.id) * swing;
     lanternGlow.material.opacity = .85 + (still ? 0 : Math.sin(t * 3.1) * .1);
+    doorGlow.material.opacity = (hovered === 'house' ? .55 : .2) + (still ? 0 : Math.sin(t * 1.8) * .06);
     // A glint over a corner not yet found, every few seconds, only while looking at the whole yard.
-    if (!still && view === 'outside' && t > nextGlint) {
+    if (!still && view === 'outside' && !trip && t > nextGlint) {
       const hidden = SPOTS.filter(spot => !found.has(spot.id));
       glintSpot = hidden.length ? hidden[Math.floor(Math.random() * hidden.length)] : null; glintAt = t; nextGlint = t + 5.5;
     }
-    const glow = glintSpot && view === 'outside' && !still ? (t - glintAt) / 1.4 : 1;
-    glint.visible = glow < 1;
-    if (glint.visible) { const [[x, y, z], [, h]] = glintSpot.box; glint.position.set(x, y + h * .45, z + .1); glint.scale.setScalar(Math.sin(glow * Math.PI) * .9); }
+    const sparkle = glintSpot && view === 'outside' && !still ? (t - glintAt) / 1.4 : 1;
+    glint.visible = sparkle < 1;
+    if (glint.visible) { const [[x, y, z], [, h]] = glintSpot.box; glint.position.set(x, y + h * .45, z + .1); glint.scale.setScalar(Math.sin(sparkle * Math.PI) * .9); }
     for (const [id, started] of wiggles) {
       const sheet = sheets.get(id), u = (t - started) / 1.6;
       if (!sheet) continue;
       sheet.holder.rotation.z = u < 1 ? Math.sin(u * Math.PI * 5) * .12 * (1 - u) : 0;
       if (u >= 1) wiggles.delete(id);
     }
+    // Whatever the mouse is over rises a little off the page.
+    for (const [id, sheet] of lifting) {
+      const goal = hovered === id ? 1.05 : 1;
+      sheet.lift += (goal - sheet.lift) * (still ? 1 : .25); sheet.holder.scale.copy(sheet.base).multiplyScalar(sheet.lift);
+      if (goal === 1 && Math.abs(sheet.lift - 1) < .002) { sheet.holder.scale.copy(sheet.base); lifting.delete(id); }
+    }
     // The reindeer's head follows the food in your hand; nods while it eats, shakes at gingerbread, droops when full.
     if (reindeerHead && reindeerRest) {
-      const ease = still ? 1 : .15;
-      reindeerTurn[0] += (reindeerAim[0] - reindeerTurn[0]) * ease; reindeerTurn[1] += (reindeerAim[1] - reindeerTurn[1]) * ease;
+      const response = still ? 1 : .15;
+      reindeerTurn[0] += (reindeerAim[0] - reindeerTurn[0]) * response; reindeerTurn[1] += (reindeerAim[1] - reindeerTurn[1]) * response;
       let extraYaw = 0, extraPitch = 0;
       if (reindeerAction) {
         const u = (t - reindeerAction.start) / 1.4;
@@ -306,30 +420,75 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       }
       reindeerHead.quaternion.copy(reindeerRest);
       reindeerHolder.updateMatrixWorld(true);
-      const parent = reindeerHead.parent.getWorldQuaternion(new THREE.Quaternion()), side = new THREE.Vector3(1, 0, 0).applyQuaternion(reindeerHolder.quaternion);
-      const delta = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), reindeerTurn[0] + extraYaw).multiply(new THREE.Quaternion().setFromAxisAngle(side, reindeerTurn[1] + extraPitch));
+      const parent = reindeerHead.parent.getWorldQuaternion(new THREE.Quaternion()), across = new THREE.Vector3(1, 0, 0).applyQuaternion(reindeerHolder.quaternion);
+      const delta = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), reindeerTurn[0] + extraYaw).multiply(new THREE.Quaternion().setFromAxisAngle(across, reindeerTurn[1] + extraPitch));
       reindeerHead.quaternion.premultiply(parent.clone().invert().multiply(delta).multiply(parent));
     }
     for (const puff of smoke) {
       const life = still ? puff.userData.phase : (t * .18 + puff.userData.phase) % 1;
-      puff.position.set(FIRE.x + life * 1.25, 3.38 + life * .6, -.75); puff.scale.set(.3 + life * .4, .22 + life * .28, 1);
+      puff.position.set(FIRE.x + life * 1.25, 3.38 + life * .6, FIRE.z); puff.scale.set(.3 + life * .4, .22 + life * .28, 1);
       puff.material.opacity = Math.sin(life * Math.PI) * .9;
     }
+    if (world.visible) village(t, still);
+  }
+  // The village keeps slowly going: the wheel and the carousel turn, waves rock, a boat bobs, gulls circle the lighthouse,
+  // skiers come down the runs and lift cabins climb. Under reduced motion each stands still where it is.
+  function village(t, still) {
+    const turn = still ? 0 : t, wheel = sheets.get('wheel'), red = clones.get('car-red') ?? [], green = clones.get('car-green') ?? [];
+    if (wheel) wheel.holder.rotation.z = turn * .1;
+    const cars = red.flatMap((car, i) => [car, green[i]]).filter(Boolean);
+    cars.forEach((car, i) => { const angle = turn * .1 + i / 8 * Math.PI * 2; car.position.set(Math.cos(angle) * WHEEL.radius, Math.sin(angle) * WHEEL.radius, .08); });
+    carousel.rotation.y = turn * .32;
+    (clones.get('horse') ?? []).forEach((horse, i, all) => {
+      const angle = i / all.length * Math.PI * 2;
+      horse.position.set(Math.sin(angle) * CAROUSEL.ring, .95 + (still ? 0 : Math.sin(t * 2.2 + i * 1.7) * .1), Math.cos(angle) * CAROUSEL.ring); horse.rotation.y = angle;
+    });
+    ['wave-near', 'wave-mid', 'wave-far'].forEach((id, i) => {
+      const sheet = sheets.get(id); if (!sheet) return;
+      const along = still ? 0 : Math.sin(t * .3 + i * 2) * .3, turned = sheet.board.turn;
+      sheet.holder.position.set(sheet.home.x + Math.cos(turned) * along, sheet.home.y + (still ? 0 : Math.sin(t * .9 + i * 1.7) * .035), sheet.home.z - Math.sin(turned) * along);
+    });
+    const boat = sheets.get('boat');
+    if (boat) { boat.holder.position.y = boat.home.y + (still ? 0 : Math.sin(t * .8) * .05); boat.holder.rotation.z = still ? 0 : Math.sin(t * .6) * .05; }
+    beam.rotation.y = still ? .6 : t * .4; lampGlow.material.opacity = .55 + (still ? 0 : Math.sin(t * 1.6) * .15);
+    if (skins.has('sea')) skins.get('sea').offset.x = still ? 0 : t * .01;
+    foam.position.x = still ? 0 : Math.sin(t * .7) * .07;
+    (clones.get('gull') ?? []).forEach((bird, i) => {
+      const angle = turn * (.22 + i * .05) + i * 2.1, radius = 2.4 + i * .8;
+      bird.position.set(LIGHTHOUSE.x - 3 + Math.cos(angle) * radius, 4.3 + i * .5 + (still ? 0 : Math.sin(t * .7 + i) * .2), LIGHTHOUSE.z + 1 + Math.sin(angle) * radius);
+      bird.scale.y = still ? 1 : .55 + Math.abs(Math.sin(t * 5 + i)) * .45;
+    });
+    (clones.get('skier') ?? []).forEach((skier, i) => {
+      const run = runs[i % runs.length], u = still ? .25 + i * .2 : (t * .035 + i * .37) % 1, at = run.getPoint(u), next = run.getPoint(Math.min(1, u + .01));
+      skier.position.set(at.x, at.y + .3, .05); skier.scale.x = next.x < at.x ? -1 : 1; skier.visible = u < .985;
+    });
+    (clones.get('gondola') ?? []).forEach((cabin, i, all) => {
+      const u = still ? i / all.length : (t * .02 + i / all.length) % 1;
+      cabin.position.set(lerp(LIFT.from[0], LIFT.to[0], u), lerp(LIFT.from[1], LIFT.to[1], u), .07);
+    });
   }
   function draw() {
     place();
-    for (const tree of billboards) tree.rotation.y = Math.atan2(camera.position.x - tree.position.x, camera.position.z - tree.position.z);
+    for (const item of billboards) item.rotation.y = Math.atan2(camera.position.x - item.position.x, camera.position.z - item.position.z);
     renderer.render(scene, camera);
   }
   function tick(now) {
     frame = requestAnimationFrame(tick);
-    const active = dragging || settling;
+    const active = dragging || settling || trip;
     if (!active && now - lastDraw < 33) return;
     const delta = Math.min((now - (lastTick || now)) / 1000, .1); lastTick = lastDraw = now; clock += delta;
-    const ease = 1 - Math.exp(-7 * delta), travel = 1 - Math.exp(-3.2 * delta);
-    yaw += (goalYaw - yaw) * ease; pitch += (goalPitch - pitch) * ease;
-    target.lerp(goalTarget, travel); distance += (goalDistance - distance) * travel; fov += (goalFov - fov) * travel;
-    settling = Math.abs(goalYaw - yaw) + Math.abs(goalPitch - pitch) + target.distanceTo(goalTarget) + Math.abs(goalDistance - distance) > .002;
+    if (trip) walking();
+    else {
+      if (spin && !pointer) {
+        const next = goalHeading + spin * delta, held = clampTurn(next);
+        goalHeading = held; spin = held !== next ? 0 : spin * Math.exp(-3.2 * delta);
+        if (Math.abs(spin) < .02) spin = 0;
+      }
+      const response = 1 - Math.exp(-7 * delta), travel = 1 - Math.exp(-3.2 * delta);
+      heading += (goalHeading - heading) * response; pitch += (goalPitch - pitch) * response;
+      eye.lerp(goalEye, travel); fov += (goalFov - fov) * travel;
+      settling = spin !== 0 || Math.abs(goalHeading - heading) + Math.abs(goalPitch - pitch) + eye.distanceTo(goalEye) + Math.abs(goalFov - fov) > .002;
+    }
     pose(); tracker?.update(delta); draw();
   }
   const stop = () => { cancelAnimationFrame(frame); frame = undefined; lastTick = 0; };
@@ -337,42 +496,94 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // Under reduced motion nothing runs on its own: every change jumps straight to its end and draws once.
   function wake() {
     if (!ready) return;
-    if (motion.matches) { yaw = goalYaw; pitch = goalPitch; target.copy(goalTarget); distance = goalDistance; fov = goalFov; pose(); tracker?.update(1); draw(); }
+    if (motion.matches) { if (trip) finishTrip(); heading = goalHeading; pitch = goalPitch; eye.copy(goalEye); fov = goalFov; spin = 0; pose(); tracker?.update(1); draw(); }
     else { settling = true; start(); }
   }
+  // Point the goals at a view. Outside comes back to wherever the visitor was looking before stepping away.
+  function aim(name) {
+    const goal = goalFor(name); goalEye.copy(goal.eye); goalFov = goal.fov;
+    goalHeading = name === 'outside' ? away.heading : goal.heading; goalPitch = name === 'outside' ? away.pitch : goal.pitch;
+  }
   function setView(name) {
-    if (!VIEWS[name] || name === view) return;
-    view = name; clearTimeout(returnTimer);
-    const goal = goalFor(view); goalTarget.copy(goal.target); goalDistance = goal.distance; goalFov = goal.fov;
-    goalYaw = VIEWS[view].yaw ?? 0; goalPitch = VIEWS[view].pitch;
-    stage.dataset.view = view; onView(view); wake();
+    if (!VIEWS[name]) return;
+    if (trip) { pending = name; return; }
+    if (name === view) return;
+    const from = view; clearTimeout(returnTimer); spin = 0;
+    if (from === 'outside') away = { heading: wrap(goalHeading), pitch: goalPitch };
+    // Indoors leads only out of the door: a corner of the yard is reached by walking out first.
+    if (from === 'inside' && name !== 'outside') { pending = name; name = 'outside'; }
+    view = name; stage.dataset.view = name;
+    if (name === 'inside' || from === 'inside') { walk(name === 'inside' ? 'in' : 'out'); return; }
+    aim(name); onView(name); wake();
+  }
+
+  // Walking in or out: along a fixed path through the front door, timed so the door swings open just before the eye reaches
+  // it and shuts again behind (or, going out, in front of) it. The door opens outward, away from the walker.
+  function walk(direction) {
+    const goal = goalFor(direction === 'in' ? 'inside' : 'outside'), inner = HOUSE.depth / 2;
+    if (direction === 'out') { world.visible = true; goal.heading = away.heading; goal.pitch = away.pitch; }
+    else onView('inside');
+    const from = { at: 0, eye: eye.clone(), heading: direction === 'in' ? heading : wrap(heading), pitch, fov };
+    const keys = direction === 'in' ? [
+      from,
+      { at: .36, eye: new THREE.Vector3(0, 1.45, front + 3), heading: 0, pitch: .07, fov: 42 },
+      { at: .6, eye: new THREE.Vector3(0, 1.08, front + .55), heading: 0, pitch: .04, fov: 52 },
+      { at: .8, eye: new THREE.Vector3(0, 1.1, inner - .25), heading: 0, pitch: .08, fov: 60 },
+      { at: 1, ...goal },
+    ] : [
+      from,
+      { at: .24, eye: new THREE.Vector3(0, 1.1, inner - .3), heading: 0, pitch: .1, fov: 60 },
+      { at: .5, eye: new THREE.Vector3(0, 1.08, front + .7), heading: 0, pitch: .06, fov: 50 },
+      { at: .76, eye: new THREE.Vector3(0, 1.6, front + 3.4), heading: 0, pitch: .1, fov: 42 },
+      { at: 1, ...goal },
+    ];
+    trip = { direction, keys, curve: new THREE.CatmullRomCurve3(keys.map(key => key.eye)), start: clock, length: direction === 'in' ? 3.6 : 3.4 };
+    stage.classList.add('is-walking'); setHover(null);
+    if (motion.matches) { finishTrip(); wake(); } else { settling = true; start(); }
+  }
+  function walking() {
+    const raw = Math.min(1, (clock - trip.start) / trip.length), u = ease(raw), { keys } = trip;
+    let i = 0; while (i < keys.length - 2 && u > keys[i + 1].at) i++;
+    const local = THREE.MathUtils.clamp((u - keys[i].at) / (keys[i + 1].at - keys[i].at), 0, 1), s = ease(local);
+    trip.curve.getPoint((i + local) / (keys.length - 1), eye);
+    heading = lerp(keys[i].heading, keys[i + 1].heading, s); pitch = lerp(keys[i].pitch, keys[i + 1].pitch, s); fov = lerp(keys[i].fov, keys[i + 1].fov, s);
+    const open = trip.direction === 'in' ? between(u, .42, .6) - between(u, .84, 1) : between(u, .1, .3) - between(u, .56, .8);
+    rigs.get('door').rotation.y = -open * DOOR.swing;
+    if (raw >= 1) finishTrip();
+  }
+  function finishTrip() {
+    const { direction, keys } = trip, last = keys.at(-1);
+    trip = null; stage.classList.remove('is-walking');
+    eye.copy(last.eye); goalEye.copy(last.eye); heading = goalHeading = last.heading; pitch = goalPitch = last.pitch; fov = goalFov = last.fov;
+    rigs.get('door').rotation.y = 0; world.visible = direction === 'out';
+    if (direction === 'out') onView('outside');
+    if (pending) { const next = pending; pending = null; setView(next); }
   }
   const onVisibility = () => { if (document.hidden) stop(); else if (!motion.matches) start(); };
   const onMotion = () => { if (motion.matches) { stop(); wake(); } else start(); };
 
-  // Turning: drag anywhere on the stage, or use the arrow keys on the focused gesture button. A tap on Santa goes inside.
+  // Turning: drag anywhere on the stage, or use the arrow keys on the focused gesture button. A tap on the house walks in.
   const gesture = stage.querySelector('.cabin-gesture'), on = (node, type, handler, options = {}) => node?.addEventListener(type, handler, { ...options, signal: events.signal });
-  const limits = () => VIEWS[view];
-  const baseYaw = () => limits().yaw ?? 0;
-  const clampYaw = value => Math.max(baseYaw() - limits().maxYaw, Math.min(baseYaw() + limits().maxYaw, value)), clampPitch = value => Math.max(limits().minPitch, Math.min(limits().maxPitch, value));
   function scheduleReturn() {
     clearTimeout(returnTimer);
-    if (motion.matches) return;
-    returnTimer = setTimeout(() => { goalYaw = baseYaw(); goalPitch = limits().pitch; wake(); }, RETURN_AFTER);
+    // Only the yard corners settle back by themselves, so the game laid over them stays lined up.
+    if (motion.matches || !SPOTS.some(spot => spot.id === view)) return;
+    returnTimer = setTimeout(() => { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }, RETURN_AFTER);
   }
   function onSanta(x, y) {
     if (!santaModel) return false;
     const box = new THREE.Box3().setFromObject(santaModel), rect = stage.getBoundingClientRect(), corners = [];
     for (const cx of [box.min.x, box.max.x]) for (const cy of [box.min.y, box.max.y]) for (const cz of [box.min.z, box.max.z]) corners.push(new THREE.Vector3(cx, cy, cz).project(camera));
+    if (corners.some(point => point.z > 1)) return false;
     const xs = corners.map(point => rect.left + (point.x + 1) / 2 * rect.width), ys = corners.map(point => rect.top + (1 - point.y) / 2 * rect.height);
     return x >= Math.min(...xs) && x <= Math.max(...xs) && y >= Math.min(...ys) && y <= Math.max(...ys);
   }
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
-  function spotAt(x, y) {
-    const rect = stage.getBoundingClientRect();
+  function hitAt(x, y) {
+    const rect = stage.getBoundingClientRect(), targets = view === 'inside' ? roomTargets : view === 'outside' ? yardTargets : [];
     ndc.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
-    return raycaster.intersectObjects(hitTargets, false)[0]?.object.userData.spot ?? null;
+    return raycaster.intersectObjects(targets, false)[0]?.object.userData ?? null;
   }
   // Screen rectangle (relative to the stage) of a spot's box or of any world-space box, for the games laid over the scene.
   function rectOfBox(center, size) {
@@ -383,42 +594,86 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     }
     return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
   }
+  function setHover(id) {
+    if (id === hovered) return;
+    hovered = id;
+    const sheet = sheets.get(id);
+    if (sheet && !sheet.board.rig) lifting.set(id, sheet);
+    wake();
+  }
+  // A tap on a thing in the village or the room: a little wiggle, and its line for the caption.
+  function touch(prop) {
+    const sheet = sheets.get(prop.id);
+    if (sheet && !sheet.board.rig && !motion.matches) { wiggles.set(prop.id, clock); wake(); }
+    onTouch(prop.id, prop.note);
+  }
+  function tap(x, y) {
+    if (view === 'inside') {
+      if (onSanta(x, y)) { touch(ROOM_PROPS.find(prop => prop.id === 'santa')); return; }
+      const hit = hitAt(x, y);
+      if (hit?.prop.id === 'door') setView('outside'); else if (hit?.prop) touch(hit.prop);
+      return;
+    }
+    if (view !== 'outside') return;
+    const hit = hitAt(x, y), spot = hit?.spot;
+    if (spot) setView(spot);
+    else if (hit?.house) setView('inside');
+    else if (hit?.prop) touch(hit.prop);
+  }
   let hoverFrame = 0;
   on(gesture, 'pointermove', event => {
-    if (pointer || event.pointerType !== 'mouse' || view !== 'outside' || hoverFrame) return;
-    hoverFrame = requestAnimationFrame(() => { hoverFrame = 0; stage.classList.toggle('is-pointing', Boolean(spotAt(event.clientX, event.clientY) || onSanta(event.clientX, event.clientY))); });
+    if (pointer || trip || event.pointerType !== 'mouse' || hoverFrame) return;
+    hoverFrame = requestAnimationFrame(() => {
+      hoverFrame = 0;
+      const hit = view === 'inside' && onSanta(event.clientX, event.clientY) ? { prop: { id: 'santa' } } : hitAt(event.clientX, event.clientY);
+      stage.classList.toggle('is-pointing', Boolean(hit));
+      setHover(hit?.spot ?? hit?.prop?.id ?? (hit?.house ? 'house' : null));
+    });
   });
-  let pointer = null;
+  on(gesture, 'pointerleave', () => { stage.classList.remove('is-pointing'); setHover(null); });
   on(gesture, 'pointerdown', event => {
-    if (pointer || (event.pointerType === 'mouse' && event.button !== 0)) return;
-    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, yaw: goalYaw, pitch: goalPitch, moved: false };
-    gesture.setPointerCapture?.(event.pointerId); dragging = true; clearTimeout(returnTimer); stage.classList.add('is-turning'); wake();
+    if (pointer || trip || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, heading: goalHeading, pitch: goalPitch, moved: false, lastX: event.clientX, lastTime: performance.now(), speed: 0 };
+    gesture.setPointerCapture?.(event.pointerId); dragging = true; spin = 0; clearTimeout(returnTimer); stage.classList.add('is-turning'); wake();
   });
   on(gesture, 'pointermove', event => {
     if (!pointer || event.pointerId !== pointer.id) return;
     if (Math.hypot(event.clientX - pointer.x, event.clientY - pointer.y) > 6) pointer.moved = true;
-    const scale = Math.PI / Math.max(stage.clientWidth, 1);
-    goalYaw = clampYaw(pointer.yaw - (event.clientX - pointer.x) * scale * .9);
-    if (event.pointerType === 'mouse') goalPitch = clampPitch(pointer.pitch + (event.clientY - pointer.y) * scale * .5);
+    // The village moves with the finger: dragging right turns the view left, as if pulling the scene round.
+    const span = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(fov / 2)) * camera.aspect), scale = span / Math.max(stage.clientWidth, 1) * 1.15;
+    goalHeading = clampTurn(pointer.heading + (event.clientX - pointer.x) * scale, true);
+    if (event.pointerType === 'mouse' || view === 'inside') goalPitch = clampPitch(pointer.pitch - (event.clientY - pointer.y) * scale);
+    const now = performance.now(), elapsed = Math.max(1, now - pointer.lastTime);
+    pointer.speed = pointer.speed * .6 + (event.clientX - pointer.lastX) * scale / elapsed * 1000 * .4; pointer.lastX = event.clientX; pointer.lastTime = now;
     wake();
   });
   const release = event => {
     if (!pointer || (event && event.pointerId !== pointer.id)) return;
-    const tapped = !pointer.moved && event?.type === 'pointerup';
+    const tapped = !pointer.moved && event?.type === 'pointerup', flick = performance.now() - pointer.lastTime < 80 ? pointer.speed : 0;
     pointer = null; dragging = false; stage.classList.remove('is-turning');
-    const spot = tapped && view === 'outside' ? spotAt(event.clientX, event.clientY) : null;
-    if (spot) setView(spot);
-    else if (tapped && view === 'outside' && onSanta(event.clientX, event.clientY)) setView('inside');
-    else { scheduleReturn(); wake(); }
+    goalHeading = clampTurn(goalHeading);
+    if (tapped) { tap(event.clientX, event.clientY); return; }
+    if (Math.abs(flick) > .4 && !motion.matches) spin = THREE.MathUtils.clamp(flick, -3, 3);
+    scheduleReturn(); wake();
   };
   on(gesture, 'pointerup', release); on(gesture, 'pointercancel', release); on(gesture, 'lostpointercapture', release);
   on(gesture, 'click', event => { if (event.detail === 0) setView(view === 'outside' ? 'inside' : 'outside'); });
   on(gesture, 'keydown', event => {
-    const step = { ArrowLeft: [.12, 0], ArrowRight: [-.12, 0], ArrowUp: [0, -.05], ArrowDown: [0, .05] }[event.key];
-    if (step) { event.preventDefault(); goalYaw = clampYaw(goalYaw + step[0]); goalPitch = clampPitch(goalPitch + step[1]); scheduleReturn(); wake(); }
+    const step = { ArrowLeft: [.15, 0], ArrowRight: [-.15, 0], ArrowUp: [0, -.06], ArrowDown: [0, .06] }[event.key];
+    if (step && !trip) { event.preventDefault(); spin = 0; goalHeading = clampTurn(goalHeading + step[0]); goalPitch = clampPitch(goalPitch + step[1]); scheduleReturn(); wake(); }
     else if (event.key === 'Escape' && view !== 'outside') setView('outside');
-    else if (event.key === 'Home') { goalYaw = baseYaw(); goalPitch = limits().pitch; wake(); }
+    else if (event.key === 'Home' && !trip) { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }
   });
+
+  // The far corners of the village are cut after the first picture is up, a few at a time, so the page is ready sooner.
+  async function paintVillage() {
+    for (let i = 0; i < WORLD.length; i += 6) {
+      const batch = await Promise.all(WORLD.slice(i, i + 6).map(board => paintBoard(board, quality).then(image => [board, image], error => { console.error('Village board failed', board.id, error); return null; })));
+      if (disposed) return;
+      for (const item of batch) if (item) { const [board, image] = item; if (board.texture) skin(board, texture(image)); else standBoard(board, texture(image)); }
+      if (motion.matches || frame === undefined) { pose(); draw(); } else wake();
+    }
+  }
 
   ready = true; frameView(); pose(); tracker?.update(0); draw();
   resize = new ResizeObserver(() => { frameView(); wake(); if (motion.matches || frame === undefined) draw(); });
@@ -429,17 +684,21 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   renderer.domElement.addEventListener('webglcontextrestored', draw, { signal: events.signal });
   stage.dataset.view = view;
   if (!motion.matches) start();
+  paintVillage();
 
   function destroy() {
-    stop(); clearTimeout(returnTimer); resize?.disconnect(); visible?.disconnect();
+    stop(); clearTimeout(returnTimer); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
+    shell?.style.removeProperty('--cabin-turn');
     release3d();
   }
   // What the games may do to the scene.
   async function repaint(id, patch) {
     const sheet = sheets.get(id); if (!sheet) return;
     sheet.board.state = { ...sheet.board.state, ...patch };
-    const next = texture(await paintBoard(sheet.board, quality)), old = sheet.material.map;
-    sheet.material.map = next; sheet.edge.material.map = next; textures.delete(old); old.dispose(); wake(); if (motion.matches || frame === undefined) draw();
+    const image = await paintBoard(sheet.board, quality);
+    if (disposed) return;
+    const next = texture(image), old = sheet.material.map;
+    sheet.material.map = next; if (sheet.edges) sheet.edges.map = next; textures.delete(old); old.dispose(); wake(); if (motion.matches || frame === undefined) draw();
   }
   const api = {
     santa: santaReady, destroy, setView, get view() { return view; }, repaint,
@@ -447,6 +706,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     rectOfBox,
     setFound(ids) { found = new Set(ids); },
     wave(id) { if (!motion.matches) { wiggles.set(id, clock); wake(); } },
+    // Turn to face one side of the village: 'left' (the fair), 'right' (the coast) or 'back' (the house and the mountain).
+    look(direction) {
+      const turn = { left: 1.2, right: -1.2 }[direction] ?? lerp(VIEWS.outside.tallHeading, 0, blend());
+      away = { heading: turn, pitch: VIEWS.outside.pitch };
+      if (view !== 'outside') { setView('outside'); return; }
+      spin = 0; goalHeading = clampTurn(turn); goalPitch = away.pitch; wake();
+    },
     // Points the reindeer's head at a spot on the stage (stage pixels); null looks straight ahead again.
     reindeerLook(point) {
       if (!point) { reindeerAim = [0, 0]; wake(); return; }
@@ -459,7 +725,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
 
   // Hoisted, and touches nothing declared after the first await, so an abandoned load can call it too.
   function release3d() {
-    events.abort(); tracker?.destroy();
+    disposed = true; events.abort(); tracker?.destroy();
     for (const model of models) model.traverse(node => {
       node.geometry?.dispose();
       for (const material of [node.material].flat()) { if (!material) continue; Object.values(material).forEach(value => { if (value?.isTexture) textures.add(value); }); material.dispose(); }

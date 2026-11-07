@@ -142,6 +142,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   return {
     enter(id) { leave(); if (!games[id]) return; layer.dataset.game = id; cleanup = games[id]() || (() => {}); },
     leave,
+    // A line about something tapped in the village or the room; it fades on its own and never covers a game.
+    note(text) { if (layer.dataset.game) return; timers.forEach(clearTimeout); timers.clear(); say(text); later(4200, () => { if (!layer.dataset.game) say(''); }); },
     // A visit to a finished corner after reload shows it finished.
     restore(ids) {
       if (ids.includes('snowman')) { memory.snowman = { nose: true, hat: true, scarf: true }; cabin.repaint('snowman', memory.snowman); }

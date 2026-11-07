@@ -142,7 +142,7 @@ await test('Wish 壓縮模型：網頁載入壓縮檔、雜湊正確、原始 GL
   const elf = await fs.readFile(path.join(project, 'assets/models/wish-elf-web.glb')), data = JSON.parse(elf.toString('utf8', 20, 20 + elf.readUInt32LE(12)).trim());
   assert.equal(data.skins[0].joints.length, 65); assert.equal(data.animations.length, 1);
 });
-await test('Santa 小屋：壓縮坐姿模型、剖面紙雕小屋、屋外與屋內兩種鏡頭、排隊 Loading 跟著真實進度', async () => {
+await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村、屋外環視與走進屋內 360°、排隊 Loading 跟著真實進度', async () => {
   const gltf = async name => { const glb = await fs.readFile(path.join(project, `assets/models/${name}.glb`)); return { bytes: glb, data: JSON.parse(glb.toString('utf8', 20, 20 + glb.readUInt32LE(12)).trim()) }; };
   const source = await gltf('santa-seated'), web = await gltf('santa-seated-web'), meta = JSON.parse(await fs.readFile(path.join(project, 'assets/models/santa-seated-web.json'), 'utf8'));
   assert.equal(createHash('sha256').update(web.bytes).digest('hex'), meta.sha256); assert.ok(web.bytes.length < 2e6 && web.bytes.length < source.bytes.length / 5);
@@ -160,6 +160,11 @@ await test('Santa 小屋：壓縮坐姿模型、剖面紙雕小屋、屋外與�
   assert.equal((art.match(/\{ id: '(mailbox|reindeer|snowman|stable)', name:/g) ?? []).length, 4, 'Four corners to explore');
   assert.ok(!/\bELF\b|flyElf|id: 'elf'/.test(art + scene + play) && !html.includes('data-spot="elf"'), 'The Santa page has no elf; the Wish elf is untouched');
   assert.ok(play.includes('onFound') && play.includes("event.detail === 0") && !play.includes('innerHTML'), 'Every game can also be played with Enter, and never writes HTML');
+  const village = await fs.readFile(path.join(project, 'js/components/cabin-world.js'), 'utf8');
+  for (const id of ['wish-post', 'wheel', 'horse', 'lighthouse', 'world-sign', 'ski-mountain', 'game-sign']) assert.ok(village.includes(`id: '${id}'`), `The village has its ${id}`);
+  assert.ok(!village.includes('innerHTML') && !village.includes("from 'three'"), 'The village is paper art only; the scene builds it');
+  assert.ok(art.includes("wall('front-out'") && art.includes("wall('front-in'") && art.includes("rig: 'door'") && art.includes('export const ROOM_PROPS'), 'The house is closed, with a door that opens and things to tap inside');
+  assert.ok(scene.includes('turn: Infinity') && scene.includes('function walk(') && scene.includes('world.visible') && scene.includes('away.heading'), 'Inside turns all the way round; walking out faces the way you came in');
   const cottage = await fs.readFile(path.join(project, 'js/components/wish-cottage.js'), 'utf8');
   assert.ok(cottage.includes("invite.href = 'santa.html'"), 'The Wish cottage is the same house: whoever answers asks you in');
   assert.ok(loader.includes("'#cabin-stage'") && loader.includes('dataset.progress') && loader.includes('prefers-reduced-motion'), 'The queue walks with the real download and stays still under reduced motion');
