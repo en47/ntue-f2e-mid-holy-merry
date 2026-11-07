@@ -7,7 +7,7 @@ import { roofHouse, snowyFir, star } from './paper-props.js';
 import { GROUND, candyCane, drift, fence, hills, lampPost, path } from './cabin-art.js';
 
 // Where the visitor stands looking at the house (cabin-scene.js keeps the eye about here on a wide screen).
-export const VIEWPOINT = { x: 0, z: 8.6 };
+export const VIEWPOINT = { x: 0, z: 11.5 };
 const face = (x, z) => Math.atan2(VIEWPOINT.x - x, VIEWPOINT.z - z);
 const CREAM = '#fbf3df', SNOW = '#fbf8f1', RED = '#a84a42', DEEP_RED = '#87302f', GREEN = '#4f7d68', DEEP_GREEN = '#3f6653', GOLD = '#e0b04f';
 const WOOD = '#8f5a3c', WOOD_LIT = '#a86b47', CORK = '#c39466', INK = '#3b2a24', IRON = '#3b302a';
@@ -19,7 +19,7 @@ const noise = index => { const value = Math.sin(index * 12.9898) * 43758.5453; r
 export const WHEEL = { x: -17, z: -1, hub: 4.7, radius: 3.2 };
 export const CAROUSEL = { x: -12.6, z: 6.8, radius: 1.75, ring: 1.3, top: 2.75, horses: 6 };
 // The shoreline, from the far back to behind the visitor; the sea lies on its +x side.
-export const SHORE = [[24, -40], [18, -20], [14.6, -8], [12.8, 2], [12.2, 12], [13, 24], [16, 40]];
+export const SHORE = [[32, -90], [24, -40], [18, -20], [14.6, -8], [12.8, 2], [12.2, 12], [13, 24], [16, 40], [22, 90]];
 const LIGHT = { x: 19.5, z: 4.4, base: GROUND + .55, h: 4.8, px: 160, lamp: 105 };
 export const LIGHTHOUSE = { x: LIGHT.x, z: LIGHT.z, lamp: LIGHT.base + LIGHT.h - LIGHT.lamp / LIGHT.px };
 // The mountain board's own units: x across from its centre, y up from its foot. Ski runs and the lift are drawn on it in

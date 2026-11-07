@@ -165,6 +165,7 @@ await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村�
   assert.ok(!village.includes('innerHTML') && !village.includes("from 'three'"), 'The village is paper art only; the scene builds it');
   assert.ok(art.includes("wall('front-out'") && art.includes("wall('front-in'") && art.includes("rig: 'door'") && art.includes('export const ROOM_PROPS'), 'The house is closed, with a door that opens and things to tap inside');
   assert.ok(scene.includes('turn: Infinity') && scene.includes('function walk(') && scene.includes('world.visible') && scene.includes('away.heading'), 'Inside turns all the way round; walking out faces the way you came in');
+  assert.ok(scene.includes("walk('fly'") && entry.includes("'site-loader:done'") && entry.includes('mountCabin(false)'), 'The first visit flies down over the village once the loader is gone; a page from the cache does not');
   const cottage = await fs.readFile(path.join(project, 'js/components/wish-cottage.js'), 'utf8');
   assert.ok(cottage.includes("invite.href = 'santa.html'"), 'The Wish cottage is the same house: whoever answers asks you in');
   const loaderCss = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8'), trek = loaderCss.slice(loaderCss.indexOf('.loader-trek'), loaderCss.indexOf('@media (max-width: 480px)'));

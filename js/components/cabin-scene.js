@@ -20,7 +20,7 @@ const RETURN_AFTER = 1600, PAPER_EDGE = 0xefe1c4, STONE = 0xd9d1c3, SNOWFIELD = 
 // left to keep the name sign in. It may turn a quarter circle either way. Inside, it stands a few steps in from the door and
 // turns all the way round, up to the rafters and down to the rug.
 const VIEWS = {
-  outside: { eye: [0, 3.75, 8.65], heading: 0, tallHeading: .12, pitch: .24, span: 56, fov: 36, tallFov: 76, turn: Math.PI / 2, minPitch: .02, maxPitch: .42 },
+  outside: { eye: [0, 2.2, 11.5], heading: 0, tallHeading: .12, pitch: .05, span: 56, fov: 36, tallFov: 76, turn: Math.PI / 2, minPitch: -.12, maxPitch: .3 },
   inside: { eye: INSIDE.eye, heading: INSIDE.heading, pitch: INSIDE.pitch, span: 92, fov: 58, tallFov: 80, turn: Infinity, minPitch: -1.1, maxPitch: 1.1 },
 };
 // Each corner of the yard is a view of its own: the camera steps up to it and only turns a little while you play there.
@@ -28,6 +28,8 @@ for (const spot of SPOTS) {
   const { target, distance, pitch, yaw } = spot.view;
   VIEWS[spot.id] = { target, distance, tallDistance: distance * 1.35, fov: 34, pitch, heading: yaw, turn: .12, minPitch: pitch - .08, maxPitch: pitch + .15 };
 }
+// Where the arrival starts: high over the village, off to the left, looking down at the house.
+const ARRIVAL = { eye: [-9, 20, 26], heading: -.33, pitch: .63, fov: 44 };
 const ease = u => u * u * (3 - 2 * u), between = (u, from, to) => ease(THREE.MathUtils.clamp((u - from) / (to - from), 0, 1));
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle)), lerp = THREE.MathUtils.lerp;
 let paperCount = 0;
@@ -83,7 +85,7 @@ function roofFrame(side, layer) {
   return { up, outward, eave, start, end, quaternion: new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(up, along, normal)), center: start.clone().add(end).multiplyScalar(.5) };
 }
 
-export async function mountCabin(stage, { onProgress = () => {}, onView = () => {}, onTouch = () => {}, isCurrent = () => true } = {}) {
+export async function mountCabin(stage, { onProgress = () => {}, onView = () => {}, onTouch = () => {}, isCurrent = () => true, fly = false } = {}) {
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
   renderer.setClearColor(0x000000, 0);
@@ -97,7 +99,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   let frame, lastTick = 0, lastDraw = 0, clock = 0, inView = true, dragging = false, returnTimer = 0, settling = false, resize, visible;
   // A flick keeps turning a moment after the finger lifts; a trip is the walk through the front door, in or out. `away` is
   // where the visitor was looking outside, so coming back out faces the same way again.
-  let spin = 0, trip = null, pending = null, hovered = null, pointer = null, away = { heading: 0, pitch: VIEWS.outside.pitch };
+  // `perched` holds the camera up at the start of the arrival until the loader has gone.
+  let spin = 0, trip = null, pending = null, hovered = null, pointer = null, perched = false, away = { heading: 0, pitch: VIEWS.outside.pitch };
   const eye = new THREE.Vector3(0, 3.7, 8.6), goalEye = eye.clone(), look = new THREE.Vector3(), shell = stage.parentElement;
 
   const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(fov, 1, .05, 110);
@@ -155,7 +158,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // Cut the boards at a resolution the screen can show; phones get smaller textures.
   const quality = Math.min(1, Math.max(.5, stage.clientWidth * Math.min(devicePixelRatio || 1, 2) / 2000));
   let painted = 0, santaShare = 0, reindeerShare = 0;
-  const report = () => onProgress(Math.min(1, painted / (BOARDS.length + 1) * .35 + santaShare * .45 + reindeerShare * .2));
+  const report = () => onProgress(Math.min(1, painted / (BOARDS.length + WORLD.length + 1) * .35 + santaShare * .45 + reindeerShare * .2));
   // Sheets by id, so a game can redraw one (the snowman's hat, the hay in the loft) and a tap can wiggle one.
   const flames = [], twinkles = [], swings = [], smoke = [], billboards = [], sheets = new Map(), lifting = new Map();
   // Soft bluish shadows on the snow, thrown right and back, away from the low sun on the left.
@@ -276,7 +279,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     }
     painted++; report();
   });
-  const boards = BOARDS.map(async board => { standBoard(board, texture(await paintBoard(board, quality))); painted++; report(); });
+  // Every board, the village's too, is cut before the page opens: the arrival flies over all of it. A village board that
+  // fails is left out; a house board that fails fails the whole cabin.
+  const boards = [...BOARDS, ...WORLD].map(async board => {
+    try { const map = texture(await paintBoard(board, quality)); if (board.texture) skin(board, map); else standBoard(board, map); }
+    catch (error) { if (!WORLD.includes(board)) throw error; console.error('Village board failed', board.id, error); }
+    painted++; report();
+  });
 
   // Warm glows: the fire, the lantern, the reading lamp, the porch and the lighthouse lamp. Sprites always face the camera.
   const warm = keep(textures, radialTexture([[0, 'rgba(255,190,110,.8)'], [.45, 'rgba(255,150,70,.28)'], [1, 'rgba(255,140,60,0)']]));
@@ -359,7 +368,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (!width || !height) return;
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(width, height, false);
     camera.aspect = width / height;
-    if (trip) return;
+    if (trip || perched) return;
     const goal = goalFor(view); goalEye.copy(goal.eye); goalFov = goal.fov;
     if (!ready) { eye.copy(goalEye); fov = goalFov; heading = goalHeading = goal.heading; pitch = goalPitch = goal.pitch; }
     goalHeading = clampTurn(goalHeading);
@@ -367,6 +376,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   function place() {
     // A near plane that follows the distance from the house keeps depth precise, so nothing shimmers far from the camera.
     camera.fov = fov; camera.near = THREE.MathUtils.clamp(eye.length() * .03, .03, .3); camera.updateProjectionMatrix();
+    // High up during the arrival the haze thins out, so the whole village shows from the air.
+    const lift = Math.max(0, eye.y - 4); scene.fog.near = 16 + lift * 1.2; scene.fog.far = 52 + lift * 1.8;
     camera.position.copy(eye);
     camera.lookAt(look.set(-Math.sin(heading) * Math.cos(pitch), -Math.sin(pitch), -Math.cos(heading) * Math.cos(pitch)).add(eye));
     // The low sun is painted behind the canvas: it slides across as the view turns, so it keeps its place in the sky.
@@ -508,6 +519,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   }
   function setView(name) {
     if (!VIEWS[name]) return;
+    if (trip?.direction === 'fly') finishTrip();
     if (trip) { pending = name; return; }
     if (name === view) return;
     const from = view; clearTimeout(returnTimer); spin = 0;
@@ -520,13 +532,18 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   }
 
   // Walking in or out: along a fixed path through the front door, timed so the door swings open just before the eye reaches
-  // it and shuts again behind (or, going out, in front of) it. The door opens outward, away from the walker.
-  function walk(direction) {
+  // it and shuts again behind (or, going out, in front of) it. The door opens outward, away from the walker. 'fly' is the
+  // arrival: from high over the village down to where the visitor stands.
+  function walk(direction, done) {
     const goal = goalFor(direction === 'in' ? 'inside' : 'outside'), inner = HOUSE.depth / 2;
     if (direction === 'out') { world.visible = true; goal.heading = away.heading; goal.pitch = away.pitch; }
-    else onView('inside');
+    if (direction === 'in') onView('inside');
     const from = { at: 0, eye: eye.clone(), heading: direction === 'in' ? heading : wrap(heading), pitch, fov };
-    const keys = direction === 'in' ? [
+    const keys = direction === 'fly' ? [
+      from,
+      { at: .55, eye: new THREE.Vector3(-3.5, 7, 16), heading: -.22, pitch: .35, fov: 40 },
+      { at: 1, ...goal },
+    ] : direction === 'in' ? [
       from,
       { at: .36, eye: new THREE.Vector3(0, 1.45, front + 3), heading: 0, pitch: .07, fov: 42 },
       { at: .6, eye: new THREE.Vector3(0, 1.08, front + .55), heading: 0, pitch: .04, fov: 52 },
@@ -539,7 +556,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       { at: .76, eye: new THREE.Vector3(0, 1.6, front + 3.4), heading: 0, pitch: .1, fov: 42 },
       { at: 1, ...goal },
     ];
-    trip = { direction, keys, curve: new THREE.CatmullRomCurve3(keys.map(key => key.eye)), start: clock, length: direction === 'in' ? 3.6 : 3.4 };
+    trip = { direction, keys, done, curve: new THREE.CatmullRomCurve3(keys.map(key => key.eye)), start: clock, length: { fly: 5.2, in: 3.6, out: 3.4 }[direction] };
     stage.classList.add('is-walking'); setHover(null);
     if (motion.matches) { finishTrip(); wake(); } else { settling = true; start(); }
   }
@@ -549,16 +566,17 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const local = THREE.MathUtils.clamp((u - keys[i].at) / (keys[i + 1].at - keys[i].at), 0, 1), s = ease(local);
     trip.curve.getPoint((i + local) / (keys.length - 1), eye);
     heading = lerp(keys[i].heading, keys[i + 1].heading, s); pitch = lerp(keys[i].pitch, keys[i + 1].pitch, s); fov = lerp(keys[i].fov, keys[i + 1].fov, s);
-    const open = trip.direction === 'in' ? between(u, .42, .6) - between(u, .84, 1) : between(u, .1, .3) - between(u, .56, .8);
+    const open = { in: between(u, .42, .6) - between(u, .84, 1), out: between(u, .1, .3) - between(u, .56, .8) }[trip.direction] ?? 0;
     rigs.get('door').rotation.y = -open * DOOR.swing;
     if (raw >= 1) finishTrip();
   }
   function finishTrip() {
-    const { direction, keys } = trip, last = keys.at(-1);
+    const { direction, keys, done } = trip, last = keys.at(-1);
     trip = null; stage.classList.remove('is-walking');
     eye.copy(last.eye); goalEye.copy(last.eye); heading = goalHeading = last.heading; pitch = goalPitch = last.pitch; fov = goalFov = last.fov;
-    rigs.get('door').rotation.y = 0; world.visible = direction === 'out';
+    rigs.get('door').rotation.y = 0; world.visible = direction !== 'in';
     if (direction === 'out') onView('outside');
+    done?.();
     if (pending) { const next = pending; pending = null; setView(next); }
   }
   const onVisibility = () => { if (document.hidden) stop(); else if (!motion.matches) start(); };
@@ -633,7 +651,10 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     });
   });
   on(gesture, 'pointerleave', () => { stage.classList.remove('is-pointing'); setHover(null); });
+  // Any touch or key during the arrival lands at once: nobody has to wait for the flight to start looking round.
+  const land = () => { if (trip?.direction === 'fly') finishTrip(); };
   on(gesture, 'pointerdown', event => {
+    land();
     if (pointer || trip || (event.pointerType === 'mouse' && event.button !== 0)) return;
     pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, heading: goalHeading, pitch: goalPitch, moved: false, lastX: event.clientX, lastTime: performance.now(), speed: 0 };
     gesture.setPointerCapture?.(event.pointerId); dragging = true; spin = 0; clearTimeout(returnTimer); stage.classList.add('is-turning'); wake();
@@ -661,23 +682,18 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   on(gesture, 'pointerup', release); on(gesture, 'pointercancel', release); on(gesture, 'lostpointercapture', release);
   on(gesture, 'click', event => { if (event.detail === 0) setView(view === 'outside' ? 'inside' : 'outside'); });
   on(gesture, 'keydown', event => {
+    land();
     const step = { ArrowLeft: [.15, 0], ArrowRight: [-.15, 0], ArrowUp: [0, -.06], ArrowDown: [0, .06] }[event.key];
     if (step && !trip) { event.preventDefault(); spin = 0; goalHeading = clampTurn(goalHeading + step[0]); goalPitch = clampPitch(goalPitch + step[1]); scheduleReturn(); wake(); }
     else if (event.key === 'Escape' && view !== 'outside') setView('outside');
     else if (event.key === 'Home' && !trip) { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }
   });
 
-  // The far corners of the village are cut after the first picture is up, a few at a time, so the page is ready sooner.
-  async function paintVillage() {
-    for (let i = 0; i < WORLD.length; i += 6) {
-      const batch = await Promise.all(WORLD.slice(i, i + 6).map(board => paintBoard(board, quality).then(image => [board, image], error => { console.error('Village board failed', board.id, error); return null; })));
-      if (disposed) return;
-      for (const item of batch) if (item) { const [board, image] = item; if (board.texture) skin(board, texture(image)); else standBoard(board, texture(image)); }
-      if (motion.matches || frame === undefined) { pose(); draw(); } else wake();
-    }
+  ready = true; frameView();
+  if (fly && !motion.matches) {
+    perched = true; eye.set(...ARRIVAL.eye); goalEye.copy(eye); heading = goalHeading = ARRIVAL.heading; pitch = goalPitch = ARRIVAL.pitch; fov = goalFov = ARRIVAL.fov;
   }
-
-  ready = true; frameView(); pose(); tracker?.update(0); draw();
+  pose(); tracker?.update(0); draw();
   resize = new ResizeObserver(() => { frameView(); wake(); if (motion.matches || frame === undefined) draw(); });
   visible = new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; if (inView && !motion.matches) start(); else stop(); });
   resize.observe(stage); visible.observe(stage);
@@ -686,7 +702,6 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   renderer.domElement.addEventListener('webglcontextrestored', draw, { signal: events.signal });
   stage.dataset.view = view;
   if (!motion.matches) start();
-  paintVillage();
 
   function destroy() {
     stop(); clearTimeout(returnTimer); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
@@ -707,6 +722,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     rect: id => { const spot = SPOTS.find(item => item.id === id); return spot ? rectOfBox(...spot.box) : null; },
     rectOfBox,
     setFound(ids) { found = new Set(ids); },
+    // Fly down from over the village to the front of the house; resolves once landed (at once when there is no flight).
+    arrive() { if (!perched) return Promise.resolve(); perched = false; return new Promise(done => walk('fly', done)); },
     wave(id) { if (!motion.matches) { wiggles.set(id, clock); wake(); } },
     // Turn to face one side of the village: 'left' (the fair), 'right' (the coast) or 'back' (the house and the mountain).
     look(direction) {
