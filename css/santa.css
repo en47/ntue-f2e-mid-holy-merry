@@ -95,7 +95,8 @@
 .note-mark { width: 5.5rem; height: auto; }
 /* 和聖誕老人聊天（預留給之後的 AI 回信）：屋裡右側一張信紙，聖誕老人的話在左、附頭像，你的話在右，像聊天軟體。
    只在進屋、門關上之後出現；可以收起成一張小標籤。手機上改成下方的面板。 */
-.cabin-chat { display: none; position: absolute; z-index: 3; top: 4.4rem; right: 1rem; bottom: 1rem; width: min(22rem, 34%); flex-direction: column; gap: .7rem; padding: 1.2rem 1.2rem 1.1rem; color: var(--ink); background: #fffdf6; border-radius: 10px; box-shadow: 0 10px 0 -3px #e4d6bf; pointer-events: auto; }
+/* 底部讓開右下角的音樂按鈕。 */
+.cabin-chat { display: none; position: absolute; z-index: 3; top: 4.4rem; right: 1rem; bottom: 5.4rem; width: min(22rem, 34%); flex-direction: column; gap: .7rem; padding: 1.2rem 1.2rem 1.1rem; color: var(--ink); background: #fffdf6; border-radius: 10px; box-shadow: 0 10px 0 -3px #e4d6bf; pointer-events: auto; }
 .cabin-stage[data-view="inside"]:not(.is-walking) .cabin-chat { display: flex; }
 .chat-head { display: flex; align-items: center; gap: .6rem; padding-bottom: .55rem; border-bottom: 2px dashed #ad3c3b40; }
 .chat-title { flex: 1; margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; }
@@ -116,7 +117,7 @@
 .cabin[data-paper] .cabin-chat { padding: 1.5rem 1.4rem 1.4rem; }
 .cabin[data-paper] .from-santa .chat-bubble { padding: .85rem 1.1rem; }
 @media (max-width: 700px) {
-  .cabin-chat { top: auto; right: .6rem; bottom: .6rem; left: .6rem; width: auto; height: 42%; }
+  .cabin-chat { top: auto; right: .6rem; bottom: 4.6rem; left: .6rem; width: auto; height: 40%; }
   .cabin-chat.is-folded { left: auto; height: auto; }
 }
 @media (max-width: 700px) {
