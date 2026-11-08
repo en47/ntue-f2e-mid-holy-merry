@@ -153,7 +153,7 @@ export const itemFor = id => ITEMS.find(item => item.id === id) ?? null;
 export const known = (place, id) => ITEMS.some(item => item.id === id && item.place === place);
 // Outfits that make the snowman play a part. `act` is what his paper body does (cabin-scene.js snowmanAct).
 export const COMBOS = [
-  { id: 'santa', needs: { head: 'santa-hat', face: 'mustache' }, act: 'hop', line: '雪人摸摸鬍子：「Ho ho ho！今天換我去送禮物！」' },
+  { id: 'santa', needs: { head: 'santa-hat', face: 'mustache' }, act: 'hop', line: '雪人摸摸鬍子：「Ho ho ho！」穀倉那邊有人探頭：「咦？今天怎麼又多了一位聖誕老人？……啊！原來是雪人呀！」' },
   { id: 'reindeer', needs: { head: 'antlers', face: 'button-nose' }, act: 'prance', line: '鹿角加紅鼻子，雪人學麋鹿蹦蹦跳跳！' },
   { id: 'gentleman', needs: { head: 'top-hat', neck: 'tie' }, act: 'bow', line: '高帽配領帶，雪人紳士地鞠了個躬。' },
 ];

@@ -3,6 +3,8 @@
 // wax seal onto the reply waiting in the rack to close it (or press Enter on either). Stamped and sealed stay so.
 import { paperLayer, shape } from './paper-art.js';
 import { DESK_LETTERS, REPLY } from '../data/cabin-letters.js';
+import { NAMES } from '../data/cabin-secret.js';
+import { knowsSantas } from '../services/cabin-story.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
@@ -86,7 +88,8 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   function flip() {
     const flipped = letter.classList.toggle('is-flipped'); sound.play('remove');
     flipButton.textContent = flipped ? '翻回正面' : '翻到背面';
-    if (flipped) say('背面有人寫了一行小字，還簽了名。');
+    // Once the little room behind the bookcase has been seen, the initial has a name.
+    if (flipped) say(knowsSantas(progress.story.seen) ? `背面簽著「${current.entry.back.sign}」——是名牌上的${NAMES[current.entry.back.sign[0]]}。` : '背面有人寫了一行小字，還簽了名。');
   }
   function close() { current.reading = false; letter.classList.remove('is-flipped'); flipButton.textContent = '翻到背面'; refresh(); sound.play('remove'); returnButton.focus({ preventScroll: true }); }
   function putBack() {

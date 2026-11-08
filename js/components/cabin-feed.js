@@ -92,7 +92,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (kind === 'gingerbread') {
       // Not for him: he turns away and the biscuit floats back to the basket.
       cabin.reindeerAct('refuse'); sound.play('refuse'); speak('不要不要，這是聖誕老人的點心！');
-      fly(ghost, centre(local(button.getBoundingClientRect())), false); say('麋鹿把頭轉開了：牠不吃薑餅。');
+      fly(ghost, centre(local(button.getBoundingClientRect())), false); say('麋鹿把頭轉開了：牠不吃薑餅。柵欄上的照顧紀錄有一行：「上次那位總是記錯牠喜歡什麼。」');
       return;
     }
     if (mouth) fly(ghost, centre(mouth), true);
@@ -102,6 +102,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (kind === 'lichen') {
       cabin.reindeerAct('happy'); sound.play('happy'); later(1800, () => { cabin.reindeerAct('chew'); sound.play('chew'); });
       burst(mouth, 'heart', 3); speak('是地衣！我最愛吃這個！');
+      later(1200, () => say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」'));
     } else {
       cabin.reindeerAct('chew'); sound.play('chew'); burst(mouth, 'heart', 1); speak(['喀滋喀滋！', '好甜的胡蘿蔔！', '再一根好不好？'][eaten % 3]);
     }

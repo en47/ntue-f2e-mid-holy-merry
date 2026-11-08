@@ -11,7 +11,9 @@ import { deskGame } from './cabin-desk.js';
 import { musicboxGame } from './cabin-musicbox.js';
 import { globeGame } from './cabin-globe.js';
 import { booksGame } from './cabin-books.js';
-import { santaGoes } from '../services/cabin-story.js';
+import { secretGame } from './cabin-secret.js';
+import { knowsSantas, santaGoes, santaReturns } from '../services/cabin-story.js';
+import { NOTES } from '../data/cabin-secret.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 
@@ -114,13 +116,14 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // Each tells the room when it has been used (`onUse`): Santa goes out once enough has been done there.
     hearth: () => hearthGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('hearth') }),
     desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk') }),
-    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox') }),
-    globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe') }),
+    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows }),
+    globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe'), knows }),
+    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known') }),
     shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened') }),
   };
 
-  // What has been used in the room on this visit.
-  const used = new Set();
+  // What has been used in the room on this visit; whether the secret behind the bookcase is known.
+  const used = new Set(), knows = () => knowsSantas(progress.story.seen);
   function leave() { timers.forEach(clearTimeout); timers.clear(); cleanup(); cleanup = () => {}; layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
   return {
     enter(id) { leave(); if (!games[id]) return; layer.dataset.game = id; cleanup = games[id]() || (() => {}); },
@@ -131,6 +134,11 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // in cabin-story.js). The story is decided here, never by the chat.
     inRoom() {
       const story = progress.story;
+      // Once the secret is known, Santa comes home from the reindeer, and knows that you know.
+      if (santaReturns({ home: cabin.santaHome, opened: story.opened, seen: story.seen })) {
+        later(700, async () => { say('門外傳來踩雪的腳步聲……'); if (await cabin.santaReturn()) { say(NOTES.back); onSanta('home'); } });
+        return;
+      }
       if (!santaGoes({ used: used.size, left: story.left, home: cabin.santaHome, opened: story.opened })) return;
       later(900, async () => {
         say('聖誕老人站起來伸了個懶腰：「看你玩得這麼開心……哎呀，麋鹿在叫我了，我去看看牠，你慢慢逛！」');

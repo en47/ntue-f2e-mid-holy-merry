@@ -244,9 +244,23 @@
 .books-tools { position: absolute; left: 50%; bottom: 1rem; display: flex; gap: .5rem; translate: -50% 0; pointer-events: auto; }
 .books-tools button { padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; }
 .chat-line.is-away .chat-bubble { color: #8a7a6a; font-style: normal; }
+/* 書櫃後的小房間：可以拿起來看的東西（看過的變淡），和打開後的紙卡：名牌、交接表（不同筆跡）、守則。 */
+.secret-thing { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 2px dashed #c08a3e88; border-radius: 12px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.secret-thing.is-read { border-style: dotted; animation: none; opacity: .55; }
+.secret-thing:focus-visible, .books-enter:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.books-enter { position: absolute; left: 50%; bottom: 1rem; padding: .5rem 1.1rem; translate: -50% 0; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; pointer-events: auto; }
+.secret-card { max-height: calc(100% - 2rem); overflow: auto; }
+.secret-title { margin: 0 0 .6rem; font-family: var(--font-hand); font-size: var(--fs-body); }
+.secret-tags { display: grid; grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr)); gap: .4rem; margin: 0 0 .8rem; padding: 0; list-style: none; font-family: var(--font-hand); font-size: var(--fs-body); }
+.secret-initial { margin-right: .3rem; font-family: var(--font-display); }
+.secret-log { margin: 0 0 1rem; padding-left: 1.2rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 2; }
+.secret-log [data-hand="n"] { color: #8f3b36; rotate: -1deg; } .secret-log [data-hand="k"] { color: #3f5a7a; letter-spacing: .05em; } .secret-log [data-hand="h"] { color: #3f6653; } .secret-log [data-hand="e"] { color: #6e4a6b; } .secret-log .is-morning { color: #8a7a6a; }
+.secret-rule, .secret-note { margin: 0 0 .5rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; }
+.secret-note { color: #6b5a4c; }
+@media (prefers-reduced-motion: reduce) { .secret-thing { animation: none; } }
 /* 觸控螢幕：每個按鈕至少 44px 見方，手指點得準。 */
 @media (pointer: coarse) {
-  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send, .desk-actions button, .books-tools button { min-width: 44px; min-height: 44px; }
+  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send, .desk-actions button, .books-tools button, .books-enter { min-width: 44px; min-height: 44px; }
 }
 /* 橫拿的手機：小屋和螢幕一樣高（點進角落或屋裡時捲到剛好整個露出），衣櫃、食物籃、對話框改成右側窄欄，提示放到左上。 */
 @media (orientation: landscape) and (max-height: 500px) {

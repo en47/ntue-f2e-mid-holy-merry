@@ -32,8 +32,9 @@ for (const spot of SPOTS) {
 }
 // The places in the room work the same way, close up; leaving one goes back to the middle of the room.
 for (const spot of ROOM_SPOTS) {
-  const { target, distance, pitch, yaw, tallDistance = distance * 1.35, fov = 34, tallFov = fov, tallDrop = 0 } = spot.view;
-  VIEWS[spot.id] = { target, distance, tallDistance, fov, tallFov, pitch, heading: yaw, aside: 0, tallDrop, turn: 0, minPitch: pitch, maxPitch: pitch, room: true };
+  // `turn`/`tilt`: how far a place lets you look round (the little room behind the bookcase, too narrow to see whole).
+  const { target, distance, pitch, yaw, tallDistance = distance * 1.35, fov = 34, tallFov = fov, tallDrop = 0, turn = 0, tilt = 0 } = spot.view;
+  VIEWS[spot.id] = { target, distance, tallDistance, fov, tallFov, pitch, heading: yaw, aside: 0, tallDrop, turn, minPitch: pitch - tilt, maxPitch: pitch + tilt, room: true };
 }
 const indoorView = name => name === 'inside' || VIEWS[name]?.room === true;
 const BACK_WALL = -HOUSE.depth / 2;
@@ -234,7 +235,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       }
       return;
     }
-    const parent = board.rig ? rigs.get(board.rig) : board.chair ? chair : board.room ? indoors : world;
+    const parent = board.secret ? secret : board.rig ? rigs.get(board.rig) : board.chair ? chair : board.room ? indoors : world;
     const edges = !board.kind && !board.flat ? keep(materials, edgeMaterial(map)) : null;
     if (board.room || board.chair) for (const each of [material, edges]) if (each) warmed.push([each, each.color.clone()]);
     if (edges) edges.fog = board.fog !== false;
@@ -373,7 +374,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const addBoard = async board => {
     const image = await cutBoard(board.id, board, set); if (disposed) return;
     const map = texture(image); if (board.texture) skin(board, map); else standBoard(board, map);
+    if (restyled.delete(board.id)) paintSheet(board.id, sheets.get(board.id));
   };
+  const restyled = new Set();
   const boards = first.map(async board => {
     try { await addBoard(board); }
     catch (error) { if (!WORLD.includes(board)) throw error; console.error('Village board failed', board.id, error); }
@@ -389,7 +392,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   glow(new THREE.Vector3(DESK.x + .03, DESK.h * (1 - (DESK.items.lamp[1] + DESK.items.lamp[3]) / 2.6), DESK.z + (.5 - (DESK.items.lamp[0] + DESK.items.lamp[2]) / 2) * DESK.w), .5);
   // The little room behind the bookcase: plain warm walls and a lamp; what is in it is laid out by cabin-secret.js.
   (() => {
-    const { left, width, height, depth } = SECRET, back = BACK_WALL - depth, mid = left + width / 2, walls = 0xd9b98f;
+    const { left, width, height, depth } = SECRET, back = BACK_WALL - depth, mid = left + width / 2, walls = 0xb98f63;
     solid(new THREE.BoxGeometry(width, .02, depth), 0x8f6444, new THREE.Vector3(mid, -.01, BACK_WALL - depth / 2), secret);
     solid(new THREE.BoxGeometry(width, .02, depth), 0x7a5236, new THREE.Vector3(mid, height + .01, BACK_WALL - depth / 2), secret);
     solid(new THREE.BoxGeometry(width, height, .02), walls, new THREE.Vector3(mid, height / 2, back), secret);
@@ -862,7 +865,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   function scheduleReturn() {
     clearTimeout(returnTimer);
     // Only the yard corners settle back by themselves, so the game laid over them stays lined up.
-    if (motion.matches || !playing()) return;
+    if (motion.matches || !playing() || VIEWS[view].turn) return;
     returnTimer = setTimeout(() => { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }, RETURN_AFTER);
   }
   function onSanta(x, y) {
@@ -878,7 +881,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const rect = stage.getBoundingClientRect(), targets = view === 'inside' ? roomTargets : view === 'outside' ? yardTargets : [];
     ndc.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
-    return raycaster.intersectObjects(targets, false)[0]?.object.userData ?? null;
+    // Once the bookcase stands open, its doorway leads into the little room and the case itself is no longer a place.
+    const open = story.open > .5, usable = data => data.spot === 'secret' ? open : data.spot === 'shelf' ? !open : true;
+    return raycaster.intersectObjects(targets, false).map(hit => hit.object.userData).find(usable) ?? null;
   }
   // Screen rectangle (relative to the stage) of a spot's box or of any world-space box, for the games laid over the scene.
   function rectOfBox(center, size) {
@@ -943,7 +948,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const playing = () => SPOTS.some(spot => spot.id === view) || VIEWS[view].room === true;
   on(gesture, 'pointerdown', event => {
     land();
-    if (playing() || story.scripted) return;
+    if ((playing() && !VIEWS[view].turn) || story.scripted) return;
     if (pointer || trip || (event.pointerType === 'mouse' && event.button !== 0)) return;
     pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, heading: goalHeading, pitch: goalPitch, moved: false, lastX: event.clientX, lastTime: performance.now(), speed: 0 };
     gesture.setPointerCapture?.(event.pointerId); dragging = true; spin = 0; clearTimeout(returnTimer); stage.classList.add('is-turning'); wake();
@@ -973,7 +978,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   on(gesture, 'keydown', event => {
     land();
     const step = { ArrowLeft: [.15, 0], ArrowRight: [-.15, 0], ArrowUp: [0, -.06], ArrowDown: [0, .06] }[event.key];
-    if (step && !trip && !playing()) { event.preventDefault(); spin = 0; goalHeading = clampTurn(goalHeading + step[0]); goalPitch = clampPitch(goalPitch + step[1]); scheduleReturn(); wake(); }
+    if (step && !trip && (!playing() || VIEWS[view].turn)) { event.preventDefault(); spin = 0; goalHeading = clampTurn(goalHeading + step[0]); goalPitch = clampPitch(goalPitch + step[1]); scheduleReturn(); wake(); }
     else if (event.key === 'Escape' && view !== 'outside') { event.preventDefault(); back(); }
     else if (event.key === 'Home' && !trip) { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }
   });
@@ -1002,8 +1007,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   }
   // What the games may do to the scene.
   // Set a board's look outright (undefined: as it was drawn); repaint() below changes only part of it.
-  // A board not cut yet (the room comes after the page opens) takes the look when it is.
-  function restyle(id, state) { const sheet = sheets.get(id), board = sheet?.board ?? BOARDS.find(item => item.id === id); if (!board) return; board.state = state; return sheet ? paintSheet(id, sheet) : undefined; }
+  // A board not cut yet (the room comes after the page opens) may already be on its way in its first look: it is cut
+  // again in the new one as soon as it arrives (addBoard).
+  function restyle(id, state) { const sheet = sheets.get(id), board = sheet?.board ?? BOARDS.find(item => item.id === id); if (!board) return; board.state = state; if (sheet) return paintSheet(id, sheet); restyled.add(id); }
   const storyTimers = [];
   function repaint(id, patch) {
     const sheet = sheets.get(id); if (!sheet) return;
@@ -1042,6 +1048,28 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       });
     },
     santaBack() { if (!story.away) return; story.away = false; restyle('front-in', undefined); redraw(); },
+    // He comes back in the same way, the other way round: the door, his coat on its peg again, and him in his chair.
+    santaReturn() {
+      if (!story.away || view !== 'inside' || trip) return Promise.resolve(false);
+      return new Promise(done => {
+        const quick = motion.matches, at = (ms, run) => storyTimers.push(setTimeout(() => { if (!disposed) run(); }, quick ? 0 : ms));
+        story.scripted = true; spin = 0; const facing = { heading: goalHeading, pitch: goalPitch };
+        goalHeading = 2.5; goalPitch = .1; wake();
+        at(1400, () => { story.door = { from: 0, to: -DOOR.swing * .75, start: clock, length: .45 }; wake(); });
+        at(2200, () => { story.door = { from: -DOOR.swing * .75, to: 0, start: clock, length: .45 }; story.away = false; restyle('front-in', undefined); wake(); });
+        at(2900, () => { goalHeading = facing.heading; goalPitch = facing.pitch; wake(); });
+        at(4200, () => { story.scripted = false; story.door = null; rigs.get('door').rotation.y = 0; redraw(); done(true); });
+      });
+    },
+    // Where something on one of the room's sheets is on screen: `place` is [left, top, right, bottom] as fractions.
+    sheetRect(id, [x0, y0, x1, y1] = [0, 0, 1, 1]) {
+      const sheet = sheets.get(id); if (!sheet) return null;
+      const { holder, board } = sheet; holder.updateMatrixWorld(true);
+      const rect = stage.getBoundingClientRect(), points = [[x0, y0], [x1, y0], [x0, y1], [x1, y1]].map(([fx, fy]) => holder.localToWorld(new THREE.Vector3((fx - .5) * board.w, (1 - fy) * board.h, .01)).project(camera));
+      if (points.some(point => point.z > 1)) return null;
+      const xs = points.map(p => (p.x + 1) / 2 * rect.width), ys = points.map(p => (1 - p.y) / 2 * rect.height);
+      return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+    },
     // The letter books: where each place is on screen (and which book stands there), holding one up to the pointer, which
     // place it was let go over (or -1), and laying them all out as the shelf now stands.
     bookRects(shelf) {

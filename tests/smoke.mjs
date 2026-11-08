@@ -287,6 +287,20 @@ await test('Santa 隱藏故事 P4：聖誕老人出門（固定規則）、MORE 
   const paint = await fs.readFile(path.join(project, 'js/components/cabin-paint.js'), 'utf8');
   assert.ok(paint.includes("'front-in': [{ coat: false }]") && paint.includes('back: [{ secret: true }]'), 'The coatless wall and the opened wall are cut ahead');
 });
+await test('Santa 隱藏故事 P5：書櫃後的小房間、第一次反轉、聖誕老人回來，與前後呼應的線索', async () => {
+  const { BOARDS, ROOM_SPOTS, SUBSTITUTES } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  const { NAMES, SHIFTS, RULES, NOTES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href);
+  const { DESK_LETTERS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href);
+  assert.ok(ROOM_SPOTS.some(spot => spot.id === 'secret' && spot.view.turn > 0) && BOARDS.filter(board => board.secret).length === 5, 'The little room is a place to look round, with five things on its walls');
+  assert.ok(SUBSTITUTES.every(([char]) => NAMES[char]) && DESK_LETTERS.every(letter => NAMES[letter.back.sign[0]]), 'Every initial on the desk has a name tag behind the bookcase');
+  assert.ok(SHIFTS.some(([date, , , handover]) => date === '12/24' && handover.includes('完成')), 'The night of 12/24 matches the note in the barn');
+  assert.ok(NOTES.known.includes('原來，聖誕老人不只一位') && !Object.values(NOTES).join('').includes('從來不只是一個人') && !RULES.lines.join('').includes('實現了'), 'The first discovery is told; the deeper one is kept for later');
+  const secret = await fs.readFile(path.join(project, 'js/components/cabin-secret.js'), 'utf8'), play = await fs.readFile(path.join(project, 'js/components/cabin-play.js'), 'utf8'), scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8');
+  assert.ok(secret.includes('knowsSantas(story.seen)') && secret.includes('cancelAnimationFrame(frame)') && !secret.includes('innerHTML'), 'The secret is known by the rules once the three clues are read; the buttons follow the view and let go');
+  assert.ok(play.includes('santaReturns({ home: cabin.santaHome') && scene.includes('santaReturn()') && scene.includes('restyled.delete(board.id)'), 'Santa comes home once the secret is known; a look set before a board arrives is applied when it does');
+  const wardrobe = await fs.readFile(path.join(project, 'js/components/cabin-wardrobe.js'), 'utf8'), feed = await fs.readFile(path.join(project, 'js/components/cabin-feed.js'), 'utf8'), world = await fs.readFile(path.join(project, 'js/components/cabin-world.js'), 'utf8');
+  assert.ok(wardrobe.includes('今天怎麼又多了一位聖誕老人') && feed.includes('今天的聖誕老人記得帶地衣來了') && feed.includes('上次那位總是記錯牠喜歡什麼') && world.includes('謝謝昨晚幫忙修好摩天輪的人'), 'Small clues outside, in words only');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

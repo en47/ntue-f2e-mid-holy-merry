@@ -5,7 +5,7 @@
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 
-export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = () => {} }) {
+export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, knows = () => false }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   say('把音樂盒的發條鑰匙順時針轉幾圈，放手它就會開始轉。');
   const knob = element('button', 'musicbox-knob', layer); knob.type = 'button';
@@ -16,7 +16,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
     const { key } = rects, size = Math.max(96, key.width * 2.4), x = key.left + key.width / 2, y = key.top + key.height / 2;
     Object.assign(knob.style, { left: `${x - size / 2}px`, top: `${y - size / 2}px`, width: `${size}px`, height: `${size}px` });
   }
-  const played = () => sound.musicOn ? '小紙雕轉起來了。（網站音樂開著時，音樂盒的歌聲會被蓋過；關掉右下角的音樂就聽得到。）' : '叮叮咚咚……小紙雕跟著音樂慢慢轉。';
+  const played = () => (knows() ? '盒蓋內側刻著 N 和 K：尼爾斯和克莉絲。' : '') + (sound.musicOn ? '小紙雕轉起來了。（網站音樂開著時，音樂盒的歌聲會被蓋過；關掉右下角的音樂就聽得到。）' : '叮叮咚咚……小紙雕跟著音樂慢慢轉。');
   // Each 30° of winding clicks the ratchet once.
   function wind(angle) {
     const before = cabin.wound, after = cabin.wind(angle);

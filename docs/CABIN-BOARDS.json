@@ -1043,6 +1043,41 @@
       "height": 160,
       "bytes": 5034
     },
+    "hi/secret-desk.webp": {
+      "fingerprint": "50c90416453d41bdd82f37016abda6359130f2502be2135994f8482617dcdde5",
+      "sha256": "5ed26f3144d3a840ee0733048a2aca63fcb58aa2d19083eeb5228d479196cb67",
+      "width": 840,
+      "height": 744,
+      "bytes": 27576
+    },
+    "hi/secret-hats.webp": {
+      "fingerprint": "7c5f768b396ced6c7759d039c751f7d5b10cd656a79ffd3de909d203a1200f1f",
+      "sha256": "8bf3d05b0d8faadd62d487326ab0d5a686215b8834a54a5303275208c27f003a",
+      "width": 550,
+      "height": 330,
+      "bytes": 19478
+    },
+    "hi/secret-log.webp": {
+      "fingerprint": "96102080d684fa0d2c51c628c2eb1d86fefd464cde62a556e1fde8aeac18e6a0",
+      "sha256": "058d2e312983cdd21b505575fe94c3021b34b9e20b1a3c027f1bbab40085bc20",
+      "width": 338,
+      "height": 442,
+      "bytes": 15232
+    },
+    "hi/secret-rack.webp": {
+      "fingerprint": "93d633c816bcc2481de4c8d60294d8322682e809242079cf399cc4bace6afea4",
+      "sha256": "372baf6faca6e6c32b9925fba861909b6202c2c37f66e509e3be38de9bf65a40",
+      "width": 550,
+      "height": 484,
+      "bytes": 43948
+    },
+    "hi/secret-tags.webp": {
+      "fingerprint": "ba616bca1e39d8de3ba1054fd02d1e490b9c17101060a66d03cf5518c29f76d5",
+      "sha256": "3faaa4efb5ec6638df29faf2207ec228cc90ed72bbb9b9c5291ccec2e6737ba4",
+      "width": 792,
+      "height": 504,
+      "bytes": 39658
+    },
     "hi/sign--stars-1.webp": {
       "fingerprint": "cb6a768f43ea73d13747014a1b4ef4c1dfd2d2f4d8b52381d2200683672ef1ae",
       "sha256": "1b8b77018f6444e24e6e34bcd4b560b13adcbe47e08442bd513fb1df4552051b",
@@ -2310,6 +2345,41 @@
       "height": 120,
       "bytes": 3758
     },
+    "large/secret-desk.webp": {
+      "fingerprint": "955618130a2ffdce1c7b70a9fba56be1c4e6a4785a6633bd77e284863d82c02a",
+      "sha256": "963a36a3e8ec22af125dac49bbeca459e95dfe135e4f11200ed8e008942c3876",
+      "width": 630,
+      "height": 558,
+      "bytes": 17584
+    },
+    "large/secret-hats.webp": {
+      "fingerprint": "021813e079011ae91cb260743659227c122f0bedbae389db2f9b5b2097946b9a",
+      "sha256": "3c8845dc483dcceaaea87fed51fdcaaadc6455373d9177dfbbdafcd0b65e8aae",
+      "width": 413,
+      "height": 248,
+      "bytes": 13322
+    },
+    "large/secret-log.webp": {
+      "fingerprint": "6f13c1298d0615d19e7c0531596b67a6d8b8c6451902ce42075157841c5913e9",
+      "sha256": "f4216e61755e0804417f81071c318697c2afbc8acbc6ee98981632e74cef52ee",
+      "width": 254,
+      "height": 332,
+      "bytes": 9906
+    },
+    "large/secret-rack.webp": {
+      "fingerprint": "665f86e3fe92297a1080d8d57853fce4346d66d56dd7718942614fd86fcd1611",
+      "sha256": "2c8d09703bf7d69d50a089ebb49e6d08c51862733e151ab78e8ced7c074bac16",
+      "width": 413,
+      "height": 363,
+      "bytes": 27196
+    },
+    "large/secret-tags.webp": {
+      "fingerprint": "c3be1764c4c90d65e32692df653c233bace292a420aa34e28e4a304010e50c45",
+      "sha256": "7cb905c5a4abcd41a246251dcc8862f0b381fd4a448ec8b41aeab4e8d1d2550a",
+      "width": 594,
+      "height": 378,
+      "bytes": 27112
+    },
     "large/sign--stars-1.webp": {
       "fingerprint": "cf1579cae5981b7b0a1b686ab59037a4d26feb8195caed55d24c5182efe5ac28",
       "sha256": "c205ccbf59401bafc56a5f778b038f57e45e80ab97ba582356121a36d5a7d5d7",
@@ -3576,6 +3646,41 @@
       "width": 170,
       "height": 80,
       "bytes": 1484
+    },
+    "small/secret-desk.webp": {
+      "fingerprint": "8ae83baa0180086bed403172d1a9ff9d7eb07737fdf8e6e25e12f2418555f14b",
+      "sha256": "074de81a2f882807ce2063c7b3a2a3462a93c45b3751dca61a2bd0990783cf5d",
+      "width": 420,
+      "height": 372,
+      "bytes": 5954
+    },
+    "small/secret-hats.webp": {
+      "fingerprint": "c92fd28e294e8d8fc54f186732b778c5afe812219338715e9d75e6c421d981c7",
+      "sha256": "8be29dfc39eacd74e6dd83629c9a7307fda2fbead782812f52bb79c88f406ad2",
+      "width": 275,
+      "height": 165,
+      "bytes": 5076
+    },
+    "small/secret-log.webp": {
+      "fingerprint": "1f1a2209c698ad5515c4be3c2f893aa115e8033734efc2a648012ef8ae09a626",
+      "sha256": "e165b141a6e5ff25957e187deb81a094f74c9498b376a3c7930eccc016f0791b",
+      "width": 169,
+      "height": 221,
+      "bytes": 3166
+    },
+    "small/secret-rack.webp": {
+      "fingerprint": "f2bd2519c840a8841e22358c841ee852fa19c723386d9efc4a58c9af4f301e98",
+      "sha256": "4e7ea321c463e7ce2d5e76bfea75225399efd111cb637b753b739a0f73f33fcf",
+      "width": 275,
+      "height": 242,
+      "bytes": 8624
+    },
+    "small/secret-tags.webp": {
+      "fingerprint": "1e20ba2048f650f0147f60d1b9d9c3fde81e8b283588b3a0da23341b932959d3",
+      "sha256": "7f3e43f81ad1b02cf21359d886da7f97675255a251aced3a2bcef51ae97b5aca",
+      "width": 396,
+      "height": 252,
+      "bytes": 11500
     },
     "small/sign--stars-1.webp": {
       "fingerprint": "bfa9e6d1e88d8e19239004679a16a9db46cff57c2b9fe2cf41236ba71b347775",
