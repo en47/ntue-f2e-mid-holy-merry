@@ -301,6 +301,25 @@ await test('Santa 隱藏故事 P5：書櫃後的小房間、第一次反轉、�
   const wardrobe = await fs.readFile(path.join(project, 'js/components/cabin-wardrobe.js'), 'utf8'), feed = await fs.readFile(path.join(project, 'js/components/cabin-feed.js'), 'utf8'), world = await fs.readFile(path.join(project, 'js/components/cabin-world.js'), 'utf8');
   assert.ok(wardrobe.includes('今天怎麼又多了一位聖誕老人') && feed.includes('今天的聖誕老人記得帶地衣來了') && feed.includes('上次那位總是記錯牠喜歡什麼') && world.includes('謝謝昨晚幫忙修好摩天輪的人'), 'Small clues outside, in words only');
 });
+await test('Santa 屋內修正：每個家具都點得到、小房間的紙不貼牆、彩燈跟著樹動、書桌逐步提示', async () => {
+  const { ROOM_SPOTS, ROOM_PROPS, INSIDE, BOARDS, SECRET } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  // From the middle of the room, a line to each place's centre must meet that place's own tap target first.
+  const boxes = [...ROOM_SPOTS.map(spot => [spot.id, spot.box]), ...ROOM_PROPS.filter(prop => prop.box).map(prop => [prop.id, prop.box])];
+  const enter = (o, d, [[cx, cy, cz], [w, h, z]]) => { let t0 = 0, t1 = Infinity; for (const [oi, di, c, s] of [[o[0], d[0], cx, w], [o[1], d[1], cy, h], [o[2], d[2], cz, z]]) { const lo = c - s / 2, hi = c + s / 2; if (Math.abs(di) < 1e-9) { if (oi < lo || oi > hi) return null; continue; } let a = (lo - oi) / di, b = (hi - oi) / di; if (a > b) [a, b] = [b, a]; t0 = Math.max(t0, a); t1 = Math.min(t1, b); if (t0 > t1) return null; } return t0; };
+  for (const spot of ROOM_SPOTS.filter(spot => !['secret', 'shelf'].includes(spot.id))) {
+    const direction = spot.box[0].map((value, i) => value - INSIDE.eye[i]);
+    const first = boxes.map(([id, box]) => [id, enter(INSIDE.eye, direction, box)]).filter(([, t]) => t !== null).sort((a, b) => a[1] - b[1])[0]?.[0];
+    assert.equal(first, spot.id, `From the middle of the room, tapping the ${spot.id} reaches it`);
+  }
+  // A sheet's paper edge lies 1.2 cm behind it: sheets on the little room's walls stand further off than that.
+  for (const board of BOARDS.filter(board => board.secret && board.turn)) {
+    const gap = board.turn > 0 ? board.at[0] - SECRET.left : SECRET.left + SECRET.width - board.at[0];
+    assert.ok(gap >= .025, `${board.id} stands clear of its wall, so its edge does not flicker against it`);
+  }
+  const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), desk = await fs.readFile(path.join(project, 'js/components/cabin-desk.js'), 'utf8');
+  assert.ok(scene.includes("const COMPANIONS = { tree: ['tree-lights'] }") && scene.includes('together(id, sheet => { sheet.holder.rotation.z'), 'The tree lights sway and lift with the tree');
+  assert.ok(desk.includes("element('p', 'desk-guide', work)") && desk.includes("tools.stamp.classList.toggle('is-ready'") && desk.includes("tools.seal.classList.toggle('is-ready'"), 'The desk says what can be done next and lights up the tool that can be used');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));
