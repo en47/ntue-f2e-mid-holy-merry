@@ -7,13 +7,15 @@ import { homeShelf, moveBook, solved } from '../services/cabin-story.js';
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const HINTS = ['燙金的那幾本書，好像特別重要。', 'SANTA 繪本左邊，正好空著四個位置。', '把燙金的四本排成一個英文字，放在 SANTA 前面。'];
 
-export function booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen }) {
+export function booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen, toggle }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const story = progress.story;
+  // Solved already: shut, it can be pushed open again (no need to spell it twice); open, the way in is behind it.
   if (story.opened) {
-    say('書櫃已經轉開了，後面有一個小房間。');
-    const enter = element('button', 'books-enter', layer, '走進書櫃後的小房間 →'); enter.type = 'button';
-    on(enter, 'click', () => cabin.setView('secret')); enter.focus({ preventScroll: true });
+    const enter = element('button', 'books-enter', layer); enter.type = 'button';
+    const show = () => { enter.textContent = story.shut ? '推開書櫃 →' : '走進書櫃後的小房間 →'; };
+    say(story.shut ? '書櫃關上了，書還照你排的樣子：M、O、R、E、SANTA。' : '書櫃已經轉開了，後面有一個小房間。'); show();
+    on(enter, 'click', () => { if (story.shut) { toggle(true); show(); } else cabin.setView('secret'); }); enter.focus({ preventScroll: true });
     return () => events.abort();
   }
   // A slip tucked in at the end of the shelf, in someone's hand.

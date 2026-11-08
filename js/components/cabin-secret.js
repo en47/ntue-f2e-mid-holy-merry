@@ -12,7 +12,7 @@ const THINGS = {
   register: ['secret-desk', [.08, .18, .27, .44], '登記簿'], stamps: ['secret-desk', [.52, .2, .9, .45], '郵戳章'], hats: ['secret-hats', undefined, '聖誕帽'], rack: ['secret-rack', undefined, '分揀架'],
 };
 
-export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow }) {
+export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const story = progress.story;
   say(knowsSantas(story.seen) ? '小房間裡還是老樣子：名牌、班表、守則，和那一排郵戳章。' : '書櫃後面是一個小房間。牆上掛著東西，桌上也擺著東西。');
@@ -21,6 +21,9 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     on(button, 'click', () => open(id, button)); return [id, button];
   });
   let card = null;
+  // Out of the little room and the bookcase pushed shut behind you (only once you are clear of its swing).
+  const leave = element('button', 'books-enter', layer, '離開，關上書櫃 ↺'); leave.type = 'button';
+  on(leave, 'click', () => { cabin.setView('inside'); setTimeout(onShut, 1300); });
   // The view can be turned a little here (to see the side walls), so the buttons follow it every frame; one out of
   // sight is put away.
   let frame = 0;

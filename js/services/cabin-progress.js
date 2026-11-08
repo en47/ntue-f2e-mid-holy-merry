@@ -8,9 +8,10 @@ export const PLACES = ['head', 'neck', 'face', 'hand'];
 export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'carrot', hand: null });
 // The barn's hoist: whether its rope is hooked at the top, and whether the note behind the bale has been read. The desk:
 // which letters have been postmarked, and whether the waiting reply has been sealed with wax. The story: whether Santa has
-// ever gone out, how the bookcase's books stand, whether it has opened, and which clues behind it have been read
+// ever gone out, how the bookcase's books stand, whether it has opened (and whether it has been pushed shut again since),
+// and which clues behind it have been read
 // (cabin-story.js).
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { stamped: [], sealed: false }, story: { left: false, opened: false, shelf: homeShelf(), seen: [] } });
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { stamped: [], sealed: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [] } });
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
 export const dayOf = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -34,7 +35,7 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   const stamped = saved.desk?.stamped;
   progress.desk = { stamped: Array.isArray(stamped) ? [...new Set(stamped.filter(id => typeof id === 'string'))].slice(0, 20) : [], sealed: saved.desk?.sealed === true };
   const seen = saved.story?.seen;
-  progress.story = { left: saved.story?.left === true, opened: saved.story?.opened === true, shelf: readShelf(saved.story?.shelf), seen: Array.isArray(seen) ? CLUES.filter(clue => seen.includes(clue)) : [] };
+  progress.story = { left: saved.story?.left === true, opened: saved.story?.opened === true, shut: saved.story?.shut === true, shelf: readShelf(saved.story?.shelf), seen: Array.isArray(seen) ? CLUES.filter(clue => seen.includes(clue)) : [] };
   return progress;
 }
 // Returns false when the browser will not keep it (private mode, full storage); the yard still plays for this visit.
