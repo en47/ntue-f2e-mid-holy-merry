@@ -5,7 +5,7 @@ import { mountCabinChat } from './components/cabin-chat.js';
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
 const back = document.querySelector('#cabin-back'), tip = document.querySelector('#cabin-tip'), explore = [...document.querySelectorAll('.cabin-explore [data-spot]')], looks = [...document.querySelectorAll('.cabin-explore [data-look]')];
-const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], ROOMS = ['hearth', 'desk', 'musicbox', 'globe', 'shelf'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
+const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], ROOMS = ['hearth', 'desk', 'musicbox', 'globe', 'shelf', 'secret'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 // The flight down over the village is for a large desktop window; a phone, a tablet or a small window starts at the house.
 const roomy = matchMedia('(min-width: 1100px) and (min-height: 650px) and (hover: hover) and (pointer: fine)');
@@ -45,11 +45,13 @@ function onView(view) {
   if (view === 'desk') status.textContent = '走到書桌前：可以抽一封信來讀，也可以蓋郵戳、封火漆。';
   if (view === 'musicbox') status.textContent = '走到音樂盒前：轉幾圈發條，它就會叮叮咚咚地轉起來。';
   if (view === 'globe') status.textContent = '拿起爐台上的雪花球：左右搖一搖，看雪花慢慢落下。';
+  if (view === 'secret') status.textContent = '走進書櫃後的小房間：牆上掛著名牌，桌上擺著一本小冊子。';
   if (view === 'shelf') status.textContent = '走到書櫃前，看看架上的書。';
   if (view === 'outside') status.textContent = '回到屋外。往左轉是遊樂場和許願角，往右轉是海邊和燈塔，雪山在小屋後面。';
 }
 back.addEventListener('click', () => cabin?.back());
-explore.forEach(button => button.addEventListener('click', () => { cabin?.setView(button.dataset.spot); back.focus(); }));
+// Once the bookcase stands open, going to it means going through it.
+explore.forEach(button => button.addEventListener('click', () => { cabin?.setView(button.dataset.spot === 'shelf' && play?.opened ? 'secret' : button.dataset.spot); back.focus(); }));
 looks.forEach(button => button.addEventListener('click', () => { cabin?.look(button.dataset.look); stage.querySelector('.cabin-gesture').focus(); }));
 // Escape steps back once (from the hearth to the room, from the room out of the door); the scene may have taken it already.
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !event.defaultPrevented && cabin && cabin.view !== 'outside') { cabin.back(); stage.querySelector('.cabin-gesture').focus(); } });
@@ -76,7 +78,7 @@ async function mountCabin(fly = true) {
     if (run !== generation) return;
     const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (note) play?.note(note); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
     if (!result || run !== generation) { result?.destroy(); return; }
-    cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; }, onSanta: state => chat.setAway(state === 'away' || state === 'opened' && !cabin?.santaHome) });
+    cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; }, onSanta: state => { if (state === 'away' || state === 'home') chat.setAway(state === 'away'); } });
     cabin.setFound([...found]);
     if (found.size) cabin.repaint('sign', { stars: found.size });
     play.restore([...found]);

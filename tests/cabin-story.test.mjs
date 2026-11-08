@@ -32,3 +32,10 @@ test('Santa goes out after two things used in the room (one if he has gone befor
   assert.equal(santaGoes({ used: 3, left: true, home: false, opened: false }), false);
   assert.equal(santaGoes({ used: 3, left: true, home: true, opened: true }), false);
 });
+test('the secret is known once the name tags, the shift log and the rulebook have all been read', async () => {
+  const { knowsSantas, santaReturns } = await import('../js/services/cabin-story.js');
+  assert.equal(knowsSantas(['tags', 'log']), false); assert.equal(knowsSantas(['rules', 'log', 'tags']), true);
+  assert.equal(santaReturns({ home: false, opened: true, seen: ['tags', 'log', 'rules'] }), true);
+  assert.equal(santaReturns({ home: false, opened: true, seen: ['tags'] }), false, 'not before the secret is known');
+  assert.equal(santaReturns({ home: true, opened: true, seen: ['tags', 'log', 'rules'] }), false, 'not when he is already home');
+});

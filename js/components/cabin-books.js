@@ -10,7 +10,12 @@ const HINTS = ['燙金的那幾本書，好像特別重要。', 'SANTA 繪本左
 export function booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const story = progress.story;
-  if (story.opened) { say('書櫃已經轉開了，後面有一個小房間。'); return () => events.abort(); }
+  if (story.opened) {
+    say('書櫃已經轉開了，後面有一個小房間。');
+    const enter = element('button', 'books-enter', layer, '走進書櫃後的小房間 →'); enter.type = 'button';
+    on(enter, 'click', () => cabin.setView('secret')); enter.focus({ preventScroll: true });
+    return () => events.abort();
+  }
   // A slip tucked in at the end of the shelf, in someone's hand.
   const slip = element('p', 'books-slip', layer, "There's always room for more."); slip.setAttribute('lang', 'en');
   const places = Array.from({ length: 13 }, (_, place) => { const button = element('button', 'books-place', layer); button.type = 'button'; button.dataset.place = place; return button; });
@@ -40,7 +45,11 @@ export function booksGame({ layer, stage, cabin, say, later, sound, progress, sa
     done = true; tools.hidden = true; slip.hidden = true; for (const button of places) button.hidden = true; sound.play('click'); cabin.glintBooks(); say('');
     later(700, () => { sound.play('thud'); say('喀——書櫃裡傳來木頭機關的聲音。'); });
     later(1500, () => { sound.play('creak'); cabin.openBookcase(true); story.opened = true; save(); onOpen(); });
-    later(4200, () => say('書櫃慢慢轉開了，後面還有一個小房間。'));
+    later(4200, () => {
+      say('書櫃慢慢轉開了，後面還有一個小房間。');
+      const enter = element('button', 'books-enter', layer, '走進書櫃後的小房間 →'); enter.type = 'button';
+      on(enter, 'click', () => cabin.setView('secret')); enter.focus({ preventScroll: true });
+    });
   }
   function move(from, to) { const next = moveBook(shelf, from, to); if (next === shelf) return; shelf = next; sound.play('snap'); settle(); }
   places.forEach((button, place) => {

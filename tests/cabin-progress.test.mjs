@@ -48,3 +48,8 @@ test('the desk remembers which letters were postmarked and whether the reply is 
   assert.deepEqual(readProgress(store).desk, { stamped: ['mia', 'ole'], sealed: true });
   assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { stamped: 'mia', sealed: 1 } }) })).desk, { stamped: [], sealed: false });
 });
+test('the story keeps only real clues and a whole shelf', () => {
+  const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ story: { left: true, opened: true, seen: ['log', 'tags', 'diary', 'log'], shelf: 'x' } }) });
+  const { story } = readProgress(store);
+  assert.deepEqual(story.seen, ['tags', 'log']); assert.equal(story.left, true); assert.equal(story.opened, true); assert.equal(story.shelf.length, 13);
+});

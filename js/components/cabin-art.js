@@ -558,6 +558,66 @@ export function chairNote({ paper }, { width, height }) {
   letter(paper, 'S', width * .78, height * .8, width * .16, height * .2, { fill: '#8f3b36' });
 }
 
+// The little room behind the bookcase, where the substitutes keep their things. Its walls are solid (cabin-scene.js);
+// these sheets hang on them. Initials are drawn letters; full names and words are read up close (cabin-secret.js).
+export const SUBSTITUTES = [['N', '#8f3b36'], ['K', '#3f5a7a'], ['H', '#3f6653'], ['E', '#6e4a6b'], ['O', '#b98a3c']];
+export function nameTags({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: height * .18, width, height: height * .1, rx: 8, fill: WOOD_LIT }, paper);
+  const step = width / 6.4;
+  SUBSTITUTES.forEach(([char, colour], i) => {
+    const cx = step * (i + .9), top = height * .23;
+    shape('circle', { cx, cy: top, r: 9, fill: WOOD }, paper);
+    shape('path', { d: `M${cx} ${top}L${cx - step * .3} ${top + height * .2}M${cx} ${top}L${cx + step * .3} ${top + height * .2}`, stroke: '#c9a77f', 'stroke-width': 3 }, paper);
+    shape('rect', { x: cx - step * .38, y: top + height * .2, width: step * .76, height: height * .44, rx: 10, fill: '#fffdf6', transform: `rotate(${(i % 2 ? 1 : -1) * 4} ${cx} ${top})` }, paper);
+    shape('rect', { x: cx - step * .38, y: top + height * .2, width: step * .76, height: height * .1, rx: 8, fill: colour, transform: `rotate(${(i % 2 ? 1 : -1) * 4} ${cx} ${top})` }, paper);
+    letter(paper, char, cx, top + height * .47, step * .44, height * .22, { fill: colour });
+  });
+  // The sixth hook, empty.
+  shape('circle', { cx: step * 5.9, cy: height * .23, r: 9, fill: WOOD }, paper);
+}
+export function shiftLog({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: height * .04, width, height: height * .96, rx: 10, fill: WOOD_LIT }, paper);
+  shape('rect', { x: width * .07, y: height * .12, width: width * .86, height: height * .82, rx: 4, fill: '#fffdf6' }, paper);
+  shape('rect', { x: width * .3, y: 0, width: width * .4, height: height * .1, rx: 6, fill: '#9a9a9a' }, paper);
+  ['#8f3b36', '#3f5a7a', '#3f6653', '#3f5a7a', '#8f3b36', '#6e4a6b'].forEach((ink, i) => shape('path', { d: `M${width * .14} ${height * (.24 + i * .12)}c${width * .2} -8 ${width * .4} 8 ${width * .62} 0`, fill: 'none', stroke: ink, 'stroke-width': 4, 'stroke-linecap': 'round' }, paper));
+}
+export function secretDesk({ paper }, { width, height }) {
+  const top = height * .42;
+  shape('rect', { x: width * .04, y: top, width: width * .92, height: 24, rx: 6, fill: WOOD_LIT }, paper);
+  for (const x of [.08, .86]) shape('rect', { x: width * x, y: top + 20, width: width * .06, height: height - top - 20, fill: WOOD }, paper);
+  // The register on its lectern, open; red string round the older pages.
+  shape('path', { d: `M${width * .1} ${top}L${width * .16} ${top - height * .2}H${width * .46}L${width * .5} ${top}Z`, fill: WOOD }, paper);
+  shape('path', { d: `M${width * .14} ${top - height * .18}Q${width * .22} ${top - height * .24} ${width * .3} ${top - height * .19}Q${width * .38} ${top - height * .24} ${width * .46} ${top - height * .18}L${width * .44} ${top - height * .04}H${width * .16}Z`, fill: '#fffdf6' }, paper);
+  shape('path', { d: `M${width * .14} ${top - height * .1}H${width * .2}M${width * .4} ${top - height * .1}H${width * .46}`, stroke: RED, 'stroke-width': 5 }, paper);
+  // A row of postmark stamps, each with its own initial, and the little rulebook.
+  SUBSTITUTES.slice(0, 4).forEach(([char, colour], i) => {
+    const cx = width * (.56 + i * .085);
+    shape('rect', { x: cx - 12, y: top - 60, width: 24, height: 40, rx: 6, fill: WOOD }, paper);
+    shape('circle', { cx, cy: top - 64, r: 13, fill: WOOD_LIT }, paper);
+    shape('rect', { x: cx - 20, y: top - 22, width: 40, height: 20, rx: 4, fill: colour }, paper);
+  });
+  shape('rect', { x: width * .3, y: top - 26, width: width * .16, height: 24, rx: 4, fill: '#3f6653', transform: `rotate(-6 ${width * .38} ${top})` }, paper);
+}
+export function sortingRack({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, rx: 8, fill: WOOD }, paper);
+  const cols = 4, rows = 3, cw = (width - 30) / cols, rh = (height - 30) / rows;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const x = 15 + c * cw, y = 15 + r * rh;
+    shape('rect', { x: x + 4, y: y + 4, width: cw - 8, height: rh - 8, fill: '#5e3e29' }, paper);
+    for (let k = 0; k < 1 + (r * 3 + c) % 3; k++) shape('rect', { x: x + 12 + k * 6, y: y + rh * .3 - k * 4, width: cw - 28, height: rh * .6, rx: 3, fill: ['#fffdf6', '#f3e6c8', '#eadcc0'][k], transform: `rotate(${(k - 1) * 4} ${x + cw / 2} ${y + rh})` }, paper);
+  }
+}
+export function hatPegs({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: height * .12, width, height: height * .1, rx: 6, fill: WOOD_LIT }, paper);
+  [1, .82, .64, .44].forEach((size, i) => {
+    const cx = width * (.14 + i * .24), top = height * .2, h = height * .7 * size, w = width * .2 * size;
+    shape('circle', { cx, cy: top, r: 7, fill: WOOD }, paper);
+    shape('path', { d: `M${cx - w / 2} ${top + h}C${cx - w * .4} ${top + h * .3} ${cx + w * .2} ${top} ${cx + w * .55} ${top + h * .35}L${cx + w / 2} ${top + h}Z`, fill: RED }, paper);
+    shape('rect', { x: cx - w * .58, y: top + h - h * .16, width: w * 1.16, height: h * .2, rx: h * .1, fill: SNOW }, paper);
+    shape('circle', { cx: cx + w * .56, cy: top + h * .38, r: Math.max(6, w * .12), fill: SNOW }, paper);
+  });
+}
+
 // The writing desk under the left window, turned to face the room. On top, from the door end: the rack with the reply
 // waiting to go, the postmark stamp on its ink pad, the bundle of letters, the wax seal, tea and the last of last night's
 // cookies, and the lamp. `DESK.items` are where they are on the sheet ([left, top, right, bottom] as fractions of its
@@ -1084,6 +1144,13 @@ export const BOARDS = [
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
   { id: 'chair-front', w: .82, h: .44, at: [0, 0, .2], draw: chairFront, chair: true },
+  // The little room behind the bookcase (`secret`: drawn only once it is open): name tags on its left wall, the shift
+  // log and hats on its right, the substitutes' table at the back, a sorting rack low on the right.
+  { id: 'secret-tags', w: .66, h: .42, px: 1200, at: [SECRET.left + .012, .6, -HOUSE.depth / 2 - .55], turn: Math.PI / 2, draw: nameTags, room: true, secret: true },
+  { id: 'secret-desk', w: .7, h: .62, px: 1200, at: [SECRET.left + SECRET.width / 2, 0, -HOUSE.depth / 2 - SECRET.depth + .02], draw: secretDesk, room: true, secret: true },
+  { id: 'secret-log', w: .26, h: .34, px: 1300, at: [SECRET.left + SECRET.width - .012, .62, -HOUSE.depth / 2 - .42], turn: -Math.PI / 2, draw: shiftLog, room: true, secret: true },
+  { id: 'secret-hats', w: .5, h: .3, px: 1100, at: [SECRET.left + SECRET.width - .012, .9, -HOUSE.depth / 2 - .9], turn: -Math.PI / 2, draw: hatPegs, room: true, secret: true },
+  { id: 'secret-rack', w: .5, h: .44, px: 1100, at: [SECRET.left + SECRET.width - .012, .08, -HOUSE.depth / 2 - .85], turn: -Math.PI / 2, draw: sortingRack, room: true, secret: true },
   // Shown only while Santa is out (cabin-scene.js), propped on the seat against the chair's back.
   { id: 'chair-note', w: .18, h: .13, px: 1400, at: [0, .47, -.2], draw: chairNote, chair: true },
   // One low ridge of snowy foothills; the far mountain ranges behind it are in cabin-world.js.
@@ -1135,6 +1202,7 @@ export const ROOM_SPOTS = [
   { id: 'desk', name: '書桌', box: [[DESK.x - .22, .7, DESK.z], [.5, 1.1, DESK.w]], view: { target: [DESK.x - .12, .82, DESK.z], distance: 1.05, pitch: .42, yaw: 1.33, tallDistance: 1.35, tallFov: 70 } },
   { id: 'musicbox', name: '音樂盒', box: [[MUSICBOX.x, MUSICBOX.y + .12, MUSICBOX.z], [.2, .3, .32]], view: { target: [MUSICBOX.x, MUSICBOX.y + .1, MUSICBOX.z], distance: .78, pitch: .28, yaw: -Math.PI / 2, tallDistance: .82, tallFov: 54 } },
   { id: 'globe', name: '雪花球', box: [[GLOBE.x, GLOBE.y + GLOBE.h / 2, GLOBE.z], [.22, .26, .2]], view: { target: [GLOBE.x, GLOBE.y + .09, GLOBE.z], distance: .62, pitch: .1, yaw: 0, tallDistance: .8, tallFov: 56 } },
+  { id: 'secret', name: '書櫃後的小房間', box: [[SECRET.left + SECRET.width / 2, SECRET.height / 2, -HOUSE.depth / 2 - .05], [SECRET.width, SECRET.height, .2]], view: { target: [SECRET.left + SECRET.width / 2, .6, -HOUSE.depth / 2 - .85], distance: .95, pitch: .22, yaw: .02, fov: 62, tallDistance: .95, tallFov: 84, turn: .6, tilt: .2 } },
   { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.05, pitch: .1, yaw: .06, fov: 40, tallDistance: 1.05, tallFov: 78 } },
 ];
 

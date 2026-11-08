@@ -23,3 +23,8 @@ export const solved = shelf => spelled(shelf) === 'MORE';
 // Santa goes out to the reindeer once the visitor has used two different things in the room (one, for someone who has
 // seen him go before), and only while he is at home and the shelf is not yet open.
 export const santaGoes = ({ used, left, home, opened }) => home && !opened && used >= (left ? 1 : 2);
+// In the little room behind the bookcase three things tell the secret: the name tags, the shift log and the rulebook.
+// Seen all three, the visitor knows there is more than one Santa; then he comes home from the reindeer.
+export const CLUES = ['tags', 'log', 'rules'];
+export const knowsSantas = seen => CLUES.every(clue => seen.includes(clue));
+export const santaReturns = ({ home, opened, seen }) => !home && opened && knowsSantas(seen);
