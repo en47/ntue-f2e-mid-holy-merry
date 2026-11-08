@@ -31,6 +31,9 @@ export const INSIDE = { eye: [.45, 1.15, .9], heading: .44, tallHeading: .78, pi
 // The bookcase on the back wall, left of the back door: `left` is its hinge edge (it can swing open on it), `z` its painted
 // back. Books stand on wooden shelves whose tops are at `shelves` (metres up from the floor).
 export const BOOKCASE = { left: -1.56, width: .95, height: 1.4, depth: .26, z: -HOUSE.depth / 2 + .02, shelves: [.05, .39, .73, 1.07] };
+// The writing desk against the left wall, facing the room (see desk()). `x` is its front edge, `z` its middle: toward the
+// door from the rocking chair, so it can be looked at straight on, with the window and its advent house over its far end.
+export const DESK = { x: -1.15, z: .82, w: .95, h: 1.25, top: .76, items: { outbox: [.04, .27, .2, .4], stamp: [.22, .28, .32, .4], stack: [.34, .3, .54, .4], seal: [.56, .29, .64, .4], cup: [.66, .3, .8, .4], lamp: [.82, .08, .97, .4] } };
 // Things in the room that move about a pivot of their own: the bellows hang beside the fire, nozzle down toward it.
 export const ROOM_RIGS = { bookcase: { at: [BOOKCASE.left, 0, BOOKCASE.z] }, bellows: { at: [1.27, .12, -HOUSE.depth / 2 + .2], tilt: -.25 } };
 const CREAM = '#fbf3df', SNOW = '#fbf8f1', RED = '#a84a42', GREEN = '#4f7d68', DEEP_GREEN = '#3f6653', GOLD = '#e0b04f';
@@ -488,19 +491,58 @@ export function bellowsLeather({ paper }, { width, height }) {
   shape('rect', { x: cx - 9, y: mouth - 6, width: 18, height: height - mouth + 6, rx: 4, fill: '#e0b04f' }, paper);
 }
 
-export function lampTable({ paper }, { width, height }) {
-  const cx = width / 2, top = height - 230;
-  shape('rect', { x: cx - 16, y: top + 18, width: 32, height: 200, fill: WOOD }, paper);
-  shape('path', { d: `M${cx - 70} ${height - 6}C${cx - 60} ${height - 36} ${cx + 60} ${height - 36} ${cx + 70} ${height - 6}Z`, fill: WOOD }, paper);
-  shape('ellipse', { cx, cy: top + 12, rx: 110, ry: 20, fill: WOOD }, paper);
-  shape('ellipse', { cx, cy: top + 4, rx: 110, ry: 20, fill: WOOD_LIT }, paper);
-  // Lamp with a cream shade (its glow is a separate sprite), and the cookies and milk left out last night.
-  shape('rect', { x: cx + 18, y: top - 120, width: 14, height: 120, fill: GOLD }, paper);
-  shape('ellipse', { cx: cx + 25, cy: top - 4, rx: 30, ry: 9, fill: GOLD }, paper);
-  shape('path', { d: `M${cx - 22} ${top - 120}L${cx + 2} ${top - 200}H${cx + 48}L${cx + 72} ${top - 120}Z`, fill: '#fbe9c2' }, paper);
-  shape('ellipse', { cx: cx - 50, cy: top - 2, rx: 40, ry: 10, fill: CREAM }, paper);
-  for (const [x, y] of [[cx - 64, top - 12], [cx - 36, top - 14]]) { shape('circle', { cx: x, cy: y, r: 14, fill: '#c08a5a' }, paper); shape('circle', { cx: x - 3, cy: y - 3, r: 3, fill: '#5b3a2c' }, paper); }
-  shape('path', { d: `M${cx - 98} ${top}L${cx - 101} ${top - 60}H${cx - 69}L${cx - 72} ${top}Z`, fill: '#fffdf7' }, paper);
+// The writing desk under the left window, turned to face the room. On top, from the door end: the rack with the reply
+// waiting to go, the postmark stamp on its ink pad, the bundle of letters, the wax seal, tea and the last of last night's
+// cookies, and the lamp. `DESK.items` are where they are on the sheet ([left, top, right, bottom] as fractions of its
+// width and height), so the desk's game can lay its buttons over them.
+export function desk({ paper }, { width, height }) {
+  const top = height * (1 - DESK.top / DESK.h), box = name => DESK.items[name].map((value, i) => value * (i % 2 ? height : width));
+  // The desk: its top seen a little from above, a drawer each side, the kneehole between.
+  shape('path', { d: `M${width * .015} ${top}L${width * .05} ${top - 46}H${width * .95}L${width * .985} ${top}Z`, fill: WOOD_LIT }, paper);
+  shape('rect', { x: 0, y: top, width, height: 30, rx: 6, fill: WOOD }, paper);
+  for (const [x, w] of [[.03, .3], [.67, .3]]) {
+    shape('rect', { x: width * x, y: top + 30, width: width * w, height: height - top - 30, fill: WOOD_LIT }, paper);
+    for (let i = 0; i < 3; i++) {
+      const y = top + 50 + i * (height - top - 70) / 3;
+      shape('rect', { x: width * (x + .02), y, width: width * (w - .04), height: (height - top - 90) / 3, rx: 8, fill: '#9a6343' }, paper);
+      shape('circle', { cx: width * (x + w / 2), cy: y + (height - top - 90) / 6, r: 9, fill: GOLD }, paper);
+    }
+  }
+  shape('rect', { x: width * .33, y: top + 30, width: width * .34, height: 70, fill: '#9a6343' }, paper);
+  shade(paper, width * .33, top + 100, width * .34, height - top - 100, .22);
+  // The reply waiting in its rack.
+  const [ox, oy, ox2, oy2] = box('outbox');
+  shape('rect', { x: ox + 8, y: oy + 24, width: ox2 - ox - 16, height: oy2 - oy - 24, rx: 6, fill: '#fffdf6', transform: `rotate(-6 ${(ox + ox2) / 2} ${oy2})` }, paper);
+  shape('path', { d: `M${ox + 8} ${oy + 30}L${(ox + ox2) / 2} ${oy + 70}L${ox2 - 8} ${oy + 30}`, fill: 'none', stroke: '#d9c9a8', 'stroke-width': 4, transform: `rotate(-6 ${(ox + ox2) / 2} ${oy2})` }, paper);
+  shape('rect', { x: ox, y: oy2 - 46, width: ox2 - ox, height: 46, rx: 6, fill: WOOD }, paper);
+  // The postmark stamp standing on its ink pad.
+  const [sx, sy, sx2, sy2] = box('stamp'), scx = (sx + sx2) / 2;
+  shape('rect', { x: sx, y: sy2 - 20, width: sx2 - sx, height: 20, rx: 5, fill: '#3b2a24' }, paper);
+  shape('rect', { x: scx - 30, y: sy2 - 46, width: 60, height: 26, rx: 4, fill: '#8f3b36' }, paper);
+  shape('rect', { x: scx - 10, y: sy + 30, width: 20, height: sy2 - sy - 76, fill: WOOD_LIT }, paper);
+  shape('circle', { cx: scx, cy: sy + 26, r: 24, fill: WOOD }, paper);
+  // The bundle of letters, tied with red string.
+  const [lx, ly, lx2, ly2] = box('stack');
+  for (let i = 0; i < 6; i++) shape('rect', { x: lx + (i % 2) * 10, y: ly2 - 16 - i * 13, width: lx2 - lx - 14, height: 16, rx: 3, fill: ['#fffdf6', '#f3e6c8', '#eadcc0'][i % 3], transform: `rotate(${(i % 3 - 1) * 2} ${(lx + lx2) / 2} ${ly2})` }, paper);
+  shape('path', { d: `M${(lx + lx2) / 2 - 4} ${ly2 - 96}V${ly2}M${lx} ${ly2 - 44}H${lx2 - 8}`, stroke: RED, 'stroke-width': 5 }, paper);
+  // The wax seal and a stick of red wax.
+  const [wx, wy, wx2, wy2] = box('seal'), wcx = (wx + wx2) / 2;
+  shape('rect', { x: wx, y: wy2 - 12, width: wx2 - wx, height: 12, rx: 6, fill: RED }, paper);
+  shape('rect', { x: wcx - 12, y: wy + 30, width: 24, height: wy2 - wy - 46, rx: 10, fill: WOOD }, paper);
+  shape('circle', { cx: wcx, cy: wy + 28, r: 16, fill: WOOD_LIT }, paper);
+  shape('rect', { x: wcx - 18, y: wy2 - 26, width: 36, height: 16, rx: 5, fill: GOLD }, paper);
+  // Tea in a red cup on its saucer, and two cookies left on a plate.
+  const [cx, cy, cx2, cy2] = box('cup'), ccx = (cx + cx2) / 2;
+  shape('ellipse', { cx: ccx, cy: cy2 - 6, rx: (cx2 - cx) / 2, ry: 10, fill: CREAM }, paper);
+  shape('path', { d: `M${ccx - 34} ${cy + 40}H${ccx + 34}L${ccx + 26} ${cy2 - 10}H${ccx - 26}Z`, fill: RED }, paper);
+  shape('path', { d: `M${ccx + 32} ${cy + 52}c22 0 22 30 0 30`, fill: 'none', stroke: RED, 'stroke-width': 8 }, paper);
+  for (const dx of [-26, 4]) { shape('circle', { cx: ccx + dx - 70, cy: cy2 - 12, r: 15, fill: '#c08a5a' }, paper); shape('circle', { cx: ccx + dx - 73, cy: cy2 - 15, r: 3, fill: '#5b3a2c' }, paper); }
+  for (const [x, h] of [[-10, 40], [8, 52]]) shape('path', { d: `M${ccx + x} ${cy + 30}c-8-${h / 3} 8-${h / 2} 0-${h}`, fill: 'none', stroke: '#fffdf6', 'stroke-width': 4, opacity: .6 }, paper);
+  // The lamp with its cream shade (its glow is a sprite of the scene's).
+  const [px, py, px2, py2] = box('lamp'), pcx = (px + px2) / 2;
+  shape('ellipse', { cx: pcx, cy: py2 - 6, rx: (px2 - px) * .32, ry: 10, fill: GOLD }, paper);
+  shape('rect', { x: pcx - 7, y: py + (py2 - py) * .42, width: 14, height: (py2 - py) * .58 - 8, fill: GOLD }, paper);
+  shape('path', { d: `M${px} ${py + (py2 - py) * .45}L${px + (px2 - px) * .22} ${py}H${px2 - (px2 - px) * .22}L${px2} ${py + (py2 - py) * .45}Z`, fill: '#fbe9c2' }, paper);
 }
 
 export function treeLights({ paper }, { width, height }) {
@@ -964,7 +1006,7 @@ export const BOARDS = [
   // Free-standing in the room, so they turn to face you wherever you stand: from the side they would be a sliver of paper.
   { id: 'tree', w: .74, h: 1.36, at: [1.25, 0, .55], draw: tree, room: true, billboard: true },
   { id: 'tree-lights', w: .74, h: 1.36, at: [1.25, 0, .55], draw: treeLights, twinkle: true, room: true, billboard: true, nudge: .01 },
-  { id: 'lamp-table', w: .5, h: .9, at: [-1.18, 0, .32], draw: lampTable, room: true, billboard: true },
+  { id: 'desk', w: DESK.w, h: DESK.h, px: 1400, at: [DESK.x, 0, DESK.z], turn: Math.PI / 2, draw: desk, room: true },
   { id: 'chair-back', w: .82, h: 1.12, at: [0, 0, -.3], draw: chairBack, chair: true },
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
@@ -1014,6 +1056,7 @@ export const SPOTS = [
 // and `distance`/`tallDistance` are for a wide and a tall screen; a negative `tallDrop` looks higher on a tall one.
 export const ROOM_SPOTS = [
   { id: 'hearth', name: '壁爐', box: [[FIRE.x + .1, .57, BACK + .25], [1.3, 1.14, .5]], view: { target: [FIRE.x + .02, .36, BACK + .25], distance: 1.4, pitch: .2, yaw: -.06, tallDistance: 1.75, tallFov: 74, tallDrop: -.2 } },
+  { id: 'desk', name: '書桌', box: [[DESK.x - .22, .7, DESK.z], [.5, 1.1, DESK.w]], view: { target: [DESK.x - .12, .82, DESK.z], distance: 1.05, pitch: .42, yaw: 1.33, tallDistance: 1.35, tallFov: 70 } },
   { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.3, pitch: .1, yaw: .06, tallDistance: 1.5, tallFov: 62 } },
 ];
 
@@ -1023,7 +1066,6 @@ export const ROOM_PROPS = [
   { id: 'door', name: '大門', box: [[0, DOOR.height / 2, DOOR.z], [DOOR.width, DOOR.height, .3]] },
   { id: 'back-door', name: '後門', box: [[0, .62, BACK + .05], [.5, 1.24, .12]], note: '後門通往後院的玩具工坊，明年的禮物已經開始做了。' },
   { id: 'tree', name: '聖誕樹', box: [[1.25, .68, .55], [.8, 1.36, .8]], note: '屋裡的聖誕樹掛著彩燈，一閃一閃。' },
-  { id: 'lamp-table', name: '小桌', box: [[-1.18, .45, .32], [.6, .9, .6]], note: '小桌上還留著昨晚的餅乾和牛奶。' },
   { id: 'window', name: '窗台', box: [[-1.55, 1.12, .08], [.15, .75, .75]], note: '窗台上的降臨小屋，十二月每過一天就多亮一扇窗。' },
   { id: 'coat', name: '掛衣架', box: [[-.9, 1.05, HOUSE.depth / 2 - .08], [.85, 1, .2]], note: '門邊掛著一件紅外套、帽子和圍巾，靴子還沾著雪。' },
 ];

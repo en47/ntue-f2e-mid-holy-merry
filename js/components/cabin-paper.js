@@ -15,10 +15,11 @@ const PAPERS = {
 };
 // Which paper each box is cut from; the first match wins, so a pressed tab is a red tag and the others stay pale.
 const KINDS = [
-  ['.cabin-letter, .cabin-chat', 'letter'],
+  ['.cabin-letter, .cabin-chat, .desk-letter', 'letter'],
+  ['.desk-envelope', 'pale'],
   ['.feed-basket, .play-basket', 'wood'],
   ['.wardrobe-item[aria-pressed="true"]', 'picked'],
-  ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send', 'tag'],
+  ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send, .desk-actions button', 'tag'],
   ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button', 'pale'],
   ['.cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble', 'note'],
 ];
