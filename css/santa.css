@@ -179,9 +179,50 @@
 .hearth-spark { position: absolute; width: 9px; height: 9px; background: #f2a541; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); pointer-events: none; animation: hearth-spark 1.1s ease-out both; }
 @keyframes hearth-spark { from { opacity: 1; translate: 0 0; } to { opacity: 0; translate: var(--dx) -80px; } }
 @media (prefers-reduced-motion: reduce) { .hearth-bellows { animation: none; } .hearth-log { transition: none; } }
+/* 書桌：信堆、回信架與兩件工具上的發光拖曳區；桌面中央的信封（封口、郵票、郵戳、火漆）與信紙（正反兩面，不同筆跡）。 */
+.desk-pick, .desk-tool { position: absolute; padding: 0; background: radial-gradient(#ffe8a455, transparent 70%); border: 2px dashed #c08a3e88; border-radius: 14px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.desk-tool { z-index: 5; cursor: grab; touch-action: none; }
+.desk-tool.is-dragging { opacity: .35; animation: none; }
+.desk-pick:focus-visible, .desk-tool:focus-visible, .desk-actions button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.desk-ghost { position: absolute; top: 0; left: 0; z-index: 7; width: 80px; height: 80px; pointer-events: none; filter: drop-shadow(0 8px 6px #3b2a2444); transition: scale .12s ease; }
+.desk-ghost .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.desk-ghost.is-pressing { scale: .8; }
+.desk-work { position: absolute; top: 4.4rem; right: 1rem; z-index: 4; width: min(22rem, 44%); display: grid; gap: .8rem; justify-items: center; pointer-events: auto; transition: transform .38s cubic-bezier(.3, .7, .4, 1), opacity .3s ease; }
+.desk-envelope { position: relative; width: 100%; aspect-ratio: 16 / 10; perspective: 900px; }
+.desk-work.is-reading .desk-envelope { display: none; }
+.envelope-flap { position: absolute; inset: 4% 3% auto; height: 52%; background: #efe3c8; clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform .45s ease; filter: drop-shadow(0 3px 2px #3b2a2433); }
+.desk-envelope[data-open="true"] .envelope-flap { transform: rotateX(165deg); }
+.envelope-flap.is-target, .envelope-stamp.is-target { outline: 3px dashed #c08a3e; outline-offset: 4px; }
+.envelope-from { position: absolute; left: 9%; bottom: 10%; margin: 0; color: #6b5a4c; font-size: var(--fs-small); }
+.envelope-to { position: absolute; left: 24%; top: 58%; margin: 0; color: var(--ink); font-family: var(--font-hand); font-size: var(--fs-body); }
+.envelope-stamp { position: absolute; right: 7%; top: 9%; z-index: 1; width: 15%; aspect-ratio: 4 / 5; background: radial-gradient(circle at 50% 60%, #4f7d68 0 28%, transparent 30%), #a84a42; border: 4px dotted #fbf3df; border-radius: 3px; }
+.envelope-postmark { position: absolute; right: 2%; top: 4%; z-index: 2; width: 27%; aspect-ratio: 1; display: grid; place-items: center; margin: 0; color: #3f5a7a; border: 3px solid #3f5a7a; border-radius: 50%; font-size: var(--fs-small); line-height: 1.2; text-align: center; white-space: pre-line; opacity: .75; rotate: -14deg; pointer-events: none; }
+.envelope-wax { position: absolute; left: 50%; top: 50%; z-index: 2; width: 17%; aspect-ratio: 1; display: grid; place-items: center; translate: -50% -50%; color: #f0c4b4; background: radial-gradient(circle at 40% 35%, #c45a4f, #8f3b36 70%); border-radius: 50% 46% 52% 48%; box-shadow: 0 3px 0 #6e2c28; font-family: var(--font-display); font-size: var(--fs-body); }
+.envelope-postmark.is-new, .envelope-wax.is-new { animation: desk-press .32s ease-out both; }
+@keyframes desk-press { from { opacity: 0; scale: 1.5; } to { scale: 1; } }
+.desk-letter { position: relative; width: 100%; min-height: 12rem; transform-style: preserve-3d; transition: transform .6s ease; }
+.desk-work:not(.is-reading) .desk-letter { display: none; }
+.desk-letter.is-flipped { transform: rotateY(180deg); }
+.desk-letter.is-unfolding { animation: desk-unfold .45s ease-out; }
+@keyframes desk-unfold { from { opacity: 0; transform: translateY(-24%) scaleY(.25); } }
+.letter-face { padding: 1.6rem 1.6rem 1.4rem; backface-visibility: hidden; }
+.letter-back { position: absolute; inset: 0; display: grid; align-content: center; gap: .4rem; transform: rotateY(180deg); }
+.letter-body, .letter-note, .letter-sign, .letter-date { margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; white-space: pre-line; }
+.letter-body { color: var(--ink); }
+.letter-sign { text-align: right; }
+.letter-date { color: #8a7a6a; font-size: var(--fs-small); }
+/* 不同的人處理過的信：同一種手寫字，墨水顏色、傾斜和字距各不相同。 */
+.letter-back[data-hand="n"] :is(.letter-note, .letter-sign) { color: #5b3a2c; rotate: -2deg; }
+.letter-back[data-hand="k"] :is(.letter-note, .letter-sign) { color: #3f5a7a; rotate: 2.5deg; letter-spacing: .06em; }
+.letter-back[data-hand="h"] :is(.letter-note, .letter-sign) { color: #3f6653; rotate: -1deg; font-size: var(--fs-small); }
+.desk-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+.desk-actions button { padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .desk-pick, .desk-tool { animation: none; } .desk-work, .desk-letter, .envelope-flap { transition: none; } }
+/* 手機上，桌面讓給桌上的東西，信封和信紙放在下方。 */
+@media (max-width: 700px) { .desk-work { top: auto; right: .6rem; bottom: .6rem; left: .6rem; width: auto; } }
 /* 觸控螢幕：每個按鈕至少 44px 見方，手指點得準。 */
 @media (pointer: coarse) {
-  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send { min-width: 44px; min-height: 44px; }
+  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send, .desk-actions button { min-width: 44px; min-height: 44px; }
 }
 /* 橫拿的手機：小屋和螢幕一樣高（點進角落或屋裡時捲到剛好整個露出），衣櫃、食物籃、對話框改成右側窄欄，提示放到左上。 */
 @media (orientation: landscape) and (max-height: 500px) {

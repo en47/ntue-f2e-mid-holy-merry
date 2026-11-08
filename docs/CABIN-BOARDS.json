@@ -357,6 +357,13 @@
       "height": 350,
       "bytes": 19278
     },
+    "hi/desk.webp": {
+      "fingerprint": "8c7439befb8f4c2923cd25b8b25322856d8b110f779b0b64a1960a1a35d95b2c",
+      "sha256": "5d8bf2cd9cc3f7a9db7aad48abd1ca91194bd4f865ccbc8aba5aa334ef1755e5",
+      "width": 1330,
+      "height": 1750,
+      "bytes": 285086
+    },
     "hi/dinghy.webp": {
       "fingerprint": "69842e758ae942ccd64219e864b034f4e6db1856b19d6221b6d1d72f5a38d55c",
       "sha256": "21998afed2fcc5d895edbac366fa792540e5b26957e52e1094a94862739bd987",
@@ -657,13 +664,6 @@
       "width": 224,
       "height": 897,
       "bytes": 19848
-    },
-    "hi/lamp-table.webp": {
-      "fingerprint": "66f63749cac6b81425ecab828f1a132416b0197b670f071db3dabfbc55c7eb40",
-      "sha256": "662675459742eb234a3b85869d4b9ce81bb4f078343622fbd796c25b0df3d922",
-      "width": 250,
-      "height": 450,
-      "bytes": 9064
     },
     "hi/lantern.webp": {
       "fingerprint": "d3dbd5ebaf20d55e5775b8ca5fa89a9ac95799083916ee8fca73ae149ae50246",
@@ -1568,6 +1568,13 @@
       "height": 263,
       "bytes": 13720
     },
+    "large/desk.webp": {
+      "fingerprint": "7083c764578b2171037b8bcdeee2de46877de3306c28f90381ca922ced900668",
+      "sha256": "e6f6bf741abd17a029df0d67191a1d81ac0001a0337d17ac2478448a47fda339",
+      "width": 998,
+      "height": 1313,
+      "bytes": 169500
+    },
     "large/dinghy.webp": {
       "fingerprint": "a9dd0267d27413946190f36c472d32883ad4f41f9e8577448e8a6974792d9c93",
       "sha256": "3013d4d2aab9df2c3cbfdd1d9b51a4b409b15d09a98fdf4b3957fc03ecece227",
@@ -1868,13 +1875,6 @@
       "width": 168,
       "height": 673,
       "bytes": 14666
-    },
-    "large/lamp-table.webp": {
-      "fingerprint": "94ac3ff6da86272f1295672efb5200d37c88b5b39eb0bb3f162282d0572ed7c3",
-      "sha256": "bcdb1dfb1104a2b39dd527e5a1a458496c38369aa0d8076f448a86f646032eec",
-      "width": 188,
-      "height": 338,
-      "bytes": 6352
     },
     "large/lantern.webp": {
       "fingerprint": "1d16dec653bab96404042ae562c3b6cbe0260e88c46db6c2b542a5fa91454d02",
@@ -2779,6 +2779,13 @@
       "height": 175,
       "bytes": 4120
     },
+    "small/desk.webp": {
+      "fingerprint": "521a9c7b9791bfbd1bcbac3ef4a5497d4f32fb284cb6c697e41176afe85454ed",
+      "sha256": "d250749a8a025df005523e69b5445632dc935dcaa80b5186d082bce3f703bd2d",
+      "width": 665,
+      "height": 875,
+      "bytes": 45650
+    },
     "small/dinghy.webp": {
       "fingerprint": "97d59e4d0af5b369b7d28dc6e9c136d6d89b3763a58ccfa480facc5fd88ef919",
       "sha256": "1daefbce65cc94600728888b29fa71a2da26ee104502e9312ef1f589604c8008",
@@ -3079,13 +3086,6 @@
       "width": 112,
       "height": 449,
       "bytes": 6428
-    },
-    "small/lamp-table.webp": {
-      "fingerprint": "df6327bf7c38d4f4f893f29ab1b021226e0b22efc807097cf40b8bb958356300",
-      "sha256": "04a833434fedb6134125c94f8c56c1b0361c74fa93157a3ab2996aff32b64d1a",
-      "width": 125,
-      "height": 225,
-      "bytes": 2638
     },
     "small/lantern.webp": {
       "fingerprint": "25415d6d1d8d672bf193d7e652c5152ea64b2e61936a9f1c2122470f2d22de4b",

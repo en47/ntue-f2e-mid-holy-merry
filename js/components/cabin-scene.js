@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -369,7 +369,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const warm = keep(textures, radialTexture([[0, 'rgba(255,190,110,.8)'], [.45, 'rgba(255,150,70,.28)'], [1, 'rgba(255,140,60,0)']]));
   const glow = (position, size, parent = indoors) => { const sprite = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: warm, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }))); sprite.position.copy(position); sprite.scale.setScalar(size); parent.add(sprite); return sprite; };
   const fireGlow = glow(new THREE.Vector3(FIRE.x, .28, FIRE.z - .05), 1), lanternGlow = glow(new THREE.Vector3(LANTERN.x, 2.68, LANTERN.z + .02), .7);
-  glow(new THREE.Vector3(-.88, .78, .36), .5);
+  // The desk lamp's glow, under its shade (the desk faces the room, so the sheet's right-hand end is toward the back).
+  glow(new THREE.Vector3(DESK.x + .03, DESK.h * (1 - (DESK.items.lamp[1] + DESK.items.lamp[3]) / 2.6), DESK.z + (.5 - (DESK.items.lamp[0] + DESK.items.lamp[2]) / 2) * DESK.w), .5);
   // The morning sun, just risen: half hidden behind the far range's second peak, up and to the left of the house, where the
   // scene's light comes from. It is part of the 3D world, so it keeps its place among the mountains as the view turns.
   (() => {
@@ -979,6 +980,16 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     bellows(amount) { hearth.squeeze = THREE.MathUtils.clamp(amount, 0, 1); redraw(); },
     blow() { hearth.flare = motion.matches ? 0 : 1; if (hearth.heat > 0) hearth.heat = Math.min(3, hearth.heat + .3); redraw(); },
     get heat() { return hearth.heat; },
+    // Where the things on the desk are on screen (stage pixels), from their places on the desk's sheet.
+    deskRects() {
+      const holder = sheets.get('desk')?.holder; if (!holder) return null;
+      holder.updateMatrixWorld(true);
+      const rect = stage.getBoundingClientRect(), corner = (fx, fy) => holder.localToWorld(new THREE.Vector3((fx - .5) * DESK.w, (1 - fy) * DESK.h, .01)).project(camera);
+      return Object.fromEntries(Object.entries(DESK.items).map(([name, [x0, y0, x1, y1]]) => {
+        const points = [corner(x0, y0), corner(x1, y0), corner(x0, y1), corner(x1, y1)], xs = points.map(p => (p.x + 1) / 2 * rect.width), ys = points.map(p => (1 - p.y) / 2 * rect.height);
+        return [name, { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) }];
+      }));
+    },
     hearthRects() {
       const [left, right] = ['bellows-left', 'bellows-right'].map(id => sheets.get(id)?.holder);
       if (!left || !right) return null;

@@ -239,15 +239,29 @@ await test('Santa 屋內：近看壁爐（添柴、風箱、火勢）、HOLY MER
   assert.deepEqual(LETTER_BOOKS.filter(book => book.gold).map(book => book.letter), ['O', 'M', 'E', 'R'], 'Four gold letters, all taken from HOLY MERRY itself');
   assert.equal(SHELF_LAYOUT.slots.length, 4); assert.ok(SHELF_LAYOUT.slots.every(x => x > 0 && x < SHELF_LAYOUT.santa && SHELF_LAYOUT.santa < BOOKCASE.width), 'Four empty places left of the SANTA picture book, inside the bookcase');
   assert.ok(BOOK_SHEETS.some(sheet => sheet.id === 'santa-book') && LETTER_BOOKS.every(book => BOOK_SHEETS.some(sheet => sheet.id === book.id)), 'Every book spine is a cut picture');
-  assert.deepEqual(ROOM_SPOTS.map(spot => spot.id), ['hearth', 'shelf']); assert.ok(!ROOM_PROPS.some(prop => prop.id === 'fireplace' || prop.id === 'bookshelf'), 'The hearth and the bookcase are places to step up to, not just a caption');
+  assert.ok(['hearth', 'shelf'].every(id => ROOM_SPOTS.some(spot => spot.id === id))); assert.ok(!ROOM_PROPS.some(prop => prop.id === 'fireplace' || prop.id === 'bookshelf'), 'The hearth and the bookcase are places to step up to, not just a caption');
   const { cabinGlyphs } = await import(pathToFileURL(path.join(project, 'js/data/cabin-glyphs.js')).href);
   assert.ok([...'HOLYMERSANT'].every(char => cabinGlyphs[char]?.d), 'Every letter on the books comes from the display face');
   const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), hearth = await fs.readFile(path.join(project, 'js/components/cabin-hearth.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8'), html = await fs.readFile(path.join(project, 'santa.html'), 'utf8');
   assert.ok(scene.includes('hearthAdd()') && scene.includes('blow()') && scene.includes('sheen.opacity = .14 + warmth') && scene.includes('fire.intensity = 2.2 + flicker * .4 + warmth'), 'One fire level drives the flames, the firelight and the gold glint');
   assert.ok(scene.includes('roomAway') && scene.includes('function back()') && scene.includes("event.preventDefault(); back();"), 'Stepping back from the hearth faces the room as before, one step at a time');
   assert.ok(hearth.includes('setPointerCapture') && hearth.includes("event.key !== 'Enter'") && hearth.includes('events.abort()') && hearth.includes('cabin.bellows(0)') && !hearth.includes('innerHTML'), 'Logs and bellows work by pointer and keyboard and let go of everything on leaving');
-  assert.ok(entry.includes("ROOMS = ['hearth', 'shelf']") && entry.includes("'← 回到房間'") && entry.includes('cabin?.back()') && entry.includes('!event.defaultPrevented'), 'The back button and Escape step back from the hearth to the room');
+  assert.ok(/ROOMS = \[[^\]]*'hearth'[^\]]*'shelf'/.test(entry) && entry.includes("'← 回到房間'") && entry.includes('cabin?.back()') && entry.includes('!event.defaultPrevented'), 'The back button and Escape step back from the hearth to the room');
   assert.ok(html.includes('data-spot="hearth"') && html.includes('data-spot="shelf"'), 'The hearth and the bookcase can be reached from the keyboard list');
+});
+await test('Santa 屋內：書桌抽信、開信、翻面、蓋郵戳、火漆封回信，信件全為虛構', async () => {
+  const { DESK, ROOM_SPOTS, BOARDS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  const { DESK_LETTERS, REPLY } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href);
+  assert.ok(ROOM_SPOTS.some(spot => spot.id === 'desk') && BOARDS.some(board => board.id === 'desk') && !BOARDS.some(board => board.id === 'lamp-table'), 'The side table became the writing desk');
+  assert.deepEqual(Object.keys(DESK.items), ['outbox', 'stamp', 'stack', 'seal', 'cup', 'lamp']);
+  assert.ok(Object.values(DESK.items).every(([x0, y0, x1, y1]) => x0 >= 0 && x1 <= 1 && x0 < x1 && y0 >= 0 && y1 <= 1 && y0 < y1), 'Every place on the desk lies on its sheet');
+  assert.ok(DESK_LETTERS.length >= 4 && DESK_LETTERS.every(letter => letter.id && letter.body && letter.back?.sign && ['n', 'k', 'h'].includes(letter.back.hand)) && REPLY.body, 'Each letter has a back signed in one of several hands');
+  assert.ok(new Set(DESK_LETTERS.map(letter => letter.back.sign)).size >= 3, 'More than one person signs for the letters');
+  const desk = await fs.readFile(path.join(project, 'js/components/cabin-desk.js'), 'utf8'), data = await fs.readFile(path.join(project, 'js/data/cabin-letters.js'), 'utf8');
+  assert.ok(!/firebase|wish-repository|publicWishes|localStorage/.test(desk + data), 'The desk never reads the Wish page or anyone’s real letters');
+  assert.ok(desk.includes('setPointerCapture') && desk.includes('desk.stamped.push') && desk.includes('desk.sealed = true') && desk.includes('events.abort()') && !desk.includes('innerHTML'), 'Stamp and seal by dragging or Enter, kept in the progress record, every listener let go');
+  const entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8'), html = await fs.readFile(path.join(project, 'santa.html'), 'utf8');
+  assert.ok(entry.includes("ROOMS = ['hearth', 'desk', 'shelf']") && html.includes('data-spot="desk"'));
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
