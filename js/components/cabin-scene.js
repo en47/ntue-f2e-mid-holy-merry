@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, CHAIR, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, REINDEER, ROOM_PROPS, SIGN, SPOTS } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -30,6 +30,13 @@ for (const spot of SPOTS) {
   const { target, distance, pitch, yaw, aside = 0, tallDrop = 0, tallDistance = distance * 1.35 } = spot.view;
   VIEWS[spot.id] = { target, distance, tallDistance, fov: 34, pitch, heading: yaw, aside, tallDrop, turn: 0, minPitch: pitch, maxPitch: pitch };
 }
+// The places in the room work the same way, close up; leaving one goes back to the middle of the room.
+for (const spot of ROOM_SPOTS) {
+  const { target, distance, pitch, yaw, tallDistance = distance * 1.35, fov = 34, tallFov = fov, tallDrop = 0 } = spot.view;
+  VIEWS[spot.id] = { target, distance, tallDistance, fov, tallFov, pitch, heading: yaw, aside: 0, tallDrop, turn: 0, minPitch: pitch, maxPitch: pitch, room: true };
+}
+const indoorView = name => name === 'inside' || VIEWS[name]?.room === true;
+const BACK_WALL = -HOUSE.depth / 2;
 // Where the arrival starts: high over the village, off to the left, looking down at the house.
 const ARRIVAL = { eye: [-9, 20, 26], heading: -.33, pitch: .63, fov: 44 };
 const ease = u => u * u * (3 - 2 * u), between = (u, from, to) => ease(THREE.MathUtils.clamp((u - from) / (to - from), 0, 1));
@@ -105,7 +112,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // `perched` holds the camera up at the start of the arrival until the loader has gone.
   let spin = 0, trip = null, pending = null, hovered = null, pointer = null, perched = false, away = { heading: 0, pitch: VIEWS.outside.pitch };
   // `roomIn` once the room's boards have come (just after the page opens); `choice` counts requests for a view.
-  let roomIn = false, choice = 0;
+  let roomIn = false, choice = 0, roomAway = null;
   const eye = new THREE.Vector3(0, 3.7, 8.6), goalEye = eye.clone(), look = new THREE.Vector3();
 
   const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(fov, 1, .05, 110);
@@ -178,6 +185,10 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const report = () => onProgress(Math.min(1, painted / (first.length + 1) * .6 + reindeerShare * .4));
   // Sheets by id, so a game can redraw one (the snowman's hat, the hay in the loft) and a tap can wiggle one.
   const flames = [], twinkles = [], swings = [], smoke = [], billboards = [], sheets = new Map(), lifting = new Map();
+  // The room's paper and the books' spines, each with its own colour, to be warmed a little by the firelight.
+  const warmed = [];
+  // The fire: `heat` is how many logs are burning (0–3, one burns down every 40 s); the bellows squeeze and flare it.
+  const hearth = { heat: 0, flare: 0, squeeze: 0 };
   // Soft bluish shadows on the snow, thrown right and back, away from the low sun on the left.
   const shade = keep(textures, radialTexture([[0, 'rgba(110,140,170,.42)'], [1, 'rgba(110,140,170,0)']], 64));
   const shadowMaterial = flat(0xffffff, { map: shade, transparent: true, depthWrite: false });
@@ -198,6 +209,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const rigs = new Map([['door', new THREE.Group()]]), clones = new Map(), skins = new Map();
   rigs.get('door').position.set(DOOR.hinge, 0, DOOR.z); indoors.add(rigs.get('door'));
   for (const [id, { at, turn = 0 }] of Object.entries(RIGS)) { const rig = new THREE.Group(); rig.position.set(...at); rig.rotation.y = turn; rigs.set(id, rig); world.add(rig); }
+  for (const [id, { at, tilt = 0 }] of Object.entries(ROOM_RIGS)) { const rig = new THREE.Group(); rig.position.set(...at); rig.rotation.z = tilt; rigs.set(id, rig); indoors.add(rig); }
   function standBoard(board, map) {
     const material = keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false, fog: board.fog !== false, side: board.mirror || board.chair && board.turn || board.billboard || board.clones ? THREE.DoubleSide : THREE.FrontSide }));
     const geometry = keep(geometries, new THREE.PlaneGeometry(board.w, board.h));
@@ -215,6 +227,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     }
     const parent = board.rig ? rigs.get(board.rig) : board.chair ? chair : board.room ? indoors : world;
     const edges = !board.kind && !board.flat ? keep(materials, edgeMaterial(map)) : null;
+    if (board.room || board.chair) for (const each of [material, edges]) if (each) warmed.push([each, each.color.clone()]);
     if (edges) edges.fog = board.fog !== false;
     if (!board.roof) geometry.translate(0, board.flat || board.center ? 0 : board.hang ? -board.h / 2 : board.h / 2, 0);
     const holders = Array.from({ length: board.clones ?? 1 }, () => {
@@ -250,6 +263,50 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     skins.set(board.id, map);
     const material = skinTargets.get(board.id);
     if (material) { material.map = map; material.color.set(0xffffff); material.needsUpdate = true; }
+  }
+
+  // The bookcase on its hinge: wooden shelves, sides and top, and books with real thickness standing on the shelves (its
+  // painted back is one of the boards). A book is a box: its spine a cut picture, its covers card of its colour, its pages
+  // cream on top. The four gold-stamped books stand a little proud and glint in the firelight.
+  const sheens = [], letterBooks = new Map(), coverMaterials = new Map();
+  const pages = keep(materials, new THREE.MeshStandardMaterial({ color: 0xf3e6c8, roughness: 1 }));
+  const gleam = keep(textures, radialTexture([[0, 'rgba(255,226,150,1)'], [.55, 'rgba(255,214,120,.35)'], [1, 'rgba(255,214,120,0)']], 64));
+  function bookGeometry(w, h, d) {
+    // Three groups of faces: covers (both sides, the bottom, the back), pages (the top) and the spine (the front).
+    const geometry = new THREE.BoxGeometry(w, h, d), index = [...geometry.index.array], face = i => index.slice(i * 6, i * 6 + 6);
+    geometry.setIndex([...[0, 1, 3, 5].flatMap(face), ...face(2), ...face(4)]);
+    geometry.clearGroups(); geometry.addGroup(0, 24, 0); geometry.addGroup(24, 6, 1); geometry.addGroup(30, 6, 2);
+    return keep(geometries, geometry.translate(0, h / 2, d / 2));
+  }
+  function book(map, colour, w, h, d = .17) {
+    if (!coverMaterials.has(colour)) coverMaterials.set(colour, keep(materials, new THREE.MeshStandardMaterial({ color: new THREE.Color(colour).multiplyScalar(.82), roughness: 1 })));
+    const spine = keep(materials, new THREE.MeshBasicMaterial({ map, toneMapped: false }));
+    warmed.push([spine, spine.color.clone()]);
+    return new THREE.Mesh(bookGeometry(w, h, d), [coverMaterials.get(colour), pages, spine]);
+  }
+  async function buildBookcase() {
+    const { width, height, depth, shelves } = BOOKCASE, rig = rigs.get('bookcase'), wood = (geometry, colour, x, y, z) => solid(geometry, colour, new THREE.Vector3(x, y, z), rig);
+    wood(new THREE.BoxGeometry(width, shelves[0], depth), 0x8f5a3c, width / 2, shelves[0] / 2, depth / 2);
+    for (const y of shelves.slice(1)) wood(new THREE.BoxGeometry(width - .05, .024, depth), 0xa86b47, width / 2, y - .012, depth / 2);
+    for (const x of [.0125, width - .0125]) wood(new THREE.BoxGeometry(.025, height, depth), 0x8f5a3c, x, height / 2, depth / 2);
+    wood(new THREE.BoxGeometry(width + .03, .04, depth + .03), 0xa86b47, width / 2, height + .02, depth / 2);
+    const maps = new Map(await Promise.all(BOOK_SHEETS.map(async sheet => [sheet.id, texture(await cutBoard(sheet.id, sheet, set))])));
+    if (disposed) return;
+    LETTER_BOOKS.forEach((entry, i) => {
+      const mesh = book(maps.get(entry.id), entry.colour, entry.w, entry.h, entry.gold ? .18 : .17);
+      mesh.position.set(SHELF_LAYOUT.letters[i], shelves[2], entry.gold ? .045 : .03); rig.add(mesh); letterBooks.set(entry.id, mesh);
+      if (!entry.gold) return;
+      const sheen = keep(materials, new THREE.MeshBasicMaterial({ map: gleam, transparent: true, opacity: .14, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+      const glint = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(entry.w * .9, entry.h * .8)), sheen);
+      glint.position.set(0, entry.h * .48, .182); mesh.add(glint); sheens.push(sheen);
+    });
+    for (const { shelf, variant, x, w, h } of PLAIN_BOOKS) {
+      const mesh = book(maps.get(`book-plain-${variant}`), ['#3f5a7a', '#7d5636', '#3f6653', '#8f3b36'][variant], w, h);
+      mesh.position.set(x, shelves[shelf], .03); rig.add(mesh);
+    }
+    const cover = book(maps.get('santa-book'), '#8f3b36', .24, .3, .028);
+    cover.position.set(SHELF_LAYOUT.santa, shelves[1], .08); cover.rotation.x = -.12; rig.add(cover);
+    redraw();
   }
 
   // The carousel is the one ride built round: a paper drum, roof and fringe that turn as one, horses rising and falling.
@@ -336,7 +393,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const unseen = flat(0xffffff, { visible: false }), unit = keep(geometries, new THREE.BoxGeometry(1, 1, 1));
   const target = ([[x, y, z], [w, h, d]], data) => { const mesh = new THREE.Mesh(unit, unseen); mesh.position.set(x, y, z); mesh.scale.set(w, h, d); mesh.userData = data; scene.add(mesh); return mesh; };
   const yardTargets = [...SPOTS.map(spot => target(spot.box, { spot: spot.id })), target([[0, 1.5, 0], [HOUSE.width + .4, 3.3, HOUSE.depth + .3]], { house: true }), ...PROPS.map(prop => target(prop.box, { prop }))];
-  const roomTargets = ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }));
+  const roomTargets = [...ROOM_SPOTS.map(spot => target(spot.box, { spot: spot.id })), ...ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }))];
   const glint = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: keep(textures, radialTexture([[0, 'rgba(255,255,240,1)'], [.25, 'rgba(255,230,150,.8)'], [1, 'rgba(255,220,120,0)']], 64)), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })));
   glint.visible = false; world.add(glint);
   let snowmanMove = null, found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null;
@@ -448,7 +505,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (settings.tallDrop) aim.y -= settings.tallDrop * (1 - t);
     if (settings.aside) aim.add(new THREE.Vector3(Math.cos(settings.heading), 0, -Math.sin(settings.heading)).multiplyScalar(settings.aside * t));
     const turn = settings.heading ?? 0, tip = settings.pitch;
-    return { eye: aim.add(new THREE.Vector3(Math.sin(turn) * Math.cos(tip), Math.sin(tip), Math.cos(turn) * Math.cos(tip)).multiplyScalar(reach)), heading: turn, pitch: tip, fov: settings.fov };
+    return { eye: aim.add(new THREE.Vector3(Math.sin(turn) * Math.cos(tip), Math.sin(tip), Math.cos(turn) * Math.cos(tip)).multiplyScalar(reach)), heading: turn, pitch: tip, fov: lerp(settings.tallFov ?? settings.fov, settings.fov, t) };
   }
   const home = () => { const settings = VIEWS[view]; return lerp(settings.tallHeading ?? settings.heading ?? 0, settings.heading ?? 0, blend()); };
   const turnLimit = () => VIEWS[view].turn;
@@ -488,8 +545,20 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     chair.rotation.x = still ? 0 : Math.sin(t * 1.7) * .028;
     if (spine && spineRest) spine.quaternion.copy(spineRest).multiply(tilt.setFromAxisAngle(side, still ? 0 : Math.sin(t * 1.5) * .014));
     const flicker = still ? 0 : Math.sin(t * 9.1) * .5 + Math.sin(t * 13.7) * .3 + Math.sin(t * 5.3) * .2;
-    for (const holder of flames) { holder.scale.y = 1 + flicker * .07; holder.scale.x = 1 + (still ? 0 : Math.sin(t * 7.3) * .025); }
-    fireGlow.material.opacity = .85 + flicker * .12; fire.intensity = 2.2 + flicker * .4;
+    // The fire burns as high as it is fed and flares when the bellows blow. Its light warms the room a little: the paper is
+    // not lit by lamps, so its colour is warmed by hand, and the gold-stamped books glint more brightly.
+    const warmth = hearth.heat / 3, blaze = 1 + hearth.heat * .22 + hearth.flare * .45;
+    for (const holder of flames) { holder.scale.y = (1 + flicker * .07) * blaze; holder.scale.x = (1 + (still ? 0 : Math.sin(t * 7.3) * .025)) * (1 + hearth.heat * .08 + hearth.flare * .12); }
+    fireGlow.material.opacity = Math.min(1, .85 + flicker * .12 + hearth.flare * .15); fireGlow.scale.setScalar(1 + warmth * .4 + hearth.flare * .3);
+    fire.intensity = 2.2 + flicker * .4 + warmth * 2.4 + hearth.flare * 2; fire.distance = 3 + warmth * 1.4;
+    const tint = warmth * .08 + hearth.flare * .04;
+    for (const [material, base] of warmed) material.color.setRGB(base.r, base.g * (1 - tint * .45), base.b * (1 - tint));
+    for (const sheen of sheens) sheen.opacity = .14 + warmth * .4 + hearth.flare * .2 + flicker * .03;
+    (clones.get('hearth-log') ?? []).forEach((log, i) => { log.visible = hearth.heat > i; log.position.set(FIRE.x + [-.06, .06, 0][i], .1 + (i === 2 ? .05 : 0), BACK_WALL + .14 + i * .004); log.rotation.z = [.06, -.05, .02][i]; });
+    // The bellows open in a V about the nozzle; squeezing closes them and folds the leather.
+    const open = .34 * (1 - hearth.squeeze) + .05, [left, right, leather] = ['bellows-left', 'bellows-right', 'bellows-leather'].map(id => sheets.get(id)?.holder);
+    if (left && right) { left.rotation.z = open; right.rotation.z = -open; }
+    if (leather) leather.scale.x = .25 + .75 * open / .39;
     for (const [index, material] of twinkles.entries()) material.opacity = still ? 1 : .72 + Math.sin(t * 2.6 + index) * .28;
     for (const [holder, swing] of swings) holder.rotation.z = still ? 0 : Math.sin(t * 1.1 + holder.id) * swing;
     lanternGlow.material.opacity = .85 + (still ? 0 : Math.sin(t * 3.1) * .1);
@@ -630,7 +699,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const frustum = new THREE.Frustum(), viewProjection = new THREE.Matrix4(), reindeerBounds = new THREE.Sphere(new THREE.Vector3(REINDEER.x, GROUND + .7, REINDEER.z), 1.2);
   function draw() {
     place();
-    chair.visible = view === 'inside' || trip?.direction === 'in' || trip?.direction === 'out';
+    chair.visible = indoorView(view) || trip?.direction === 'in' || trip?.direction === 'out';
     if (reindeerHolder) {
       camera.updateMatrixWorld(); frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
       reindeerHolder.visible = frustum.intersectsSphere(reindeerBounds);
@@ -643,6 +712,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const active = dragging || settling || trip;
     if (!active && now - lastDraw < 33) return;
     const delta = Math.min((now - (lastTick || now)) / 1000, .1); lastTick = lastDraw = now; clock += delta;
+    hearth.heat = Math.max(0, hearth.heat - delta / 40); hearth.flare = Math.max(0, hearth.flare - delta * 1.4);
     if (trip) walking();
     else {
       if (spin && !pointer) {
@@ -670,21 +740,28 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // Point the goals at a view. Outside comes back to wherever the visitor was looking before stepping away.
   function aim(name) {
     const goal = goalFor(name); goalEye.copy(goal.eye); goalFov = goal.fov;
-    goalHeading = name === 'outside' ? away.heading : goal.heading; goalPitch = name === 'outside' ? away.pitch : goal.pitch;
+    const facing = name === 'outside' ? away : name === 'inside' && roomAway ? roomAway : goal;
+    goalHeading = facing.heading; goalPitch = facing.pitch;
   }
+  // One step back: from a place in the room to the middle of the room, from anywhere else out in front of the house.
+  function back() { setView(VIEWS[view].room ? 'inside' : 'outside'); }
   function setView(name) {
     if (!VIEWS[name]) return;
     const asked = ++choice;
-    if (name === 'inside' && view === 'outside' && !roomIn) { roomReady.then(() => { if (asked === choice) setView('inside'); }); return; }
+    if (indoorView(name) && !indoorView(view) && !roomIn) { roomReady.then(() => { if (asked === choice) setView(name); }); return; }
     if (trip?.direction === 'fly') finishTrip();
     if (trip) { pending = name; return; }
     if (name === view) return;
     const from = view; clearTimeout(returnTimer); spin = 0;
     if (from === 'outside') away = { heading: wrap(goalHeading), pitch: goalPitch };
-    // Indoors leads only out of the door: a corner of the yard is reached by walking out first.
-    if (from === 'inside' && name !== 'outside') { pending = name; name = 'outside'; }
+    // Stepping up to something in the room remembers where you were looking, to face that way again after.
+    if (from === 'inside' && VIEWS[name].room) roomAway = { heading: goalHeading, pitch: goalPitch };
+    // Indoors leads only out of the door (a corner of the yard is reached by walking out first), and a place in the room is
+    // reached by walking in first.
+    if (indoorView(from) && !indoorView(name) && name !== 'outside') { pending = name; name = 'outside'; }
+    if (!indoorView(from) && VIEWS[name].room) { pending = name; name = 'inside'; }
     view = name; stage.dataset.view = name;
-    if (name === 'inside' || from === 'inside') { walk(name === 'inside' ? 'in' : 'out'); return; }
+    if (indoorView(name) !== indoorView(from)) { walk(indoorView(name) ? 'in' : 'out'); return; }
     aim(name); onView(name); wake();
   }
 
@@ -744,7 +821,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   function scheduleReturn() {
     clearTimeout(returnTimer);
     // Only the yard corners settle back by themselves, so the game laid over them stays lined up.
-    if (motion.matches || !SPOTS.some(spot => spot.id === view)) return;
+    if (motion.matches || !playing()) return;
     returnTimer = setTimeout(() => { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }, RETURN_AFTER);
   }
   function onSanta(x, y) {
@@ -788,7 +865,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (view === 'inside') {
       if (onSanta(x, y)) { touch(ROOM_PROPS.find(prop => prop.id === 'santa')); return; }
       const hit = hitAt(x, y);
-      if (hit?.prop.id === 'door') setView('outside'); else if (hit?.prop) touch(hit.prop);
+      if (hit?.prop?.id === 'door') setView('outside'); else if (hit?.spot) setView(hit.spot); else if (hit?.prop) touch(hit.prop);
       return;
     }
     if (view !== 'outside') return;
@@ -822,7 +899,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // Any touch or key during the arrival lands at once: nobody has to wait for the flight to start looking round.
   const land = () => { if (trip?.direction === 'fly') finishTrip(); };
   // At a corner of the yard the view holds still: the game laid over it gets every drag.
-  const playing = () => SPOTS.some(spot => spot.id === view);
+  const playing = () => SPOTS.some(spot => spot.id === view) || VIEWS[view].room === true;
   on(gesture, 'pointerdown', event => {
     land();
     if (playing()) return;
@@ -856,7 +933,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     land();
     const step = { ArrowLeft: [.15, 0], ArrowRight: [-.15, 0], ArrowUp: [0, -.06], ArrowDown: [0, .06] }[event.key];
     if (step && !trip && !playing()) { event.preventDefault(); spin = 0; goalHeading = clampTurn(goalHeading + step[0]); goalPitch = clampPitch(goalPitch + step[1]); scheduleReturn(); wake(); }
-    else if (event.key === 'Escape' && view !== 'outside') setView('outside');
+    else if (event.key === 'Escape' && view !== 'outside') { event.preventDefault(); back(); }
     else if (event.key === 'Home' && !trip) { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }
   });
 
@@ -873,7 +950,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   renderer.domElement.addEventListener('webglcontextrestored', draw, { signal: events.signal });
   stage.dataset.view = view;
   if (!motion.matches) start();
-  const roomReady = Promise.all(after.filter(indoor).map(board => addBoard(board).catch(error => console.error('Room board failed', board.id, error)))).then(() => { roomIn = true; redraw(); });
+  const roomReady = Promise.all([...after.filter(indoor).map(board => addBoard(board).catch(error => console.error('Room board failed', board.id, error))), buildBookcase().catch(error => console.error('Bookcase failed', error))]).then(() => { roomIn = true; redraw(); });
   for (const board of after.filter(board => !indoor(board))) addBoard(board).then(redraw, error => console.error('Village board failed', board.id, error));
   const santaReady = loadSanta();
   if (!reindeer) loadReindeer();
@@ -894,7 +971,21 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const api = {
     // Resolves true once Santa sits in his chair, false if his model could not load.
     santa: santaReady, destroy, setView, get view() { return view; }, repaint,
-    rect: id => { const spot = SPOTS.find(item => item.id === id); return spot ? rectOfBox(...spot.box) : null; },
+    rect: id => { const spot = [...SPOTS, ...ROOM_SPOTS].find(item => item.id === id); return spot ? rectOfBox(...spot.box) : null; },
+    back,
+    // The hearth: feed the fire a log (false when it already burns as high as it goes), squeeze the bellows (0–1) and let
+    // them blow; and where the fire's mouth, the basket and the bellows' handles are on screen.
+    hearthAdd() { if (hearth.heat > 2.5) return false; hearth.heat = Math.min(3, hearth.heat + 1); redraw(); return true; },
+    bellows(amount) { hearth.squeeze = THREE.MathUtils.clamp(amount, 0, 1); redraw(); },
+    blow() { hearth.flare = motion.matches ? 0 : 1; if (hearth.heat > 0) hearth.heat = Math.min(3, hearth.heat + .3); redraw(); },
+    get heat() { return hearth.heat; },
+    hearthRects() {
+      const [left, right] = ['bellows-left', 'bellows-right'].map(id => sheets.get(id)?.holder);
+      if (!left || !right) return null;
+      const tip = holder => { holder.updateMatrixWorld(true); return holder.localToWorld(new THREE.Vector3(0, .34, 0)); };
+      const handles = tip(left).add(tip(right)).multiplyScalar(.5);
+      return { mouth: rectOfBox([FIRE.x, .27, BACK_WALL + .2], [.46, .3, .05]), basket: rectOfBox([.47, .17, BACK_WALL + .42], [.34, .22, .05]), bellows: rectOfBox(handles.toArray(), [.22, .16, .05]) };
+    },
     rectOfBox,
     setFound(ids) { found = new Set(ids); },
     // Fly down from over the village to the front of the house; resolves once landed (at once when there is no flight).

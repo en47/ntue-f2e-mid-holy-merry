@@ -2,7 +2,7 @@
 // the snowman's accessories. scripts/build-cabin-boards.mjs cuts them all ahead of time at two sizes (images/cabin/), so
 // the page only downloads finished pictures instead of running the paper filter on every board while it opens. A sheet
 // with no picture, or whose picture fails to load, is cut here in the browser exactly as before.
-import { BOARDS, HOIST, PX, SMOKE, SPOTS, hayBale, hoistBracket, hoistHatch, hoistToggle, hoistWheel } from './cabin-art.js';
+import { BOARDS, BOOK_SHEETS, HOIST, PX, SMOKE, SPOTS, hayBale, hoistBracket, hoistHatch, hoistToggle, hoistWheel } from './cabin-art.js';
 import { RIGS, VIEWPOINT, WORLD } from './cabin-world.js';
 import { PLACES, WARDROBE } from './cabin-wardrobe.js';
 import { paperFilter, shape } from './paper-art.js';
@@ -24,11 +24,12 @@ export function outfitBoard(item) {
 }
 // The other looks a sheet can take, cut ahead too: the sign with one to four stars lit, the mailbox and the hatch open.
 const VARIANTS = { sign: [1, 2, 3, 4].map(stars => ({ stars })), mailbox: [{ open: true }], 'hoist-hatch': [{ open: true }] };
-const SHEETS = [...[...BOARDS, ...WORLD].map(board => [board.id, board]), ...Object.entries(PIECES), ...WARDROBE.map(item => [`outfit-${item.id}`, outfitBoard(item)])];
+const SHEETS = [...[...BOARDS, ...WORLD].map(board => [board.id, board]), ...Object.entries(PIECES), ...BOOK_SHEETS.map(sheet => [sheet.id, sheet]), ...WARDROBE.map(item => [`outfit-${item.id}`, outfitBoard(item)])];
 // Each sheet's look when the page opened: a game changes board.state later, and the picture only matches the first look.
 const FIRST = new Map(SHEETS.map(([name, board]) => [name, JSON.stringify(board.state ?? null)]));
 const variantName = (name, state) => JSON.stringify(state ?? null) === FIRST.get(name) ? name : `${name}--${Object.entries(state).map(([key, value]) => `${key}-${value}`).join('--')}`;
-// Every picture there is: its file name, the board and the look it shows.
+// Every picture there is (the boards, the hoist's pieces, the accessories, the bookcase's books): its file name, the board
+// and the look it shows.
 export const everyCut = () => SHEETS.flatMap(([name, board]) => [[name, board, board.state], ...(VARIANTS[name] ?? []).map(state => [variantName(name, state), board, state])]);
 
 // The picture set for a screen, by how fine it shows the boards: a Retina or large desktop screen, an ordinary one, a phone.
@@ -37,11 +38,12 @@ export const cutSet = quality => quality >= .9 ? 'hi' : quality > .6 ? 'large' :
 // The village was drawn coarse back when the browser cut every board on each visit; as ready pictures its boards are cut as
 // fine as they show on a large screen: SHARP pixels per metre at the nearest place they are seen from (where the visitor
 // stands outside, or a corner of the yard), at most four times their own art. The house and the yard keep their own
-// fineness. No picture is cut wider or taller than 4096 pixels, the most every graphics card takes. The drawing itself
+// fineness, unless a board asks for more itself (`detail`: the hearth, seen up close). No picture is cut wider or taller than 4096 pixels, the most every graphics card takes. The drawing itself
 // does not change, only how finely it is cut.
 const SHARP = 2000, LIMIT = 4096;
 const EYES = [[VIEWPOINT.x, VIEWPOINT.z], ...SPOTS.map(({ view: { target, distance, pitch, yaw } }) => [target[0] + Math.sin(yaw) * Math.cos(pitch) * distance, target[2] + Math.cos(yaw) * Math.cos(pitch) * distance])];
 function detail(board) {
+  if (board.detail) return board.detail;
   if (!WORLD.includes(board)) return 1;
   const at = board.rig ? RIGS[board.rig].at : board.at;
   if (!at) return 1;

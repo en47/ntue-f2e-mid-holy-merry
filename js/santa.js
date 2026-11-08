@@ -5,7 +5,7 @@ import { mountCabinChat } from './components/cabin-chat.js';
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
 const back = document.querySelector('#cabin-back'), tip = document.querySelector('#cabin-tip'), explore = [...document.querySelectorAll('.cabin-explore [data-spot]')], looks = [...document.querySelectorAll('.cabin-explore [data-look]')];
-const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
+const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], ROOMS = ['hearth', 'shelf'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 // The flight down over the village is for a large desktop window; a phone, a tablet or a small window starts at the house.
 const roomy = matchMedia('(min-width: 1100px) and (min-height: 650px) and (hover: hover) and (pointer: fine)');
@@ -36,15 +36,18 @@ function onFound(id) {
 }
 function onView(view) {
   if (view !== 'outside') { tip.classList.add('is-gone'); fitSideways(); }
-  back.hidden = view === 'outside'; back.textContent = view === 'inside' ? '← 走出門外' : '← 回到小屋前'; clearTimeout(enterTimer); play?.leave();
-  if (SPOTS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : 1000);
+  back.hidden = view === 'outside'; back.textContent = view === 'inside' ? '← 走出門外' : ROOMS.includes(view) ? '← 回到房間' : '← 回到小屋前'; clearTimeout(enterTimer); play?.leave();
+  if (SPOTS.includes(view) || ROOMS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : 1000);
   if (view === 'inside') status.textContent = '推開門走進屋裡：聖誕老人坐在火爐邊。拖曳可以環顧整個房間，點門口就能出去。';
+  if (view === 'hearth') status.textContent = '走到壁爐前：可以從柴籃添柴，也可以壓一壓風箱。';
+  if (view === 'shelf') status.textContent = '走到書櫃前，看看架上的書。';
   if (view === 'outside') status.textContent = '回到屋外。往左轉是遊樂場和許願角，往右轉是海邊和燈塔，雪山在小屋後面。';
 }
-back.addEventListener('click', () => cabin?.setView('outside'));
+back.addEventListener('click', () => cabin?.back());
 explore.forEach(button => button.addEventListener('click', () => { cabin?.setView(button.dataset.spot); back.focus(); }));
 looks.forEach(button => button.addEventListener('click', () => { cabin?.look(button.dataset.look); stage.querySelector('.cabin-gesture').focus(); }));
-document.addEventListener('keydown', event => { if (event.key === 'Escape' && cabin && cabin.view !== 'outside') { cabin.setView('outside'); stage.querySelector('.cabin-gesture').focus(); } });
+// Escape steps back once (from the hearth to the room, from the room out of the door); the scene may have taken it already.
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && !event.defaultPrevented && cabin && cabin.view !== 'outside') { cabin.back(); stage.querySelector('.cabin-gesture').focus(); } });
 markExplore();
 
 // A one-time hint, gone after the first touch of the scene.

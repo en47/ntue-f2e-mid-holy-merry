@@ -4,6 +4,7 @@
 import { holly, pine, shape } from './paper-art.js';
 import { church, roofHouse, snowyFir, star } from './paper-props.js';
 import { headingGlyphs } from '../data/heading-glyphs.js';
+import { cabinGlyphs } from '../data/cabin-glyphs.js';
 
 export const PX = 500;
 // Inner floor from x -1.6 to 1.6 and z -1.5 to 1.5, walls 1.9 high, ridge at 3: deep enough to stand inside and look round.
@@ -27,6 +28,11 @@ export const DOOR = { width: .66, height: 1.5, swing: 1.75, hinge: -.33, z: HOUS
 // turns a little right of him, so he sits on the left and the letter-paper chat (santa.html) has the right; on a tall
 // phone he is centred and looked down on a little, above the chat sheet along the bottom.
 export const INSIDE = { eye: [.45, 1.15, .9], heading: .44, tallHeading: .78, pitch: .27, tallPitch: .46 };
+// The bookcase on the back wall, left of the back door: `left` is its hinge edge (it can swing open on it), `z` its painted
+// back. Books stand on wooden shelves whose tops are at `shelves` (metres up from the floor).
+export const BOOKCASE = { left: -1.56, width: .95, height: 1.4, depth: .26, z: -HOUSE.depth / 2 + .02, shelves: [.05, .39, .73, 1.07] };
+// Things in the room that move about a pivot of their own: the bellows hang beside the fire, nozzle down toward it.
+export const ROOM_RIGS = { bookcase: { at: [BOOKCASE.left, 0, BOOKCASE.z] }, bellows: { at: [1.27, .12, -HOUSE.depth / 2 + .2], tilt: -.25 } };
 const CREAM = '#fbf3df', SNOW = '#fbf8f1', RED = '#a84a42', GREEN = '#4f7d68', DEEP_GREEN = '#3f6653', GOLD = '#e0b04f';
 const WOOD = '#8f5a3c', WOOD_LIT = '#a86b47', TIMBER = '#6b4a33', PLASTER = '#f1e4c8';
 // Stable "random" numbers, so every visit cuts the same cabin.
@@ -340,21 +346,146 @@ export function lantern({ paper }, { width, height }) {
   shape('rect', { x: cx - 52, y: 258, width: 104, height: 16, rx: 6, fill: '#3b2a24' }, paper);
 }
 
-export function bookshelf({ paper }, { width, height }) {
-  shape('rect', { x: 0, y: 0, width, height, rx: 8, fill: WOOD }, paper);
-  shape('rect', { x: 16, y: 16, width: width - 32, height: height - 32, fill: '#6b4a33' }, paper);
-  const shelves = 4, gap = (height - 32) / shelves, colours = [RED, GREEN, GOLD, '#7cb8ec', CREAM, '#b5625a', DEEP_GREEN];
-  for (let s = 0; s < shelves; s++) {
-    const base = 16 + gap * (s + 1);
-    shape('rect', { x: 10, y: base - 10, width: width - 20, height: 16, fill: WOOD_LIT }, paper);
-    let x = 26;
-    while (x < width - 60) {
-      const w = 18 + noise(s * 17 + x) * 18, h = gap * (.55 + noise(x + s) * .3);
-      if (s === 1 && x > width * .55) { shape('rect', { x, y: base - 10 - 46, width: 50, height: 46, rx: 8, fill: '#b5625a' }, paper); holly(paper, x + 25, base - 60, .5); break; }
-      shape('rect', { x, y: base - 10 - h, width: w, height: h, rx: 3, fill: colours[Math.floor(noise(x * 3 + s) * colours.length)] }, paper);
-      x += w + 4;
+// A letter from the display face (scripts/build-title-glyphs.mjs), centred on (cx, cy) and fitted into a box.
+function letter(parent, char, cx, cy, width, height, style) {
+  const { d, box: [x1, y1, x2, y2] } = cabinGlyphs[char], scale = Math.min(width / (x2 - x1), height / (y2 - y1));
+  return shape('path', { d, transform: `translate(${cx - scale * (x1 + x2) / 2} ${cy - scale * (y1 + y2) / 2}) scale(${scale})`, ...style }, parent);
+}
+const shade = (parent, x, y, width, height, opacity, fill = '#000') => shape('rect', { x, y, width, height, fill, opacity }, parent);
+
+// The bookcase's painted back: wood planks, a shadow under each shelf, and on the second shelf four paler marks in the
+// dust where books once stood. The shelves, sides and books in front of it are solid (cabin-scene.js).
+export function bookcaseBack({ paper }, { width, height }) {
+  const unit = width / BOOKCASE.width;
+  shape('rect', { x: 0, y: 0, width, height, rx: 10, fill: '#7a5236' }, paper);
+  for (let i = 1; i < 5; i++) shape('rect', { x: i * width / 5 - 2, y: 0, width: 4, height, fill: '#5e3e29', opacity: .5 }, paper);
+  for (let i = 0; i < 9; i++) {
+    const y = 60 + i * height / 9 + noise(i) * 30;
+    shape('path', { d: `M${10 + noise(i + 3) * 40} ${y}C${width * .3} ${y - 14} ${width * .6} ${y + 16} ${width - 20} ${y - 4}`, fill: 'none', stroke: '#8f6444', 'stroke-width': 3, opacity: .55 }, paper);
+  }
+  for (const shelf of BOOKCASE.shelves.slice(1)) shade(paper, 0, height - shelf * unit, width, 34, .22);
+  shade(paper, 0, 0, width, 46, .25);
+  const base = height - BOOKCASE.shelves[1] * unit;
+  for (const x of SHELF_LAYOUT.slots) shape('rect', { x: (x - .036) * unit, y: base - .25 * unit, width: .072 * unit, height: .25 * unit, rx: 6, fill: '#a07752', opacity: .55 }, paper);
+}
+// A book's spine: cloth of its colour, two pairs of bands, and its letter in the middle. A gold book has gold bands and a
+// gold-stamped letter; the others are printed in cream.
+export function letterSpine({ letter: char, colour, gold }) {
+  return ({ paper }, { width, height }) => {
+    shape('rect', { x: 0, y: 0, width, height, rx: 8, fill: colour }, paper);
+    shade(paper, 0, 0, width * .3, height, .1, '#fff');
+    shade(paper, width * .82, 0, width * .18, height, .14);
+    const band = gold ? '#e3c27a' : '#f6ecd6', bandOpacity = gold ? 1 : .55;
+    for (const y of [.07, .11, .87, .91]) shape('rect', { x: 0, y: height * y, width, height: height * .018, fill: band, opacity: bandOpacity }, paper);
+    letter(paper, char, width / 2, height * .45, width * .7, height * .24, gold ? { fill: '#f0cf7e', stroke: '#8f6a2c', 'stroke-width': 1.6 } : { fill: '#f6ecd6', opacity: .9 });
+    for (const [y, w] of [[.66, .5], [.7, .34]]) shape('rect', { x: width * (1 - w) / 2, y: height * y, width: width * w, height: height * .012, rx: 2, fill: band, opacity: bandOpacity * .8 }, paper);
+  };
+}
+// Ordinary books: four plain spines, used again and again at different sizes.
+const PLAIN = ['#3f5a7a', '#7d5636', '#3f6653', '#8f3b36'];
+export function plainSpine(variant) {
+  return ({ paper }, { width, height }) => {
+    shape('rect', { x: 0, y: 0, width, height, rx: 8, fill: PLAIN[variant] }, paper);
+    shade(paper, 0, 0, width * .3, height, .1, '#fff');
+    shade(paper, width * .82, 0, width * .18, height, .14);
+    const bands = [[.08, .14], [.1, .2, .8], [.5], [.12, .88]][variant];
+    for (const y of bands) shape('rect', { x: 0, y: height * y, width, height: height * .025, fill: '#f6ecd6', opacity: .45 }, paper);
+    shape('rect', { x: width * .3, y: height * .32, width: width * .4, height: height * .16, rx: 4, fill: '#f6ecd6', opacity: .35 }, paper);
+  };
+}
+// The SANTA picture book, stood face out: a night over snowy roofs, the sleigh crossing the moon, its title in gold.
+export function santaCover({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, rx: 14, fill: '#8f3b36' }, paper);
+  shade(paper, 0, 0, width * .08, height, .2);
+  const inset = width * .09, sky = { x: inset, y: height * .3, width: width - inset * 2, height: height * .58 };
+  shape('rect', { ...sky, rx: 10, fill: '#2f4a6b' }, paper);
+  shape('circle', { cx: sky.x + sky.width * .68, cy: sky.y + sky.height * .3, r: sky.width * .17, fill: '#f6ecd6' }, paper);
+  for (let i = 0; i < 9; i++) shape('circle', { cx: sky.x + sky.width * noise(i * 3 + 1), cy: sky.y + sky.height * .5 * noise(i * 5 + 2), r: 2.4, fill: '#e0b04f' }, paper);
+  // The sleigh and two reindeer, cut from one dark sheet, against the moon.
+  const sy = sky.y + sky.height * .32, sx = sky.x + sky.width * .5;
+  shape('path', { d: `M${sx - 40} ${sy}C${sx - 36} ${sy + 18} ${sx + 10} ${sy + 20} ${sx + 22} ${sy + 6}L${sx + 30} ${sy - 4}H${sx + 18}L${sx + 10} ${sy + 2}H${sx - 30}L${sx - 34} ${sy - 12}Z`, fill: '#1f2f45' }, paper);
+  for (const dx of [46, 84]) shape('path', { d: `M${sx + dx} ${sy - 6}l10-4 8-12 4 4-6 10 12 2 4 10-6 2-4-6-12 2-4 8-6-2 4-10Z`, fill: '#1f2f45' }, paper);
+  shape('path', { d: `M${sx + 22} ${sy}L${sx + 90} ${sy - 8}`, stroke: '#1f2f45', 'stroke-width': 2 }, paper);
+  // Snowy roofs along the bottom, one chimney smoking.
+  const roofs = sky.y + sky.height;
+  shape('path', { d: `M${sky.x} ${roofs}V${roofs - 46}L${sky.x + 50} ${roofs - 80}L${sky.x + 100} ${roofs - 46}L${sky.x + 150} ${roofs - 70}L${sky.x + 200} ${roofs - 40}L${sky.x + sky.width} ${roofs - 62}V${roofs}Z`, fill: '#fbf8f1' }, paper);
+  shape('rect', { x: sky.x + 120, y: roofs - 98, width: 16, height: 30, fill: '#b5625a' }, paper);
+  for (const [x, y, w, h] of [[sky.x + 30, roofs - 34, 16, 20], [sky.x + 74, roofs - 30, 16, 18], [sky.x + 168, roofs - 26, 18, 16]]) shape('rect', { x, y, width: w, height: h, rx: 2, fill: '#f4cf74' }, paper);
+  shape('rect', { x: inset, y: inset * .7, width: width - inset * 2, height: height * .2, rx: 10, fill: 'none', stroke: '#e0b04f', 'stroke-width': 4 }, paper);
+  [...'SANTA'].forEach((char, i) => letter(paper, char, inset + (width - inset * 2) * (i + .5) / 5, inset * .7 + height * .1, (width - inset * 2) / 5 * .86, height * .14, { fill: '#f0cf7e', stroke: '#8f6a2c', 'stroke-width': 1.4 }));
+  shape('rect', { x: inset, y: height - inset * .75, width: width - inset * 2, height: 5, rx: 2, fill: '#e0b04f' }, paper);
+}
+
+// Where everything sits on the bookcase, in metres from its hinge edge: HOLY MERRY along the third shelf (a little gap
+// between the words), and on the second the four empty places and the SANTA picture book at the right.
+const SPINE = { red: '#8f3b36', green: '#3f6653', navy: '#3f5a7a', plum: '#6e4a6b', teal: '#4a7d80', brown: '#7d5636', mustard: '#b98a3c' };
+export const LETTER_BOOKS = [
+  ['H', SPINE.green, .064, .25], ['O', SPINE.red, .074, .27, true], ['L', SPINE.navy, .058, .23], ['Y', SPINE.brown, .066, .26],
+  ['M', SPINE.plum, .076, .28, true], ['E', SPINE.teal, .07, .255, true], ['R', SPINE.red, .072, .27, true], ['R', SPINE.green, .062, .24], ['Y', SPINE.mustard, .066, .26],
+].map(([char, colour, w, h, gold = false], index, all) => ({ id: `book-${char.toLowerCase()}${all.slice(0, index).filter(([other]) => other === char).length + 1}`, letter: char, colour, w, h, gold }));
+export const SHELF_LAYOUT = (() => {
+  const gap = .006, word = .05, total = LETTER_BOOKS.reduce((sum, book) => sum + book.w + gap, -gap) + word;
+  let x = (BOOKCASE.width - total) / 2;
+  const letters = LETTER_BOOKS.map((book, index) => { const at = x + book.w / 2; x += book.w + gap + (index === 3 ? word : 0); return at; });
+  return { letters, slots: [.31, .388, .466, .544], santa: .76 };
+})();
+// Ordinary books on the other shelves: [shelf, variant, width, height], packed from the left.
+export const PLAIN_BOOKS = (() => {
+  const rows = { 0: { from: .06, to: .9, tall: [.26, .31], wide: [.06, .08] }, 1: { from: .05, to: .2, tall: [.22, .26], wide: [.05, .062] }, 3: { from: .06, to: .62, tall: [.18, .24], wide: [.045, .06] } };
+  const books = [];
+  for (const [shelf, { from, to, tall, wide }] of Object.entries(rows)) {
+    let x = from, i = 0;
+    while (true) {
+      const w = wide[0] + (wide[1] - wide[0]) * noise(shelf * 31 + i * 7), h = tall[0] + (tall[1] - tall[0]) * noise(shelf * 17 + i * 3 + 1);
+      if (x + w > to) break;
+      books.push({ shelf: Number(shelf), variant: Math.floor(noise(shelf * 5 + i * 11 + 2) * 4), x: x + w / 2, w, h }); x += w + .004; i++;
     }
   }
+  return books;
+})();
+// The sheets the book spines are cut from: one per letter book, four plain ones, and the picture book's cover.
+export const BOOK_SHEETS = [
+  ...LETTER_BOOKS.map(book => ({ id: book.id, w: book.w, h: book.h, px: 1600, draw: letterSpine(book) })),
+  ...PLAIN.map((colour, variant) => ({ id: `book-plain-${variant}`, w: .06, h: .25, px: 1000, draw: plainSpine(variant) })),
+  { id: 'santa-book', w: .24, h: .3, px: 1600, draw: santaCover },
+];
+
+// A wicker basket of firewood beside the hearth.
+export function logBasket({ paper }, { width, height }) {
+  for (const [x, tilt] of [[.28, -.2], [.5, .08], [.72, .26]]) {
+    const cx = width * x, top = height * .08;
+    shape('rect', { x: cx - 18, y: top, width: 36, height: height * .45, rx: 10, fill: '#7d5636', transform: `rotate(${tilt * 57} ${cx} ${top + 60})` }, paper);
+    shape('ellipse', { cx: cx + tilt * 30, cy: top + 6, rx: 19, ry: 16, fill: '#c99a6a' }, paper);
+    shape('ellipse', { cx: cx + tilt * 30, cy: top + 6, rx: 10, ry: 8, fill: 'none', stroke: '#a8774d', 'stroke-width': 3 }, paper);
+  }
+  const top = height * .36;
+  shape('path', { d: `M${width * .04} ${top}H${width * .96}L${width * .86} ${height}H${width * .14}Z`, fill: '#b98a52' }, paper);
+  for (let y = top + 16; y < height - 8; y += 18) shape('path', { d: `M${width * .06 + (y - top) * .12} ${y}H${width * .94 - (y - top) * .12}`, stroke: '#a8774d', 'stroke-width': 7, opacity: .8 }, paper);
+  for (let i = 1; i < 8; i++) shape('path', { d: `M${width * (.04 + i * .115)} ${top}L${width * (.14 + i * .09)} ${height}`, stroke: '#8f6444', 'stroke-width': 3, opacity: .7 }, paper);
+  shape('rect', { x: width * .02, y: top - 8, width: width * .96, height: 18, rx: 9, fill: '#8f5a3c' }, paper);
+}
+// One split log, seen from the side, its cut end turned toward the room.
+export function hearthLog({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: height * .08, width: width * .88, height: height * .84, rx: height * .4, fill: '#7d5636' }, paper);
+  for (let i = 0; i < 4; i++) shape('path', { d: `M${width * (.08 + i * .2)} ${height * .3}c${width * .06} ${height * .1} ${width * .1} -${height * .05} ${width * .16} ${height * .06}`, fill: 'none', stroke: '#5e3e29', 'stroke-width': 4 }, paper);
+  shape('ellipse', { cx: width * .86, cy: height / 2, rx: width * .1, ry: height * .46, fill: '#c99a6a' }, paper);
+  for (const r of [.3, .62]) shape('ellipse', { cx: width * .86, cy: height / 2, rx: width * .1 * r, ry: height * .46 * r, fill: 'none', stroke: '#a8774d', 'stroke-width': 3 }, paper);
+  shape('ellipse', { cx: width * .3, cy: height * .8, rx: width * .14, ry: height * .14, fill: '#3b2a24', opacity: .5 }, paper);
+}
+// The bellows: two wooden boards hinged at the brass nozzle (the bottom of each sheet), and the pleated leather between.
+export function bellowsPaddle({ paper }, { width, height }) {
+  const cx = width / 2;
+  shape('path', { d: `M${cx - 14} ${height}L${width * .1} ${height * .42}C${width * .02} ${height * .24} ${width * .2} ${height * .14} ${cx} ${height * .14}C${width * .8} ${height * .14} ${width * .98} ${height * .24} ${width * .9} ${height * .42}L${cx + 14} ${height}Z`, fill: '#a86b47' }, paper);
+  shape('path', { d: `M${cx - 6} ${height * .9}L${width * .2} ${height * .44}C${width * .14} ${height * .3} ${width * .28} ${height * .22} ${cx} ${height * .22}C${width * .72} ${height * .22} ${width * .86} ${height * .3} ${width * .8} ${height * .44}L${cx + 6} ${height * .9}Z`, fill: '#8f5a3c' }, paper);
+  shape('rect', { x: cx - 12, y: 0, width: 24, height: height * .18, rx: 10, fill: '#a86b47' }, paper);
+  shape('circle', { cx, cy: height * .06, r: 7, fill: '#6b4a33' }, paper);
+  for (const y of [.3, .5, .7]) shape('circle', { cx, cy: height * y, r: 5, fill: '#e0b04f' }, paper);
+}
+export function bellowsLeather({ paper }, { width, height }) {
+  const cx = width / 2, mouth = height * .8;
+  shape('path', { d: `M${width * .04} 0H${width * .96}L${cx + 10} ${mouth}H${cx - 10}Z`, fill: '#5b3a2c' }, paper);
+  for (let i = 1; i < 6; i++) shape('path', { d: `M${width * (.04 + i * .07)} 0L${cx - 6 + i * 2} ${mouth}M${width * (.96 - i * .07)} 0L${cx + 6 - i * 2} ${mouth}`, stroke: '#3b2a24', 'stroke-width': 3, opacity: .6 }, paper);
+  shape('rect', { x: cx - 9, y: mouth - 6, width: 18, height: height - mouth + 6, rx: 4, fill: '#e0b04f' }, paper);
 }
 
 export function lampTable({ paper }, { width, height }) {
@@ -819,9 +950,17 @@ export const BOARDS = [
   { id: 'roof-out-right', roof: 'right', layer: 'outer', w: HOUSE.slope + HOUSE.eaves, h: HOUSE.depth + HOUSE.overhang * 2, draw: roofOutside, kind: 'floor' },
   { id: 'garland', w: HOUSE.width + HOUSE.eaves * 2.6, h: 1.42, at: [0, HOUSE.wall - .26, HOUSE.depth / 2 + HOUSE.overhang + .03], draw: roofGarland },
   { id: 'lantern', w: .3, h: .56, at: [LANTERN.x, HOUSE.ridge, LANTERN.z], hang: true, draw: lantern, room: true },
-  { id: 'bookshelf', w: .55, h: 1.25, at: [-1.22, 0, BACK + .1], draw: bookshelf, room: true },
-  { id: 'fireplace', w: 1.05, h: 1.14, at: [FIRE.x, 0, BACK + .08], draw: fireplace, room: true },
-  { id: 'flames', w: .36, h: .28, at: [FIRE.x, .09, BACK + .12], draw: flames, flame: true, room: true },
+  // The bookcase's painted back hangs on its hinge; the fireplace and its flames are cut finer, as they are seen up close.
+  { id: 'bookshelf', w: BOOKCASE.width, h: BOOKCASE.height, px: 900, at: [BOOKCASE.width / 2, 0, 0], rig: 'bookcase', draw: bookcaseBack, room: true },
+  { id: 'fireplace', w: 1.05, h: 1.14, at: [FIRE.x, 0, BACK + .08], detail: 2, draw: fireplace, room: true },
+  { id: 'flames', w: .36, h: .28, at: [FIRE.x, .09, BACK + .12], detail: 2, draw: flames, flame: true, room: true },
+  // The hearth's own things: firewood in a basket, up to three logs burning on the grate (placed by the scene as the fire
+  // is fed), and the bellows on their hinge.
+  { id: 'log-basket', w: .34, h: .27, px: 900, at: [.47, 0, BACK + .42], draw: logBasket, room: true },
+  { id: 'hearth-log', w: .24, h: .075, px: 1200, at: [FIRE.x, .1, BACK + .14], clones: 3, draw: hearthLog, room: true },
+  { id: 'bellows-leather', w: .2, h: .32, px: 1100, at: [0, 0, 0], rig: 'bellows', draw: bellowsLeather, room: true },
+  { id: 'bellows-left', w: .13, h: .4, px: 1100, at: [0, 0, .004], rig: 'bellows', draw: bellowsPaddle, room: true },
+  { id: 'bellows-right', w: .13, h: .4, px: 1100, at: [0, 0, .008], rig: 'bellows', mirror: true, draw: bellowsPaddle, room: true },
   // Free-standing in the room, so they turn to face you wherever you stand: from the side they would be a sliver of paper.
   { id: 'tree', w: .74, h: 1.36, at: [1.25, 0, .55], draw: tree, room: true, billboard: true },
   { id: 'tree-lights', w: .74, h: 1.36, at: [1.25, 0, .55], draw: treeLights, twinkle: true, room: true, billboard: true, nudge: .01 },
@@ -871,13 +1010,18 @@ export const SPOTS = [
   { id: 'stable', name: '馴鹿小屋', box: [[7.4, 1.2, -7], [3.6, 2.8, 1.4]], view: { target: [7.05, .95, -7.05], distance: 4.4, pitch: .08, yaw: -.05, tallDistance: 6.4 } },
 ];
 
+// Places in the room the camera steps up to, for things to do there with your own hands (cabin-play.js). `fov`/`tallFov`
+// and `distance`/`tallDistance` are for a wide and a tall screen; a negative `tallDrop` looks higher on a tall one.
+export const ROOM_SPOTS = [
+  { id: 'hearth', name: '壁爐', box: [[FIRE.x + .1, .57, BACK + .25], [1.3, 1.14, .5]], view: { target: [FIRE.x + .02, .36, BACK + .25], distance: 1.4, pitch: .2, yaw: -.06, tallDistance: 1.75, tallFov: 74, tallDrop: -.2 } },
+  { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.3, pitch: .1, yaw: .06, tallDistance: 1.5, tallFov: 62 } },
+];
+
 // Things in the room that answer a tap with a line of their own. `box` is the tap target [centre, size]; the door takes you out.
 export const ROOM_PROPS = [
   { id: 'santa', name: '聖誕老人', note: '聖誕老人朝你點點頭：「外面很冷吧？在火爐邊暖暖身子。」' },
   { id: 'door', name: '大門', box: [[0, DOOR.height / 2, DOOR.z], [DOOR.width, DOOR.height, .3]] },
   { id: 'back-door', name: '後門', box: [[0, .62, BACK + .05], [.5, 1.24, .12]], note: '後門通往後院的玩具工坊，明年的禮物已經開始做了。' },
-  { id: 'bookshelf', name: '書架', box: [[-1.22, .62, BACK + .15], [.6, 1.25, .3]], note: '書架上排滿了一年又一年的送禮紀錄。' },
-  { id: 'fireplace', name: '壁爐', box: [[FIRE.x, .57, BACK + .15], [1.05, 1.14, .3]], note: '壁爐的火劈啪作響，架上掛著三隻襪子。' },
   { id: 'tree', name: '聖誕樹', box: [[1.25, .68, .55], [.8, 1.36, .8]], note: '屋裡的聖誕樹掛著彩燈，一閃一閃。' },
   { id: 'lamp-table', name: '小桌', box: [[-1.18, .45, .32], [.6, .9, .6]], note: '小桌上還留著昨晚的餅乾和牛奶。' },
   { id: 'window', name: '窗台', box: [[-1.55, 1.12, .08], [.15, .75, .75]], note: '窗台上的降臨小屋，十二月每過一天就多亮一扇窗。' },
