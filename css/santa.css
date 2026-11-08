@@ -220,6 +220,20 @@
 @media (prefers-reduced-motion: reduce) { .desk-pick, .desk-tool { animation: none; } .desk-work, .desk-letter, .envelope-flap { transition: none; } }
 /* 手機上，桌面讓給桌上的東西，信封和信紙放在下方。 */
 @media (max-width: 700px) { .desk-work { top: auto; right: .6rem; bottom: .6rem; left: .6rem; width: auto; } }
+/* 音樂盒：發條鑰匙外的一圈拖曳區（順時針轉）；反方向時棘輪擋住、輕輕彈一下。 */
+.musicbox-knob { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 2px dashed #c08a3e99; border-radius: 50%; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.musicbox-knob::after { content: '↻'; position: absolute; right: -4px; top: -6px; color: #c08a3e; font-size: var(--fs-body); font-weight: 700; }
+.musicbox-knob.is-winding { cursor: grabbing; animation: none; border-color: #c08a3e; }
+.musicbox-knob.is-resisting { animation: knob-resist .25s ease; }
+@keyframes knob-resist { 30% { rotate: -6deg; } 70% { rotate: 3deg; } }
+/* 雪花球：近看時換成可以搖的一顆（3D 那顆先藏起來），整顆以底座為軸傾斜，雪在玻璃罩裡飄落、堆在小屋腳下。 */
+.snow-globe { position: absolute; padding: 0; background: none; border: 0; border-radius: 50% 50% 12px 12px; cursor: grab; touch-action: none; pointer-events: auto; }
+.snow-globe.is-held { cursor: grabbing; }
+.snow-globe:focus-visible, .musicbox-knob:focus-visible { outline: 3px solid var(--yellow); outline-offset: 4px; }
+.globe-tilt { position: absolute; inset: 0; transform-origin: 50% 100%; filter: drop-shadow(0 8px 8px #3b2a2440); }
+.globe-tilt .art-layer, .globe-snow { position: absolute; inset: 0; width: 100%; height: 100%; }
+.globe-engraving { position: absolute; left: 0; right: 0; bottom: 4%; color: #e9d3a8; font-family: var(--font-hand); font-size: var(--fs-small); text-align: center; opacity: .85; }
+@media (prefers-reduced-motion: reduce) { .musicbox-knob { animation: none; } .musicbox-knob.is-resisting { animation: none; } }
 /* 觸控螢幕：每個按鈕至少 44px 見方，手指點得準。 */
 @media (pointer: coarse) {
   .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send, .desk-actions button { min-width: 44px; min-height: 44px; }

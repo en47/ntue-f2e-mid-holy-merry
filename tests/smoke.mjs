@@ -261,7 +261,18 @@ await test('Santa 屋內：書桌抽信、開信、翻面、蓋郵戳、火漆�
   assert.ok(!/firebase|wish-repository|publicWishes|localStorage/.test(desk + data), 'The desk never reads the Wish page or anyone’s real letters');
   assert.ok(desk.includes('setPointerCapture') && desk.includes('desk.stamped.push') && desk.includes('desk.sealed = true') && desk.includes('events.abort()') && !desk.includes('innerHTML'), 'Stamp and seal by dragging or Enter, kept in the progress record, every listener let go');
   const entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8'), html = await fs.readFile(path.join(project, 'santa.html'), 'utf8');
-  assert.ok(entry.includes("ROOMS = ['hearth', 'desk', 'shelf']") && html.includes('data-spot="desk"'));
+  assert.ok(/ROOMS = \[[^\]]*'desk'/.test(entry) && html.includes('data-spot="desk"'));
+});
+await test('Santa 屋內：音樂盒上發條（棘輪、越轉越慢、原創旋律只在網站音樂關著時響）與雪花球搖晃沉澱', async () => {
+  const { ROOM_SPOTS, BOARDS, ROOM_RIGS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  assert.ok(['musicbox', 'globe'].every(id => ROOM_SPOTS.some(spot => spot.id === id)) && ROOM_RIGS.turntable && BOARDS.some(board => board.id === 'musicbox-scene' && board.clones === 2), 'The music box turns two crossed cut-outs on a rig of its own');
+  const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), box = await fs.readFile(path.join(project, 'js/components/cabin-musicbox.js'), 'utf8'), globe = await fs.readFile(path.join(project, 'js/components/cabin-globe.js'), 'utf8'), sounds = await fs.readFile(path.join(project, 'js/components/cabin-sound.js'), 'utf8');
+  assert.ok(scene.includes('musicbox.energy - delta / 26') && scene.includes('!musicbox.held') && scene.includes('Math.PI * 6'), 'Three turns wind it fully; it runs down over time, not while a hand holds the key');
+  assert.ok(box.includes('if (delta > 0) wind(delta)') && box.includes('is-resisting') && box.includes("'ArrowRight'") && box.includes('events.abort()'), 'Only clockwise winds it (the ratchet holds the other way), arrow keys and Enter work too');
+  assert.ok(sounds.includes('const boxReady = () => !on()') && sounds.includes("const TUNE = [") && !/\.mp3|\.ogg|jingle bells|silent night/i.test(sounds), 'The tune is written here and plays only while the site music is off');
+  assert.ok(globe.includes('cabin.showGlobe(false)') && globe.includes('cabin.showGlobe(true)') && globe.includes('now - stirred > 100') && globe.includes('ground(flake.x)') && globe.includes('cancelAnimationFrame(frame)'), 'The shaken globe stands in for the one on the mantel and gives it back; snow is stirred in measure and settles on the mound');
+  const entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8'), html = await fs.readFile(path.join(project, 'santa.html'), 'utf8');
+  assert.ok(entry.includes("'musicbox', 'globe'") && html.includes('data-spot="musicbox"') && html.includes('data-spot="globe"'));
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
