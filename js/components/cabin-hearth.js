@@ -70,7 +70,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
     });
     on(button, 'pointermove', event => {
       if (!drag || event.pointerId !== drag.id) return;
-      const point = at(event), dx = point.x - drag.from.x, dy = point.y - drag.from.y;
+      const point = drag.point = at(event), dx = point.x - drag.from.x, dy = point.y - drag.from.y;
       if (!drag.moved && Math.hypot(dx, dy) < 6) return;
       if (!drag.moved) { drag.moved = true; button.classList.add('is-dragging'); sound.play('pick'); }
       button.style.translate = `${dx}px ${dy}px`;
@@ -78,11 +78,11 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
     });
     const drop = event => {
       if (!drag || event.pointerId !== drag.id) return;
-      const { moved } = drag; drag = null; mouth.classList.remove('is-open'); button.classList.remove('is-dragging');
+      const { moved, point: last } = drag; drag = null; mouth.classList.remove('is-open'); button.classList.remove('is-dragging');
       if (!moved) return;
       dragged = true;
-      const point = at(event), rect = cabin.hearthRects()?.mouth;
-      if (event.type === 'pointerup' && near(point, rect, 30)) {
+      const point = event.type === 'lostpointercapture' ? last : at(event), rect = cabin.hearthRects()?.mouth;
+      if (event.type !== 'pointercancel' && near(point, rect, 30)) {
         // It slides into the fire from where it was let go.
         const from = button.getBoundingClientRect(), box = stage.getBoundingClientRect(), target = centre(rect);
         const dx = target.x - (from.left - box.left + from.width / 2) + Number(button.style.translate.split('px')[0] || 0), dy = target.y - (from.top - box.top + from.height / 2) + Number(button.style.translate.split(' ')[1]?.replace('px', '') || 0);
@@ -90,7 +90,9 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
       }
       sound.play('drop'); button.style.translate = '';
     };
-    on(button, 'pointerup', drop); on(button, 'pointercancel', drop);
+    // A release swallowed before it reaches the page (some browser extensions do that) still ends the drag: the browser takes
+    // the pointer back from the button (lostpointercapture), and it counts as let go where it last was.
+    on(button, 'pointerup', drop); on(button, 'pointercancel', drop); on(button, 'lostpointercapture', drop);
     // A tap or Enter puts it straight on the fire.
     on(button, 'click', () => { if (dragged) { dragged = false; return; } feed(button); });
   });
@@ -124,7 +126,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
     if (amount > .45) blow();
     release(amount);
   };
-  on(grip, 'pointerup', letGo); on(grip, 'pointercancel', letGo);
+  on(grip, 'pointerup', letGo); on(grip, 'pointercancel', letGo); on(grip, 'lostpointercapture', letGo);
   on(grip, 'keydown', event => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault(); cabin.bellows(1); blow(); later(160, () => release(1));

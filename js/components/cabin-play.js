@@ -60,16 +60,17 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       if (!drag || event.pointerId !== drag.id) return;
       const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
       if (Math.hypot(dx, dy) > 5) drag.moved = true;
-      button.style.translate = `${dx}px ${dy}px`; follow(point(event));
+      button.style.translate = `${dx}px ${dy}px`; follow(drag.at = point(event));
     });
     const drop = event => {
       if (!drag || event.pointerId !== drag.id) return;
-      const moved = drag.moved; drag = null; button.classList.remove('is-dragging'); follow(null);
-      const used = moved ? use(point(event)) : false;
+      const { moved, at: last } = drag; drag = null; button.classList.remove('is-dragging'); follow(null);
+      const used = moved && event.type !== 'pointercancel' ? use(event.type === 'lostpointercapture' ? last : point(event)) : false;
       button.style.translate = '';
       if (used) button.remove();
     };
-    button.addEventListener('pointerup', drop); button.addEventListener('pointercancel', drop);
+    // A release swallowed before it reaches the page (some browser extensions do that) still ends the drag (lostpointercapture).
+    button.addEventListener('pointerup', drop); button.addEventListener('pointercancel', drop); button.addEventListener('lostpointercapture', drop);
     button.addEventListener('click', event => { if (event.detail === 0 && use(null)) button.remove(); });
   }
   function burst(rect, kind, count = 3) {

@@ -64,19 +64,21 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
         paperLayer(drag.ghost, '0 0 100 100', '', art[kind], paper);
         button.classList.add('is-lifted'); sound.play('pick');
       }
-      const point = at(event); move(drag.ghost, point);
+      const point = drag.point = at(event); move(drag.ghost, point);
       cabin.reindeerLook(point); showRing(near(point, cabin.mouthRect(), 40));
     });
     const drop = event => {
       if (!drag || event.pointerId !== drag.id) return;
-      const { ghost } = drag; drag = null; button.classList.remove('is-lifted'); showRing(false); cabin.reindeerLook(null);
+      const { ghost, point: last } = drag; drag = null; button.classList.remove('is-lifted'); showRing(false); cabin.reindeerLook(null);
       if (!ghost) return;
       dragged = true;
-      const point = at(event);
-      if (event.type === 'pointerup' && near(point, cabin.mouthRect(), 40)) offer(kind, button, ghost);
+      const point = event.type === 'lostpointercapture' ? last : at(event);
+      if (event.type !== 'pointercancel' && near(point, cabin.mouthRect(), 40)) offer(kind, button, ghost);
       else { sound.play('drop'); fly(ghost, centre(local(button.getBoundingClientRect())), false); }
     };
-    on(button, 'pointerup', drop); on(button, 'pointercancel', drop);
+    // A release swallowed before it reaches the page (some browser extensions do that) still ends the drag: the browser takes
+    // the pointer back from the button (lostpointercapture), and it counts as let go where it last was.
+    on(button, 'pointerup', drop); on(button, 'pointercancel', drop); on(button, 'lostpointercapture', drop);
     // A tap or Enter hands it straight to him.
     on(button, 'click', () => { if (dragged) { dragged = false; return; } offer(kind, button, null); });
   }

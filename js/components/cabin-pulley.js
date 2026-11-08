@@ -72,7 +72,7 @@ export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, s
     drag = null; grip.classList.remove('is-pulling');
     if (pull >= TOP) atTop(); else drop();
   };
-  on(grip, 'pointerup', letGo); on(grip, 'pointercancel', letGo);
+  on(grip, 'pointerup', letGo); on(grip, 'pointercancel', letGo); on(grip, 'lostpointercapture', letGo);
   on(grip, 'keydown', event => {
     const step = { ArrowDown: .12, ArrowUp: -.12 }[event.key];
     if (!step || state.locked) return;

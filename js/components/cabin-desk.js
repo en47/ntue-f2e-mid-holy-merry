@@ -140,7 +140,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     });
     on(button, 'pointermove', event => {
       if (!drag || event.pointerId !== drag.id) return;
-      const point = at(event);
+      const point = drag.point = at(event);
       if (!drag.ghost) {
         if (Math.hypot(point.x - drag.from.x, point.y - drag.from.y) < 6) return;
         drag.ghost = element('div', 'desk-ghost', layer); paperLayer(drag.ghost, '0 0 100 100', '', TOOLS[kind], PAPER); button.classList.add('is-dragging'); sound.play('pick');
@@ -150,14 +150,16 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     });
     const drop = event => {
       if (!drag || event.pointerId !== drag.id) return;
-      const { ghost } = drag; drag = null; button.classList.remove('is-dragging');
+      const { ghost, point: last } = drag; drag = null; button.classList.remove('is-dragging');
       for (const node of [postage, flap]) node.classList.remove('is-target');
       if (!ghost) return;
       dragged = true;
-      const target = targetOf(kind), hit = event.type === 'pointerup' && target && near(at(event), local(target.getBoundingClientRect()), 24);
+      const target = targetOf(kind), hit = event.type !== 'pointercancel' && target && near(event.type === 'lostpointercapture' ? last : at(event), local(target.getBoundingClientRect()), 24);
       if (hit) { ghost.classList.add('is-pressing'); use(kind); later(260, () => ghost.remove()); } else { sound.play('drop'); ghost.remove(); }
     };
-    on(button, 'pointerup', drop); on(button, 'pointercancel', drop);
+    // A release swallowed before it reaches the page (some browser extensions do that) still ends the drag: the browser takes
+    // the pointer back from the button (lostpointercapture), and it counts as let go where it last was.
+    on(button, 'pointerup', drop); on(button, 'pointercancel', drop); on(button, 'lostpointercapture', drop);
     on(button, 'click', () => { if (dragged) { dragged = false; return; } use(kind); });
   }
 
