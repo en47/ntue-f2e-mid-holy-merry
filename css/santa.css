@@ -165,6 +165,20 @@
 @media (max-width: 700px) {
   .cabin { height: max(560px, calc(100svh - 86px)); }
 }
+/* 壁爐：柴籃上的紙雕木柴（拖進爐口，或按一下直接放）、風箱握把、拖近時爐口的暖光，和添柴時飄起的火星。 */
+.hearth-log { position: absolute; z-index: 2; padding: 0; border: 0; border-radius: 10px; background: none; cursor: grab; touch-action: none; pointer-events: auto; filter: drop-shadow(0 5px 4px #3b2a2440); transition: translate .3s ease, scale .3s ease, opacity .3s ease; }
+.hearth-log .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hearth-log:hover { scale: 1.05; }
+.hearth-log.is-dragging { z-index: 6; cursor: grabbing; scale: 1.1; transition: none; }
+.hearth-log.is-used { opacity: 0; scale: .5; pointer-events: none; }
+.hearth-bellows { position: absolute; padding: 0; background: radial-gradient(#ffe8a455, transparent 70%); border: 2px dashed #c08a3e88; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.hearth-bellows.is-pressing { cursor: grabbing; border-color: #c08a3e; animation: none; }
+.hearth-log:focus-visible, .hearth-bellows:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.hearth-mouth { position: absolute; border-radius: 45% 45% 12px 12px; background: radial-gradient(#ffd38a88, transparent 70%); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+.hearth-mouth.is-open { opacity: 1; }
+.hearth-spark { position: absolute; width: 9px; height: 9px; background: #f2a541; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); pointer-events: none; animation: hearth-spark 1.1s ease-out both; }
+@keyframes hearth-spark { from { opacity: 1; translate: 0 0; } to { opacity: 0; translate: var(--dx) -80px; } }
+@media (prefers-reduced-motion: reduce) { .hearth-bellows { animation: none; } .hearth-log { transition: none; } }
 /* 觸控螢幕：每個按鈕至少 44px 見方，手指點得準。 */
 @media (pointer: coarse) {
   .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send { min-width: 44px; min-height: 44px; }

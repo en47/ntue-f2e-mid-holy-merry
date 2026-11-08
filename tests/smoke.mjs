@@ -231,7 +231,23 @@ await test('Santa 手機版：觸控按鈕至少 44px、橫拿手機改右側窄
   assert.ok(sideways.includes('.cabin { height: 100svh; }') && sideways.includes('.feed-basket { flex-direction: column; }') && sideways.includes('.wardrobe {') && sideways.includes('.cabin-chat {'), 'A phone held sideways gets the whole screen and the trays down the right side');
   assert.ok(entry.includes("matchMedia('(orientation: landscape) and (max-height: 500px)')") && entry.includes('fitSideways()'), 'Opening a corner sideways scrolls the cabin fully into view');
   assert.ok(/\.wardrobe \{[^}]*bottom: 5\.4rem/.test(css) && css.includes('.wardrobe-reset { margin-right: 3.8rem; }'), 'The wardrobe stays clear of the music button');
-  assert.ok(scene.includes("chair.visible = view === 'inside' || trip?.direction === 'in' || trip?.direction === 'out'") && scene.includes('reindeerHolder.visible = frustum.intersectsSphere(reindeerBounds)'), 'Santa is drawn only around the room and the reindeer only while in view');
+  assert.ok(scene.includes("chair.visible = indoorView(view) || trip?.direction === 'in' || trip?.direction === 'out'") && scene.includes("const indoorView = name => name === 'inside' || VIEWS[name]?.room === true") && scene.includes('reindeerHolder.visible = frustum.intersectsSphere(reindeerBounds)'), 'Santa is drawn only around the room and the reindeer only while in view');
+});
+await test('Santa 屋內：近看壁爐（添柴、風箱、火勢）、HOLY MERRY 書櫃與燙金書脊隨火光發亮', async () => {
+  const { BOOKCASE, LETTER_BOOKS, SHELF_LAYOUT, BOOK_SHEETS, ROOM_SPOTS, ROOM_PROPS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  assert.equal(LETTER_BOOKS.map(book => book.letter).join(''), 'HOLYMERRY', 'The books spell the site name');
+  assert.deepEqual(LETTER_BOOKS.filter(book => book.gold).map(book => book.letter), ['O', 'M', 'E', 'R'], 'Four gold letters, all taken from HOLY MERRY itself');
+  assert.equal(SHELF_LAYOUT.slots.length, 4); assert.ok(SHELF_LAYOUT.slots.every(x => x > 0 && x < SHELF_LAYOUT.santa && SHELF_LAYOUT.santa < BOOKCASE.width), 'Four empty places left of the SANTA picture book, inside the bookcase');
+  assert.ok(BOOK_SHEETS.some(sheet => sheet.id === 'santa-book') && LETTER_BOOKS.every(book => BOOK_SHEETS.some(sheet => sheet.id === book.id)), 'Every book spine is a cut picture');
+  assert.deepEqual(ROOM_SPOTS.map(spot => spot.id), ['hearth', 'shelf']); assert.ok(!ROOM_PROPS.some(prop => prop.id === 'fireplace' || prop.id === 'bookshelf'), 'The hearth and the bookcase are places to step up to, not just a caption');
+  const { cabinGlyphs } = await import(pathToFileURL(path.join(project, 'js/data/cabin-glyphs.js')).href);
+  assert.ok([...'HOLYMERSANT'].every(char => cabinGlyphs[char]?.d), 'Every letter on the books comes from the display face');
+  const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), hearth = await fs.readFile(path.join(project, 'js/components/cabin-hearth.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8'), html = await fs.readFile(path.join(project, 'santa.html'), 'utf8');
+  assert.ok(scene.includes('hearthAdd()') && scene.includes('blow()') && scene.includes('sheen.opacity = .14 + warmth') && scene.includes('fire.intensity = 2.2 + flicker * .4 + warmth'), 'One fire level drives the flames, the firelight and the gold glint');
+  assert.ok(scene.includes('roomAway') && scene.includes('function back()') && scene.includes("event.preventDefault(); back();"), 'Stepping back from the hearth faces the room as before, one step at a time');
+  assert.ok(hearth.includes('setPointerCapture') && hearth.includes("event.key !== 'Enter'") && hearth.includes('events.abort()') && hearth.includes('cabin.bellows(0)') && !hearth.includes('innerHTML'), 'Logs and bellows work by pointer and keyboard and let go of everything on leaving');
+  assert.ok(entry.includes("ROOMS = ['hearth', 'shelf']") && entry.includes("'← 回到房間'") && entry.includes('cabin?.back()') && entry.includes('!event.defaultPrevented'), 'The back button and Escape step back from the hearth to the room');
+  assert.ok(html.includes('data-spot="hearth"') && html.includes('data-spot="shelf"'), 'The hearth and the bookcase can be reached from the keyboard list');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');

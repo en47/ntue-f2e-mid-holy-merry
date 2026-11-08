@@ -49,6 +49,9 @@ export function createSound(widget = document.querySelector('.music-widget'), au
     thud: () => { tone(140, 0, .22, { type: 'sine', gain: .25, slide: 70 }); rustle(0, .14, 900, 300, .12); },
     open: () => { tone(330, 0, .28, { type: 'triangle', gain: .07, slide: 420 }); rustle(.05, .18, 2600, 1200, .1); },
     jingle: () => { [NOTE.G5, NOTE.C6, NOTE.E6].forEach((note, i) => tone(note, i * .07, .35, { gain: .12 })); },
+    // A log catching: a few dry snaps over a low thump. The bellows: one long breath of air.
+    crackle: () => { tone(150, 0, .2, { type: 'sine', gain: .12, slide: 90 }); for (let i = 0; i < 6; i++) rustle(.05 + i * .07 + (i % 3) * .015, .03, 3200 + i * 300, 1800, .12); },
+    whoosh: () => rustle(0, .5, 380, 1400, .22),
   };
   return {
     play(name) {
