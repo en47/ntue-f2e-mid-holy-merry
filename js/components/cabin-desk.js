@@ -22,7 +22,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
   const desk = progress.desk;
-  say('書桌上堆著一疊信。從信堆抽一封來看看；郵戳和火漆也可以拿起來用。');
+  say('書桌上堆著一疊信。點信堆抽一封來看；左邊的架子上，還有一封等著寄出的回信。');
 
   const pick = (label, run) => { const button = element('button', 'desk-pick', layer); button.type = 'button'; button.setAttribute('aria-label', label); on(button, 'click', run); return button; };
   const stack = pick('從信堆抽一封信', () => take(DESK_LETTERS[next++ % DESK_LETTERS.length], stack));
@@ -35,6 +35,8 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   // The letter on the desk: its envelope (flap, address, postage stamp, the postmark once stamped, the wax once sealed),
   // the letter itself with a front and a back, and what can be done with it.
   const work = element('div', 'desk-work', layer); work.hidden = true;
+  // What can be done next with the letter on the desk, in one line that changes with each step.
+  const guide = element('p', 'desk-guide', work);
   const envelope = element('div', 'desk-envelope', work);
   const flap = element('span', 'envelope-flap', envelope), from = element('p', 'envelope-from', envelope), to = element('p', 'envelope-to', envelope);
   const postage = element('span', 'envelope-stamp', envelope), postmark = element('span', 'envelope-postmark', envelope, '北極郵局\n12 · 25'), wax = element('span', 'envelope-wax', envelope, 'S');
@@ -57,6 +59,13 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     work.classList.toggle('is-reading', reading); envelope.dataset.open = String(opened);
     const sealed = outgoing && desk.sealed;
     postmark.hidden = outgoing || !desk.stamped.includes(entry.id); postage.hidden = outgoing; wax.hidden = !sealed;
+    const stamped = !outgoing && desk.stamped.includes(entry.id), flipped = letter.classList.contains('is-flipped');
+    guide.textContent = outgoing
+      ? (sealed ? '封好了，放回架上等著寄出。' : reading ? '讀完就收進信封，再把桌上的火漆印拖到封口。' : '這封回信還沒封口：可以先讀一讀，再把桌上的火漆印拖到封口。')
+      : reading ? (flipped ? '背面是處理這封信的人寫的。收進信封放回去，再抽下一封。' : '讀完可以翻到背面，看看是誰處理的。')
+      : stamped ? '郵戳蓋好了。打開信看看寫了什麼。' : '把桌上的郵戳拖到右上角的郵票上蓋章，或直接打開信。';
+    // Only the tool that can be used now stands out.
+    tools.stamp.classList.toggle('is-ready', !outgoing && !reading && !stamped); tools.seal.classList.toggle('is-ready', outgoing && !reading && !sealed);
     openButton.hidden = reading || sealed; openButton.textContent = outgoing ? '讀一讀回信' : '打開信';
     flipButton.hidden = !reading || outgoing; closeButton.hidden = !reading; returnButton.hidden = reading; returnButton.textContent = outgoing ? '放回架上' : '放回去';
   }
@@ -87,13 +96,14 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   }
   function flip() {
     const flipped = letter.classList.toggle('is-flipped'); sound.play('remove');
-    flipButton.textContent = flipped ? '翻回正面' : '翻到背面';
+    flipButton.textContent = flipped ? '翻回正面' : '翻到背面'; refresh();
     // Once the little room behind the bookcase has been seen, the initial has a name.
     if (flipped) say(knowsSantas(progress.story.seen) ? `背面簽著「${current.entry.back.sign}」——是名牌上的${NAMES[current.entry.back.sign[0]]}。` : '背面有人寫了一行小字，還簽了名。');
   }
   function close() { current.reading = false; letter.classList.remove('is-flipped'); flipButton.textContent = '翻到背面'; refresh(); sound.play('remove'); returnButton.focus({ preventScroll: true }); }
   function putBack() {
     const { source } = current; current = null; sound.play('remove'); say('');
+    for (const tool of Object.values(tools)) tool.classList.remove('is-ready');
     fly(local(source.getBoundingClientRect()), true); source.focus({ preventScroll: true });
   }
 

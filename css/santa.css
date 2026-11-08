@@ -183,6 +183,10 @@
 .desk-pick, .desk-tool { position: absolute; padding: 0; background: radial-gradient(#ffe8a455, transparent 70%); border: 2px dashed #c08a3e88; border-radius: 14px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .desk-tool { z-index: 5; cursor: grab; touch-action: none; }
 .desk-tool.is-dragging { opacity: .35; animation: none; }
+/* 用得到的工具亮起來，用不到的先淡下去；面板頂端一行說明現在可以做什麼。 */
+.desk-tool:not(.is-ready) { opacity: .5; animation: none; }
+.desk-tool.is-ready { border-color: #c08a3e; box-shadow: 0 0 0 4px #ffe8a466; }
+.desk-guide { margin: 0; padding: .45rem .9rem; color: var(--ink); background: #fffbedee; border-radius: 10px; box-shadow: 0 3px 0 -1px #dccaa9; font-size: var(--fs-small); text-align: center; }
 .desk-pick:focus-visible, .desk-tool:focus-visible, .desk-actions button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .desk-ghost { position: absolute; top: 0; left: 0; z-index: 7; width: 80px; height: 80px; pointer-events: none; filter: drop-shadow(0 8px 6px #3b2a2444); transition: scale .12s ease; }
 .desk-ghost .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }

@@ -1145,12 +1145,13 @@ export const BOARDS = [
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
   { id: 'chair-front', w: .82, h: .44, at: [0, 0, .2], draw: chairFront, chair: true },
   // The little room behind the bookcase (`secret`: drawn only once it is open): name tags on its left wall, the shift
-  // log and hats on its right, the substitutes' table at the back, a sorting rack low on the right.
-  { id: 'secret-tags', w: .66, h: .42, px: 1200, at: [SECRET.left + .012, .6, -HOUSE.depth / 2 - .55], turn: Math.PI / 2, draw: nameTags, room: true, secret: true },
-  { id: 'secret-desk', w: .7, h: .62, px: 1200, at: [SECRET.left + SECRET.width / 2, 0, -HOUSE.depth / 2 - SECRET.depth + .02], draw: secretDesk, room: true, secret: true },
-  { id: 'secret-log', w: .26, h: .34, px: 1300, at: [SECRET.left + SECRET.width - .012, .62, -HOUSE.depth / 2 - .42], turn: -Math.PI / 2, draw: shiftLog, room: true, secret: true },
-  { id: 'secret-hats', w: .5, h: .3, px: 1100, at: [SECRET.left + SECRET.width - .012, .9, -HOUSE.depth / 2 - .9], turn: -Math.PI / 2, draw: hatPegs, room: true, secret: true },
-  { id: 'secret-rack', w: .5, h: .44, px: 1100, at: [SECRET.left + SECRET.width - .012, .08, -HOUSE.depth / 2 - .85], turn: -Math.PI / 2, draw: sortingRack, room: true, secret: true },
+  // log and hats on its right, the substitutes' table at the back, a sorting rack low on the right. Each stands 3 cm off
+  // its wall: its paper edge, 1.2 cm behind it, would otherwise lie in the wall's plane and flicker.
+  { id: 'secret-tags', w: .66, h: .42, px: 1200, at: [SECRET.left + .03, .6, -HOUSE.depth / 2 - .55], turn: Math.PI / 2, draw: nameTags, room: true, secret: true },
+  { id: 'secret-desk', w: .7, h: .62, px: 1200, at: [SECRET.left + SECRET.width / 2, 0, -HOUSE.depth / 2 - SECRET.depth + .05], draw: secretDesk, room: true, secret: true },
+  { id: 'secret-log', w: .26, h: .34, px: 1300, at: [SECRET.left + SECRET.width - .03, .62, -HOUSE.depth / 2 - .42], turn: -Math.PI / 2, draw: shiftLog, room: true, secret: true },
+  { id: 'secret-hats', w: .5, h: .3, px: 1100, at: [SECRET.left + SECRET.width - .03, .9, -HOUSE.depth / 2 - .9], turn: -Math.PI / 2, draw: hatPegs, room: true, secret: true },
+  { id: 'secret-rack', w: .5, h: .44, px: 1100, at: [SECRET.left + SECRET.width - .03, .08, -HOUSE.depth / 2 - .85], turn: -Math.PI / 2, draw: sortingRack, room: true, secret: true },
   // Shown only while Santa is out (cabin-scene.js), propped on the seat against the chair's back.
   { id: 'chair-note', w: .18, h: .13, px: 1400, at: [0, .47, -.2], draw: chairNote, chair: true },
   // One low ridge of snowy foothills; the far mountain ranges behind it are in cabin-world.js.
@@ -1194,13 +1195,14 @@ export const SPOTS = [
   { id: 'stable', name: '馴鹿小屋', box: [[7.4, 1.2, -7], [3.6, 2.8, 1.4]], view: { target: [7.05, .95, -7.05], distance: 4.4, pitch: .08, yaw: -.05, tallDistance: 6.4 } },
 ];
 
-// Places in the room the camera steps up to, for things to do there with your own hands (cabin-play.js). `fov`/`tallFov`
+// Places in the room the camera steps up to, for things to do there with your own hands (cabin-play.js). The hearth's
+// target stops below the mantel, so the snow globe on it can be tapped on its own. `fov`/`tallFov`
 // and `distance`/`tallDistance` are for a wide and a tall screen; a negative `tallDrop` looks higher on a tall one. The
 // bookcase is looked at from close in: the rocking chair, turned toward the visitor, has its side across the floor behind.
 export const ROOM_SPOTS = [
-  { id: 'hearth', name: '壁爐', box: [[FIRE.x + .1, .57, BACK + .25], [1.3, 1.14, .5]], view: { target: [FIRE.x + .02, .36, BACK + .25], distance: 1.4, pitch: .2, yaw: -.06, tallDistance: 1.75, tallFov: 74, tallDrop: -.2 } },
+  { id: 'hearth', name: '壁爐', box: [[FIRE.x + .1, .34, BACK + .25], [1.3, .68, .5]], view: { target: [FIRE.x + .02, .36, BACK + .25], distance: 1.4, pitch: .2, yaw: -.06, tallDistance: 1.75, tallFov: 74, tallDrop: -.2 } },
   { id: 'desk', name: '書桌', box: [[DESK.x - .22, .7, DESK.z], [.5, 1.1, DESK.w]], view: { target: [DESK.x - .12, .82, DESK.z], distance: 1.05, pitch: .42, yaw: 1.33, tallDistance: 1.35, tallFov: 70 } },
-  { id: 'musicbox', name: '音樂盒', box: [[MUSICBOX.x, MUSICBOX.y + .12, MUSICBOX.z], [.2, .3, .32]], view: { target: [MUSICBOX.x, MUSICBOX.y + .1, MUSICBOX.z], distance: .78, pitch: .28, yaw: -Math.PI / 2, tallDistance: .82, tallFov: 54 } },
+  { id: 'musicbox', name: '音樂盒', box: [[MUSICBOX.x - .02, MUSICBOX.y + .12, MUSICBOX.z], [.26, .34, .4]], view: { target: [MUSICBOX.x, MUSICBOX.y + .1, MUSICBOX.z], distance: .78, pitch: .28, yaw: -Math.PI / 2, tallDistance: .82, tallFov: 54 } },
   { id: 'globe', name: '雪花球', box: [[GLOBE.x, GLOBE.y + GLOBE.h / 2, GLOBE.z], [.22, .26, .2]], view: { target: [GLOBE.x, GLOBE.y + .09, GLOBE.z], distance: .62, pitch: .1, yaw: 0, tallDistance: .8, tallFov: 56 } },
   { id: 'secret', name: '書櫃後的小房間', box: [[SECRET.left + SECRET.width / 2, SECRET.height / 2, -HOUSE.depth / 2 - .05], [SECRET.width, SECRET.height, .2]], view: { target: [SECRET.left + SECRET.width / 2, .6, -HOUSE.depth / 2 - .85], distance: .95, pitch: .22, yaw: .02, fov: 62, tallDistance: .95, tallFov: 84, turn: .6, tilt: .2 } },
   { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.05, pitch: .1, yaw: .06, fov: 40, tallDistance: 1.05, tallFov: 78 } },
@@ -1211,7 +1213,7 @@ export const ROOM_PROPS = [
   { id: 'santa', name: '聖誕老人', note: '聖誕老人朝你點點頭：「外面很冷吧？在火爐邊暖暖身子。」' },
   { id: 'door', name: '大門', box: [[0, DOOR.height / 2, DOOR.z], [DOOR.width, DOOR.height, .3]] },
   { id: 'back-door', name: '後門', box: [[0, .62, BACK + .05], [.5, 1.24, .12]], note: '後門通往後院的玩具工坊，明年的禮物已經開始做了。' },
-  { id: 'tree', name: '聖誕樹', box: [[1.25, .68, .55], [.8, 1.36, .8]], note: '屋裡的聖誕樹掛著彩燈，一閃一閃。' },
+  { id: 'tree', name: '聖誕樹', box: [[1.3, .68, .62], [.56, 1.36, .4]], note: '屋裡的聖誕樹掛著彩燈，一閃一閃。' },
   { id: 'window', name: '窗台', box: [[-1.55, 1.12, .08], [.15, .75, .75]], note: '窗台上的降臨小屋，十二月每過一天就多亮一扇窗。' },
   { id: 'coat', name: '掛衣架', box: [[-.9, 1.05, HOUSE.depth / 2 - .08], [.85, 1, .2]], note: '門邊掛著一件紅外套、帽子和圍巾，靴子還沾著雪。' },
 ];

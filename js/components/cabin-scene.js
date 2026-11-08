@@ -186,6 +186,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const report = () => onProgress(Math.min(1, painted / (first.length + 1) * .6 + reindeerShare * .4));
   // Sheets by id, so a game can redraw one (the snowman's hat, the hay in the loft) and a tap can wiggle one.
   const flames = [], twinkles = [], swings = [], smoke = [], billboards = [], sheets = new Map(), lifting = new Map();
+  // Sheets that move as one: the tree's lights are a sheet of their own (they twinkle) hung on the same tree.
+  const COMPANIONS = { tree: ['tree-lights'] };
+  const together = (id, apply) => { for (const other of [id, ...(COMPANIONS[id] ?? [])]) { const sheet = sheets.get(other); if (sheet) apply(sheet); } };
   // The room's paper and the books' spines, each with its own colour, to be warmed a little by the firelight.
   const warmed = [];
   // The fire: `heat` is how many logs are burning (0–3, one burns down every 40 s); the bellows squeeze and flare it.
@@ -624,16 +627,15 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       if (u >= 1) { holder.position.y = snowman.home.y; holder.rotation.set(0, snowman.board.turn, 0); snowmanMove = null; }
     }
     for (const [id, started] of wiggles) {
-      const sheet = sheets.get(id), u = (t - started) / 1.6;
-      if (!sheet) continue;
-      sheet.holder.rotation.z = u < 1 ? Math.sin(u * Math.PI * 5) * .12 * (1 - u) : 0;
+      const u = (t - started) / 1.6;
+      together(id, sheet => { sheet.holder.rotation.z = u < 1 ? Math.sin(u * Math.PI * 5) * .12 * (1 - u) : 0; });
       if (u >= 1) wiggles.delete(id);
     }
     // Whatever the mouse is over rises a little off the page.
     for (const [id, sheet] of lifting) {
       const goal = hovered === id ? 1.05 : 1;
-      sheet.lift += (goal - sheet.lift) * (still ? 1 : .25); sheet.holder.scale.copy(sheet.base).multiplyScalar(sheet.lift);
-      if (goal === 1 && Math.abs(sheet.lift - 1) < .002) { sheet.holder.scale.copy(sheet.base); lifting.delete(id); }
+      sheet.lift += (goal - sheet.lift) * (still ? 1 : .25); together(id, other => other.holder.scale.copy(other.base).multiplyScalar(sheet.lift));
+      if (goal === 1 && Math.abs(sheet.lift - 1) < .002) { together(id, other => other.holder.scale.copy(other.base)); lifting.delete(id); }
     }
     // The reindeer's head follows the food in your hand. Eating, he chews (small quick bobs with the head a little down);
     // lichen, his favourite, makes him hop and nod; gingerbread he turns away from. Only the head bone turns and the whole
