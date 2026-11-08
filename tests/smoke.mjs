@@ -320,6 +320,14 @@ await test('Santa 屋內修正：每個家具都點得到、小房間的紙不�
   assert.ok(scene.includes("const COMPANIONS = { tree: ['tree-lights'] }") && scene.includes('together(id, sheet => { sheet.holder.rotation.z'), 'The tree lights sway and lift with the tree');
   assert.ok(desk.includes("element('p', 'desk-guide', work)") && desk.includes("tools.stamp.classList.toggle('is-ready'") && desk.includes("tools.seal.classList.toggle('is-ready'"), 'The desk says what can be done next and lights up the tool that can be used');
 });
+await test('Santa 書櫃解開後可以手動開關：點書櫃關上或轉開、關著時可推開、離開小房間時可順手關上', async () => {
+  const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), play = await fs.readFile(path.join(project, 'js/components/cabin-play.js'), 'utf8'), books = await fs.readFile(path.join(project, 'js/components/cabin-books.js'), 'utf8'), secret = await fs.readFile(path.join(project, 'js/components/cabin-secret.js'), 'utf8');
+  assert.ok(scene.includes("caseTarget.userData = { bookcase: true }; rigs.get('bookcase').add(caseTarget)") && scene.includes("else if (hit?.bookcase) onTouch('bookcase')"), 'The bookcase can be tapped wherever it stands, open or shut');
+  assert.ok(scene.includes("story.mend = setTimeout(") && scene.includes('story.open < .01'), 'Shutting, the wall behind is mended only once the case covers the doorway');
+  assert.ok(scene.includes('raycaster.intersectObject(santaModel, true)'), 'Only a tap on Santa himself counts as one: the bookcase behind him can be tapped');
+  assert.ok(play.includes('story.shut = !open; save(); cabin.openBookcase(open)') && play.includes('cabin.openBookcase(!progress.story.shut, false)'), 'Open or shut is kept, and comes back so');
+  assert.ok(books.includes("'推開書櫃 →'") && secret.includes("'離開，關上書櫃 ↺'") && secret.includes('setTimeout(onShut, 1300)'), 'From the keyboard too: push it open from the shelf; leave the little room and shut it once clear of its swing');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

@@ -426,7 +426,10 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const unseen = flat(0xffffff, { visible: false }), unit = keep(geometries, new THREE.BoxGeometry(1, 1, 1));
   const target = ([[x, y, z], [w, h, d]], data) => { const mesh = new THREE.Mesh(unit, unseen); mesh.position.set(x, y, z); mesh.scale.set(w, h, d); mesh.userData = data; scene.add(mesh); return mesh; };
   const yardTargets = [...SPOTS.map(spot => target(spot.box, { spot: spot.id })), target([[0, 1.5, 0], [HOUSE.width + .4, 3.3, HOUSE.depth + .3]], { house: true }), ...PROPS.map(prop => target(prop.box, { prop }))];
-  const roomTargets = [...ROOM_SPOTS.map(spot => target(spot.box, { spot: spot.id })), ...ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }))];
+  // The bookcase as a whole, on its hinge, so it can be tapped wherever it stands once it opens and shuts by hand.
+  const caseTarget = new THREE.Mesh(unit, unseen); caseTarget.position.set(BOOKCASE.width / 2, BOOKCASE.height / 2, BOOKCASE.depth / 2);
+  caseTarget.scale.set(BOOKCASE.width, BOOKCASE.height, BOOKCASE.depth); caseTarget.userData = { bookcase: true }; rigs.get('bookcase').add(caseTarget);
+  const roomTargets = [caseTarget, ...ROOM_SPOTS.map(spot => target(spot.box, { spot: spot.id })), ...ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }))];
   const glint = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: keep(textures, radialTexture([[0, 'rgba(255,255,240,1)'], [.25, 'rgba(255,230,150,.8)'], [1, 'rgba(255,220,120,0)']], 64)), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })));
   glint.visible = false; world.add(glint);
   let snowmanMove = null, found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null;
@@ -870,13 +873,17 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (motion.matches || !playing() || VIEWS[view].turn) return;
     returnTimer = setTimeout(() => { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }, RETURN_AFTER);
   }
+  // Whether a point on screen is on Santa: a quick check against his box, then against the model itself.
   function onSanta(x, y) {
     if (!santaModel || story.away) return false;
     const box = new THREE.Box3().setFromObject(santaModel), rect = stage.getBoundingClientRect(), corners = [];
     for (const cx of [box.min.x, box.max.x]) for (const cy of [box.min.y, box.max.y]) for (const cz of [box.min.z, box.max.z]) corners.push(new THREE.Vector3(cx, cy, cz).project(camera));
     if (corners.some(point => point.z > 1)) return false;
     const xs = corners.map(point => rect.left + (point.x + 1) / 2 * rect.width), ys = corners.map(point => rect.top + (1 - point.y) / 2 * rect.height);
-    return x >= Math.min(...xs) && x <= Math.max(...xs) && y >= Math.min(...ys) && y <= Math.max(...ys);
+    if (x < Math.min(...xs) || x > Math.max(...xs) || y < Math.min(...ys) || y > Math.max(...ys)) return false;
+    // Inside his box, only a point on Santa himself counts: the bookcase behind him shows between his arm and the chair.
+    ndc.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1); raycaster.setFromCamera(ndc, camera);
+    return raycaster.intersectObject(santaModel, true).length > 0;
   }
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
   function hitAt(x, y) {
@@ -884,7 +891,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     ndc.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
     // Once the bookcase stands open, its doorway leads into the little room and the case itself is no longer a place.
-    const open = story.open > .5, usable = data => data.spot === 'secret' ? open : data.spot === 'shelf' ? !open : true;
+    const open = story.open > .5, usable = data => data.spot === 'secret' ? open : data.spot === 'shelf' ? !story.solved : data.bookcase ? Boolean(story.solved) : true;
     return raycaster.intersectObjects(targets, false).map(hit => hit.object.userData).find(usable) ?? null;
   }
   // Screen rectangle (relative to the stage) of a spot's box or of any world-space box, for the games laid over the scene.
@@ -913,7 +920,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (view === 'inside') {
       if (onSanta(x, y)) { touch(ROOM_PROPS.find(prop => prop.id === 'santa')); return; }
       const hit = hitAt(x, y);
-      if (hit?.prop?.id === 'door') setView('outside'); else if (hit?.spot) setView(hit.spot); else if (hit?.prop) touch(hit.prop);
+      if (hit?.prop?.id === 'door') setView('outside'); else if (hit?.bookcase) onTouch('bookcase'); else if (hit?.spot) setView(hit.spot); else if (hit?.prop) touch(hit.prop);
       return;
     }
     if (view !== 'outside') return;
@@ -1004,7 +1011,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   if (!reindeer) loadReindeer();
 
   function destroy() {
-    stop(); clearTimeout(returnTimer); storyTimers.forEach(clearTimeout); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
+    stop(); clearTimeout(returnTimer); clearTimeout(story.mend); storyTimers.forEach(clearTimeout); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
     release3d();
   }
   // What the games may do to the scene.
@@ -1109,11 +1116,17 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     },
     // The gold letters flash, the case gives a little shake, then it swings open into the room; or stands open already.
     glintBooks() { hearth.flare = motion.matches ? 0 : 1.6; story.shake = motion.matches ? null : clock; redraw(); },
+    // Once the puzzle is solved the bookcase is a door: it can be pushed shut and opened again. Shutting, the wall behind
+    // is mended only once the case covers the doorway again.
     openBookcase(open = true, animate = true) {
-      restyle('back', open ? { secret: true } : undefined);
-      if (!animate || motion.matches) { story.opening = null; story.open = open ? 1 : 0; } else story.opening = { from: story.open, to: open ? 1 : 0, start: clock };
+      story.solved = true; clearTimeout(story.mend);
+      const still = !animate || motion.matches;
+      if (open || still) restyle('back', open ? { secret: true } : undefined);
+      else story.mend = setTimeout(() => { if (!disposed && story.open < .01) restyle('back', undefined); }, 2700);
+      if (still) { story.opening = null; story.open = open ? 1 : 0; } else story.opening = { from: story.open, to: open ? 1 : 0, start: clock };
       redraw();
     },
+    get bookcaseOpen() { return story.open > .5; },
     // The music box: turn its key by `angle` (radians, positive winds it; it takes three turns), hold it still while a hand
     // is on it, and how wound it is now (0–1); where its key and box are on screen.
     wind(angle) { const before = musicbox.energy; musicbox.energy = THREE.MathUtils.clamp(musicbox.energy + angle / (Math.PI * 6), 0, 1); musicbox.key += (musicbox.energy - before) * Math.PI * 6; redraw(); return musicbox.energy; },

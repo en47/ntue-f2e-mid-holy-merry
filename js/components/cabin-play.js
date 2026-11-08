@@ -118,10 +118,17 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk') }),
     musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows }),
     globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe'), knows }),
-    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known') }),
-    shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened') }),
+    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false) }),
+    shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened'), toggle: open => swing(open) }),
   };
 
+  // The solved bookcase is a door you work by hand: pushed shut it is a wall of books again; pushed again it swings open.
+  function swing(open = progress.story.shut) {
+    const story = progress.story; if (!story.opened) return;
+    story.shut = !open; save(); cabin.openBookcase(open); sound.play('creak');
+    say(open ? '書櫃又慢慢轉開了，後面的小房間還在。' : '書櫃慢慢轉回原位，又是一整面普通的書牆。');
+    later(3600, () => { if (!layer.dataset.game) say(''); });
+  }
   // What has been used in the room on this visit; whether the secret behind the bookcase is known.
   const used = new Set(), knows = () => knowsSantas(progress.story.seen);
   function leave() { timers.forEach(clearTimeout); timers.clear(); cleanup(); cleanup = () => {}; layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
@@ -150,12 +157,15 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // Leaving the house before the bookcase has opened, Santa is back in his chair the next time you come in.
     outside() { if (!progress.story.opened && !cabin.santaHome) { cabin.santaBack(); onSanta('home'); } },
     get opened() { return progress.story.opened; },
+    get shut() { return progress.story.shut; },
+    // A tap on the bookcase itself in the room, once it has been solved: open it or push it shut.
+    swing: () => swing(),
     // Coming back shows the yard as it was left: the snowman in his outfit, finished corners finished.
     restore(ids) {
       for (const place of Object.keys(PLACES)) cabin.dress(place, progress.outfit[place]);
       cabin.hoist(progress.hoist.locked ? 1 : 0); if (progress.hoist.locked && progress.hoist.found) cabin.openHatch(true);
       if (ids.includes('mailbox')) cabin.repaint('mailbox', { open: true });
-      cabin.placeBooks(progress.story.shelf); if (progress.story.opened) cabin.openBookcase(true, false);
+      cabin.placeBooks(progress.story.shelf); if (progress.story.opened) cabin.openBookcase(!progress.story.shut, false);
     },
     destroy() { leave(); sound.destroy(); layer.remove(); },
   };

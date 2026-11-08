@@ -53,3 +53,8 @@ test('the story keeps only real clues and a whole shelf', () => {
   const { story } = readProgress(store);
   assert.deepEqual(story.seen, ['tags', 'log']); assert.equal(story.left, true); assert.equal(story.opened, true); assert.equal(story.shelf.length, 13);
 });
+test('a solved bookcase remembers being pushed shut', () => {
+  assert.equal(readProgress(memory()).story.shut, false);
+  assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ story: { opened: true, shut: true } }) })).story.shut, true);
+  assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ story: { opened: true, shut: 'yes' } }) })).story.shut, false);
+});
