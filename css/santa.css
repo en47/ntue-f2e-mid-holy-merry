@@ -246,7 +246,7 @@
 .books-place:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
 .books-slip { position: absolute; z-index: 2; max-width: 11rem; margin: 0; padding: .3rem .6rem; color: #5b3a2c; background: #fffdf6; border-radius: 4px; box-shadow: 0 3px 6px #3b2a2433; font-family: var(--font-hand); font-size: var(--fs-small); rotate: -4deg; pointer-events: none; }
 .books-tools { position: absolute; left: 50%; bottom: 1rem; display: flex; gap: .5rem; translate: -50% 0; pointer-events: auto; }
-.books-tools button { padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; }
+.books-tools button { padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; white-space: nowrap; }
 .chat-line.is-away .chat-bubble { color: #8a7a6a; font-style: normal; }
 /* 書櫃後的小房間：可以拿起來看的東西（看過的變淡），和打開後的紙卡：名牌、交接表（不同筆跡）、守則。 */
 .secret-thing { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 2px dashed #c08a3e88; border-radius: 12px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }

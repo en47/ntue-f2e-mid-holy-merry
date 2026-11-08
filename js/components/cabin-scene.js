@@ -426,7 +426,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const unseen = flat(0xffffff, { visible: false }), unit = keep(geometries, new THREE.BoxGeometry(1, 1, 1));
   const target = ([[x, y, z], [w, h, d]], data) => { const mesh = new THREE.Mesh(unit, unseen); mesh.position.set(x, y, z); mesh.scale.set(w, h, d); mesh.userData = data; scene.add(mesh); return mesh; };
   const yardTargets = [...SPOTS.map(spot => target(spot.box, { spot: spot.id })), target([[0, 1.5, 0], [HOUSE.width + .4, 3.3, HOUSE.depth + .3]], { house: true }), ...PROPS.map(prop => target(prop.box, { prop }))];
-  // The bookcase as a whole, on its hinge, so it can be tapped wherever it stands once it opens and shuts by hand.
+  // The bookcase as a whole, on its hinge, so it can be tapped wherever it stands, open or shut.
   const caseTarget = new THREE.Mesh(unit, unseen); caseTarget.position.set(BOOKCASE.width / 2, BOOKCASE.height / 2, BOOKCASE.depth / 2);
   caseTarget.scale.set(BOOKCASE.width, BOOKCASE.height, BOOKCASE.depth); caseTarget.userData = { bookcase: true }; rigs.get('bookcase').add(caseTarget);
   const roomTargets = [caseTarget, ...ROOM_SPOTS.map(spot => target(spot.box, { spot: spot.id })), ...ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }))];
@@ -891,7 +891,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     ndc.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
     // Once the bookcase stands open, its doorway leads into the little room and the case itself is no longer a place.
-    const open = story.open > .5, usable = data => data.spot === 'secret' ? open : data.spot === 'shelf' ? !story.solved : data.bookcase ? Boolean(story.solved) : true;
+    // The bookcase itself (its own target turns with it) is where to step up to it; its doorway, once open, leads in.
+    const open = story.open > .5, usable = data => data.spot === 'secret' ? open : data.spot !== 'shelf';
     return raycaster.intersectObjects(targets, false).map(hit => hit.object.userData).find(usable) ?? null;
   }
   // Screen rectangle (relative to the stage) of a spot's box or of any world-space box, for the games laid over the scene.
@@ -920,7 +921,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (view === 'inside') {
       if (onSanta(x, y)) { touch(ROOM_PROPS.find(prop => prop.id === 'santa')); return; }
       const hit = hitAt(x, y);
-      if (hit?.prop?.id === 'door') setView('outside'); else if (hit?.bookcase) onTouch('bookcase'); else if (hit?.spot) setView(hit.spot); else if (hit?.prop) touch(hit.prop);
+      if (hit?.prop?.id === 'door') setView('outside'); else if (hit?.bookcase) setView('shelf'); else if (hit?.spot) setView(hit.spot); else if (hit?.prop) touch(hit.prop);
       return;
     }
     if (view !== 'outside') return;

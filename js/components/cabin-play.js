@@ -119,10 +119,11 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows }),
     globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe'), knows }),
     secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false) }),
-    shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened'), toggle: open => swing(open) }),
+    shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened'), toggle: open => swing(open), restart: () => start('shelf') }),
   };
 
-  // The solved bookcase is a door you work by hand: pushed shut it is a wall of books again; pushed again it swings open.
+  // The solved bookcase is a door you work by hand (from up close, cabin-books.js): pushed shut it is a wall of books
+  // again; pushed again, or spelled again, it swings open.
   function swing(open = progress.story.shut) {
     const story = progress.story; if (!story.opened) return;
     story.shut = !open; save(); cabin.openBookcase(open); sound.play('creak');
@@ -131,9 +132,10 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   }
   // What has been used in the room on this visit; whether the secret behind the bookcase is known.
   const used = new Set(), knows = () => knowsSantas(progress.story.seen);
+  function start(id) { leave(); if (!games[id]) return; layer.dataset.game = id; cleanup = games[id]() || (() => {}); }
   function leave() { timers.forEach(clearTimeout); timers.clear(); cleanup(); cleanup = () => {}; layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
   return {
-    enter(id) { leave(); if (!games[id]) return; layer.dataset.game = id; cleanup = games[id]() || (() => {}); },
+    enter: start,
     leave,
     // A line about something tapped in the village or the room; it fades on its own and never covers a game.
     note(text) { if (layer.dataset.game) return; timers.forEach(clearTimeout); timers.clear(); say(text); later(4200, () => { if (!layer.dataset.game) say(''); }); },
@@ -157,9 +159,6 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // Leaving the house before the bookcase has opened, Santa is back in his chair the next time you come in.
     outside() { if (!progress.story.opened && !cabin.santaHome) { cabin.santaBack(); onSanta('home'); } },
     get opened() { return progress.story.opened; },
-    get shut() { return progress.story.shut; },
-    // A tap on the bookcase itself in the room, once it has been solved: open it or push it shut.
-    swing: () => swing(),
     // Coming back shows the yard as it was left: the snowman in his outfit, finished corners finished.
     restore(ids) {
       for (const place of Object.keys(PLACES)) cabin.dress(place, progress.outfit[place]);

@@ -7,25 +7,30 @@ import { homeShelf, moveBook, solved } from '../services/cabin-story.js';
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const HINTS = ['燙金的那幾本書，好像特別重要。', 'SANTA 繪本左邊，正好空著四個位置。', '把燙金的四本排成一個英文字，放在 SANTA 前面。'];
 
-export function booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen, toggle }) {
+export function booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen, toggle, restart }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const story = progress.story;
-  // Solved already: shut, it can be pushed open again (no need to spell it twice); open, the way in is behind it.
-  if (story.opened) {
-    const enter = element('button', 'books-enter', layer); enter.type = 'button';
-    const show = () => { enter.textContent = story.shut ? '推開書櫃 →' : '走進書櫃後的小房間 →'; };
-    say(story.shut ? '書櫃關上了，書還照你排的樣子：M、O、R、E、SANTA。' : '書櫃已經轉開了，後面有一個小房間。'); show();
-    on(enter, 'click', () => { if (story.shut) { toggle(true); show(); } else cabin.setView('secret'); }); enter.focus({ preventScroll: true });
+  // Standing open: the way in is behind it, or it can be pushed shut (and then played again).
+  if (story.opened && !story.shut) {
+    say('書櫃轉開了，後面是那個小房間。');
+    const tools = element('div', 'books-tools', layer), enter = element('button', '', tools, '走進小房間 →'), shut = element('button', '', tools, '關上書櫃 ↺');
+    enter.type = shut.type = 'button';
+    on(enter, 'click', () => cabin.setView('secret'));
+    on(shut, 'click', () => { tools.hidden = true; toggle(false); later(2800, restart); });
+    enter.focus({ preventScroll: true });
     return () => events.abort();
   }
+  // Shut again after it was solved, it can be played again: the books come down whether Santa is home or not (he knows you
+  // know), MORE opens it once more, and while the books still spell it, it can simply be pushed open.
+  const replay = story.opened;
   // A slip tucked in at the end of the shelf, in someone's hand.
   const slip = element('p', 'books-slip', layer, "There's always room for more."); slip.setAttribute('lang', 'en');
   const places = Array.from({ length: 13 }, (_, place) => { const button = element('button', 'books-place', layer); button.type = 'button'; button.dataset.place = place; return button; });
-  const tools = element('div', 'books-tools', layer), reset = element('button', '', tools, '全部放回 ↺'), hint = element('button', '', tools, '需要提示嗎？');
-  reset.type = hint.type = 'button'; hint.hidden = true;
+  const tools = element('div', 'books-tools', layer), push = element('button', '', tools, '推開書櫃 →'), reset = element('button', '', tools, '全部放回 ↺'), hint = element('button', '', tools, '需要提示嗎？');
+  push.type = reset.type = hint.type = 'button'; hint.hidden = true;
   let shelf = story.shelf, picked = -1, moves = 0, hints = 0, done = false;
-  const home = cabin.santaHome;
-  say(home ? '書背上的字拼出 HOLY MERRY……聖誕老人就坐在旁邊，不好意思亂動他的書。' : '聖誕老人出門了。書櫃上的書，好像可以抽出來。');
+  const home = cabin.santaHome && !replay;
+  say(replay ? (solved(shelf) ? '書還排著 MORE SANTA，可以直接推開；想再玩一次，就全部放回重拼。' : '書櫃關上了。把書重新排好，再拼一次看看。') : home ? '書背上的字拼出 HOLY MERRY……聖誕老人就坐在旁邊，不好意思亂動他的書。' : '聖誕老人出門了。書櫃上的書，好像可以抽出來。');
   tools.hidden = home;
 
   function layout() {
@@ -40,13 +45,16 @@ export function booksGame({ layer, stage, cabin, say, later, sound, progress, sa
     const first = rects[9];
     Object.assign(slip.style, { left: `${first.left - 6}px`, top: `${first.top + first.height + 6}px` });
   }
+  // Pushed open as it stands, when the books still spell MORE.
+  const showPush = () => { push.hidden = !replay || done || !solved(shelf); };
+  on(push, 'click', () => { done = true; tools.hidden = true; for (const button of places) button.hidden = true; slip.hidden = true; toggle(true); later(2800, restart); });
   function settle() {
-    cabin.placeBooks(shelf); story.shelf = shelf; save(); layout();
+    cabin.placeBooks(shelf); story.shelf = shelf; save(); layout(); showPush();
     if (!solved(shelf)) { if (++moves >= 8 && hints < HINTS.length) hint.hidden = false; return; }
     // MORE SANTA: a flash of gold, a wooden click and a shudder, and the case swings open.
     done = true; tools.hidden = true; slip.hidden = true; for (const button of places) button.hidden = true; sound.play('click'); cabin.glintBooks(); say('');
     later(700, () => { sound.play('thud'); say('喀——書櫃裡傳來木頭機關的聲音。'); });
-    later(1500, () => { sound.play('creak'); cabin.openBookcase(true); story.opened = true; save(); onOpen(); });
+    later(1500, () => { sound.play('creak'); cabin.openBookcase(true); story.opened = true; story.shut = false; save(); onOpen(); });
     later(4200, () => {
       say('書櫃慢慢轉開了，後面還有一個小房間。');
       const enter = element('button', 'books-enter', layer, '走進書櫃後的小房間 →'); enter.type = 'button';
@@ -94,7 +102,7 @@ export function booksGame({ layer, stage, cabin, say, later, sound, progress, sa
   });
   later(45000, () => { if (!done && !home) hint.hidden = false; });
 
-  layout(); later(500, layout); later(1200, layout);
+  showPush(); layout(); later(500, layout); later(1200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
   return () => { events.abort(); watch.disconnect(); if (!done) cabin.placeBooks(shelf); };
 }
