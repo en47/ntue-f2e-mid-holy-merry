@@ -50,8 +50,7 @@ function onView(view) {
   if (view === 'outside') status.textContent = '回到屋外。往左轉是遊樂場和許願角，往右轉是海邊和燈塔，雪山在小屋後面。';
 }
 back.addEventListener('click', () => cabin?.back());
-// Once the bookcase stands open, going to it means going through it (shut again, it is looked at as before).
-explore.forEach(button => button.addEventListener('click', () => { cabin?.setView(button.dataset.spot === 'shelf' && play?.opened && !play.shut ? 'secret' : button.dataset.spot); back.focus(); }));
+explore.forEach(button => button.addEventListener('click', () => { cabin?.setView(button.dataset.spot); back.focus(); }));
 looks.forEach(button => button.addEventListener('click', () => { cabin?.look(button.dataset.look); stage.querySelector('.cabin-gesture').focus(); }));
 // Escape steps back once (from the hearth to the room, from the room out of the door); the scene may have taken it already.
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !event.defaultPrevented && cabin && cabin.view !== 'outside') { cabin.back(); stage.querySelector('.cabin-gesture').focus(); } });
@@ -76,7 +75,7 @@ async function mountCabin(fly = true) {
   try {
     const [{ mountCabin: build }, { mountPlay }] = await Promise.all([import('./components/cabin-scene.js'), import('./components/cabin-play.js')]);
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (id === 'bookcase') play?.swing(); else if (note) play?.note(note); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
+    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (note) play?.note(note); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
     if (!result || run !== generation) { result?.destroy(); return; }
     cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; }, onSanta: state => { if (state === 'away' || state === 'home') chat.setAway(state === 'away'); } });
     cabin.setFound([...found]);
