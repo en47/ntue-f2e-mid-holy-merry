@@ -8,6 +8,8 @@ import { feedGame } from './cabin-feed.js';
 import { pulleyGame } from './cabin-pulley.js';
 import { hearthGame } from './cabin-hearth.js';
 import { deskGame } from './cabin-desk.js';
+import { musicboxGame } from './cabin-musicbox.js';
+import { globeGame } from './cabin-globe.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 
@@ -106,9 +108,11 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art: ART, paper: PAPER }),
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti }),
     stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound }),
-    // In the room: the hearth to tend, the desk's letters, and the bookcase to look over.
+    // In the room: the hearth to tend, the desk's letters, the music box and the snow globe, and the bookcase to look over.
     hearth: () => hearthGame({ layer, stage, cabin, say, later, sound }),
     desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save }),
+    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound }),
+    globe: () => globeGame({ layer, stage, cabin, say, later, sound }),
     shelf() { say('一整排書背拼出村子的名字：HOLY MERRY。下面一層立著一本《SANTA》繪本。'); },
   };
 

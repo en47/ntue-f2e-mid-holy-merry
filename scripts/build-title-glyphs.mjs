@@ -35,7 +35,7 @@ await fs.writeFile('js/data/title-glyphs.js', `${header}\nexport const TITLE_BOX
 await fs.writeFile('js/data/story-glyphs.js', `${header}\nexport const STORY_BOX = '0 0 660 360';\nexport const storyGlyphs = ${JSON.stringify(story)};\n`);
 await fs.writeFile('js/data/heading-glyphs.js', `${header}\nexport const headingGlyphs = ${JSON.stringify(headings)};\n`);
 // 只給 Santa 頁小屋用：書脊與繪本封面上的單一字母，字級 100、基線在 y = 0（其他頁的字形檔不受影響）。
-const letters = Object.fromEntries([...'HOLYMERSANT'].map(char => {
+const letters = Object.fromEntries([...'HOLYMERSANTK'].map(char => {
   const path = font.getPath(char, 0, 0, 100), box = path.getBoundingBox();
   return [char, { d: path.toPathData(1), box: [box.x1, box.y1, box.x2, box.y2].map(value => +value.toFixed(1)) }];
 }));

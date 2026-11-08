@@ -35,7 +35,14 @@ export const BOOKCASE = { left: -1.56, width: .95, height: 1.4, depth: .26, z: -
 // door from the rocking chair, so it can be looked at straight on, with the window and its advent house over its far end.
 export const DESK = { x: -1.15, z: .82, w: .95, h: 1.25, top: .76, items: { outbox: [.04, .27, .2, .4], stamp: [.22, .28, .32, .4], stack: [.34, .3, .54, .4], seal: [.56, .29, .64, .4], cup: [.66, .3, .8, .4], lamp: [.82, .08, .97, .4] } };
 // Things in the room that move about a pivot of their own: the bellows hang beside the fire, nozzle down toward it.
-export const ROOM_RIGS = { bookcase: { at: [BOOKCASE.left, 0, BOOKCASE.z] }, bellows: { at: [1.27, .12, -HOUSE.depth / 2 + .2], tilt: -.25 } };
+// The music box stands on the candle shelf of the right wall, facing the room; its little scene turns on a rig of its own.
+export const MUSICBOX = { x: 1.49, y: .96, z: -.02 };
+// The snow globe stands on the mantel, at its left end.
+export const GLOBE = { x: .52, y: .72, z: -HOUSE.depth / 2 + .17, w: .15, h: .18 };
+export const ROOM_RIGS = {
+  bookcase: { at: [BOOKCASE.left, 0, BOOKCASE.z] }, bellows: { at: [1.27, .12, -HOUSE.depth / 2 + .2], tilt: -.25 },
+  musicbox: { at: [MUSICBOX.x, MUSICBOX.y, MUSICBOX.z], turn: -Math.PI / 2 }, turntable: { at: [MUSICBOX.x + .02, MUSICBOX.y + .135, MUSICBOX.z] },
+};
 const CREAM = '#fbf3df', SNOW = '#fbf8f1', RED = '#a84a42', GREEN = '#4f7d68', DEEP_GREEN = '#3f6653', GOLD = '#e0b04f';
 const WOOD = '#8f5a3c', WOOD_LIT = '#a86b47', TIMBER = '#6b4a33', PLASTER = '#f1e4c8';
 // Stable "random" numbers, so every visit cuts the same cabin.
@@ -489,6 +496,51 @@ export function bellowsLeather({ paper }, { width, height }) {
   shape('path', { d: `M${width * .04} 0H${width * .96}L${cx + 10} ${mouth}H${cx - 10}Z`, fill: '#5b3a2c' }, paper);
   for (let i = 1; i < 6; i++) shape('path', { d: `M${width * (.04 + i * .07)} 0L${cx - 6 + i * 2} ${mouth}M${width * (.96 - i * .07)} 0L${cx + 6 - i * 2} ${mouth}`, stroke: '#3b2a24', 'stroke-width': 3, opacity: .6 }, paper);
   shape('rect', { x: cx - 9, y: mouth - 6, width: 18, height: height - mouth + 6, rx: 4, fill: '#e0b04f' }, paper);
+}
+
+// The music box: a red lacquered box with gold corners, its lid standing open behind it (engraved inside: someone's
+// initials for someone else), a little paper scene on the turntable (a fir, the sleigh and a reindeer, cut as one) and a
+// gold butterfly key on its front.
+export function musicBoxBody({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: height * .12, width, height: height * .88, rx: 10, fill: '#8f3b36' }, paper);
+  shape('rect', { x: 0, y: 0, width, height: height * .16, rx: 8, fill: '#a84a42' }, paper);
+  shape('rect', { x: width * .06, y: height * .3, width: width * .88, height: height * .56, rx: 8, fill: 'none', stroke: GOLD, 'stroke-width': 5 }, paper);
+  for (const x of [.04, .96]) for (const y of [.18, .94]) shape('circle', { cx: width * x, cy: height * y, r: 9, fill: GOLD }, paper);
+  for (let i = 0; i < 5; i++) shape('path', { d: `M${width * (.2 + i * .1)} ${height * .58}l${width * .02} -${height * .1} ${width * .02} ${height * .1}Z`, fill: GOLD, opacity: .8 }, paper);
+}
+export function musicBoxLid({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, rx: 10, fill: '#a84a42' }, paper);
+  shape('rect', { x: width * .05, y: height * .08, width: width * .9, height: height * .84, rx: 8, fill: '#f3e6c8' }, paper);
+  shape('rect', { x: width * .05, y: height * .08, width: width * .9, height: height * .84, rx: 8, fill: 'none', stroke: GOLD, 'stroke-width': 4 }, paper);
+  // The engraving: a small heart and two pairs of initials, worn soft.
+  shape('path', { d: `M${width / 2} ${height * .62}c-${width * .06} -${height * .08} -${width * .1} -${height * .22} 0 -${height * .2}c${width * .1} -${height * .02} ${width * .06} ${height * .12} 0 ${height * .2}Z`, fill: '#c9a77f' }, paper);
+  for (const [char, x] of [['N', .26], ['K', .74]]) letter(paper, char, width * x, height * .44, width * .14, height * .26, { fill: '#b98a5a' });
+}
+export function musicBoxScene({ paper }, { width, height }) {
+  shape('ellipse', { cx: width / 2, cy: height * .94, rx: width * .46, ry: height * .06, fill: '#e3d6bf' }, paper);
+  shape('path', { d: `M${width * .3} ${height * .9}L${width * .42} ${height * .05}L${width * .54} ${height * .9}Z`, fill: GREEN }, paper);
+  for (const y of [.35, .6]) shape('path', { d: `M${width * .34} ${height * y}H${width * .5}`, stroke: SNOW, 'stroke-width': 6 }, paper);
+  shape('circle', { cx: width * .42, cy: height * .06, r: 8, fill: GOLD }, paper);
+  shape('path', { d: `M${width * .58} ${height * .86}C${width * .6} ${height * .7} ${width * .76} ${height * .66} ${width * .9} ${height * .7}L${width * .94} ${height * .58}H${width * .98}L${width * .96} ${height * .78}C${width * .9} ${height * .9} ${width * .7} ${height * .92} ${width * .58} ${height * .86}Z`, fill: RED }, paper);
+  shape('path', { d: `M${width * .06} ${height * .62}l${width * .06} -${height * .1} ${width * .1} 0 ${width * .06} -${height * .14} ${width * .04} ${height * .04} -${width * .04} ${height * .12} ${width * .06} ${height * .2} -${width * .05} 0 -${width * .04} -${height * .1} -${width * .1} 0 -${width * .02} ${height * .1}Z`, fill: '#a8774d' }, paper);
+}
+export function musicBoxKey({ paper }, { width, height }) {
+  const cx = width / 2, cy = height / 2;
+  for (const side of [-1, 1]) shape('path', { d: `M${cx} ${cy}C${cx + side * width * .2} ${cy - height * .42} ${cx + side * width * .5} ${cy - height * .3} ${cx + side * width * .46} ${cy}C${cx + side * width * .5} ${cy + height * .3} ${cx + side * width * .2} ${cy + height * .42} ${cx} ${cy}Z`, fill: GOLD }, paper);
+  shape('circle', { cx, cy, r: Math.min(width, height) * .12, fill: '#c08a3e' }, paper);
+}
+// The snow globe as it stands on the mantel: a glass dome over a little red house and a fir, snow lying at its foot,
+// on a turned wooden base. Up close it is replaced by one that can be shaken (cabin-globe.js).
+export function snowGlobe({ paper }, { width, height }) {
+  const r = width * .46, cx = width / 2, cy = r + 4;
+  shape('circle', { cx, cy, r, fill: '#dbeaf2', opacity: .75 }, paper);
+  shape('path', { d: `M${cx - r * .92} ${cy + r * .4}Q${cx} ${cy + r * .2} ${cx + r * .92} ${cy + r * .4}A${r} ${r} 0 0 1 ${cx - r * .92} ${cy + r * .4}Z`, fill: SNOW }, paper);
+  shape('rect', { x: cx - r * .42, y: cy - r * .02, width: r * .5, height: r * .4, fill: RED }, paper);
+  shape('path', { d: `M${cx - r * .5} ${cy}L${cx - r * .17} ${cy - r * .32}L${cx + r * .16} ${cy}Z`, fill: SNOW }, paper);
+  shape('path', { d: `M${cx + r * .22} ${cy + r * .36}L${cx + r * .4} ${cy - r * .3}L${cx + r * .58} ${cy + r * .36}Z`, fill: GREEN }, paper);
+  shape('path', { d: `M${cx - r * .62} ${cy - r * .56}A${r * .8} ${r * .8} 0 0 1 ${cx - r * .1} ${cy - r * .84}`, fill: 'none', stroke: '#fff', 'stroke-width': 6, opacity: .7 }, paper);
+  shape('path', { d: `M${cx - r * .9} ${height}L${cx - r * .78} ${cy + r * .82}H${cx + r * .78}L${cx + r * .9} ${height}Z`, fill: WOOD }, paper);
+  shape('rect', { x: cx - r * .8, y: cy + r * .8, width: r * 1.6, height: 10, rx: 4, fill: GOLD }, paper);
 }
 
 // The writing desk under the left window, turned to face the room. On top, from the door end: the rack with the reply
@@ -1007,6 +1059,12 @@ export const BOARDS = [
   { id: 'tree', w: .74, h: 1.36, at: [1.25, 0, .55], draw: tree, room: true, billboard: true },
   { id: 'tree-lights', w: .74, h: 1.36, at: [1.25, 0, .55], draw: treeLights, twinkle: true, room: true, billboard: true, nudge: .01 },
   { id: 'desk', w: DESK.w, h: DESK.h, px: 1400, at: [DESK.x, 0, DESK.z], turn: Math.PI / 2, draw: desk, room: true },
+  // The music box on its rigs (the box, its lid and key; the turning scene), and the snow globe on the mantel.
+  { id: 'musicbox-lid', w: .25, h: .15, px: 1800, at: [0, .1, -.075], rig: 'musicbox', draw: musicBoxLid, room: true },
+  { id: 'musicbox-body', w: .26, h: .14, px: 1800, at: [0, 0, 0], rig: 'musicbox', draw: musicBoxBody, room: true },
+  { id: 'musicbox-key', w: .07, h: .05, px: 1800, at: [.095, .07, .008], rig: 'musicbox', center: true, draw: musicBoxKey, room: true },
+  { id: 'musicbox-scene', w: .13, h: .11, px: 1800, at: [0, 0, 0], rig: 'turntable', clones: 2, draw: musicBoxScene, room: true },
+  { id: 'snowglobe', w: GLOBE.w, h: GLOBE.h, px: 1800, at: [GLOBE.x, GLOBE.y, GLOBE.z], draw: snowGlobe, room: true },
   { id: 'chair-back', w: .82, h: 1.12, at: [0, 0, -.3], draw: chairBack, chair: true },
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
@@ -1057,6 +1115,8 @@ export const SPOTS = [
 export const ROOM_SPOTS = [
   { id: 'hearth', name: '壁爐', box: [[FIRE.x + .1, .57, BACK + .25], [1.3, 1.14, .5]], view: { target: [FIRE.x + .02, .36, BACK + .25], distance: 1.4, pitch: .2, yaw: -.06, tallDistance: 1.75, tallFov: 74, tallDrop: -.2 } },
   { id: 'desk', name: '書桌', box: [[DESK.x - .22, .7, DESK.z], [.5, 1.1, DESK.w]], view: { target: [DESK.x - .12, .82, DESK.z], distance: 1.05, pitch: .42, yaw: 1.33, tallDistance: 1.35, tallFov: 70 } },
+  { id: 'musicbox', name: '音樂盒', box: [[MUSICBOX.x, MUSICBOX.y + .12, MUSICBOX.z], [.2, .3, .32]], view: { target: [MUSICBOX.x, MUSICBOX.y + .1, MUSICBOX.z], distance: .78, pitch: .28, yaw: -Math.PI / 2, tallDistance: .82, tallFov: 54 } },
+  { id: 'globe', name: '雪花球', box: [[GLOBE.x, GLOBE.y + GLOBE.h / 2, GLOBE.z], [.22, .26, .2]], view: { target: [GLOBE.x, GLOBE.y + .09, GLOBE.z], distance: .62, pitch: .1, yaw: 0, tallDistance: .8, tallFov: 56 } },
   { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.3, pitch: .1, yaw: .06, tallDistance: 1.5, tallFov: 62 } },
 ];
 

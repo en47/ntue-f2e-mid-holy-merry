@@ -714,6 +714,34 @@
       "height": 475,
       "bytes": 10662
     },
+    "hi/musicbox-body.webp": {
+      "fingerprint": "1649b769c8bf9a4bbe60ac78af7c0817c58c60de8d79b8eb408e666a022d2bb0",
+      "sha256": "c709fd956a45e058e05b1e055050b855e6160efcfeb3cd62d2f13abe88b9e10e",
+      "width": 468,
+      "height": 252,
+      "bytes": 26448
+    },
+    "hi/musicbox-key.webp": {
+      "fingerprint": "acf0d8ca0032c45623e9c0775a77070400c6155aa531ebdd1fec08401e5d0197",
+      "sha256": "653708c3003159facd45ae110952263a279820ec6ccc7e49effbbb6b4b729183",
+      "width": 126,
+      "height": 90,
+      "bytes": 2136
+    },
+    "hi/musicbox-lid.webp": {
+      "fingerprint": "01d0b937945f410e27ff9a9b0690812cca25fedd9723dafda9186a2f3cd4b3b3",
+      "sha256": "d58e39a3ea29ce2583b5b1c9079c33f816e5df2c59df8c86461da047b2083289",
+      "width": 450,
+      "height": 270,
+      "bytes": 11268
+    },
+    "hi/musicbox-scene.webp": {
+      "fingerprint": "0864f715a4cf5c4f82ebc9b365f250d0f5be16fdbf37d1365a2cf80631a480a8",
+      "sha256": "d812634e984c65f74e44127eb4a06dfcf9809f614f2c501021c081e1bbb9086f",
+      "width": 234,
+      "height": 198,
+      "bytes": 7566
+    },
     "hi/outfit-antlers.webp": {
       "fingerprint": "875c5b219cb093b227c46a9b26d23a18d80daf708a15ed621053adec2e65d03a",
       "sha256": "7e40822fba77800e7d13a52a9c94608952d72c7110362e6e316ccfc6386d8901",
@@ -1091,6 +1119,13 @@
       "width": 240,
       "height": 140,
       "bytes": 3140
+    },
+    "hi/snowglobe.webp": {
+      "fingerprint": "dd93eb800139d83c02c4600408c94c681ae25beb4d9127bcf9c0c631518aaaa0",
+      "sha256": "dfae30eb48df51aaece0103491cac8501ad8fdb766d125df1799d7da977ffd89",
+      "width": 270,
+      "height": 324,
+      "bytes": 15588
     },
     "hi/snowman.webp": {
       "fingerprint": "831bd375cf2166897cdd103384d41a8dbf4b8c8a51c7a841fcdb4a2275689912",
@@ -1925,6 +1960,34 @@
       "height": 356,
       "bytes": 7018
     },
+    "large/musicbox-body.webp": {
+      "fingerprint": "c48baebac78f19b59aeac837401dfb09a9a7a0f525e24f1a4ca4601b640f6fb2",
+      "sha256": "11de71dc082f3f579aaf6ec5cc0a3c0f2e04ff2904805dcbdb5548ef276e7450",
+      "width": 351,
+      "height": 189,
+      "bytes": 16016
+    },
+    "large/musicbox-key.webp": {
+      "fingerprint": "66109a23bca1555f83be9d5d494e04c20884200dd01ea8da29dfcaef88c46123",
+      "sha256": "a75da75c4de27a25ca6969823cf25b8bbf54e9866207b6605914f4cada274bf6",
+      "width": 95,
+      "height": 68,
+      "bytes": 1690
+    },
+    "large/musicbox-lid.webp": {
+      "fingerprint": "2c063af6aa2220e9dea87ddb25d86a4a7db5ff35e7daa4513aa4fa88c8bd5788",
+      "sha256": "c3dbbd13df4420d893c76dcaa01767e740a132a4fe669e77ae4751a2a9a1714f",
+      "width": 338,
+      "height": 203,
+      "bytes": 7690
+    },
+    "large/musicbox-scene.webp": {
+      "fingerprint": "03f051494e931ee9b06c88c17db898f7993944c6de27259d95ff3b7dc6e322ed",
+      "sha256": "1f303d4e9256a33a094ae08022029f96b25cf9e5dbd639d4bab2df958288cf67",
+      "width": 176,
+      "height": 149,
+      "bytes": 5396
+    },
     "large/outfit-antlers.webp": {
       "fingerprint": "09f6dd30ea8a5107c947c26182bb8d90f320cc5d5a7a9b3a7819bf94c10889bd",
       "sha256": "9e5de2701d552bf6b1b6c758c18392d405ac82a1ff51388755e789c2b896943d",
@@ -2302,6 +2365,13 @@
       "width": 180,
       "height": 105,
       "bytes": 2512
+    },
+    "large/snowglobe.webp": {
+      "fingerprint": "c427b8348494b276e38f8a08f243b07ca380226133882e58768182191f7f1473",
+      "sha256": "348640728b472ef62237e0e8003c5780186084626244a6fde01c8bcee7a84a58",
+      "width": 203,
+      "height": 243,
+      "bytes": 10746
     },
     "large/snowman.webp": {
       "fingerprint": "fb0fc66ffaddc8b4448f834a22e73ddb4ea3ca6b68afb3034eca854da0ee9ec5",
@@ -3136,6 +3206,34 @@
       "height": 238,
       "bytes": 2214
     },
+    "small/musicbox-body.webp": {
+      "fingerprint": "004eb4db50d510d994e55dff4765a75f8049314771d86d065135c253629ae044",
+      "sha256": "c777981bfe98eedc922a5d95fba317e214097501a95d2a95409a066d07b486a6",
+      "width": 234,
+      "height": 126,
+      "bytes": 4302
+    },
+    "small/musicbox-key.webp": {
+      "fingerprint": "c9ed280089fe91a42157c17291d31564bd43adbb194fafe3092d469b6856e31b",
+      "sha256": "b688e1697ce97bba678b9aced0e0977a32640aa45a8990022cc8aa5b097f66df",
+      "width": 63,
+      "height": 45,
+      "bytes": 896
+    },
+    "small/musicbox-lid.webp": {
+      "fingerprint": "dbd4a34da5795fd30e02686bb7feb2d1384611b665be064eb44b4077b23e14ec",
+      "sha256": "fc6095b76d5692f6581cbfb849673965178c9181b980a9c3ee4ebdcd543da004",
+      "width": 225,
+      "height": 135,
+      "bytes": 2322
+    },
+    "small/musicbox-scene.webp": {
+      "fingerprint": "54344d327146c6d83bd2033efac4746990d53735bcf039035bab50c4f78b5d45",
+      "sha256": "77c4df49076b68f54517b477862cd3b2b6626985faceabde8e7e519e052601ba",
+      "width": 117,
+      "height": 99,
+      "bytes": 2550
+    },
     "small/outfit-antlers.webp": {
       "fingerprint": "e858484def36aaee7e060c1b5bb4a10ccc6c4dc5d7c5beadf26aee69bd696260",
       "sha256": "53998369730de18bd6e4499a2740720a9a1e428f8f23c3b34f315f37e40978be",
@@ -3513,6 +3611,13 @@
       "width": 120,
       "height": 70,
       "bytes": 1158
+    },
+    "small/snowglobe.webp": {
+      "fingerprint": "7ad46ff218b829a16f43090aa2d3401f7db062b04dab97405ac1e10d5dce250d",
+      "sha256": "f5c3e827d856352b58bbab012e27976cf27bba0733454c9a97d68c0346ac5914",
+      "width": 135,
+      "height": 162,
+      "bytes": 4730
     },
     "small/snowman.webp": {
       "fingerprint": "fd94c4b812ec1194b4ced8b55880fd9c4e00cff0ff7a82c34ffd1a980fee1b27",

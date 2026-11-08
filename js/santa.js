@@ -5,7 +5,7 @@ import { mountCabinChat } from './components/cabin-chat.js';
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
 const back = document.querySelector('#cabin-back'), tip = document.querySelector('#cabin-tip'), explore = [...document.querySelectorAll('.cabin-explore [data-spot]')], looks = [...document.querySelectorAll('.cabin-explore [data-look]')];
-const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], ROOMS = ['hearth', 'desk', 'shelf'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
+const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], ROOMS = ['hearth', 'desk', 'musicbox', 'globe', 'shelf'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 // The flight down over the village is for a large desktop window; a phone, a tablet or a small window starts at the house.
 const roomy = matchMedia('(min-width: 1100px) and (min-height: 650px) and (hover: hover) and (pointer: fine)');
@@ -41,6 +41,8 @@ function onView(view) {
   if (view === 'inside') status.textContent = '推開門走進屋裡：聖誕老人坐在火爐邊。拖曳可以環顧整個房間，點門口就能出去。';
   if (view === 'hearth') status.textContent = '走到壁爐前：可以從柴籃添柴，也可以壓一壓風箱。';
   if (view === 'desk') status.textContent = '走到書桌前：可以抽一封信來讀，也可以蓋郵戳、封火漆。';
+  if (view === 'musicbox') status.textContent = '走到音樂盒前：轉幾圈發條，它就會叮叮咚咚地轉起來。';
+  if (view === 'globe') status.textContent = '拿起爐台上的雪花球：左右搖一搖，看雪花慢慢落下。';
   if (view === 'shelf') status.textContent = '走到書櫃前，看看架上的書。';
   if (view === 'outside') status.textContent = '回到屋外。往左轉是遊樂場和許願角，往右轉是海邊和燈塔，雪山在小屋後面。';
 }

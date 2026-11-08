@@ -53,12 +53,33 @@ export function createSound(widget = document.querySelector('.music-widget'), au
     crackle: () => { tone(150, 0, .2, { type: 'sine', gain: .12, slide: 90 }); for (let i = 0; i < 6; i++) rustle(.05 + i * .07 + (i % 3) * .015, .03, 3200 + i * 300, 1800, .12); },
     whoosh: () => rustle(0, .5, 380, 1400, .22),
   };
+  // The music box's tune, written for this page: a little waltz in C. Unlike the yard's sounds it plays only while the
+  // site's music is off (with the music on, the two would clash). It slows as the spring runs down and stops when it has.
+  const TUNE = [['E5', 1], ['G5', 1], ['C6', 1], ['B5', 1], ['G5', 1], ['E5', 1], ['F5', 1], ['A5', 1], ['C6', 1], ['B5', 3], ['A5', 1], ['F5', 1], ['D5', 1], ['G5', 1], ['E5', 1], ['C5', 1], ['D5', 1], ['G5', 1], ['B5', 1], ['C6', 3]];
+  const PITCH = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5 };
+  let tuneTimer = 0;
+  const boxReady = () => !on() && start() && (context.state !== 'suspended' || (context.resume().catch(() => {}), true));
+  function stopTune() { clearTimeout(tuneTimer); tuneTimer = 0; }
   return {
+    // The music box: `wound()` says how wound it is (0–1); a click of its ratchet; whether the site's music is playing.
+    tune(wound) {
+      stopTune(); let index = 0;
+      const step = () => {
+        const left = wound();
+        if (left <= 0 || !boxReady()) { tuneTimer = 0; return; }
+        const [note, beats] = TUNE[index++ % TUNE.length], beat = .3 / (.4 + .6 * left);
+        try { tone(PITCH[note], 0, beat * beats * 1.8, { type: 'sine', gain: .2 }); tone(PITCH[note] * 2, 0, beat * .7, { type: 'triangle', gain: .05 }); } catch { /* a missed note is not worth an error */ }
+        tuneTimer = setTimeout(step, beat * beats * 1000);
+      };
+      step();
+    },
+    tick() { if (boxReady()) try { tone(2600, 0, .03, { type: 'square', gain: .04 }); } catch { /* fine */ } },
+    get musicOn() { return on(); },
     play(name) {
       if (!on() || !SOUNDS[name] || !start()) return;
       if (context.state === 'suspended') context.resume().catch(() => {});
       try { SOUNDS[name](); } catch { /* a missed sound is not worth an error */ }
     },
-    destroy() { context?.close().catch(() => {}); context = null; },
+    destroy() { stopTune(); context?.close().catch(() => {}); context = null; },
   };
 }

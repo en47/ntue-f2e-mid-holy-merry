@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, GLOBE, MUSICBOX, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -189,6 +189,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const warmed = [];
   // The fire: `heat` is how many logs are burning (0–3, one burns down every 40 s); the bellows squeeze and flare it.
   const hearth = { heat: 0, flare: 0, squeeze: 0 };
+  // The music box: `energy` is how far it is wound (0–1, three turns of the key), spent as it plays; `key` and `spin` are
+  // the key's and the little scene's angles. It does not run down while a hand is on the key.
+  const musicbox = { energy: 0, key: 0, spin: 0, held: false };
   // Soft bluish shadows on the snow, thrown right and back, away from the low sun on the left.
   const shade = keep(textures, radialTexture([[0, 'rgba(110,140,170,.42)'], [1, 'rgba(110,140,170,0)']], 64));
   const shadowMaterial = flat(0xffffff, { map: shade, transparent: true, depthWrite: false });
@@ -209,7 +212,10 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const rigs = new Map([['door', new THREE.Group()]]), clones = new Map(), skins = new Map();
   rigs.get('door').position.set(DOOR.hinge, 0, DOOR.z); indoors.add(rigs.get('door'));
   for (const [id, { at, turn = 0 }] of Object.entries(RIGS)) { const rig = new THREE.Group(); rig.position.set(...at); rig.rotation.y = turn; rigs.set(id, rig); world.add(rig); }
-  for (const [id, { at, tilt = 0 }] of Object.entries(ROOM_RIGS)) { const rig = new THREE.Group(); rig.position.set(...at); rig.rotation.z = tilt; rigs.set(id, rig); indoors.add(rig); }
+  for (const [id, { at, turn = 0, tilt = 0 }] of Object.entries(ROOM_RIGS)) { const rig = new THREE.Group(); rig.position.set(...at); rig.rotation.set(0, turn, tilt); rigs.set(id, rig); indoors.add(rig); }
+  // Real shelves for the things that stand on painted ones: the mantel (the snow globe) and the candle shelf (the music box).
+  solid(new THREE.BoxGeometry(1.08, .03, .2), 0xa86b47, new THREE.Vector3(FIRE.x, GLOBE.y - .015, GLOBE.z), indoors);
+  solid(new THREE.BoxGeometry(.2, .025, .76), 0xa86b47, new THREE.Vector3(MUSICBOX.x + .01, MUSICBOX.y - .0125, MUSICBOX.z), indoors);
   function standBoard(board, map) {
     const material = keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false, fog: board.fog !== false, side: board.mirror || board.chair && board.turn || board.billboard || board.clones ? THREE.DoubleSide : THREE.FrontSide }));
     const geometry = keep(geometries, new THREE.PlaneGeometry(board.w, board.h));
@@ -560,6 +566,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const open = .34 * (1 - hearth.squeeze) + .05, [left, right, leather] = ['bellows-left', 'bellows-right', 'bellows-leather'].map(id => sheets.get(id)?.holder);
     if (left && right) { left.rotation.z = open; right.rotation.z = -open; }
     if (leather) leather.scale.x = .25 + .75 * open / .39;
+    // The music box's key and its turning scene (two crossed cut-outs, so it never turns edge-on to nothing).
+    const key = sheets.get('musicbox-key')?.holder; if (key) key.rotation.z = musicbox.key;
+    (clones.get('musicbox-scene') ?? []).forEach((scene, i) => { scene.rotation.y = musicbox.spin + i * Math.PI / 2; });
     for (const [index, material] of twinkles.entries()) material.opacity = still ? 1 : .72 + Math.sin(t * 2.6 + index) * .28;
     for (const [holder, swing] of swings) holder.rotation.z = still ? 0 : Math.sin(t * 1.1 + holder.id) * swing;
     lanternGlow.material.opacity = .85 + (still ? 0 : Math.sin(t * 3.1) * .1);
@@ -714,6 +723,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (!active && now - lastDraw < 33) return;
     const delta = Math.min((now - (lastTick || now)) / 1000, .1); lastTick = lastDraw = now; clock += delta;
     hearth.heat = Math.max(0, hearth.heat - delta / 40); hearth.flare = Math.max(0, hearth.flare - delta * 1.4);
+    if (musicbox.energy > 0 && !musicbox.held) { musicbox.spin += delta * (.5 + 2.4 * musicbox.energy); musicbox.key -= delta * (.6 + 1.8 * musicbox.energy); musicbox.energy = Math.max(0, musicbox.energy - delta / 26); }
     if (trip) walking();
     else {
       if (spin && !pointer) {
@@ -980,6 +990,19 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     bellows(amount) { hearth.squeeze = THREE.MathUtils.clamp(amount, 0, 1); redraw(); },
     blow() { hearth.flare = motion.matches ? 0 : 1; if (hearth.heat > 0) hearth.heat = Math.min(3, hearth.heat + .3); redraw(); },
     get heat() { return hearth.heat; },
+    // The music box: turn its key by `angle` (radians, positive winds it; it takes three turns), hold it still while a hand
+    // is on it, and how wound it is now (0–1); where its key and box are on screen.
+    wind(angle) { const before = musicbox.energy; musicbox.energy = THREE.MathUtils.clamp(musicbox.energy + angle / (Math.PI * 6), 0, 1); musicbox.key += (musicbox.energy - before) * Math.PI * 6; redraw(); return musicbox.energy; },
+    holdKey(held) { musicbox.held = held; redraw(); },
+    get wound() { return musicbox.energy; },
+    musicRects() {
+      const key = sheets.get('musicbox-key')?.holder; if (!key) return null;
+      key.updateMatrixWorld(true);
+      return { key: rectOfBox(key.getWorldPosition(new THREE.Vector3()).toArray(), [.08, .08, .08]), box: rectOfBox([MUSICBOX.x, MUSICBOX.y + .1, MUSICBOX.z], [.16, .26, .3]) };
+    },
+    // The snow globe: where it stands on screen, and hiding it while the one that can be shaken is laid over it.
+    globeRect: () => rectOfBox([GLOBE.x, GLOBE.y + GLOBE.h / 2, GLOBE.z], [GLOBE.w, GLOBE.h, .001]),
+    showGlobe(shown) { const globe = sheets.get('snowglobe')?.holder; if (globe) globe.visible = shown; redraw(); },
     // Where the things on the desk are on screen (stage pixels), from their places on the desk's sheet.
     deskRects() {
       const holder = sheets.get('desk')?.holder; if (!holder) return null;
