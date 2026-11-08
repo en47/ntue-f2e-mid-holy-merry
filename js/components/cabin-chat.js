@@ -44,5 +44,11 @@ export function mountCabinChat(stage) {
     const folded = panel.classList.toggle('is-folded');
     fold.textContent = folded ? '和聖誕老人聊聊 ✉' : '收起'; fold.setAttribute('aria-expanded', String(!folded));
   });
-  return { destroy() { panel.remove(); } };
+  // While Santa is out the letter waits for him: a line on his behalf, and his name marked out.
+  const absent = element('li', 'chat-line from-santa is-away', log); absent.hidden = true;
+  element('p', 'chat-bubble', absent, '（聖誕老人去看麋鹿了，搖椅上留了一張紙條。）');
+  return {
+    destroy() { panel.remove(); },
+    setAway(away) { absent.hidden = !away; panel.classList.toggle('is-away', away); },
+  };
 }

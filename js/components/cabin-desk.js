@@ -14,7 +14,7 @@ const TOOLS = {
   seal: parent => { shape('circle', { cx: 50, cy: 16, r: 12, fill: '#a86b47' }, parent); shape('rect', { x: 42, y: 24, width: 16, height: 46, rx: 8, fill: '#8f5a3c' }, parent); shape('path', { d: 'M32 70H68L72 90H28Z', fill: '#e0b04f' }, parent); },
 };
 
-export function deskGame({ layer, stage, cabin, say, later, sound, progress, save }) {
+export function deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
@@ -79,7 +79,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     (openButton.hidden ? returnButton : openButton).focus({ preventScroll: true });
   }
   function open() {
-    current.open = true; current.reading = true; refresh(); sound.play('open'); say('');
+    current.open = true; current.reading = true; refresh(); sound.play('open'); say(''); onUse();
     if (!still()) { letter.classList.remove('is-unfolding'); void letter.offsetWidth; letter.classList.add('is-unfolding'); }
     (current.outgoing ? closeButton : flipButton).focus({ preventScroll: true });
   }

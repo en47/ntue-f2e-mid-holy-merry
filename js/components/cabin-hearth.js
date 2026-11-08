@@ -15,7 +15,7 @@ function log(parent) {
   shape('ellipse', { cx: 84, cy: 22, rx: 6, ry: 8, fill: 'none', stroke: '#a8774d', 'stroke-width': 2 }, parent);
 }
 
-export function hearthGame({ layer, stage, cabin, say, later, sound }) {
+export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
@@ -57,7 +57,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound }) {
   // Into the fire: false (and back to the basket) when the fire already burns as high as it goes.
   function feed(button) {
     if (!cabin.hearthAdd()) { say('火已經燒得很旺了，等它小一點再添吧。'); sound.play('nope'); return false; }
-    sound.play('crackle'); sparks(); say(line());
+    sound.play('crackle'); sparks(); say(line()); onUse();
     button.classList.add('is-used'); later(1300, () => { button.classList.remove('is-used'); button.style.translate = ''; layout(); });
     return true;
   }
@@ -99,7 +99,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound }) {
   let press = null, spring = 0;
   const reach = () => Math.max(50, (cabin.hearthRects()?.bellows.height ?? 40) * 1.6);
   function blow() {
-    cabin.blow(); sound.play('whoosh');
+    cabin.blow(); sound.play('whoosh'); onUse();
     if (cabin.heat > 0) { sparks(); say('呼——火焰一下竄了起來。'); } else say('風箱呼地一吹，只揚起一點灰。先放根木柴吧。');
   }
   function release(from) {

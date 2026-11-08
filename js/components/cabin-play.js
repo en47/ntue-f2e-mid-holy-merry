@@ -10,6 +10,8 @@ import { hearthGame } from './cabin-hearth.js';
 import { deskGame } from './cabin-desk.js';
 import { musicboxGame } from './cabin-musicbox.js';
 import { globeGame } from './cabin-globe.js';
+import { booksGame } from './cabin-books.js';
+import { santaGoes } from '../services/cabin-story.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 
@@ -31,7 +33,7 @@ const ART = {
   gingerbread: parent => { shape('path', { d: 'M50 12C62 12 66 22 62 30 74 30 86 34 86 42 86 48 74 48 66 46L72 80C72 88 62 90 58 84L50 70 42 84C38 90 28 88 28 80L34 46C26 48 14 48 14 42 14 34 26 30 38 30 34 22 38 12 50 12Z', fill: '#b97a4a' }, parent); for (const [x, y] of [[44, 22], [56, 22]]) shape('circle', { cx: x, cy: y, r: 3, fill: '#fbf3df' }, parent); for (const y of [44, 56]) shape('circle', { cx: 50, cy: y, r: 4, fill: '#a84a42' }, parent); },
 };
 
-export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {} } = {}) {
+export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {}, onSanta = () => {} } = {}) {
   const layer = element('div', 'cabin-play', stage), caption = element('p', 'cabin-caption', layer);
   caption.setAttribute('aria-hidden', 'true'); caption.hidden = true;
   const timers = new Set(), later = (ms, run) => { const id = setTimeout(() => { timers.delete(id); run(); }, ms); timers.add(id); };
@@ -109,24 +111,43 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti }),
     stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound }),
     // In the room: the hearth to tend, the desk's letters, the music box and the snow globe, and the bookcase to look over.
-    hearth: () => hearthGame({ layer, stage, cabin, say, later, sound }),
-    desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save }),
-    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound }),
-    globe: () => globeGame({ layer, stage, cabin, say, later, sound }),
-    shelf() { say('一整排書背拼出村子的名字：HOLY MERRY。下面一層立著一本《SANTA》繪本。'); },
+    // Each tells the room when it has been used (`onUse`): Santa goes out once enough has been done there.
+    hearth: () => hearthGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('hearth') }),
+    desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk') }),
+    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox') }),
+    globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe') }),
+    shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened') }),
   };
 
+  // What has been used in the room on this visit.
+  const used = new Set();
   function leave() { timers.forEach(clearTimeout); timers.clear(); cleanup(); cleanup = () => {}; layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
   return {
     enter(id) { leave(); if (!games[id]) return; layer.dataset.game = id; cleanup = games[id]() || (() => {}); },
     leave,
     // A line about something tapped in the village or the room; it fades on its own and never covers a game.
     note(text) { if (layer.dataset.game) return; timers.forEach(clearTimeout); timers.clear(); say(text); later(4200, () => { if (!layer.dataset.game) say(''); }); },
+    // Back in the middle of the room: after enough has been used there, Santa goes out to see to the reindeer (the rule is
+    // in cabin-story.js). The story is decided here, never by the chat.
+    inRoom() {
+      const story = progress.story;
+      if (!santaGoes({ used: used.size, left: story.left, home: cabin.santaHome, opened: story.opened })) return;
+      later(900, async () => {
+        say('聖誕老人站起來伸了個懶腰：「看你玩得這麼開心……哎呀，麋鹿在叫我了，我去看看牠，你慢慢逛！」');
+        if (!(await cabin.santaLeave())) return;
+        story.left = true; save(); onSanta('away');
+        say('搖椅還輕輕晃著，椅子上留了一張紙條。');
+      });
+    },
+    // Leaving the house before the bookcase has opened, Santa is back in his chair the next time you come in.
+    outside() { if (!progress.story.opened && !cabin.santaHome) { cabin.santaBack(); onSanta('home'); } },
+    get opened() { return progress.story.opened; },
     // Coming back shows the yard as it was left: the snowman in his outfit, finished corners finished.
     restore(ids) {
       for (const place of Object.keys(PLACES)) cabin.dress(place, progress.outfit[place]);
       cabin.hoist(progress.hoist.locked ? 1 : 0); if (progress.hoist.locked && progress.hoist.found) cabin.openHatch(true);
       if (ids.includes('mailbox')) cabin.repaint('mailbox', { open: true });
+      cabin.placeBooks(progress.story.shelf); if (progress.story.opened) cabin.openBookcase(true, false);
     },
     destroy() { leave(); sound.destroy(); layer.remove(); },
   };

@@ -19,7 +19,7 @@ function globe(parent) {
   shape('rect', { x: 14, y: 90, width: 72, height: 5, rx: 2, fill: '#e0b04f' }, parent);
 }
 
-export function globeGame({ layer, stage, cabin, say, later, sound }) {
+export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   say('按住雪花球左右搖一搖。');
@@ -52,7 +52,7 @@ export function globeGame({ layer, stage, cabin, say, later, sound }) {
   // Snow stirred by a shake of `push` (dome units per second, sideways): each flake takes it a little differently, so the
   // snow scatters instead of flying as one clump.
   function stir(push) {
-    const strength = Math.max(-40, Math.min(40, push));
+    const strength = Math.max(-40, Math.min(40, push)); onUse();
     for (const flake of flakes) { flake.vx += strength * (.1 + Math.random() * .9) + (Math.random() - .5) * 24; flake.vy -= Math.abs(strength) * Math.random() * .55 + Math.random() * 14; flake.still = false; }
     if (still()) { for (const flake of flakes) { flake.x = 14 + Math.random() * 72; flake.y = 14 + Math.random() * 60; } paint(); later(1200, settle); return; }
     run();

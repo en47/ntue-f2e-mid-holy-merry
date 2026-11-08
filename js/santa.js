@@ -19,7 +19,7 @@ function fitSideways() {
 mountCabinBackdrop(document.querySelector('.cabin-backdrop'));
 mountCabinPaper(document.querySelector('.cabin'));
 // The letter-paper chat with Santa waits in the room (its writing line stays off until the AI reply is ready).
-mountCabinChat(stage);
+const chat = mountCabinChat(stage);
 
 // Corners already found stay found on this browser (a convenience: an empty store just starts over).
 // Ids no longer in the yard (the elf that used to sit in a fir) are dropped.
@@ -38,6 +38,8 @@ function onView(view) {
   if (view !== 'outside') { tip.classList.add('is-gone'); fitSideways(); }
   back.hidden = view === 'outside'; back.textContent = view === 'inside' ? '← 走出門外' : ROOMS.includes(view) ? '← 回到房間' : '← 回到小屋前'; clearTimeout(enterTimer); play?.leave();
   if (SPOTS.includes(view) || ROOMS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : 1000);
+  if (view === 'inside') play?.inRoom();
+  if (view === 'outside') { play?.outside(); chat.setAway(Boolean(cabin && !cabin.santaHome)); }
   if (view === 'inside') status.textContent = '推開門走進屋裡：聖誕老人坐在火爐邊。拖曳可以環顧整個房間，點門口就能出去。';
   if (view === 'hearth') status.textContent = '走到壁爐前：可以從柴籃添柴，也可以壓一壓風箱。';
   if (view === 'desk') status.textContent = '走到書桌前：可以抽一封信來讀，也可以蓋郵戳、封火漆。';
@@ -74,7 +76,7 @@ async function mountCabin(fly = true) {
     if (run !== generation) return;
     const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (note) play?.note(note); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
     if (!result || run !== generation) { result?.destroy(); return; }
-    cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; } });
+    cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; }, onSanta: state => chat.setAway(state === 'away' || state === 'opened' && !cabin?.santaHome) });
     cabin.setFound([...found]);
     if (found.size) cabin.repaint('sign', { stars: found.size });
     play.restore([...found]);

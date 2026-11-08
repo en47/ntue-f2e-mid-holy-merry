@@ -5,7 +5,7 @@
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 
-export function musicboxGame({ layer, stage, cabin, say, later, sound }) {
+export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   say('把音樂盒的發條鑰匙順時針轉幾圈，放手它就會開始轉。');
   const knob = element('button', 'musicbox-knob', layer); knob.type = 'button';
@@ -27,7 +27,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound }) {
   }
   function release() {
     cabin.holdKey(false);
-    if (cabin.wound > 0) { sound.tune(() => cabin.wound); say(played()); }
+    if (cabin.wound > 0) { sound.tune(() => cabin.wound); say(played()); onUse(); }
   }
   on(knob, 'pointerdown', event => {
     if (event.button > 0) return;
