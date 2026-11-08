@@ -30,10 +30,13 @@ export const DOOR = { width: .66, height: 1.5, swing: 1.75, hinge: -.33, z: HOUS
 export const INSIDE = { eye: [.45, 1.15, .9], heading: .44, tallHeading: .78, pitch: .27, tallPitch: .46 };
 // The bookcase on the back wall, left of the back door: `left` is its hinge edge (it can swing open on it), `z` its painted
 // back. Books stand on wooden shelves whose tops are at `shelves` (metres up from the floor).
-export const BOOKCASE = { left: -1.56, width: .95, height: 1.4, depth: .26, z: -HOUSE.depth / 2 + .02, shelves: [.05, .39, .73, 1.07] };
+export const BOOKCASE = { left: -1.47, width: .95, height: 1.4, depth: .26, z: -HOUSE.depth / 2 + .02, shelves: [.05, .39, .73, 1.07] };
 // The writing desk against the left wall, facing the room (see desk()). `x` is its front edge, `z` its middle: toward the
 // door from the rocking chair, so it can be looked at straight on, with the window and its advent house over its far end.
 export const DESK = { x: -1.15, z: .82, w: .95, h: 1.25, top: .76, items: { outbox: [.04, .27, .2, .4], stamp: [.22, .28, .32, .4], stack: [.34, .3, .54, .4], seal: [.56, .29, .64, .4], cup: [.66, .3, .8, .4], lamp: [.82, .08, .97, .4] } };
+// The small room behind the bookcase, reached once it has swung aside: its doorway in the back wall (`left`, `width`,
+// `height`, hidden by the closed bookcase) and how far back it goes.
+export const SECRET = { left: -1.4, width: .76, height: 1.28, depth: 1.15 };
 // Things in the room that move about a pivot of their own: the bellows hang beside the fire, nozzle down toward it.
 // The music box stands on the candle shelf of the right wall, facing the room; its little scene turns on a rig of its own.
 export const MUSICBOX = { x: 1.49, y: .96, z: -.02 };
@@ -47,7 +50,7 @@ const CREAM = '#fbf3df', SNOW = '#fbf8f1', RED = '#a84a42', GREEN = '#4f7d68', D
 const WOOD = '#8f5a3c', WOOD_LIT = '#a86b47', TIMBER = '#6b4a33', PLASTER = '#f1e4c8';
 // Stable "random" numbers, so every visit cuts the same cabin.
 const noise = index => { const value = Math.sin(index * 12.9898) * 43758.5453; return value - Math.floor(value); };
-const clip = (svg, id, d) => { shape('path', { d }, shape('clipPath', { id }, shape('defs', {}, svg))); return `url(#${id})`; };
+const clip = (svg, id, d, rule) => { shape('path', rule ? { d, 'clip-rule': rule } : { d }, shape('clipPath', { id }, shape('defs', {}, svg))); return `url(#${id})`; };
 // The same, with the doorway left out, so the wall's paper is cut right through there.
 const cutDoor = (svg, id, outline, centre, height) => {
   const w = DOOR.width * PX, x = centre - w / 2, y = height - DOOR.height * PX;
@@ -106,9 +109,11 @@ function archedDoor(parent, x, top, width, bottom) {
   shape('circle', { cx: x + width - 34, cy: top + (bottom - top) * .58, r: 11, fill: GOLD }, parent);
 }
 
-export function backWall({ plain, paper, svg }, { width, height }) {
+export function backWall({ plain, paper, svg }, { width, height }, state = {}) {
   const eave = height - HOUSE.wall * PX, rail = height - .42 * PX;
-  const wall = shape('g', { 'clip-path': clip(svg, 'gable', `M0 ${height}V${eave}L${width / 2} 0L${width} ${eave}V${height}Z`) }, plain);
+  // Once the bookcase has swung aside, the wall behind it is a doorway into a small room (SECRET).
+  const hole = state.secret ? `M${(SECRET.left + HOUSE.width / 2) * PX} ${height}V${height - SECRET.height * PX}H${(SECRET.left + SECRET.width + HOUSE.width / 2) * PX}V${height}Z` : '';
+  const wall = shape('g', { 'clip-path': clip(svg, 'gable', `M0 ${height}V${eave}L${width / 2} 0L${width} ${eave}V${height}Z${hole}`, hole ? 'evenodd' : undefined) }, plain);
   plaster(wall, width, height);
   // The fireplace stands in front at x = .88; its stone chimney climbs on up through the gable.
   stones(wall, 1155, 0, 170, 880);
@@ -180,7 +185,7 @@ export function frontOutside({ plain, paper, svg }, { width, height }) {
   for (const [from, to] of [[0, x - 40], [x + w + 40, width]]) shape('path', { d: `M${from} ${height}C${from + (to - from) * .2} ${height - 60} ${from + (to - from) * .6} ${height - 30} ${to} ${height - 40}V${height}Z`, fill: SNOW }, paper);
 }
 // The same wall from inside: the window onto the morning on one side of the door, coat pegs with a spare red coat on the other.
-export function frontInside({ plain, paper, svg }, { width, height }) {
+export function frontInside({ plain, paper, svg }, { width, height }, state = {}) {
   const cx = width / 2, eave = height - HOUSE.wall * PX, rail = height - .42 * PX;
   const wall = shape('g', { 'clip-path': cutDoor(svg, 'front-in', `M0 ${height}V${eave}L${cx} 0L${width} ${eave}V${height}Z`, cx, height) }, plain);
   plaster(wall, width, height); wainscot(wall, width, height, rail);
@@ -198,7 +203,7 @@ export function frontInside({ plain, paper, svg }, { width, height }) {
   for (let i = 0; i < 5; i++) holly(paper, x - 20 + i * (w + 40) / 4, y - 34, .62);
   pictureFrame(paper, 470, eave + 150, 150, 120);
   holly(paper, 545, eave + 146, .6);
-  coatPegs(paper, 1070, eave + 170, 390, height - 14);
+  coatPegs(paper, 1070, eave + 170, 390, height - 14, state.coat !== false);
 }
 function litWindow(parent, x, y, width, height) {
   for (const sx of [x - 58, x + width + 14]) shape('rect', { x: sx, y: y - 6, width: 44, height: height + 12, rx: 6, fill: GREEN }, parent);
@@ -236,15 +241,18 @@ function woodpile(parent, x, base, width) {
   shape('path', { d: `M${x + width + 30} ${base}L${x + width + 64} ${top - 70}M${x + width + 96} ${base}L${x + width + 80} ${top - 70}`, stroke: '#3b302a', 'stroke-width': 6 }, parent);
 }
 // A peg rail by the door: a spare red coat, a hat and a scarf, boots standing underneath.
-function coatPegs(parent, x, y, width, floor) {
+function coatPegs(parent, x, y, width, floor, coat = true) {
   shape('rect', { x, y, width, height: 26, rx: 8, fill: WOOD_LIT }, parent);
   for (const px of [x + 70, x + width / 2, x + width - 70]) shape('circle', { cx: px, cy: y + 13, r: 10, fill: WOOD }, parent);
   const cx = x + 70;
+  // The red coat hangs on the first peg while Santa is at home; he takes it when he goes out.
+  if (coat) {
   shape('path', { d: `M${cx} ${y + 20}C${cx - 60} ${y + 30} ${cx - 80} ${y + 70} ${cx - 82} ${y + 330}H${cx + 82}C${cx + 80} ${y + 70} ${cx + 60} ${y + 30} ${cx} ${y + 20}Z`, fill: RED }, parent);
   shape('rect', { x: cx - 86, y: y + 310, width: 172, height: 34, rx: 16, fill: SNOW }, parent);
   shape('rect', { x: cx - 12, y: y + 40, width: 24, height: 290, rx: 10, fill: SNOW }, parent);
   shape('rect', { x: cx - 80, y: y + 180, width: 160, height: 26, fill: '#3b2a24' }, parent);
   shape('rect', { x: cx - 18, y: y + 176, width: 36, height: 34, rx: 4, fill: 'none', stroke: GOLD, 'stroke-width': 7 }, parent);
+  }
   const hx = x + width / 2;
   shape('path', { d: `M${hx - 50} ${y + 120}C${hx - 40} ${y + 60} ${hx + 20} ${y + 20} ${hx + 70} ${y + 70}L${hx + 50} ${y + 120}Z`, fill: RED }, parent);
   shape('rect', { x: hx - 58, y: y + 112, width: 116, height: 30, rx: 14, fill: SNOW }, parent);
@@ -541,6 +549,13 @@ export function snowGlobe({ paper }, { width, height }) {
   shape('path', { d: `M${cx - r * .62} ${cy - r * .56}A${r * .8} ${r * .8} 0 0 1 ${cx - r * .1} ${cy - r * .84}`, fill: 'none', stroke: '#fff', 'stroke-width': 6, opacity: .7 }, paper);
   shape('path', { d: `M${cx - r * .9} ${height}L${cx - r * .78} ${cy + r * .82}H${cx + r * .78}L${cx + r * .9} ${height}Z`, fill: WOOD }, paper);
   shape('rect', { x: cx - r * .8, y: cy + r * .8, width: r * 1.6, height: 10, rx: 4, fill: GOLD }, paper);
+}
+
+// The note Santa leaves on his chair when he goes out to the reindeer: a few lines in his hand and his initial.
+export function chairNote({ paper }, { width, height }) {
+  shape('rect', { x: 0, y: 0, width, height, rx: 6, fill: '#fffdf6', transform: `rotate(-4 ${width / 2} ${height / 2})` }, paper);
+  for (const [y, w] of [[.26, .7], [.44, .58], [.62, .66]]) shape('path', { d: `M${width * .12} ${height * y}c${width * w * .3} -6 ${width * w * .6} 6 ${width * w} 0`, fill: 'none', stroke: '#8f3b36', 'stroke-width': 4, 'stroke-linecap': 'round' }, paper);
+  letter(paper, 'S', width * .78, height * .8, width * .16, height * .2, { fill: '#8f3b36' });
 }
 
 // The writing desk under the left window, turned to face the room. On top, from the door end: the rack with the reply
@@ -1069,6 +1084,8 @@ export const BOARDS = [
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
   { id: 'chair-front', w: .82, h: .44, at: [0, 0, .2], draw: chairFront, chair: true },
+  // Shown only while Santa is out (cabin-scene.js), propped on the seat against the chair's back.
+  { id: 'chair-note', w: .18, h: .13, px: 1400, at: [0, .47, -.2], draw: chairNote, chair: true },
   // One low ridge of snowy foothills; the far mountain ranges behind it are in cabin-world.js.
   { id: 'hills-near', w: 80, h: 2.8, px: 22, at: [0, GROUND, -19], draw: hills(0), kind: 'scenery', fog: false },
   // Firs: one board per variant, planted at each [x, z, height]. Each tree turns to face the camera, so its outline stays clean from any side.
@@ -1111,13 +1128,14 @@ export const SPOTS = [
 ];
 
 // Places in the room the camera steps up to, for things to do there with your own hands (cabin-play.js). `fov`/`tallFov`
-// and `distance`/`tallDistance` are for a wide and a tall screen; a negative `tallDrop` looks higher on a tall one.
+// and `distance`/`tallDistance` are for a wide and a tall screen; a negative `tallDrop` looks higher on a tall one. The
+// bookcase is looked at from close in: the rocking chair, turned toward the visitor, has its side across the floor behind.
 export const ROOM_SPOTS = [
   { id: 'hearth', name: '壁爐', box: [[FIRE.x + .1, .57, BACK + .25], [1.3, 1.14, .5]], view: { target: [FIRE.x + .02, .36, BACK + .25], distance: 1.4, pitch: .2, yaw: -.06, tallDistance: 1.75, tallFov: 74, tallDrop: -.2 } },
   { id: 'desk', name: '書桌', box: [[DESK.x - .22, .7, DESK.z], [.5, 1.1, DESK.w]], view: { target: [DESK.x - .12, .82, DESK.z], distance: 1.05, pitch: .42, yaw: 1.33, tallDistance: 1.35, tallFov: 70 } },
   { id: 'musicbox', name: '音樂盒', box: [[MUSICBOX.x, MUSICBOX.y + .12, MUSICBOX.z], [.2, .3, .32]], view: { target: [MUSICBOX.x, MUSICBOX.y + .1, MUSICBOX.z], distance: .78, pitch: .28, yaw: -Math.PI / 2, tallDistance: .82, tallFov: 54 } },
   { id: 'globe', name: '雪花球', box: [[GLOBE.x, GLOBE.y + GLOBE.h / 2, GLOBE.z], [.22, .26, .2]], view: { target: [GLOBE.x, GLOBE.y + .09, GLOBE.z], distance: .62, pitch: .1, yaw: 0, tallDistance: .8, tallFov: 56 } },
-  { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.3, pitch: .1, yaw: .06, tallDistance: 1.5, tallFov: 62 } },
+  { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.05, pitch: .1, yaw: .06, fov: 40, tallDistance: 1.05, tallFov: 78 } },
 ];
 
 // Things in the room that answer a tap with a line of their own. `box` is the tap target [centre, size]; the door takes you out.

@@ -1,12 +1,15 @@
 // What a visitor has done in Santa's yard, kept in this browser only and never sent anywhere. One versioned record, so a
 // Christmas passport or the cabin's story can later read the same place. Every function takes the storage, so tests pass a stand-in.
+import { homeShelf, readShelf } from './cabin-story.js';
+
 const KEY = 'holy-merry:cabin:v1';
 export const PLACES = ['head', 'neck', 'face', 'hand'];
 // The snowman as he was built: only a carrot nose.
 export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'carrot', hand: null });
 // The barn's hoist: whether its rope is hooked at the top, and whether the note behind the bale has been read. The desk:
-// which letters have been postmarked, and whether the waiting reply has been sealed with wax.
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { stamped: [], sealed: false } });
+// which letters have been postmarked, and whether the waiting reply has been sealed with wax. The story: whether Santa has
+// ever gone out, how the bookcase's books stand, and whether it has opened (cabin-story.js).
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { stamped: [], sealed: false }, story: { left: false, opened: false, shelf: homeShelf() } });
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
 export const dayOf = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -29,6 +32,7 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   progress.hoist = { locked: saved.hoist?.locked === true, found: saved.hoist?.found === true };
   const stamped = saved.desk?.stamped;
   progress.desk = { stamped: Array.isArray(stamped) ? [...new Set(stamped.filter(id => typeof id === 'string'))].slice(0, 20) : [], sealed: saved.desk?.sealed === true };
+  progress.story = { left: saved.story?.left === true, opened: saved.story?.opened === true, shelf: readShelf(saved.story?.shelf) };
   return progress;
 }
 // Returns false when the browser will not keep it (private mode, full storage); the yard still plays for this visit.

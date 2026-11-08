@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, GLOBE, MUSICBOX, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -192,6 +192,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // The music box: `energy` is how far it is wound (0–1, three turns of the key), spent as it plays; `key` and `spin` are
   // the key's and the little scene's angles. It does not run down while a hand is on the key.
   const musicbox = { energy: 0, key: 0, spin: 0, held: false };
+  // The story: whether Santa is out (his chair empty, his coat gone from its peg, a note on the seat), whether a little
+  // scene is playing (his going out) and holds the controls, and how far the bookcase has swung open (0–1).
+  const story = { away: false, scripted: false, open: 0, opening: null, kick: -10, door: null };
   // Soft bluish shadows on the snow, thrown right and back, away from the low sun on the left.
   const shade = keep(textures, radialTexture([[0, 'rgba(110,140,170,.42)'], [1, 'rgba(110,140,170,0)']], 64));
   const shadowMaterial = flat(0xffffff, { map: shade, transparent: true, depthWrite: false });
@@ -290,6 +293,11 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     warmed.push([spine, spine.color.clone()]);
     return new THREE.Mesh(bookGeometry(w, h, d), [coverMaterials.get(colour), pages, spine]);
   }
+  // The thirteen places a letter book can stand (cabin-story.js): along HOLY MERRY's shelf, then the four left of SANTA.
+  const bookPlaces = [...SHELF_LAYOUT.letters.map(x => [x, BOOKCASE.shelves[2]]), ...SHELF_LAYOUT.slots.map(x => [x, BOOKCASE.shelves[1]])];
+  let shelfNow = null;
+  const bookGoal = (mesh, place) => { const [x, y] = bookPlaces[place]; mesh.userData.goal = new THREE.Vector3(x, y, mesh.userData.gold ? .045 : .03); };
+  const secret = new THREE.Group(); secret.visible = false; indoors.add(secret);
   async function buildBookcase() {
     const { width, height, depth, shelves } = BOOKCASE, rig = rigs.get('bookcase'), wood = (geometry, colour, x, y, z) => solid(geometry, colour, new THREE.Vector3(x, y, z), rig);
     wood(new THREE.BoxGeometry(width, shelves[0], depth), 0x8f5a3c, width / 2, shelves[0] / 2, depth / 2);
@@ -300,7 +308,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (disposed) return;
     LETTER_BOOKS.forEach((entry, i) => {
       const mesh = book(maps.get(entry.id), entry.colour, entry.w, entry.h, entry.gold ? .18 : .17);
-      mesh.position.set(SHELF_LAYOUT.letters[i], shelves[2], entry.gold ? .045 : .03); rig.add(mesh); letterBooks.set(entry.id, mesh);
+      mesh.userData.gold = entry.gold; mesh.userData.size = [entry.w, entry.h]; bookGoal(mesh, i); mesh.position.copy(mesh.userData.goal); rig.add(mesh); letterBooks.set(entry.id, mesh);
       if (!entry.gold) return;
       const sheen = keep(materials, new THREE.MeshBasicMaterial({ map: gleam, transparent: true, opacity: .14, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
       const glint = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(entry.w * .9, entry.h * .8)), sheen);
@@ -310,6 +318,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const mesh = book(maps.get(`book-plain-${variant}`), ['#3f5a7a', '#7d5636', '#3f6653', '#8f3b36'][variant], w, h);
       mesh.position.set(x, shelves[shelf], .03); rig.add(mesh);
     }
+    // Books stand where the visitor last left them.
+    if (shelfNow) shelfNow.forEach((id, place) => { const mesh = id && letterBooks.get(id); if (mesh) { bookGoal(mesh, place); mesh.position.copy(mesh.userData.goal); } });
     const cover = book(maps.get('santa-book'), '#8f3b36', .24, .3, .028);
     cover.position.set(SHELF_LAYOUT.santa, shelves[1], .08); cover.rotation.x = -.12; rig.add(cover);
     redraw();
@@ -377,6 +387,16 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const fireGlow = glow(new THREE.Vector3(FIRE.x, .28, FIRE.z - .05), 1), lanternGlow = glow(new THREE.Vector3(LANTERN.x, 2.68, LANTERN.z + .02), .7);
   // The desk lamp's glow, under its shade (the desk faces the room, so the sheet's right-hand end is toward the back).
   glow(new THREE.Vector3(DESK.x + .03, DESK.h * (1 - (DESK.items.lamp[1] + DESK.items.lamp[3]) / 2.6), DESK.z + (.5 - (DESK.items.lamp[0] + DESK.items.lamp[2]) / 2) * DESK.w), .5);
+  // The little room behind the bookcase: plain warm walls and a lamp; what is in it is laid out by cabin-secret.js.
+  (() => {
+    const { left, width, height, depth } = SECRET, back = BACK_WALL - depth, mid = left + width / 2, walls = 0xd9b98f;
+    solid(new THREE.BoxGeometry(width, .02, depth), 0x8f6444, new THREE.Vector3(mid, -.01, BACK_WALL - depth / 2), secret);
+    solid(new THREE.BoxGeometry(width, .02, depth), 0x7a5236, new THREE.Vector3(mid, height + .01, BACK_WALL - depth / 2), secret);
+    solid(new THREE.BoxGeometry(width, height, .02), walls, new THREE.Vector3(mid, height / 2, back), secret);
+    for (const x of [left - .01, left + width + .01]) solid(new THREE.BoxGeometry(.02, height, depth), walls, new THREE.Vector3(x, height / 2, BACK_WALL - depth / 2), secret);
+    const lamp = new THREE.PointLight(0xffc98a, 1.6, 2.2, 1.5); lamp.position.set(mid, height - .15, back + .3); secret.add(lamp);
+    glow(new THREE.Vector3(mid, height - .2, back + .32), .7, secret);
+  })();
   // The morning sun, just risen: half hidden behind the far range's second peak, up and to the left of the house, where the
   // scene's light comes from. It is part of the 3D world, so it keeps its place among the mountains as the view turns.
   (() => {
@@ -549,7 +569,16 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const tilt = new THREE.Quaternion(), side = new THREE.Vector3(1, 0, 0);
   function pose() {
     const still = motion.matches, t = clock;
-    chair.rotation.x = still ? 0 : Math.sin(t * 1.7) * .028;
+    // The chair rocks; just after Santa has got up from it, it rocks harder for a while on its own.
+    chair.rotation.x = still ? 0 : Math.sin(t * 1.7) * .028 + Math.exp(-(t - story.kick) * .7) * Math.sin((t - story.kick) * 4) * .09;
+    if (santaModel) santaModel.visible = !story.away;
+    const note = sheets.get('chair-note')?.holder; if (note) note.visible = story.away;
+    if (story.door && !trip) { const u = THREE.MathUtils.clamp((t - story.door.start) / story.door.length, 0, 1); rigs.get('door').rotation.y = lerp(story.door.from, story.door.to, ease(u)); }
+    // The bookcase swings on its hinge into the room.
+    if (story.opening) { const u = THREE.MathUtils.clamp((t - story.opening.start) / 2.6, 0, 1); story.open = story.opening.from + (story.opening.to - story.opening.from) * ease(u); }
+    // Hinged at its left edge, it swings out into the room toward the left wall, about 55°.
+    rigs.get('bookcase').rotation.y = -.95 * story.open; secret.visible = story.open > 0 && indoorView(view);
+    if (story.shake && t - story.shake < .5) rigs.get('bookcase').position.x = BOOKCASE.left + Math.sin((t - story.shake) * 60) * .004 * (1 - (t - story.shake) * 2); else rigs.get('bookcase').position.x = BOOKCASE.left;
     if (spine && spineRest) spine.quaternion.copy(spineRest).multiply(tilt.setFromAxisAngle(side, still ? 0 : Math.sin(t * 1.5) * .014));
     const flicker = still ? 0 : Math.sin(t * 9.1) * .5 + Math.sin(t * 13.7) * .3 + Math.sin(t * 5.3) * .2;
     // The fire burns as high as it is fed and flares when the bellows blow. Its light warms the room a little: the paper is
@@ -723,6 +752,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (!active && now - lastDraw < 33) return;
     const delta = Math.min((now - (lastTick || now)) / 1000, .1); lastTick = lastDraw = now; clock += delta;
     hearth.heat = Math.max(0, hearth.heat - delta / 40); hearth.flare = Math.max(0, hearth.flare - delta * 1.4);
+    for (const mesh of letterBooks.values()) if (mesh.userData.goal && !mesh.userData.held && mesh.position.distanceToSquared(mesh.userData.goal) > 1e-7) { mesh.position.lerp(mesh.userData.goal, Math.min(1, delta * 12)); settling = true; }
     if (musicbox.energy > 0 && !musicbox.held) { musicbox.spin += delta * (.5 + 2.4 * musicbox.energy); musicbox.key -= delta * (.6 + 1.8 * musicbox.energy); musicbox.energy = Math.max(0, musicbox.energy - delta / 26); }
     if (trip) walking();
     else {
@@ -757,7 +787,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // One step back: from a place in the room to the middle of the room, from anywhere else out in front of the house.
   function back() { setView(VIEWS[view].room ? 'inside' : 'outside'); }
   function setView(name) {
-    if (!VIEWS[name]) return;
+    if (!VIEWS[name] || story.scripted) return;
     const asked = ++choice;
     if (indoorView(name) && !indoorView(view) && !roomIn) { roomReady.then(() => { if (asked === choice) setView(name); }); return; }
     if (trip?.direction === 'fly') finishTrip();
@@ -836,7 +866,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     returnTimer = setTimeout(() => { goalHeading = home(); goalPitch = VIEWS[view].pitch; wake(); }, RETURN_AFTER);
   }
   function onSanta(x, y) {
-    if (!santaModel) return false;
+    if (!santaModel || story.away) return false;
     const box = new THREE.Box3().setFromObject(santaModel), rect = stage.getBoundingClientRect(), corners = [];
     for (const cx of [box.min.x, box.max.x]) for (const cy of [box.min.y, box.max.y]) for (const cz of [box.min.z, box.max.z]) corners.push(new THREE.Vector3(cx, cy, cz).project(camera));
     if (corners.some(point => point.z > 1)) return false;
@@ -913,7 +943,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const playing = () => SPOTS.some(spot => spot.id === view) || VIEWS[view].room === true;
   on(gesture, 'pointerdown', event => {
     land();
-    if (playing()) return;
+    if (playing() || story.scripted) return;
     if (pointer || trip || (event.pointerType === 'mouse' && event.button !== 0)) return;
     pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, heading: goalHeading, pitch: goalPitch, moved: false, lastX: event.clientX, lastTime: performance.now(), speed: 0 };
     gesture.setPointerCapture?.(event.pointerId); dragging = true; spin = 0; clearTimeout(returnTimer); stage.classList.add('is-turning'); wake();
@@ -967,13 +997,19 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   if (!reindeer) loadReindeer();
 
   function destroy() {
-    stop(); clearTimeout(returnTimer); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
+    stop(); clearTimeout(returnTimer); storyTimers.forEach(clearTimeout); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
     release3d();
   }
   // What the games may do to the scene.
-  async function repaint(id, patch) {
+  // Set a board's look outright (undefined: as it was drawn); repaint() below changes only part of it.
+  // A board not cut yet (the room comes after the page opens) takes the look when it is.
+  function restyle(id, state) { const sheet = sheets.get(id), board = sheet?.board ?? BOARDS.find(item => item.id === id); if (!board) return; board.state = state; return sheet ? paintSheet(id, sheet) : undefined; }
+  const storyTimers = [];
+  function repaint(id, patch) {
     const sheet = sheets.get(id); if (!sheet) return;
-    sheet.board.state = { ...sheet.board.state, ...patch };
+    sheet.board.state = { ...sheet.board.state, ...patch }; return paintSheet(id, sheet);
+  }
+  async function paintSheet(id, sheet) {
     const image = await cutBoard(id, sheet.board, set);
     if (disposed) return;
     const next = texture(image), old = sheet.material.map;
@@ -990,6 +1026,64 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     bellows(amount) { hearth.squeeze = THREE.MathUtils.clamp(amount, 0, 1); redraw(); },
     blow() { hearth.flare = motion.matches ? 0 : 1; if (hearth.heat > 0) hearth.heat = Math.min(3, hearth.heat + .3); redraw(); },
     get heat() { return hearth.heat; },
+    // The story. Santa goes out to the reindeer: the view turns to the door, the coat leaves its peg, the door opens and
+    // shuts, and turning back the chair is empty and still rocking. Resolves when it is over. He comes back unseen.
+    get santaHome() { return !story.away && Boolean(santaModel); },
+    santaLeave() {
+      if (story.away || !santaModel || view !== 'inside' || trip) return Promise.resolve(false);
+      return new Promise(done => {
+        const quick = motion.matches, at = (ms, run) => storyTimers.push(setTimeout(() => { if (!disposed) run(); }, quick ? 0 : ms));
+        story.scripted = true; spin = 0; const facing = { heading: goalHeading, pitch: goalPitch };
+        goalHeading = 2.5; goalPitch = .1; wake();
+        at(1500, () => { story.away = true; story.kick = clock; restyle('front-in', { coat: false }); story.door = { from: 0, to: -DOOR.swing * .75, start: clock, length: .45 }; wake(); });
+        at(2300, () => { story.door = { from: -DOOR.swing * .75, to: 0, start: clock, length: .45 }; wake(); });
+        at(3000, () => { goalHeading = facing.heading; goalPitch = facing.pitch; wake(); });
+        at(4300, () => { story.scripted = false; story.door = null; rigs.get('door').rotation.y = 0; redraw(); done(true); });
+      });
+    },
+    santaBack() { if (!story.away) return; story.away = false; restyle('front-in', undefined); redraw(); },
+    // The letter books: where each place is on screen (and which book stands there), holding one up to the pointer, which
+    // place it was let go over (or -1), and laying them all out as the shelf now stands.
+    bookRects(shelf) {
+      const rig = rigs.get('bookcase'); rig.updateMatrixWorld(true);
+      return bookPlaces.map(([x, y], place) => {
+        const id = shelf[place], [w, h] = id ? letterBooks.get(id)?.userData.size ?? [.07, .26] : [.072, .25];
+        const corners = [[x - w / 2, y], [x + w / 2, y], [x - w / 2, y + h], [x + w / 2, y + h]].map(([px, py]) => rig.localToWorld(new THREE.Vector3(px, py, .2)).project(camera));
+        const rect = stage.getBoundingClientRect(), xs = corners.map(p => (p.x + 1) / 2 * rect.width), ys = corners.map(p => (1 - p.y) / 2 * rect.height);
+        return { id, left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+      });
+    },
+    holdBook(id, clientX, clientY) {
+      const mesh = letterBooks.get(id); if (!mesh) return;
+      const rig = rigs.get('bookcase'), rect = stage.getBoundingClientRect(); rig.updateMatrixWorld(true);
+      ndc.set((clientX - rect.left) / rect.width * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1); raycaster.setFromCamera(ndc, camera);
+      const normal = new THREE.Vector3(0, 0, 1).transformDirection(rig.matrixWorld), plane = new THREE.Plane().setFromNormalAndCoplanarPoint(normal, rig.localToWorld(new THREE.Vector3(0, 0, .3))), hit = new THREE.Vector3();
+      if (!raycaster.ray.intersectPlane(plane, hit)) return;
+      const local = rig.worldToLocal(hit), [, h] = mesh.userData.size;
+      mesh.userData.held = true; mesh.position.set(THREE.MathUtils.clamp(local.x, .04, BOOKCASE.width - .04), THREE.MathUtils.clamp(local.y - h / 2, .05, BOOKCASE.height - h), .12); mesh.rotation.z = .06;
+      wake(); if (motion.matches || frame === undefined) draw();
+    },
+    dropBook(id) {
+      const mesh = letterBooks.get(id); if (!mesh) return -1;
+      mesh.userData.held = false; mesh.rotation.z = 0;
+      const [, h] = mesh.userData.size, x = mesh.position.x, y = mesh.position.y + h / 2;
+      let best = -1, near = Infinity;
+      bookPlaces.forEach(([px, py], place) => { const d = Math.hypot(px - x, (py + .13 - y) * .5); if (d < near) { near = d; best = place; } });
+      return near < .08 ? best : -1;
+    },
+    placeBooks(shelf) {
+      shelfNow = [...shelf];
+      shelf.forEach((id, place) => { const mesh = id && letterBooks.get(id); if (mesh) bookGoal(mesh, place); });
+      if (motion.matches) for (const mesh of letterBooks.values()) mesh.position.copy(mesh.userData.goal);
+      redraw();
+    },
+    // The gold letters flash, the case gives a little shake, then it swings open into the room; or stands open already.
+    glintBooks() { hearth.flare = motion.matches ? 0 : 1.6; story.shake = motion.matches ? null : clock; redraw(); },
+    openBookcase(open = true, animate = true) {
+      restyle('back', open ? { secret: true } : undefined);
+      if (!animate || motion.matches) { story.opening = null; story.open = open ? 1 : 0; } else story.opening = { from: story.open, to: open ? 1 : 0, start: clock };
+      redraw();
+    },
     // The music box: turn its key by `angle` (radians, positive winds it; it takes three turns), hold it still while a hand
     // is on it, and how wound it is now (0–1); where its key and box are on screen.
     wind(angle) { const before = musicbox.energy; musicbox.energy = THREE.MathUtils.clamp(musicbox.energy + angle / (Math.PI * 6), 0, 1); musicbox.key += (musicbox.energy - before) * Math.PI * 6; redraw(); return musicbox.energy; },

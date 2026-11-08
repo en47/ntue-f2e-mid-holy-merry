@@ -234,9 +234,19 @@
 .globe-tilt .art-layer, .globe-snow { position: absolute; inset: 0; width: 100%; height: 100%; }
 .globe-engraving { position: absolute; left: 0; right: 0; bottom: 4%; color: #e9d3a8; font-family: var(--font-hand); font-size: var(--fs-small); text-align: center; opacity: .85; }
 @media (prefers-reduced-motion: reduce) { .musicbox-knob { animation: none; } .musicbox-knob.is-resisting { animation: none; } }
+/* 書櫃解謎：每個書位一個透明的拖曳區（拿起的書高亮），書架尾端夾著一張手寫小紙條，下方是「全部放回」與提示。 */
+.books-place { position: absolute; padding: 0; background: none; border: 2px solid transparent; border-radius: 6px; cursor: grab; touch-action: none; pointer-events: auto; }
+.books-place:disabled { cursor: default; pointer-events: none; }
+.books-place.is-empty { cursor: pointer; border: 2px dashed #e3c27a66; }
+.books-place.is-picked { border-color: #f0cf7e; box-shadow: 0 0 14px #f0cf7e99; }
+.books-place:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.books-slip { position: absolute; z-index: 2; max-width: 11rem; margin: 0; padding: .3rem .6rem; color: #5b3a2c; background: #fffdf6; border-radius: 4px; box-shadow: 0 3px 6px #3b2a2433; font-family: var(--font-hand); font-size: var(--fs-small); rotate: -4deg; pointer-events: none; }
+.books-tools { position: absolute; left: 50%; bottom: 1rem; display: flex; gap: .5rem; translate: -50% 0; pointer-events: auto; }
+.books-tools button { padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; }
+.chat-line.is-away .chat-bubble { color: #8a7a6a; font-style: normal; }
 /* 觸控螢幕：每個按鈕至少 44px 見方，手指點得準。 */
 @media (pointer: coarse) {
-  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send, .desk-actions button { min-width: 44px; min-height: 44px; }
+  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send, .desk-actions button, .books-tools button { min-width: 44px; min-height: 44px; }
 }
 /* 橫拿的手機：小屋和螢幕一樣高（點進角落或屋裡時捲到剛好整個露出），衣櫃、食物籃、對話框改成右側窄欄，提示放到左上。 */
 @media (orientation: landscape) and (max-height: 500px) {

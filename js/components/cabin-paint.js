@@ -22,8 +22,9 @@ export function outfitBoard(item) {
   const { size: [w, h], box } = PLACES[item.place];
   return { w, h, px: 640, draw: ({ paper }, { width, height }) => item.draw(shape('g', { transform: `scale(${width / 100} ${height / box})` }, paper)) };
 }
-// The other looks a sheet can take, cut ahead too: the sign with one to four stars lit, the mailbox and the hatch open.
-const VARIANTS = { sign: [1, 2, 3, 4].map(stars => ({ stars })), mailbox: [{ open: true }], 'hoist-hatch': [{ open: true }] };
+// The other looks a sheet can take, cut ahead too: the sign with one to four stars lit, the mailbox and the hatch open, the
+// coat gone from its peg while Santa is out, and the back wall open behind the bookcase.
+const VARIANTS = { sign: [1, 2, 3, 4].map(stars => ({ stars })), mailbox: [{ open: true }], 'hoist-hatch': [{ open: true }], 'front-in': [{ coat: false }], back: [{ secret: true }] };
 const SHEETS = [...[...BOARDS, ...WORLD].map(board => [board.id, board]), ...Object.entries(PIECES), ...BOOK_SHEETS.map(sheet => [sheet.id, sheet]), ...WARDROBE.map(item => [`outfit-${item.id}`, outfitBoard(item)])];
 // Each sheet's look when the page opened: a game changes board.state later, and the picture only matches the first look.
 const FIRST = new Map(SHEETS.map(([name, board]) => [name, JSON.stringify(board.state ?? null)]));

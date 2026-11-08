@@ -274,6 +274,19 @@ await test('Santa 屋內：音樂盒上發條（棘輪、越轉越慢、原創�
   const entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8'), html = await fs.readFile(path.join(project, 'santa.html'), 'utf8');
   assert.ok(entry.includes("'musicbox', 'globe'") && html.includes('data-spot="musicbox"') && html.includes('data-spot="globe"'));
 });
+await test('Santa 隱藏故事 P4：聖誕老人出門（固定規則）、MORE SANTA 書櫃解謎與轉開', async () => {
+  const play = await fs.readFile(path.join(project, 'js/components/cabin-play.js'), 'utf8'), books = await fs.readFile(path.join(project, 'js/components/cabin-books.js'), 'utf8'), scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), chat = await fs.readFile(path.join(project, 'js/components/cabin-chat.js'), 'utf8');
+  assert.ok(play.includes('santaGoes({ used: used.size') && play.includes("onUse: () => used.add('hearth')") && play.includes("onUse: () => used.add('desk')"), 'Santa goes out by a fixed rule after things are used in the room, never by the chat');
+  assert.ok(!/santaGoes|solved\(|moveBook/.test(chat), 'The chat cannot move the story');
+  assert.ok(books.includes('const home = cabin.santaHome') && books.includes('button.disabled = home || done') && books.includes('solved(shelf)') && books.includes("'需要提示嗎？'") && books.includes('真的要看答案嗎？'), 'Books stay put while Santa is home; MORE is checked by the rules; hints come one at a time and the answer only when asked twice');
+  assert.ok(books.includes('setPointerCapture') && books.includes("event.key === 'Escape' && picked >= 0") && books.includes('events.abort()') && !books.includes('innerHTML'), 'Drag or tap-then-place, Escape puts a picked book back, every listener let go');
+  assert.ok(scene.includes("restyle('front-in', { coat: false })") && scene.includes('story.scripted = true') && scene.includes('if (!santaModel || story.away) return false') && scene.includes('storyTimers.forEach(clearTimeout)'), 'Going out: the coat leaves its peg, the controls wait for the little scene, an empty chair cannot be talked to, timers go with the page');
+  assert.ok(scene.includes("restyle('back', open ? { secret: true } : undefined)") && scene.includes('secret.visible = story.open > 0 && indoorView(view)'), 'The back wall opens behind the bookcase, and the little room is drawn only from indoors');
+  const { SECRET, BOOKCASE } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  assert.ok(SECRET.left >= BOOKCASE.left && SECRET.left + SECRET.width <= BOOKCASE.left + BOOKCASE.width, 'The doorway is hidden behind the closed bookcase');
+  const paint = await fs.readFile(path.join(project, 'js/components/cabin-paint.js'), 'utf8');
+  assert.ok(paint.includes("'front-in': [{ coat: false }]") && paint.includes('back: [{ secret: true }]'), 'The coatless wall and the opened wall are cut ahead');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));
