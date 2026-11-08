@@ -337,6 +337,17 @@ await test('Santa 書櫃可以再玩一次：開著時近看可進小房間或�
   assert.ok(play.includes("restart: () => start('shelf')") && play.includes('enter: start') && !play.includes('swing: () => swing()'), 'The shelf game restarts in place; the bookcase is no longer worked from afar');
   assert.ok(page.includes('onTouch: (id, note) => { if (note) play?.note(note); }') && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
 });
+await test('Santa 拖曳不會卡住：放開被攔下時（例如瀏覽器擴充功能）仍會結束拖曳，書一次只拿一本、Esc 只放回書', async () => {
+  const dir = path.join(project, 'js/components'), files = (await fs.readdir(dir)).filter(name => name.startsWith('cabin-') && name.endsWith('.js'));
+  for (const name of files) {
+    const source = await fs.readFile(path.join(dir, name), 'utf8');
+    if (source.includes('setPointerCapture')) assert.ok(source.includes('lostpointercapture'), `${name}: a drag that captures the pointer also ends when the capture is lost`);
+  }
+  const books = await fs.readFile(path.join(dir, 'cabin-books.js'), 'utf8'), scene = await fs.readFile(path.join(dir, 'cabin-scene.js'), 'utf8');
+  assert.ok(books.includes("window.addEventListener(type, handler, { capture: true, signal: events.signal })") && books.includes('cabin.dropBook(id)') && books.includes("if (drag) letGo({ type: 'pointercancel', pointerId: drag.pointer })"), 'A book drag is followed on the window, remembers its book, and a book still in hand goes back first');
+  assert.ok(scene.includes('if (other !== mesh && other.userData.held)') && scene.includes('mesh.userData.held = false; mesh.rotation.z = 0; } });'), 'Only one book is ever held; laying out the shelf leaves none in hand');
+  assert.ok(books.includes("document.addEventListener('keydown', event => { if (event.key === 'Escape' && picked >= 0)") && books.includes('capture: true, signal: events.signal });'), 'Esc puts a picked book back before the page takes it as stepping out');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

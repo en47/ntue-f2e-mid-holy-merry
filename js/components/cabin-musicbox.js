@@ -44,7 +44,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
     else if (delta < -.05) { knob.classList.remove('is-resisting'); void knob.offsetWidth; knob.classList.add('is-resisting'); }
   });
   const letGo = event => { if (!turn || event.pointerId !== turn.id) return; turn = null; knob.classList.remove('is-winding'); release(); };
-  on(knob, 'pointerup', letGo); on(knob, 'pointercancel', letGo);
+  on(knob, 'pointerup', letGo); on(knob, 'pointercancel', letGo); on(knob, 'lostpointercapture', letGo);
   on(knob, 'keydown', event => {
     if (!['ArrowRight', 'ArrowDown', 'Enter', ' '].includes(event.key)) return;
     event.preventDefault(); cabin.holdKey(true); wind(Math.PI / 2);

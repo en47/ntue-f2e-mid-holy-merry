@@ -636,6 +636,8 @@ export function desk({ paper }, { width, height }) {
     }
   }
   shape('rect', { x: width * .33, y: top + 30, width: width * .34, height: 70, fill: '#9a6343' }, paper);
+  // The kneehole's back panel, solid: a see-through shadow let the wall show through speckled with the paper's grain.
+  shape('rect', { x: width * .33, y: top + 100, width: width * .34, height: height - top - 100, fill: TIMBER }, paper);
   shade(paper, width * .33, top + 100, width * .34, height - top - 100, .22);
   // The reply waiting in its rack.
   const [ox, oy, ox2, oy2] = box('outbox');

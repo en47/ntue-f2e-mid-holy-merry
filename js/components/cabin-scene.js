@@ -1098,6 +1098,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const normal = new THREE.Vector3(0, 0, 1).transformDirection(rig.matrixWorld), plane = new THREE.Plane().setFromNormalAndCoplanarPoint(normal, rig.localToWorld(new THREE.Vector3(0, 0, .3))), hit = new THREE.Vector3();
       if (!raycaster.ray.intersectPlane(plane, hit)) return;
       const local = rig.worldToLocal(hit), [, h] = mesh.userData.size;
+      for (const other of letterBooks.values()) if (other !== mesh && other.userData.held) { other.userData.held = false; other.rotation.z = 0; }
       mesh.userData.held = true; mesh.position.set(THREE.MathUtils.clamp(local.x, .04, BOOKCASE.width - .04), THREE.MathUtils.clamp(local.y - h / 2, .05, BOOKCASE.height - h), .12); mesh.rotation.z = .06;
       wake(); if (motion.matches || frame === undefined) draw();
     },
@@ -1111,7 +1112,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     },
     placeBooks(shelf) {
       shelfNow = [...shelf];
-      shelf.forEach((id, place) => { const mesh = id && letterBooks.get(id); if (mesh) bookGoal(mesh, place); });
+      // Every book back on the shelf as it now stands: none is left in hand, or leaning.
+      shelf.forEach((id, place) => { const mesh = id && letterBooks.get(id); if (mesh) { bookGoal(mesh, place); mesh.userData.held = false; mesh.rotation.z = 0; } });
       if (motion.matches) for (const mesh of letterBooks.values()) mesh.position.copy(mesh.userData.goal);
       redraw();
     },

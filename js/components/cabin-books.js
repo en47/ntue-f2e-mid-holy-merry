@@ -62,37 +62,46 @@ export function booksGame({ layer, stage, cabin, say, later, sound, progress, sa
     });
   }
   function move(from, to) { const next = moveBook(shelf, from, to); if (next === shelf) return; shelf = next; sound.play('snap'); settle(); }
+  // One book in hand at a time, and the drag remembers which. It is followed on the window (capture phase), so the book is
+  // let go wherever the release lands. A release swallowed before it reaches the page (some browser extensions do that)
+  // still ends the drag: the browser takes the pointer back from the button, and the book is let go where it was held. A
+  // book somehow still in hand when the next one is taken goes back to its place first.
+  let drag = null, dragEnded = -Infinity;
+  const follow = (type, handler) => window.addEventListener(type, handler, { capture: true, signal: events.signal });
+  function letGo(event) {
+    if (!drag || event.pointerId !== drag.pointer) return;
+    const { moved, id } = drag; drag = null; if (!moved) return;
+    dragEnded = performance.now();
+    const to = cabin.dropBook(id), from = shelf.indexOf(id);
+    if (event.type !== 'pointercancel' && to >= 0 && from >= 0 && to !== from) move(from, to); else { cabin.placeBooks(shelf); sound.play('drop'); }
+  }
+  follow('pointermove', event => {
+    if (!drag || event.pointerId !== drag.pointer) return;
+    if (!drag.moved && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 6) return;
+    if (!drag.moved) { drag.moved = true; sound.play('pick'); picked = -1; layout(); }
+    cabin.holdBook(drag.id, event.clientX, event.clientY);
+  });
+  follow('pointerup', letGo); follow('pointercancel', letGo);
   places.forEach((button, place) => {
-    let drag = null, dragged = false;
     on(button, 'pointerdown', event => {
       if (event.button > 0 || button.disabled || !shelf[place]) return;
-      event.preventDefault(); button.setPointerCapture(event.pointerId); dragged = false;
-      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+      if (drag) letGo({ type: 'pointercancel', pointerId: drag.pointer });
+      event.preventDefault(); try { button.setPointerCapture(event.pointerId); } catch {}
+      drag = { pointer: event.pointerId, id: shelf[place], x: event.clientX, y: event.clientY, moved: false };
     });
-    on(button, 'pointermove', event => {
-      if (!drag || event.pointerId !== drag.id) return;
-      if (!drag.moved && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 6) return;
-      if (!drag.moved) { drag.moved = true; sound.play('pick'); picked = -1; }
-      cabin.holdBook(shelf[place], event.clientX, event.clientY);
-    });
-    const drop = event => {
-      if (!drag || event.pointerId !== drag.id) return;
-      const { moved } = drag; drag = null; if (!moved) return;
-      dragged = true;
-      const to = cabin.dropBook(shelf[place]);
-      if (to >= 0 && to !== place) move(place, to); else { cabin.placeBooks(shelf); sound.play('drop'); }
-    };
-    on(button, 'pointerup', drop); on(button, 'pointercancel', drop);
-    // A tap (or Enter) picks a book; a second tap on a place puts it there.
+    on(button, 'lostpointercapture', letGo);
+    // A tap (or Enter) picks a book; a second tap on a place puts it there. The click that ends a drag is not a tap.
     on(button, 'click', () => {
-      if (dragged) { dragged = false; return; }
+      if (performance.now() - dragEnded < 350) return;
       if (picked < 0) { if (!shelf[place]) return; picked = place; sound.play('pick'); say('拿起來了，再點一個位置放下（按 Esc 放回原位）。'); layout(); return; }
       const from = picked; picked = -1;
       if (from === place) { layout(); say(''); return; }
       move(from, place); say('');
     });
-    on(button, 'keydown', event => { if (event.key === 'Escape' && picked >= 0) { event.preventDefault(); picked = -1; layout(); say(''); } });
   });
+  // Esc puts a picked book back, wherever focus is (a book taken by mouse or finger never has it), before the page takes
+  // Esc to step back out of the close-up.
+  document.addEventListener('keydown', event => { if (event.key === 'Escape' && picked >= 0) { event.preventDefault(); picked = -1; layout(); say(''); } }, { capture: true, signal: events.signal });
   on(reset, 'click', () => { shelf = homeShelf(); picked = -1; sound.play('remove'); settle(); say('書都放回原來的位置了。'); });
   // Hints come one at a time, and the answer only when asked for twice.
   on(hint, 'click', () => {
