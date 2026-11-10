@@ -562,7 +562,9 @@ export function chairNote({ paper }, { width, height }) {
 // The little room behind the bookcase, where the substitutes keep their things. Its walls are solid (cabin-scene.js);
 // these sheets hang on them. Initials are drawn letters; full names and words are read up close (cabin-secret.js).
 export const SUBSTITUTES = [['N', '#8f3b36'], ['K', '#3f5a7a'], ['H', '#3f6653'], ['E', '#6e4a6b'], ['O', '#b98a3c']];
-export function nameTags({ paper }, { width, height }) {
+// `mine`: the visitor has signed the early shift, and their tag hangs on the sixth hook (a red band and a gold star: the
+// board's letters are cut from a fixed set, so their initial is on the card, cabin-secret.js).
+export function nameTags({ paper }, { width, height }, state = {}) {
   shape('rect', { x: 0, y: height * .18, width, height: height * .1, rx: 8, fill: WOOD_LIT }, paper);
   const step = width / 6.4;
   SUBSTITUTES.forEach(([char, colour], i) => {
@@ -573,8 +575,15 @@ export function nameTags({ paper }, { width, height }) {
     shape('rect', { x: cx - step * .38, y: top + height * .2, width: step * .76, height: height * .1, rx: 8, fill: colour, transform: `rotate(${(i % 2 ? 1 : -1) * 4} ${cx} ${top})` }, paper);
     letter(paper, char, cx, top + height * .47, step * .44, height * .22, { fill: colour });
   });
-  // The sixth hook, empty.
-  shape('circle', { cx: step * 5.9, cy: height * .23, r: 9, fill: WOOD }, paper);
+  // The sixth hook, empty until the visitor stays on.
+  const cx = step * 5.9, top = height * .23;
+  shape('circle', { cx, cy: top, r: 9, fill: WOOD }, paper);
+  if (!state.mine) return;
+  shape('path', { d: `M${cx} ${top}L${cx - step * .3} ${top + height * .2}M${cx} ${top}L${cx + step * .3} ${top + height * .2}`, stroke: '#c9a77f', 'stroke-width': 3 }, paper);
+  shape('rect', { x: cx - step * .38, y: top + height * .2, width: step * .76, height: height * .44, rx: 10, fill: '#fffdf6', transform: `rotate(-4 ${cx} ${top})` }, paper);
+  shape('rect', { x: cx - step * .38, y: top + height * .2, width: step * .76, height: height * .1, rx: 8, fill: RED, transform: `rotate(-4 ${cx} ${top})` }, paper);
+  const y = top + height * .47, r = step * .2;
+  shape('path', { d: Array.from({ length: 10 }, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? r * .45 : r; return `${i ? 'L' : 'M'}${(cx + Math.cos(a) * d).toFixed(1)} ${(y + Math.sin(a) * d).toFixed(1)}`; }).join('') + 'Z', fill: GOLD }, paper);
 }
 export function shiftLog({ paper }, { width, height }) {
   shape('rect', { x: 0, y: height * .04, width, height: height * .96, rx: 10, fill: WOOD_LIT }, paper);

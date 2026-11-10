@@ -67,3 +67,9 @@ test('volunteering is kept: a valid initial and the known jobs, once each', () =
   storage.setItem('holy-merry:cabin:v1', JSON.stringify({ volunteer: { mark: 'N', tasks: 'hay' } }));
   assert.deepEqual(readProgress(storage).volunteer, { mark: '', tasks: [] }, 'a name tag\'s initial, or tasks that are not a list, are dropped');
 });
+test('the end is kept: offered, untied, the wish, staying, the endings seen; nothing else', () => {
+  assert.deepEqual(readProgress(memory()).finale, { invited: false, twist: false, wish: null, stayed: false, endings: [] });
+  const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { invited: true, twist: true, wish: 'snow', stayed: true, endings: ['B', 'D', 'B', 'Z'] } }) });
+  assert.deepEqual(readProgress(store).finale, { invited: true, twist: true, wish: 'snow', stayed: true, endings: ['B', 'D'] });
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { twist: 'yes', wish: 'pony', endings: 'A' } }) })).finale, { invited: false, twist: false, wish: null, stayed: false, endings: [] });
+});

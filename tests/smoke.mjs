@@ -403,6 +403,17 @@ await test('Santa 卡片的字只在內頁裡捲，不會跑到封面或木框�
   const ledger = paper.slice(paper.indexOf('ledger(paper, width, height, seed)'), paper.indexOf('booklet(paper'));
   assert.ok(!ledger.includes('#e8a3a0') && !ledger.includes('#e5d8bc') && ledger.includes('long = 26'), 'The ledger page has no margin line or rules standing still under scrolling words; its ribbon stays on the cover');
 });
+await test('Santa 故事結尾：紅繩舊頁（第二次反轉）、三個章許願、四件工作留下、結局 A～D', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [play, secret, finaleUi, paint, paper] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-secret.js', 'js/components/cabin-finale.js', 'js/components/cabin-paint.js', 'js/components/cabin-paper.js'].map(read));
+  const { WISHES, ENDINGS, OLD_PAGE } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href);
+  assert.deepEqual(WISHES.map(wish => wish.id), ['sleigh', 'snow', 'gift', 'blessing']); assert.deepEqual(Object.keys(ENDINGS), ['A', 'B', 'C', 'D']);
+  assert.ok(OLD_PAGE.entry.includes('2003') && OLD_PAGE.entry.includes('H.'), 'Holly\'s old page matches the snow globe (H. · 2003)');
+  assert.ok(secret.includes('if (finale.twist || canUntie(volunteer))') && secret.includes('if (canWish(volunteer, finale))') && secret.includes('if (canStay(volunteer, finale))') && secret.includes('if (!finale.twist) onTwist();'), 'The register unties the old page, offers a wish, the log offers the early shift, each by the rules');
+  assert.ok(play.includes("if ((kind === 'B' || kind === 'C') && trueMiracle(finale)) ending('D');") && play.includes('if (visited && goesHome(progress))') && play.includes("cabin.repaint('secret-tags', { mine: true })"), 'D follows B or C once the old page is known; A only after a visit; the visitor\'s tag hangs on the board');
+  assert.ok(finaleUi.includes('export function wishScene') && finaleUi.includes('export function endingCard') && !finaleUi.includes('innerHTML'), 'Wish scenes and ending cards, text only through textContent');
+  assert.ok(paint.includes("'secret-tags': [{ mine: true }]") && paper.includes("['.finale-card', 'certificate']") && paper.includes("['.secret-card[data-thing=\"oldpage\"]', 'oldpage']"), 'The board with the visitor\'s tag is drawn ahead; the ending cards and the old page are drawn as paper');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

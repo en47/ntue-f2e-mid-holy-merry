@@ -25,6 +25,9 @@ const PAPERS = {
 // Which paper each box is cut from; the first match wins, so a pressed tab is a red tag and the others stay pale.
 const KINDS = [
   ['.secret-card[data-thing="tags"] .secret-tags li', 'label'],
+  ['.finale-card', 'certificate'],
+  ['.wish-card', 'stationery'],
+  ['.secret-card[data-thing="oldpage"]', 'oldpage'],
   ['.secret-card[data-thing="tags"], .gearbox', 'board'],
   ['.secret-card[data-thing="log"]', 'clipboard'],
   ['.secret-card[data-thing="register"]', 'ledger'],
@@ -201,6 +204,20 @@ const OBJECTS = {
     for (let i = 0; i <= 18; i++) { const a = i / 18 * Math.PI * 2, rr = r * (.88 + noise(seed + i % 18) * .14); d += `${i ? 'L' : 'M'}${(cx + Math.cos(a) * rr).toFixed(1)} ${(cy + Math.sin(a) * rr).toFixed(1)}`; }
     cut(paper, `${d}Z`, '#a8423b', '#6e2c28');
     shape('circle', { cx, cy, r: r * .64, fill: 'none', stroke: '#c9665c', 'stroke-width': 1.6 }, paper);
+  },
+  // An ending's card: heavy cream paper, a red line and a green one inside its edge, a gold star at the top.
+  certificate(paper, width, height, seed) {
+    cut(paper, outline(width, height, seed), '#fffaf0', '#dccaa9');
+    shape('path', { d: rounded(10, 12, width - 10, height - SHADOW - 10, seed + 2, 6), fill: 'none', stroke: '#b5443c', 'stroke-width': 2.2 }, paper);
+    shape('path', { d: rounded(16, 18, width - 16, height - SHADOW - 16, seed + 5, 4), fill: 'none', stroke: '#3f6653', 'stroke-width': 1.2 }, paper);
+    const x = width / 2;
+    shape('path', { d: `M${x} 1L${x + 4.7} 12.5L${x + 17} 13L${x + 7.4} 20.6L${x + 10.6} 32.5L${x} 25.6L${x - 10.6} 32.5L${x - 7.4} 20.6L${x - 17} 13L${x - 4.7} 12.5Z`, fill: '#e0b04f' }, paper);
+  },
+  // The register's old page: yellowed, foxed here and there, and the red cord that tied it lying loose along its edge.
+  oldpage(paper, width, height, seed) {
+    cut(paper, outline(width, height, seed), '#f1e2bd', '#c9b07c');
+    for (let i = 0; i < 14; i++) shape('circle', { cx: noise(seed + i) * width, cy: noise(seed + i * 5) * height, r: 2 + noise(seed + i * 9) * 6, fill: '#e2c98f', opacity: .45 }, paper);
+    ink(`M4 20Q22 34 12 56Q4 76 22 92Q34 104 18 122`, '#b5443c', paper, 3);
   },
   // A chosen slip or letter: warmer paper with a red line round it.
   chosen(paper, width, height, seed) {
