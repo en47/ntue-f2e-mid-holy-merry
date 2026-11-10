@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BOOK_IDS, GAPS, LOG_ANSWER, LOG_GIVEN, goal, homeShelf, logSolved, logWrong, readLog, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
+import { BOOK_IDS, GAPS, LOCK, LOG_ANSWER, opens, LOG_GIVEN, goal, homeShelf, logSolved, logWrong, readLog, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
 import { GOALS } from '../js/data/cabin-clues.js';
 
 const place = id => homeShelf().indexOf(id);
@@ -98,3 +98,7 @@ test('the wet shift log: one cell still reads, the rest are written back in, and
   assert.equal(goal({ story: { left: true, opened: true, seen: ['tags', 'rules'] }, volunteer: { mark: '', tasks: [] }, finale: { endings: [] } }), 'log');
   assert.equal(goal({ story: { left: true, opened: true, seen: ['log'] }, volunteer: { mark: '', tasks: [] }, finale: { endings: [] } }), 'secret');
 });
+test('the cord\'s lock opens to the year on the snow globe, and nothing else', () => {
+  assert.equal(opens([2, 0, 0, 3]), true); assert.equal(opens([2, 0, 0, 4]), false); assert.equal(opens('2003'), false); assert.equal(LOCK, '2003');
+});
+

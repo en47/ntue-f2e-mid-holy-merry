@@ -648,3 +648,22 @@ html.theatre-open { overflow: hidden; }
 .shift-pick:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 .shift-erase { color: var(--muted); font-family: var(--font-body); font-size: var(--fs-small); }
 @media (prefers-reduced-motion: reduce) { .shift-grid.is-wrong, .shift-grid.is-solved .shift-mark { animation: none; } }
+/* 紅繩的小鎖：黃銅鎖身、四個轉輪（點一下加一，方向鍵也行），對了鎖扣彈開。 */
+.cord-lock { position: relative; width: 8.5rem; aspect-ratio: 120 / 130; margin: .3rem auto .5rem; }
+.lock-shackle { transform-origin: 71.7% 44.6%; transition: translate .5s cubic-bezier(.3,1.6,.5,1), rotate .5s ease-out; }
+.cord-lock.is-open .lock-shackle { translate: 0 -12%; rotate: 20deg; }
+.lock-dials { position: absolute; left: 17.5%; top: 55.4%; width: 64.6%; height: 23%; display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 5.8%; }
+.lock-dial { padding: 0; border: 0; border-radius: 0; color: #3b2a24; background: none; font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; cursor: pointer; }
+.lock-dial:focus-visible { outline: 3px solid var(--red); outline-offset: 1px; }
+.cord-lock.is-open .lock-dial { color: #3f6653; }
+/* 壁爐前的空白紙條；火不夠旺時抖一下。烤過的紙條上，淡褐色的字一個一個浮出來。 */
+.hearth-slip { position: absolute; padding: 0; border: 0; background: none; rotate: -8deg; pointer-events: auto; cursor: pointer; }
+.hearth-slip:hover { translate: 0 -3px; }
+.hearth-slip:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.hearth-slip.is-warm { animation: slip-warm .6s ease; }
+@keyframes slip-warm { 30% { rotate: -2deg; } 60% { rotate: -12deg; } }
+.lemon-card { width: min(22rem, calc(100% - 2rem)); }
+.lemon-words { margin: .4rem 0 1rem; color: #8a5a2b; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 2; white-space: pre-line; }
+.lemon-char { animation: lemon-ink 1.2s ease-out var(--at) both; }
+@keyframes lemon-ink { from { opacity: 0; color: #f0dcb0; } }
+@media (prefers-reduced-motion: reduce) { .lock-shackle { transition: none; } .hearth-slip.is-warm, .lemon-char { animation: none; } }

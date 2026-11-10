@@ -47,7 +47,7 @@ const KINDS = [
   ['.envelope-stamp', 'stamp'],
   ['.envelope-wax', 'wax'],
   ['.compose-choice[aria-pressed="true"], .register-letter[aria-pressed="true"]', 'chosen'],
-  ['.compose-choice', 'slip'],
+  ['.compose-choice, .lemon-card', 'slip'],
   ['.register-jobs .is-done .job-box', 'tag'],
   ['.job-box', 'kraft'],
   ['.register-letter, .sack-count', 'pale'],

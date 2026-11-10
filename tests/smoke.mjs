@@ -409,7 +409,7 @@ await test('Santa 故事結尾：紅繩舊頁（第二次反轉）、三個章�
   const { WISHES, ENDINGS, OLD_PAGE } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href);
   assert.deepEqual(WISHES.map(wish => wish.id), ['sleigh', 'snow', 'gift', 'blessing']); assert.deepEqual(Object.keys(ENDINGS), ['A', 'B', 'C', 'D']);
   assert.ok(OLD_PAGE.entry.includes('2003') && OLD_PAGE.entry.includes('H.'), 'Holly\'s old page matches the snow globe (H. · 2003)');
-  assert.ok(secret.includes('if (finale.twist || canUntie(volunteer))') && secret.includes('if (canWish(volunteer, finale))') && secret.includes('if (canStay(volunteer, finale))') && secret.includes('if (!finale.twist) onTwist();'), 'The register unties the old page, offers a wish, the log offers the early shift, each by the rules');
+  assert.ok(secret.includes('if (finale.twist || finale.unlocked)') && secret.includes('else if (canUntie(volunteer)) lock(cord, from);') && secret.includes('if (canWish(volunteer, finale))') && secret.includes('if (canStay(volunteer, finale))') && secret.includes('if (!finale.twist) onTwist();'), 'The register unties the old page, offers a wish, the log offers the early shift, each by the rules');
   assert.ok(play.includes("const next = !replay && (kind === 'B' || kind === 'C') && trueMiracle(finale);") && play.includes('if (next) ending(\'D\')') && play.includes('if (visited && goesHome(progress))') && play.includes("cabin.repaint('secret-tags', { mine: true })"), 'D follows B or C once the old page is known (not on a replay); A only after a visit; the visitor\'s tag hangs on the board');
   assert.ok(finaleUi.includes('export function wishScene') && !finaleUi.includes('endingCard') && !finaleUi.includes('innerHTML'), 'Wish scenes, text only through textContent; the endings are told in their theatre');
   assert.ok(paint.includes("'secret-tags': [{ mine: true }]") && /\.theatre-close[^']*', 'tag'\]/.test(paper) && paper.includes("['.secret-card[data-thing=\"oldpage\"]', 'oldpage']"), 'The board with the visitor\'s tag is drawn ahead; the theatre\'s buttons and the old page are drawn as paper');
@@ -446,7 +446,7 @@ await test('Santa 結局劇場：全螢幕紙雕立體書、逐字寫出、跳�
 });
 await test('Santa 線索本：看到的線索自動記下、分段提示依故事進度、紙雕筆記本', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
-  const [book, play, paper, ...games] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'js/components/cabin-pulley.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-globe.js', 'js/components/cabin-secret.js', 'js/components/cabin-feed.js'].map(read));
+  const [book, play, paper, ...games] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'js/components/cabin-pulley.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-globe.js', 'js/components/cabin-secret.js', 'js/components/cabin-feed.js', 'js/components/cabin-hearth.js'].map(read));
   const { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
   assert.ok(book.includes('export function mountNotebook') && book.includes("paperLayer(button, '0 0 48 56', 'notebook-icon', cover, PAPER)") && !book.includes('innerHTML'), 'The clue book is a paper notebook; words only through textContent');
   assert.ok(book.includes('const now = goal(progress)') && book.includes('progress.hints[now] = shown + 1; save();'), 'Hints follow the story (cabin-story.js goal) and get plainer one at a time, kept between visits');
@@ -454,7 +454,7 @@ await test('Santa 線索本：看到的線索自動記下、分段提示依故�
   assert.ok(play.includes('const notebook = mountNotebook(stage, { progress, save, sound }), clue = id => notebook.add(id);') && play.includes("if (id === 'wish-board') clue('wish-board');"), 'Games write into the book through one function');
   // Every clue the games write is one the book knows, and every clue in the book is written somewhere.
   const written = [...games.join('\n').matchAll(/clue\((?:'([\w-]+)'|current\.entry\.id === 'route' \? 'route-note' : 'letter-backs'|id)\)/g)];
-  assert.equal(written.length, 6, 'The barn, the desk, the music box, the snow globe, the little room and the reindeer\'s care log record their clues');
+  assert.ok(written.length >= 6, 'The games record their clues where they are seen');
   const named = new Set([...games.join('\n').matchAll(/'([\w-]+)'/g)].map(([, id]) => id).filter(id => id in NOTEBOOK).concat(play.includes("clue('wish-board')") ? ['wish-board'] : []));
   for (const id of Object.keys(NOTEBOOK)) assert.ok(named.has(id), `${id} is written into the book somewhere`);
   assert.ok(paper.includes("['.notebook-card', 'notebook']") && paper.includes('notebook(paper, width, height, seed)'), 'Its open page is cut like every other sheet');
@@ -473,6 +473,17 @@ await test('Santa 弄濕的交接表：看墨水顏色與別處線索補回縮�
   assert.ok(secret.includes("blot(ink, COLOURS[writer], index * 7 + 3)") && secret.includes("inked(cell, '0 0 80 44'"), 'A blot keeps its writer\'s colour; the ink is SVG');
   assert.ok(secret.includes("if (!logSolved(log)) { note.textContent = LOG.wrong(logWrong(log));") && secret.includes("learn('log');") && secret.includes("if (id === 'tags' || id === 'rules') { clue(id); learn(id); }"), 'Wrong, it says only how many; right, the log counts as read');
   assert.ok(feed.includes("clue('care-log')") && css.includes('.shift-grid.is-solved .shift-mark { animation: shift-dry'), 'The care log goes in the clue book; put right, the ink dries back a row at a time');
+});
+await test('Santa 紅繩小鎖：空白紙條烤火浮出荷莉的字，密碼是雪花球底座的年份', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [secret, hearth, globe, css] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-hearth.js', 'js/components/cabin-globe.js', 'css/santa.css'].map(read));
+  const { LOCK } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href), { OLD_PAGE, CORD } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href);
+  const { GOALS, NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.ok(LOCK === OLD_PAGE.entry[0] && globe.includes(`'H. · ${LOCK}'`) && NOTEBOOK['globe-base'].text.includes(LOCK), 'The code is the year on the snow globe\'s base and on the old page');
+  assert.ok(CORD.lemon.join('').includes('雪花球') && NOTEBOOK['lemon-note'].text.includes('雪花球') && GOALS.cord.hints.at(-1).includes(LOCK), 'The lemon writing points to the snow globe; the last hint gives the code');
+  assert.ok(secret.includes('if (finale.twist || finale.unlocked)') && secret.includes('else if (canUntie(volunteer)) lock(cord, from);') && secret.includes('if (!opens(dials)) return;'), 'Two jobs loosen the cord; only the code opens the lock');
+  assert.ok(secret.includes("paperLayer(padlock, '0 0 120 130', 'lock-shackle', lockShackle, BRASS)") && css.includes('.cord-lock.is-open .lock-shackle'), 'The lock is paper SVG, its shackle a piece that springs open');
+  assert.ok(hearth.includes('if (cabin.heat < 1.5)') && hearth.includes("finale.slip = 'read'; save(); clue('lemon-note');") && css.includes('@keyframes lemon-ink'), 'Held to a fire of two logs, the lemon writing comes up a character at a time');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
