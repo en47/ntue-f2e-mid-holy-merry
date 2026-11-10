@@ -10,6 +10,9 @@ import { GIFT_HINTS, GIFT_ORDER, GOALS, NOTEBOOK } from '../data/cabin-clues.js'
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const PAPER = { paper: { scale: .25, grain: .4, shadow: .3 }, eager: true }, GIFT_PAPER = { paper: { scale: .3, grain: .45, shadow: .25, rim: '#fbf6ea' }, eager: true };
+// Between the parts of the page: a wavering pencil line with a little star in the middle.
+const RULE = { paper: { scale: .2, grain: .6, shadow: 0, rim: '#ffffff00' }, eager: true };
+const divider = parent => paperLayer(element('div', 'notebook-rule', parent), '0 0 240 14', '', g => { shape('path', { d: 'M4 7C40 4 70 10 104 7M136 7C170 4 200 10 236 7', fill: 'none', stroke: '#d8c49c', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, g); star(g, 120, 7, 5.5); }, RULE);
 // A gift not yet found: a pale paper ornament with a question mark.
 function unfound(g) {
   shape('path', { d: 'M50 0V24', stroke: '#cdbb98', 'stroke-width': 1.6 }, g); shape('rect', { x: 42, y: 22, width: 16, height: 10, rx: 2, fill: '#e2d4b8' }, g);
@@ -55,6 +58,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
     // The welcome gifts, once the secret is known: a place for each substitute's ornament, cut out in colour once found,
     // faint until then; and a hint about the next one not yet found, each time one is asked for.
     if (knowsSantas(progress.story.seen) || progress.ornaments.length) {
+      divider(body);
       const gifts = element('section', 'notebook-gifts', body), have = progress.ornaments;
       element('h4', 'notebook-goal', gifts, `見面禮：找到 ${have.length}／${GIFTS.length}`);
       element('p', 'notebook-hint-line', gifts, have.length === GIFTS.length ? '五個都找齊了，掛在小屋的聖誕樹上。' : '五位替身各藏了一個吊飾，留給新來的替身。');
@@ -72,6 +76,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
     }
     // A hint for what the story is waiting on: one more line each time it is asked for.
     const now = goal(progress), { title, hints } = GOALS[now], shown = progress.hints[now] ?? 0;
+    divider(body);
     const help = element('section', 'notebook-hints', body); help.setAttribute('aria-live', 'polite');
     element('h4', 'notebook-goal', help, `現在：${title}`);
     hints.slice(0, shown).forEach((hint, i) => element('p', 'notebook-hint-line', help, `${i + 1}. ${hint}`));
