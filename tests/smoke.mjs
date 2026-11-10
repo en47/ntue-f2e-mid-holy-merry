@@ -311,9 +311,12 @@ await test('Santa 屋內修正：每個家具都點得到、小房間的紙不�
     const first = boxes.map(([id, box]) => [id, enter(INSIDE.eye, direction, box)]).filter(([, t]) => t !== null).sort((a, b) => a[1] - b[1])[0]?.[0];
     assert.equal(first, spot.id, `From the middle of the room, tapping the ${spot.id} reaches it`);
   }
-  // A sheet's paper edge lies 1.2 cm behind it: sheets on the little room's walls stand further off than that.
+  // A sheet's paper edge lies 1.2 cm behind it: sheets on the little room's walls stand further off than that from the
+  // walls' inner face (the walls stand inside the doorway, `SECRET.wall` thick, so they do not line up with the back wall).
+  const shell = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8');
+  assert.ok(SECRET.wall > 0 && shell.includes('new THREE.Vector3(mid, height - wall / 2, BACK_WALL - depth / 2)') && shell.includes('for (const x of [left + wall / 2, left + width - wall / 2])'), 'The little room\'s ceiling and walls stand inside the doorway, not in line with the back wall');
   for (const board of BOARDS.filter(board => board.secret && board.turn)) {
-    const gap = board.turn > 0 ? board.at[0] - SECRET.left : SECRET.left + SECRET.width - board.at[0];
+    const gap = board.turn > 0 ? board.at[0] - SECRET.left - SECRET.wall : SECRET.left + SECRET.width - SECRET.wall - board.at[0];
     assert.ok(gap >= .025, `${board.id} stands clear of its wall, so its edge does not flicker against it`);
   }
   const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), desk = await fs.readFile(path.join(project, 'js/components/cabin-desk.js'), 'utf8');

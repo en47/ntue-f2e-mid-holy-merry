@@ -35,8 +35,9 @@ export const BOOKCASE = { left: -1.47, width: .95, height: 1.4, depth: .26, z: -
 // door from the rocking chair, so it can be looked at straight on, with the window and its advent house over its far end.
 export const DESK = { x: -1.15, z: .82, w: .95, h: 1.25, top: .76, items: { outbox: [.04, .27, .2, .4], stamp: [.22, .28, .32, .4], stack: [.34, .3, .54, .4], seal: [.56, .29, .64, .4], cup: [.66, .3, .8, .4], lamp: [.82, .08, .97, .4] } };
 // The small room behind the bookcase, reached once it has swung aside: its doorway in the back wall (`left`, `width`,
-// `height`, hidden by the closed bookcase) and how far back it goes.
-export const SECRET = { left: -1.4, width: .76, height: 1.28, depth: 1.15 };
+// `height`, hidden by the closed bookcase), how far back it goes, and how thick its walls and ceiling are (`wall`: they
+// stand just inside the doorway, cabin-scene.js).
+export const SECRET = { left: -1.4, width: .76, height: 1.28, depth: 1.15, wall: .02 };
 // Things in the room that move about a pivot of their own: the bellows hang beside the fire, nozzle down toward it.
 // The music box stands on the candle shelf of the right wall, facing the room; its little scene turns on a rig of its own.
 export const MUSICBOX = { x: 1.49, y: .96, z: -.02 };
@@ -1161,11 +1162,11 @@ export const BOARDS = [
   // The little room behind the bookcase (`secret`: drawn only once it is open): name tags on its left wall, the shift
   // log and hats on its right, the substitutes' table at the back, a sorting rack low on the right. Each stands 3 cm off
   // its wall: its paper edge, 1.2 cm behind it, would otherwise lie in the wall's plane and flicker.
-  { id: 'secret-tags', w: .66, h: .42, px: 1200, at: [SECRET.left + .03, .6, -HOUSE.depth / 2 - .55], turn: Math.PI / 2, draw: nameTags, room: true, secret: true },
+  { id: 'secret-tags', w: .66, h: .42, px: 1200, at: [SECRET.left + SECRET.wall + .03, .6, -HOUSE.depth / 2 - .55], turn: Math.PI / 2, draw: nameTags, room: true, secret: true },
   { id: 'secret-desk', w: .7, h: .62, px: 1200, at: [SECRET.left + SECRET.width / 2, 0, -HOUSE.depth / 2 - SECRET.depth + .05], draw: secretDesk, room: true, secret: true },
-  { id: 'secret-log', w: .26, h: .34, px: 1300, at: [SECRET.left + SECRET.width - .03, .62, -HOUSE.depth / 2 - .42], turn: -Math.PI / 2, draw: shiftLog, room: true, secret: true },
-  { id: 'secret-hats', w: .5, h: .3, px: 1100, at: [SECRET.left + SECRET.width - .03, .9, -HOUSE.depth / 2 - .9], turn: -Math.PI / 2, draw: hatPegs, room: true, secret: true },
-  { id: 'secret-rack', w: .5, h: .44, px: 1100, at: [SECRET.left + SECRET.width - .03, .08, -HOUSE.depth / 2 - .85], turn: -Math.PI / 2, draw: sortingRack, room: true, secret: true },
+  { id: 'secret-log', w: .26, h: .34, px: 1300, at: [SECRET.left + SECRET.width - SECRET.wall - .03, .62, -HOUSE.depth / 2 - .42], turn: -Math.PI / 2, draw: shiftLog, room: true, secret: true },
+  { id: 'secret-hats', w: .5, h: .3, px: 1100, at: [SECRET.left + SECRET.width - SECRET.wall - .03, .9, -HOUSE.depth / 2 - .9], turn: -Math.PI / 2, draw: hatPegs, room: true, secret: true },
+  { id: 'secret-rack', w: .5, h: .44, px: 1100, at: [SECRET.left + SECRET.width - SECRET.wall - .03, .08, -HOUSE.depth / 2 - .85], turn: -Math.PI / 2, draw: sortingRack, room: true, secret: true },
   // Shown only while Santa is out (cabin-scene.js), standing on the seat against the chair's back.
   { id: 'chair-note', w: .18, h: .13, px: 1400, at: [0, .34, -.24], draw: chairNote, chair: true },
   // One low ridge of snowy foothills; the far mountain ranges behind it are in cabin-world.js.

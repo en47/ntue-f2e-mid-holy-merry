@@ -286,7 +286,6 @@
 .books-place.is-empty { cursor: pointer; border: 2px solid #e3c27a66; }
 .books-place.is-picked { border-color: #f0cf7e; box-shadow: 0 0 14px #f0cf7e99; }
 .books-place:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
-.books-slip { position: absolute; z-index: 2; max-width: 11rem; margin: 0; padding: .3rem .6rem; color: #5b3a2c; background: #fffdf6; border-radius: 4px; box-shadow: 0 3px 6px #3b2a2433; font-family: var(--font-hand); font-size: var(--fs-small); rotate: -4deg; pointer-events: none; }
 .books-tools { position: absolute; left: 50%; bottom: 1rem; display: flex; gap: .5rem; translate: -50% 0; pointer-events: auto; }
 .books-tools button { padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; white-space: nowrap; }
 .chat-line.is-away .chat-bubble { color: #8a7a6a; font-style: normal; }

@@ -23,8 +23,6 @@ export function booksGame({ layer, stage, cabin, say, later, sound, progress, sa
   // Shut again after it was solved, it can be played again: the books come down whether Santa is home or not (he knows you
   // know), MORE opens it once more, and while the books still spell it, it can simply be pushed open.
   const replay = story.opened;
-  // A slip tucked in at the end of the shelf, in someone's hand.
-  const slip = element('p', 'books-slip', layer, "There's always room for more."); slip.setAttribute('lang', 'en');
   const places = Array.from({ length: 13 }, (_, place) => { const button = element('button', 'books-place', layer); button.type = 'button'; button.dataset.place = place; return button; });
   const tools = element('div', 'books-tools', layer), push = element('button', '', tools, '推開書櫃 →'), reset = element('button', '', tools, '全部放回 ↺'), hint = element('button', '', tools, '需要提示嗎？');
   push.type = reset.type = hint.type = 'button'; hint.hidden = true;
@@ -42,17 +40,15 @@ export function booksGame({ layer, stage, cabin, say, later, sound, progress, sa
       button.disabled = home || done;
       button.setAttribute('aria-label', rect.id ? `書：${rect.id.at(5).toUpperCase()}${place > 8 ? '（在 SANTA 旁邊）' : ''}` : `空位 ${place - 8}`);
     });
-    const first = rects[9];
-    Object.assign(slip.style, { left: `${first.left - 6}px`, top: `${first.top + first.height + 6}px` });
   }
   // Pushed open as it stands, when the books still spell MORE.
   const showPush = () => { push.hidden = !replay || done || !solved(shelf); };
-  on(push, 'click', () => { done = true; tools.hidden = true; for (const button of places) button.hidden = true; slip.hidden = true; toggle(true); later(2800, restart); });
+  on(push, 'click', () => { done = true; tools.hidden = true; for (const button of places) button.hidden = true; toggle(true); later(2800, restart); });
   function settle() {
     cabin.placeBooks(shelf); story.shelf = shelf; save(); layout(); showPush();
     if (!solved(shelf)) { if (++moves >= 8 && hints < HINTS.length) hint.hidden = false; return; }
     // MORE SANTA: a flash of gold, a wooden click and a shudder, and the case swings open.
-    done = true; tools.hidden = true; slip.hidden = true; for (const button of places) button.hidden = true; sound.play('click'); cabin.glintBooks(); say('');
+    done = true; tools.hidden = true; for (const button of places) button.hidden = true; sound.play('click'); cabin.glintBooks(); say('');
     later(700, () => { sound.play('thud'); say('喀——書櫃裡傳來木頭機關的聲音。'); });
     later(1500, () => { sound.play('creak'); cabin.openBookcase(true); story.opened = true; story.shut = false; save(); onOpen(); });
     later(4200, () => {
