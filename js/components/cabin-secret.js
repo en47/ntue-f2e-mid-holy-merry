@@ -18,7 +18,7 @@ const THINGS = {
 
 // The end of the story starts here too (`onInvite`, `onTwist`, `onWish`, `onStay`: cabin-play.js): the register's old page,
 // a wish for three stamps, the early shift to sign (and then the visitor's own tag on the board's empty hook).
-export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut, join, quit, onInvite, onTwist, onWish, onStay, onReplay }) {
+export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut, join, quit, onInvite, onTwist, onWish, onStay, onReplay, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const story = progress.story, volunteer = progress.volunteer, finale = progress.finale, invited = () => knowsSantas(story.seen) && !signedUp(volunteer);
   say(knowsSantas(story.seen) ? `小房間裡還是老樣子：名牌、班表、守則，和那一排郵戳章。${invited() ? REGISTER.hint : ''}` : '書櫃後面是一個小房間。牆上掛著東西，桌上也擺著東西。');
@@ -157,6 +157,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     card?.remove(); card = null; sound.play('remove');
     const before = knowsSantas(story.seen);
     if (CLUES.includes(id) && !story.seen.includes(id)) { story.seen.push(id); save(); }
+    if (id === 'tags' || id === 'rules') clue(id);
     layout(); from.focus({ preventScroll: true });
     // The first discovery: more than one Santa. Told once, quietly.
     if (!before && knowsSantas(story.seen)) { later(400, () => { sound.play('jingle'); say(NOTES.known); onKnow(); }); later(4600, () => { if (!card && invited()) say(REGISTER.hint); }); }

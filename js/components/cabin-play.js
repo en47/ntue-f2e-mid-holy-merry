@@ -21,6 +21,7 @@ import { DONE, JOBS, NOTES } from '../data/cabin-secret.js';
 import { GLOBE, NEXT, SANTA_ON_HOLLY, TWIST } from '../data/cabin-finale.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
+import { mountNotebook } from './cabin-notebook.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -64,6 +65,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   let storage = null; try { storage = localStorage; } catch { /* this visit only */ }
   const progress = readProgress(storage, known), save = () => writeProgress(progress, storage), sound = createSound();
   let cleanup = () => {};
+  // The clue book in the corner: games write what they show into it (`clue`).
+  const notebook = mountNotebook(stage, { progress, save, sound }), clue = id => notebook.add(id);
   function say(text) { caption.textContent = text; caption.hidden = !text; if (text) announce(text); }
   const point = event => { const rect = stage.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; };
   function prop(kind, parent, label) {
@@ -133,16 +136,16 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     },
     reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen') }),
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti }),
-    stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask: () => task('hay') }),
+    stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask: () => task('hay'), clue }),
     // The broken big wheel, mended up close (a sheet laid over the yard: it is too far off to walk up to).
     wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, again: !pending(progress.volunteer, 'wheel'), onMended: () => { task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
     // In the room: the hearth to tend, the desk's letters, the music box and the snow globe, and the bookcase to look over.
     // Each tells the room when it has been used (`onUse`): Santa goes out once enough has been done there.
     hearth: () => hearthGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('hearth') }),
-    desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk'), onTask: () => task('letters') }),
-    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows }),
-    globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe'), knows, knownLine: () => progress.finale.twist ? GLOBE : null }),
-    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit, onInvite: invite, onTwist: twist, onWish: grant, onStay: stay, onReplay: kind => ending(kind, true) }),
+    desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk'), onTask: () => task('letters'), clue }),
+    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows, clue }),
+    globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe'), knows, knownLine: () => progress.finale.twist ? GLOBE : null, clue }),
+    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit, onInvite: invite, onTwist: twist, onWish: grant, onStay: stay, onReplay: kind => ending(kind, true), clue }),
     shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened'), toggle: open => swing(open), restart: () => start('shelf') }),
   };
 
@@ -208,7 +211,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     enter: start,
     leave,
     // A line about something tapped in the village or the room; it fades on its own and never covers a game.
-    note(text) { if (layer.dataset.game) return; timers.forEach(clearTimeout); timers.clear(); say(text); later(4200, () => { if (!layer.dataset.game) say(''); }); },
+    // `id`: what was tapped; the wish board's thank-you note goes in the clue book.
+    note(text, id) { if (id === 'wish-board') clue('wish-board'); if (layer.dataset.game) return; timers.forEach(clearTimeout); timers.clear(); say(text); later(4200, () => { if (!layer.dataset.game) say(''); }); },
     // Back in the middle of the room: after enough has been used there, Santa goes out to see to the reindeer (the rule is
     // in cabin-story.js). The story is decided here, never by the chat.
     inRoom() {
@@ -224,7 +228,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       later(900, async () => {
         say('聖誕老人站起來伸了個懶腰：「看你玩得這麼開心……哎呀，麋鹿在叫我了，我去看看牠，你慢慢逛！」');
         if (!(await cabin.santaLeave())) return;
-        story.left = true; save(); onSanta('away');
+        story.left = true; save(); onSanta('away'); notebook.refresh();
         say('搖椅還輕輕晃著，椅子上留了一張紙條。');
       });
     },
@@ -248,6 +252,6 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       cabin.wheelBroken(pending(progress.volunteer, 'wheel'), false);
       if (progress.finale.stayed) cabin.repaint('secret-tags', { mine: true });
     },
-    destroy() { leave(); sound.destroy(); layer.remove(); },
+    destroy() { leave(); notebook.destroy(); sound.destroy(); layer.remove(); },
   };
 }

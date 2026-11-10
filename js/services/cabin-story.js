@@ -49,3 +49,12 @@ export const canWish = (volunteer, finale) => signedUp(volunteer) && points(volu
 export const canStay = (volunteer, finale) => signedUp(volunteer) && points(volunteer) === TASKS.length && !finale.stayed;
 export const trueMiracle = finale => finale.twist && Boolean(finale.wish || finale.stayed);
 export const goesHome = ({ volunteer, finale }) => finale.invited && !signedUp(volunteer) && !finale.endings.includes('A');
+// What the story is waiting on now, for the clue book's hints (data/cabin-clues.js): the first thing not yet done.
+export function goal({ story, volunteer, finale }) {
+  if (!story.opened) return story.left ? 'bookcase' : 'room';
+  if (!knowsSantas(story.seen)) return 'secret';
+  if (!signedUp(volunteer)) return finale.endings.length ? 'endings' : 'join';
+  if (!finale.twist) return canUntie(volunteer) ? 'cord' : 'jobs';
+  if (!finale.wish && !finale.stayed) return points(volunteer) >= WISH_COST ? 'wish' : 'jobs';
+  return finale.endings.length === 4 ? 'done' : 'endings';
+}
