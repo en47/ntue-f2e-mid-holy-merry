@@ -336,6 +336,13 @@
       "height": 500,
       "bytes": 17202
     },
+    "hi/chair-seat.webp": {
+      "fingerprint": "004a0f52fd72eb8710e065d294b3f4c0a5663d1217217887f87ec610214959ac",
+      "sha256": "0c64717e8cb96f8ec92e0c787f253988931e76370e34236699c34dfca9c65232",
+      "width": 370,
+      "height": 250,
+      "bytes": 19212
+    },
     "hi/coaster-car-a.webp": {
       "fingerprint": "403b68c143a4d716f154977f9304d654c510bd6681a30de3934ce13c109e6ee6",
       "sha256": "10f9df16eb0b46f3cce7f351f2d10f9045c79bc122eed0f26ba8f1f5b54561cf",
@@ -1638,6 +1645,13 @@
       "height": 375,
       "bytes": 12450
     },
+    "large/chair-seat.webp": {
+      "fingerprint": "f69ed6c6fd1e2528b01eadc6aac1250da5f0e4dfa9b77d5cfd827ee03af2f876",
+      "sha256": "c0f179cd0217b5ac02457bb518b78eee6ffb32491582fd15634622ca3306b29c",
+      "width": 278,
+      "height": 188,
+      "bytes": 11698
+    },
     "large/coaster-car-a.webp": {
       "fingerprint": "6e269a62331bb76021daefaefa31850745ec7365f1afff4f497626158ce51a39",
       "sha256": "791452b95fc73fd1f5d216483d56cf34120e969d42d1ea6d729956b4270fad07",
@@ -2939,6 +2953,13 @@
       "width": 225,
       "height": 250,
       "bytes": 4570
+    },
+    "small/chair-seat.webp": {
+      "fingerprint": "0c96fbfbb8445385a6b686b99f35a6c0f9332dd2714fc0059e737dd9ff90fc15",
+      "sha256": "aaecceeb898a042b39d0d1302a5f5094e0471362cdf44966b0c0f9088846718b",
+      "width": 185,
+      "height": 125,
+      "bytes": 3028
     },
     "small/coaster-car-a.webp": {
       "fingerprint": "b4d09bd8bfa006060c0399f4f8931561e274f2ed5ca6df405524fcf50adf00d7",

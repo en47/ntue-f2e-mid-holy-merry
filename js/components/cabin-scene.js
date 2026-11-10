@@ -239,7 +239,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       return;
     }
     const parent = board.secret ? secret : board.rig ? rigs.get(board.rig) : board.chair ? chair : board.room ? indoors : world;
-    const edges = !board.kind && !board.flat ? keep(materials, edgeMaterial(map)) : null;
+    const edges = !board.kind && (!board.flat || board.flat === 'seat') ? keep(materials, edgeMaterial(map)) : null;
     if (board.room || board.chair) for (const each of [material, edges]) if (each) warmed.push([each, each.color.clone()]);
     if (edges) edges.fog = board.fog !== false;
     if (!board.roof) geometry.translate(0, board.flat || board.center ? 0 : board.hang ? -board.h / 2 : board.h / 2, 0);
@@ -253,6 +253,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       } else {
         holder.position.set(...board.at ?? [0, 0, 0]);
         if (board.flat === 'floor') { holder.rotation.x = -Math.PI / 2; holder.position.y = .002; }
+        // Lying level where it is put (the rocking chair's seat), its top edge to the back.
+        if (board.flat === 'seat') holder.rotation.x = -Math.PI / 2;
         if (board.flat === 'ground') { holder.rotation.set(-Math.PI / 2, 0, board.turn ?? 0); holder.position.y = GROUND + .006; }
         else if (board.turn) holder.rotation.y = board.turn;
         if (board.mirror) holder.scale.x = -1;
@@ -581,7 +583,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // The chair rocks; just after Santa has got up from it, it rocks harder for a while on its own.
     chair.rotation.x = still ? 0 : Math.sin(t * 1.7) * .028 + Math.exp(-(t - story.kick) * .7) * Math.sin((t - story.kick) * 4) * .09;
     if (santaModel) santaModel.visible = !story.away;
-    const note = sheets.get('chair-note')?.holder; if (note) note.visible = story.away;
+    // The seat and the note on it show only while he is out: sitting, his thighs slope down below the seat's front edge.
+    for (const id of ['chair-note', 'chair-seat']) { const holder = sheets.get(id)?.holder; if (holder) holder.visible = story.away; }
     if (story.door && !trip) { const u = THREE.MathUtils.clamp((t - story.door.start) / story.door.length, 0, 1); rigs.get('door').rotation.y = lerp(story.door.from, story.door.to, ease(u)); }
     // The bookcase swings on its hinge into the room.
     if (story.opening) { const u = THREE.MathUtils.clamp((t - story.opening.start) / 2.6, 0, 1); story.open = story.opening.from + (story.opening.to - story.opening.from) * ease(u); }

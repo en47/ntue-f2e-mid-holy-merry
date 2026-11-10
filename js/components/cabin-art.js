@@ -1081,6 +1081,17 @@ export function chairSide({ paper }, { width, height }) {
   for (let i = 0; i < 3; i++) shape('rect', { x: 120 + i * 60, y: arm + 6, width: 14, height: seat - arm - 6, rx: 7, fill: WOOD }, paper);
 }
 
+// The seat, seen from above (its top edge against the chair's back): a wooden frame round the same green cushion as the
+// back and sides, piped in cream and buttoned, a little shaded where it meets the back. Shown only while Santa is out
+// (cabin-scene.js): the empty chair had nothing between its back and front legs.
+export function chairSeat({ paper }, { width, height }) {
+  shape('rect', { x: 4, y: 4, width: width - 8, height: height - 8, rx: 26, fill: WOOD_LIT }, paper);
+  shape('rect', { x: 26, y: 18, width: width - 52, height: height - 44, rx: 34, fill: '#5f8a70' }, paper);
+  shape('rect', { x: 40, y: 32, width: width - 80, height: height - 72, rx: 26, fill: 'none', stroke: CREAM, 'stroke-width': 5, opacity: .75 }, paper);
+  for (const [x, y] of [[.33, .4], [.67, .4], [.5, .62]]) shape('circle', { cx: width * x, cy: height * y, r: 7, fill: '#4a6f5a' }, paper);
+  shade(paper, 26, 18, width - 52, 34, .18);
+}
+
 export function chairFront({ paper }, { width, height }) {
   // Only the two front legs and armrest knobs: Santa's knees come forward between them.
   for (const x of [26, width - 60]) {
@@ -1146,6 +1157,7 @@ export const BOARDS = [
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },
   { id: 'chair-right', w: .9, h: 1.0, at: [.38, 0, -.04], turn: Math.PI / 2, draw: chairSide, chair: true },
   { id: 'chair-front', w: .82, h: .44, at: [0, 0, .2], draw: chairFront, chair: true },
+  { id: 'chair-seat', w: .74, h: .5, at: [0, .335, -.04], flat: 'seat', draw: chairSeat, chair: true },
   // The little room behind the bookcase (`secret`: drawn only once it is open): name tags on its left wall, the shift
   // log and hats on its right, the substitutes' table at the back, a sorting rack low on the right. Each stands 3 cm off
   // its wall: its paper edge, 1.2 cm behind it, would otherwise lie in the wall's plane and flicker.
@@ -1154,8 +1166,8 @@ export const BOARDS = [
   { id: 'secret-log', w: .26, h: .34, px: 1300, at: [SECRET.left + SECRET.width - .03, .62, -HOUSE.depth / 2 - .42], turn: -Math.PI / 2, draw: shiftLog, room: true, secret: true },
   { id: 'secret-hats', w: .5, h: .3, px: 1100, at: [SECRET.left + SECRET.width - .03, .9, -HOUSE.depth / 2 - .9], turn: -Math.PI / 2, draw: hatPegs, room: true, secret: true },
   { id: 'secret-rack', w: .5, h: .44, px: 1100, at: [SECRET.left + SECRET.width - .03, .08, -HOUSE.depth / 2 - .85], turn: -Math.PI / 2, draw: sortingRack, room: true, secret: true },
-  // Shown only while Santa is out (cabin-scene.js), propped on the seat against the chair's back.
-  { id: 'chair-note', w: .18, h: .13, px: 1400, at: [0, .47, -.2], draw: chairNote, chair: true },
+  // Shown only while Santa is out (cabin-scene.js), standing on the seat against the chair's back.
+  { id: 'chair-note', w: .18, h: .13, px: 1400, at: [0, .34, -.24], draw: chairNote, chair: true },
   // One low ridge of snowy foothills; the far mountain ranges behind it are in cabin-world.js.
   { id: 'hills-near', w: 80, h: 2.8, px: 22, at: [0, GROUND, -19], draw: hills(0), kind: 'scenery', fog: false },
   // Firs: one board per variant, planted at each [x, z, height]. Each tree turns to face the camera, so its outline stays clean from any side.
