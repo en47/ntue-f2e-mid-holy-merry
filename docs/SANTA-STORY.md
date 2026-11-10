@@ -111,4 +111,5 @@
 - 規則：`js/services/cabin-story.js`；存檔：`js/services/cabin-progress.js`（`story`、`volunteer`、`desk`、`finale`）
 - 文字：`js/data/cabin-secret.js`（小房間、登記簿、工作）、`js/data/cabin-letters.js`（書桌信件）、`js/data/cabin-finale.js`（舊頁、願望、結局）
 - 畫面：`cabin-secret.js`（小房間）、`cabin-desk.js`（回信桌）、`cabin-wheel.js`（動力箱）、`cabin-finale.js`（願望場景）、`cabin-ending.js`＋`cabin-ending-art.js`（結局劇場）、`cabin-play.js`（串起每一段）
+- 整套驗收：`BASE=http://127.0.0.1:5511 node scripts/check-santa-playthrough.mjs`（`WIDTH=390 HEIGHT=844` 是手機、`SHOTS=資料夾` 存截圖）：從空白存檔按頁面上的按鈕一路玩到四個結局、五個見面禮與聖誕樹，沒有頁面錯誤才 PASS
 - 預覽：`tests/ending-preview.html?ending=A`（B 加 `&wish=sleigh|snow|gift|blessing`、D 加 `&both=1`），透過 HTTP 伺服器開啟，不讀寫存檔
