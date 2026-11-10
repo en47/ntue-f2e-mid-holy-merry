@@ -4,8 +4,8 @@
 // and the register's newest page has a blank row they may sign to volunteer (`join`, `quit`: cabin-play.js).
 import { SUBSTITUTES } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
-import { shape } from './paper-art.js';
-import { CLUES, LOG_GIVEN, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, logSolved, logWrong, points, signedUp } from '../services/cabin-story.js';
+import { paperLayer, shape } from './paper-art.js';
+import { CLUES, LOG_GIVEN, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, logSolved, logWrong, opens, points, signedUp } from '../services/cabin-story.js';
 import { COLOUR_NAMES, INK, JOBS, LOG, MORNING, NAMES, NOTES, REGISTER, RULES } from '../data/cabin-secret.js';
 import { CORD, OLD_PAGE, PENCIL, SEEN, STAY, WISH, WISHES } from '../data/cabin-finale.js';
 
@@ -19,6 +19,20 @@ function blot(ink, colour, seed) {
   shape('path', { d: round(40, 20, 14, 1.6, .85), fill: colour, opacity: .32 }, ink);
   shape('path', { d: round(38, 20, 8, 1.5, .8), fill: colour, opacity: .38 }, ink);
   for (const [x, l] of [[30 + noise(seed) * 8, 10], [48 + noise(seed + 1) * 8, 7]]) shape('path', { d: `M${x - 1.6} 28Q${x} ${28 + l} ${x + 1.6} 28Z`, fill: colour, opacity: .35 }, ink);
+}
+// The cord's little lock, 120 × 130: a brass body with four dial windows (the digits are buttons laid over them) and the
+// red cord through its shackle. The shackle is a piece of its own, so it can spring open.
+const BRASS = { paper: { scale: .35, grain: .4, shadow: .25 }, eager: true };
+function lockBody(paper) {
+  shape('path', { d: 'M-6 48C20 40 40 58 60 52S100 40 126 50', fill: 'none', stroke: '#b5443c', 'stroke-width': 5, 'stroke-linecap': 'round' }, paper);
+  shape('rect', { x: 14, y: 52, width: 92, height: 70, rx: 12, fill: '#c99a3c' }, paper);
+  shape('rect', { x: 14, y: 52, width: 92, height: 10, rx: 5, fill: '#dcb257' }, paper);
+  for (let i = 0; i < 4; i++) shape('rect', { x: 21 + i * 20.5, y: 72, width: 16, height: 30, rx: 3, fill: '#fbf3df', stroke: '#8f6a2c', 'stroke-width': 2 }, paper);
+  shape('circle', { cx: 60, cy: 112, r: 3.4, fill: '#7a5a22' }, paper);
+}
+function lockShackle(paper) {
+  shape('path', { d: 'M34 58V36C34 14 86 14 86 36V58', fill: 'none', stroke: '#9b978c', 'stroke-width': 9, 'stroke-linecap': 'round' }, paper);
+  shape('path', { d: 'M37 54V37C37 19 83 19 83 37V54', fill: 'none', stroke: '#c9c5b9', 'stroke-width': 2.5, 'stroke-linecap': 'round' }, paper);
 }
 function stain(ink, seed) {
   shape('ellipse', { cx: 40 + noise(seed) * 4, cy: 22, rx: 30, ry: 13, fill: '#9fb3c4', opacity: .16 }, ink);
@@ -144,6 +158,32 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       note.textContent = LOG.solved; sound.play('cheer'); learn('log');
     }
   }
+  // The cord, loose but locked: four dials to turn (a tap, or the arrow keys), and the blank slip tucked under it.
+  function lock(cord, from) {
+    element('p', 'secret-note', cord, CORD.locked);
+    const padlock = element('div', 'cord-lock', cord);
+    paperLayer(padlock, '0 0 120 130', 'lock-shackle', lockShackle, BRASS); paperLayer(padlock, '0 0 120 130', 'lock-body', lockBody, BRASS);
+    const row = element('div', 'lock-dials', padlock), dials = [0, 0, 0, 0];
+    dials.forEach((_, i) => {
+      const dial = element('button', 'lock-dial', row, '0'); dial.type = 'button'; dial.setAttribute('aria-label', CORD.dial(i + 1, 0));
+      const turn = by => {
+        if (padlock.classList.contains('is-open')) return;
+        dials[i] = (dials[i] + by + 10) % 10; dial.textContent = String(dials[i]); dial.setAttribute('aria-label', CORD.dial(i + 1, dials[i])); sound.play('click');
+        if (!opens(dials)) return;
+        // Open: the shackle springs up, the cord slides off; the register opens again with the way to the old page.
+        padlock.classList.add('is-open'); finale.unlocked = true; save(); sound.play('snap'); say(CORD.opened);
+        later(1100, () => { open('register', from); say(CORD.opened); });
+      };
+      on(dial, 'click', () => turn(1));
+      on(dial, 'keydown', event => { const by = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[event.key]; if (by) { event.preventDefault(); turn(by); } });
+    });
+    // The slip: taken once; in the pocket until it has been held to the fire (cabin-hearth.js); then what it said.
+    if (finale.slip === 'none') {
+      element('p', 'secret-note', cord, CORD.slip);
+      const take = element('button', 'register-sign', cord, CORD.take); take.type = 'button';
+      on(take, 'click', () => { finale.slip = 'taken'; save(); sound.play('pick'); clue('blank-slip'); open('register', from); say(CORD.took); });
+    } else element('p', 'secret-note', cord, finale.slip === 'read' ? CORD.read : CORD.pocket);
+  }
   // The register's newest page: each substitute's stamps this season, then the visitor's row, or a blank one to sign.
   function register(card, from) {
     element('h3', 'secret-title', card, REGISTER.title);
@@ -163,7 +203,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       for (const task of TASKS) { const done = volunteer.tasks.includes(task), item = element('li', done ? 'is-done' : '', jobs); element('span', 'job-box', item, done ? '✓' : '').setAttribute('aria-hidden', 'true'); element('strong', '', item, JOBS[task][0]); element('span', '', item, JOBS[task][1]); }
       // The old pages, tied with red cord (two jobs untie them); a wish for three stamps; the endings seen so far.
       const cord = element('div', 'register-cord', card);
-      if (finale.twist || canUntie(volunteer)) { const untie = element('button', 'register-sign', cord, finale.twist ? '再翻開舊的一頁' : CORD.untie); untie.type = 'button'; on(untie, 'click', () => { sound.play('remove'); open('oldpage', from); }); }
+      if (finale.twist || finale.unlocked) { const untie = element('button', 'register-sign', cord, finale.twist ? CORD.again : CORD.untie); untie.type = 'button'; on(untie, 'click', () => { sound.play('remove'); open('oldpage', from); }); }
+      else if (canUntie(volunteer)) lock(cord, from);
       else element('p', 'secret-note', cord, `${CORD.tied}${CORD.soon}`);
       if (canWish(volunteer, finale)) {
         element('h4', 'register-heading', card, WISH.title); element('p', 'secret-note', card, WISH.invite);

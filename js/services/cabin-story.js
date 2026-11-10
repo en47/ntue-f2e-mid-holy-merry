@@ -54,6 +54,11 @@ export function record(volunteer, task) { if (!pending(volunteer, task)) return 
 // blank row and went home without signing; B, a wish granted; C, staying on; D, either of those knowing what Holly knew.
 export const WISH_COST = 3;
 export const canUntie = volunteer => signedUp(volunteer) && points(volunteer) >= 2;
+// The cord's little lock: four dials, opened by the year Holly's wish came true (the snow globe's base, H. · 2003).
+export const LOCK = '2003';
+export const opens = dials => Array.isArray(dials) && dials.join('') === LOCK;
+// The blank slip under the cord: still there, in the visitor's pocket, or held to the fire and read.
+export const SLIP = ['none', 'taken', 'read'];
 export const canWish = (volunteer, finale) => signedUp(volunteer) && points(volunteer) >= WISH_COST && !finale.wish;
 export const canStay = (volunteer, finale) => signedUp(volunteer) && points(volunteer) === TASKS.length && !finale.stayed;
 export const trueMiracle = finale => finale.twist && Boolean(finale.wish || finale.stayed);

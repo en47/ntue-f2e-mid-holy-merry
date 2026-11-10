@@ -3,7 +3,16 @@
 
 // Tied with red cord until the visitor has done two jobs: Holly's wish, granted in 2003, and her on the night shift
 // every year since. Her initial is the one on the snow globe's base (H. · 2003).
-export const CORD = { tied: '前面的舊頁用紅繩綁著。', soon: '（再多做一件替身工作，紅繩好像就解得開了。）', untie: '解開紅繩，翻到舊的一頁', back: '翻回最新的一頁' };
+// Once two jobs are done the cord can be got at, but it is held by a little four-dial lock; a blank slip tucked under it
+// smells of lemon, and held to the fire it shows Holly's hand: the year the snow globe remembers is the code.
+export const CORD = {
+  tied: '前面的舊頁用紅繩綁著。', soon: '（再多做一件替身工作，紅繩好像就解得開了。）', untie: '解開紅繩，翻到舊的一頁', again: '再翻開舊的一頁', back: '翻回最新的一頁',
+  locked: '紅繩鬆了，卻被一個小小的四位數密碼鎖扣著。', dial: (place, digit) => `第 ${place} 個轉輪：${digit}（按一下加一）`, opened: '喀！小鎖彈開了，紅繩滑了下來。',
+  slip: '繩上夾著一張空白的紙條，聞起來有一點檸檬的味道。', take: '拿起紙條', took: '你把空白紙條收進口袋了。檸檬的味道……好像在哪裡聽過，這種紙要用火烤一烤？',
+  pocket: '（空白紙條還在你口袋裡。）',
+  warm: '火不夠旺，紙條只是溫溫的。再添一點柴，用風箱把火吹旺。', toFire: '把空白紙條靠近火烤一烤',
+  lemon: ['我的願望實現的那一年，', '雪花球一直記得。'], sign: '—— H.', read: '紙條上浮出淡褐色的字：「我的願望實現的那一年，雪花球一直記得。」—— H.',
+};
 export const OLD_PAGE = {
   title: '登記簿　舊的一頁',
   entry: ['2003', 'H.', '荷莉', '願望：讓住院的媽媽，回家過聖誕節。'],

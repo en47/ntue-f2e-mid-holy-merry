@@ -1,7 +1,10 @@
 // The hearth up close. Firewood waits in the basket and the bellows hang beside the fire: drag a log into the fire (or press
 // Enter on it) and the fire climbs, up to three logs; press the bellows' handles down and let go, and the fire flares. The
-// fire itself lives in the scene (cabin-scene.js), so it keeps burning down while you are elsewhere in the room.
+// fire itself lives in the scene (cabin-scene.js), so it keeps burning down while you are elsewhere in the room. The blank
+// slip from the register, once it is in the visitor's pocket, waits here too: held to a fire with two logs burning, the
+// lemon writing on it comes up brown, a character at a time.
 import { paperLayer, shape } from './paper-art.js';
+import { CORD } from '../data/cabin-finale.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
@@ -15,11 +18,19 @@ function log(parent) {
   shape('ellipse', { cx: 84, cy: 22, rx: 6, ry: 8, fill: 'none', stroke: '#a8774d', 'stroke-width': 2 }, parent);
 }
 
-export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () => {} }) {
+// The blank slip: cream paper folded once, a faint lemon mark at one corner.
+function slipArt(parent) {
+  shape('path', { d: 'M6 10L86 4 94 50 12 56Z', fill: '#fffaf0' }, parent);
+  shape('path', { d: 'M86 4L94 50 80 40Z', fill: '#efe3c8' }, parent);
+  shape('circle', { cx: 24, cy: 22, r: 8, fill: '#f6ecc4', opacity: .8 }, parent);
+}
+
+export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, progress, save = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
-  say('從柴籃拿一根木柴放進爐口；把風箱往下壓再放開，火會竄高。');
+  const finale = progress?.finale, pocket = finale?.slip === 'taken';
+  say(pocket ? '從柴籃拿木柴放進爐口、用風箱把火吹旺。口袋裡那張空白紙條，也可以拿出來靠近火。' : '從柴籃拿一根木柴放進爐口；把風箱往下壓再放開，火會竄高。');
   const mouth = element('span', 'hearth-mouth', layer); mouth.setAttribute('aria-hidden', 'true');
   const logs = [0, 1, 2].map(() => {
     const button = element('button', 'hearth-log', layer); button.type = 'button'; button.setAttribute('aria-label', '拿一根木柴放進壁爐');
@@ -27,6 +38,8 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
   });
   const grip = element('button', 'hearth-bellows', layer); grip.type = 'button'; grip.setAttribute('aria-label', '風箱：往下壓再放開，把火吹旺（也可以按 Enter）');
   let size = 60;
+  const slip = pocket ? element('button', 'hearth-slip', layer) : null;
+  if (slip) { slip.type = 'button'; slip.setAttribute('aria-label', CORD.toFire); paperLayer(slip, '0 0 100 60', '', slipArt, PAPER); }
 
   const place = (node, rect) => Object.assign(node.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
   function layout() {
@@ -39,6 +52,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
       button.style.rotate = `${[-9, 4, 11][i]}deg`;
     });
     place(mouth, rects.mouth);
+    if (slip) place(slip, { left: Math.max(8, basket.left + basket.width * .1), top: Math.max(8, basket.top - size * .95), width: size * .9, height: size * .54 });
     const handle = rects.bellows, side = Math.max(56, handle.width, handle.height);
     place(grip, { left: handle.left + handle.width / 2 - side / 2, top: handle.top + handle.height / 2 - side / 2, width: side, height: side });
   }
@@ -131,6 +145,22 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault(); cabin.bellows(1); blow(); later(160, () => release(1));
   });
+
+  // Held to the fire: with two logs burning (they burn down slowly, so a little under two), the writing comes up;
+  // otherwise it only warms.
+  function roast() {
+    if (cabin.heat < 1.5) { say(CORD.warm); sound.play('nope'); slip.classList.remove('is-warm'); void slip.offsetWidth; slip.classList.add('is-warm'); return; }
+    slip.remove(); finale.slip = 'read'; save(); clue('lemon-note'); sound.play('open'); say('');
+    const card = element('article', 'cabin-letter lemon-card', layer); card.setAttribute('aria-label', '烤過的紙條');
+    const words = element('p', 'lemon-words', card), text = CORD.lemon.join('');
+    const full = element('span', 'sr-only', words); full.textContent = `${text}${CORD.sign}`;
+    const ink = element('span', '', words); ink.setAttribute('aria-hidden', 'true');
+    [...CORD.lemon.join('\n'), '\n', ...CORD.sign].forEach((char, i) => { const each = element('span', 'lemon-char', ink); each.textContent = char; each.style.setProperty('--at', `${(.6 + i * .12).toFixed(2)}s`); });
+    const done = element('button', 'cabin-letter-close', card); done.type = 'button'; done.textContent = '收好紙條 ✓';
+    on(done, 'click', () => { card.remove(); sound.play('remove'); say('雪花球記得的那一年……'); });
+    done.focus({ preventScroll: true });
+  }
+  if (slip) on(slip, 'click', roast);
 
   layout(); later(500, layout); later(1200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
