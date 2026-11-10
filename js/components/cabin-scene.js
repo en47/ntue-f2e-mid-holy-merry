@@ -533,10 +533,14 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   if (!isCurrent()) { release3d(); return null; }
   stage.prepend(renderer.domElement);
 
+  // A view's settings as they stand now: the bookcase, standing open (or swinging open), is looked at from the side. Both
+  // the goal and the turning limits read this, or the two would pull the camera back and forth.
+  function settingsOf(name) {
+    const settings = VIEWS[name];
+    return settings.open && (story.opening ? story.opening.to : story.open) > .5 ? { ...settings, target: settings.open.target, heading: settings.open.yaw } : settings;
+  }
   function goalFor(name) {
-    const t = blend(), aspect = (stage.clientWidth || 1) / (stage.clientHeight || 1);
-    let settings = VIEWS[name];
-    if (settings.open && (story.opening ? story.opening.to : story.open) > .5) settings = { ...settings, target: settings.open.target, heading: settings.open.yaw };
+    const t = blend(), aspect = (stage.clientWidth || 1) / (stage.clientHeight || 1), settings = settingsOf(name);
     if (settings.eye) {
       const lens = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(settings.span / 2)) / aspect));
       return { eye: new THREE.Vector3(...settings.eye), heading: lerp(settings.tallHeading ?? settings.heading, settings.heading, t), pitch: lerp(settings.tallPitch ?? settings.pitch, settings.pitch, t), fov: THREE.MathUtils.clamp(lens, settings.fov, settings.tallFov) };
@@ -548,7 +552,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const turn = settings.heading ?? 0, tip = settings.pitch;
     return { eye: aim.add(new THREE.Vector3(Math.sin(turn) * Math.cos(tip), Math.sin(tip), Math.cos(turn) * Math.cos(tip)).multiplyScalar(reach)), heading: turn, pitch: tip, fov: lerp(settings.tallFov ?? settings.fov, settings.fov, t) };
   }
-  const home = () => { const settings = VIEWS[view]; return lerp(settings.tallHeading ?? settings.heading ?? 0, settings.heading ?? 0, blend()); };
+  const home = () => { const settings = settingsOf(view); return lerp(settings.tallHeading ?? settings.heading ?? 0, settings.heading ?? 0, blend()); };
   const turnLimit = () => VIEWS[view].turn;
   // Past the edge of the village the view gives a little, like paper, and springs back once let go.
   function clampTurn(value, soft = false) {
