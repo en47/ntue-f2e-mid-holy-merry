@@ -2,7 +2,16 @@
 // way, it only clicks and springs), or press the arrow keys or Enter for a quarter turn. Let go and the little scene on
 // top turns while the tune plays, both slowing as the spring runs down; wind it again whenever you like. The box keeps
 // playing if you step away (the scene and cabin-sound.js keep it going).
+import { paperLayer, shape } from './paper-art.js';
+import { letter } from './cabin-art.js';
+
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
+// The gold medallion under the little turning scene, with its letter O: it rises while the box plays.
+function medallion(parent) {
+  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; shape('path', { d: `M${50 + Math.cos(a) * 34} ${50 + Math.sin(a) * 34}L${50 + Math.cos(a + .13) * 46} ${50 + Math.sin(a + .13) * 46}L${50 + Math.cos(a + .26) * 34} ${50 + Math.sin(a + .26) * 34}Z`, fill: '#e9c162' }, parent); }
+  shape('circle', { cx: 50, cy: 50, r: 34, fill: '#e0b04f' }, parent); shape('circle', { cx: 50, cy: 50, r: 26, fill: '#fff6dc' }, parent);
+  letter(parent, 'O', 50, 51, 28, 30, { fill: '#a84a42' });
+}
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 
 export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, knows = () => false, clue = () => {} }) {
@@ -11,10 +20,13 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
   const knob = element('button', 'musicbox-knob', layer); knob.type = 'button';
   knob.setAttribute('aria-label', '音樂盒的發條：繞著它順時針拖曳上緊，或按方向鍵右、Enter 轉四分之一圈');
   let turn = null, clicks = 0;
+  const gold = element('span', 'musicbox-letter', layer); gold.setAttribute('aria-hidden', 'true');
+  paperLayer(gold, '0 0 100 100', '', medallion, { paper: { scale: .35, grain: .4, shadow: .25 }, eager: true });
   function layout() {
     const rects = cabin.musicRects(); if (!rects) return;
     const { key } = rects, size = Math.max(96, key.width * 2.4), x = key.left + key.width / 2, y = key.top + key.height / 2;
     Object.assign(knob.style, { left: `${x - size / 2}px`, top: `${y - size / 2}px`, width: `${size}px`, height: `${size}px` });
+    const { box } = rects, medal = Math.max(44, box.width * .55); Object.assign(gold.style, { left: `${box.left + box.width / 2 - medal / 2}px`, top: `${box.top - medal * .9}px`, width: `${medal}px`, height: `${medal}px` });
   }
   const played = () => (knows() ? '盒蓋內側刻著 N 和 K：尼爾斯和克莉絲。' : '') + (sound.musicOn ? '小紙雕轉起來了。（網站音樂開著時，音樂盒的歌聲會被蓋過；關掉右下角的音樂就聽得到。）' : '叮叮咚咚……小紙雕跟著音樂慢慢轉。');
   // Each 30° of winding clicks the ratchet once.
@@ -29,6 +41,13 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
     cabin.holdKey(false);
     if (cabin.wound > 0) { sound.tune(() => cabin.wound); say(played()); onUse(); clue('music-lid'); }
   }
+  // While it plays, the gold O rises under the turning scene; the first time, it is told and written in the clue book.
+  function playing() {
+    const up = cabin.wound > 0; gold.classList.toggle('is-up', up);
+    if (up && clue('letter-musicbox')) later(2600, () => say('小紙雕轉著轉著，底下升起一個金色的字母：O。'));
+    later(500, playing);
+  }
+  playing();
   on(knob, 'pointerdown', event => {
     if (event.button > 0) return;
     event.preventDefault(); knob.setPointerCapture(event.pointerId); cabin.holdKey(true); knob.classList.add('is-winding');

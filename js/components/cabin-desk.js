@@ -6,6 +6,7 @@
 // the bundle and writes their replies, choosing what to say. Sealed, postmarked and sent are kept (cabin-progress.js).
 import { paperLayer, shape } from './paper-art.js';
 import { inked } from './cabin-paper.js';
+import { letter } from './cabin-art.js';
 import { DESK_LETTERS, REPLY, VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { NAMES } from '../data/cabin-secret.js';
 import { knowsSantas, pending, signedUp } from '../services/cabin-story.js';
@@ -44,6 +45,29 @@ function sack(parent) {
   shape('rect', { x: 34, y: 62, width: 32, height: 22, rx: 3, fill: '#a84a42' }, parent);
   shape('path', { d: 'M38 66H62M38 72H58M38 78H54', stroke: '#fbf3df', 'stroke-width': 1.6 }, parent);
 }
+
+// The shallow drawer over the kneehole, cut to match the one drawn on the desk: its front slides out, and inside lies a
+// rocker blotter. Up close (a card of its own) the blotter's paper shows one letter soaked in backwards; a tap turns it
+// the right way round.
+function drawerFront(parent) {
+  shape('rect', { x: 0, y: 0, width: 200, height: 24, rx: 4, fill: '#9a6343' }, parent);
+  shape('rect', { x: 6, y: 4, width: 188, height: 16, rx: 3, fill: '#a86b47' }, parent);
+  shape('circle', { cx: 100, cy: 12, r: 4.2, fill: '#e0b04f' }, parent);
+}
+function drawerInside(parent) {
+  shape('rect', { x: 0, y: 0, width: 200, height: 24, rx: 3, fill: '#4a3226' }, parent);
+  shape('path', { d: 'M70 18C80 8 120 8 130 18Z', fill: '#8f5a3c' }, parent); shape('rect', { x: 96, y: 4, width: 8, height: 7, rx: 3, fill: '#6b4a33' }, parent);
+  for (const [x, w] of [[18, 34], [150, 30]]) shape('rect', { x, y: 12, width: w, height: 5, rx: 2, fill: ['#b5443c', '#3f6653'][x > 100 ? 1 : 0] }, parent);
+}
+// The rocker blotter up close, 240 × 150: turned bottom up, its curved paper with ink soaked in, a brass knob for a handle.
+function rocker(parent) {
+  shape('path', { d: 'M20 40Q120 8 220 40V108Q120 142 20 108Z', fill: '#f3ead6' }, parent);
+  for (const [d, o] of [['M46 58c14-5 24 5 38 0', .4], ['M150 98c10 3 20-3 30 1', .35], ['M54 100c8-3 14 2 22-1', .3], ['M156 54c8-2 14 2 20 0', .3]]) shape('path', { d, fill: 'none', stroke: '#7f93a6', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: o }, parent);
+  shape('path', { d: 'M12 36Q120 2 228 36L232 44Q120 12 8 44Z', fill: '#8f5a3c' }, parent);
+  shape('path', { d: 'M12 112Q120 148 228 112L232 104Q120 136 8 104Z', fill: '#8f5a3c' }, parent);
+  shape('circle', { cx: 120, cy: 14, r: 9, fill: '#e0b04f' }, parent);
+}
+const printed = parent => letter(parent, 'E', 120, 74, 48, 56, { fill: '#2f3e4a', opacity: .6 });
 
 export function deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse = () => {}, onTask = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
@@ -96,11 +120,33 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   const buttons = { open: action('拆開信', open), flip: action('翻到背面', flip), write: action('寫回信 ✎', write), fold: action('摺好放進信封', fold), send: action('投進郵袋', send), back: action('放回去', putBack) };
   const bag = element('div', 'desk-sack', work); paperLayer(bag, '0 0 100 110', '', sack, PAPER); const count = element('span', 'sack-count', bag);
   let current = null;
+  // The drawer over the kneehole: pulled out, the rocker blotter inside comes up close.
+  const drawer = element('button', 'desk-drawer', layer); drawer.type = 'button'; drawer.setAttribute('aria-label', '拉開書桌中間的抽屜');
+  paperLayer(drawer, '0 0 200 24', 'drawer-inside', drawerInside, PAPER); paperLayer(drawer, '0 0 200 24', 'drawer-front', drawerFront, PAPER);
+  on(drawer, 'click', () => {
+    if (drawer.classList.contains('is-open')) { drawer.classList.remove('is-open'); sound.play('drop'); return; }
+    drawer.classList.add('is-open'); sound.play('open'); later(650, blotterCard);
+  });
+  function blotterCard() {
+    const card = element('article', 'cabin-letter blotter-card', layer); card.setAttribute('aria-label', '抽屜裡的吸墨器');
+    element('p', 'blotter-words', card, '抽屜裡躺著一個搖擺式吸墨器。翻過來，吸墨紙上印著一個字——反過來的。');
+    const pad = element('button', 'blotter-pad', card); pad.type = 'button'; pad.setAttribute('aria-label', '把吸墨紙上反過來的字翻正');
+    paperLayer(pad, '0 0 240 150', '', rocker, PAPER); paperLayer(pad, '0 0 240 150', 'blotter-print', printed, { paper: { scale: .3, grain: .7, shadow: 0, rim: '#ffffff00' }, eager: true });
+    on(pad, 'click', () => {
+      if (pad.classList.contains('is-turned')) return;
+      pad.classList.add('is-turned'); sound.play('remove'); clue('letter-desk');
+      later(900, () => { card.querySelector('.blotter-words').textContent = '對著光翻過來看——是 E。'; say('吸墨紙上反過來的字，翻正是 E。'); });
+    });
+    const done = element('button', 'cabin-letter-close', card, '放回抽屜 ✓'); done.type = 'button';
+    on(done, 'click', () => { card.remove(); drawer.classList.remove('is-open'); sound.play('drop'); drawer.focus({ preventScroll: true }); });
+    pad.focus({ preventScroll: true });
+  }
 
   function layout() {
     const rects = cabin.deskRects(); if (!rects) return;
     const place = (node, rect, least) => { const w = Math.max(least, rect.width), h = Math.max(least, rect.height); Object.assign(node.style, { left: `${rect.left + rect.width / 2 - w / 2}px`, top: `${rect.top + rect.height / 2 - h / 2}px`, width: `${w}px`, height: `${h}px` }); };
     place(stack, rects.stack, 48); place(outbox, rects.outbox, 48);
+    const { drawer: slot } = rects; Object.assign(drawer.style, { left: `${slot.left}px`, top: `${slot.top}px`, width: `${slot.width}px`, height: `${Math.max(slot.height, 20)}px` });
     for (const [kind, button] of Object.entries(tools)) if (!button.classList.contains('is-dragging')) place(button, rects[kind], 52);
   }
   // Everything shown follows the letter on the desk and how far along it is.

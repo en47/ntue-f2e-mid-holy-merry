@@ -17,7 +17,7 @@ import { wheelGame } from './cabin-wheel.js';
 import { wishScene } from './cabin-finale.js';
 import { endingTheatre } from './cabin-ending.js';
 import { TASKS, canStay, canWish, goesHome, knowsSantas, pending, points, record, santaGoes, santaReturns, trueMiracle } from '../services/cabin-story.js';
-import { DONE, JOBS, NOTES } from '../data/cabin-secret.js';
+import { CHAIR, DONE, JOBS, NOTES } from '../data/cabin-secret.js';
 import { GLOBE, NEXT, SANTA_ON_HOLLY, TWIST } from '../data/cabin-finale.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
@@ -202,6 +202,18 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     finale.stayed = true; reach('C'); if (trueMiracle(finale)) reach('D'); cabin.repaint('secret-tags', { mine: true });
     later(400, () => ending('C'));
   }
+  // The note on the empty chair: the bookcase's riddle, in Santa's hand. It goes in the clue book as it is read.
+  function chairNote() {
+    if (layer.dataset.game) return;
+    clue('chair-note'); sound.play('open');
+    const card = element('article', 'cabin-letter chair-card', layer); card.setAttribute('aria-label', CHAIR.title);
+    element('h3', 'chair-title', card).textContent = CHAIR.title;
+    for (const line of CHAIR.lines) element('p', 'chair-line', card).textContent = line;
+    element('p', 'chair-sign', card).textContent = CHAIR.sign;
+    const done = element('button', 'cabin-letter-close', card); done.type = 'button'; done.textContent = '收好紙條 ✓';
+    done.addEventListener('click', () => { card.remove(); sound.play('remove'); say('他最喜歡的四樣東西……壁爐、書桌、音樂盒，還有雪花球？'); });
+    done.focus({ preventScroll: true });
+  }
   // What has been used in the room on this visit; whether the secret behind the bookcase is known.
   const used = new Set(), knows = () => knowsSantas(progress.story.seen);
   let visited = false;
@@ -217,6 +229,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // in cabin-story.js). The story is decided here, never by the chat.
     inRoom() {
       const story = progress.story; visited = true;
+      // Back with Santa still out: his note is still on the chair (and in the clue book).
+      if (story.left && !story.opened && !cabin.santaHome) clue('chair-note');
       // Back from the old page, Santa (if he is in) has a word about Holly; once.
       if (heardHolly && cabin.santaHome) { heardHolly = false; later(900, () => say(SANTA_ON_HOLLY)); return; }
       // Once the secret is known, Santa comes home from the reindeer, and knows that you know.
@@ -229,7 +243,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
         say('聖誕老人站起來伸了個懶腰：「看你玩得這麼開心……哎呀，麋鹿在叫我了，我去看看牠，你慢慢逛！」');
         if (!(await cabin.santaLeave())) return;
         story.left = true; save(); onSanta('away'); notebook.refresh();
-        say('搖椅還輕輕晃著，椅子上留了一張紙條。');
+        say('搖椅還輕輕晃著，椅子上留了一張紙條。'); later(2000, chairNote);
       });
     },
     // Leaving the house before the bookcase has opened, Santa is back in his chair the next time you come in.

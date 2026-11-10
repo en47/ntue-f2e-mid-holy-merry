@@ -283,8 +283,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
 
   // The bookcase on its hinge: wooden shelves, sides and top, and books with real thickness standing on the shelves (its
   // painted back is one of the boards). A book is a box: its spine a cut picture, its covers card of its colour, its pages
-  // cream on top. The four gold-stamped books stand a little proud and glint in the firelight.
-  const sheens = [], letterBooks = new Map(), coverMaterials = new Map();
+  // cream on top. No book stands out: which four letters matter is found around the room. When they spell MORE, those four
+  // light up for a moment (`glintBooks`).
+  const sheens = new Map(), letterBooks = new Map(), coverMaterials = new Map();
   const pages = keep(materials, new THREE.MeshStandardMaterial({ color: 0xf3e6c8, roughness: 1 }));
   const gleam = keep(textures, radialTexture([[0, 'rgba(255,226,150,1)'], [.55, 'rgba(255,214,120,.35)'], [1, 'rgba(255,214,120,0)']], 64));
   function bookGeometry(w, h, d) {
@@ -303,7 +304,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // The thirteen places a letter book can stand (cabin-story.js): along HOLY MERRY's shelf, then the four left of SANTA.
   const bookPlaces = [...SHELF_LAYOUT.letters.map(x => [x, BOOKCASE.shelves[2]]), ...SHELF_LAYOUT.slots.map(x => [x, BOOKCASE.shelves[1]])];
   let shelfNow = null;
-  const bookGoal = (mesh, place) => { const [x, y] = bookPlaces[place]; mesh.userData.goal = new THREE.Vector3(x, y, mesh.userData.gold ? .045 : .03); };
+  const bookGoal = (mesh, place) => { const [x, y] = bookPlaces[place]; mesh.userData.goal = new THREE.Vector3(x, y, .03); };
   const secret = new THREE.Group(); secret.visible = false; indoors.add(secret);
   async function buildBookcase() {
     const { width, height, depth, shelves } = BOOKCASE, rig = rigs.get('bookcase'), wood = (geometry, colour, x, y, z) => solid(geometry, colour, new THREE.Vector3(x, y, z), rig);
@@ -314,12 +315,11 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const maps = new Map(await Promise.all(BOOK_SHEETS.map(async sheet => [sheet.id, texture(await cutBoard(sheet.id, sheet, set))])));
     if (disposed) return;
     LETTER_BOOKS.forEach((entry, i) => {
-      const mesh = book(maps.get(entry.id), entry.colour, entry.w, entry.h, entry.gold ? .18 : .17);
-      mesh.userData.gold = entry.gold; mesh.userData.size = [entry.w, entry.h]; bookGoal(mesh, i); mesh.position.copy(mesh.userData.goal); rig.add(mesh); letterBooks.set(entry.id, mesh);
-      if (!entry.gold) return;
-      const sheen = keep(materials, new THREE.MeshBasicMaterial({ map: gleam, transparent: true, opacity: .14, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
-      const glint = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(entry.w * .9, entry.h * .8)), sheen);
-      glint.position.set(0, entry.h * .48, .182); mesh.add(glint); sheens.push(sheen);
+      const mesh = book(maps.get(entry.id), entry.colour, entry.w, entry.h);
+      mesh.userData.size = [entry.w, entry.h]; bookGoal(mesh, i); mesh.position.copy(mesh.userData.goal); rig.add(mesh); letterBooks.set(entry.id, mesh);
+      const sheen = keep(materials, new THREE.MeshBasicMaterial({ map: gleam, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+      const glint = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(entry.w * 1.3, entry.h * 1.1)), sheen);
+      glint.position.set(0, entry.h * .48, .172); mesh.add(glint); sheens.set(entry.id, sheen);
     });
     for (const { shelf, variant, x, w, h } of PLAIN_BOOKS) {
       const mesh = book(maps.get(`book-plain-${variant}`), ['#3f5a7a', '#7d5636', '#3f6653', '#8f3b36'][variant], w, h);
@@ -603,14 +603,16 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (spine && spineRest) spine.quaternion.copy(spineRest).multiply(tilt.setFromAxisAngle(side, still ? 0 : Math.sin(t * 1.5) * .014));
     const flicker = still ? 0 : Math.sin(t * 9.1) * .5 + Math.sin(t * 13.7) * .3 + Math.sin(t * 5.3) * .2;
     // The fire burns as high as it is fed and flares when the bellows blow. Its light warms the room a little: the paper is
-    // not lit by lamps, so its colour is warmed by hand, and the gold-stamped books glint more brightly.
+    // not lit by lamps, so its colour is warmed by hand. The books that spelled MORE glow for a moment.
     const warmth = hearth.heat / 3, blaze = 1 + hearth.heat * .22 + hearth.flare * .45;
     for (const holder of flames) { holder.scale.y = (1 + flicker * .07) * blaze; holder.scale.x = (1 + (still ? 0 : Math.sin(t * 7.3) * .025)) * (1 + hearth.heat * .08 + hearth.flare * .12); }
     fireGlow.material.opacity = Math.min(1, .85 + flicker * .12 + hearth.flare * .15); fireGlow.scale.setScalar(1 + warmth * .4 + hearth.flare * .3);
     fire.intensity = 2.2 + flicker * .4 + warmth * 2.4 + hearth.flare * 2; fire.distance = 3 + warmth * 1.4;
     const tint = warmth * .08 + hearth.flare * .04;
     for (const [material, base] of warmed) material.color.setRGB(base.r, base.g * (1 - tint * .45), base.b * (1 - tint));
-    for (const sheen of sheens) sheen.opacity = .14 + warmth * .4 + hearth.flare * .2 + flicker * .03;
+    const glow = story.glint ? Math.max(0, Math.sin(Math.min(1, (t - story.glint.at) / 1.6) * Math.PI)) : 0;
+    for (const [id, sheen] of sheens) sheen.opacity = story.glint?.ids.includes(id) ? glow * .85 : 0;
+    if (story.glint && t - story.glint.at > 1.6) story.glint = null;
     (clones.get('hearth-log') ?? []).forEach((log, i) => { log.visible = hearth.heat > i; log.position.set(FIRE.x + [-.06, .06, 0][i], .1 + (i === 2 ? .05 : 0), BACK_WALL + .14 + i * .004); log.rotation.z = [.06, -.05, .02][i]; });
     // The bellows open in a V about the nozzle; squeezing closes them and folds the leather.
     const open = .34 * (1 - hearth.squeeze) + .05, [left, right, leather] = ['bellows-left', 'bellows-right', 'bellows-leather'].map(id => sheets.get(id)?.holder);
@@ -1134,8 +1136,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       if (motion.matches) for (const mesh of letterBooks.values()) mesh.position.copy(mesh.userData.goal);
       redraw();
     },
-    // The gold letters flash, the case gives a little shake, then it swings open into the room; or stands open already.
-    glintBooks() { hearth.flare = motion.matches ? 0 : 1.6; story.shake = motion.matches ? null : clock; redraw(); },
+    // The four books that spelled it light up, the case gives a little shake, then it swings open into the room; or stands
+    // open already.
+    glintBooks(ids = []) { hearth.flare = motion.matches ? 0 : 1.6; story.shake = motion.matches ? null : clock; story.glint = motion.matches ? null : { at: clock, ids }; redraw(); },
     // Once the puzzle is solved the bookcase is a door: it can be pushed shut and opened again. Shutting, the wall behind
     // is mended only once the case covers the doorway again.
     openBookcase(open = true, animate = true) {
