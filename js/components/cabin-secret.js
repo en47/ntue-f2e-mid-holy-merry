@@ -3,6 +3,8 @@
 // rack. Each opens as a sheet of paper over the scene. Once the three have been read, the visitor knows (cabin-story.js),
 // and the register's newest page has a blank row they may sign to volunteer (`join`, `quit`: cabin-play.js).
 import { SUBSTITUTES } from './cabin-art.js';
+import { inked } from './cabin-paper.js';
+import { shape } from './paper-art.js';
 import { CLUES, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, points, signedUp } from '../services/cabin-story.js';
 import { JOBS, MORNING, NAMES, NOTES, REGISTER, RULES, SHIFTS } from '../data/cabin-secret.js';
 import { CORD, OLD_PAGE, PENCIL, SEEN, STAY, WISH, WISHES } from '../data/cabin-finale.js';
@@ -74,7 +76,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       element('p', 'secret-note', page, finale.twist ? PENCIL : RULES.margin);
     } else if (id === 'register' && knowsSantas(story.seen)) register(page, from);
     else if (id === 'oldpage') oldPage(page);
-    else element('p', 'secret-note', page, NOTES[id]);
+    else element('p', 'secret-note', page, id === 'hats' && finale.twist ? NOTES.hatsKnown : NOTES[id]);
     const done = element('button', 'cabin-letter-close', card, id === 'oldpage' ? CORD.back : '放回去 ✓'); done.type = 'button';
     on(done, 'click', () => id === 'oldpage' ? open('register', from) : close(id, from)); done.focus({ preventScroll: true });
   }
@@ -86,7 +88,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       const item = element('li', you ? 'is-you' : '', list); item.dataset.hand = you ? 'you' : mark.toLowerCase();
       element('span', 'register-mark', item, `${mark}.${you ? REGISTER.you : ''}`);
       const stamps = element('span', 'register-stamps', item); stamps.setAttribute('aria-label', `${count}／${REGISTER.full} 個章`);
-      for (let i = 0; i < REGISTER.full; i++) element('span', i < count ? 'is-stamped' : '', stamps);
+      // Each stamp in red ink, the places still to fill as faint rings.
+      inked(stamps, `0 0 ${REGISTER.full * 25} 24`, ink => { for (let i = 0; i < REGISTER.full; i++) { const cx = 12 + i * 25; if (i < count) { shape('circle', { cx, cy: 12, r: 9.5, fill: 'none', stroke: '#b5443c', 'stroke-width': 2.2 }, ink); shape('circle', { cx, cy: 12, r: 5, fill: '#b5443c' }, ink); } else shape('circle', { cx, cy: 12, r: 9.5, fill: 'none', stroke: '#d6c6a4', 'stroke-width': 1.6 }, ink); } });
     };
     for (const [mark, count] of REGISTER.rows) row(mark, count);
     if (signedUp(volunteer)) {
@@ -109,7 +112,10 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
         on(make, 'click', () => { if (!chosen) return; sound.play('thud'); closeCard(); onWish(chosen); });
       } else if (finale.wish) element('p', 'secret-note', card, WISH.made(WISHES.find(wish => wish.id === finale.wish).name));
       const seen = element('p', 'register-endings', card); element('span', '', seen, `${SEEN}：`);
-      for (const ending of ['A', 'B', 'C', 'D']) element('span', finale.endings.includes(ending) ? 'is-seen' : '', seen, ending).setAttribute('aria-label', `結局 ${ending}${finale.endings.includes(ending) ? '，看過了' : '，還沒看過'}`);
+      for (const ending of ['A', 'B', 'C', 'D']) {
+        const got = finale.endings.includes(ending), mark = element('span', got ? 'is-seen' : '', seen); mark.setAttribute('aria-label', `結局 ${ending}${got ? '，看過了' : '，還沒看過'}`);
+        inked(mark, '0 0 30 30', ink => shape('circle', got ? { cx: 15, cy: 15, r: 13, fill: '#b5443c' } : { cx: 15, cy: 15, r: 12, fill: 'none', stroke: '#d6c6a4', 'stroke-width': 1.8 }, ink)); element('span', 'ending-letter', mark, ending);
+      }
       // Leaving takes a second press, and keeps the stamps.
       const leave = element('button', 'register-leave', card, REGISTER.leave); leave.type = 'button';
       on(leave, 'click', () => {
@@ -140,7 +146,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     element('h3', 'secret-title', page, OLD_PAGE.title);
     const entry = element('div', 'old-entry', page);
     element('p', 'old-line', entry, `${year}　${mark}　${name}`); element('p', 'old-line', entry, wish);
-    element('span', 'old-stamp', entry, OLD_PAGE.stamp);
+    const fulfilled = element('span', 'old-stamp', entry); inked(fulfilled, '0 0 160 40', ink => { shape('rect', { x: 3, y: 3, width: 154, height: 34, rx: 6, fill: 'none', stroke: '#b5443c', 'stroke-width': 2.4 }, ink); shape('rect', { x: 8, y: 8, width: 144, height: 24, rx: 4, fill: 'none', stroke: '#b5443c', 'stroke-width': 1.2 }, ink); }); element('span', 'ink-words', fulfilled, OLD_PAGE.stamp);
     const since = element('ul', 'old-since', page); for (const line of OLD_PAGE.since) element('li', '', since, line);
     element('p', 'old-pencil', page, OLD_PAGE.pencil);
     if (!finale.twist) onTwist();

@@ -414,6 +414,17 @@ await test('Santa 故事結尾：紅繩舊頁（第二次反轉）、三個章�
   assert.ok(finaleUi.includes('export function wishScene') && finaleUi.includes('export function endingCard') && !finaleUi.includes('innerHTML'), 'Wish scenes and ending cards, text only through textContent');
   assert.ok(paint.includes("'secret-tags': [{ mine: true }]") && paper.includes("['.finale-card', 'certificate']") && paper.includes("['.secret-card[data-thing=\"oldpage\"]', 'oldpage']"), 'The board with the visitor\'s tag is drawn ahead; the ending cards and the old page are drawn as paper');
 });
+await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const { RULES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { WISH, NEXT } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href), { WISH_COST } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const count = ['零', '一', '二', '三', '四'][WISH_COST];
+  assert.ok(RULES.lines.some(line => line.includes(`集到${count}個章`)) && WISH.invite.includes(`集到${count}個章`), 'The rulebook and the wish say the same number of stamps as the rule');
+  assert.deepEqual(Object.keys(NEXT), ['2', '3', '4']);
+  const [play, secret, desk, story] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-secret.js', 'js/components/cabin-desk.js', 'docs/SANTA-STORY.md'].map(read));
+  assert.ok(play.includes('const next = NEXT[points(progress.volunteer)]; if (next) later(3600, () => say(next));'), 'After each stamp, a line says where the story goes next');
+  assert.ok(secret.includes('inked(stamps,') && secret.includes('inked(fulfilled,') && desk.includes('inked(postmark,') && desk.includes('inked(arrived,'), 'Stamps and postmarks are ink drawn in SVG');
+  assert.ok(['第一次', '第二次', '結局 A', '結局 D'].every(word => story.includes(word)) || ['兩次反轉', 'A　普通訪客', 'D　真正的聖誕奇蹟'].every(word => story.includes(word)), 'The story line is written down in one place');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

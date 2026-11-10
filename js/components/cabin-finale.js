@@ -46,6 +46,11 @@ function room(parent) {
   for (const [x, y, c] of [[142, 52, '#d9614f'], [158, 64, '#e0b04f'], [148, 76, '#6f9fc0'], [160, 44, '#8fbf7f']]) shape('circle', { cx: x, cy: y, r: 2.6, fill: c }, parent);
   shape('path', { d: 'M150 12L152.5 18 159 18.5 154 22.5 156 29 150 25 144 29 146 22.5 141 18.5 147.5 18Z', fill: '#e0b04f' }, parent);
 }
+// A paper snowflake, cut with six arms.
+function flake(parent) {
+  for (let i = 0; i < 3; i++) { const a = i * Math.PI / 3, x = Math.cos(a) * 8, y = Math.sin(a) * 8; shape('path', { d: `M${10 - x} ${10 - y}L${10 + x} ${10 + y}`, stroke: '#fffdf6', 'stroke-width': 2.6, 'stroke-linecap': 'round' }, parent); }
+  shape('circle', { cx: 10, cy: 10, r: 2.6, fill: '#fffdf6' }, parent);
+}
 function box(parent) {
   shape('rect', { x: 10, y: 20, width: 80, height: 58, rx: 3, fill: '#b5443c' }, parent);
   shape('rect', { x: 44, y: 20, width: 12, height: 58, fill: '#e0b04f' }, parent);
@@ -90,7 +95,9 @@ export function wishScene({ layer, wish, mark, sound, later, onDone }) {
     later(still ? 300 : 4400, done);
   } else if (wish === 'snow') {
     art(village);
-    for (let i = 0; i < 46; i++) { const flake = element('span', 'wish-flake', scene); flake.style.left = `${(i * 37) % 100}%`; flake.style.animationDelay = `${-(i * 0.73) % 6}s`; flake.style.scale = String(.6 + (i % 5) * .15); }
+    // One paper flake, cut once and copied for the whole snowfall.
+    const cut = paperLayer(element('span', ''), '0 0 20 20', '', flake, { paper: { scale: .2, grain: .3, shadow: .25, rim: '#dfe8ee' }, eager: true });
+    for (let i = 0; i < 46; i++) { const each = element('span', 'wish-flake', scene); each.append(cut.cloneNode(true)); each.style.left = `${(i * 37) % 100}%`; each.style.animationDelay = `${-(i * 0.73) % 6}s`; each.style.scale = String(.6 + (i % 5) * .15); }
     storm(still ? 0 : 40000);
     words.textContent = '雪一片接著一片落下來，屋頂、樹梢和整片天空都白了。';
     later(still ? 300 : 3800, done);
