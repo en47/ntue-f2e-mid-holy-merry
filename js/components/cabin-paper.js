@@ -121,15 +121,14 @@ const OBJECTS = {
     shape('path', { d: rounded(x + 6, 12, x + clip - 6, 22, seed + 5, 4), fill: '#d3dbe1' }, paper);
     for (const cx of [x + 12, x + clip - 12]) shape('circle', { cx, cy: 29, r: 2.4, fill: '#5f6b74' }, paper);
   },
-  // The register: a leather cover with a gold line, a ruled page, a red ribbon to keep the place.
+  // The register: a leather cover with a gold line, a plain page (its rows are ruled as they scroll), and the end of a red
+  // ribbon over the top edge of the cover, clear of the words.
   ledger(paper, width, height, seed) {
     cut(paper, outline(width, height, seed), '#6b3f2a', '#3f2618');
     for (let i = 0; i < 40; i++) shape('circle', { cx: noise(seed + i) * width, cy: noise(seed + i * 5) * height, r: 1.1, fill: '#5a3423', opacity: .6 }, paper);
     shape('path', { d: rounded(8, 8, width - 8, height - SHADOW - 8, seed + 2, 9), fill: 'none', stroke: '#c9a14a', 'stroke-width': 1.6 }, paper);
     shape('path', { d: rounded(13, 13, width - 13, height - SHADOW - 13, seed + 4, 6), fill: '#fbf3e2' }, paper);
-    for (let y = 64; y < height - SHADOW - 24; y += 32) ink(`M24 ${y}H${width - 24}`, '#e5d8bc', paper, 1.1);
-    ink(`M44 18V${height - SHADOW - 18}`, '#e8a3a0', paper, 1.2, .8);
-    const x = width - 62, long = Math.min(70, height * .2);
+    const x = width - 62, long = 26;
     shape('path', { d: `M${x} 0H${x + 16}V${long}L${x + 8} ${long - 9}L${x} ${long}Z`, fill: '#b5443c' }, paper);
   },
   // The rulebook: a page bound with red cloth down its spine.

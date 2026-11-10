@@ -45,22 +45,24 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     // Each is its own thing: the register a ledger, the name tags on their board, the log on a clipboard, the rules a
     // little booklet, anything else an index card.
     card.dataset.thing = id === 'register' ? (knowsSantas(story.seen) ? 'register' : 'note') : ['tags', 'log', 'rules'].includes(id) ? id : 'note';
+    // The words scroll within the page, never over the cover or the board round it.
+    const page = element('div', 'secret-body', card);
     if (id === 'tags') {
-      element('h3', 'secret-title', card, '名牌');
-      const list = element('ul', 'secret-tags', card);
+      element('h3', 'secret-title', page, '名牌');
+      const list = element('ul', 'secret-tags', page);
       for (const [char, colour] of SUBSTITUTES) { const item = element('li', '', list); const mark = element('span', 'secret-initial', item, `${char}.`); mark.style.color = colour; element('span', '', item, NAMES[char]); }
-      element('p', 'secret-note', card, '最右邊還有一個空掛勾。');
+      element('p', 'secret-note', page, '最右邊還有一個空掛勾。');
     } else if (id === 'log') {
-      element('h3', 'secret-title', card, '夜班交接表');
-      const list = element('ol', 'secret-log', card);
+      element('h3', 'secret-title', page, '夜班交接表');
+      const list = element('ol', 'secret-log', page);
       for (const [date, shift, sign, handover, hand] of SHIFTS) { const item = element('li', '', list); item.dataset.hand = hand; item.textContent = `${date}　${shift}　${sign}　${handover}`; }
       const morning = element('li', 'is-morning', list); morning.textContent = `${MORNING.date}　${MORNING.shift}　${progress.combos.includes('santa') ? MORNING.snowman : MORNING.empty}`;
     } else if (id === 'rules') {
-      element('h3', 'secret-title', card, RULES.title);
-      for (const line of RULES.lines) element('p', 'secret-rule', card, line);
-      element('p', 'secret-note', card, RULES.margin);
-    } else if (id === 'register' && knowsSantas(story.seen)) register(card, from);
-    else element('p', 'secret-note', card, NOTES[id]);
+      element('h3', 'secret-title', page, RULES.title);
+      for (const line of RULES.lines) element('p', 'secret-rule', page, line);
+      element('p', 'secret-note', page, RULES.margin);
+    } else if (id === 'register' && knowsSantas(story.seen)) register(page, from);
+    else element('p', 'secret-note', page, NOTES[id]);
     const done = element('button', 'cabin-letter-close', card, '放回去 ✓'); done.type = 'button';
     on(done, 'click', () => close(id, from)); done.focus({ preventScroll: true });
   }
