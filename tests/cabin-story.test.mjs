@@ -39,3 +39,18 @@ test('the secret is known once the name tags, the shift log and the rulebook hav
   assert.equal(santaReturns({ home: false, opened: true, seen: ['tags'] }), false, 'not before the secret is known');
   assert.equal(santaReturns({ home: true, opened: true, seen: ['tags', 'log', 'rules'] }), false, 'not when he is already home');
 });
+test('volunteering: an initial of your own, four jobs, a point each the first time while signed up', async () => {
+  const { TASKS, canSign, signedUp, points, pending, record } = await import('../js/services/cabin-story.js');
+  assert.deepEqual(TASKS, ['lichen', 'hay', 'letters', 'wheel']);
+  assert.equal(canSign('A'), true); assert.equal(canSign('Z'), true);
+  for (const mark of ['N', 'K', 'H', 'E', 'O', 'S', 'a', 'AB', '', 1, null]) assert.equal(canSign(mark), false, `${mark} cannot be signed`);
+  const volunteer = { mark: '', tasks: [] };
+  assert.equal(record(volunteer, 'hay'), false, 'nothing counts before signing up'); assert.equal(points(volunteer), 0);
+  volunteer.mark = 'J'; assert.equal(signedUp(volunteer), true);
+  assert.equal(pending(volunteer, 'hay'), true);
+  assert.equal(record(volunteer, 'hay'), true); assert.equal(record(volunteer, 'hay'), false, 'a job counts once');
+  assert.equal(record(volunteer, 'sweeping'), false, 'only the four jobs count');
+  record(volunteer, 'wheel'); assert.equal(points(volunteer), 2);
+  volunteer.mark = ''; assert.equal(signedUp(volunteer), false); assert.equal(points(volunteer), 2, 'leaving keeps the points');
+  assert.equal(record(volunteer, 'lichen'), false, 'nothing counts after leaving');
+});

@@ -1219,7 +1219,7 @@ export const ROOM_SPOTS = [
   { id: 'musicbox', name: '音樂盒', box: [[MUSICBOX.x - .02, MUSICBOX.y + .12, MUSICBOX.z], [.26, .34, .4]], view: { target: [MUSICBOX.x, MUSICBOX.y + .1, MUSICBOX.z], distance: .78, pitch: .28, yaw: -Math.PI / 2, tallDistance: .82, tallFov: 54 } },
   { id: 'globe', name: '雪花球', box: [[GLOBE.x, GLOBE.y + GLOBE.h / 2, GLOBE.z], [.22, .26, .2]], view: { target: [GLOBE.x, GLOBE.y + .09, GLOBE.z], distance: .62, pitch: .1, yaw: 0, tallDistance: .8, tallFov: 56 } },
   { id: 'secret', name: '書櫃後的小房間', box: [[SECRET.left + SECRET.width / 2, SECRET.height / 2, -HOUSE.depth / 2 - .05], [SECRET.width, SECRET.height, .2]], view: { target: [SECRET.left + SECRET.width / 2, .6, -HOUSE.depth / 2 - .85], distance: .95, pitch: .22, yaw: .02, fov: 62, tallDistance: .95, tallFov: 84, turn: .6, tilt: .2 } },
-  { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.05, pitch: .1, yaw: .06, fov: 40, tallDistance: 1.05, tallFov: 78 } },
+  { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.05, pitch: .1, yaw: .06, fov: 40, tallDistance: 1.05, tallFov: 78, open: { target: [SECRET.left + SECRET.width * .62, .7, BOOKCASE.z + .15], yaw: .55 } } },
 ];
 
 // Things in the room that answer a tap with a line of their own. `box` is the tap target [centre, size]; the door takes you out.

@@ -10,7 +10,8 @@ const element = (tag, className, parent) => { const node = document.createElemen
 const centre = rect => ({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
 const near = (point, rect, pad) => rect && point.x >= rect.left - pad && point.x <= rect.left + rect.width + pad && point.y >= rect.top - pad && point.y <= rect.top + rect.height + pad;
 
-export function feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art, paper }) {
+// A volunteer still owing him his lichen (`wants`) finds the basket holding only that, even once he is full for the day.
+export function feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art, paper, wants = () => false, onTask = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
   const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
@@ -24,13 +25,14 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     bubble.classList.remove('is-popping'); void bubble.offsetWidth; bubble.classList.add('is-popping');
     clearTimeout(hush); hush = setTimeout(() => { bubble.hidden = true; }, 2400);
   }
-  if (full(progress)) {
+  const lichenOnly = full(progress) && wants();
+  if (full(progress) && !lichenOnly) {
     say('麋鹿今天已經吃飽了，明天再來餵牠吧。');
     later(500, () => { cabin.reindeerAct('nod'); speak('今天吃飽囉，明天再來餵我！'); });
     return () => { events.abort(); clearTimeout(hush); };
   }
 
-  say('從籃子拿食物，拖到麋鹿嘴邊餵牠吃吧！');
+  say(lichenOnly ? '麋鹿今天已經吃飽了……不過牠最愛的地衣，好像還吃得下一點。' : '從籃子拿食物，拖到麋鹿嘴邊餵牠吃吧！');
   const tray = element('div', 'feed-tray', layer), meter = element('p', 'feed-meter', tray), basket = element('div', 'feed-basket', tray);
   const meals = Array.from({ length: MEALS }, () => element('span', 'feed-meal', meter));
   const ring = element('span', 'feed-mouth', layer); ring.setAttribute('aria-hidden', 'true');
@@ -103,7 +105,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     const eaten = eat(progress); save(); count();
     if (kind === 'lichen') {
       cabin.reindeerAct('happy'); sound.play('happy'); later(1800, () => { cabin.reindeerAct('chew'); sound.play('chew'); });
-      burst(mouth, 'heart', 3); speak('是地衣！我最愛吃這個！');
+      burst(mouth, 'heart', 3); speak('是地衣！我最愛吃這個！'); onTask();
       later(1200, () => say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」'));
     } else {
       cabin.reindeerAct('chew'); sound.play('chew'); burst(mouth, 'heart', 1); speak(['喀滋喀滋！', '好甜的胡蘿蔔！', '再一根好不好？'][eaten % 3]);
@@ -116,7 +118,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     });
   }
 
-  for (const [kind, label] of FOODS) piece(kind, label);
+  for (const [kind, label] of FOODS) if (!lichenOnly || kind === 'lichen') piece(kind, label);
   count();
   return () => { events.abort(); clearTimeout(hush); cabin.reindeerLook(null); cabin.reindeerAct(null); };
 }

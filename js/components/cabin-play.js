@@ -12,8 +12,9 @@ import { musicboxGame } from './cabin-musicbox.js';
 import { globeGame } from './cabin-globe.js';
 import { booksGame } from './cabin-books.js';
 import { secretGame } from './cabin-secret.js';
-import { knowsSantas, santaGoes, santaReturns } from '../services/cabin-story.js';
-import { NOTES } from '../data/cabin-secret.js';
+import { wheelGame } from './cabin-wheel.js';
+import { TASKS, knowsSantas, pending, points, record, santaGoes, santaReturns } from '../services/cabin-story.js';
+import { DONE, JOBS, NOTES } from '../data/cabin-secret.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 
@@ -110,16 +111,18 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       });
       open.focus();
     },
-    reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art: ART, paper: PAPER }),
+    reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen') }),
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti }),
-    stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound }),
+    stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask: () => task('hay') }),
+    // The broken big wheel, mended up close (a sheet laid over the yard: it is too far off to walk up to).
+    wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, onMended: () => { task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
     // In the room: the hearth to tend, the desk's letters, the music box and the snow globe, and the bookcase to look over.
     // Each tells the room when it has been used (`onUse`): Santa goes out once enough has been done there.
     hearth: () => hearthGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('hearth') }),
-    desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk') }),
+    desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk'), onTask: () => task('letters') }),
     musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows }),
     globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe'), knows }),
-    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false) }),
+    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit }),
     shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened'), toggle: open => swing(open), restart: () => start('shelf') }),
   };
 
@@ -130,6 +133,18 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     story.shut = !open; save(); cabin.openBookcase(open); sound.play('creak');
     say(open ? '書櫃又慢慢轉開了，後面的小房間還在。' : '書櫃慢慢轉回原位，又是一整面普通的書牆。');
     later(3600, () => { if (!layer.dataset.game) say(''); });
+  }
+  // Volunteering (the rules are in cabin-story.js). Signed up, the big wheel stands still until it is mended; each job done
+  // the first time is stamped in the register, with a postmark that pops up over the scene.
+  function join(mark) { progress.volunteer.mark = mark; save(); cabin.wheelBroken(pending(progress.volunteer, 'wheel')); }
+  function quit() { progress.volunteer.mark = ''; save(); cabin.wheelBroken(false); }
+  function task(id) {
+    if (!record(progress.volunteer, id)) return;
+    save(); later(1500, () => {
+      sound.play('thud'); say(DONE(JOBS[id][0], points(progress.volunteer), TASKS.length));
+      const stamp = element('p', 'volunteer-stamp', layer); stamp.setAttribute('aria-hidden', 'true');
+      stamp.textContent = `替身工作 ✓\n${points(progress.volunteer)}／${TASKS.length}`; later(3200, () => stamp.remove());
+    });
   }
   // What has been used in the room on this visit; whether the secret behind the bookcase is known.
   const used = new Set(), knows = () => knowsSantas(progress.story.seen);
@@ -160,12 +175,15 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // Leaving the house before the bookcase has opened, Santa is back in his chair the next time you come in.
     outside() { if (!progress.story.opened && !cabin.santaHome) { cabin.santaBack(); onSanta('home'); } },
     get opened() { return progress.story.opened; },
+    // Tapped while it stands broken, the big wheel opens to be mended instead of saying its line.
+    get wheelBroken() { return pending(progress.volunteer, 'wheel'); },
     // Coming back shows the yard as it was left: the snowman in his outfit, finished corners finished.
     restore(ids) {
       for (const place of Object.keys(PLACES)) cabin.dress(place, progress.outfit[place]);
       cabin.hoist(progress.hoist.locked ? 1 : 0); if (progress.hoist.locked && progress.hoist.found) cabin.openHatch(true);
       if (ids.includes('mailbox')) cabin.repaint('mailbox', { open: true });
       cabin.placeBooks(progress.story.shelf); if (progress.story.opened) cabin.openBookcase(!progress.story.shut, false);
+      cabin.wheelBroken(pending(progress.volunteer, 'wheel'), false);
     },
     destroy() { leave(); sound.destroy(); layer.remove(); },
   };

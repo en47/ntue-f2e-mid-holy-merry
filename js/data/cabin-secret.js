@@ -19,3 +19,23 @@ export const NOTES = {
   known: '名牌、班表、守則……原來，聖誕老人不只一位。',
   back: '門開了，聖誕老人拍掉身上的雪走進來：「我回來了——咦，書櫃怎麼開著？……看來你都看見了。呵呵，這是我們村子的小秘密。」',
 };
+// The register's newest page, once the secret is known: how many stamps each substitute has this season (four fill a row;
+// Holly's is full, and she is still on the shift log), then a blank row the visitor may sign.
+export const REGISTER = {
+  title: '登記簿　最新的一頁', full: 4,
+  rows: [['N', 3], ['K', 2], ['H', 4], ['E', 1], ['O', 2]],
+  invite: '最下面還空著一格。想一起幫忙，把願望送到大家手上嗎？選一個字母當你的縮寫，蓋上章就加入了。不加入也沒關係。',
+  taken: '已經有人用了', sign: '蓋章加入',
+  jobs: '今天可以幫忙的事', you: '（你）',
+  joined: mark => `蓋好了。從今天起，你也是一位替身：${mark}.。登記簿上寫著今天可以幫忙的事。`,
+  leave: '離開替身工作', sure: '確定要離開嗎？蓋過的章會留著，想回來隨時可以。', left: '你把縮寫輕輕劃掉了。蓋過的章，還留在登記簿上。',
+  hint: '登記簿最新的一頁，最下面好像還空著一格。',
+};
+// The four jobs, each with where to go. Done while signed up, each earns a stamp (a wish point) once (cabin-story.js).
+export const JOBS = {
+  lichen: ['照顧麋鹿', '院子裡的麋鹿：餵牠最愛吃的地衣。'],
+  hay: ['收好乾草', '馴鹿小屋：用滑輪把乾草拉上去掛好。'],
+  letters: ['處理信件', '屋裡的書桌：新來了兩封信，替它們蓋好郵戳。'],
+  wheel: ['修摩天輪', '遊樂場的摩天輪停了，去看看哪裡壞了。'],
+};
+export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿上多了一個章（願望點數 ${count}／${of}）。`;

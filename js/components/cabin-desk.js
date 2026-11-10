@@ -2,9 +2,9 @@
 // over to see who dealt with it, put it back. Drag the postmark stamp onto an envelope's postage stamp to cancel it, and the
 // wax seal onto the reply waiting in the rack to close it (or press Enter on either). Stamped and sealed stay so.
 import { paperLayer, shape } from './paper-art.js';
-import { DESK_LETTERS, REPLY } from '../data/cabin-letters.js';
+import { DESK_LETTERS, REPLY, VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { NAMES } from '../data/cabin-secret.js';
-import { knowsSantas } from '../services/cabin-story.js';
+import { knowsSantas, pending } from '../services/cabin-story.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
@@ -16,16 +16,19 @@ const TOOLS = {
   seal: parent => { shape('circle', { cx: 50, cy: 16, r: 12, fill: '#a86b47' }, parent); shape('rect', { x: 42, y: 24, width: 16, height: 46, rx: 8, fill: '#8f5a3c' }, parent); shape('path', { d: 'M32 70H68L72 90H28Z', fill: '#e0b04f' }, parent); },
 };
 
-export function deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse = () => {} }) {
+// A volunteer finds two new letters on top of the pile, waiting for their postmark and the volunteer's initial (`onTask`
+// once both are stamped).
+export function deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse = () => {}, onTask = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
   const desk = progress.desk;
-  say('書桌上堆著一疊信。點信堆抽一封來看；左邊的架子上，還有一封等著寄出的回信。');
+  const waiting = () => pending(progress.volunteer, 'letters') ? VOLUNTEER_LETTERS.filter(entry => !desk.stamped.includes(entry.id)) : [];
+  say(waiting().length ? '信堆最上面有新來的信，是要交給新替身處理的。點信堆抽一封來看。' : '書桌上堆著一疊信。點信堆抽一封來看；左邊的架子上，還有一封等著寄出的回信。');
 
   const pick = (label, run) => { const button = element('button', 'desk-pick', layer); button.type = 'button'; button.setAttribute('aria-label', label); on(button, 'click', run); return button; };
-  const stack = pick('從信堆抽一封信', () => take(DESK_LETTERS[next++ % DESK_LETTERS.length], stack));
+  const stack = pick('從信堆抽一封信', () => take(waiting()[0] ?? DESK_LETTERS[next++ % DESK_LETTERS.length], stack));
   const outbox = pick('拿起架上等著寄出的回信', () => take(REPLY, outbox));
   const tools = Object.fromEntries(Object.keys(TOOLS).map(kind => {
     const button = element('button', `desk-tool desk-${kind}`, layer); button.type = 'button';
@@ -84,7 +87,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     current = { entry, outgoing, source: source, open: outgoing && !desk.sealed, reading: false };
     from.textContent = outgoing ? '寄件：北極' : `寄件：${entry.from}`; to.textContent = entry.to;
     body.textContent = entry.body; letter.classList.remove('is-flipped'); flipButton.textContent = '翻到背面';
-    if (!outgoing) { note.textContent = entry.back.note; sign.textContent = `—— ${entry.back.sign}`; dated.textContent = entry.back.date; back.dataset.hand = entry.back.hand; }
+    if (!outgoing) { note.textContent = entry.back.note; sign.textContent = `—— ${entry.back.sign ?? `${progress.volunteer.mark}.`}`; dated.textContent = entry.back.date; back.dataset.hand = entry.back.hand; }
     work.hidden = false; refresh(); fly(local(source.getBoundingClientRect()), false); sound.play('pick');
     say(outgoing ? (desk.sealed ? '這封回信已經用火漆封好了，等著寄出。' : '架上這封回信還沒封口。讀完可以用火漆封起來。') : `信封上寫著：${entry.from}。`);
     (openButton.hidden ? returnButton : openButton).focus({ preventScroll: true });
@@ -98,7 +101,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     const flipped = letter.classList.toggle('is-flipped'); sound.play('remove');
     flipButton.textContent = flipped ? '翻回正面' : '翻到背面'; refresh();
     // Once the little room behind the bookcase has been seen, the initial has a name.
-    if (flipped) say(knowsSantas(progress.story.seen) ? `背面簽著「${current.entry.back.sign}」——是名牌上的${NAMES[current.entry.back.sign[0]]}。` : '背面有人寫了一行小字，還簽了名。');
+    if (flipped) say(!current.entry.back.sign ? `背面寫著「交給新來的替身」，簽名欄是你的縮寫：${progress.volunteer.mark}.。` : knowsSantas(progress.story.seen) ? `背面簽著「${current.entry.back.sign}」——是名牌上的${NAMES[current.entry.back.sign[0]]}。` : '背面有人寫了一行小字，還簽了名。');
   }
   function close() { current.reading = false; letter.classList.remove('is-flipped'); flipButton.textContent = '翻到背面'; refresh(); sound.play('remove'); returnButton.focus({ preventScroll: true }); }
   function putBack() {
@@ -124,6 +127,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (kind === 'stamp') {
       if (desk.stamped.includes(current.entry.id)) { say('這封已經蓋過郵戳了。'); return true; }
       desk.stamped.push(current.entry.id); save(); sound.play('thud'); refresh(); pop(postmark); say('咚！郵戳蓋好了：北極郵局，12 月 25 日。');
+      if (VOLUNTEER_LETTERS.every(entry => desk.stamped.includes(entry.id))) onTask();
     } else {
       desk.sealed = true; current.open = false; save(); sound.play('click'); later(120, () => sound.play('thud')); refresh(); pop(wax); say('火漆壓好了，回信封得牢牢的，可以寄出了。');
       returnButton.focus({ preventScroll: true });

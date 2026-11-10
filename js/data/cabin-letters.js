@@ -29,3 +29,17 @@ export const REPLY = {
   body: '親愛的小米：\n奶奶的雪橇已經上好軟墊，平安夜就會停在你家門口。謝謝你每天幫忙掃雪，這比什麼禮物都珍貴。',
   sign: 'S.',
 };
+// Two letters that come to the desk once the visitor has signed the register: their backs wait for the new substitute's
+// initial (`sign` is filled in with it).
+export const VOLUNTEER_LETTERS = [
+  {
+    id: 'tomas', from: '托馬（8 歲）', to: '北極　聖誕老人 收',
+    body: '親愛的聖誕老人：\n我們家搬到新的城市了，我還沒有朋友。可以讓我在新學校交到一個好朋友嗎？我會先跟大家打招呼的！',
+    back: { note: '交給新來的替身：蓋好郵戳，就能寄出。', date: '12/25', hand: 'you' },
+  },
+  {
+    id: 'aya', from: '阿雅（6 歲）', to: '北極　聖誕老人 收',
+    body: '聖誕老人你好：\n弟弟生病住院，今年不能回家過聖誕節。可以請你也去醫院看看他嗎？他最喜歡麋鹿了。',
+    back: { note: '交給新來的替身：蓋好郵戳，就能寄出。', date: '12/25', hand: 'you' },
+  },
+];

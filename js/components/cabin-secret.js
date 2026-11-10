@@ -1,9 +1,10 @@
 // The little room behind the bookcase, looked into from its doorway. Its things can be picked up and read: the name tags,
 // the shift log and the rulebook (these three tell the secret), and the register, the stamps, the hats and the sorting
-// rack. Each opens as a sheet of paper over the scene. Once the three have been read, the visitor knows (cabin-story.js).
+// rack. Each opens as a sheet of paper over the scene. Once the three have been read, the visitor knows (cabin-story.js),
+// and the register's newest page has a blank row they may sign to volunteer (`join`, `quit`: cabin-play.js).
 import { SUBSTITUTES } from './cabin-art.js';
-import { CLUES, knowsSantas } from '../services/cabin-story.js';
-import { MORNING, NAMES, NOTES, RULES, SHIFTS } from '../data/cabin-secret.js';
+import { CLUES, TASKS, canSign, knowsSantas, points, signedUp } from '../services/cabin-story.js';
+import { JOBS, MORNING, NAMES, NOTES, REGISTER, RULES, SHIFTS } from '../data/cabin-secret.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 // Each thing: the sheet it is on, where on that sheet ([left, top, right, bottom]), and its name.
@@ -12,10 +13,10 @@ const THINGS = {
   register: ['secret-desk', [.08, .18, .27, .44], '登記簿'], stamps: ['secret-desk', [.52, .2, .9, .45], '郵戳章'], hats: ['secret-hats', undefined, '聖誕帽'], rack: ['secret-rack', undefined, '分揀架'],
 };
 
-export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut }) {
+export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut, join, quit }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
-  const story = progress.story;
-  say(knowsSantas(story.seen) ? '小房間裡還是老樣子：名牌、班表、守則，和那一排郵戳章。' : '書櫃後面是一個小房間。牆上掛著東西，桌上也擺著東西。');
+  const story = progress.story, volunteer = progress.volunteer, invited = () => knowsSantas(story.seen) && !signedUp(volunteer);
+  say(knowsSantas(story.seen) ? `小房間裡還是老樣子：名牌、班表、守則，和那一排郵戳章。${invited() ? REGISTER.hint : ''}` : '書櫃後面是一個小房間。牆上掛著東西，桌上也擺著東西。');
   const buttons = Object.entries(THINGS).map(([id, [, , name]]) => {
     const button = element('button', 'secret-thing', layer); button.type = 'button'; button.dataset.id = id; button.setAttribute('aria-label', `看看${name}`);
     on(button, 'click', () => open(id, button)); return [id, button];
@@ -55,9 +56,50 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       element('h3', 'secret-title', card, RULES.title);
       for (const line of RULES.lines) element('p', 'secret-rule', card, line);
       element('p', 'secret-note', card, RULES.margin);
-    } else element('p', 'secret-note', card, NOTES[id]);
+    } else if (id === 'register' && knowsSantas(story.seen)) register(card, from);
+    else element('p', 'secret-note', card, NOTES[id]);
     const done = element('button', 'cabin-letter-close', card, '放回去 ✓'); done.type = 'button';
     on(done, 'click', () => close(id, from)); done.focus({ preventScroll: true });
+  }
+  // The register's newest page: each substitute's stamps this season, then the visitor's row, or a blank one to sign.
+  function register(card, from) {
+    element('h3', 'secret-title', card, REGISTER.title);
+    const list = element('ul', 'register-rows', card);
+    const row = (mark, count, you = false) => {
+      const item = element('li', you ? 'is-you' : '', list); item.dataset.hand = you ? 'you' : mark.toLowerCase();
+      element('span', 'register-mark', item, `${mark}.${you ? REGISTER.you : ''}`);
+      const stamps = element('span', 'register-stamps', item); stamps.setAttribute('aria-label', `${count}／${REGISTER.full} 個章`);
+      for (let i = 0; i < REGISTER.full; i++) element('span', i < count ? 'is-stamped' : '', stamps);
+    };
+    for (const [mark, count] of REGISTER.rows) row(mark, count);
+    if (signedUp(volunteer)) {
+      row(volunteer.mark, points(volunteer), true);
+      element('h4', 'register-heading', card, REGISTER.jobs);
+      const jobs = element('ul', 'register-jobs', card);
+      for (const task of TASKS) { const item = element('li', volunteer.tasks.includes(task) ? 'is-done' : '', jobs); element('strong', '', item, JOBS[task][0]); element('span', '', item, JOBS[task][1]); }
+      // Leaving takes a second press, and keeps the stamps.
+      const leave = element('button', 'register-leave', card, REGISTER.leave); leave.type = 'button';
+      on(leave, 'click', () => {
+        if (!leave.dataset.sure) { leave.dataset.sure = '1'; leave.textContent = '確定離開'; say(REGISTER.sure); return; }
+        quit(); sound.play('remove'); open('register', from); say(REGISTER.left);
+      });
+      return;
+    }
+    element('p', 'secret-note', card, REGISTER.invite);
+    const grid = element('div', 'register-letters', card); grid.setAttribute('aria-label', '選一個字母當你的縮寫');
+    const sign = element('button', 'register-sign', card, REGISTER.sign); sign.type = 'button'; sign.disabled = true;
+    let chosen = '';
+    for (const char of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
+      const tile = element('button', 'register-letter', grid, char); tile.type = 'button';
+      if (!canSign(char)) { tile.disabled = true; tile.title = REGISTER.taken; tile.setAttribute('aria-label', `${char}（${REGISTER.taken}）`); continue; }
+      tile.setAttribute('aria-pressed', 'false');
+      on(tile, 'click', () => {
+        chosen = char; sound.play('pick');
+        for (const other of grid.children) if (other.hasAttribute('aria-pressed')) other.setAttribute('aria-pressed', String(other === tile));
+        sign.disabled = false; sign.textContent = `${REGISTER.sign}：${char}.`;
+      });
+    }
+    on(sign, 'click', () => { if (!chosen) return; join(chosen); sound.play('thud'); open('register', from); say(REGISTER.joined(chosen)); });
   }
   function close(id, from) {
     card?.remove(); card = null; sound.play('remove');
@@ -65,7 +107,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     if (CLUES.includes(id) && !story.seen.includes(id)) { story.seen.push(id); save(); }
     layout(); from.focus({ preventScroll: true });
     // The first discovery: more than one Santa. Told once, quietly.
-    if (!before && knowsSantas(story.seen)) { later(400, () => { sound.play('jingle'); say(NOTES.known); onKnow(); }); }
+    if (!before && knowsSantas(story.seen)) { later(400, () => { sound.play('jingle'); say(NOTES.known); onKnow(); }); later(4600, () => { if (!card && invited()) say(REGISTER.hint); }); }
   }
   const follow = () => { layout(); frame = requestAnimationFrame(follow); };
   follow();
