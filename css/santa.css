@@ -302,7 +302,7 @@
 .secret-title { margin: 0 0 .6rem; font-family: var(--font-hand); font-size: var(--fs-body); }
 .secret-tags { display: grid; grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr)); gap: .4rem; margin: 0 0 .8rem; padding: 0; list-style: none; font-family: var(--font-hand); font-size: var(--fs-body); }
 .secret-initial { margin-right: .3rem; font-family: var(--font-display); }
-.secret-log { margin: 0 0 1rem; padding-left: 1.2rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 2; }
+.secret-log { margin: 0 0 1rem; padding-left: 0; list-style: none; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 2; }
 .secret-log [data-hand="n"] { color: #8f3b36; rotate: -1deg; } .secret-log [data-hand="k"] { color: #3f5a7a; letter-spacing: .05em; } .secret-log [data-hand="h"] { color: #3f6653; } .secret-log [data-hand="e"] { color: #6e4a6b; } .secret-log .is-morning { color: #8a7a6a; }
 .secret-rule, .secret-note { margin: 0 0 .5rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; }
 .secret-note { color: #6b5a4c; }
@@ -621,3 +621,30 @@ html.theatre-open { overflow: hidden; }
 .notebook-hint:focus-visible, .notebook-close:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 @media (max-width: 700px) { .notebook-button { top: .6rem; right: .6rem; width: 40px; height: 47px; } .notebook-card { padding: 1.4rem 1.3rem 1.1rem; } }
 @media (prefers-reduced-motion: reduce) { .notebook-button.is-new, .notebook-card { animation: none; } }
+/* 弄濕的交接表：四晚 × 前半夜／後半夜的格子。暈開的墨水留著寫字人的顏色，洗掉的只剩水痕；點格子再點名牌補字，補對了墨水一行行乾回來。 */
+.shift-note { margin-bottom: .4rem; }
+.shift-grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: .35rem .5rem; align-items: center; margin: 0 0 .8rem; }
+.shift-head { color: var(--muted); font-size: var(--fs-small); text-align: center; }
+.shift-date { color: var(--ink); font-family: var(--font-hand); font-size: var(--fs-small); }
+.shift-cell { position: relative; height: 2.9rem; padding: 0; border: 0; border-radius: 0; background: none; cursor: pointer; }
+.shift-cell .ink-layer { pointer-events: none; transition: opacity .8s ease; }
+.shift-mark { position: relative; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; }
+.shift-ink { position: absolute; right: .3rem; bottom: .1rem; color: var(--muted); font-size: var(--fs-small); opacity: .8; }
+.shift-cell[aria-pressed="true"] { outline: 2px solid var(--red); outline-offset: 1px; }
+.shift-cell:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.shift-cell:disabled { cursor: default; opacity: 1; }
+.shift-grid.is-wrong { animation: shift-wrong .5s ease; }
+@keyframes shift-wrong { 25% { translate: -4px 0; } 50% { translate: 4px 0; } 75% { translate: -2px 0; } }
+.shift-grid.is-solved .ink-layer { opacity: .18; }
+.shift-grid.is-solved .shift-ink { display: none; }
+.shift-grid.is-solved .shift-mark { animation: shift-dry .7s ease-out both; }
+.shift-grid.is-solved .shift-cell:nth-of-type(n + 3) .shift-mark { animation-delay: .25s; }
+.shift-grid.is-solved .shift-cell:nth-of-type(n + 5) .shift-mark { animation-delay: .5s; }
+.shift-grid.is-solved .shift-cell:nth-of-type(n + 7) .shift-mark { animation-delay: .75s; }
+@keyframes shift-dry { from { opacity: .2; filter: blur(2px); } }
+.shift-picks { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 .9rem; }
+.shift-pick { min-width: 2.8rem; padding: .35rem .7rem; border: 0; border-radius: 0; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; background: transparent no-repeat 0 0 / 100% 100%; cursor: pointer; }
+.shift-pick:hover { translate: 0 -2px; }
+.shift-pick:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.shift-erase { color: var(--muted); font-family: var(--font-body); font-size: var(--fs-small); }
+@media (prefers-reduced-motion: reduce) { .shift-grid.is-wrong, .shift-grid.is-solved .shift-mark { animation: none; } }

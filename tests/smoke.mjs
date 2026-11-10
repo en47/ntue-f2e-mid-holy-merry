@@ -289,11 +289,11 @@ await test('Santa 隱藏故事 P4：聖誕老人出門（固定規則）、MORE 
 });
 await test('Santa 隱藏故事 P5：書櫃後的小房間、第一次反轉、聖誕老人回來，與前後呼應的線索', async () => {
   const { BOARDS, ROOM_SPOTS, SUBSTITUTES } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
-  const { NAMES, SHIFTS, RULES, NOTES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href);
+  const { NAMES, RULES, NOTES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { NIGHTS } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
   const { DESK_LETTERS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href);
   assert.ok(ROOM_SPOTS.some(spot => spot.id === 'secret' && spot.view.turn > 0) && BOARDS.filter(board => board.secret).length === 5, 'The little room is a place to look round, with five things on its walls');
   assert.ok(SUBSTITUTES.every(([char]) => NAMES[char]) && DESK_LETTERS.every(letter => NAMES[letter.back.sign[0]]), 'Every initial on the desk has a name tag behind the bookcase');
-  assert.ok(SHIFTS.some(([date, , , handover]) => date === '12/24' && handover.includes('完成')), 'The night of 12/24 matches the note in the barn');
+  assert.deepEqual(NIGHTS.find(([date]) => date === '12/24'), ['12/24', 'K', 'H'], 'The night of 12/24 matches the note in the barn: blue K. starts, green H. finishes');
   assert.ok(NOTES.known.includes('原來，聖誕老人不只一位') && !Object.values(NOTES).join('').includes('從來不只是一個人') && !RULES.lines.join('').includes('實現了'), 'The first discovery is told; the deeper one is kept for later');
   const secret = await fs.readFile(path.join(project, 'js/components/cabin-secret.js'), 'utf8'), play = await fs.readFile(path.join(project, 'js/components/cabin-play.js'), 'utf8'), scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8');
   assert.ok(secret.includes('knowsSantas(story.seen)') && secret.includes('cancelAnimationFrame(frame)') && !secret.includes('innerHTML'), 'The secret is known by the rules once the three clues are read; the buttons follow the view and let go');
@@ -446,7 +446,7 @@ await test('Santa 結局劇場：全螢幕紙雕立體書、逐字寫出、跳�
 });
 await test('Santa 線索本：看到的線索自動記下、分段提示依故事進度、紙雕筆記本', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
-  const [book, play, paper, ...games] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'js/components/cabin-pulley.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-globe.js', 'js/components/cabin-secret.js'].map(read));
+  const [book, play, paper, ...games] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'js/components/cabin-pulley.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-globe.js', 'js/components/cabin-secret.js', 'js/components/cabin-feed.js'].map(read));
   const { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
   assert.ok(book.includes('export function mountNotebook') && book.includes("paperLayer(button, '0 0 48 56', 'notebook-icon', cover, PAPER)") && !book.includes('innerHTML'), 'The clue book is a paper notebook; words only through textContent');
   assert.ok(book.includes('const now = goal(progress)') && book.includes('progress.hints[now] = shown + 1; save();'), 'Hints follow the story (cabin-story.js goal) and get plainer one at a time, kept between visits');
@@ -454,10 +454,25 @@ await test('Santa 線索本：看到的線索自動記下、分段提示依故�
   assert.ok(play.includes('const notebook = mountNotebook(stage, { progress, save, sound }), clue = id => notebook.add(id);') && play.includes("if (id === 'wish-board') clue('wish-board');"), 'Games write into the book through one function');
   // Every clue the games write is one the book knows, and every clue in the book is written somewhere.
   const written = [...games.join('\n').matchAll(/clue\((?:'([\w-]+)'|current\.entry\.id === 'route' \? 'route-note' : 'letter-backs'|id)\)/g)];
-  assert.equal(written.length, 5, 'The barn, the desk, the music box, the snow globe and the little room record their clues');
+  assert.equal(written.length, 6, 'The barn, the desk, the music box, the snow globe, the little room and the reindeer\'s care log record their clues');
   const named = new Set([...games.join('\n').matchAll(/'([\w-]+)'/g)].map(([, id]) => id).filter(id => id in NOTEBOOK).concat(play.includes("clue('wish-board')") ? ['wish-board'] : []));
   for (const id of Object.keys(NOTEBOOK)) assert.ok(named.has(id), `${id} is written into the book somewhere`);
   assert.ok(paper.includes("['.notebook-card', 'notebook']") && paper.includes('notebook(paper, width, height, seed)'), 'Its open page is cut like every other sheet');
+});
+await test('Santa 弄濕的交接表：看墨水顏色與別處線索補回縮寫，補對才算讀過', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [secret, feed, css] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-feed.js', 'css/santa.css'].map(read));
+  const { NIGHTS, LOG_ANSWER, LOG_GIVEN } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { INK, COLOUR_NAMES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href);
+  const { SUBSTITUTES } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  const { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.equal(INK.length, LOG_ANSWER.length); assert.equal(INK[LOG_GIVEN], 'clear');
+  // Every washed-out cell can be found elsewhere: 12/21's second half in the reindeer's care log, 12/24 in the barn note.
+  INK.forEach((state, i) => { if (state !== 'washed') return; const [date] = NIGHTS[Math.floor(i / 2)], who = LOG_ANSWER[i]; assert.ok(Object.values(NOTEBOOK).some(({ text }) => text.includes(date) && (text.includes(`${who}.`) || text.includes(COLOUR_NAMES[who]))) || (date === '12/24' && NOTEBOOK['barn-note'].text.includes(who === 'K' ? '藍' : '綠')), `${date} ${who}: a clue somewhere says so`); });
+  assert.ok(SUBSTITUTES.every(([char]) => COLOUR_NAMES[char] && NOTEBOOK.tags.text.includes(`${char} ${COLOUR_NAMES[char]}`)), 'The tags say each colour by name too');
+  assert.ok(secret.includes("blot(ink, COLOURS[writer], index * 7 + 3)") && secret.includes("inked(cell, '0 0 80 44'"), 'A blot keeps its writer\'s colour; the ink is SVG');
+  assert.ok(secret.includes("if (!logSolved(log)) { note.textContent = LOG.wrong(logWrong(log));") && secret.includes("learn('log');") && secret.includes("if (id === 'tags' || id === 'rules') { clue(id); learn(id); }"), 'Wrong, it says only how many; right, the log counts as read');
+  assert.ok(feed.includes("clue('care-log')") && css.includes('.shift-grid.is-solved .shift-mark { animation: shift-dry'), 'The care log goes in the clue book; put right, the ink dries back a row at a time');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
