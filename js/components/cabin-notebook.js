@@ -4,11 +4,18 @@
 // in it, and hops when something new goes in. Cut from the same paper as everything else (cabin-paper.js draws its page).
 import { paperLayer, shape } from './paper-art.js';
 import { star } from './paper-props.js';
-import { goal } from '../services/cabin-story.js';
-import { GOALS, NOTEBOOK } from '../data/cabin-clues.js';
+import { ornament } from './cabin-ornaments.js';
+import { GIFTS, goal, knowsSantas } from '../services/cabin-story.js';
+import { GIFT_HINTS, GIFT_ORDER, GOALS, NOTEBOOK } from '../data/cabin-clues.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
-const PAPER = { paper: { scale: .25, grain: .4, shadow: .3 }, eager: true };
+const PAPER = { paper: { scale: .25, grain: .4, shadow: .3 }, eager: true }, GIFT_PAPER = { paper: { scale: .3, grain: .45, shadow: .25, rim: '#fbf6ea' }, eager: true };
+// A gift not yet found: a pale paper ornament with a question mark.
+function unfound(g) {
+  shape('path', { d: 'M50 0V24', stroke: '#cdbb98', 'stroke-width': 1.6 }, g); shape('rect', { x: 42, y: 22, width: 16, height: 10, rx: 2, fill: '#e2d4b8' }, g);
+  shape('circle', { cx: 50, cy: 74, r: 34, fill: '#f1e6cf' }, g);
+  shape('path', { d: 'M40 64C40 52 60 52 60 64 60 72 50 72 50 82M50 92V93', fill: 'none', stroke: '#cdbb98', 'stroke-width': 5, 'stroke-linecap': 'round' }, g);
+}
 // The notebook: kraft cover, darker spine, the cream pages showing at its edge, a red elastic band and a gold star.
 function cover(paper) {
   shape('rect', { x: 9, y: 5, width: 34, height: 45, rx: 3, fill: '#fffaf0' }, paper);
@@ -44,6 +51,24 @@ export function mountNotebook(stage, { progress, save, sound }) {
     for (const id of found) {
       const item = element('li', fresh.has(id) ? 'is-fresh' : '', list);
       element('strong', 'notebook-place', item, NOTEBOOK[id].place); element('span', '', item, NOTEBOOK[id].text);
+    }
+    // The welcome gifts, once the secret is known: a place for each substitute's ornament, cut out in colour once found,
+    // faint until then; and a hint about the next one not yet found, each time one is asked for.
+    if (knowsSantas(progress.story.seen) || progress.ornaments.length) {
+      const gifts = element('section', 'notebook-gifts', body), have = progress.ornaments;
+      element('h4', 'notebook-goal', gifts, `見面禮：找到 ${have.length}／${GIFTS.length}`);
+      element('p', 'notebook-hint-line', gifts, have.length === GIFTS.length ? '五個都找齊了，掛在小屋的聖誕樹上。' : '五位替身各藏了一個吊飾，留給新來的替身。');
+      const row = element('div', 'gift-row', gifts);
+      for (const mark of GIFTS) {
+        const slot = element('span', have.includes(mark) ? 'gift-slot is-found' : 'gift-slot', row); slot.setAttribute('role', 'img'); slot.setAttribute('aria-label', have.includes(mark) ? `${mark}. 的吊飾，找到了` : '還沒找到的吊飾');
+        paperLayer(slot, '-6 -4 112 140', '', g => (have.includes(mark) ? ornament(mark, g) : unfound(g)), GIFT_PAPER);
+      }
+      const missing = GIFT_ORDER.filter(mark => !have.includes(mark)), asked = Math.min(progress.hints.gifts ?? 0, missing.length);
+      missing.slice(0, asked).forEach(mark => element('p', 'notebook-hint-line', gifts, `・${GIFT_HINTS[mark]}`));
+      if (asked < missing.length) {
+        const ask = element('button', 'notebook-hint', gifts, asked ? '還有哪裡？' : '去哪裡找？'); ask.type = 'button';
+        ask.addEventListener('click', () => { progress.hints.gifts = asked + 1; save(); sound.play('pick'); render(); });
+      }
     }
     // A hint for what the story is waiting on: one more line each time it is asked for.
     const now = goal(progress), { title, hints } = GOALS[now], shown = progress.hints[now] ?? 0;

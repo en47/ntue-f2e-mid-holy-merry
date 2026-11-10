@@ -59,7 +59,9 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   progress.ornaments = GIFTS.filter(mark => found.includes(mark)); progress.tree = saved.tree === true;
   if (Array.isArray(saved.clues)) progress.clues = Object.keys(NOTEBOOK).filter(id => saved.clues.includes(id));
   const hints = saved.hints && typeof saved.hints === 'object' && !Array.isArray(saved.hints) ? saved.hints : {};
-  progress.hints = Object.fromEntries(Object.keys(GOALS).filter(id => Number.isInteger(hints[id]) && hints[id] > 0).map(id => [id, Math.min(hints[id], GOALS[id].hints.length)]));
+  // `gifts`: how many hints about the welcome gifts have been asked for.
+  const most = id => id === 'gifts' ? 5 : GOALS[id].hints.length;
+  progress.hints = Object.fromEntries([...Object.keys(GOALS), 'gifts'].filter(id => Number.isInteger(hints[id]) && hints[id] > 0).map(id => [id, Math.min(hints[id], most(id))]));
   return progress;
 }
 // Returns false when the browser will not keep it (private mode, full storage); the yard still plays for this visit.

@@ -537,6 +537,14 @@ await test('Santa 五位替身的見面禮：各自顏色的紙雕吊飾藏在�
   assert.ok(play.includes("clue(`gift-${mark}`)") && play.includes('GIFTS.every(mark => progress.ornaments.includes(mark)) && !progress.tree') && secret.includes("if (id === 'hats' && finale.twist)") && wheel.includes("gift('K')"), 'Each kept once; Holly\'s after her old page; all five hang on the tree, once');
   assert.ok(ornamentsUi.includes('export function treeCard') && !ornamentsUi.includes('innerHTML') && !ornamentsUi.includes('torn'), 'Paper ornaments on a paper tree; nothing torn');
 });
+await test('Santa 支線不會被錯過：線索本裡的見面禮進度與提示；雪花球大部分落定就看得到門牌；關鍵字母夠大', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [book, globe, hearth] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-globe.js', 'js/components/cabin-hearth.js'].map(read));
+  const { GIFT_HINTS, GIFT_ORDER } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href), { GIFTS } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  assert.deepEqual([...GIFT_ORDER].sort(), [...GIFTS].sort()); assert.ok(GIFTS.every(mark => GIFT_HINTS[mark]), 'A hint for every gift');
+  assert.ok(book.includes('見面禮：找到 ${have.length}／${GIFTS.length}') && book.includes('progress.hints.gifts = asked + 1; save();'), 'The clue book counts the gifts found and hints at the next, one at a time');
+  assert.ok(globe.includes('flakes.filter(flake => flake.still).length >= flakes.length * .85') && hearth.includes('Math.max(30, rects.mouth.width * .2)'), 'The sign is told once most snow is down; the carving is big enough to read');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

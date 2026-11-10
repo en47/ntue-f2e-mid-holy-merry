@@ -28,7 +28,7 @@ export function ornament(mark, g) {
   shape('path', { d: 'M50 0V24', stroke: '#8f6a4c', 'stroke-width': 1.6 }, g);
   shape('rect', { x: 42, y: 22, width: 16, height: 10, rx: 2, fill: GOLD }, g);
   SHAPES[mark](g, COLOURS[mark]);
-  letter(g, mark, 50, mark === 'O' ? 70 : mark === 'H' ? 76 : 75, 24, 28, { fill: CREAM });
+  letter(g, mark, 50, mark === 'O' ? 70 : mark === 'H' ? 76 : 75, 30, 34, { fill: CREAM, stroke: '#00000022', 'stroke-width': 1 });
 }
 const PAPER = { paper: { scale: .3, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true };
 // An ornament just found, with the line its maker wrote on the little tag tied to it.
