@@ -371,7 +371,7 @@ await test('Santa 替身工作：登記簿簽縮寫加入，四件工作各在�
   assert.ok(scene.includes('settings = settingsOf(name);') && scene.includes('const home = () => { const settings = settingsOf(view);'), 'The aim and the turning limit read the same settings, so a resize or a drag does not swing the view back and forth');
   assert.ok(wheel.includes("place(wheel, WHEEL.at, 90); paperLayer(wheel, '0 0 180 180', '', spokes, PAPER)"), 'The wheel\'s spokes are drawn whole round its hub, so no gap turns into view');
   const paper = await read('js/components/cabin-paper.js');
-  assert.ok(paper.includes(".gearbox-actions button, .desk-actions button, .register-sign', 'tag']") && wheel.includes("paperLayer(banner, '0 0 300 72', '', ribbon, PAPER)") && wheel.includes('function door(parent)') && play.includes("paperLayer(stamp, '0 0 120 144', '', postage, STAMP)"), 'The gearbox has a ribbon banner, a paper door and plain paper buttons; a job done lands as a postage stamp');
+  assert.ok(paper.includes(".gearbox-actions button, .desk-actions button, .register-sign, .theatre-close', 'tag']") && wheel.includes("paperLayer(banner, '0 0 300 72', '', ribbon, PAPER)") && wheel.includes('function door(parent)') && play.includes("paperLayer(stamp, '0 0 120 144', '', postage, STAMP)"), 'The gearbox has a ribbon banner, a paper door and plain paper buttons; a job done lands as a postage stamp');
 });
 await test('Santa 回信桌：收到的信換紙讀、翻面；回信摺進航空信封、封口、蓋郵戳、投進郵袋；替身挑一句回覆', async () => {
   const desk = await fs.readFile(path.join(project, 'js/components/cabin-desk.js'), 'utf8'), paper = await fs.readFile(path.join(project, 'js/components/cabin-paper.js'), 'utf8');
@@ -410,9 +410,9 @@ await test('Santa 故事結尾：紅繩舊頁（第二次反轉）、三個章�
   assert.deepEqual(WISHES.map(wish => wish.id), ['sleigh', 'snow', 'gift', 'blessing']); assert.deepEqual(Object.keys(ENDINGS), ['A', 'B', 'C', 'D']);
   assert.ok(OLD_PAGE.entry.includes('2003') && OLD_PAGE.entry.includes('H.'), 'Holly\'s old page matches the snow globe (H. · 2003)');
   assert.ok(secret.includes('if (finale.twist || canUntie(volunteer))') && secret.includes('if (canWish(volunteer, finale))') && secret.includes('if (canStay(volunteer, finale))') && secret.includes('if (!finale.twist) onTwist();'), 'The register unties the old page, offers a wish, the log offers the early shift, each by the rules');
-  assert.ok(play.includes("if ((kind === 'B' || kind === 'C') && trueMiracle(finale)) ending('D');") && play.includes('if (visited && goesHome(progress))') && play.includes("cabin.repaint('secret-tags', { mine: true })"), 'D follows B or C once the old page is known; A only after a visit; the visitor\'s tag hangs on the board');
-  assert.ok(finaleUi.includes('export function wishScene') && finaleUi.includes('export function endingCard') && !finaleUi.includes('innerHTML'), 'Wish scenes and ending cards, text only through textContent');
-  assert.ok(paint.includes("'secret-tags': [{ mine: true }]") && paper.includes("['.finale-card', 'certificate']") && paper.includes("['.secret-card[data-thing=\"oldpage\"]', 'oldpage']"), 'The board with the visitor\'s tag is drawn ahead; the ending cards and the old page are drawn as paper');
+  assert.ok(play.includes("const next = !replay && (kind === 'B' || kind === 'C') && trueMiracle(finale);") && play.includes('if (next) ending(\'D\')') && play.includes('if (visited && goesHome(progress))') && play.includes("cabin.repaint('secret-tags', { mine: true })"), 'D follows B or C once the old page is known (not on a replay); A only after a visit; the visitor\'s tag hangs on the board');
+  assert.ok(finaleUi.includes('export function wishScene') && !finaleUi.includes('endingCard') && !finaleUi.includes('innerHTML'), 'Wish scenes, text only through textContent; the endings are told in their theatre');
+  assert.ok(paint.includes("'secret-tags': [{ mine: true }]") && paper.includes(".theatre-close', 'tag']") && paper.includes("['.secret-card[data-thing=\"oldpage\"]', 'oldpage']"), 'The board with the visitor\'s tag is drawn ahead; the theatre\'s buttons and the old page are drawn as paper');
 });
 await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
@@ -424,6 +424,25 @@ await test('Santa 故事前後一致：守則與許願的章數相同、每段�
   assert.ok(play.includes('const next = NEXT[points(progress.volunteer)]; if (next) later(3600, () => say(next));'), 'After each stamp, a line says where the story goes next');
   assert.ok(secret.includes('inked(stamps,') && secret.includes('inked(fulfilled,') && desk.includes('inked(postmark,') && desk.includes('inked(arrived,'), 'Stamps and postmarks are ink drawn in SVG');
   assert.ok(['第一次', '第二次', '結局 A', '結局 D'].every(word => story.includes(word)) || ['兩次反轉', 'A　普通訪客', 'D　真正的聖誕奇蹟'].every(word => story.includes(word)), 'The story line is written down in one place');
+});
+await test('Santa 結局劇場：全螢幕紙雕立體書、逐字寫出、跳過與 Esc、重看、紙片雪', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [stage, art, css, play, secret, backdrop, glyphs, build] = await Promise.all(['js/components/cabin-ending.js', 'js/components/cabin-ending-art.js', 'css/santa.css', 'js/components/cabin-play.js', 'js/components/cabin-secret.js', 'js/components/cabin-backdrop.js', 'js/data/heading-glyphs.js', 'scripts/build-title-glyphs.mjs'].map(read));
+  assert.ok(stage.includes("const SCENES = { A: goingHome, B: wishGranted, C: stayingOn, D: miracle };") && stage.includes('theatre.showModal()') && !stage.includes('innerHTML') && !art.includes('innerHTML'), 'Each ending has its own scene, over the whole page; words only through textContent');
+  assert.ok(stage.includes("event.preventDefault(); event.stopPropagation(); escape();") && stage.includes("theatre.classList.add('is-skipped')") && stage.includes("matchMedia('(prefers-reduced-motion: reduce)')"), 'Esc and 跳過 put everything where it ends, without leaving the room behind; reduced motion stands finished');
+  assert.ok(stage.includes("element('span', 'sr-only', line, text)") && stage.includes("element('span', 'theatre-char', ink, char)"), 'The words are written in a character at a time; screen readers get each line whole');
+  for (const key of ['ending-a', 'ending-b', 'ending-c', 'ending-d']) assert.ok(glyphs.includes(`"${key}"`) && build.includes(`'${key}'`), `${key}: the title is paper letters made by the glyph script`);
+  assert.ok(play.includes('onReplay: kind => ending(kind, true)') && secret.includes("onReplay(ending)") && play.includes('theatre?.close(); theatre = null;'), 'Endings seen are replayed from the register; leaving closes the theatre');
+  const theatre = css.slice(css.indexOf('/* 結局劇場'));
+  assert.ok(theatre.includes('.ending-theatre.is-skipped') && theatre.includes('@media (prefers-reduced-motion: reduce) { .ending-theatre[open], .ending-theatre :is(*, *::before, *::after) { animation: none !important; }') && !/gradient|dashed|clip-path|border-radius: 50%/.test(theatre), 'The theatre moves only paper pieces: no CSS gradients, dashes or round CSS shapes');
+  assert.ok(backdrop.includes('export function flakeDot()') && backdrop.includes('flake.append(dot.cloneNode(true))') && /\.cabin-flake \{ position: absolute; top: -12px; width: 9px; height: 9px; animation:/.test(css), 'The sky\'s snow is round dots cut from paper, not CSS circles');
+  // The walk home and the sleigh's flight are set out once in the art and once in santa.css: they have to agree.
+  const { WALK, FLIGHT } = await import(pathToFileURL(path.join(project, 'js/components/cabin-ending-art.js')).href);
+  const frames = name => [...css.match(new RegExp(`@keyframes ${name} \\{([\\s\\S]*?)\\n\\}`))[1].matchAll(/(\d+)% \{ translate: (\S+) (\S+); scale: ([\d.]+);/g)].map(([, at, x, y, size]) => [Number(at) / 100, parseFloat(x), parseFloat(y), Number(size)]);
+  const near = (a, b, tolerance) => Math.abs(a - b) <= tolerance;
+  assert.equal(frames('a-walk').length, WALK.points.length); assert.equal(frames('b-fly').length, FLIGHT.points.length);
+  frames('a-walk').forEach(([at, x, y, size], i) => { const [px, py, ps] = WALK.points[i], [x0, y0] = WALK.points[0]; assert.ok(near(at, WALK.at[i], .011) && near(x, (px - x0) / 6, .01) && near(y, (py - y0) / 6, .01) && near(size, ps, .001), `a-walk ${i}`); });
+  frames('b-fly').forEach(([, x, y, size], i) => { const [px, py, ps] = FLIGHT.points[i], [x5, y5, s5] = FLIGHT.points[5]; assert.ok(near(x, (px - x5) / 6, .01) && near(y, (py - y5) / 6, .01) && near(size, ps / s5, .002), `b-fly ${i}`); });
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');

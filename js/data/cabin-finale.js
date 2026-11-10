@@ -28,13 +28,16 @@ export const WISHES = [
 export const STAY = { invite: '12/25 早班還沒有人簽名。四件工作你都做過了，要簽上你的縮寫，留下來幫忙嗎？', sign: '簽上早班', tag: '最右邊的掛勾上，掛著你的名牌。' };
 
 // The endings. A: you knew, and went home; B: a wish granted; C: staying on; D: knowing why Holly stayed, and doing as
-// she did (with B or C; the most when you wished and stayed both). Each is told once, on a card of its own.
+// she did (with B or C; the most when you wished and stayed both). Each is told once, in a little paper theatre of its
+// own (cabin-ending.js), under its title in paper letters (`en`, from scripts/build-title-glyphs.mjs).
 export const ENDINGS = {
-  A: { title: '結局 A　普通訪客', lines: ['聖誕老人送你到門口，塞給你一張明信片：', '「謝謝你來小屋作客。村子的小秘密，就放在你心裡吧。哪天想回來幫忙，登記簿最下面那一格，永遠留給你。」'], sign: '—— S.' },
-  B: { title: '結局 B　願望旅人', lines: ['你用三個章，換了一個願望。', '替身們把它送到了。你帶著實現的願望，和一段北極的回憶回家。'] },
-  C: { title: '結局 C　自願留下', lines: ['你在 12/25 早班簽上了自己的縮寫。', '名牌板最右邊的空掛勾，現在掛著你的名牌。明天早上，換你出發。'] },
-  D: { title: '結局 D　真正的聖誕奇蹟', lines: ['登記簿裡夾著一封信，信封上寫著你的縮寫。'] },
+  A: { title: '結局 A　普通訪客', en: 'Going Home', lines: ['聖誕老人送你到門口，塞給你一張明信片：', '「謝謝你來小屋作客。村子的小秘密，就放在你心裡吧。」', '「哪天想回來幫忙，登記簿最下面那一格，永遠留給你。」'], sign: '—— S.' },
+  B: { title: '結局 B　願望旅人', en: 'Wish Granted', lines: ['你用三個章，換了一個願望。', '替身們把它送到了。你帶著實現的願望，和一段北極的回憶回家。'] },
+  C: { title: '結局 C　自願留下', en: 'Staying On', lines: ['你在 12/25 早班簽上了自己的縮寫。', '名牌板最右邊的空掛勾，現在掛著你的名牌。明天早上，換你出發。'] },
+  D: { title: '結局 D　真正的聖誕奇蹟', en: 'Christmas Miracle', lines: ['登記簿裡夾著一封信，信封上寫著你的縮寫。'] },
 };
+// The theatre's buttons, and the line D ends on.
+export const THEATRE = { skip: '跳過', again: '再看一次', close: '回到村子', next: '繼續', last: '原來，聖誕老人從來不只是一個人。' };
 export const HOLLY = {
   greeting: mark => `親愛的 ${mark}.：`,
   body: '你也看到那一頁了吧。我的願望，在 2003 年就實現了。那年平安夜，替身們把媽媽送回了家。\n從那天起我就想：換我來，把這份溫暖，再傳給下一個人。',

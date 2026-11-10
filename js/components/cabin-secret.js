@@ -18,7 +18,7 @@ const THINGS = {
 
 // The end of the story starts here too (`onInvite`, `onTwist`, `onWish`, `onStay`: cabin-play.js): the register's old page,
 // a wish for three stamps, the early shift to sign (and then the visitor's own tag on the board's empty hook).
-export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut, join, quit, onInvite, onTwist, onWish, onStay }) {
+export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut, join, quit, onInvite, onTwist, onWish, onStay, onReplay }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const story = progress.story, volunteer = progress.volunteer, finale = progress.finale, invited = () => knowsSantas(story.seen) && !signedUp(volunteer);
   say(knowsSantas(story.seen) ? `小房間裡還是老樣子：名牌、班表、守則，和那一排郵戳章。${invited() ? REGISTER.hint : ''}` : '書櫃後面是一個小房間。牆上掛著東西，桌上也擺著東西。');
@@ -112,8 +112,10 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
         on(make, 'click', () => { if (!chosen) return; sound.play('thud'); closeCard(); onWish(chosen); });
       } else if (finale.wish) element('p', 'secret-note', card, WISH.made(WISHES.find(wish => wish.id === finale.wish).name));
       const seen = element('p', 'register-endings', card); element('span', '', seen, `${SEEN}：`);
+      // A stamp for each ending seen: press it to watch that ending again.
       for (const ending of ['A', 'B', 'C', 'D']) {
-        const got = finale.endings.includes(ending), mark = element('span', got ? 'is-seen' : '', seen); mark.setAttribute('aria-label', `結局 ${ending}${got ? '，看過了' : '，還沒看過'}`);
+        const got = finale.endings.includes(ending), mark = element(got ? 'button' : 'span', got ? 'is-seen' : '', seen); mark.setAttribute('aria-label', got ? `再看一次結局 ${ending}` : `結局 ${ending}，還沒看過`);
+        if (got) { mark.type = 'button'; on(mark, 'click', () => { sound.play('pick'); onReplay(ending); }); }
         inked(mark, '0 0 30 30', ink => shape('circle', got ? { cx: 15, cy: 15, r: 13, fill: '#b5443c' } : { cx: 15, cy: 15, r: 12, fill: 'none', stroke: '#d6c6a4', 'stroke-width': 1.8 }, ink)); element('span', 'ending-letter', mark, ending);
       }
       // Leaving takes a second press, and keeps the stamps.
