@@ -43,11 +43,11 @@ test('the hoist remembers being hooked and the note being read, and nothing else
   assert.deepEqual(readProgress(store).hoist, { locked: true, found: false });
 });
 test('the desk remembers which replies were sealed, postmarked and sent, and what was chosen to say', () => {
-  assert.deepEqual(readProgress(memory()).desk, { sealed: [], marked: [], sent: [], answers: {} });
+  assert.deepEqual(readProgress(memory()).desk, { sealed: [], marked: [], sent: [], answers: {}, sorted: false });
   const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sealed: ['reply', 'reply', 7], marked: ['reply'], sent: ['reply-tomas'], answers: { tomas: 2, aya: 5, ole: 'x' } } }) });
-  assert.deepEqual(readProgress(store).desk, { sealed: ['reply'], marked: ['reply'], sent: ['reply-tomas'], answers: { tomas: 2 } });
-  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { stamped: ['mia'], sealed: true } }) })).desk, { sealed: ['reply'], marked: [], sent: [], answers: {} }, 'an older record: the reply had been sealed');
-  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sealed: 1, answers: [1] } }) })).desk, { sealed: [], marked: [], sent: [], answers: {} });
+  assert.deepEqual(readProgress(store).desk, { sealed: ['reply'], marked: ['reply'], sent: ['reply-tomas'], answers: { tomas: 2 }, sorted: true });
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { stamped: ['mia'], sealed: true } }) })).desk, { sealed: ['reply'], marked: [], sent: [], answers: {}, sorted: false }, 'an older record: the reply had been sealed');
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sealed: 1, answers: [1] } }) })).desk, { sealed: [], marked: [], sent: [], answers: {}, sorted: false });
 });
 test('the story keeps only real clues and a whole shelf', () => {
   const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ story: { left: true, opened: true, seen: ['log', 'tags', 'diary', 'log'], shelf: 'x' } }) });
@@ -93,5 +93,11 @@ test('the cord\'s lock is kept open, and the blank slip taken or read; an older 
 test('the photograph\'s pieces found are kept, known ones once each', () => {
   assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ pieces: ['hat', 'music', 'nope', 'music'] }) })).pieces, ['music', 'hat']);
   assert.deepEqual(readProgress(memory()).pieces, []);
+});
+test('the rack sorted is kept; letters already answered or the job done count as sorted', () => {
+  assert.equal(readProgress(memory()).desk.sorted, false);
+  assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sorted: true } }) })).desk.sorted, true);
+  assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { answers: { tomas: 1 } } }) })).desk.sorted, true);
+  assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ volunteer: { mark: 'J', tasks: ['letters'] } }) })).desk.sorted, true);
 });
 

@@ -37,6 +37,16 @@ export const SUBSTITUTES = ['N', 'K', 'H', 'E', 'O'];
 export const readLog = saved => LOG_ANSWER.map((mark, i) => i === LOG_GIVEN ? mark : Array.isArray(saved) && SUBSTITUTES.includes(saved[i]) ? saved[i] : '');
 export const logWrong = log => log.filter((mark, i) => mark !== LOG_ANSWER[i]).length;
 export const logSolved = log => logWrong(log) === 0;
+// The sorting rack, where the letters job starts: a letter goes to whoever was flying when it was postmarked, by the shift
+// log; past midnight still counts as the night before (its second half). The two for the new substitute go to them.
+export const MAIL = [['m1', '12/21', '20:10'], ['m2', '12/22', '02:40'], ['m3', '12/22', '22:30'], ['m4', '12/23', '01:15'], ['m5', '12/23', '19:50'], ['m6', '12/24', '04:05']];
+const dayBefore = date => { const [month, day] = date.split('/').map(Number); return `${month}/${day - 1}`; };
+export function flyer(date, time) {
+  const late = Number(time.split(':')[0]) < 12, night = NIGHTS.find(([day]) => day === (late ? dayBefore(date) : date));
+  return night ? night[late ? 2 : 1] : null;
+}
+export const mailFor = id => { const letter = MAIL.find(([each]) => each === id); return letter ? flyer(letter[1], letter[2]) : 'you'; };
+export const sortWrong = placed => Object.entries(placed).filter(([id, box]) => box !== mailFor(id)).length;
 // The music box's hidden drawer opens to its comb played in the order the substitutes first flew that season, as the
 // shift log has it (E, O, N, K, H).
 export const FLIGHT_ORDER = [...new Set(LOG_ANSWER)];

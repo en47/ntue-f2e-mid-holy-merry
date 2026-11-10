@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BOOK_IDS, FLIGHT_ORDER, GAPS, LOCK, PHOTO, playsOpen, LOG_ANSWER, opens, LOG_GIVEN, goal, homeShelf, logSolved, logWrong, readLog, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
+import { BOOK_IDS, FLIGHT_ORDER, MAIL, flyer, mailFor, sortWrong, GAPS, LOCK, PHOTO, playsOpen, LOG_ANSWER, opens, LOG_GIVEN, goal, homeShelf, logSolved, logWrong, readLog, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
 import { GOALS } from '../js/data/cabin-clues.js';
 
 const place = id => homeShelf().indexOf(id);
@@ -105,5 +105,13 @@ test('the music box drawer opens to the order the substitutes first flew, as the
   assert.deepEqual(FLIGHT_ORDER, ['E', 'O', 'N', 'K', 'H']);
   assert.equal(playsOpen(['E', 'O', 'N', 'K', 'H']), true); assert.equal(playsOpen(['E', 'O', 'K', 'N', 'H']), false); assert.equal(playsOpen('EONKH'), false);
   assert.equal(new Set(PHOTO).size, 5, 'five torn pieces of the photograph');
+});
+test('the sorting rack: a letter goes to whoever was flying when it was postmarked; past midnight is still the night before', () => {
+  assert.equal(flyer('12/21', '20:10'), 'E'); assert.equal(flyer('12/22', '02:40'), 'O', 'after midnight: the second half of 12/21');
+  assert.equal(flyer('12/24', '04:05'), 'N'); assert.equal(flyer('12/20', '22:00'), null, 'no night on the log');
+  assert.equal(mailFor('tomas'), 'you'); assert.equal(mailFor('aya'), 'you');
+  const right = Object.fromEntries([...MAIL.map(([id]) => [id, mailFor(id)]), ['tomas', 'you'], ['aya', 'you']]);
+  assert.equal(sortWrong(right), 0); assert.equal(sortWrong({ ...right, m2: 'E' }), 1);
+  assert.deepEqual([...new Set(MAIL.map(([id]) => mailFor(id)))].sort(), ['E', 'H', 'K', 'N', 'O'], 'every substitute gets a letter');
 });
 

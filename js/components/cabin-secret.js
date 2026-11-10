@@ -5,8 +5,10 @@
 import { SUBSTITUTES } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { paperLayer, shape } from './paper-art.js';
-import { CLUES, LOG_GIVEN, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, logSolved, logWrong, opens, points, signedUp } from '../services/cabin-story.js';
-import { COLOUR_NAMES, INK, JOBS, LOG, MORNING, NAMES, NOTES, REGISTER, RULES } from '../data/cabin-secret.js';
+import { CLUES, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
+import { COLOUR_NAMES, INK, JOBS, LOG, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
+import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
+import { bounds, piece } from './cabin-photo.js';
 import { CORD, OLD_PAGE, PENCIL, SEEN, STAY, WISH, WISHES } from '../data/cabin-finale.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
@@ -34,6 +36,21 @@ function lockShackle(paper) {
   shape('path', { d: 'M34 58V36C34 14 86 14 86 36V58', fill: 'none', stroke: '#9b978c', 'stroke-width': 9, 'stroke-linecap': 'round' }, paper);
   shape('path', { d: 'M37 54V37C37 19 83 19 83 37V54', fill: 'none', stroke: '#c9c5b9', 'stroke-width': 2.5, 'stroke-linecap': 'round' }, paper);
 }
+// The sorting rack's pigeonholes, 100 × 76: a wooden box, dark inside, a brass plate for the name. And the envelopes, 120 × 80,
+// in a few papers, each with its stamp; the postmark is ink of its own.
+function pigeonhole(paper) {
+  shape('rect', { x: 2, y: 2, width: 96, height: 72, rx: 5, fill: '#8f5a3c' }, paper);
+  shape('rect', { x: 9, y: 8, width: 82, height: 47, rx: 3, fill: '#5e3e29' }, paper);
+  shape('rect', { x: 30, y: 58, width: 40, height: 16, rx: 3, fill: '#e0b04f' }, paper); shape('rect', { x: 33, y: 60.5, width: 34, height: 11, rx: 2, fill: '#fff6dc' }, paper);
+}
+const ENVELOPES = [['#fffaf0', '#e4d6bf'], ['#e6eff5', '#b9c9d6'], ['#f3e3c3', '#cbb990'], ['#fde6c0', '#d9b98a']];
+const envelope = ([fill, edge], fresh) => paper => {
+  shape('rect', { x: 3, y: 4, width: 114, height: 72, rx: 4, fill }, paper);
+  shape('path', { d: 'M5 6L60 44L115 6', fill: 'none', stroke: edge, 'stroke-width': 2 }, paper);
+  shape('rect', { x: 92, y: 10, width: 18, height: 22, rx: 1, fill: fresh ? '#b5443c' : '#3f6653' }, paper); shape('rect', { x: 95, y: 13, width: 12, height: 16, fill: '#fbf3df', opacity: .5 }, paper);
+};
+const postmark = ink => { shape('circle', { cx: 34, cy: 42, r: 24, fill: 'none', stroke: '#3f4f5f', 'stroke-width': 1.8 }, ink); shape('circle', { cx: 34, cy: 42, r: 19, fill: 'none', stroke: '#3f4f5f', 'stroke-width': .9 }, ink); };
+const PILE = ['m4', 'tomas', 'm1', 'm6', 'm3', 'aya', 'm2', 'm5'];
 function stain(ink, seed) {
   shape('ellipse', { cx: 40 + noise(seed) * 4, cy: 22, rx: 30, ry: 13, fill: '#9fb3c4', opacity: .16 }, ink);
   shape('ellipse', { cx: 38, cy: 21, rx: 24, ry: 10, fill: 'none', stroke: '#9fb3c4', 'stroke-width': 1.2, opacity: .4 }, ink);
@@ -78,7 +95,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     card = element('article', 'cabin-letter secret-card', layer); card.setAttribute('aria-label', THINGS[id]?.[2] ?? '登記簿的舊頁');
     // Each is its own thing: the register a ledger, the name tags on their board, the log on a clipboard, the rules a
     // little booklet, anything else an index card.
-    card.dataset.thing = id === 'register' ? (knowsSantas(story.seen) ? 'register' : 'note') : ['tags', 'log', 'rules', 'oldpage'].includes(id) ? id : 'note';
+    card.dataset.thing = id === 'register' ? (knowsSantas(story.seen) ? 'register' : 'note') : id === 'rack' && signedUp(volunteer) ? 'rack' : ['tags', 'log', 'rules', 'oldpage'].includes(id) ? id : 'note';
     // The words scroll within the page, never over the cover or the board round it.
     const page = element('div', 'secret-body', card);
     if (id === 'tags') {
@@ -105,6 +122,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       element('p', 'secret-note', page, finale.twist ? PENCIL : RULES.margin);
     } else if (id === 'register' && knowsSantas(story.seen)) register(page, from);
     else if (id === 'oldpage') oldPage(page);
+    else if (id === 'rack' && signedUp(volunteer)) sorting(page);
     else element('p', 'secret-note', page, id === 'hats' && finale.twist ? NOTES.hatsKnown : NOTES[id]);
     const done = element('button', 'cabin-letter-close', card, id === 'oldpage' ? CORD.back : '放回去 ✓'); done.type = 'button';
     on(done, 'click', () => id === 'oldpage' ? open('register', from) : close(id, from)); done.focus({ preventScroll: true });
@@ -157,6 +175,57 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       grid.classList.add('is-solved'); picks.remove(); cells.forEach(cell => { cell.disabled = true; cell.removeAttribute('aria-pressed'); });
       note.textContent = LOG.solved; sound.play('cheer'); learn('log');
     }
+  }
+  // The sorting rack, where the letters job starts: eight letters for six pigeonholes (N, K, H, E, O and the new
+  // substitute). Pick a letter, then a pigeonhole, and it flies in; picked again, it can go elsewhere, or back to the pile.
+  // All in, the rules check (cabin-story.js): the wrong ones bounce back out; right, the two new ones go to the desk and
+  // the oldest envelope lets fall a piece of the old photograph.
+  function sorting(page) {
+    const desk = progress.desk, placed = {}, cubbies = {};
+    element('h3', 'secret-title', page, RACK.title); element('p', 'secret-note rack-sign', page, RACK.sign); clue('rack-rule');
+    const note = element('p', 'secret-note', page, desk.sorted ? RACK.sorted : RACK.how);
+    const rack = element('div', 'rack', page), pile = element('div', 'rack-pile', page);
+    let picked = null;
+    const choose = node => { picked = picked === node ? null : node; for (const each of page.querySelectorAll('.rack-letter')) each.setAttribute('aria-pressed', String(each === picked)); if (picked) sound.play('pick'); };
+    const move = (node, into) => {
+      const before = node.getBoundingClientRect(); into.append(node); const after = node.getBoundingClientRect();
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && after.width) node.animate([{ transform: `translate(${before.left - after.left}px, ${before.top - after.top}px) scale(${before.width / after.width})` }, { transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.3,1.25,.5,1)' });
+    };
+    for (const mark of [...WHO, 'you']) {
+      const box = element('div', 'rack-box', rack), slot = element('button', 'rack-slot', box); slot.type = 'button';
+      paperLayer(slot, '0 0 100 76', '', pigeonhole, BRASS);
+      const name = element('span', 'rack-name', box, `${mark === 'you' ? volunteer.mark : mark}.`); name.style.color = mark === 'you' ? '#b5443c' : COLOURS[mark];
+      slot.setAttribute('aria-label', mark === 'you' ? `你的格子（${volunteer.mark}.）` : `${NAMES[mark]}的格子（${mark}.）`);
+      cubbies[mark] = element('span', 'rack-in', box);
+      on(slot, 'click', () => { if (!picked || desk.sorted) return; placed[picked.dataset.id] = mark; move(picked, cubbies[mark]); sound.play('snap'); choose(picked); if (!pile.querySelector('.rack-letter')) later(550, check); });
+    }
+    on(pile, 'click', event => { if (picked && !pile.contains(picked) && event.target === pile) { delete placed[picked.dataset.id]; move(picked, pile); sound.play('remove'); choose(picked); } });
+    PILE.forEach((id, i) => {
+      const mail = MAIL.find(([each]) => each === id), [date, time] = mail ? mail.slice(1) : ['12/25', '08:30'], fresh = !mail;
+      const letter = element('button', 'rack-letter', desk.sorted ? cubbies[mailFor(id)] : pile); letter.type = 'button'; letter.dataset.id = id; letter.setAttribute('aria-pressed', 'false');
+      letter.setAttribute('aria-label', `${RACK.places[id]}寄來的信，郵戳 ${date} ${time}${fresh ? `，寫著「${RACK.fresh}」` : ''}`);
+      paperLayer(letter, '0 0 120 80', '', envelope(ENVELOPES[i % ENVELOPES.length], fresh), BRASS); inked(letter, '0 0 120 80', postmark);
+      const text = element('span', 'rack-text', letter); element('span', 'rack-date', text, date); element('span', 'rack-time', text, time); element('span', 'rack-place', letter, fresh ? RACK.fresh : RACK.places[id]);
+      if (fresh) letter.classList.add('is-fresh');
+      if (desk.sorted) { letter.disabled = true; placed[id] = mailFor(id); } else on(letter, 'click', () => choose(letter));
+    });
+    if (desk.sorted && progress.pieces.includes('rack')) showPiece(page, false);
+    function check() {
+      const wrong = sortWrong(placed);
+      if (wrong) {
+        for (const node of [...rack.querySelectorAll('.rack-letter')]) if (placed[node.dataset.id] !== mailFor(node.dataset.id)) { delete placed[node.dataset.id]; move(node, pile); node.classList.remove('is-bounced'); void node.offsetWidth; node.classList.add('is-bounced'); }
+        note.textContent = RACK.wrong(wrong); sound.play('nope'); return;
+      }
+      desk.sorted = true; save(); sound.play('cheer'); note.textContent = RACK.done; say(RACK.done);
+      for (const node of page.querySelectorAll('.rack-letter')) node.disabled = true;
+      if (!progress.pieces.includes('rack')) later(1000, () => { progress.pieces.push('rack'); save(); clue('rack-photo'); sound.play('open'); showPiece(page, true); });
+    }
+  }
+  // A piece of the photograph, lifted out of where it was found.
+  function showPiece(page, fresh) {
+    const [x, y, w, h] = bounds('rack'), found = element('div', 'rack-found', page);
+    found.style.aspectRatio = `${w + 12} / ${h + 12}`; paperLayer(found, `${x - 6} ${y - 6} ${w + 12} ${h + 12}`, '', g => piece('rack', g), { paper: { scale: .35, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true });
+    if (fresh) element('p', 'secret-note', page, RACK.photo);
   }
   // The cord, loose but locked: four dials to turn (a tap, or the arrow keys), and the blank slip tucked under it.
   function lock(cord, from) {

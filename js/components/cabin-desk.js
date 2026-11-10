@@ -79,11 +79,11 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   // round in the bundle with the others and can be answered again (only the first time is stamped in the register). On
   // the rack: Santa's reply to Mia until it is sent, and each reply a volunteer has written, until it is sent.
   const answered = entry => entry.id in desk.answers;
-  const unanswered = () => pending(volunteer, 'letters') ? VOLUNTEER_LETTERS.filter(entry => !answered(entry) && !desk.sent.includes(`reply-${entry.id}`)) : [];
+  const unanswered = () => pending(volunteer, 'letters') && desk.sorted ? VOLUNTEER_LETTERS.filter(entry => !answered(entry) && !desk.sent.includes(`reply-${entry.id}`)) : [];
   const bundle = () => [...DESK_LETTERS, ...(signedUp(volunteer) && !pending(volunteer, 'letters') ? VOLUNTEER_LETTERS.filter(entry => !answered(entry)) : [])];
   const replyTo = entry => ({ id: `reply-${entry.id}`, letter: entry.id, to: `給${entry.name}`, greeting: `親愛的${entry.name}：`, body: entry.answers[desk.answers[entry.id]], sign: `替身 ${volunteer.mark}. 代筆`, seal: volunteer.mark, name: entry.name });
   const outgoing = () => [...(desk.sent.includes(REPLY.id) ? [] : [{ ...REPLY, seal: 'S', name: '小米' }]), ...VOLUNTEER_LETTERS.filter(answered).map(replyTo)];
-  say(unanswered().length ? '信堆最上面有兩封新來的信，要交給新替身回覆。點信堆抽一封來讀。' : outgoing().length ? '書桌上堆著收到的信；左邊架子上，還有等著寄出的回信。' : '書桌上堆著收到的信。點信堆抽一封來讀。');
+  say(unanswered().length ? '信堆最上面有兩封新來的信，要交給新替身回覆。點信堆抽一封來讀。' : pending(volunteer, 'letters') && !desk.sorted ? '信堆裡還沒有新的信。小房間的分揀架上，好像還有一疊信沒分。' : outgoing().length ? '書桌上堆著收到的信；左邊架子上，還有等著寄出的回信。' : '書桌上堆著收到的信。點信堆抽一封來讀。');
 
   const pick = (label, run) => { const button = element('button', 'desk-pick', layer); button.type = 'button'; button.setAttribute('aria-label', label); on(button, 'click', run); return button; };
   let next = 0;
