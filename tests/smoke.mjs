@@ -496,6 +496,18 @@ await test('Santa 書櫃的謎題：搖椅紙條、四樣東西各藏一個字�
   assert.ok(CHAIR.lines.join('').includes('四樣東西') && play.includes('later(2000, chairNote)') && GOALS.bookcase.hints.at(-1).includes('MORE'), 'Santa\'s note on the chair is the riddle; the last hint answers it');
   assert.ok(books.includes("cabin.glintBooks(GAPS.map(place => shelf[place]))") && books.includes("progress.clues.filter(id => id in LETTERS)") && scene.includes('glintBooks(ids = [])'), 'The letters found wait as tiles; the four books that spell it light up');
 });
+await test('Santa 音樂盒底的抽屜：照交接表上第一次飛的順序彈音梳，抽屜彈開是撕下來的舊照片一角', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [music, photoUi, sound, css] = await Promise.all(['js/components/cabin-musicbox.js', 'js/components/cabin-photo.js', 'js/components/cabin-sound.js', 'css/santa.css'].map(read));
+  const { PHOTO, FLIGHT_ORDER } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { PIECES, W, H, bounds } = await import(pathToFileURL(path.join(project, 'js/components/cabin-photo.js')).href);
+  assert.deepEqual(Object.keys(PIECES).sort(), [...PHOTO].sort(), 'The photograph is torn into the pieces the story knows');
+  for (const id of PHOTO) { const [x, y, w, h] = bounds(id); assert.ok(x >= 0 && y >= 0 && x + w <= W + .5 && y + h <= H + .5 && w > 40 && h > 40, `${id} lies inside the photograph`); }
+  assert.ok(music.includes("const drawer = knows() && progress ? element('button', 'musicbox-drawer', layer) : null;") && music.includes('if (playsOpen(played))') && music.includes("progress.pieces.push('music'); save(); clue('music-drawer');"), 'Only once the secret is known; the rules decide; the piece is kept and written down');
+  const comb = music.slice(music.indexOf('const COMB = ['), music.indexOf('];', music.indexOf('const COMB = [')));
+  assert.deepEqual([...comb.matchAll(/\['([A-Z])', '([A-G]\d)'/g)].map(([, mark]) => mark).sort(), [...FLIGHT_ORDER].sort(), 'One tine for each substitute');
+  assert.ok(sound.includes('pluck(note) { if (PITCH[note] && boxReady())') && photoUi.includes("shape('clipPath', { id: clip }, g)") && css.includes('@keyframes tine-ring'), 'The tines ring in the box\'s own voice; each piece is the photo cut along its torn line');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));
