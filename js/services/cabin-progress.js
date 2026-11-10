@@ -9,14 +9,15 @@ export const PLACES = ['head', 'neck', 'face', 'hand'];
 // The snowman as he was built: only a carrot nose.
 export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'carrot', hand: null });
 // The barn's hoist: whether its rope is hooked at the top, and whether the note behind the bale has been read. The desk:
-// which replies have been sealed with wax, postmarked and sent, and what the volunteer chose to say in theirs (by letter). The story: whether Santa has
+// which replies have been sealed with wax, postmarked and sent, what the volunteer chose to say in theirs (by letter), and
+// whether the rack's letters have been sorted (the two new ones reach the desk only then). The story: whether Santa has
 // ever gone out, how the bookcase's books stand, whether it has opened (and whether it has been pushed shut again since),
 // and which clues behind it have been read, and how far the wet shift log has been written back in
 // (cabin-story.js). Volunteering: the initial signed in the register ('' when not signed up) and the jobs done for it. The
 // end: whether the register's blank row has been offered, the old pages untied, which wish was made, the early shift
 // signed, and which endings have been seen; the cord's lock opened, and the blank slip under it taken or read. The clue book: what has been written in it, and how many hints have been asked
 // for, by what the story was waiting on. The torn pieces of the old photograph found so far.
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {} }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog() }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, pieces: [] });
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog() }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, pieces: [] });
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
 export const dayOf = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -40,13 +41,15 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   // An older record kept only whether Santa's reply was sealed.
   const desk = saved.desk ?? {}, ids = list => Array.isArray(list) ? [...new Set(list.filter(id => typeof id === 'string'))].slice(0, 20) : [];
   const answers = desk.answers && typeof desk.answers === 'object' && !Array.isArray(desk.answers) ? Object.entries(desk.answers).filter(([, value]) => Number.isInteger(value) && value >= 0 && value < 3).slice(0, 10) : [];
-  progress.desk = { sealed: desk.sealed === true ? ['reply'] : ids(desk.sealed), marked: ids(desk.marked), sent: ids(desk.sent), answers: Object.fromEntries(answers) };
+  progress.desk = { sealed: desk.sealed === true ? ['reply'] : ids(desk.sealed), marked: ids(desk.marked), sent: ids(desk.sent), answers: Object.fromEntries(answers), sorted: desk.sorted === true || answers.length > 0 };
   const seen = saved.story?.seen;
   progress.story = { left: saved.story?.left === true, opened: saved.story?.opened === true, shut: saved.story?.shut === true, shelf: readShelf(saved.story?.shelf), seen: Array.isArray(seen) ? CLUES.filter(clue => seen.includes(clue)) : [] };
   // The shift log as far as it has been written back in; one read before it got wet (an older record) is whole.
   progress.story.log = progress.story.seen.includes('log') ? [...LOG_ANSWER] : readLog(saved.story?.log);
   const tasks = saved.volunteer?.tasks;
   progress.volunteer = { mark: canSign(saved.volunteer?.mark) ? saved.volunteer.mark : '', tasks: Array.isArray(tasks) ? TASKS.filter(task => tasks.includes(task)) : [] };
+  // Letters answered before the rack had to be sorted first: it counts as sorted.
+  if (progress.volunteer.tasks.includes('letters')) progress.desk.sorted = true;
   const end = saved.finale ?? {}, endings = end.endings;
   progress.finale = { invited: end.invited === true, twist: end.twist === true, unlocked: end.unlocked === true || end.twist === true, slip: SLIP.includes(end.slip) ? end.slip : 'none', wish: WISHES.some(wish => wish.id === end.wish) ? end.wish : null, stayed: end.stayed === true, endings: Array.isArray(endings) ? ['A', 'B', 'C', 'D'].filter(ending => endings.includes(ending)) : [] };
   if (Array.isArray(saved.pieces)) progress.pieces = PHOTO.filter(id => saved.pieces.includes(id));

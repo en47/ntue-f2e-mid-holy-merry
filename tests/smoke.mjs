@@ -508,6 +508,15 @@ await test('Santa 音樂盒底的抽屜：照交接表上第一次飛的順序�
   assert.deepEqual([...comb.matchAll(/\['([A-Z])', '([A-G]\d)'/g)].map(([, mark]) => mark).sort(), [...FLIGHT_ORDER].sort(), 'One tine for each substitute');
   assert.ok(sound.includes('pluck(note) { if (PITCH[note] && boxReady())') && photoUi.includes("shape('clipPath', { id: clip }, g)") && css.includes('@keyframes tine-ring'), 'The tines ring in the box\'s own voice; each piece is the photo cut along its torn line');
 });
+await test('Santa 分揀架：依郵戳時間對交接表分信，分好兩封新信才到書桌，舊信封掉出照片一角', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [secret, desk, css] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-desk.js', 'css/santa.css'].map(read));
+  const { JOBS, RACK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.ok(JOBS.letters[1].includes('分揀架') && RACK.sign.includes('午夜') && NOTEBOOK['rack-rule'].text === RACK.sign, 'The job says to start at the rack; its rule is on its sign and in the clue book');
+  assert.ok(desk.includes("pending(volunteer, 'letters') && desk.sorted ?") && secret.includes('const wrong = sortWrong(placed);') && secret.includes("progress.pieces.push('rack'); save(); clue('rack-photo');"), 'The rules check the sorting; only then do the new letters reach the desk; the piece is kept');
+  assert.ok(secret.includes("else if (id === 'rack' && signedUp(volunteer)) sorting(page);") && !secret.slice(secret.indexOf('function sorting'), secret.indexOf('function showPiece')).includes('innerHTML'), 'The rack is for a signed-up substitute; words only through textContent');
+  assert.ok(Object.values(RACK.places).every(place => place.length <= 3) && css.includes('.rack-letter[aria-pressed="true"]'), 'Short place names fit the envelope; a picked letter lifts');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

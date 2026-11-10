@@ -37,6 +37,7 @@ const KINDS = [
   ['.secret-card[data-thing="register"]', 'ledger'],
   ['.secret-card[data-thing="rules"]', 'booklet'],
   ['.secret-card[data-thing="note"]', 'index'],
+  ['.secret-card[data-thing="rack"]', 'kraft'],
   ['.desk-letter[data-paper="kid"] .letter-face', 'lined'],
   ['.desk-letter[data-paper="pad"] .letter-face', 'squared'],
   ['.desk-letter[data-paper="santa"] .letter-face, .desk-compose', 'stationery'],

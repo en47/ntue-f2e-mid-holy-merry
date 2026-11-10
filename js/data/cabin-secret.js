@@ -17,6 +17,17 @@ export const LOG = {
 // The note Santa leaves on his chair when he goes out: the bookcase's riddle. His four favourite things in the room (the
 // hearth, the desk, the music box, the snow globe) each hide a letter (cabin-clues.js LETTERS).
 export const CHAIR = { title: '搖椅上的紙條', lines: ['我去看看麋鹿，馬上回來。', '這屋子裡，我最喜歡的四樣東西上，各藏著一個字母。', '把它們排在我的繪本前面，你就會知道這間屋子的小秘密。'], sign: '—— S.' };
+// The sorting rack, once signed up: the rule on its sign, and what is said as the letters go in (cabin-story.js decides).
+export const RACK = {
+  title: '分揀架', sign: '分信守則：信交給郵戳上那個時間正在飛的人。過了午夜，還算前一晚。',
+  how: '點一封信，再點要放的格子。放好的信可以再點一下，換到別的格子，或點信堆放回去。',
+  wrong: count => `有 ${count} 封放錯了，被退了回來。對照交接表，再分一次。`,
+  done: '分好了！交給你的兩封信，送到書桌上了。',
+  photo: '最舊的那個信封裡，滑出一張撕下來的舊照片的一角：一棵掛著星星的小聖誕樹。',
+  sorted: '信都分好了，每一格都整整齊齊。',
+  places: { m1: '台北', m2: '東京', m3: '冰島', m4: '多倫多', m5: '奧斯陸', m6: '開普敦', tomas: '北極', aya: '北極' },
+  fresh: '新替身收',
+};
 // The early shift on Christmas morning: nobody has signed yet (unless the snowman has been dressed as Santa).
 export const MORNING = { date: '12/25', shift: '早班', empty: '（還沒有人簽名）', snowman: '雪人？（實習）' };
 export const RULES = { title: '聖誕老人替身守則', lines: ['一、自願加入，隨時都可以離開。', '二、每替別人傳遞一個願望，就在登記簿上蓋一個章。', '三、集到三個章，就能許一個願望，帶著它回家。', '四、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在班表上簽名。'], margin: '（最下面有人用鉛筆加了一行小字，太淡了，看不清楚。）' };
@@ -47,7 +58,7 @@ export const REGISTER = {
 export const JOBS = {
   lichen: ['照顧麋鹿', '院子裡的麋鹿：餵牠最愛吃的地衣。'],
   hay: ['收好乾草', '馴鹿小屋：用滑輪把乾草拉上去掛好。'],
-  letters: ['處理信件', '屋裡的書桌：新來了兩封信，替聖誕老人回信、寄出去。'],
+  letters: ['處理信件', '小房間的分揀架：先把信分給對的人；交給你的兩封，拿到書桌回信、寄出去。'],
   wheel: ['修摩天輪', '遊樂場的摩天輪停了，去看看哪裡壞了。'],
 };
 export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿上多了一個章（願望點數 ${count}／${of}）。`;
