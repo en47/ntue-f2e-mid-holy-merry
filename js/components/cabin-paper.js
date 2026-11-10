@@ -18,13 +18,12 @@ const PAPERS = {
 };
 // Which paper each box is cut from; the first match wins, so a pressed tab is a red tag and the others stay pale.
 const KINDS = [
-  ['.cabin-letter, .cabin-chat, .desk-letter', 'letter'],
-  ['.desk-envelope', 'pale'],
-  ['.gearbox-hint', 'pine'],
-  ['.gearbox-actions button', 'holly'],
+  ['.cabin-letter, .cabin-chat', 'letter'],
+  ['.gearbox-hint, .desk-guide', 'pine'],
+  ['.gearbox-actions button, .desk-actions button', 'holly'],
   ['.feed-basket, .play-basket', 'wood'],
   ['.wardrobe-item[aria-pressed="true"]', 'picked'],
-  ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send, .desk-actions button, .books-tools button, .books-enter', 'tag'],
+  ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send, .books-tools button, .books-enter', 'tag'],
   ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button', 'pale'],
   ['.cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble', 'note'],
 ];
