@@ -8,7 +8,7 @@ import { paperLayer, shape } from './paper-art.js';
 import { CLUES, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
 import { COLOUR_NAMES, INK, JOBS, LOG, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
 import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
-import { bounds, piece } from './cabin-photo.js';
+import { bounds, piece, polaroid } from './cabin-photo.js';
 import { CORD, OLD_PAGE, PENCIL, SEEN, STAY, WISH, WISHES } from '../data/cabin-finale.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
@@ -123,6 +123,12 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     } else if (id === 'register' && knowsSantas(story.seen)) register(page, from);
     else if (id === 'oldpage') oldPage(page);
     else if (id === 'rack' && signedUp(volunteer)) sorting(page);
+    // On the hat rack, an old polaroid of the snowman, dressed; its back says to dress him so again.
+    if (id === 'hats') {
+      const picture = element('div', 'hats-polaroid', page); picture.setAttribute('role', 'img'); picture.setAttribute('aria-label', '舊拍立得：雪人戴著耳罩、格紋圍巾、圓框眼鏡，手裡提著燈');
+      paperLayer(picture, '-4 -4 128 158', '', polaroid, { paper: { scale: .3, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true });
+      element('p', 'secret-note', page, NOTES.polaroid); clue('snowman-photo');
+    }
     else element('p', 'secret-note', page, id === 'hats' && finale.twist ? NOTES.hatsKnown : NOTES[id]);
     const done = element('button', 'cabin-letter-close', card, id === 'oldpage' ? CORD.back : '放回去 ✓'); done.type = 'button';
     on(done, 'click', () => id === 'oldpage' ? open('register', from) : close(id, from)); done.focus({ preventScroll: true });

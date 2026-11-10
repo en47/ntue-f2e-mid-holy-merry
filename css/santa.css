@@ -752,3 +752,9 @@ html.theatre-open { overflow: hidden; }
 .rack-found { position: relative; width: min(8rem, 40%); margin: .2rem auto .6rem; animation: found-lift 1s cubic-bezier(.3,1.4,.5,1) both; }
 @media (max-width: 700px) { .rack-letter { width: 6.6rem; } .rack-pile { gap: .4rem; } }
 @media (prefers-reduced-motion: reduce) { .rack-letter { transition: none; } .rack-letter.is-bounced, .rack-found { animation: none; } }
+/* 帽架上的舊拍立得，和雪人圍巾裡掉出來的照片一角。 */
+.hats-polaroid { position: relative; width: min(12.5rem, 66%); aspect-ratio: 128 / 158; margin: .3rem auto .5rem; rotate: -4deg; }
+.piece-card { width: min(21rem, calc(100% - 2rem)); }
+.piece-words { margin: 0 0 .6rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; }
+.piece-found { position: relative; width: min(8rem, 45%); margin: 0 auto .8rem; animation: found-lift 1s cubic-bezier(.3,1.4,.5,1) both; }
+@media (prefers-reduced-motion: reduce) { .piece-found { animation: none; } }

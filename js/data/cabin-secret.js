@@ -39,6 +39,7 @@ export const NOTES = {
   // Once the old page has been read (cabin-finale.js): the smallest hat was Holly's, the year her wish came true.
   hatsKnown: '最小的那頂聖誕帽內側，用紅線繡著「H. 2003」。原來荷莉許願的那年，她還是個孩子。',
   rack: '分揀架上塞滿了信，每一格的郵戳都不一樣。',
+  polaroid: '帽架上夾著一張舊拍立得：一個打扮好的雪人。翻到背面，有人寫著：「照這樣打扮，它會想起來。」',
   known: '名牌、班表、守則……原來，聖誕老人不只一位。',
   back: '門開了，聖誕老人拍掉身上的雪走進來：「我回來了——咦，書櫃怎麼開著？……看來你都看見了。呵呵，這是我們村子的小秘密。」',
 };
