@@ -18,11 +18,11 @@
 .cabin-back { position: absolute; z-index: 4; top: 1rem; left: 1rem; padding: .45rem 1rem; color: var(--ink); background: var(--cream); border: 0; border-radius: 12px; box-shadow: 0 4px 0 #dccaa9; font-weight: 700; font-size: var(--fs-small); rotate: -2deg; }
 .cabin-back:hover { translate: 0 -2px; }
 .cabin-back:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
-.cabin-tip { position: absolute; z-index: 3; left: 50%; top: 14%; margin: 0; padding: .55rem 1.2rem; translate: -50% 0; color: var(--ink); background: #fffbedee; border: 2px dashed #ad3c3b55; border-radius: 14px; box-shadow: 0 6px 0 -2px #dccaa9; font-size: var(--fs-small); pointer-events: none; transition: opacity .6s ease; }
+.cabin-tip { position: absolute; z-index: 3; left: 50%; top: 14%; margin: 0; padding: .55rem 1.2rem; translate: -50% 0; color: var(--ink); background: #fffbedee; border: 2px solid #ad3c3b55; border-radius: 14px; box-shadow: 0 6px 0 -2px #dccaa9; font-size: var(--fs-small); pointer-events: none; transition: opacity .6s ease; }
 .cabin-tip.is-gone { opacity: 0; }
 .cabin-explore { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .cabin-explore:focus-within { z-index: 5; top: 1rem; right: 1rem; width: auto; height: auto; overflow: visible; clip-path: none; display: grid; gap: .3rem; padding: .7rem; background: var(--cream); border-radius: 14px; box-shadow: 0 6px 0 -2px #dccaa9; }
-.cabin-explore button { padding: .3rem .8rem; border: 1px dashed var(--line); border-radius: 10px; background: none; font-size: var(--fs-small); text-align: left; }
+.cabin-explore button { padding: .3rem .8rem; border: 1px solid var(--line); border-radius: 10px; background: none; font-size: var(--fs-small); text-align: left; }
 .cabin-explore button.is-found::after { content: ' ★'; color: #c08a3e; }
 /* 小遊戲：紙雕道具疊在場景上，只有道具本身接收觸控。 */
 .cabin-play { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
@@ -48,12 +48,12 @@
 .wardrobe-tabs button { padding: .35rem 0; color: var(--ink); background: #efe4cc; border: 0; border-radius: 10px 10px 4px 4px; font-size: var(--fs-small); font-weight: 700; }
 .wardrobe-tabs button[aria-pressed="true"] { color: var(--cream); background: var(--red); }
 .wardrobe-items { flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; align-content: start; overflow: auto; }
-.wardrobe-item { position: relative; aspect-ratio: 1; padding: 0; background: #f6efe0; border: 2px dashed transparent; border-radius: 14px; cursor: pointer; transition: scale .2s ease; }
+.wardrobe-item { position: relative; aspect-ratio: 1; padding: 0; background: #f6efe0; border: 2px solid transparent; border-radius: 14px; cursor: pointer; transition: scale .2s ease; }
 .wardrobe-item:hover { scale: 1.05; }
 .wardrobe-item[aria-pressed="true"] { background: #fbf1d6; border-color: #c08a3e; }
 .wardrobe-item:focus-visible, .wardrobe-tabs button:focus-visible, .wardrobe-reset:focus-visible, .wardrobe-place:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
 .wardrobe-reset { padding: .45rem; color: var(--ink); background: var(--cream); border: 0; border-radius: 10px; box-shadow: inset 0 0 0 2px #dccaa9; font-size: var(--fs-small); font-weight: 700; }
-.wardrobe-place { position: absolute; padding: 0; background: none; border: 2px dashed transparent; border-radius: 16px; pointer-events: none; transition: border-color .2s ease, background-color .2s ease; }
+.wardrobe-place { position: absolute; padding: 0; background: none; border: 2px solid transparent; border-radius: 16px; pointer-events: none; transition: border-color .2s ease, background-color .2s ease; }
 .wardrobe-place.is-filled { cursor: pointer; pointer-events: auto; }
 .wardrobe-place.is-filled:hover { border-color: #ad3c3b77; }
 .wardrobe-ghost { position: absolute; top: 0; left: 0; z-index: 6; pointer-events: none; filter: drop-shadow(0 8px 6px #3b2a2433); }
@@ -80,7 +80,7 @@
 .reindeer-bubble.is-popping { animation: bubble-pop .32s cubic-bezier(.3, 1.4, .5, 1) both; }
 @keyframes bubble-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
 /* 穀倉滑輪：木頭握把上的抓取區（往下拉）、掛鉤與鬆開的紙標籤、暗格的亮點，和兩種筆跡的紙條。 */
-.hoist-grip { position: absolute; padding: 0; background: radial-gradient(#ffe8a466, transparent 70%); border: 2px dashed #c08a3e88; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.hoist-grip { position: absolute; padding: 0; background: radial-gradient(#ffe8a466, transparent 70%); border: 2px solid #c08a3e88; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .hoist-grip.is-pulling { cursor: grabbing; animation: none; border-color: #c08a3e; }
 .hoist-grip.is-locked { border-color: transparent; background: none; animation: none; cursor: default; }
 .hoist-grip:focus-visible, .hoist-hook:focus-visible, .hoist-release:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
@@ -98,7 +98,7 @@
 /* 底部讓開右下角的音樂按鈕。 */
 .cabin-chat { display: none; position: absolute; z-index: 3; top: 4.4rem; right: 1rem; bottom: 5.4rem; width: min(22rem, 34%); flex-direction: column; gap: .7rem; padding: 1.2rem 1.2rem 1.1rem; color: var(--ink); background: #fffdf6; border-radius: 10px; box-shadow: 0 10px 0 -3px #e4d6bf; pointer-events: auto; }
 .cabin-stage[data-view="inside"]:not(.is-walking) .cabin-chat { display: flex; }
-.chat-head { display: flex; align-items: center; gap: .6rem; padding-bottom: .55rem; border-bottom: 2px dashed #ad3c3b40; }
+.chat-head { display: flex; align-items: center; gap: .6rem; padding-bottom: .55rem; border-bottom: 2px solid #ad3c3b40; }
 .chat-title { flex: 1; margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; }
 .chat-avatar { position: relative; flex: none; width: 2.5rem; aspect-ratio: 1; }
 .chat-avatar .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -108,9 +108,9 @@
 .chat-line { display: flex; align-items: flex-end; gap: .5rem; }
 .chat-line.from-me { flex-direction: row-reverse; }
 .chat-bubble { max-width: 78%; margin: 0; padding: .7rem 1rem; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; background: #fbf3df; border-radius: 14px 14px 14px 4px; }
-.chat-line.is-example .chat-bubble { color: #8a7a6a; background: none; border: 2px dashed #c9b48f; border-radius: 14px 14px 4px 14px; }
+.chat-line.is-example .chat-bubble { color: #8a7a6a; background: none; border: 2px solid #c9b48f; border-radius: 14px 14px 4px 14px; }
 .chat-form { display: flex; gap: .5rem; }
-.chat-form input { flex: 1; min-width: 0; padding: .55rem .8rem; color: var(--ink); background: #fffdf6; border: 2px dashed #c9b48f; border-radius: 10px; font-size: var(--fs-small); }
+.chat-form input { flex: 1; min-width: 0; padding: .55rem .8rem; color: var(--ink); background: #fffdf6; border: 2px solid #c9b48f; border-radius: 10px; font-size: var(--fs-small); }
 .cabin-chat.is-folded { top: auto; width: auto; padding: .8rem 1rem; }
 .cabin-chat.is-folded :is(.chat-log, .chat-form) { display: none; }
 .cabin-chat.is-folded .chat-head { padding: 0; border: 0; }
@@ -132,7 +132,7 @@
 /* 紙雕聖誕老人替身：3D 小屋準備好之前先站在雪地上。 */
 .cabin-stage .santa-placeholder-host { position: absolute; left: 50%; bottom: 22%; width: min(220px, 30%); aspect-ratio: 300 / 270; translate: -50% 0; transition: opacity .4s ease; pointer-events: none; }
 .cabin-stage:not([data-state='loading']) .santa-placeholder-host { opacity: 0; }
-.cabin-away { position: absolute; left: 50%; top: 34%; max-width: 15rem; margin: 0; padding: .7rem 1rem; translate: -50% 0; rotate: -3deg; color: var(--ink); background: var(--cream); border: 2px dashed #ad3c3b73; border-radius: 12px; box-shadow: 0 6px 0 -2px #dccaa9; text-align: center; pointer-events: none; }
+.cabin-away { position: absolute; left: 50%; top: 34%; max-width: 15rem; margin: 0; padding: .7rem 1rem; translate: -50% 0; rotate: -3deg; color: var(--ink); background: var(--cream); border: 2px solid #ad3c3b73; border-radius: 12px; box-shadow: 0 6px 0 -2px #dccaa9; text-align: center; pointer-events: none; }
 .cabin-error { display: none; }
 .cabin-stage[data-state='error'] .cabin-error { position: absolute; inset: 0; display: grid; place-content: center; padding: 2rem; color: var(--muted); text-align: center; }
 .cabin-noscript { position: absolute; left: 50%; bottom: 30%; translate: -50% 0; padding: .7rem 1rem; background: var(--cream); border-radius: 12px; }
@@ -144,7 +144,7 @@
 .cabin[data-paper] :is(.cabin-chat, .from-santa .chat-bubble, .chat-fold, .chat-send, .hoist-hint, .hoist-hook, .hoist-release, .cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .cabin-letter, .cabin-back, .cabin-letter-close, .wardrobe-reset, .wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .feed-basket, .play-basket) { background-repeat: no-repeat; background-size: 100% 100%; }
 .cabin[data-paper] :is(.cabin-back, .cabin-letter-close, .wardrobe-reset, .wardrobe-tabs button[aria-pressed="true"], .hoist-hook, .hoist-release, .chat-fold, .chat-send) { color: var(--cream); }
 /* 鍵盤焦點也是紙的樣子：圓角的金色虛線，不是方正的紅框。 */
-.cabin[data-paper] :is(button, [tabindex]):focus-visible { outline: 2px dashed #c08a3e; outline-offset: 4px; border-radius: 14px; }
+.cabin[data-paper] :is(button, [tabindex]):focus-visible { outline: 3px solid #e0b04f; outline-offset: 4px; border-radius: 14px; }
 /* 紙片的邊與縫線佔了一圈，文字往內收一點；每張紙微微歪一點，像是隨手貼上去的。 */
 .cabin[data-paper] .cabin-letter { padding: 2rem 2.2rem 1.6rem; }
 .cabin[data-paper] .cabin-caption { padding: .8rem 1.5rem; rotate: -.6deg; }
@@ -171,7 +171,7 @@
 .hearth-log:hover { scale: 1.05; }
 .hearth-log.is-dragging { z-index: 6; cursor: grabbing; scale: 1.1; transition: none; }
 .hearth-log.is-used { opacity: 0; scale: .5; pointer-events: none; }
-.hearth-bellows { position: absolute; padding: 0; background: radial-gradient(#ffe8a455, transparent 70%); border: 2px dashed #c08a3e88; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.hearth-bellows { position: absolute; padding: 0; background: radial-gradient(#ffe8a455, transparent 70%); border: 2px solid #c08a3e88; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .hearth-bellows.is-pressing { cursor: grabbing; border-color: #c08a3e; animation: none; }
 .hearth-log:focus-visible, .hearth-bellows:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .hearth-mouth { position: absolute; border-radius: 45% 45% 12px 12px; background: radial-gradient(#ffd38a88, transparent 70%); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
@@ -267,7 +267,7 @@
 /* 手機上，桌面讓給桌上的東西，信封和信紙放在下方。 */
 @media (max-width: 700px) { .desk-work { top: auto; right: .6rem; bottom: .6rem; left: .6rem; width: auto; max-height: 62%; } .desk-letter { min-height: 11rem; } }
 /* 音樂盒：發條鑰匙外的一圈拖曳區（順時針轉）；反方向時棘輪擋住、輕輕彈一下。 */
-.musicbox-knob { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 2px dashed #c08a3e99; border-radius: 50%; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.musicbox-knob { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 2px solid #c08a3e99; border-radius: 50%; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .musicbox-knob::after { content: '↻'; position: absolute; right: -4px; top: -6px; color: #c08a3e; font-size: var(--fs-body); font-weight: 700; }
 .musicbox-knob.is-winding { cursor: grabbing; animation: none; border-color: #c08a3e; }
 .musicbox-knob.is-resisting { animation: knob-resist .25s ease; }
@@ -283,7 +283,7 @@
 /* 書櫃解謎：每個書位一個透明的拖曳區（拿起的書高亮），書架尾端夾著一張手寫小紙條，下方是「全部放回」與提示。 */
 .books-place { position: absolute; padding: 0; background: none; border: 2px solid transparent; border-radius: 6px; cursor: grab; touch-action: none; pointer-events: auto; }
 .books-place:disabled { cursor: default; pointer-events: none; }
-.books-place.is-empty { cursor: pointer; border: 2px dashed #e3c27a66; }
+.books-place.is-empty { cursor: pointer; border: 2px solid #e3c27a66; }
 .books-place.is-picked { border-color: #f0cf7e; box-shadow: 0 0 14px #f0cf7e99; }
 .books-place:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
 .books-slip { position: absolute; z-index: 2; max-width: 11rem; margin: 0; padding: .3rem .6rem; color: #5b3a2c; background: #fffdf6; border-radius: 4px; box-shadow: 0 3px 6px #3b2a2433; font-family: var(--font-hand); font-size: var(--fs-small); rotate: -4deg; pointer-events: none; }
@@ -291,8 +291,8 @@
 .books-tools button { padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; white-space: nowrap; }
 .chat-line.is-away .chat-bubble { color: #8a7a6a; font-style: normal; }
 /* 書櫃後的小房間：可以拿起來看的東西（看過的變淡），和打開後的紙卡：名牌、交接表（不同筆跡）、守則。 */
-.secret-thing { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 2px dashed #c08a3e88; border-radius: 12px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
-.secret-thing.is-read { border-style: dotted; animation: none; opacity: .55; }
+.secret-thing { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 2px solid #c08a3e88; border-radius: 12px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.secret-thing.is-read { animation: none; opacity: .55; }
 .secret-thing:focus-visible, .books-enter:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .books-enter { position: absolute; left: 50%; bottom: 1rem; padding: .5rem 1.1rem; translate: -50% 0; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; pointer-events: auto; }
 .secret-card { max-height: calc(100% - 2rem); overflow: auto; }
@@ -303,14 +303,30 @@
 .secret-log [data-hand="n"] { color: #8f3b36; rotate: -1deg; } .secret-log [data-hand="k"] { color: #3f5a7a; letter-spacing: .05em; } .secret-log [data-hand="h"] { color: #3f6653; } .secret-log [data-hand="e"] { color: #6e4a6b; } .secret-log .is-morning { color: #8a7a6a; }
 .secret-rule, .secret-note { margin: 0 0 .5rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; }
 .secret-note { color: #6b5a4c; }
+/* 小房間裡的東西各是各的樣子：登記簿是皮面帳本（金邊、紅書籤絲帶、橫線），名牌掛在木板上，班表夾在夾板上，
+   守則是紅布書脊的小冊子，其他是索引卡。 */
+.cabin .secret-card { padding: 1.7rem 1.7rem 1.3rem; border-radius: 6px; rotate: -1deg; }
+.cabin .secret-card[data-thing="register"] { padding: 2rem 1.9rem 1.4rem 2.3rem; background: linear-gradient(90deg, transparent 1.7rem, #e8a3a088 1.7rem 1.78rem, transparent 1.78rem), repeating-linear-gradient(#fbf3e2 0 2rem, #e9dfc7 2rem calc(2rem + 1px)), #fbf3e2; box-shadow: inset 0 0 0 10px #6b3f2a, inset 0 0 0 12px #c9a14a, 0 18px 40px #3b2a2455; border-radius: 12px; }
+.cabin .secret-card[data-thing="register"]::before { content: ''; position: absolute; right: 2.6rem; top: 0; width: .9rem; height: 3.8rem; background: #b5443c; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%); }
+.cabin .secret-card[data-thing="tags"] { color: #fff6e6; background: linear-gradient(#b07e52, #8f5a3c); box-shadow: inset 0 0 0 4px #c49466, inset 0 -7px 0 #6b4a33, 0 18px 40px #3b2a2455; border-radius: 12px; }
+.cabin .secret-card[data-thing="tags"] :is(.secret-title, .secret-note) { color: #fff6e6; }
+.cabin .secret-card[data-thing="tags"] .secret-tags li { position: relative; padding: 1.1rem .5rem .6rem; color: var(--ink); background: #fffaf0; clip-path: polygon(16% 0, 84% 0, 100% 18%, 100% 100%, 0 100%, 0 18%); text-align: center; rotate: -3deg; }
+.cabin .secret-card[data-thing="tags"] .secret-tags li:nth-child(even) { rotate: 3deg; }
+.cabin .secret-card[data-thing="tags"] .secret-tags li::before { content: ''; position: absolute; left: 50%; top: .35rem; width: .5rem; aspect-ratio: 1; translate: -50% 0; background: #8f5a3c; border-radius: 50%; }
+.cabin .secret-card[data-thing="log"] { padding: 3rem 2rem 1.2rem; background: linear-gradient(#fffdf6, #fffdf6) 1rem 1.9rem / calc(100% - 2rem) calc(100% - 5.2rem) no-repeat, #b98d5c; box-shadow: inset 0 0 0 3px #a37a4c, 0 18px 40px #3b2a2455; border-radius: 14px; }
+.cabin .secret-card[data-thing="log"]::before { content: ''; position: absolute; left: 50%; top: .7rem; width: 6.5rem; height: 1.7rem; translate: -50% 0; background: linear-gradient(#d3dbe1, #8b97a0); border-radius: 7px 7px 3px 3px; box-shadow: 0 2px 0 #5f6b74; }
+.cabin .secret-card[data-thing="log"] .cabin-letter-close { margin-top: 1.4rem; }
+.cabin .secret-card[data-thing="rules"] { padding: 1.8rem 1.7rem 1.3rem 3.4rem; background: linear-gradient(90deg, #a84a42 0 1.7rem, #7f312c 1.7rem 1.9rem, #fffaf0 1.9rem); box-shadow: inset 0 0 0 1px #e4d6bf, 0 18px 40px #3b2a2455; border-radius: 4px 12px 12px 4px; }
+.cabin .secret-card[data-thing="rules"] .secret-title { color: #a84a42; font-family: var(--font-display); }
+.cabin .secret-card[data-thing="note"] { padding-top: 3.2rem; background: linear-gradient(#fffdf6 0 2.4rem, #e8a3a0 2.4rem calc(2.4rem + 2px), transparent 0), repeating-linear-gradient(#fffdf6 0 1.8rem, #cfe0ec 1.8rem calc(1.8rem + 1px)) 0 .4rem; box-shadow: 0 18px 40px #3b2a2455; border-radius: 4px; }
 @media (prefers-reduced-motion: reduce) { .secret-thing { animation: none; } }
 /* 替身登記簿：每位替身這一季的章（四格一列）、你的那一列、可以選的字母、今天可以幫忙的事。 */
 .register-rows { display: grid; gap: .35rem; margin: 0 0 .8rem; padding: 0; list-style: none; font-family: var(--font-hand); font-size: var(--fs-body); }
-.register-rows li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: .25rem; border-bottom: 1px dashed #d9c9a8; }
+.register-rows li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: .25rem; border-bottom: 1px solid #d9c9a8; }
 .register-rows [data-hand="n"] .register-mark { color: #8f3b36; } .register-rows [data-hand="k"] .register-mark { color: #3f5a7a; } .register-rows [data-hand="h"] .register-mark { color: #3f6653; } .register-rows [data-hand="e"] .register-mark { color: #6e4a6b; } .register-rows [data-hand="o"] .register-mark { color: #9a6b2f; }
 .register-rows .is-you .register-mark { color: var(--red); }
 .register-stamps { display: inline-flex; gap: .3rem; }
-.register-stamps span { width: 1.1rem; aspect-ratio: 1; border: 2px dashed #d9c9a8; border-radius: 50%; }
+.register-stamps span { width: 1.1rem; aspect-ratio: 1; border: 2px solid #d9c9a8; border-radius: 50%; }
 .register-stamps .is-stamped { background: radial-gradient(circle, #fffdf6 28%, #b5544c 30%); border: 2px solid #b5544c; rotate: -12deg; }
 .register-heading { margin: .2rem 0 .4rem; font-family: var(--font-hand); font-size: var(--fs-body); }
 .register-jobs { display: grid; gap: .45rem; margin: 0 0 .9rem; padding: 0; list-style: none; font-size: var(--fs-small); }
@@ -352,7 +368,7 @@
 @keyframes lamp-on { from { background: #6b6250; box-shadow: none; } }
 .gearbox-label, .gearbox-tray-label { translate: -50% 0; color: #f4ead4cc; font-size: var(--fs-small); letter-spacing: .1em; pointer-events: none; }
 .gearbox-tray-label { left: 64%; bottom: 0; translate: -50% 0; color: #fbe9d6; }
-.gearbox-peg { padding: 0; background: radial-gradient(circle, #f1d68f 0 30%, #a37b34 32% 42%, transparent 44%); border: 2px dashed #d8c08a66; border-radius: 50%; cursor: pointer; }
+.gearbox-peg { padding: 0; background: radial-gradient(circle, #f1d68f 0 30%, #a37b34 32% 42%, transparent 44%); border: 2px solid #d8c08a66; border-radius: 50%; cursor: pointer; }
 .gearbox-peg::before { content: ''; position: absolute; inset: -40%; border-radius: 50%; }
 .gearbox-peg.is-ready { border-color: #f1d68f; animation: peg-ready 1.2s ease-in-out infinite; }
 .gearbox-peg.is-near { background: radial-gradient(circle, #fff1c2 0 34%, #f1d68f 36% 60%, transparent 62%); border-style: solid; }

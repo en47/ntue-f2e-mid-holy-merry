@@ -378,6 +378,12 @@ await test('Santa 回信桌：收到的信換紙讀、翻面；回信摺進航�
   assert.ok(desk.includes('desk.answers[answered.id] = current.choice; save();') && desk.includes("buttons.fold.disabled = step === 'compose' && current.choice === undefined;"), 'A volunteer\'s answer counts once the reply is folded in');
   assert.ok(!paper.includes('.desk-letter') && !paper.includes('.desk-envelope') && paper.includes("['.gearbox-actions button, .desk-actions button', 'holly']"), 'The desk\'s papers are its own (not the shared stitched sheet); its buttons are snow-capped paper');
 });
+await test('Santa 紙片不再一律信紙加虛線：按鈕積雪、字幕貼膠帶、信角冬青，小房間的東西各有樣子', async () => {
+  const css = await fs.readFile(path.join(project, 'css/santa.css'), 'utf8'), paper = await fs.readFile(path.join(project, 'js/components/cabin-paper.js'), 'utf8'), secret = await fs.readFile(path.join(project, 'js/components/cabin-secret.js'), 'utf8');
+  assert.ok(!css.includes('dashed') && !paper.includes('stroke-dasharray'), 'No dashed lines round the boxes and buttons');
+  assert.ok(paper.includes("tag: ['#b5443c', '#7f312c', 'snow']") && paper.includes("pinned: ['#fbf3df', '#dccaa9', 'tape']") && paper.includes("letter: ['#fffdf6', '#e4d6bf', 'holly']"), 'Buttons are snow-capped, captions taped up, letters have holly');
+  assert.ok(secret.includes("card.dataset.thing = id === 'register'") && ['register', 'tags', 'log', 'rules', 'note'].every(thing => css.includes(`.secret-card[data-thing="${thing}"]`)), 'The ledger, the name board, the clipboard, the booklet and index cards each look like themselves');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));

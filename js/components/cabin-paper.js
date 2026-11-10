@@ -1,31 +1,37 @@
 // Paper for every box of words in Santa's yard: captions, speech bubbles, tags, drawers and the letter are cut from the same
-// paper as the rest of the site (paperFilter's grain and soft rim), each with a slightly uneven edge, a stitched line and a
-// dropped shadow. Each box gets one whole sheet drawn at its own size, so there are no seams; when a box changes size (a new
-// caption, a drawer opening) its sheet is drawn again. The page marks itself data-paper while this is running.
+// paper as the rest of the site (paperFilter's grain and soft rim), each with a slightly uneven edge and a dropped shadow,
+// some with a Christmas trim (snow, tape, holly). Each box gets one whole sheet drawn at its own size, so there are no
+// seams; when a box changes size (a new caption, a drawer opening) its sheet is drawn again. The page marks itself
+// data-paper while this is running.
 import { paperFilter, shape } from './paper-art.js';
 
-// fill, the shadow under it, an optional stitched line just inside the edge, and an optional trim: 'snow' lies along the
-// top edge instead of a stitch (the gearbox's buttons, cut for Christmas).
+// fill, the shadow under it, and an optional trim cut for Christmas: 'snow' along the top edge (buttons), a strip of
+// 'tape' holding a note up (captions), a sprig of 'holly' in a letter's corner. No sheet is stitched: a dashed line round
+// every box made them all look alike.
 const PAPERS = {
-  note: ['#fbf3df', '#dccaa9', '#ad3c3b'],
-  tag: ['#a84a42', '#853a34', '#fff3dc'],
-  pale: ['#f6efe0', '#e2d4b8', null],
-  picked: ['#fbf1d6', '#e2d4b8', '#c08a3e'],
-  wood: ['#a8774d', '#6b4a33', '#fbf3df'],
-  letter: ['#fffdf6', '#e4d6bf', '#ad3c3b'],
-  holly: ['#b5443c', '#7f312c', null, 'snow'],
-  pine: ['#3f6653', '#2c4a3b', null, 'snow'],
+  note: ['#fbf3df', '#dccaa9'],
+  pinned: ['#fbf3df', '#dccaa9', 'tape'],
+  tag: ['#b5443c', '#7f312c', 'snow'],
+  pale: ['#f6efe0', '#e2d4b8'],
+  picked: ['#fde6c0', '#e2c79a'],
+  wood: ['#a8774d', '#6b4a33', 'snow'],
+  letter: ['#fffdf6', '#e4d6bf', 'holly'],
+  plain: ['#fffdf6', '#e4d6bf'],
+  holly: ['#b5443c', '#7f312c', 'snow'],
+  pine: ['#3f6653', '#2c4a3b', 'snow'],
 };
 // Which paper each box is cut from; the first match wins, so a pressed tab is a red tag and the others stay pale.
 const KINDS = [
-  ['.cabin-letter, .cabin-chat', 'letter'],
+  ['.cabin-letter:not(.secret-card)', 'letter'],
+  ['.cabin-chat', 'plain'],
+  ['.cabin-caption, .cabin-tip, .cabin-away', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
   ['.gearbox-actions button, .desk-actions button', 'holly'],
   ['.feed-basket, .play-basket', 'wood'],
   ['.wardrobe-item[aria-pressed="true"]', 'picked'],
   ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send, .books-tools button, .books-enter', 'tag'],
   ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button', 'pale'],
-  ['.cabin-caption, .cabin-tip, .cabin-away, .cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble', 'note'],
+  ['.cabin-noscript, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble', 'note'],
 ];
 const ALL = KINDS.map(([selector]) => selector).join(', ');
 const kindOf = node => KINDS.find(([selector]) => node.matches(selector))?.[1];
@@ -40,6 +46,12 @@ function outline(width, height, seed) {
   const x0 = 2 + jitter(1), y0 = 2 + jitter(2), x1 = width - 2 + jitter(3), y1 = height - 2 - SHADOW + jitter(4), mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
   return `M${x0 + r} ${y0}Q${mx} ${y0 - 1.6 + jitter(5) * .5} ${x1 - r} ${y0}Q${x1} ${y0} ${x1} ${y0 + r}Q${x1 + 1.4 + jitter(6) * .5} ${my} ${x1} ${y1 - r}`
     + `Q${x1} ${y1} ${x1 - r} ${y1}Q${mx} ${y1 + 1.6 + jitter(7) * .5} ${x0 + r} ${y1}Q${x0} ${y1} ${x0} ${y1 - r}Q${x0 - 1.4 + jitter(8) * .5} ${my} ${x0} ${y0 + r}Q${x0} ${y0} ${x0 + r} ${y0}Z`;
+}
+// A sprig of holly at (x, y): two leaves and three berries.
+function holly(parent, x, y) {
+  shape('path', { d: `M${x - 20} ${y + 4}C${x - 14} ${y - 8} ${x - 2} ${y - 8} ${x + 2} ${y}C${x - 4} ${y - 1} ${x - 6} ${y + 6} ${x - 11} ${y + 3}C${x - 13} ${y + 9} ${x - 19} ${y + 9} ${x - 20} ${y + 4}Z`, fill: '#3f6653' }, parent);
+  shape('path', { d: `M${x + 20} ${y + 4}C${x + 14} ${y - 8} ${x + 2} ${y - 8} ${x - 2} ${y}C${x + 4} ${y - 1} ${x + 6} ${y + 6} ${x + 11} ${y + 3}C${x + 13} ${y + 9} ${x + 19} ${y + 9} ${x + 20} ${y + 4}Z`, fill: '#4f7d68' }, parent);
+  for (const [dx, dy] of [[0, 2], [-4, 6], [4, 6]]) shape('circle', { cx: x + dx, cy: y + dy, r: 3.4, fill: '#c63a33' }, parent);
 }
 // Snow lying along a sheet's top edge: over the rounded corners, its lower edge in soft lumps with a drip or two.
 function snowCap(width, height, seed) {
@@ -56,13 +68,13 @@ const sheets = new Map();
 function sheet(kind, width, height) {
   const key = `${kind}:${width}x${height}`;
   if (sheets.has(key)) return sheets.get(key);
-  const [fill, shadow, stitch, trim] = PAPERS[kind], svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width, height });
+  const [fill, shadow, trim] = PAPERS[kind], svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width, height });
   const paper = shape('g', { filter: paperFilter(svg, `cabin-ui-${++count}`, { scale: .5, grain: .55, shadow: .16 }) }, svg), d = outline(width, height, width * 7 + height);
   shape('path', { d, fill: shadow, transform: `translate(0 ${SHADOW})` }, paper);
   shape('path', { d, fill }, paper);
-  const inset = height < 44 ? 5 : 8;
   if (trim === 'snow') shape('path', { d: snowCap(width, height, width * 3 + height), fill: '#fbf8f1' }, paper);
-  if (stitch && width > 40 && height > 26) shape('rect', { x: inset + 2, y: inset + 2, width: width - inset * 2 - 4, height: height - SHADOW - inset * 2 - 4, rx: Math.min(9, height / 4), fill: 'none', stroke: stitch, 'stroke-opacity': .42, 'stroke-width': 1.4, 'stroke-dasharray': '6 5' }, paper);
+  if (trim === 'tape' && width > 60) shape('rect', { x: width / 2 - 24, y: 0, width: 48, height: 11, fill: '#efe2b4', opacity: .82, transform: `rotate(${((noise(width + height) - .5) * 8).toFixed(2)} ${width / 2} 5)` }, paper);
+  if (trim === 'holly' && width > 120 && height > 90) holly(paper, width - 32, 22);
   const url = image(svg);
   if (sheets.size > 200) sheets.clear();
   sheets.set(key, url); return url;

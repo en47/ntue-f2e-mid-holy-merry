@@ -32,7 +32,7 @@ export function mountCabinChat(stage) {
     paperLayer(element('span', 'chat-avatar', line), '0 0 100 100', '', portrait, PAPER);
     element('p', 'chat-bubble', line, text);
   }
-  // Where your own lines will go; a dashed outline only, nothing is put in your mouth.
+  // Where your own lines will go; an outline only, nothing is put in your mouth.
   const yours = element('li', 'chat-line from-me is-example', log); yours.setAttribute('aria-hidden', 'true');
   element('p', 'chat-bubble', yours, '你寫的話會出現在這一邊');
   const form = element('form', 'chat-form', panel);

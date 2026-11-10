@@ -42,6 +42,9 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   function open(id, from) {
     card?.remove(); sound.play('open'); say('');
     card = element('article', 'cabin-letter secret-card', layer); card.setAttribute('aria-label', THINGS[id][2]);
+    // Each is its own thing: the register a ledger, the name tags on their board, the log on a clipboard, the rules a
+    // little booklet, anything else an index card.
+    card.dataset.thing = id === 'register' ? (knowsSantas(story.seen) ? 'register' : 'note') : ['tags', 'log', 'rules'].includes(id) ? id : 'note';
     if (id === 'tags') {
       element('h3', 'secret-title', card, '名牌');
       const list = element('ul', 'secret-tags', card);
