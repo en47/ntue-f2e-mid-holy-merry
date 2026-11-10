@@ -73,3 +73,9 @@ test('the end is kept: offered, untied, the wish, staying, the endings seen; not
   assert.deepEqual(readProgress(store).finale, { invited: true, twist: true, wish: 'snow', stayed: true, endings: ['B', 'D'] });
   assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { twist: 'yes', wish: 'pony', endings: 'A' } }) })).finale, { invited: false, twist: false, wish: null, stayed: false, endings: [] });
 });
+test('the clue book is kept: known clues once each, hints asked for by goal, nothing else', () => {
+  const storage = memory({ 'holy-merry:cabin:v1': JSON.stringify({ clues: ['tags', 'barn-note', 'nonsense', 'tags', 3], hints: { room: 2, jobs: 9, bookcase: -1, nonsense: 1, secret: 'x' } }) });
+  const progress = readProgress(storage);
+  assert.deepEqual(progress.clues, ['barn-note', 'tags']); assert.deepEqual(progress.hints, { room: 2, jobs: 3 });
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ clues: 'tags', hints: [1] }) })).hints, {});
+});

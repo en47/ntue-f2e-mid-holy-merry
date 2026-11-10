@@ -2,6 +2,7 @@
 // Christmas passport or the cabin's story can later read the same place. Every function takes the storage, so tests pass a stand-in.
 import { CLUES, TASKS, canSign, homeShelf, readShelf } from './cabin-story.js';
 import { WISHES } from '../data/cabin-finale.js';
+import { GOALS, NOTEBOOK } from '../data/cabin-clues.js';
 
 const KEY = 'holy-merry:cabin:v1';
 export const PLACES = ['head', 'neck', 'face', 'hand'];
@@ -13,8 +14,9 @@ export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'car
 // and which clues behind it have been read
 // (cabin-story.js). Volunteering: the initial signed in the register ('' when not signed up) and the jobs done for it. The
 // end: whether the register's blank row has been offered, the old pages untied, which wish was made, the early shift
-// signed, and which endings have been seen.
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {} }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [] }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, wish: null, stayed: false, endings: [] } });
+// signed, and which endings have been seen. The clue book: what has been written in it, and how many hints have been asked
+// for, by what the story was waiting on.
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {} }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [] }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, wish: null, stayed: false, endings: [] }, clues: [], hints: {} });
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
 export const dayOf = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -45,6 +47,9 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   progress.volunteer = { mark: canSign(saved.volunteer?.mark) ? saved.volunteer.mark : '', tasks: Array.isArray(tasks) ? TASKS.filter(task => tasks.includes(task)) : [] };
   const end = saved.finale ?? {}, endings = end.endings;
   progress.finale = { invited: end.invited === true, twist: end.twist === true, wish: WISHES.some(wish => wish.id === end.wish) ? end.wish : null, stayed: end.stayed === true, endings: Array.isArray(endings) ? ['A', 'B', 'C', 'D'].filter(ending => endings.includes(ending)) : [] };
+  if (Array.isArray(saved.clues)) progress.clues = Object.keys(NOTEBOOK).filter(id => saved.clues.includes(id));
+  const hints = saved.hints && typeof saved.hints === 'object' && !Array.isArray(saved.hints) ? saved.hints : {};
+  progress.hints = Object.fromEntries(Object.keys(GOALS).filter(id => Number.isInteger(hints[id]) && hints[id] > 0).map(id => [id, Math.min(hints[id], GOALS[id].hints.length)]));
   return progress;
 }
 // Returns false when the browser will not keep it (private mode, full storage); the yard still plays for this visit.

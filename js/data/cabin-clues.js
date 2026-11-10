@@ -1,0 +1,24 @@
+// The visitor's clue book: what has been noticed around the village that may matter later, in the order the story meets
+// it, and hints for whatever the story is waiting on now (`goal` in cabin-story.js decides which). Each goal's hints get
+// plainer one at a time; the last one says what to do. All made up; nothing is read from the chat.
+export const NOTEBOOK = {
+  'barn-note': { place: '穀倉的暗格', text: '紙條上「12/24 — 夜班交接」是藍色的字；底下的「完成 ✓」是另一個人用綠色寫的。' },
+  'letter-backs': { place: '書桌上的信', text: '每封信的背面，處理過的人都簽了縮寫：N. 是深紅色的字，K. 是藍色的字。' },
+  'route-note': { place: '書桌的工作筆記', text: '平安夜路線的背面，綠色的字：「收到，後半段換我飛。」—— H.' },
+  'music-lid': { place: '音樂盒', text: '盒蓋內側刻著一顆小愛心，兩邊是 N 和 K。' },
+  'globe-base': { place: '雪花球', text: '雪落定以後，底座刻著「H. · 2003」。' },
+  'wish-board': { place: '許願角的留言板', text: '「謝謝昨晚幫忙修好摩天輪的人。」沒有署名。' },
+  tags: { place: '小房間的名牌板', text: '五個名牌：尼爾斯 N、克莉絲 K、荷莉 H、艾洛 E、歐拉 O。每個人的字都是自己的顏色。' },
+  rules: { place: '替身守則', text: '自願加入，隨時可以離開；替別人傳遞一個願望就蓋一個章，集到三個章能許一個願望。' },
+};
+export const GOALS = {
+  room: { title: '在小屋裡待一會兒', hints: ['屋裡的東西都可以碰碰看：壁爐、書桌、音樂盒、雪花球。', '玩過兩樣以後，聖誕老人好像會想出門走走。', '到壁爐前添一根柴，再到書桌讀一封信，然後回到房間中間。'] },
+  bookcase: { title: '聖誕老人出門了', hints: ['趁他不在，靠近那整面書櫃看看。', '書櫃第二層有一本 SANTA 繪本，它左邊空著四個位置。', '把燙金的 M、O、R、E 四本書，照順序放進繪本左邊的空位。'] },
+  secret: { title: '書櫃後面的小房間', hints: ['牆上的名牌、桌上的班表和守則，每一樣都拿起來讀讀看。', '三樣都讀完，就會明白一件事。讀過的東西會打上勾。', '依序點名牌板、班表、守則小冊，讀完按「放回去」。'] },
+  join: { title: '登記簿的空格', hints: ['小房間桌上的登記簿，最新的一頁最下面還空著一格。', '選一個沒人用過的字母當縮寫，蓋章就能加入；不想加入，也可以直接走出門。', '加入以後，登記簿上會寫著今天可以幫忙的四件事。'] },
+  jobs: { title: '替身工作', hints: ['登記簿上列著四件工作，第一次做完就蓋一個章。', '麋鹿、馴鹿小屋的滑輪、屋裡的書桌、遊樂場的摩天輪：還沒打勾的去看看。', '摩天輪在遊樂場（屋外往左轉）；書桌上有兩封新來的信等你回。'] },
+  cord: { title: '紅繩綁著的舊頁', hints: ['做了兩件工作以後，登記簿上綁著舊頁的紅繩好像鬆了。', '回到小房間，打開登記簿看看紅繩那裡。', '按「解開紅繩，翻到舊的一頁」。'] },
+  wish: { title: '三個章', hints: ['守則上說，集到三個章就能許一個願望。', '登記簿上有四個願望可以選，選一個再蓋章許願。', '也可以先不許願：四件工作都做完，班表上 12/25 早班還空著。'] },
+  endings: { title: '還有別的結局', hints: ['登記簿下方蓋著你看過的結局；還沒蓋章的，換個選擇試試。', 'A：知道秘密卻沒有加入（或離開替身工作）就走出門；B：用三個章許願；C：四件工作都做完，簽 12/25 早班。', 'D：看過紅繩綁著的舊頁，再走到 B 或 C。'] },
+  done: { title: '四個結局都看過了', hints: ['謝謝你陪聖誕村過了這個聖誕節。登記簿上看過的結局，點章就能再看一次。'] },
+};

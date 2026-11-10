@@ -91,8 +91,8 @@
 .hoist-release { translate: 0 0; }
 .cabin-note { width: min(22rem, calc(100% - 2rem)); rotate: 2deg; }
 .note-line { margin: 0; font-family: var(--font-hand); line-height: 1.6; }
-.note-first { color: #5b3a2c; font-size: var(--fs-body); }
-.note-second { display: flex; align-items: center; gap: .4rem; margin: .2rem 0 1rem 2.4rem; color: #3f5a6e; font-size: var(--fs-title); letter-spacing: .12em; rotate: -6deg; }
+.note-first { color: #3f5a7a; font-size: var(--fs-body); }
+.note-second { display: flex; align-items: center; gap: .4rem; margin: .2rem 0 1rem 2.4rem; color: #3f6653; font-size: var(--fs-title); letter-spacing: .12em; rotate: -6deg; }
 .note-mark { width: 5.5rem; height: auto; }
 /* 和聖誕老人聊天（預留給之後的 AI 回信）：屋裡右側一張信紙，聖誕老人的話在左、附頭像，你的話在右，像聊天軟體。
    只在進屋、門關上之後出現；可以收起成一張小標籤。手機上改成下方的面板。 */
@@ -595,3 +595,29 @@ html.theatre-open { overflow: hidden; }
   .theatre-words { width: min(100%, 30rem); max-height: none; overflow: visible; padding: 1.6rem 1.4rem 1.3rem; }
 }
 @media (prefers-reduced-motion: reduce) { .ending-theatre[open], .ending-theatre :is(*, *::before, *::after) { animation: none !important; } .theatre-snow { display: none; } }
+/* 線索本：右上角的牛皮紙小筆記本；有新線索時跳一下、亮一個紅點。打開是一頁紙：記下的線索，和一格分段提示。 */
+.notebook-button { position: absolute; z-index: 5; top: .8rem; right: .9rem; width: 46px; height: 54px; padding: 0; border: 0; background: none; cursor: pointer; }
+.notebook-button[hidden] { display: none; }
+.notebook-button:hover { translate: 0 -2px; rotate: -3deg; }
+.notebook-button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.notebook-button.is-new { animation: notebook-hop .9s ease-out; }
+@keyframes notebook-hop { 30% { scale: 1.18; rotate: -8deg; } 60% { rotate: 6deg; } }
+.notebook-new { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; }
+.notebook-new[hidden] { display: none; }
+.notebook-card { position: absolute; z-index: 7; left: 50%; top: 50%; width: min(27rem, calc(100% - 2rem)); max-height: calc(100% - 2rem); display: flex; flex-direction: column; gap: .7rem; padding: 1.7rem 1.8rem 1.3rem; translate: -50% -50%; color: var(--ink); background: transparent no-repeat 0 0 / 100% 100%; pointer-events: auto; animation: finale-in .4s ease-out both; }
+.notebook-body { min-height: 0; overflow: auto; display: grid; gap: .6rem; padding-right: .3rem; }
+.notebook-title { margin: 0; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-body); letter-spacing: .12em; }
+.notebook-empty { margin: 0; color: var(--muted); font-size: var(--fs-small); }
+.notebook-clues { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; font-size: var(--fs-small); line-height: 1.7; }
+.notebook-place { display: block; color: #8f5a3c; }
+.notebook-clues .is-fresh .notebook-place::after { content: ' ★ 新'; color: #c08a3e; }
+.notebook-hints { display: grid; gap: .35rem; margin-top: .3rem; padding-top: .7rem; border-top: 2px solid #ecdcbf; }
+.notebook-goal { margin: 0; color: #3f6653; font-size: var(--fs-small); }
+.notebook-hint-line { margin: 0; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; }
+.notebook-hint, .notebook-close { justify-self: start; padding: .45rem 1rem; border: 0; border-radius: 0; font-weight: 700; font-size: var(--fs-small); background: transparent no-repeat 0 0 / 100% 100%; cursor: pointer; }
+.notebook-hint { color: var(--ink); }
+.notebook-close { align-self: flex-end; color: #fffaf0; }
+.notebook-hint:hover, .notebook-close:hover { translate: 0 -2px; }
+.notebook-hint:focus-visible, .notebook-close:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+@media (max-width: 700px) { .notebook-button { top: .6rem; right: .6rem; width: 40px; height: 47px; } .notebook-card { padding: 1.4rem 1.3rem 1.1rem; } }
+@media (prefers-reduced-motion: reduce) { .notebook-button.is-new, .notebook-card { animation: none; } }

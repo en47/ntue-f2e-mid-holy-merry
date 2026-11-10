@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BOOK_IDS, GAPS, homeShelf, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
+import { BOOK_IDS, GAPS, goal, homeShelf, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
+import { GOALS } from '../js/data/cabin-clues.js';
 
 const place = id => homeShelf().indexOf(id);
 test('the shelf starts as HOLY MERRY with four empty places', () => {
@@ -71,4 +72,18 @@ test('the end: two jobs untie the old pages, three stamps buy a wish, all four l
   assert.equal(goesHome({ volunteer: { mark: '', tasks: [] }, finale: { ...finale, invited: false } }), false, 'not before the row was offered');
   assert.equal(goesHome({ volunteer: volunteer([]), finale }), false, 'not when signed up');
   assert.equal(goesHome({ volunteer: { mark: '', tasks: [] }, finale: { ...finale, endings: ['A'] } }), false, 'told once');
+});
+test('the clue book hints at the first thing the story is still waiting on', () => {
+  const story = { left: false, opened: false, seen: [] }, volunteer = { mark: '', tasks: [] }, finale = { invited: false, twist: false, wish: null, stayed: false, endings: [] };
+  const at = (changes = {}) => goal({ story: { ...story, ...changes.story }, volunteer: { ...volunteer, ...changes.volunteer }, finale: { ...finale, ...changes.finale } });
+  const known = { opened: true, left: true, seen: ['tags', 'log', 'rules'] }, signed = tasks => ({ mark: 'J', tasks });
+  assert.equal(at(), 'room'); assert.equal(at({ story: { left: true } }), 'bookcase');
+  assert.equal(at({ story: { opened: true, left: true, seen: ['tags'] } }), 'secret');
+  assert.equal(at({ story: known }), 'join'); assert.equal(at({ story: known, finale: { endings: ['A'] } }), 'endings', 'went home: other endings');
+  assert.equal(at({ story: known, volunteer: signed(['hay']) }), 'jobs'); assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']) }), 'cord');
+  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']), finale: { twist: true } }), 'jobs');
+  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true } }), 'wish');
+  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true, wish: 'snow', endings: ['B', 'D'] } }), 'endings');
+  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C', 'D'] } }), 'done');
+  for (const id of ['room', 'bookcase', 'secret', 'join', 'jobs', 'cord', 'wish', 'endings', 'done']) assert.ok(GOALS[id]?.hints.length, `${id} has hints`);
 });

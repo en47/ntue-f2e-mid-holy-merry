@@ -18,7 +18,7 @@ function globe(parent) {
   shape('rect', { x: 14, y: 90, width: 72, height: 5, rx: 2, fill: '#e0b04f' }, parent);
 }
 
-export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, knows = () => false, knownLine = () => null }) {
+export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, knows = () => false, knownLine = () => null, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   say('按住雪花球左右搖一搖。');
@@ -118,7 +118,7 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
     }
     paint();
     frame = moving ? requestAnimationFrame(step) : 0;
-    if (!moving) say(knownLine() ?? (knows() ? '雪慢慢落定了。底座刻著「H. · 2003」——是荷莉。' : '雪慢慢落定了。底座上好像刻著什麼。'));
+    if (!moving) { say(knownLine() ?? (knows() ? '雪慢慢落定了。底座刻著「H. · 2003」——是荷莉。' : '雪慢慢落定了。底座上好像刻著什麼。')); clue('globe-base'); }
   }
   on(holder, 'pointerdown', event => {
     if (event.button > 0) return;

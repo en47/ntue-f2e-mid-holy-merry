@@ -6,7 +6,7 @@ import { shape } from './paper-art.js';
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
 const TOP = .92;
 
-export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask = () => {} }) {
+export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const state = progress.hoist, still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   let pull = state.locked ? 1 : 0, fall = 0, holding = 0, notch = 0;
@@ -93,7 +93,7 @@ export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, s
     const mark = shape('svg', { viewBox: '0 0 90 34', class: 'note-mark', 'aria-hidden': 'true' }, second);
     shape('path', { d: 'M4 18L12 27 30 5', fill: 'none', stroke: 'currentColor', 'stroke-width': 3.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, mark);
     shape('path', { d: 'M40 24C44 10 50 8 52 16S56 30 60 18 66 6 70 18C72 24 78 26 86 14', fill: 'none', stroke: 'currentColor', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, mark);
-    const close = element('button', 'cabin-letter-close', note); close.type = 'button'; close.textContent = '收好紙條 ✓';
+    const close = element('button', 'cabin-letter-close', note); close.type = 'button'; close.textContent = '收好紙條 ✓'; clue('barn-note');
     on(close, 'click', () => {
       note.remove(); state.found = true; save(); onFound('stable'); sound.play('remove');
       say('紙條收回箱子裡了。上面有兩種不同的筆跡……'); loosen.focus({ preventScroll: true }); hatch.hidden = false;

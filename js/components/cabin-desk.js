@@ -45,7 +45,7 @@ function sack(parent) {
   shape('path', { d: 'M38 66H62M38 72H58M38 78H54', stroke: '#fbf3df', 'stroke-width': 1.6 }, parent);
 }
 
-export function deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse = () => {}, onTask = () => {} }) {
+export function deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse = () => {}, onTask = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
@@ -150,6 +150,8 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   }
   function flip() {
     const flipped = letter.classList.toggle('is-flipped'); sound.play('remove'); refresh();
+    // Whoever signed the back goes in the clue book: the route note's line about the second half, or just their hands.
+    if (flipped && current.entry.back.sign) clue(current.entry.id === 'route' ? 'route-note' : 'letter-backs');
     // Once the little room behind the bookcase has been seen, the initial has a name.
     if (flipped) say(!current.entry.back.sign ? `背面寫著「交給新來的替身」，簽名欄是你的縮寫：${volunteer.mark}.。` : knowsSantas(progress.story.seen) ? `背面簽著「${current.entry.back.sign}」——是名牌上的${NAMES[current.entry.back.sign[0]]}。` : '背面有人寫了一行小字，還簽了名。');
   }

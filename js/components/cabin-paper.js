@@ -57,8 +57,9 @@ const KINDS = [
   ['.gearbox-hint, .desk-guide', 'pine'],
   ['.feed-basket, .play-basket', 'wood'],
   ['.wardrobe-item[aria-pressed="true"]', 'picked'],
-  ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send, .books-tools button, .books-enter, .gearbox-actions button, .desk-actions button, .register-sign, .theatre-close', 'tag'],
-  ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .theatre-again, .theatre-skip', 'pale'],
+  ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send, .books-tools button, .books-enter, .gearbox-actions button, .desk-actions button, .register-sign, .theatre-close, .notebook-close', 'tag'],
+  ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .theatre-again, .theatre-skip, .notebook-hint', 'pale'],
+  ['.notebook-card', 'notebook'],
   ['.cabin-noscript, .theatre-words, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble', 'note'],
 ];
 const ALL = KINDS.map(([selector]) => selector).join(', ');
@@ -208,6 +209,12 @@ const OBJECTS = {
     for (let i = 0; i <= 18; i++) { const a = i / 18 * Math.PI * 2, rr = r * (.88 + noise(seed + i % 18) * .14); d += `${i ? 'L' : 'M'}${(cx + Math.cos(a) * rr).toFixed(1)} ${(cy + Math.sin(a) * rr).toFixed(1)}`; }
     cut(paper, `${d}Z`, '#a8423b', '#6e2c28');
     shape('circle', { cx, cy, r: r * .64, fill: 'none', stroke: '#c9665c', 'stroke-width': 1.6 }, paper);
+  },
+  // The clue book opened: a kraft cover round a cream page, a red ribbon to keep the place.
+  notebook(paper, width, height, seed) {
+    cut(paper, outline(width, height, seed), '#c9a46a', '#a8865a');
+    shape('path', { d: rounded(9, 9, width - 9, height - SHADOW - 9, seed + 3, 6), fill: '#fffaf0' }, paper);
+    shape('path', { d: `M${width - 46} 0V50L${width - 40} 44L${width - 34} 50V0Z`, fill: '#b5443c' }, paper);
   },
   // The register's old page: yellowed, foxed here and there, and the red cord that tied it lying loose along its edge.
   oldpage(paper, width, height, seed) {
