@@ -4,7 +4,8 @@
 // caption, a drawer opening) its sheet is drawn again. The page marks itself data-paper while this is running.
 import { paperFilter, shape } from './paper-art.js';
 
-// fill, the shadow under it, and an optional stitched line just inside the edge.
+// fill, the shadow under it, an optional stitched line just inside the edge, and an optional trim: 'snow' lies along the
+// top edge instead of a stitch (the gearbox's buttons, cut for Christmas).
 const PAPERS = {
   note: ['#fbf3df', '#dccaa9', '#ad3c3b'],
   tag: ['#a84a42', '#853a34', '#fff3dc'],
@@ -12,11 +13,15 @@ const PAPERS = {
   picked: ['#fbf1d6', '#e2d4b8', '#c08a3e'],
   wood: ['#a8774d', '#6b4a33', '#fbf3df'],
   letter: ['#fffdf6', '#e4d6bf', '#ad3c3b'],
+  holly: ['#b5443c', '#7f312c', null, 'snow'],
+  pine: ['#3f6653', '#2c4a3b', null, 'snow'],
 };
 // Which paper each box is cut from; the first match wins, so a pressed tab is a red tag and the others stay pale.
 const KINDS = [
   ['.cabin-letter, .cabin-chat, .desk-letter', 'letter'],
   ['.desk-envelope', 'pale'],
+  ['.gearbox-hint', 'pine'],
+  ['.gearbox-actions button', 'holly'],
   ['.feed-basket, .play-basket', 'wood'],
   ['.wardrobe-item[aria-pressed="true"]', 'picked'],
   ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send, .desk-actions button, .books-tools button, .books-enter', 'tag'],
@@ -37,15 +42,27 @@ function outline(width, height, seed) {
   return `M${x0 + r} ${y0}Q${mx} ${y0 - 1.6 + jitter(5) * .5} ${x1 - r} ${y0}Q${x1} ${y0} ${x1} ${y0 + r}Q${x1 + 1.4 + jitter(6) * .5} ${my} ${x1} ${y1 - r}`
     + `Q${x1} ${y1} ${x1 - r} ${y1}Q${mx} ${y1 + 1.6 + jitter(7) * .5} ${x0 + r} ${y1}Q${x0} ${y1} ${x0} ${y1 - r}Q${x0 - 1.4 + jitter(8) * .5} ${my} ${x0} ${y0 + r}Q${x0} ${y0} ${x0 + r} ${y0}Z`;
 }
+// Snow lying along a sheet's top edge: over the rounded corners, its lower edge in soft lumps with a drip or two.
+function snowCap(width, height, seed) {
+  const top = 1, r = Math.min(14, height / 3, width / 3), deep = Math.min(9, height * .24);
+  let d = `M1 ${top + r * .9}Q1 ${top} ${r} ${top}H${width - r}Q${width - 1} ${top} ${width - 1} ${top + r * .9}`;
+  const lumps = Math.max(3, Math.round(width / 16));
+  for (let i = 1; i <= lumps; i++) {
+    const x = width - 1 - (width - 2) * i / lumps, mid = x + (width - 2) / lumps / 2, drip = noise(seed + i) > .82 ? 5 : 0;
+    d += `Q${mid.toFixed(1)} ${(top + deep + 2 + noise(seed + i * 3) * 3 + drip).toFixed(1)} ${x.toFixed(1)} ${(top + deep - 1 + noise(seed + i * 5) * 2).toFixed(1)}`;
+  }
+  return `${d}Z`;
+}
 const sheets = new Map();
 function sheet(kind, width, height) {
   const key = `${kind}:${width}x${height}`;
   if (sheets.has(key)) return sheets.get(key);
-  const [fill, shadow, stitch] = PAPERS[kind], svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width, height });
+  const [fill, shadow, stitch, trim] = PAPERS[kind], svg = shape('svg', { viewBox: `0 0 ${width} ${height}`, width, height });
   const paper = shape('g', { filter: paperFilter(svg, `cabin-ui-${++count}`, { scale: .5, grain: .55, shadow: .16 }) }, svg), d = outline(width, height, width * 7 + height);
   shape('path', { d, fill: shadow, transform: `translate(0 ${SHADOW})` }, paper);
   shape('path', { d, fill }, paper);
   const inset = height < 44 ? 5 : 8;
+  if (trim === 'snow') shape('path', { d: snowCap(width, height, width * 3 + height), fill: '#fbf8f1' }, paper);
   if (stitch && width > 40 && height > 26) shape('rect', { x: inset + 2, y: inset + 2, width: width - inset * 2 - 4, height: height - SHADOW - inset * 2 - 4, rx: Math.min(9, height / 4), fill: 'none', stroke: stitch, 'stroke-opacity': .42, 'stroke-width': 1.4, 'stroke-dasharray': '6 5' }, paper);
   const url = image(svg);
   if (sheets.size > 200) sheets.clear();

@@ -60,6 +60,37 @@ function spokes(parent) {
   for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; shape('path', { d: `M90 90L${90 + Math.cos(a) * 88} ${90 + Math.sin(a) * 88}`, stroke: '#ffffff26', 'stroke-width': 3 }, parent); }
   shape('circle', { cx: 90, cy: 90, r: 62, fill: 'none', stroke: '#ffffff1f', 'stroke-width': 2.4 }, parent);
 }
+// Across the top of the box, a pine garland with little bulbs on it (stretched to the box's width).
+const sag = x => 7 + 15 * (1 - ((x - 200) / 200) ** 2);
+function garland(parent) {
+  shape('path', { d: `M0 ${sag(0)}Q200 ${sag(200) * 2 - 7} 400 ${sag(400)}`, fill: 'none', stroke: '#2c4a3b', 'stroke-width': 3 }, parent);
+  for (let x = 2, i = 0; x < 400; x += 7, i++) {
+    const y = sag(x), tilt = (i % 3 - 1) * 28;
+    shape('ellipse', { cx: x, cy: y - 2, rx: 6, ry: 3.6, fill: ['#3f6653', '#4f7d68', '#2f5544'][i % 3], transform: `rotate(${tilt} ${x} ${y})` }, parent);
+    shape('ellipse', { cx: x + 2, cy: y + 2, rx: 5, ry: 3, fill: ['#2f5544', '#3f6653', '#4f7d68'][i % 3], transform: `rotate(${-tilt} ${x} ${y})` }, parent);
+  }
+  for (let x = 24, i = 0; x < 400; x += 44, i++) {
+    const y = sag(x) + 5;
+    shape('rect', { x: x - 2, y, width: 4, height: 3, fill: '#d8c08a' }, parent);
+    shape('ellipse', { cx: x, cy: y + 7, rx: 3.6, ry: 5, fill: ['#d9614f', '#e0b04f', '#6f9fc0', '#8fbf7f'][i % 4] }, parent);
+    shape('ellipse', { cx: x - 1.2, cy: y + 5.6, rx: 1, ry: 1.6, fill: '#ffffffaa' }, parent);
+  }
+}
+// The box's name on a red ribbon with swallow-tailed ends: snow along its top, holly at one end, a gold star at the other.
+function ribbon(parent) {
+  for (const flip of [1, -1]) {
+    const x = v => flip > 0 ? v : 300 - v;
+    shape('path', { d: `M${x(6)} 26H${x(60)}V64H${x(6)}L${x(22)} 45Z`, fill: '#8a3530' }, parent);
+    shape('path', { d: `M${x(44)} 54L${x(60)} 54L${x(60)} 64Z`, fill: '#5f2420' }, parent);
+  }
+  shape('path', { d: 'M40 14Q150 2 260 14V54Q150 42 40 54Z', fill: '#b5443c' }, parent);
+  shape('path', { d: 'M40 19Q150 7 260 19M40 49Q150 37 260 49', fill: 'none', stroke: '#e0b04f', 'stroke-width': 2 }, parent);
+  shape('path', { d: 'M38 15Q150 0 262 15V19Q254 24 246 19Q236 27 224 19Q208 23 192 17Q172 22 152 15Q132 21 114 16Q96 23 80 17Q66 24 56 18Q46 23 38 19Z', fill: '#fbf8f1' }, parent);
+  shape('path', { d: 'M34 22C40 12 52 12 58 20C52 18 50 26 44 22C42 28 36 28 34 22Z', fill: '#3f6653' }, parent);
+  shape('path', { d: 'M50 24C54 14 66 14 70 22C64 21 64 29 58 25C56 31 50 30 50 24Z', fill: '#4f7d68' }, parent);
+  for (const [x, y] of [[50, 22], [55, 26], [46, 27]]) shape('circle', { cx: x, cy: y, r: 3.2, fill: '#c63a33' }, parent);
+  shape('path', { d: 'M246 10L249.5 19 259 19.5 251.5 25.5 254 35 246 29.5 238 35 240.5 25.5 233 19.5 242.5 19Z', fill: '#e0b04f' }, parent);
+}
 function arm(parent) {
   shape('rect', { x: 46, y: 8, width: 8, height: 44, rx: 4, fill: '#4b3a30' }, parent);
   shape('circle', { cx: 50, cy: 50, r: 7, fill: '#d8c08a' }, parent);
@@ -72,7 +103,8 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, onMended, on
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   say('');
   const box = element('article', 'gearbox', layer); box.setAttribute('aria-label', '摩天輪的動力箱');
-  element('h3', 'gearbox-plaque', box, '摩天輪　動力箱');
+  paperLayer(element('span', 'gearbox-garland', box), '0 0 400 44', '', garland, { ...PAPER, preserveAspectRatio: 'none' });
+  const banner = element('h3', 'gearbox-banner', box); paperLayer(banner, '0 0 300 72', '', ribbon, PAPER); element('span', 'gearbox-name', banner, '摩天輪動力箱');
   const guide = element('p', 'gearbox-guide', box, '輪軸和曲柄之間少了齒輪。把齒輪裝到三根軸釘上，再轉轉右下角的曲柄。');
   const board = element('div', 'gearbox-board', box);
   const place = (node, [x, y], size) => Object.assign(node.style, { left: `${(x - size) / W * 100}%`, top: `${(y - size) / H * 100}%`, width: `${size * 2 / W * 100}%`, height: `${size * 2 / H * 100}%` });
