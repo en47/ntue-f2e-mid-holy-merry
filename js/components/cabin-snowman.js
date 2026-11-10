@@ -2,7 +2,8 @@
 // accessory and it flies onto him; tap it again, or tap it on him, to take it off; or start over. Every change is kept
 // (cabin-progress.js), so he is still dressed the next time you come by.
 import { paperLayer } from './paper-art.js';
-import { COMBOS, PLACES, WARDROBE, itemFor } from './cabin-wardrobe.js';
+import { COMBOS, PLACES, REMEMBERED, WARDROBE, itemFor } from './cabin-wardrobe.js';
+import { bounds, piece } from './cabin-photo.js';
 import { DEFAULT_OUTFIT, dressed } from '../services/cabin-progress.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
@@ -11,7 +12,7 @@ const centre = rect => ({ x: rect.left + rect.width / 2, y: rect.top + rect.heig
 // The picture in the drawer: most accessories show their own drawing; a pair of mittens has a tidier icon of its own.
 const picture = item => item.icon ?? [item.thumb, item.draw];
 
-export function snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti }) {
+export function snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const outfit = progress.outfit, local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
   let drawer = 'head';
@@ -81,6 +82,9 @@ export function snowmanGame({ layer, stage, cabin, say, later, sound, progress, 
   // All dressed for the first time: he spins and paper confetti flies. Some outfits make him play a part.
   function react(before, line) {
     const matches = (combo, look) => Object.entries(combo.needs).every(([place, id]) => look[place] === id);
+    // Dressed just as in the polaroid on the hat rack (once it has been seen): he remembers, and something falls from his scarf.
+    const remembers = look => matches({ needs: REMEMBERED }, look);
+    if (remembers(outfit) && !remembers(before) && progress.clues.includes('snowman-photo') && !progress.pieces.includes('snowman')) { say('雪人愣了一下，歪著頭……好像想起了什麼。'); later(1300, recall); return; }
     const combo = COMBOS.find(entry => matches(entry, outfit) && !matches(entry, before)), finished = dressed(outfit) && !dressed(before);
     if (finished) { cabin.snowmanAct('spin'); confetti(cabin.rect('snowman')); later(120, () => sound.play('cheer')); onFound('snowman'); }
     if (combo) {
@@ -89,6 +93,17 @@ export function snowmanGame({ layer, stage, cabin, say, later, sound, progress, 
       say(combo.line); return;
     }
     say(finished ? '雪人從頭到腳都打扮好了！他開心地轉了一圈。' : line);
+  }
+  // A piece of the old photograph, fallen from his scarf.
+  function recall() {
+    cabin.snowmanAct('hop'); sound.play('jingle'); progress.pieces.push('snowman'); save(); clue('snowman-piece');
+    const [x, y, w, h] = bounds('snowman'), card = element('article', 'cabin-letter piece-card', layer); card.setAttribute('aria-label', '雪人圍巾裡掉出來的東西');
+    const words = element('p', 'piece-words', card); words.textContent = '雪人的圍巾裡，掉出一張撕下來的舊照片的一角：角落用白墨水寫著「2003」。';
+    const found = element('div', 'piece-found', card); found.style.aspectRatio = `${w + 12} / ${h + 12}`;
+    paperLayer(found, `${x - 6} ${y - 6} ${w + 12} ${h + 12}`, '', g => piece('snowman', g), { paper: { scale: .35, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true });
+    const done = element('button', 'cabin-letter-close', card); done.type = 'button'; done.textContent = '收好 ✓';
+    done.addEventListener('click', () => { card.remove(); sound.play('remove'); say('照片收好了。'); });
+    done.focus({ preventScroll: true });
   }
   on(reset, 'click', () => {
     Object.assign(outfit, DEFAULT_OUTFIT); save();

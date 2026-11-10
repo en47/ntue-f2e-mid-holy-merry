@@ -151,6 +151,9 @@ for (const item of ITEMS) {
 export const WARDROBE = ITEMS;
 export const itemFor = id => ITEMS.find(item => item.id === id) ?? null;
 export const known = (place, id) => ITEMS.some(item => item.id === id && item.place === place);
+// How the snowman was dressed in the old polaroid on the little room's hat rack (cabin-photo.js): dressed so again, he
+// remembers (cabin-snowman.js).
+export const REMEMBERED = { head: 'earmuffs', neck: 'plaid-scarf', face: 'round-glasses', hand: 'lantern' };
 // Outfits that make the snowman play a part. `act` is what his paper body does (cabin-scene.js snowmanAct).
 export const COMBOS = [
   { id: 'santa', needs: { head: 'santa-hat', face: 'mustache' }, act: 'hop', line: '雪人摸摸鬍子：「Ho ho ho！」穀倉那邊有人探頭：「咦？今天怎麼又多了一位聖誕老人？……啊！原來是雪人呀！」' },

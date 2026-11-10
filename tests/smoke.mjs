@@ -446,7 +446,9 @@ await test('Santa 結局劇場：全螢幕紙雕立體書、逐字寫出、跳�
 });
 await test('Santa 線索本：看到的線索自動記下、分段提示依故事進度、紙雕筆記本', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
-  const [book, play, paper, ...games] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'js/components/cabin-pulley.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-globe.js', 'js/components/cabin-secret.js', 'js/components/cabin-feed.js', 'js/components/cabin-hearth.js'].map(read));
+  // Every game in the yard and the room may write into the book: all of js/components/cabin-*.js but the book itself.
+  const gameFiles = (await fs.readdir(path.join(project, 'js/components'))).filter(name => /^cabin-.*\.js$/.test(name) && !['cabin-notebook.js', 'cabin-play.js', 'cabin-paper.js'].includes(name)).map(name => `js/components/${name}`);
+  const [book, play, paper, ...games] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', ...gameFiles].map(read));
   const { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
   assert.ok(book.includes('export function mountNotebook') && book.includes("paperLayer(button, '0 0 48 56', 'notebook-icon', cover, PAPER)") && !book.includes('innerHTML'), 'The clue book is a paper notebook; words only through textContent');
   assert.ok(book.includes('const now = goal(progress)') && book.includes('progress.hints[now] = shown + 1; save();'), 'Hints follow the story (cabin-story.js goal) and get plainer one at a time, kept between visits');
@@ -516,6 +518,15 @@ await test('Santa 分揀架：依郵戳時間對交接表分信，分好兩封�
   assert.ok(desk.includes("pending(volunteer, 'letters') && desk.sorted ?") && secret.includes('const wrong = sortWrong(placed);') && secret.includes("progress.pieces.push('rack'); save(); clue('rack-photo');"), 'The rules check the sorting; only then do the new letters reach the desk; the piece is kept');
   assert.ok(secret.includes("else if (id === 'rack' && signedUp(volunteer)) sorting(page);") && !secret.slice(secret.indexOf('function sorting'), secret.indexOf('function showPiece')).includes('innerHTML'), 'The rack is for a signed-up substitute; words only through textContent');
   assert.ok(Object.values(RACK.places).every(place => place.length <= 3) && css.includes('.rack-letter[aria-pressed="true"]'), 'Short place names fit the envelope; a picked letter lifts');
+});
+await test('Santa 帽架上的舊拍立得：照片裡的雪人怎麼打扮，照著打扮院子的雪人，圍巾裡掉出照片一角', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [snowmanUi, secret, photoUi] = await Promise.all(['js/components/cabin-snowman.js', 'js/components/cabin-secret.js', 'js/components/cabin-photo.js'].map(read));
+  const { REMEMBERED, COMBOS, known } = await import(pathToFileURL(path.join(project, 'js/components/cabin-wardrobe.js')).href);
+  assert.ok(Object.entries(REMEMBERED).every(([place, id]) => known(place, id)) && Object.keys(REMEMBERED).length === 4, 'The polaroid\'s outfit is four things the wardrobe has, one for each place');
+  assert.ok(!COMBOS.some(combo => Object.entries(combo.needs).every(([place, id]) => REMEMBERED[place] === id)), 'It is not one of the outfits that already make him act');
+  assert.ok(photoUi.includes('itemFor(id).draw(') && photoUi.includes('snowman({ paper: board }'), 'The polaroid is drawn from the snowman\'s own paper and accessories');
+  assert.ok(secret.includes("if (id === 'hats') {") && secret.includes("clue('snowman-photo')") && snowmanUi.includes("progress.clues.includes('snowman-photo') && !progress.pieces.includes('snowman')") && snowmanUi.includes("progress.pieces.push('snowman'); save(); clue('snowman-piece');"), 'Only once the polaroid has been seen; the piece is kept and written down');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
