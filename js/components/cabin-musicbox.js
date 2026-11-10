@@ -5,7 +5,7 @@
 import { paperLayer, shape } from './paper-art.js';
 import { SUBSTITUTES, letter } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
-import { piece } from './cabin-photo.js';
+import { showOrnament } from './cabin-ornaments.js';
 import { FLIGHT_ORDER, playsOpen } from '../services/cabin-story.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
@@ -40,7 +40,7 @@ function medallion(parent) {
 }
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 
-export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, knows = () => false, clue = () => {}, progress, save = () => {} }) {
+export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, knows = () => false, clue = () => {}, gift = () => false, progress, save = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   say('把音樂盒的發條鑰匙順時針轉幾圈，放手它就會開始轉。');
   const knob = element('button', 'musicbox-knob', layer); knob.type = 'button';
@@ -48,7 +48,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
   let turn = null, clicks = 0;
   // Once the secret is known: a little drawer under the box, with a comb inside that opens it.
   const drawer = knows() && progress ? element('button', 'musicbox-drawer', layer) : null;
-  if (drawer) { drawer.type = 'button'; drawer.setAttribute('aria-label', '音樂盒底下的小抽屜'); paperLayer(drawer, '0 0 120 30', '', drawerFront, PAPER); on(drawer, 'click', () => combCard()); later(1600, () => { if (!progress.pieces.includes('music')) say('咦，音樂盒底下有一個小抽屜，上面刻著一行小字。'); }); }
+  if (drawer) { drawer.type = 'button'; drawer.setAttribute('aria-label', '音樂盒底下的小抽屜'); paperLayer(drawer, '0 0 120 30', '', drawerFront, PAPER); on(drawer, 'click', () => combCard()); later(1600, () => { if (!progress.ornaments.includes('N')) say('咦，音樂盒底下有一個小抽屜，上面刻著一行小字。'); }); }
   const gold = element('span', 'musicbox-letter', layer); gold.setAttribute('aria-hidden', 'true');
   paperLayer(gold, '0 0 100 100', '', medallion, { paper: { scale: .35, grain: .4, shadow: .25 }, eager: true });
   function layout() {
@@ -73,7 +73,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
   }
   // While it plays, the gold O rises under the turning scene; the first time, it is told and written in the clue book.
   // The drawer's comb, up close: five tines to pluck; five plucked in the right order and the drawer springs open on a
-  // torn piece of an old photograph. Played wrong, the comb buzzes and starts again.
+  // welcome ornament Nils hid for the next new substitute. Played wrong, the comb buzzes and starts again.
   let card = null;
   function combCard() {
     card?.remove(); sound.play('open'); say('');
@@ -81,7 +81,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
     element('h3', 'comb-title', card, '音樂盒底的小抽屜');
     const words = element('p', 'comb-words', card);
     const close = () => { card?.remove(); card = null; sound.play('remove'); drawer.focus({ preventScroll: true }); };
-    if (progress.pieces.includes('music')) words.textContent = '抽屜開著。那張舊照片的一角，你已經收好了。';
+    if (progress.ornaments.includes('N')) words.textContent = '抽屜開著，尼爾斯的吊飾你已經收好了。';
     else {
       words.textContent = '抽屜上刻著一行小字：「照我們那一季飛的順序，彈一次。」裡面是一排小小的音梳，每一根都刻著一個字母。';
       const comb = element('div', 'comb', card); paperLayer(comb, '0 0 300 150', 'comb-bar', combBar, PAPER);
@@ -98,7 +98,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
           sound.pluck(note); button.classList.remove('is-ringing'); void button.offsetWidth; button.classList.add('is-ringing');
           played.push(mark); dots[played.length - 1].classList.add('is-on');
           if (played.length < FLIGHT_ORDER.length) return;
-          if (playsOpen(played)) { later(500, () => { progress.pieces.push('music'); save(); clue('music-drawer'); sound.play('snap'); words.textContent = '喀噠——抽屜彈開了！'; comb.remove(); notes.remove(); opened(card, true); }); return; }
+          if (playsOpen(played)) { later(500, () => { gift('N'); clue('music-drawer'); sound.play('snap'); words.textContent = '喀噠——抽屜彈開了！'; comb.remove(); notes.remove(); opened(card, true); }); return; }
           later(450, () => { sound.play('nope'); comb.classList.remove('is-buzz'); void comb.offsetWidth; comb.classList.add('is-buzz'); words.textContent = '音梳「嗡」地響了一聲，抽屜還是卡著。照那一季飛的順序，再彈一次。'; });
           later(1100, () => { played = []; dots.forEach(dot => dot.classList.remove('is-on')); });
         });
@@ -106,14 +106,14 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
       comb.querySelector('.comb-tine').focus({ preventScroll: true });
     }
     const done = element('button', 'cabin-letter-close', card, '放回去 ✓'); done.type = 'button'; on(done, 'click', close);
-    if (progress.pieces.includes('music') && !card.querySelector('.comb')) opened(card, false);
+    if (progress.ornaments.includes('N') && !card.querySelector('.comb')) opened(card, false);
   }
-  // The drawer open: a torn corner of an old photograph, lifted out.
+  // The drawer open: Nils's ornament inside, a red paper star, and the line on its tag.
   function opened(card, fresh) {
     card.classList.add('is-open');
-    const found = element('div', 'comb-found'), done = card.querySelector('.cabin-letter-close');
-    card.insertBefore(found, done); paperLayer(found, '-6 -6 108 109', '', g => piece('music', g), { paper: { scale: .35, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true });
-    if (fresh) card.insertBefore(element('p', 'comb-words', null, '裡面夾著一張撕下來的舊照片的一角：一扇下著雪的窗。照片的其他部分，會在哪裡呢？'), done);
+    const done = card.querySelector('.cabin-letter-close');
+    if (fresh) card.insertBefore(element('p', 'comb-words', null, '裡面躺著一個紅色的紙星星吊飾，綁著一張小卡片——是尼爾斯留給新替身的見面禮。'), done);
+    showOrnament(card, 'N', done);
   }
   function playing() {
     const up = cabin.wound > 0; gold.classList.toggle('is-up', up);

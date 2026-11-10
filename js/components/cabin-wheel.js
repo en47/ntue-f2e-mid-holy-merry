@@ -5,7 +5,8 @@
 // turn, each the other way from the last, until the chain breaks off or jams; when it reaches the wheel, the wheel's
 // lamps come on and it turns again. The rules (which gears mesh, how far the turning reaches) are in cabin-gears.js.
 import { paperLayer, shape } from './paper-art.js';
-import { CRANK, PEGS, PIECES, WHEEL, drive, link, radius } from '../services/cabin-gears.js';
+import { BOARDS, PIECES, WHEEL, drive, link, radius } from '../services/cabin-gears.js';
+import { showOrnament } from './cabin-ornaments.js';
 
 const PAPER = { paper: { scale: .5, grain: .4, shadow: .2 }, eager: true };
 // Gears are small drawings: a finer cut, so the paper's rim does not fill the gaps between their teeth.
@@ -19,7 +20,14 @@ const COLOURS = { s: '#9aa6b0', m: '#7b95a6', m2: '#7b95a6', l: '#b8734a', xl: '
 const HOME = { s: [80, 150], m: [104, 150], l: [140, 150], m2: [178, 150], xl: [27, 150] };
 // The crank turns this far, with the chain whole, before the wheel catches.
 const CATCH = Math.PI * 3;
-const HINTS = ['工具盒裡好像少了最大的那個……角落的雪堆裡，是不是埋著什麼？', '齒輪要剛好咬在一起：太大會擠住，太小碰不到。從曲柄旁邊開始，一格一格接上去。', '最靠近曲柄的那一格，放最小的齒輪。'];
+// Hints for a board, plainer each time: where the missing gear is (or that it is not needed), how gears meet, and what
+// goes by the crank and by the wheel.
+const SIZE = { 8: '最小的', 12: '中等的', 15: '大的', 19: '最大的' };
+const hintsFor = ({ teeth }) => [
+  teeth.includes(19) ? '工具盒裡好像少了最大的那個……角落的雪堆裡，是不是埋著什麼？' : '這一次，雪堆裡那個最大的齒輪用不到。',
+  '齒輪要剛好咬在一起：太大會擠住，太小碰不到。從曲柄旁邊開始，一格一格接上去。',
+  `最靠近曲柄的那一格放${SIZE[teeth[2]]}齒輪，靠輪軸的那一格放${SIZE[teeth[0]]}，中間放${SIZE[teeth[1]]}。`,
+];
 
 // A gear in a box of its own, its centre in the middle: one tooth for each `teeth`, all teeth the same size, holes in the
 // bigger ones, a hub and a bolt.
@@ -40,7 +48,7 @@ function cog(teeth, colour) {
   };
 }
 // The panel behind: dark painted metal, rivets, the crank's mounting plate; the toolbox's inside.
-function panel(parent) {
+const panel = ({ pegs: PEGS, crank: CRANK }) => parent => {
   shape('rect', { x: 0, y: 0, width: W, height: H, fill: '#2f3d48' }, parent);
   for (let x = 20; x < W; x += 20) shape('path', { d: `M${x} 0V128`, stroke: '#ffffff0d', 'stroke-width': .6 }, parent);
   for (let y = 20; y < 128; y += 20) shape('path', { d: `M0 ${y}H${W}`, stroke: '#ffffff0d', 'stroke-width': .6 }, parent);
@@ -49,7 +57,7 @@ function panel(parent) {
   shape('rect', { x: 58, y: 130, width: 140, height: 40, rx: 4, fill: '#3b2a24' }, parent);
   // The three empty pegs: brass studs.
   for (const [x, y] of PEGS) { shape('circle', { cx: x, cy: y, r: 5, fill: '#a37b34' }, parent); shape('circle', { cx: x, cy: y, r: 3.2, fill: '#e2c47a' }, parent); shape('circle', { cx: x - 1, cy: y - 1, r: 1, fill: '#fff1c2' }, parent); }
-}
+};
 // In front: the toolbox's lip, and the snow drifted into the corner over the fallen gear.
 function front(parent) {
   shape('rect', { x: 56, y: 156, width: 144, height: 14, rx: 3, fill: '#a84a42' }, parent);
@@ -112,9 +120,11 @@ function arm(parent) {
 }
 
 // `again`: the wheel was mended before and runs; its gearbox is opened to set the gears once more.
-export function wheelGame({ layer, stage, cabin, say, later, sound, again = false, onMended, onClose }) {
+// `round`: how many times it has been mended; each time it opens on the next board.
+export function wheelGame({ layer, stage, cabin, say, later, sound, again = false, round = 0, progress, save = () => {}, clue = () => {}, gift = () => false, onMended, onClose }) {
   const events = new AbortController(), on = (node, type, handler, options = {}) => node.addEventListener(type, handler, { ...options, signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const setup = BOARDS[round % BOARDS.length], { pegs: PEGS, crank: CRANK } = setup, hintLines = hintsFor(setup);
   say('');
   const box = element('article', 'gearbox', layer); box.setAttribute('aria-label', '摩天輪的動力箱');
   paperLayer(element('span', 'gearbox-garland', box), '0 0 400 44', '', garland, { ...PAPER, preserveAspectRatio: 'none' });
@@ -124,7 +134,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
   const guide = element('p', 'gearbox-guide', inside, again ? '摩天輪轉得好好的。想再排一次齒輪，就把它們裝回三根軸釘上，再轉轉曲柄。' : '輪軸和曲柄之間少了齒輪。把齒輪裝到三根軸釘上，再轉轉右下角的曲柄。');
   const board = element('div', 'gearbox-board', inside);
   const place = (node, [x, y], size) => Object.assign(node.style, { left: `${(x - size) / W * 100}%`, top: `${(y - size) / H * 100}%`, width: `${size * 2 / W * 100}%`, height: `${size * 2 / H * 100}%` });
-  paperLayer(element('span', 'gearbox-art', board), `0 0 ${W} ${H}`, '', panel, PAPER);
+  paperLayer(element('span', 'gearbox-art', board), `0 0 ${W} ${H}`, '', panel(setup), PAPER);
   // The wheel's hub and spokes (turning with its gear), its lamps, and its gear.
   const wheel = element('span', 'gearbox-spokes', board); place(wheel, WHEEL.at, 90); paperLayer(wheel, '0 0 180 180', '', spokes, PAPER);
   // Their light, over the bulbs drawn on the spokes: it only shows once the wheel runs.
@@ -165,7 +175,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
       piece.node.setAttribute('aria-label', `${NAMES[piece.teeth]}（${piece.teeth} 齒）${piece.peg !== null ? `，裝在軸釘${'一二三'[piece.peg]}上` : piece.node.classList.contains('is-buried') ? '，半埋在雪裡' : '，在工具盒裡'}`);
     }
     pegs.forEach((peg, i) => peg.classList.toggle('is-ready', Boolean(selected) && selected.peg !== i));
-    const run = drive(teethOnPegs()), chain = [{ at: CRANK.at, teeth: CRANK.teeth, angle: crankAngle }];
+    const run = drive(teethOnPegs(), setup), chain = [{ at: CRANK.at, teeth: CRANK.teeth, angle: crankAngle }];
     for (let k = 1; k < run.chain.length; k++) {
       const last = chain.at(-1), next = run.chain[k], toward = Math.atan2(next.at[1] - last.at[1], next.at[0] - last.at[0]);
       const angle = toward + Math.PI - (toward - last.angle) * last.teeth / next.teeth + Math.PI / next.teeth;
@@ -244,7 +254,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
   const where = ['曲柄空轉：靠曲柄的軸釘上，還沒有咬上的齒輪。', '曲柄帶動了第一個齒輪，可是中間那一格沒咬上。', '轉到中間就停了：靠輪軸的那一格沒咬上。', '三個齒輪都在轉，可是碰不到輪軸的齒輪。'];
   function turn(delta) {
     if (mended) return;
-    const run = drive(teethOnPegs());
+    const run = drive(teethOnPegs(), setup);
     if (run.stop === 'jam') {
       if (!crank.classList.contains('is-resisting')) { sound.play('nope'); tries++; offerHint(); }
       flash(crank, 'is-resisting'); flash(handle, 'is-resisting'); guide.textContent = '卡住了！有兩個齒輪擠在一起，曲柄轉不動。'; return;
@@ -259,13 +269,19 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
     spun += delta;
     if (spun > Math.PI) { spun = 0; tries++; guide.textContent = where[run.reach]; flash(run.at >= 0 ? pegs[run.at] : wheelGear, 'is-missing'); offerHint(); }
   }
-  function offerHint() { if (tries >= 2 && hints < HINTS.length) hintButton.hidden = false; }
-  on(hintButton, 'click', () => { guide.textContent = HINTS[hints++]; if (hints >= HINTS.length) hintButton.hidden = true; });
-  later(40000, () => { if (!mended && hints < HINTS.length) hintButton.hidden = false; });
+  function offerHint() { if (tries >= 2 && hints < hintLines.length) hintButton.hidden = false; }
+  on(hintButton, 'click', () => { guide.textContent = hintLines[hints++]; if (hints >= hintLines.length) hintButton.hidden = true; });
+  later(40000, () => { if (!mended && hints < hintLines.length) hintButton.hidden = false; });
   function mend() {
     mended = true; crank.disabled = true; box.classList.add('is-running'); sound.play('jingle'); onMended();
     guide.textContent = again ? '齒輪又排好了！輪軸上的燈一盞盞亮起來。' : '喀啦——輪軸咬住了！摩天輪的燈一盞盞亮起來，又慢慢轉起來了。'; say(again ? '齒輪排好了，燈又亮了一次。' : '摩天輪修好了，又慢慢地轉了起來。');
     hintButton.hidden = true; quit.textContent = '好了 ✓'; quit.focus({ preventScroll: true });
+    // The first time: behind the gearbox door, Kris's welcome ornament.
+    if (progress && !progress.ornaments.includes('K')) later(2400, () => {
+      gift('K'); sound.play('open');
+      const actions = quit.parentNode, words = element('p', 'gearbox-guide', null, '動力箱的門內側，夾著一個藍色的紙雪花吊飾，綁著一張小卡片——是克莉絲留給新替身的見面禮。');
+      actions.parentNode.insertBefore(words, actions); showOrnament(actions.parentNode, 'K', actions).scrollIntoView({ block: 'nearest', behavior: still() ? 'auto' : 'smooth' });
+    });
     if (still()) return;
     let last = performance.now();
     const run = now => { crankAngle += (now - last) / 1000 * .8; last = now; draw(); frame = requestAnimationFrame(run); };

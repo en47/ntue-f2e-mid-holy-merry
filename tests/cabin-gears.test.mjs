@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CRANK, PEGS, PIECES, WHEEL, drive, link, radius } from '../js/services/cabin-gears.js';
+import { BOARDS, CRANK, PEGS, PIECES, WHEEL, drive, link, radius } from '../js/services/cabin-gears.js';
 
 const teeth = id => PIECES.find(piece => piece.id === id).teeth;
 test('the pegs stand so that exactly one choice of sizes reaches the wheel: small, the big one from the snow, middle', () => {
@@ -33,3 +33,17 @@ test('nothing overlaps on the board: the pegs, the crank and the wheel are sprea
   for (let i = 0; i < spots.length; i++) for (let j = i + 2; j < spots.length; j++) assert.ok(Math.hypot(spots[i][0] - spots[j][0], spots[i][1] - spots[j][1]) > radius(19) * 2, `${i} and ${j} are apart`);
   for (const [x, y] of spots) assert.ok(x > 25 && x < 175 && y > 25 && y < 125, 'inside the panel, above the toolbox');
 });
+test('every board: the gears it needs are in the toolbox, exactly one choice fits, nothing overlaps, all inside the panel', () => {
+  const sizes = [...new Set(PIECES.map(piece => piece.teeth))], box = PIECES.map(piece => piece.teeth);
+  assert.equal(BOARDS.length, 3); assert.deepEqual(BOARDS[0].pegs, PEGS); assert.deepEqual(BOARDS[0].crank, CRANK);
+  BOARDS.forEach((board, n) => {
+    const answers = [];
+    for (const a of [null, ...sizes]) for (const b of [null, ...sizes]) for (const c of [null, ...sizes]) if (drive([a, b, c], board).done) answers.push([a, b, c]);
+    assert.deepEqual(answers, [board.teeth], `board ${n}: one answer`);
+    const need = [...board.teeth], spare = [...box]; for (const t of need) { const at = spare.indexOf(t); assert.ok(at >= 0, `board ${n}: a ${t}-tooth gear is in the box`); spare.splice(at, 1); }
+    const spots = [{ at: WHEEL.at, teeth: WHEEL.teeth }, ...board.pegs.map((at, i) => ({ at, teeth: board.teeth[i] })), board.crank];
+    for (let i = 0; i < spots.length; i++) for (let j = i + 2; j < spots.length; j++) assert.ok(Math.hypot(spots[i].at[0] - spots[j].at[0], spots[i].at[1] - spots[j].at[1]) > radius(spots[i].teeth) + radius(spots[j].teeth) + 3, `board ${n}: ${i} and ${j} do not overlap`);
+    for (const { at: [x, y], teeth } of spots) assert.ok(x - radius(teeth) > 2 && x + radius(teeth) < 198 && y - radius(teeth) > 2 && y + radius(teeth) < 128, `board ${n}: inside the panel`);
+  });
+});
+

@@ -8,7 +8,8 @@ import { paperLayer, shape } from './paper-art.js';
 import { CLUES, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
 import { COLOUR_NAMES, INK, JOBS, LOG, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
 import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
-import { bounds, piece, polaroid } from './cabin-photo.js';
+import { polaroid } from './cabin-photo.js';
+import { showOrnament } from './cabin-ornaments.js';
 import { CORD, OLD_PAGE, PENCIL, SEEN, STAY, WISH, WISHES } from '../data/cabin-finale.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
@@ -63,7 +64,7 @@ const THINGS = {
 
 // The end of the story starts here too (`onInvite`, `onTwist`, `onWish`, `onStay`: cabin-play.js): the register's old page,
 // a wish for three stamps, the early shift to sign (and then the visitor's own tag on the board's empty hook).
-export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut, join, quit, onInvite, onTwist, onWish, onStay, onReplay, clue = () => {} }) {
+export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut, join, quit, onInvite, onTwist, onWish, onStay, onReplay, clue = () => {}, gift = () => false }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const story = progress.story, volunteer = progress.volunteer, finale = progress.finale, invited = () => knowsSantas(story.seen) && !signedUp(volunteer);
   say(knowsSantas(story.seen) ? `小房間裡還是老樣子：名牌、班表、守則，和那一排郵戳章。${invited() ? REGISTER.hint : ''}` : '書櫃後面是一個小房間。牆上掛著東西，桌上也擺著東西。');
@@ -129,6 +130,11 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       paperLayer(picture, '-4 -4 128 158', '', polaroid, { paper: { scale: .3, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true });
       element('p', 'secret-note', page, NOTES.polaroid); clue('snowman-photo');
     }
+    // Once Holly's old page has been read: the smallest hat was hers, and something is tucked inside it.
+    if (id === 'hats' && finale.twist) {
+      if (progress.ornaments.includes('H')) showOrnament(page, 'H');
+      else { const look = element('button', 'register-sign', page, NOTES.hatLook); look.type = 'button'; on(look, 'click', () => { look.remove(); gift('H'); sound.play('open'); element('p', 'secret-note', page, NOTES.hatGift); showOrnament(page, 'H'); }); }
+    }
     else element('p', 'secret-note', page, id === 'hats' && finale.twist ? NOTES.hatsKnown : NOTES[id]);
     const done = element('button', 'cabin-letter-close', card, id === 'oldpage' ? CORD.back : '放回去 ✓'); done.type = 'button';
     on(done, 'click', () => id === 'oldpage' ? open('register', from) : close(id, from)); done.focus({ preventScroll: true });
@@ -184,8 +190,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   }
   // The sorting rack, where the letters job starts: eight letters for six pigeonholes (N, K, H, E, O and the new
   // substitute). Pick a letter, then a pigeonhole, and it flies in; picked again, it can go elsewhere, or back to the pile.
-  // All in, the rules check (cabin-story.js): the wrong ones bounce back out; right, the two new ones go to the desk and
-  // the oldest envelope lets fall a piece of the old photograph.
+  // All in, the rules check (cabin-story.js): the wrong ones bounce back out; right, the two new ones go to the desk, and
+  // in the oldest envelope is Ola's welcome ornament.
   function sorting(page) {
     const desk = progress.desk, placed = {}, cubbies = {};
     element('h3', 'secret-title', page, RACK.title); element('p', 'secret-note rack-sign', page, RACK.sign); clue('rack-rule');
@@ -215,7 +221,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       if (fresh) letter.classList.add('is-fresh');
       if (desk.sorted) { letter.disabled = true; placed[id] = mailFor(id); } else on(letter, 'click', () => choose(letter));
     });
-    if (desk.sorted && progress.pieces.includes('rack')) showPiece(page, false);
+    if (desk.sorted && progress.ornaments.includes('O')) showOrnament(page, 'O');
     function check() {
       const wrong = sortWrong(placed);
       if (wrong) {
@@ -224,14 +230,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       }
       desk.sorted = true; save(); sound.play('cheer'); note.textContent = RACK.done; say(RACK.done);
       for (const node of page.querySelectorAll('.rack-letter')) node.disabled = true;
-      if (!progress.pieces.includes('rack')) later(1000, () => { progress.pieces.push('rack'); save(); clue('rack-photo'); sound.play('open'); showPiece(page, true); });
+      if (!progress.ornaments.includes('O')) later(1000, () => { gift('O'); sound.play('open'); element('p', 'secret-note', page, RACK.gift); showOrnament(page, 'O'); });
     }
-  }
-  // A piece of the photograph, lifted out of where it was found.
-  function showPiece(page, fresh) {
-    const [x, y, w, h] = bounds('rack'), found = element('div', 'rack-found', page);
-    found.style.aspectRatio = `${w + 12} / ${h + 12}`; paperLayer(found, `${x - 6} ${y - 6} ${w + 12} ${h + 12}`, '', g => piece('rack', g), { paper: { scale: .35, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true });
-    if (fresh) element('p', 'secret-note', page, RACK.photo);
   }
   // The cord, loose but locked: four dials to turn (a tap, or the arrow keys), and the blank slip tucked under it.
   function lock(cord, from) {

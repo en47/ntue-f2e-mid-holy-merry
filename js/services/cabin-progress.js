@@ -1,6 +1,6 @@
 // What a visitor has done in Santa's yard, kept in this browser only and never sent anywhere. One versioned record, so a
 // Christmas passport or the cabin's story can later read the same place. Every function takes the storage, so tests pass a stand-in.
-import { CLUES, LOG_ANSWER, PHOTO, SLIP, TASKS, canSign, homeShelf, readLog, readShelf } from './cabin-story.js';
+import { CLUES, GIFTS, LOG_ANSWER, SLIP, TASKS, canSign, homeShelf, readLog, readShelf } from './cabin-story.js';
 import { WISHES } from '../data/cabin-finale.js';
 import { GOALS, NOTEBOOK } from '../data/cabin-clues.js';
 
@@ -16,8 +16,9 @@ export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'car
 // (cabin-story.js). Volunteering: the initial signed in the register ('' when not signed up) and the jobs done for it. The
 // end: whether the register's blank row has been offered, the old pages untied, which wish was made, the early shift
 // signed, and which endings have been seen; the cord's lock opened, and the blank slip under it taken or read. The clue book: what has been written in it, and how many hints have been asked
-// for, by what the story was waiting on. The torn pieces of the old photograph found so far.
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog() }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, pieces: [] });
+// for, by what the story was waiting on. The substitutes' welcome ornaments found so far (by initial), and whether they
+// have been hung on the tree; how many times the big wheel's gearbox has been put right (each opens a new board).
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog() }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0 });
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
 export const dayOf = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -52,7 +53,10 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   if (progress.volunteer.tasks.includes('letters')) progress.desk.sorted = true;
   const end = saved.finale ?? {}, endings = end.endings;
   progress.finale = { invited: end.invited === true, twist: end.twist === true, unlocked: end.unlocked === true || end.twist === true, slip: SLIP.includes(end.slip) ? end.slip : 'none', wish: WISHES.some(wish => wish.id === end.wish) ? end.wish : null, stayed: end.stayed === true, endings: Array.isArray(endings) ? ['A', 'B', 'C', 'D'].filter(ending => endings.includes(ending)) : [] };
-  if (Array.isArray(saved.pieces)) progress.pieces = PHOTO.filter(id => saved.pieces.includes(id));
+  if (Number.isInteger(saved.wheelRounds) && saved.wheelRounds > 0) progress.wheelRounds = Math.min(saved.wheelRounds, 999);
+  // An earlier record kept the same finds as pieces of a photograph, by where they were found.
+  const OLD = { music: 'N', rack: 'O', snowman: 'E', wheel: 'K', hat: 'H' }, found = Array.isArray(saved.ornaments) ? saved.ornaments : Array.isArray(saved.pieces) ? saved.pieces.map(id => OLD[id]) : [];
+  progress.ornaments = GIFTS.filter(mark => found.includes(mark)); progress.tree = saved.tree === true;
   if (Array.isArray(saved.clues)) progress.clues = Object.keys(NOTEBOOK).filter(id => saved.clues.includes(id));
   const hints = saved.hints && typeof saved.hints === 'object' && !Array.isArray(saved.hints) ? saved.hints : {};
   progress.hints = Object.fromEntries(Object.keys(GOALS).filter(id => Number.isInteger(hints[id]) && hints[id] > 0).map(id => [id, Math.min(hints[id], GOALS[id].hints.length)]));
