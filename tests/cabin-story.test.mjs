@@ -54,3 +54,21 @@ test('volunteering: an initial of your own, four jobs, a point each the first ti
   volunteer.mark = ''; assert.equal(signedUp(volunteer), false); assert.equal(points(volunteer), 2, 'leaving keeps the points');
   assert.equal(record(volunteer, 'lichen'), false, 'nothing counts after leaving');
 });
+test('the end: two jobs untie the old pages, three stamps buy a wish, all four let you stay; D needs the old page too', async () => {
+  const { canUntie, canWish, canStay, trueMiracle, goesHome } = await import('../js/services/cabin-story.js');
+  const finale = { invited: true, twist: false, wish: null, stayed: false, endings: [] };
+  const volunteer = tasks => ({ mark: 'J', tasks });
+  assert.equal(canUntie(volunteer(['hay'])), false); assert.equal(canUntie(volunteer(['hay', 'wheel'])), true);
+  assert.equal(canUntie({ mark: '', tasks: ['hay', 'wheel'] }), false, 'not after leaving');
+  assert.equal(canWish(volunteer(['hay', 'wheel']), finale), false); assert.equal(canWish(volunteer(['hay', 'wheel', 'lichen']), finale), true);
+  assert.equal(canWish(volunteer(['hay', 'wheel', 'lichen']), { ...finale, wish: 'snow' }), false, 'one wish');
+  assert.equal(canStay(volunteer(['hay', 'wheel', 'lichen']), finale), false); assert.equal(canStay(volunteer(['hay', 'wheel', 'lichen', 'letters']), finale), true);
+  assert.equal(canStay(volunteer(['hay', 'wheel', 'lichen', 'letters']), { ...finale, stayed: true }), false, 'signed once');
+  assert.equal(trueMiracle({ ...finale, wish: 'snow' }), false, 'not without the old page');
+  assert.equal(trueMiracle({ ...finale, twist: true }), false, 'not without a wish or staying');
+  assert.equal(trueMiracle({ ...finale, twist: true, stayed: true }), true);
+  assert.equal(goesHome({ volunteer: { mark: '', tasks: [] }, finale }), true, 'offered the blank row, not signed: a visitor going home');
+  assert.equal(goesHome({ volunteer: { mark: '', tasks: [] }, finale: { ...finale, invited: false } }), false, 'not before the row was offered');
+  assert.equal(goesHome({ volunteer: volunteer([]), finale }), false, 'not when signed up');
+  assert.equal(goesHome({ volunteer: { mark: '', tasks: [] }, finale: { ...finale, endings: ['A'] } }), false, 'told once');
+});

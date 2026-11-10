@@ -39,3 +39,13 @@ export const points = volunteer => TASKS.filter(task => volunteer.tasks.includes
 export const pending = (volunteer, task) => signedUp(volunteer) && TASKS.includes(task) && !volunteer.tasks.includes(task);
 // A job done: it counts once, and only while signed up. Returns whether it counted.
 export function record(volunteer, task) { if (!pending(volunteer, task)) return false; volunteer.tasks.push(task); return true; }
+// The end of the story. Two jobs done, the register's old pages can be untied: Holly's wish, granted long ago, and her on
+// the shift log every year since (the second twist). Three stamps buy a wish (granted by another substitute); all four
+// jobs done, the early shift on Christmas morning can be signed (staying on). Endings: A, a visitor who saw the register's
+// blank row and went home without signing; B, a wish granted; C, staying on; D, either of those knowing what Holly knew.
+export const WISH_COST = 3;
+export const canUntie = volunteer => signedUp(volunteer) && points(volunteer) >= 2;
+export const canWish = (volunteer, finale) => signedUp(volunteer) && points(volunteer) >= WISH_COST && !finale.wish;
+export const canStay = (volunteer, finale) => signedUp(volunteer) && points(volunteer) === TASKS.length && !finale.stayed;
+export const trueMiracle = finale => finale.twist && Boolean(finale.wish || finale.stayed);
+export const goesHome = ({ volunteer, finale }) => finale.invited && !signedUp(volunteer) && !finale.endings.includes('A');
