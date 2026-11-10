@@ -33,8 +33,9 @@ for (const spot of SPOTS) {
 // The places in the room work the same way, close up; leaving one goes back to the middle of the room.
 for (const spot of ROOM_SPOTS) {
   // `turn`/`tilt`: how far a place lets you look round (the little room behind the bookcase, too narrow to see whole).
-  const { target, distance, pitch, yaw, tallDistance = distance * 1.35, fov = 34, tallFov = fov, tallDrop = 0, turn = 0, tilt = 0 } = spot.view;
-  VIEWS[spot.id] = { target, distance, tallDistance, fov, tallFov, pitch, heading: yaw, aside: 0, tallDrop, turn, minPitch: pitch - tilt, maxPitch: pitch + tilt, room: true };
+  // `open`: where the bookcase is looked at from once it stands open (from the side, past it, into the doorway).
+  const { target, distance, pitch, yaw, tallDistance = distance * 1.35, fov = 34, tallFov = fov, tallDrop = 0, turn = 0, tilt = 0, open } = spot.view;
+  VIEWS[spot.id] = { target, distance, tallDistance, fov, tallFov, pitch, heading: yaw, aside: 0, tallDrop, turn, minPitch: pitch - tilt, maxPitch: pitch + tilt, room: true, open };
 }
 const indoorView = name => name === 'inside' || VIEWS[name]?.room === true;
 const BACK_WALL = -HOUSE.depth / 2;
@@ -533,7 +534,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   stage.prepend(renderer.domElement);
 
   function goalFor(name) {
-    const settings = VIEWS[name], t = blend(), aspect = (stage.clientWidth || 1) / (stage.clientHeight || 1);
+    const t = blend(), aspect = (stage.clientWidth || 1) / (stage.clientHeight || 1);
+    let settings = VIEWS[name];
+    if (settings.open && (story.opening ? story.opening.to : story.open) > .5) settings = { ...settings, target: settings.open.target, heading: settings.open.yaw };
     if (settings.eye) {
       const lens = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(settings.span / 2)) / aspect));
       return { eye: new THREE.Vector3(...settings.eye), heading: lerp(settings.tallHeading ?? settings.heading, settings.heading, t), pitch: lerp(settings.tallPitch ?? settings.pitch, settings.pitch, t), fov: THREE.MathUtils.clamp(lens, settings.fov, settings.tallFov) };
@@ -678,12 +681,17 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (world.visible) village(t, still);
   }
   // The village keeps slowly going: the wheel and the carousel turn, waves rock, a boat bobs, gulls circle the lighthouse,
-  // skiers come down the runs and lift cabins climb. Under reduced motion each stands still where it is.
+  // skiers come down the runs and lift cabins climb. Under reduced motion each stands still where it is. The big wheel
+  // keeps its own turning, so it can slow to a stop while it stands broken (a volunteer's job) and pick up again once mended.
+  const fair = { broken: false, speed: 1, angle: 0, last: null };
   function village(t, still) {
     const turn = still ? 0 : t, wheel = sheets.get('wheel'), red = clones.get('car-red') ?? [], green = clones.get('car-green') ?? [];
-    if (wheel) wheel.holder.rotation.z = turn * .1;
+    const step = fair.last === null ? 0 : Math.min(.1, Math.max(0, t - fair.last)); fair.last = t;
+    fair.speed += ((fair.broken ? 0 : 1) - fair.speed) * Math.min(1, step * .8); fair.angle += step * .1 * fair.speed;
+    const spin = still ? 0 : fair.angle;
+    if (wheel) wheel.holder.rotation.z = spin;
     const cars = red.flatMap((car, i) => [car, green[i]]).filter(Boolean);
-    cars.forEach((car, i) => { const angle = turn * .1 + i / 8 * Math.PI * 2; car.position.set(Math.cos(angle) * WHEEL.radius, Math.sin(angle) * WHEEL.radius, .08); });
+    cars.forEach((car, i) => { const angle = spin + i / 8 * Math.PI * 2; car.position.set(Math.cos(angle) * WHEEL.radius, Math.sin(angle) * WHEEL.radius, .08); });
     carousel.rotation.y = turn * .32;
     (clones.get('horse') ?? []).forEach((horse, i, all) => {
       const angle = i / all.length * Math.PI * 2;
@@ -1130,9 +1138,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       if (open || still) restyle('back', open ? { secret: true } : undefined);
       else story.mend = setTimeout(() => { if (!disposed && story.open < .01) restyle('back', undefined); }, 2700);
       if (still) { story.opening = null; story.open = open ? 1 : 0; } else story.opening = { from: story.open, to: open ? 1 : 0, start: clock };
+      // Up close, the view turns with it: past the open case into the doorway, or square on to the shelves.
+      if (view === 'shelf') aim('shelf');
       redraw();
     },
     get bookcaseOpen() { return story.open > .5; },
+    // The big wheel broken (it slows to a stop) or going again.
+    wheelBroken(broken, animate = true) { fair.broken = broken; if (!animate || motion.matches) fair.speed = broken ? 0 : 1; redraw(); },
     // The music box: turn its key by `angle` (radians, positive winds it; it takes three turns), hold it still while a hand
     // is on it, and how wound it is now (0–1); where its key and box are on screen.
     wind(angle) { const before = musicbox.energy; musicbox.energy = THREE.MathUtils.clamp(musicbox.energy + angle / (Math.PI * 6), 0, 1); musicbox.key += (musicbox.energy - before) * Math.PI * 6; redraw(); return musicbox.energy; },

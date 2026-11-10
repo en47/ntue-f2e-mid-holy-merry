@@ -28,3 +28,14 @@ export const santaGoes = ({ used, left, home, opened }) => home && !opened && us
 export const CLUES = ['tags', 'log', 'rules'];
 export const knowsSantas = seen => CLUES.every(clue => seen.includes(clue));
 export const santaReturns = ({ home, opened, seen }) => !home && opened && knowsSantas(seen);
+// Once the secret is known, the visitor may sign the register with an initial of their own (not one already on a name
+// tag, nor Santa's S) and help: four jobs around the village, each earning a wish point the first time it is done while
+// signed up. Leaving is always allowed and keeps the points earned (they come back on signing again).
+export const TASKS = ['lichen', 'hay', 'letters', 'wheel'];
+export const TAKEN = ['N', 'K', 'H', 'E', 'O', 'S'];
+export const canSign = mark => typeof mark === 'string' && /^[A-Z]$/.test(mark) && !TAKEN.includes(mark);
+export const signedUp = volunteer => canSign(volunteer.mark);
+export const points = volunteer => TASKS.filter(task => volunteer.tasks.includes(task)).length;
+export const pending = (volunteer, task) => signedUp(volunteer) && TASKS.includes(task) && !volunteer.tasks.includes(task);
+// A job done: it counts once, and only while signed up. Returns whether it counted.
+export function record(volunteer, task) { if (!pending(volunteer, task)) return false; volunteer.tasks.push(task); return true; }

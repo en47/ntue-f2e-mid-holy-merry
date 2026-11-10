@@ -58,3 +58,11 @@ test('a solved bookcase remembers being pushed shut', () => {
   assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ story: { opened: true, shut: true } }) })).story.shut, true);
   assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ story: { opened: true, shut: 'yes' } }) })).story.shut, false);
 });
+test('volunteering is kept: a valid initial and the known jobs, once each', () => {
+  const storage = memory();
+  assert.deepEqual(readProgress(storage).volunteer, { mark: '', tasks: [] });
+  storage.setItem('holy-merry:cabin:v1', JSON.stringify({ volunteer: { mark: 'J', tasks: ['hay', 'hay', 'sweeping', 'wheel'] } }));
+  assert.deepEqual(readProgress(storage).volunteer, { mark: 'J', tasks: ['hay', 'wheel'] });
+  storage.setItem('holy-merry:cabin:v1', JSON.stringify({ volunteer: { mark: 'N', tasks: 'hay' } }));
+  assert.deepEqual(readProgress(storage).volunteer, { mark: '', tasks: [] }, 'a name tag\'s initial, or tasks that are not a list, are dropped');
+});

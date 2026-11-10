@@ -6,7 +6,7 @@ import { shape } from './paper-art.js';
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
 const TOP = .92;
 
-export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound }) {
+export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const state = progress.hoist, still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   let pull = state.locked ? 1 : 0, fall = 0, holding = 0, notch = 0;
@@ -81,7 +81,7 @@ export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, s
     if (pull >= TOP) atTop(); else { hook.hidden = true; clearTimeout(holding); holding = setTimeout(drop, 1600); }
   });
   on(hook, 'click', () => {
-    clearTimeout(holding); state.locked = true; save(); set(1); sound.play('click'); settle();
+    clearTimeout(holding); state.locked = true; save(); set(1); sound.play('click'); settle(); onTask();
     say('掛好了！乾草吊在半空中，牆腳原本被擋住的地方露出一個小暗格。'); hatch.focus({ preventScroll: true });
   });
   on(hatch, 'click', () => {

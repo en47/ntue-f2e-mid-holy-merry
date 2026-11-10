@@ -335,7 +335,7 @@ await test('Santa 書櫃可以再玩一次：開著時近看可進小房間或�
   assert.ok(books.includes("push.hidden = !replay || done || !solved(shelf)") && books.includes('toggle(true); later(2800, restart)'), 'It can simply be pushed open only while the books still spell MORE');
   assert.ok(books.includes('story.opened = true; story.shut = false; save(); onOpen()'), 'Spelling MORE again opens it again, with the same flash and creak');
   assert.ok(play.includes("restart: () => start('shelf')") && play.includes('enter: start') && !play.includes('swing: () => swing()'), 'The shelf game restarts in place; the bookcase is no longer worked from afar');
-  assert.ok(page.includes('onTouch: (id, note) => { if (note) play?.note(note); }') && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
+  assert.ok(page.includes("onTouch: (id, note) => { if (id === 'wheel' && play?.wheelBroken) play.enter('wheel'); else if (note) play?.note(note); }") && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
 });
 await test('Santa 拖曳不會卡住：放開被攔下時（例如瀏覽器擴充功能）仍會結束拖曳，書一次只拿一本、Esc 只放回書', async () => {
   const dir = path.join(project, 'js/components'), files = (await fs.readdir(dir)).filter(name => name.startsWith('cabin-') && name.endsWith('.js'));
@@ -352,6 +352,19 @@ await test('Santa 空搖椅有座面：聖誕老人出門時才出現，紙條�
   const art = await fs.readFile(path.join(project, 'js/components/cabin-art.js'), 'utf8'), scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8');
   assert.ok(art.includes("{ id: 'chair-seat', w: .74, h: .5, at: [0, .335, -.04], flat: 'seat', draw: chairSeat, chair: true }") && art.includes("at: [0, .34, -.24], draw: chairNote"), 'A level seat between the chair back and front legs, the note standing on it');
   assert.ok(scene.includes("if (board.flat === 'seat') holder.rotation.x = -Math.PI / 2;") && scene.includes("for (const id of ['chair-note', 'chair-seat'])") && scene.includes('holder.visible = story.away'), 'Laid level, and shown only while Santa is out (his thighs dip below its front edge)');
+});
+await test('Santa 替身工作：登記簿簽縮寫加入，四件工作各在第一次完成時蓋章，摩天輪壞了要修', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [secret, play, feed, pulley, desk, wheel, scene, art, page] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-play.js', 'js/components/cabin-feed.js', 'js/components/cabin-pulley.js', 'js/components/cabin-desk.js', 'js/components/cabin-wheel.js', 'js/components/cabin-scene.js', 'js/components/cabin-art.js', 'js/santa.js'].map(read));
+  const { JOBS, REGISTER } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { VOLUNTEER_LETTERS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href), { TASKS } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  assert.deepEqual(Object.keys(JOBS), TASKS); assert.equal(VOLUNTEER_LETTERS.length, 2); assert.ok(VOLUNTEER_LETTERS.every(entry => !entry.back.sign && entry.back.hand === 'you'), 'The new letters are signed with the visitor\'s own initial');
+  assert.ok(REGISTER.rows.some(([mark, count]) => mark === 'H' && count === REGISTER.full), 'Holly\'s row is already full, and she is still on the shift log');
+  assert.ok(secret.includes("else if (id === 'register' && knowsSantas(story.seen)) register(card, from);") && secret.includes('if (!canSign(char)) { tile.disabled = true;') && secret.includes("if (!leave.dataset.sure)"), 'The register is signed once the secret is known; taken initials cannot be chosen; leaving takes a second press');
+  assert.ok(play.includes("if (!record(progress.volunteer, id)) return;") && play.includes("onTask: () => task('lichen')") && play.includes("onTask: () => task('hay')") && play.includes("onTask: () => task('letters')") && play.includes("onMended: () => { task('wheel'); cabin.wheelBroken(false); }"), 'Each of the four jobs reports to one place, where the rule decides');
+  assert.ok(feed.includes("const lichenOnly = full(progress) && wants();") && pulley.includes("settle(); onTask();") && desk.includes('if (VOLUNTEER_LETTERS.every(entry => desk.stamped.includes(entry.id))) onTask();'), 'Lichen even when he is full, the hay hooked, both new letters stamped');
+  assert.ok(scene.includes('fair.speed += ((fair.broken ? 0 : 1) - fair.speed)') && scene.includes('wheelBroken(broken, animate = true)') && page.includes("if (id === 'wheel' && play?.wheelBroken) play.enter('wheel');"), 'Signed up, the big wheel slows to a stop, and a tap on it opens it to be mended');
+  assert.ok(wheel.includes('const TURNS = 2;') && wheel.includes("on(cog, 'lostpointercapture', drop)") && wheel.includes("['ArrowRight', 'ArrowDown', 'Enter', ' ']"), 'The wheel is mended by pointer or keyboard');
+  assert.ok(art.includes('open: { target: [SECRET.left + SECRET.width * .62, .7, BOOKCASE.z + .15], yaw: .55 }') && scene.includes("if (view === 'shelf') aim('shelf');"), 'Standing open, the bookcase is looked at from the side, into the doorway');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
