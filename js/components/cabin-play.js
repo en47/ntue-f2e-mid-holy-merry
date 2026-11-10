@@ -36,6 +36,32 @@ const ART = {
   gingerbread: parent => { shape('path', { d: 'M50 12C62 12 66 22 62 30 74 30 86 34 86 42 86 48 74 48 66 46L72 80C72 88 62 90 58 84L50 70 42 84C38 90 28 88 28 80L34 46C26 48 14 48 14 42 14 34 26 30 38 30 34 22 38 12 50 12Z', fill: '#b97a4a' }, parent); for (const [x, y] of [[44, 22], [56, 22]]) shape('circle', { cx: x, cy: y, r: 3, fill: '#fbf3df' }, parent); for (const y of [44, 56]) shape('circle', { cx: 50, cy: y, r: 4, fill: '#a84a42' }, parent); },
 };
 
+// A North Pole postage stamp, 120 × 144: perforated edges, a red and a green frame, holly, a postmark over one corner and
+// snowflakes; the words go over it (`task` below).
+const STAMP = { paper: { scale: .3, grain: .35, shadow: .25 }, eager: true };
+function perforated(x0, y0, x1, y1, step = 10, bite = 2.6) {
+  let d = `M${x0} ${y0}`;
+  const edge = (ax, ay, bx, by) => {
+    const length = Math.hypot(bx - ax, by - ay), n = Math.round(length / step), ux = (bx - ax) / length, uy = (by - ay) / length;
+    for (let i = 0; i < n; i++) { const a = (i + .5) * length / n - bite, b = a + bite * 2; d += `L${(ax + ux * a).toFixed(1)} ${(ay + uy * a).toFixed(1)}A${bite} ${bite} 0 0 0 ${(ax + ux * b).toFixed(1)} ${(ay + uy * b).toFixed(1)}`; }
+    d += `L${bx} ${by}`;
+  };
+  edge(x0, y0, x1, y0); edge(x1, y0, x1, y1); edge(x1, y1, x0, y1); edge(x0, y1, x0, y0);
+  return `${d}Z`;
+}
+function postage(parent) {
+  shape('path', { d: perforated(6, 6, 114, 138), fill: '#fffaf0' }, parent);
+  shape('rect', { x: 15, y: 15, width: 90, height: 114, rx: 3, fill: '#fbf1dc', stroke: '#b5443c', 'stroke-width': 3 }, parent);
+  shape('rect', { x: 20, y: 20, width: 80, height: 104, rx: 2, fill: 'none', stroke: '#3f6653', 'stroke-width': 1.2 }, parent);
+  shape('path', { d: 'M22 34C28 24 38 24 42 32C36 30 34 38 28 34C26 40 20 40 22 34Z', fill: '#3f6653' }, parent);
+  shape('path', { d: 'M48 30C44 20 34 19 30 26C36 25 37 33 42 30C44 36 50 35 48 30Z', fill: '#4f7d68' }, parent);
+  for (const [x, y] of [[37, 32], [33, 36], [41, 36]]) shape('circle', { cx: x, cy: y, r: 3, fill: '#c63a33' }, parent);
+  shape('circle', { cx: 88, cy: 34, r: 15, fill: 'none', stroke: '#b5443c', 'stroke-width': 2, opacity: .5 }, parent);
+  shape('circle', { cx: 88, cy: 34, r: 10.5, fill: 'none', stroke: '#b5443c', 'stroke-width': 1, opacity: .45 }, parent);
+  for (const y of [27, 33, 39]) shape('path', { d: `M66 ${y}q4 -3 8 0t8 0t8 0t8 0t8 0`, fill: 'none', stroke: '#b5443c', 'stroke-width': 1.3, opacity: .38 }, parent);
+  for (const [x, y] of [[30, 114], [90, 114]]) for (let a = 0; a < 3; a++) { const c = Math.cos(a * Math.PI / 3) * 4.5, n = Math.sin(a * Math.PI / 3) * 4.5; shape('path', { d: `M${x - c} ${y - n}L${x + c} ${y + n}`, stroke: '#9fc3d8', 'stroke-width': 1.5, 'stroke-linecap': 'round' }, parent); }
+}
+
 export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {}, onSanta = () => {} } = {}) {
   const layer = element('div', 'cabin-play', stage), caption = element('p', 'cabin-caption', layer);
   caption.setAttribute('aria-hidden', 'true'); caption.hidden = true;
@@ -142,8 +168,13 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     if (!record(progress.volunteer, id)) return;
     save(); later(1500, () => {
       sound.play('thud'); say(DONE(JOBS[id][0], points(progress.volunteer), TASKS.length));
-      const stamp = element('p', 'volunteer-stamp', layer); stamp.setAttribute('aria-hidden', 'true');
-      stamp.textContent = `替身工作 ✓\n${points(progress.volunteer)}／${TASKS.length}`; later(3200, () => stamp.remove());
+      // A postage stamp lands on the corner of the scene: the job done, a gold star for each point.
+      const stamp = element('div', 'volunteer-stamp', layer); stamp.setAttribute('aria-hidden', 'true'); paperLayer(stamp, '0 0 120 144', '', postage, STAMP);
+      const words = element('div', 'stamp-words', stamp);
+      element('span', 'stamp-kicker', words).textContent = '替身工作'; element('span', 'stamp-done', words).textContent = '完成！';
+      const stars = element('span', 'stamp-stars', words);
+      for (let i = 0; i < TASKS.length; i++) element('span', i < points(progress.volunteer) ? 'is-on' : '', stars).textContent = '★';
+      later(3700, () => stamp.remove());
     });
   }
   // What has been used in the room on this visit; whether the secret behind the bookcase is known.

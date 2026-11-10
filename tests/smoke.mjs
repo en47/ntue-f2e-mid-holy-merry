@@ -367,6 +367,8 @@ await test('Santa 替身工作：登記簿簽縮寫加入，四件工作各在�
   assert.ok(art.includes('open: { target: [SECRET.left + SECRET.width * .62, .7, BOOKCASE.z + .15], yaw: .55 }') && scene.includes("if (view === 'shelf') aim('shelf');"), 'Standing open, the bookcase is looked at from the side, into the doorway');
   assert.ok(scene.includes('settings = settingsOf(name);') && scene.includes('const home = () => { const settings = settingsOf(view);'), 'The aim and the turning limit read the same settings, so a resize or a drag does not swing the view back and forth');
   assert.ok(wheel.includes("place(wheel, WHEEL.at, 90); paperLayer(wheel, '0 0 180 180', '', spokes, PAPER)"), 'The wheel\'s spokes are drawn whole round its hub, so no gap turns into view');
+  const paper = await read('js/components/cabin-paper.js');
+  assert.ok(paper.includes("['.gearbox-actions button', 'holly']") && paper.includes("if (trim === 'snow')") && wheel.includes("paperLayer(banner, '0 0 300 72', '', ribbon, PAPER)") && play.includes("paperLayer(stamp, '0 0 120 144', '', postage, STAMP)"), 'The gearbox has a ribbon banner and snow-capped paper buttons; a job done lands as a postage stamp');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');

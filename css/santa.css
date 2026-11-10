@@ -284,12 +284,22 @@
 .register-sign:disabled { opacity: .45; }
 .register-leave { color: #6b5a4c; background: none; text-decoration: underline; }
 .letter-back[data-hand="you"] :is(.letter-note, .letter-sign) { color: var(--red); rotate: -1.5deg; }
-/* 完成一件替身工作：一枚郵戳從畫面上方蓋下來。 */
-.volunteer-stamp { position: absolute; top: 4.6rem; right: 1.2rem; display: grid; place-items: center; width: 6.2rem; aspect-ratio: 1; margin: 0; color: #a84a42; background: #fffdf6e6; border: 4px double #a84a42; border-radius: 50%; font-family: var(--font-hand); font-size: var(--fs-small); text-align: center; white-space: pre-line; line-height: 1.4; rotate: -12deg; pointer-events: none; animation: stamp-down .45s cubic-bezier(.3, 1.6, .5, 1) both; }
-@keyframes stamp-down { from { opacity: 0; scale: 1.6; } to { opacity: 1; scale: 1; } }
+/* 完成一件替身工作：一張北極郵票蓋在畫面右上（齒孔、紅綠雙框、冬青、郵戳），寫著完成，金星是點數。 */
+.volunteer-stamp { position: absolute; top: 4.4rem; right: 1.2rem; width: 7.6rem; aspect-ratio: 120 / 144; rotate: 7deg; pointer-events: none; filter: drop-shadow(0 6px 8px #3b2a2455); animation: stamp-land .65s cubic-bezier(.3, 1.5, .5, 1) both, stamp-leave .5s 3.15s ease-in both; }
+.stamp-words { position: absolute; inset: 34% 14% 16%; display: grid; place-content: center; justify-items: center; gap: .1rem; text-align: center; }
+.stamp-kicker { color: #3f6653; font-family: var(--font-hand); font-size: var(--fs-small); letter-spacing: .14em; }
+.stamp-done { color: #b5443c; font-family: var(--font-display); font-size: var(--fs-body); }
+.stamp-stars { display: flex; gap: .12rem; color: #dccaa9; font-size: var(--fs-small); }
+.stamp-stars .is-on { color: #e0b04f; text-shadow: 0 0 5px #ffd36e; }
+@keyframes stamp-land { from { opacity: 0; scale: 1.8; rotate: -12deg; } 60% { opacity: 1; scale: .94; } to { scale: 1; rotate: 7deg; } }
+@keyframes stamp-leave { to { opacity: 0; translate: 0 -14px; } }
+@media (max-width: 700px) { .volunteer-stamp { width: 6.2rem; right: .6rem; } }
 /* 摩天輪動力箱：木框裡一塊深色金屬面板，黃銅銘牌；三根軸釘、工具盒裡的齒輪、雪堆裡半埋的特大齒輪，右下角的曲柄。 */
-.gearbox { position: absolute; left: 50%; top: 50%; width: min(34rem, calc(100% - 1.5rem)); max-height: calc(100% - 1.5rem); overflow: auto; padding: .8rem .9rem .9rem; translate: -50% -50%; color: #f4ead4; background: linear-gradient(#7a5236, #5d3d28); border-radius: 14px; box-shadow: inset 0 0 0 3px #8f6646, inset 0 0 0 6px #4a3020, 0 18px 40px #1d140e88; pointer-events: auto; }
-.gearbox-plaque { width: fit-content; margin: 0 auto .45rem; padding: .2rem 1.1rem; color: #4a3020; background: linear-gradient(#ecd28b, #c9a14a); border-radius: 6px; box-shadow: inset 0 0 0 2px #f6e3a8, 0 2px 0 #8a6a2c; font-family: var(--font-display); font-size: var(--fs-body); letter-spacing: .12em; }
+.gearbox { position: absolute; left: 50%; top: 50%; width: min(34rem, calc(100% - 1.5rem)); max-height: calc(100% - 1.5rem); overflow: auto; padding: .3rem .9rem .9rem; translate: -50% -50%; color: #f4ead4; background: linear-gradient(#7a5236, #5d3d28); border-radius: 14px; box-shadow: inset 0 0 0 3px #8f6646, inset 0 0 0 6px #4a3020, 0 18px 40px #1d140e88; pointer-events: auto; }
+/* 頂端一串松枝與小燈泡，前面一條紅緞帶橫幅寫著名字（上緣積雪、冬青、金星）。 */
+.gearbox-garland { position: absolute; left: .5rem; right: .5rem; top: .2rem; height: 2.3rem; pointer-events: none; }
+.gearbox-banner { position: relative; display: grid; place-items: center; width: min(19rem, 88%); aspect-ratio: 300 / 72; margin: .3rem auto .1rem; filter: drop-shadow(0 3px 2px #1d140e66); }
+.gearbox-name { position: relative; translate: 0 -6%; color: #fff6e6; font-family: var(--font-display); font-size: var(--fs-body); letter-spacing: .16em; text-shadow: 0 1px 0 #7f312c; }
 .gearbox-guide { min-height: 3em; margin: 0 0 .5rem; font-size: var(--fs-small); line-height: 1.5; text-align: center; }
 .gearbox-board { position: relative; aspect-ratio: 200 / 170; overflow: hidden; border-radius: 8px; box-shadow: inset 0 0 0 2px #1d262e; perspective: 900px; touch-action: none; }
 .gearbox-board > * { position: absolute; }
@@ -329,8 +339,11 @@
 .gearbox-door-sign { padding: .2rem .8rem; color: #fbf3df; background: #a84a42; border-radius: 4px; font-weight: 700; letter-spacing: .2em; rotate: -4deg; }
 @keyframes door-open { to { transform: rotateY(-105deg); opacity: .2; } }
 .gearbox-actions { display: flex; justify-content: center; gap: .5rem; margin-top: .6rem; }
-.gearbox-actions button { padding: .4rem 1.1rem; color: #4a3020; background: linear-gradient(#ecd28b, #c9a14a); border: 0; border-radius: 8px; box-shadow: 0 3px 0 #8a6a2c; font-size: var(--fs-small); font-weight: 700; }
-.gearbox-actions .gearbox-hint { color: #f4ead4; background: none; box-shadow: none; text-decoration: underline; }
+.gearbox-actions button { padding: .45rem 1.2rem; color: #fff6e6; background: #b5443c; border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; }
+.gearbox-actions .gearbox-hint { background: #3f6653; }
+/* 紙雕按鈕：紅紙（提示是松綠紙）、頂端積雪，沒有縫線（cabin-paper.js）。 */
+.cabin[data-paper] .gearbox-actions button { padding: .8rem 1.35rem .55rem; background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border-radius: 0; text-shadow: 0 1px 0 #00000040; }
+.cabin[data-paper] .gearbox-actions button:active { translate: 0 2px; }
 /* 手機：紙卡往下讓出左上角的返回鈕。 */
 @media (max-width: 700px) { .secret-card, .gearbox { top: calc(50% + 1.6rem); max-height: calc(100% - 5.2rem); } }
 @media (prefers-reduced-motion: reduce) { .volunteer-stamp, .gearbox-peg.is-ready, .gearbox-peg.is-missing, .gearbox-piece.is-jammed, .gearbox-gear.is-missing, .gearbox-crank.is-resisting, .gearbox-arm.is-resisting, .gearbox.is-running .gearbox-lamp { animation: none; } .gearbox-piece { transition: none; } }
