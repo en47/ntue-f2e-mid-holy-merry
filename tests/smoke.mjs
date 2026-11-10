@@ -348,6 +348,11 @@ await test('Santa 拖曳不會卡住：放開被攔下時（例如瀏覽器擴�
   assert.ok(scene.includes('if (other !== mesh && other.userData.held)') && scene.includes('mesh.userData.held = false; mesh.rotation.z = 0; } });'), 'Only one book is ever held; laying out the shelf leaves none in hand');
   assert.ok(books.includes("document.addEventListener('keydown', event => { if (event.key === 'Escape' && picked >= 0)") && books.includes('capture: true, signal: events.signal });'), 'Esc puts a picked book back before the page takes it as stepping out');
 });
+await test('Santa 空搖椅有座面：聖誕老人出門時才出現，紙條立在座面上', async () => {
+  const art = await fs.readFile(path.join(project, 'js/components/cabin-art.js'), 'utf8'), scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8');
+  assert.ok(art.includes("{ id: 'chair-seat', w: .74, h: .5, at: [0, .335, -.04], flat: 'seat', draw: chairSeat, chair: true }") && art.includes("at: [0, .34, -.24], draw: chairNote"), 'A level seat between the chair back and front legs, the note standing on it');
+  assert.ok(scene.includes("if (board.flat === 'seat') holder.rotation.x = -Math.PI / 2;") && scene.includes("for (const id of ['chair-note', 'chair-seat'])") && scene.includes('holder.visible = story.away'), 'Laid level, and shown only while Santa is out (his thighs dip below its front edge)');
+});
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
   assert.ok(!html.includes('wish-keepsakes') && !html.includes('envelope-list" id="envelope-list"'));
