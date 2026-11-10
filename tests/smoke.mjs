@@ -505,7 +505,7 @@ await test('Santa 音樂盒底的抽屜：照交接表上第一次飛的順序�
   assert.ok(music.includes("const drawer = knows() && progress ? element('button', 'musicbox-drawer', layer) : null;") && music.includes('if (playsOpen(played))') && music.includes("gift('N'); clue('music-drawer');"), 'Only once the secret is known; the rules decide; the ornament is kept and written down');
   const comb = music.slice(music.indexOf('const COMB = ['), music.indexOf('];', music.indexOf('const COMB = [')));
   assert.deepEqual([...comb.matchAll(/\['([A-Z])', '([A-G]\d)'/g)].map(([, mark]) => mark).sort(), [...FLIGHT_ORDER].sort(), 'One tine for each substitute');
-  assert.ok(sound.includes('pluck(note) { if (PITCH[note] && boxReady())') && css.includes('@keyframes tine-ring'), 'The tines ring in the box\'s own voice');
+  assert.ok(sound.includes('pluck(note) {') && sound.includes('if (boxReady()) try { tone(PITCH[note]') && css.includes('@keyframes tine-ring'), 'The tines ring in the box\'s own voice');
 });
 await test('Santa 分揀架：依郵戳時間對交接表分信，分好兩封新信才到書桌，舊信封裡是歐拉的吊飾', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
@@ -544,6 +544,14 @@ await test('Santa 支線不會被錯過：線索本裡的見面禮進度與提�
   assert.deepEqual([...GIFT_ORDER].sort(), [...GIFTS].sort()); assert.ok(GIFTS.every(mark => GIFT_HINTS[mark]), 'A hint for every gift');
   assert.ok(book.includes('見面禮：找到 ${have.length}／${GIFTS.length}') && book.includes('progress.hints.gifts = asked + 1; save();'), 'The clue book counts the gifts found and hints at the next, one at a time');
   assert.ok(globe.includes('flakes.filter(flake => flake.still).length >= flakes.length * .85') && hearth.includes('Math.max(30, rects.mouth.width * .2)'), 'The sign is told once most snow is down; the carving is big enough to read');
+});
+await test('Santa 打磨（二）：信與名牌可以拖曳（放開被攔下也會結束）、音樂開著音梳也有聲、線改成紙雕筆觸', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [secret, sound, book, css] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-sound.js', 'js/components/cabin-notebook.js', 'css/santa.css'].map(read));
+  assert.ok(secret.includes("on(node, 'pointerup', end); on(node, 'pointercancel', end); on(node, 'lostpointercapture', end);") && secret.includes("draggable(letter, '.rack-slot, .rack-pile'") && secret.includes("draggable(pick, '.shift-cell'"), 'Letters and name tags can be dragged; a swallowed release still ends the drag');
+  assert.ok(secret.includes('!node.contains(dragged)') && css.includes(':is(.rack-letter, .shift-pick) :is(.art-layer, img) { pointer-events: none; -webkit-user-drag: none;'), 'The drop finds what lies under the pointer, and the paper inside is never dragged off as an image');
+  assert.ok(sound.includes('else if (on() && start())') && secret.includes("classList.add('shift-ring')") && !/\.shift-cell\[aria-pressed="true"\] \{ outline/.test(css), 'With the music on a tine still answers; the chosen cell is circled in pencil, not outlined');
+  assert.ok(book.includes('const divider = parent => paperLayer(') && !/\.notebook-hints \{[^}]*border-top/.test(css), 'The clue book\'s parts are divided by a pencil line, not a ruled border');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');

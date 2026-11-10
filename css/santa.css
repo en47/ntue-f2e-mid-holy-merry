@@ -611,7 +611,8 @@ html.theatre-open { overflow: hidden; }
 .notebook-clues { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; font-size: var(--fs-small); line-height: 1.7; }
 .notebook-place { display: block; color: #8f5a3c; }
 .notebook-clues .is-fresh .notebook-place::after { content: ' ★ 新'; color: #c08a3e; }
-.notebook-hints { display: grid; gap: .35rem; margin-top: .3rem; padding-top: .7rem; border-top: 2px solid #ecdcbf; }
+.notebook-hints { display: grid; gap: .35rem; }
+.notebook-rule { position: relative; height: .9rem; margin: .2rem 0 0; }
 .notebook-goal { margin: 0; color: #3f6653; font-size: var(--fs-small); }
 .notebook-hint-line { margin: 0; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; }
 .notebook-hint, .notebook-close { justify-self: start; padding: .45rem 1rem; border: 0; border-radius: 0; font-weight: 700; font-size: var(--fs-small); background: transparent no-repeat 0 0 / 100% 100%; cursor: pointer; }
@@ -630,7 +631,9 @@ html.theatre-open { overflow: hidden; }
 .shift-cell .ink-layer { pointer-events: none; transition: opacity .8s ease; }
 .shift-mark { position: relative; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; }
 .shift-ink { position: absolute; right: .3rem; bottom: .1rem; color: var(--muted); font-size: var(--fs-small); opacity: .8; }
-.shift-cell[aria-pressed="true"] { outline: 2px solid var(--red); outline-offset: 1px; }
+.shift-cell .shift-ring { opacity: 0; transition: opacity .2s ease; }
+.shift-cell[aria-pressed="true"] .shift-ring { opacity: 1; }
+.shift-cell.is-over .shift-ring { opacity: .55; }
 .shift-cell:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 .shift-cell:disabled { cursor: default; opacity: 1; }
 .shift-grid.is-wrong { animation: shift-wrong .5s ease; }
@@ -643,7 +646,7 @@ html.theatre-open { overflow: hidden; }
 .shift-grid.is-solved .shift-cell:nth-of-type(n + 7) .shift-mark { animation-delay: .75s; }
 @keyframes shift-dry { from { opacity: .2; filter: blur(2px); } }
 .shift-picks { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 .9rem; }
-.shift-pick { min-width: 2.8rem; padding: .35rem .7rem; border: 0; border-radius: 0; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; background: transparent no-repeat 0 0 / 100% 100%; cursor: pointer; }
+.shift-pick { position: relative; touch-action: none; transition: translate .2s ease; min-width: 2.8rem; padding: .35rem .7rem; border: 0; border-radius: 0; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; background: transparent no-repeat 0 0 / 100% 100%; cursor: pointer; }
 .shift-pick:hover { translate: 0 -2px; }
 .shift-pick:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 .shift-erase { color: var(--muted); font-family: var(--font-body); font-size: var(--fs-small); }
@@ -740,7 +743,7 @@ html.theatre-open { overflow: hidden; }
 .rack-in .rack-letter:nth-child(3) { translate: -4% -24%; rotate: -3deg; }
 .rack-in :is(.rack-text, .rack-place) { display: none; }
 .rack-pile { display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; min-height: 4.6rem; margin: 0 0 .8rem; padding: .3rem; }
-.rack-letter { position: relative; width: 7.4rem; aspect-ratio: 120 / 80; padding: 0; border: 0; border-radius: 0; background: none; cursor: pointer; transition: translate .2s ease, rotate .2s ease; }
+.rack-letter { position: relative; touch-action: none; width: 7.4rem; aspect-ratio: 120 / 80; padding: 0; border: 0; border-radius: 0; background: none; cursor: pointer; transition: translate .2s ease, rotate .2s ease; }
 .rack-letter:disabled { cursor: default; opacity: 1; }
 .rack-letter[aria-pressed="true"] { translate: 0 -8px; rotate: -4deg; }
 .rack-letter:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
@@ -769,8 +772,13 @@ html.theatre-open { overflow: hidden; }
 .tree-last { color: #b5443c; font-weight: 700; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .ornament-found, .ornament-hung, .ornament-hung.is-mine { animation: none; } }
 /* 線索本裡的見面禮：五個位置，找到的是彩色吊飾，還沒找到的是淡淡的問號。 */
-.notebook-gifts { display: grid; gap: .35rem; margin-top: .3rem; padding-top: .7rem; }
+.notebook-gifts { display: grid; gap: .35rem; }
 .gift-row { display: flex; justify-content: center; gap: .5rem; }
 .gift-slot { position: relative; width: 2.7rem; aspect-ratio: 112 / 140; }
 .gift-slot.is-found { animation: ornament-sway 2.6s ease-in-out infinite alternate; transform-origin: 50% 0; }
 @media (prefers-reduced-motion: reduce) { .gift-slot.is-found { animation: none; } }
+/* 拖曳中的信和名牌跟著手走、浮在最上面；拖到格子上時，格子微微抬起。 */
+.rack-letter.is-dragging, .shift-pick.is-dragging { z-index: 6; transition: none; rotate: -5deg; filter: drop-shadow(0 8px 8px #3b2a2440); }
+.rack-slot.is-over { translate: 0 -3px; }
+/* 拖曳時抓的是信封、名牌本身：裡面的紙雕圖不能被瀏覽器當成圖片拖走。 */
+:is(.rack-letter, .shift-pick) :is(.art-layer, img) { pointer-events: none; -webkit-user-drag: none; user-select: none; }

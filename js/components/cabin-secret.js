@@ -66,6 +66,33 @@ const THINGS = {
 // a wish for three stamps, the early shift to sign (and then the visitor's own tag on the board's empty hook).
 export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut, join, quit, onInvite, onTwist, onWish, onStay, onReplay, clue = () => {}, gift = () => false }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
+  // A paper thing dragged by pointer: it follows the hand and, let go over a target (`over`, a selector), `drop` gets that
+  // target; anywhere else it springs back. A press without moving is still a click. A release swallowed before it reaches
+  // the page (some browser extensions) still ends the drag: the pointer is let go where it last was.
+  // What lies under the pointer, past the thing being dragged and whatever holds it.
+  const targetAt = ([x, y], over, dragged) => document.elementsFromPoint(x, y).find(node => node.matches(over) && !node.disabled && !node.contains(dragged));
+  function draggable(node, over, drop) {
+    let drag = null, lit = null;
+    const light = target => { if (lit === target) return; lit?.classList.remove('is-over'); lit = target; lit?.classList.add('is-over'); };
+    on(node, 'click', event => { if (node.dataset.dragged) { delete node.dataset.dragged; event.stopImmediatePropagation(); } });
+    on(node, 'pointerdown', event => { if (event.button > 0 || node.disabled) return; drag = { id: event.pointerId, from: [event.clientX, event.clientY], last: [event.clientX, event.clientY], moved: false }; node.setPointerCapture(event.pointerId); });
+    on(node, 'pointermove', event => {
+      if (!drag || event.pointerId !== drag.id) return;
+      drag.last = [event.clientX, event.clientY]; const dx = drag.last[0] - drag.from[0], dy = drag.last[1] - drag.from[1];
+      if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+      if (!drag.moved) { drag.moved = true; node.classList.add('is-dragging'); sound.play('pick'); }
+      node.style.translate = `${dx}px ${dy}px`; light(targetAt(drag.last, over, node) ?? null);
+    });
+    const end = event => {
+      if (!drag || event.pointerId !== drag.id) return;
+      const { moved, last } = drag; drag = null; light(null); node.classList.remove('is-dragging');
+      if (!moved) return;
+      node.dataset.dragged = '1'; setTimeout(() => delete node.dataset.dragged, 0);
+      const target = event.type === 'pointercancel' ? null : targetAt(last, over, node);
+      if (target) drop(target); else { node.style.translate = ''; sound.play('drop'); }
+    };
+    on(node, 'pointerup', end); on(node, 'pointercancel', end); on(node, 'lostpointercapture', end);
+  }
   const story = progress.story, volunteer = progress.volunteer, finale = progress.finale, invited = () => knowsSantas(story.seen) && !signedUp(volunteer);
   say(knowsSantas(story.seen) ? `小房間裡還是老樣子：名牌、班表、守則，和那一排郵戳章。${invited() ? REGISTER.hint : ''}` : '書櫃後面是一個小房間。牆上掛著東西，桌上也擺著東西。');
   const buttons = Object.entries(THINGS).map(([id, [, , name]]) => {
@@ -156,6 +183,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
         const index = night * 2 + half, state = INK[index], writer = NIGHTS[night][half + 1];
         const cell = element('button', 'shift-cell', grid); cell.type = 'button'; cell.dataset.ink = state; cells.push(cell);
         inked(cell, '0 0 80 44', ink => state === 'blot' ? blot(ink, COLOURS[writer], index * 7 + 3) : state === 'washed' ? stain(ink, index * 5 + 1) : null);
+        inked(cell, '0 0 80 44', ink => shape('ellipse', { cx: 40, cy: 22, rx: 34, ry: 17, fill: 'none', stroke: '#b5443c', 'stroke-width': 2, transform: 'rotate(-4 40 22)' }, ink)).classList.add('shift-ring');
         const mark = element('span', 'shift-mark', cell);
         const hint = state === 'blot' ? `暈開的${COLOUR_NAMES[writer]}色墨水` : state === 'washed' ? '整個洗掉了' : '還看得清楚';
         if (state === 'blot') element('span', 'shift-ink', cell, `${COLOUR_NAMES[writer]}色`);
@@ -169,8 +197,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     if (solved()) return;
     // The name tags to write with, and an eraser.
     const picks = element('div', 'shift-picks', page);
-    const write = mark => {
-      const empty = log.findIndex((value, i) => !value && i !== LOG_GIVEN), at = chosen >= 0 ? chosen : empty;
+    const write = (mark, cell = chosen) => {
+      const empty = log.findIndex((value, i) => !value && i !== LOG_GIVEN), at = cell >= 0 ? cell : empty;
       if (at < 0) return;
       log[at] = mark; save(); cells[at].show(); sound.play(mark ? 'snap' : 'remove');
       // Next, the next empty cell.
@@ -178,7 +206,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       chosen = next; cells.forEach((each, i) => each.hasAttribute('aria-pressed') && each.setAttribute('aria-pressed', String(i === next)));
       if (next < 0) check();
     };
-    for (const mark of WHO) { const pick = element('button', 'shift-pick', picks, `${mark}.`); pick.type = 'button'; pick.style.color = COLOURS[mark]; pick.setAttribute('aria-label', `寫上 ${mark}.（${NAMES[mark]}）`); on(pick, 'click', () => write(mark)); }
+    for (const mark of WHO) { const pick = element('button', 'shift-pick', picks, `${mark}.`); pick.type = 'button'; pick.style.color = COLOURS[mark]; pick.setAttribute('aria-label', `寫上 ${mark}.（${NAMES[mark]}）`); draggable(pick, '.shift-cell', cell => { pick.style.translate = ''; write(mark, cells.indexOf(cell)); }); on(pick, 'click', () => write(mark)); }
     const erase = element('button', 'shift-pick shift-erase', picks, LOG.erase); erase.type = 'button';
     on(erase, 'click', () => { if (chosen >= 0 && log[chosen]) { log[chosen] = ''; save(); cells[chosen].show(); sound.play('remove'); } });
     function check() {
@@ -200,7 +228,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     let picked = null;
     const choose = node => { picked = picked === node ? null : node; for (const each of page.querySelectorAll('.rack-letter')) each.setAttribute('aria-pressed', String(each === picked)); if (picked) sound.play('pick'); };
     const move = (node, into) => {
-      const before = node.getBoundingClientRect(); into.append(node); const after = node.getBoundingClientRect();
+      const before = node.getBoundingClientRect(); node.style.translate = ''; into.append(node); const after = node.getBoundingClientRect();
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches && after.width) node.animate([{ transform: `translate(${before.left - after.left}px, ${before.top - after.top}px) scale(${before.width / after.width})` }, { transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.3,1.25,.5,1)' });
     };
     for (const mark of [...WHO, 'you']) {
@@ -209,9 +237,13 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       const name = element('span', 'rack-name', box, `${mark === 'you' ? volunteer.mark : mark}.`); name.style.color = mark === 'you' ? '#b5443c' : COLOURS[mark];
       slot.setAttribute('aria-label', mark === 'you' ? `你的格子（${volunteer.mark}.）` : `${NAMES[mark]}的格子（${mark}.）`);
       cubbies[mark] = element('span', 'rack-in', box);
-      on(slot, 'click', () => { if (!picked || desk.sorted) return; placed[picked.dataset.id] = mark; move(picked, cubbies[mark]); sound.play('snap'); choose(picked); if (!pile.querySelector('.rack-letter')) later(550, check); });
+      slot.dataset.mark = mark;
+      on(slot, 'click', () => { if (picked && !desk.sorted) put(picked, mark); });
     }
-    on(pile, 'click', event => { if (picked && !pile.contains(picked) && event.target === pile) { delete placed[picked.dataset.id]; move(picked, pile); sound.play('remove'); choose(picked); } });
+    // Into a pigeonhole, or back to the pile; all in, the rules check.
+    function put(node, mark) { placed[node.dataset.id] = mark; move(node, cubbies[mark]); sound.play('snap'); if (picked) choose(picked); if (!pile.querySelector('.rack-letter')) later(550, check); }
+    function unput(node) { delete placed[node.dataset.id]; move(node, pile); sound.play('remove'); if (picked) choose(picked); }
+    on(pile, 'click', event => { if (picked && !pile.contains(picked) && event.target === pile) unput(picked); });
     PILE.forEach((id, i) => {
       const mail = MAIL.find(([each]) => each === id), [date, time] = mail ? mail.slice(1) : ['12/25', '08:30'], fresh = !mail;
       const letter = element('button', 'rack-letter', desk.sorted ? cubbies[mailFor(id)] : pile); letter.type = 'button'; letter.dataset.id = id; letter.setAttribute('aria-pressed', 'false');
@@ -219,7 +251,12 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       paperLayer(letter, '0 0 120 80', '', envelope(ENVELOPES[i % ENVELOPES.length], fresh), BRASS); inked(letter, '0 0 120 80', postmark);
       const text = element('span', 'rack-text', letter); element('span', 'rack-date', text, date); element('span', 'rack-time', text, time); element('span', 'rack-place', letter, fresh ? RACK.fresh : RACK.places[id]);
       if (fresh) letter.classList.add('is-fresh');
-      if (desk.sorted) { letter.disabled = true; placed[id] = mailFor(id); } else on(letter, 'click', () => choose(letter));
+      if (desk.sorted) { letter.disabled = true; placed[id] = mailFor(id); }
+      else {
+        // Dragged onto a pigeonhole it goes in; onto the pile it comes back out (or, from the pile, just settles again).
+        draggable(letter, '.rack-slot, .rack-pile', target => { if (!target.classList.contains('rack-pile')) put(letter, target.dataset.mark); else if (pile.contains(letter)) letter.style.translate = ''; else unput(letter); });
+        on(letter, 'click', () => choose(letter));
+      }
     });
     if (desk.sorted && progress.ornaments.includes('O')) showOrnament(page, 'O');
     function check() {
