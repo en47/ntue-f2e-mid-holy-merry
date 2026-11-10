@@ -53,7 +53,7 @@ const KINDS = [
   ['.register-letter, .sack-count', 'pale'],
   ['.cabin-letter:not(.secret-card)', 'letter'],
   ['.cabin-chat', 'plain'],
-  ['.cabin-caption, .cabin-tip, .cabin-away', 'pinned'],
+  ['.cabin-caption, .cabin-tip, .cabin-away, .books-found', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
   ['.feed-basket, .play-basket', 'wood'],
   ['.wardrobe-item[aria-pressed="true"]', 'picked'],

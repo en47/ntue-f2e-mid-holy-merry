@@ -4,6 +4,7 @@
 // slip from the register, once it is in the visitor's pocket, waits here too: held to a fire with two logs burning, the
 // lemon writing on it comes up brown, a character at a time.
 import { paperLayer, shape } from './paper-art.js';
+import { letter } from './cabin-art.js';
 import { CORD } from '../data/cabin-finale.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
@@ -25,6 +26,11 @@ function slipArt(parent) {
   shape('circle', { cx: 24, cy: 22, r: 8, fill: '#f6ecc4', opacity: .8 }, parent);
 }
 
+// The letter carved in the hearthstone in front of the fire, R: too shallow to see until the firelight catches its edges.
+function carving(parent) {
+  letter(parent, 'R', 50, 52, 46, 52, { fill: '#9a6343', stroke: '#ffcf73', 'stroke-width': 2.6, 'stroke-linejoin': 'round' });
+}
+
 export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, progress, save = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -38,6 +44,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
   });
   const grip = element('button', 'hearth-bellows', layer); grip.type = 'button'; grip.setAttribute('aria-label', '風箱：往下壓再放開，把火吹旺（也可以按 Enter）');
   let size = 60;
+  const back = element('span', 'hearth-letter', layer); back.setAttribute('aria-hidden', 'true'); paperLayer(back, '0 0 100 104', '', carving, { paper: { scale: .3, grain: .6, shadow: 0, rim: '#ffd88a00' }, eager: true });
   const slip = pocket ? element('button', 'hearth-slip', layer) : null;
   if (slip) { slip.type = 'button'; slip.setAttribute('aria-label', CORD.toFire); paperLayer(slip, '0 0 100 60', '', slipArt, PAPER); }
 
@@ -52,6 +59,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
       button.style.rotate = `${[-9, 4, 11][i]}deg`;
     });
     place(mouth, rects.mouth);
+    const plate = rects.mouth.width * .13; place(back, { left: rects.mouth.left + rects.mouth.width / 2 - plate / 2, top: rects.mouth.top + rects.mouth.height * 1.02, width: plate, height: plate * 1.04 });
     if (slip) place(slip, { left: Math.max(8, basket.left + basket.width * .1), top: Math.max(8, basket.top - size * .95), width: size * .9, height: size * .54 });
     const handle = rects.bellows, side = Math.max(56, handle.width, handle.height);
     place(grip, { left: handle.left + handle.width / 2 - side / 2, top: handle.top + handle.height / 2 - side / 2, width: side, height: side });
@@ -161,6 +169,13 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
     done.focus({ preventScroll: true });
   }
   if (slip) on(slip, 'click', roast);
+  // The hearthstone's letter shows while the fire burns; the first time, it is told and written in the clue book.
+  function firelight() {
+    const lit = cabin.heat > .6; back.classList.toggle('is-lit', lit);
+    if (lit && clue('letter-hearth')) later(1700, () => say('火光照到壁爐前的石板，淺淺的刻痕亮了起來——是一個字母：R。'));
+    later(700, firelight);
+  }
+  firelight();
 
   layout(); later(500, layout); later(1200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);

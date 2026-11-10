@@ -667,3 +667,40 @@ html.theatre-open { overflow: hidden; }
 .lemon-char { animation: lemon-ink 1.2s ease-out var(--at) both; }
 @keyframes lemon-ink { from { opacity: 0; color: #f0dcb0; } }
 @media (prefers-reduced-motion: reduce) { .lock-shackle { transition: none; } .hearth-slip.is-warm, .lemon-char { animation: none; } }
+/* 書櫃的謎題：聖誕老人最喜歡的四樣東西各藏一個字母。壁爐的 R 只在火光裡浮現；吸墨紙上的 E 是反的，點一下翻正；
+   音樂盒轉起來時升起金色的 O；雪花球落定後，小屋門牌的 M 閃一下。書櫃前方排著找到的字母紙片。 */
+.hearth-letter { position: absolute; opacity: 0; transition: opacity 1.2s ease; pointer-events: none; }
+.hearth-letter.is-lit { opacity: 1; animation: fireback 2.4s ease-in-out infinite alternate; }
+.hearth-letter .art-layer { filter: drop-shadow(0 0 6px #ffcf7399); }
+@keyframes fireback { from { opacity: .72; } to { opacity: 1; } }
+.desk-drawer { position: absolute; padding: 0; border: 0; background: none; pointer-events: auto; cursor: pointer; }
+.desk-drawer .drawer-front { transition: translate .55s cubic-bezier(.3,1.3,.5,1), scale .55s cubic-bezier(.3,1.3,.5,1); }
+.desk-drawer:hover .drawer-front { translate: 0 8%; }
+.desk-drawer.is-open .drawer-front { translate: 0 70%; scale: 1.06; }
+.desk-drawer:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.blotter-card { width: min(22rem, calc(100% - 2rem)); }
+.blotter-words { margin: .2rem 0 .6rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; }
+.blotter-pad { position: relative; display: block; width: min(15rem, 100%); aspect-ratio: 240 / 150; margin: 0 auto .8rem; padding: 0; border: 0; background: none; cursor: pointer; }
+.blotter-pad:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.blotter-pad.is-turned { animation: blotter-rock .9s ease-in-out; }
+@keyframes blotter-rock { 25% { rotate: -6deg; } 60% { rotate: 4deg; } }
+.blotter-print { scale: -1 1; transition: scale .8s cubic-bezier(.5,0,.3,1) .2s; }
+.blotter-pad.is-turned .blotter-print { scale: 1 1; }
+.musicbox-letter { position: absolute; opacity: 0; translate: 0 45%; scale: .4; transition: opacity .6s ease, translate .9s cubic-bezier(.3,1.5,.5,1), scale .9s cubic-bezier(.3,1.5,.5,1); pointer-events: none; }
+.musicbox-letter.is-up { opacity: 1; translate: 0 0; scale: 1; }
+.musicbox-letter.is-up .art-layer { animation: medallion-turn 7s linear infinite; }
+@keyframes medallion-turn { to { rotate: 360deg; } }
+.globe-glint { position: absolute; left: 44%; top: 40%; width: 11%; aspect-ratio: 1; opacity: 0; pointer-events: none; }
+.globe-glint.is-on { animation: globe-glint 1.5s ease-out both; }
+@keyframes globe-glint { 0% { opacity: 0; scale: .2; rotate: -40deg; } 35% { opacity: 1; scale: 1.15; } 100% { opacity: 0; scale: .6; rotate: 30deg; } }
+.books-found { position: absolute; left: 50%; bottom: 4.2rem; display: flex; align-items: center; gap: .45rem; padding: .7rem 1rem .6rem; translate: -50% 0; background: transparent no-repeat 0 0 / 100% 100%; pointer-events: none; }
+.books-found-label { margin-right: .2rem; color: var(--ink); font-size: var(--fs-small); font-weight: 700; white-space: nowrap; }
+.books-tile { position: relative; width: 2.1rem; aspect-ratio: 60 / 68; }
+.books-tile.is-found { animation: tile-in .6s cubic-bezier(.3,1.5,.5,1) calc(var(--i) * .12s) both; }
+@keyframes tile-in { from { translate: 0 -40%; scale: .5; opacity: 0; } }
+.books-found.is-solved .books-tile { animation: tile-hop .5s ease-in-out calc(var(--i) * .1s) 2 alternate; }
+@keyframes tile-hop { to { translate: 0 -18%; } }
+.chair-title { margin: 0 0 .4rem; color: #8f3b36; font-size: var(--fs-small); letter-spacing: .1em; }
+.chair-line { margin: 0; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.9; }
+.chair-sign { margin: .3rem 0 .9rem; color: #8f3b36; font-family: var(--font-hand); text-align: right; }
+@media (prefers-reduced-motion: reduce) { .hearth-letter, .blotter-print, .musicbox-letter, .desk-drawer .drawer-front { transition: none; } .blotter-pad.is-turned { animation: none; } .hearth-letter.is-lit, .musicbox-letter.is-up .art-layer, .globe-glint.is-on, .books-tile.is-found, .books-found.is-solved .books-tile { animation: none; } }

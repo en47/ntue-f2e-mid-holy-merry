@@ -2,6 +2,8 @@
 // side (or press the arrow keys): it tilts, the snow inside whirls up, and when let go it rocks back upright while the
 // snow drifts down and settles at the foot of the little house. Something is engraved on its base.
 import { paperLayer, shape } from './paper-art.js';
+import { letter } from './cabin-art.js';
+import { star } from './paper-props.js';
 
 const PAPER = { paper: { scale: .5, grain: .4, shadow: .2 }, eager: true };
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
@@ -12,6 +14,9 @@ function globe(parent) {
   shape('rect', { x: 30, y: 52, width: 24, height: 20, fill: '#a84a42' }, parent);
   shape('path', { d: 'M26 53L42 38L58 53Z', fill: '#fbf8f1' }, parent);
   shape('rect', { x: 39, y: 61, width: 7, height: 11, fill: '#6b4a33' }, parent);
+  // A little sign over the door: M.
+  shape('rect', { x: 35.5, y: 54.6, width: 14, height: 5.6, rx: 1.2, fill: '#fbf3df' }, parent);
+  letter(parent, 'M', 42.5, 57.4, 8.6, 4.2, { fill: '#a84a42' });
   shape('path', { d: 'M60 72L69 42L78 72Z', fill: '#4f7d68' }, parent);
   shape('path', { d: 'M8 70Q50 62 92 70A46 46 0 0 1 8 70Z', fill: '#fbf8f1' }, parent);
   shape('path', { d: 'M10 120L16 92H84L90 120Z', fill: '#8f5a3c' }, parent);
@@ -26,6 +31,8 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
   const tilt = element('span', 'globe-tilt', holder); paperLayer(tilt, '0 0 100 120', 'globe-art', globe, PAPER);
   const canvas = element('canvas', 'globe-snow', tilt); canvas.setAttribute('aria-hidden', 'true');
   element('span', 'globe-engraving', tilt, 'H. · 2003').setAttribute('aria-hidden', 'true');
+  // A glint on the sign over the door once the snow has settled.
+  const glint = element('span', 'globe-glint', tilt); glint.setAttribute('aria-hidden', 'true'); paperLayer(glint, '0 0 20 20', '', paper => star(paper, 10, 10, 8, '#fff4cc'), { paper: { scale: .15, grain: .2, shadow: 0, rim: '#ffffff00' }, eager: true });
   const context = canvas.getContext('2d');
   // Snow in dome units (the 100 × 120 box), as snow in water is: many small flat flakes and a few bigger ones, some nearer
   // the glass (bigger, brighter) and some further in. Each tumbles as it goes, a thin sliver edge-on and a bright one turned
@@ -83,10 +90,15 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
       flake.vx = flake.vx * .5 + strength * .35 + Math.cos(way) * toss;
       flake.vy = flake.vy * .5 + Math.sin(way) * toss - (flake.still ? 20 + Math.random() * 25 : Math.random() * 6); flake.still = false;
     }
-    if (still()) { for (const flake of flakes) { flake.x = 14 + Math.random() * 72; flake.y = 14 + Math.random() * 60; } paint(); later(1200, settle); return; }
+    if (still()) { for (const flake of flakes) { flake.x = 14 + Math.random() * 72; flake.y = 14 + Math.random() * 60; } paint(); later(1200, () => { settle(); settled(); }); return; }
     run();
   }
   function settle() { flakes.forEach(rest); churn = swirl = 0; paint(); }
+  // Settled: the sign over the little house's door glints, and the base can be read (both go in the clue book).
+  function settled() {
+    say(knownLine() ?? (knows() ? '雪慢慢落定了。底座刻著「H. · 2003」——是荷莉。' : '雪慢慢落定了。小屋門上掛著一塊小牌子，寫著 M；底座上好像還刻著什麼。'));
+    clue('globe-base'); clue('letter-globe'); glint.classList.remove('is-on'); void glint.offsetWidth; glint.classList.add('is-on');
+  }
   function run() { if (!frame) { last = performance.now(); frame = requestAnimationFrame(step); } }
   function step(now) {
     const delta = Math.min(.05, (now - last) / 1000); last = now; let moving = Boolean(drag);
@@ -118,7 +130,7 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
     }
     paint();
     frame = moving ? requestAnimationFrame(step) : 0;
-    if (!moving) { say(knownLine() ?? (knows() ? '雪慢慢落定了。底座刻著「H. · 2003」——是荷莉。' : '雪慢慢落定了。底座上好像刻著什麼。')); clue('globe-base'); }
+    if (!moving) settled();
   }
   on(holder, 'pointerdown', event => {
     if (event.button > 0) return;

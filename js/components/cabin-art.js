@@ -33,7 +33,7 @@ export const INSIDE = { eye: [.45, 1.15, .9], heading: .44, tallHeading: .78, pi
 export const BOOKCASE = { left: -1.47, width: .95, height: 1.4, depth: .26, z: -HOUSE.depth / 2 + .02, shelves: [.05, .39, .73, 1.07] };
 // The writing desk against the left wall, facing the room (see desk()). `x` is its front edge, `z` its middle: toward the
 // door from the rocking chair, so it can be looked at straight on, with the window and its advent house over its far end.
-export const DESK = { x: -1.15, z: .82, w: .95, h: 1.25, top: .76, items: { outbox: [.04, .27, .2, .4], stamp: [.22, .28, .32, .4], stack: [.34, .3, .54, .4], seal: [.56, .29, .64, .4], cup: [.66, .3, .8, .4], lamp: [.82, .08, .97, .4] } };
+export const DESK = { x: -1.15, z: .82, w: .95, h: 1.25, top: .76, items: { outbox: [.04, .27, .2, .4], stamp: [.22, .28, .32, .4], stack: [.34, .3, .54, .4], seal: [.56, .29, .64, .4], cup: [.66, .3, .8, .4], lamp: [.82, .08, .97, .4], drawer: [.33, .409, .67, .449] } };
 // The small room behind the bookcase, reached once it has swung aside: its doorway in the back wall (`left`, `width`,
 // `height`, hidden by the closed bookcase), how far back it goes, and how thick its walls and ceiling are (`wall`: they
 // stand just inside the doorway, cabin-scene.js).
@@ -366,7 +366,7 @@ export function lantern({ paper }, { width, height }) {
 }
 
 // A letter from the display face (scripts/build-title-glyphs.mjs), centred on (cx, cy) and fitted into a box.
-function letter(parent, char, cx, cy, width, height, style) {
+export function letter(parent, char, cx, cy, width, height, style) {
   const { d, box: [x1, y1, x2, y2] } = cabinGlyphs[char], scale = Math.min(width / (x2 - x1), height / (y2 - y1));
   return shape('path', { d, transform: `translate(${cx - scale * (x1 + x2) / 2} ${cy - scale * (y1 + y2) / 2}) scale(${scale})`, ...style }, parent);
 }
@@ -439,8 +439,8 @@ export function santaCover({ paper }, { width, height }) {
 // between the words), and on the second the four empty places and the SANTA picture book at the right.
 const SPINE = { red: '#8f3b36', green: '#3f6653', navy: '#3f5a7a', plum: '#6e4a6b', teal: '#4a7d80', brown: '#7d5636', mustard: '#b98a3c' };
 export const LETTER_BOOKS = [
-  ['H', SPINE.green, .064, .25], ['O', SPINE.red, .074, .27, true], ['L', SPINE.navy, .058, .23], ['Y', SPINE.brown, .066, .26],
-  ['M', SPINE.plum, .076, .28, true], ['E', SPINE.teal, .07, .255, true], ['R', SPINE.red, .072, .27, true], ['R', SPINE.green, .062, .24], ['Y', SPINE.mustard, .066, .26],
+  ['H', SPINE.green, .064, .25], ['O', SPINE.red, .074, .27], ['L', SPINE.navy, .058, .23], ['Y', SPINE.brown, .066, .26],
+  ['M', SPINE.plum, .076, .28], ['E', SPINE.teal, .07, .255], ['R', SPINE.red, .072, .27], ['R', SPINE.green, .062, .24], ['Y', SPINE.mustard, .066, .26],
 ].map(([char, colour, w, h, gold = false], index, all) => ({ id: `book-${char.toLowerCase()}${all.slice(0, index).filter(([other]) => other === char).length + 1}`, letter: char, colour, w, h, gold }));
 export const SHELF_LAYOUT = (() => {
   const gap = .006, word = .05, total = LETTER_BOOKS.reduce((sum, book) => sum + book.w + gap, -gap) + word;

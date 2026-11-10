@@ -14,6 +14,9 @@ export const LOG = {
   solved: '最後一格補上，墨水乾了，字一行一行回來：每一晚，都是兩個人接力飛完的。',
   erase: '擦掉',
 };
+// The note Santa leaves on his chair when he goes out: the bookcase's riddle. His four favourite things in the room (the
+// hearth, the desk, the music box, the snow globe) each hide a letter (cabin-clues.js LETTERS).
+export const CHAIR = { title: '搖椅上的紙條', lines: ['我去看看麋鹿，馬上回來。', '這屋子裡，我最喜歡的四樣東西上，各藏著一個字母。', '把它們排在我的繪本前面，你就會知道這間屋子的小秘密。'], sign: '—— S.' };
 // The early shift on Christmas morning: nobody has signed yet (unless the snowman has been dressed as Santa).
 export const MORNING = { date: '12/25', shift: '早班', empty: '（還沒有人簽名）', snowman: '雪人？（實習）' };
 export const RULES = { title: '聖誕老人替身守則', lines: ['一、自願加入，隨時都可以離開。', '二、每替別人傳遞一個願望，就在登記簿上蓋一個章。', '三、集到三個章，就能許一個願望，帶著它回家。', '四、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在班表上簽名。'], margin: '（最下面有人用鉛筆加了一行小字，太淡了，看不清楚。）' };

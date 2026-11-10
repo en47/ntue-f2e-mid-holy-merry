@@ -236,14 +236,14 @@ await test('Santa 手機版：觸控按鈕至少 44px、橫拿手機改右側窄
 await test('Santa 屋內：近看壁爐（添柴、風箱、火勢）、HOLY MERRY 書櫃與燙金書脊隨火光發亮', async () => {
   const { BOOKCASE, LETTER_BOOKS, SHELF_LAYOUT, BOOK_SHEETS, ROOM_SPOTS, ROOM_PROPS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
   assert.equal(LETTER_BOOKS.map(book => book.letter).join(''), 'HOLYMERRY', 'The books spell the site name');
-  assert.deepEqual(LETTER_BOOKS.filter(book => book.gold).map(book => book.letter), ['O', 'M', 'E', 'R'], 'Four gold letters, all taken from HOLY MERRY itself');
+  assert.ok(LETTER_BOOKS.every(book => !book.gold) && ['M', 'O', 'R', 'E'].every(char => LETTER_BOOKS.some(book => book.letter === char)), 'No book stands out; MORE is all taken from HOLY MERRY itself');
   assert.equal(SHELF_LAYOUT.slots.length, 4); assert.ok(SHELF_LAYOUT.slots.every(x => x > 0 && x < SHELF_LAYOUT.santa && SHELF_LAYOUT.santa < BOOKCASE.width), 'Four empty places left of the SANTA picture book, inside the bookcase');
   assert.ok(BOOK_SHEETS.some(sheet => sheet.id === 'santa-book') && LETTER_BOOKS.every(book => BOOK_SHEETS.some(sheet => sheet.id === book.id)), 'Every book spine is a cut picture');
   assert.ok(['hearth', 'shelf'].every(id => ROOM_SPOTS.some(spot => spot.id === id))); assert.ok(!ROOM_PROPS.some(prop => prop.id === 'fireplace' || prop.id === 'bookshelf'), 'The hearth and the bookcase are places to step up to, not just a caption');
   const { cabinGlyphs } = await import(pathToFileURL(path.join(project, 'js/data/cabin-glyphs.js')).href);
   assert.ok([...'HOLYMERSANT'].every(char => cabinGlyphs[char]?.d), 'Every letter on the books comes from the display face');
   const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), hearth = await fs.readFile(path.join(project, 'js/components/cabin-hearth.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8'), html = await fs.readFile(path.join(project, 'santa.html'), 'utf8');
-  assert.ok(scene.includes('hearthAdd()') && scene.includes('blow()') && scene.includes('sheen.opacity = .14 + warmth') && scene.includes('fire.intensity = 2.2 + flicker * .4 + warmth'), 'One fire level drives the flames, the firelight and the gold glint');
+  assert.ok(scene.includes('hearthAdd()') && scene.includes('blow()') && scene.includes("for (const [id, sheen] of sheens) sheen.opacity = story.glint?.ids.includes(id) ? glow * .85 : 0;") && scene.includes('fire.intensity = 2.2 + flicker * .4 + warmth'), 'One fire level drives the flames, the firelight and the gold glint');
   assert.ok(scene.includes('roomAway') && scene.includes('function back()') && scene.includes("event.preventDefault(); back();"), 'Stepping back from the hearth faces the room as before, one step at a time');
   assert.ok(hearth.includes('setPointerCapture') && hearth.includes("event.key !== 'Enter'") && hearth.includes('events.abort()') && hearth.includes('cabin.bellows(0)') && !hearth.includes('innerHTML'), 'Logs and bellows work by pointer and keyboard and let go of everything on leaving');
   assert.ok(/ROOMS = \[[^\]]*'hearth'[^\]]*'shelf'/.test(entry) && entry.includes("'← 回到房間'") && entry.includes('cabin?.back()') && entry.includes('!event.defaultPrevented'), 'The back button and Escape step back from the hearth to the room');
@@ -253,7 +253,7 @@ await test('Santa 屋內：書桌抽信、開信、翻面、蓋郵戳、火漆�
   const { DESK, ROOM_SPOTS, BOARDS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
   const { DESK_LETTERS, REPLY } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href);
   assert.ok(ROOM_SPOTS.some(spot => spot.id === 'desk') && BOARDS.some(board => board.id === 'desk') && !BOARDS.some(board => board.id === 'lamp-table'), 'The side table became the writing desk');
-  assert.deepEqual(Object.keys(DESK.items), ['outbox', 'stamp', 'stack', 'seal', 'cup', 'lamp']);
+  assert.deepEqual(Object.keys(DESK.items), ['outbox', 'stamp', 'stack', 'seal', 'cup', 'lamp', 'drawer'], 'The things on the desk, and the shallow drawer over the kneehole');
   assert.ok(Object.values(DESK.items).every(([x0, y0, x1, y1]) => x0 >= 0 && x1 <= 1 && x0 < x1 && y0 >= 0 && y1 <= 1 && y0 < y1), 'Every place on the desk lies on its sheet');
   assert.ok(DESK_LETTERS.length >= 4 && DESK_LETTERS.every(letter => letter.id && letter.body && letter.back?.sign && ['n', 'k', 'h'].includes(letter.back.hand)) && REPLY.body, 'Each letter has a back signed in one of several hands');
   assert.ok(new Set(DESK_LETTERS.map(letter => letter.back.sign)).size >= 3, 'More than one person signs for the letters');
@@ -455,7 +455,7 @@ await test('Santa 線索本：看到的線索自動記下、分段提示依故�
   // Every clue the games write is one the book knows, and every clue in the book is written somewhere.
   const written = [...games.join('\n').matchAll(/clue\((?:'([\w-]+)'|current\.entry\.id === 'route' \? 'route-note' : 'letter-backs'|id)\)/g)];
   assert.ok(written.length >= 6, 'The games record their clues where they are seen');
-  const named = new Set([...games.join('\n').matchAll(/'([\w-]+)'/g)].map(([, id]) => id).filter(id => id in NOTEBOOK).concat(play.includes("clue('wish-board')") ? ['wish-board'] : []));
+  const named = new Set([...[...games, play].join('\n').matchAll(/clue\('([\w-]+)'\)/g)].map(([, id]) => id).concat(games.join('\n').includes("'route-note' : 'letter-backs'") ? ['route-note', 'letter-backs'] : [], games.join('\n').includes('if (id === \'tags\' || id === \'rules\') { clue(id);') ? ['tags', 'rules'] : []));
   for (const id of Object.keys(NOTEBOOK)) assert.ok(named.has(id), `${id} is written into the book somewhere`);
   assert.ok(paper.includes("['.notebook-card', 'notebook']") && paper.includes('notebook(paper, width, height, seed)'), 'Its open page is cut like every other sheet');
 });
@@ -484,6 +484,17 @@ await test('Santa 紅繩小鎖：空白紙條烤火浮出荷莉的字，密碼�
   assert.ok(secret.includes('if (finale.twist || finale.unlocked)') && secret.includes('else if (canUntie(volunteer)) lock(cord, from);') && secret.includes('if (!opens(dials)) return;'), 'Two jobs loosen the cord; only the code opens the lock');
   assert.ok(secret.includes("paperLayer(padlock, '0 0 120 130', 'lock-shackle', lockShackle, BRASS)") && css.includes('.cord-lock.is-open .lock-shackle'), 'The lock is paper SVG, its shackle a piece that springs open');
   assert.ok(hearth.includes('if (cabin.heat < 1.5)') && hearth.includes("finale.slip = 'read'; save(); clue('lemon-note');") && css.includes('@keyframes lemon-ink'), 'Held to a fire of two logs, the lemon writing comes up a character at a time');
+});
+await test('Santa 書櫃的謎題：搖椅紙條、四樣東西各藏一個字母、找到的字母紙片、MORE 四本書發光', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [hearth, desk, music, globe, books, play, scene] = await Promise.all(['js/components/cabin-hearth.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-globe.js', 'js/components/cabin-books.js', 'js/components/cabin-play.js', 'js/components/cabin-scene.js'].map(read));
+  const { LETTERS, NOTEBOOK, GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href), { CHAIR } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href);
+  assert.deepEqual(Object.values(LETTERS).sort(), ['E', 'M', 'O', 'R'], 'The four hidden letters are MORE, in some other order');
+  assert.notEqual(Object.keys(NOTEBOOK).filter(id => id in LETTERS).map(id => LETTERS[id]).join(''), 'MORE', 'The clue book never lists them already spelled');
+  for (const [file, id] of [[hearth, 'letter-hearth'], [desk, 'letter-desk'], [music, 'letter-musicbox'], [globe, 'letter-globe']]) assert.ok(file.includes(`clue('${id}')`) && NOTEBOOK[id], `${id} is found in its own place and written down`);
+  assert.ok(hearth.includes('const lit = cabin.heat > .6;') && desk.includes("pad.classList.add('is-turned')") && music.includes("gold.classList.toggle('is-up', up)") && globe.includes("letter(parent, 'M',"), 'R only in firelight, E turned the right way round, O rising while it plays, M on the little house');
+  assert.ok(CHAIR.lines.join('').includes('四樣東西') && play.includes('later(2000, chairNote)') && GOALS.bookcase.hints.at(-1).includes('MORE'), 'Santa\'s note on the chair is the riddle; the last hint answers it');
+  assert.ok(books.includes("cabin.glintBooks(GAPS.map(place => shelf[place]))") && books.includes("progress.clues.filter(id => id in LETTERS)") && scene.includes('glintBooks(ids = [])'), 'The letters found wait as tiles; the four books that spell it light up');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');
