@@ -80,7 +80,7 @@
 .reindeer-bubble.is-popping { animation: bubble-pop .32s cubic-bezier(.3, 1.4, .5, 1) both; }
 @keyframes bubble-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
 /* 穀倉滑輪：木頭握把上的抓取區（往下拉）、掛鉤與鬆開的紙標籤、暗格的亮點，和兩種筆跡的紙條。 */
-.hoist-grip { position: absolute; padding: 0; background: radial-gradient(#ffe8a466, transparent 70%); border: 2px solid #c08a3e88; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.hoist-grip { position: absolute; padding: 0; background: radial-gradient(#ffe8a466, transparent 70%); border: 0; box-shadow: 0 0 0 2px #ffe8a455, 0 0 14px 2px #ffe8a433; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .hoist-grip.is-pulling { cursor: grabbing; animation: none; border-color: #c08a3e; }
 .hoist-grip.is-locked { border-color: transparent; background: none; animation: none; cursor: default; }
 .hoist-grip:focus-visible, .hoist-hook:focus-visible, .hoist-release:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
@@ -171,7 +171,7 @@
 .hearth-log:hover { scale: 1.05; }
 .hearth-log.is-dragging { z-index: 6; cursor: grabbing; scale: 1.1; transition: none; }
 .hearth-log.is-used { opacity: 0; scale: .5; pointer-events: none; }
-.hearth-bellows { position: absolute; padding: 0; background: radial-gradient(#ffe8a455, transparent 70%); border: 2px solid #c08a3e88; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.hearth-bellows { position: absolute; padding: 0; background: radial-gradient(#ffe8a455, transparent 70%); border: 0; box-shadow: 0 0 0 2px #ffe8a455, 0 0 14px 2px #ffe8a433; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .hearth-bellows.is-pressing { cursor: grabbing; border-color: #c08a3e; animation: none; }
 .hearth-log:focus-visible, .hearth-bellows:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .hearth-mouth { position: absolute; border-radius: 45% 45% 12px 12px; background: radial-gradient(#ffd38a88, transparent 70%); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
@@ -193,7 +193,7 @@
 .desk-work { position: absolute; top: 4.4rem; right: 1rem; z-index: 4; width: min(23rem, 44%); max-height: calc(100% - 5.2rem); overflow: auto; display: grid; gap: .7rem; justify-items: center; padding: .3rem .5rem .8rem; pointer-events: auto; transition: transform .38s cubic-bezier(.3, .7, .4, 1), opacity .3s ease; }
 .desk-guide { margin: 0; padding: .5rem 1.1rem; color: #fff6e6; background: #3f6653; border-radius: 10px; font-size: var(--fs-small); line-height: 1.5; text-align: center; }
 /* 說明也是一張紙：松綠紙條、頂端積雪（cabin-paper.js）。 */
-.cabin[data-paper] .desk-guide { padding: .95rem 1.4rem .7rem; background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border-radius: 0; text-shadow: 0 1px 0 #00000040; }
+.cabin[data-paper] .desk-guide { padding: .6rem 1.3rem .7rem; background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border-radius: 0; text-shadow: 0 1px 0 #00000040; }
 .desk-sheet { position: relative; width: 100%; filter: drop-shadow(0 8px 10px #3b2a2440); }
 /* 信封：收到的是小朋友的淡藍信封（郵局蓋好的收件章），寄出的是紅藍斜紋航空信封（封口火漆、北極郵局郵戳）。 */
 .desk-envelope { position: relative; width: 100%; aspect-ratio: 16 / 10; perspective: 900px; background: #e6eff5; border-radius: 6px; touch-action: none; transition: margin-top .45s ease; }
@@ -267,9 +267,9 @@
 /* 手機上，桌面讓給桌上的東西，信封和信紙放在下方。 */
 @media (max-width: 700px) { .desk-work { top: auto; right: .6rem; bottom: .6rem; left: .6rem; width: auto; max-height: 62%; } .desk-letter { min-height: 11rem; } }
 /* 音樂盒：發條鑰匙外的一圈拖曳區（順時針轉）；反方向時棘輪擋住、輕輕彈一下。 */
-.musicbox-knob { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 2px solid #c08a3e99; border-radius: 50%; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.musicbox-knob { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 0; box-shadow: 0 0 0 2px #ffe8a455, 0 0 14px 2px #ffe8a433; border-radius: 50%; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .musicbox-knob::after { content: '↻'; position: absolute; right: -4px; top: -6px; color: #c08a3e; font-size: var(--fs-body); font-weight: 700; }
-.musicbox-knob.is-winding { cursor: grabbing; animation: none; border-color: #c08a3e; }
+.musicbox-knob.is-winding { cursor: grabbing; animation: none; box-shadow: 0 0 0 3px #f1d68f, 0 0 16px 4px #ffe8a4aa; }
 .musicbox-knob.is-resisting { animation: knob-resist .25s ease; }
 @keyframes knob-resist { 30% { rotate: -6deg; } 70% { rotate: 3deg; } }
 /* 雪花球：近看時換成可以搖的一顆（3D 那顆先藏起來），整顆以底座為軸傾斜，雪在玻璃罩裡飄落、堆在小屋腳下。 */
@@ -291,7 +291,7 @@
 .books-tools button { padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; white-space: nowrap; }
 .chat-line.is-away .chat-bubble { color: #8a7a6a; font-style: normal; }
 /* 書櫃後的小房間：可以拿起來看的東西（看過的變淡），和打開後的紙卡：名牌、交接表（不同筆跡）、守則。 */
-.secret-thing { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 2px solid #c08a3e88; border-radius: 12px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.secret-thing { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 0; box-shadow: 0 0 0 2px #ffe8a455, 0 0 14px 2px #ffe8a433; border-radius: 12px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .secret-thing.is-read { animation: none; opacity: .55; }
 .secret-thing:focus-visible, .books-enter:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .books-enter { position: absolute; left: 50%; bottom: 1rem; padding: .5rem 1.1rem; translate: -50% 0; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; pointer-events: auto; }
@@ -330,9 +330,10 @@
 .register-stamps .is-stamped { background: radial-gradient(circle, #fffdf6 28%, #b5544c 30%); border: 2px solid #b5544c; rotate: -12deg; }
 .register-heading { margin: .2rem 0 .4rem; font-family: var(--font-hand); font-size: var(--fs-body); }
 .register-jobs { display: grid; gap: .45rem; margin: 0 0 .9rem; padding: 0; list-style: none; font-size: var(--fs-small); }
-.register-jobs li { display: grid; gap: .1rem; padding-left: 1.6rem; position: relative; }
-.register-jobs li::before { content: ''; position: absolute; left: 0; top: .2rem; width: 1rem; aspect-ratio: 1; border: 2px solid #d9c9a8; border-radius: 4px; }
-.register-jobs li.is-done::before { content: '✓'; display: grid; place-items: center; color: var(--cream); background: #b5544c; border-color: #b5544c; font-size: var(--fs-small); line-height: 1; }
+.register-jobs li { display: grid; gap: .1rem; padding-left: 2rem; position: relative; }
+.job-box { position: absolute; left: 0; top: .05rem; width: 1.5rem; aspect-ratio: 1; display: grid; place-items: center; color: var(--cream); border: 2px solid #d9c9a8; border-radius: 4px; font-size: var(--fs-small); line-height: 1; }
+.register-jobs .is-done .job-box { background: #b5544c; border-color: #b5544c; }
+.cabin[data-paper] .job-box { padding-bottom: 3px; background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border: 0; border-radius: 0; }
 .register-jobs .is-done strong { text-decoration: line-through #b5544c 2px; }
 .register-letters { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr)); gap: .3rem; margin: 0 0 .8rem; }
 .register-letter { aspect-ratio: 1; padding: 0; color: #5b3a2c; background: #f4ead4; border: 2px solid #e3d2b0; border-radius: 8px; font-family: var(--font-hand); font-size: var(--fs-body); }
@@ -363,15 +364,15 @@
 .gearbox-board > * { position: absolute; }
 .gearbox-art { inset: 0; pointer-events: none; }
 .gearbox-spokes, .gearbox-gear, .gearbox-arm { pointer-events: none; }
-.gearbox-lamp { position: absolute; width: 4%; aspect-ratio: 1; translate: -50% -50%; background: #6b6250; border-radius: 50%; box-shadow: 0 0 0 2px #00000033; }
-.gearbox.is-running .gearbox-lamp { background: #ffe39a; box-shadow: 0 0 10px 3px #ffd36e; animation: lamp-on .5s ease both; }
-@keyframes lamp-on { from { background: #6b6250; box-shadow: none; } }
+.gearbox-lamp { position: absolute; width: 7%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; pointer-events: none; }
+.gearbox.is-running .gearbox-lamp { background: radial-gradient(circle, #fff6d6 0 22%, #ffd36ecc 34%, #ffd36e00 70%); animation: lamp-on .5s ease both; }
+@keyframes lamp-on { from { opacity: 0; } }
 .gearbox-label, .gearbox-tray-label { translate: -50% 0; color: #f4ead4cc; font-size: var(--fs-small); letter-spacing: .1em; pointer-events: none; }
 .gearbox-tray-label { left: 64%; bottom: 0; translate: -50% 0; color: #fbe9d6; }
-.gearbox-peg { padding: 0; background: radial-gradient(circle, #f1d68f 0 30%, #a37b34 32% 42%, transparent 44%); border: 2px solid #d8c08a66; border-radius: 50%; cursor: pointer; }
+.gearbox-peg { padding: 0; background: none; border: 0; border-radius: 50%; cursor: pointer; }
 .gearbox-peg::before { content: ''; position: absolute; inset: -40%; border-radius: 50%; }
-.gearbox-peg.is-ready { border-color: #f1d68f; animation: peg-ready 1.2s ease-in-out infinite; }
-.gearbox-peg.is-near { background: radial-gradient(circle, #fff1c2 0 34%, #f1d68f 36% 60%, transparent 62%); border-style: solid; }
+.gearbox-peg.is-ready { box-shadow: 0 0 0 2px #f1d68f99, 0 0 12px 2px #ffe8a466; animation: peg-ready 1.2s ease-in-out infinite; }
+.gearbox-peg.is-near { box-shadow: 0 0 0 3px #f1d68f, 0 0 16px 4px #ffe8a4aa; }
 .gearbox-peg.is-missing { animation: peg-missing .7s ease; }
 @keyframes peg-ready { 50% { scale: 1.25; } }
 @keyframes peg-missing { 30%, 70% { box-shadow: 0 0 0 6px #e0605088; border-color: #e06050; } }
@@ -392,16 +393,21 @@
 .gearbox-arm { z-index: 5; }
 .gearbox-knob { position: absolute; left: 38%; top: 0; width: 24%; height: 24%; border-radius: 50%; pointer-events: auto; cursor: grab; }
 .gearbox-crank.is-resisting, .gearbox-arm.is-resisting { animation: gear-jam .3s ease; }
-.gearbox-door { z-index: 9; inset: 0; display: grid; place-items: center; background: linear-gradient(135deg, #5f6f7b, #45535e); box-shadow: inset 0 0 0 3px #7d8c97, inset -10px 0 0 #3a4650; transform-origin: 0 50%; animation: door-open .9s .25s cubic-bezier(.5, 0, .3, 1) both; }
-.gearbox-door::after { content: ''; position: absolute; right: 7%; top: 46%; width: 4%; height: 10%; background: #d8c08a; border-radius: 4px; }
-.gearbox-door-sign { padding: .2rem .8rem; color: #fbf3df; background: #a84a42; border-radius: 4px; font-weight: 700; letter-spacing: .2em; rotate: -4deg; }
+.gearbox-door { z-index: 9; inset: 0; display: grid; place-items: center; transform-origin: 0 50%; animation: door-open .9s .25s cubic-bezier(.5, 0, .3, 1) both; }
+.gearbox-door-sign { position: relative; color: #fbf3df; font-weight: 700; letter-spacing: .2em; rotate: -4deg; }
 @keyframes door-open { to { transform: rotateY(-105deg); opacity: .2; } }
 .gearbox-actions { display: flex; justify-content: center; gap: .5rem; margin-top: .6rem; }
 .gearbox-actions button { padding: .45rem 1.2rem; color: #fff6e6; background: #b5443c; border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; }
 .gearbox-actions .gearbox-hint { background: #3f6653; }
 /* 紙雕按鈕：紅紙（提示是松綠紙）、頂端積雪，沒有縫線（cabin-paper.js）。 */
-.cabin[data-paper] :is(.gearbox-actions, .desk-actions) button { padding: .8rem 1.35rem .55rem; background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border-radius: 0; text-shadow: 0 1px 0 #00000040; }
+.cabin[data-paper] :is(.gearbox-actions, .desk-actions) button { padding: .55rem 1.3rem .65rem; background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border-radius: 0; }
 .cabin[data-paper] :is(.gearbox-actions, .desk-actions) button:active { translate: 0 2px; }
+/* 畫成紙的東西（cabin-paper.js）：紙片就是它的樣子，這裡只留排版；沒有紙片時才用上面的平面樣式。 */
+.cabin[data-paper] :is(.secret-card, .secret-card[data-thing="tags"] .secret-tags li, .gearbox, .desk-letter .letter-face, .desk-compose, .desk-envelope, .envelope-flap, .envelope-stamp, .envelope-wax, .compose-choice, .register-letter, .register-sign, .sack-count) { background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; background-position: 0 0; border: 0; border-radius: 0; box-shadow: none; clip-path: none; -webkit-mask: none; mask: none; filter: none; }
+.cabin[data-paper] :is(.secret-card, .secret-card .secret-tags li, .desk-letter .letter-face)::before { content: none; }
+.cabin[data-paper] .register-letter[aria-pressed="true"] { color: var(--red-dark); }
+.cabin[data-paper] .register-sign { padding: .55rem 1.3rem .65rem; color: var(--cream); }
+.cabin[data-paper] .envelope-wax { color: #f6d2c6; }
 /* 手機：紙卡往下讓出左上角的返回鈕。 */
 @media (max-width: 700px) { .secret-card, .gearbox { top: calc(50% + 1.6rem); max-height: calc(100% - 5.2rem); } }
 @media (prefers-reduced-motion: reduce) { .volunteer-stamp, .gearbox-peg.is-ready, .gearbox-peg.is-missing, .gearbox-piece.is-jammed, .gearbox-gear.is-missing, .gearbox-crank.is-resisting, .gearbox-arm.is-resisting, .gearbox.is-running .gearbox-lamp { animation: none; } .gearbox-piece { transition: none; } }

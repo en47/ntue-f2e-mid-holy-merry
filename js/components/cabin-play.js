@@ -3,6 +3,7 @@
 // open at a time; leaving one clears its props, timers and listeners. The bigger games live in their own files.
 import { paperLayer, shape } from './paper-art.js';
 import { createSound } from './cabin-sound.js';
+import { perforated } from './cabin-paper.js';
 import { snowmanGame } from './cabin-snowman.js';
 import { feedGame } from './cabin-feed.js';
 import { pulleyGame } from './cabin-pulley.js';
@@ -39,16 +40,6 @@ const ART = {
 // A North Pole postage stamp, 120 × 144: perforated edges, a red and a green frame, holly, a postmark over one corner and
 // snowflakes; the words go over it (`task` below).
 const STAMP = { paper: { scale: .3, grain: .35, shadow: .25 }, eager: true };
-function perforated(x0, y0, x1, y1, step = 10, bite = 2.6) {
-  let d = `M${x0} ${y0}`;
-  const edge = (ax, ay, bx, by) => {
-    const length = Math.hypot(bx - ax, by - ay), n = Math.round(length / step), ux = (bx - ax) / length, uy = (by - ay) / length;
-    for (let i = 0; i < n; i++) { const a = (i + .5) * length / n - bite, b = a + bite * 2; d += `L${(ax + ux * a).toFixed(1)} ${(ay + uy * a).toFixed(1)}A${bite} ${bite} 0 0 0 ${(ax + ux * b).toFixed(1)} ${(ay + uy * b).toFixed(1)}`; }
-    d += `L${bx} ${by}`;
-  };
-  edge(x0, y0, x1, y0); edge(x1, y0, x1, y1); edge(x1, y1, x0, y1); edge(x0, y1, x0, y0);
-  return `${d}Z`;
-}
 function postage(parent) {
   shape('path', { d: perforated(6, 6, 114, 138), fill: '#fffaf0' }, parent);
   shape('rect', { x: 15, y: 15, width: 90, height: 114, rx: 3, fill: '#fbf1dc', stroke: '#b5443c', 'stroke-width': 3 }, parent);

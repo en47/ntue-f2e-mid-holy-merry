@@ -47,6 +47,8 @@ function panel(parent) {
   for (const [x, y] of [[6, 6], [194, 6], [6, 122], [194, 122]]) { shape('circle', { cx: x, cy: y, r: 2.6, fill: '#8b97a0' }, parent); shape('circle', { cx: x - .6, cy: y - .6, r: 1, fill: '#c9d2d8' }, parent); }
   shape('circle', { cx: CRANK.at[0], cy: CRANK.at[1], r: 20, fill: '#26313a' }, parent);
   shape('rect', { x: 58, y: 130, width: 140, height: 40, rx: 4, fill: '#3b2a24' }, parent);
+  // The three empty pegs: brass studs.
+  for (const [x, y] of PEGS) { shape('circle', { cx: x, cy: y, r: 5, fill: '#a37b34' }, parent); shape('circle', { cx: x, cy: y, r: 3.2, fill: '#e2c47a' }, parent); shape('circle', { cx: x - 1, cy: y - 1, r: 1, fill: '#fff1c2' }, parent); }
 }
 // In front: the toolbox's lip, and the snow drifted into the corner over the fallen gear.
 function front(parent) {
@@ -56,9 +58,12 @@ function front(parent) {
   shape('path', { d: 'M0 158C10 152 24 154 36 160S50 164 58 166V170H0Z', fill: '#e6eef2' }, parent);
 }
 // The big wheel's spokes round its hub (the wheel itself is far bigger than the panel); lamps on them light when it runs.
+const LAMPS = [150, 190, 230, 270, 310];
 function spokes(parent) {
   for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; shape('path', { d: `M90 90L${90 + Math.cos(a) * 88} ${90 + Math.sin(a) * 88}`, stroke: '#ffffff26', 'stroke-width': 3 }, parent); }
   shape('circle', { cx: 90, cy: 90, r: 62, fill: 'none', stroke: '#ffffff1f', 'stroke-width': 2.4 }, parent);
+  // Its lamps, unlit: glass bulbs in brass caps.
+  for (const deg of LAMPS) { const a = deg * Math.PI / 180, x = 90 + Math.cos(a) * 40, y = 90 + Math.sin(a) * 40; shape('circle', { cx: x, cy: y, r: 4.6, fill: '#8a826c' }, parent); shape('circle', { cx: x, cy: y, r: 3.2, fill: '#b9b29a' }, parent); shape('circle', { cx: x - 1, cy: y - 1, r: 1, fill: '#e8e2cf' }, parent); }
 }
 // Across the top of the box, a pine garland with little bulbs on it (stretched to the box's width).
 const sag = x => 7 + 15 * (1 - ((x - 200) / 200) ** 2);
@@ -91,6 +96,14 @@ function ribbon(parent) {
   for (const [x, y] of [[50, 22], [55, 26], [46, 27]]) shape('circle', { cx: x, cy: y, r: 3.2, fill: '#c63a33' }, parent);
   shape('path', { d: 'M246 10L249.5 19 259 19.5 251.5 25.5 254 35 246 29.5 238 35 240.5 25.5 233 19.5 242.5 19Z', fill: '#e0b04f' }, parent);
 }
+// The gearbox's door, a painted metal sheet with rivets and a handle (stretched to the board), swung open at the start.
+function door(parent) {
+  shape('rect', { x: 2, y: 2, width: W - 4, height: H - 4, rx: 6, fill: '#55656f' }, parent);
+  shape('rect', { x: 9, y: 9, width: W - 18, height: H - 18, rx: 4, fill: '#617380' }, parent);
+  for (const [x, y] of [[14, 14], [W - 14, 14], [14, H - 14], [W - 14, H - 14], [W / 2, 14], [W / 2, H - 14]]) { shape('circle', { cx: x, cy: y, r: 2.6, fill: '#8b97a0' }, parent); shape('circle', { cx: x - .7, cy: y - .7, r: .9, fill: '#c9d2d8' }, parent); }
+  shape('rect', { x: W - 26, y: H / 2 - 12, width: 8, height: 24, rx: 4, fill: '#d8c08a' }, parent);
+  shape('rect', { x: W / 2 - 32, y: H / 2 - 11, width: 64, height: 22, rx: 3, fill: '#b5443c', transform: `rotate(-4 ${W / 2} ${H / 2})` }, parent);
+}
 function arm(parent) {
   shape('rect', { x: 46, y: 8, width: 8, height: 44, rx: 4, fill: '#4b3a30' }, parent);
   shape('circle', { cx: 50, cy: 50, r: 7, fill: '#d8c08a' }, parent);
@@ -111,7 +124,8 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, onMended, on
   paperLayer(element('span', 'gearbox-art', board), `0 0 ${W} ${H}`, '', panel, PAPER);
   // The wheel's hub and spokes (turning with its gear), its lamps, and its gear.
   const wheel = element('span', 'gearbox-spokes', board); place(wheel, WHEEL.at, 90); paperLayer(wheel, '0 0 180 180', '', spokes, PAPER);
-  [150, 190, 230, 270, 310].forEach((deg, i) => { const lamp = element('span', 'gearbox-lamp', wheel), a = deg * Math.PI / 180; Object.assign(lamp.style, { left: `${50 + Math.cos(a) * 40 / 1.8}%`, top: `${50 + Math.sin(a) * 40 / 1.8}%`, animationDelay: `${i * .18}s` }); });
+  // Their light, over the bulbs drawn on the spokes: it only shows once the wheel runs.
+  LAMPS.forEach((deg, i) => { const lamp = element('span', 'gearbox-lamp', wheel), a = deg * Math.PI / 180; Object.assign(lamp.style, { left: `${50 + Math.cos(a) * 40 / 1.8}%`, top: `${50 + Math.sin(a) * 40 / 1.8}%`, animationDelay: `${i * .18}s` }); });
   const gear = (id, teeth, at) => { const node = element('span', 'gearbox-gear', board); place(node, at, reach(teeth)); paperLayer(node, `${-reach(teeth)} ${-reach(teeth)} ${reach(teeth) * 2} ${reach(teeth) * 2}`, '', cog(teeth, COLOURS[id]), GEAR); return node; };
   const wheelGear = gear('wheel', WHEEL.teeth, WHEEL.at), crankGear = gear('crank', CRANK.teeth, CRANK.at);
   Object.assign(element('span', 'gearbox-label', board, '輪軸').style, { left: `${WHEEL.at[0] / W * 100}%`, top: `${(WHEEL.at[1] + reach(WHEEL.teeth) + 1) / H * 100}%` });
@@ -136,7 +150,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, onMended, on
   hintButton.type = quit.type = 'button'; hintButton.hidden = true;
   on(quit, 'click', () => onClose());
   // The gearbox's door swings open first.
-  if (!still()) { const door = element('span', 'gearbox-door', board); element('span', 'gearbox-door-sign', door, '維修中'); on(door, 'animationend', () => door.remove()); }
+  if (!still()) { const cover = element('span', 'gearbox-door', board); paperLayer(cover, `0 0 ${W} ${H}`, '', door, { ...PAPER, preserveAspectRatio: 'none' }); element('span', 'gearbox-door-sign', cover, '維修中'); on(cover, 'animationend', () => cover.remove()); }
 
   let crankAngle = 0, wheelAngle = 0, caught = 0, ticks = 0, mended = false, selected = null, tries = 0, hints = 0, spun = 0, frame = 0;
   const teethOnPegs = () => PEGS.map((_, i) => pieces.find(piece => piece.peg === i)?.teeth ?? null);
