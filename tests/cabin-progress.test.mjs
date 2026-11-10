@@ -101,4 +101,8 @@ test('the rack sorted is kept; letters already answered or the job done count as
   assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { answers: { tomas: 1 } } }) })).desk.sorted, true);
   assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ volunteer: { mark: 'J', tasks: ['letters'] } }) })).desk.sorted, true);
 });
+test('hints asked for about the welcome gifts are kept too, up to one for each gift', () => {
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ hints: { gifts: 2, nonsense: 3 } }) })).hints, { gifts: 2 });
+  assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ hints: { gifts: 40 } }) })).hints.gifts, 5);
+});
 

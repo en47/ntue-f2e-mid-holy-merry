@@ -15,8 +15,8 @@ function globe(parent) {
   shape('path', { d: 'M26 53L42 38L58 53Z', fill: '#fbf8f1' }, parent);
   shape('rect', { x: 39, y: 61, width: 7, height: 11, fill: '#6b4a33' }, parent);
   // A little sign over the door: M.
-  shape('rect', { x: 35.5, y: 54.6, width: 14, height: 5.6, rx: 1.2, fill: '#fbf3df' }, parent);
-  letter(parent, 'M', 42.5, 57.4, 8.6, 4.2, { fill: '#a84a42' });
+  shape('rect', { x: 33.5, y: 52.6, width: 18, height: 8, rx: 1.5, fill: '#fbf3df' }, parent);
+  letter(parent, 'M', 42.5, 56.6, 12, 6.2, { fill: '#a84a42' });
   shape('path', { d: 'M60 72L69 42L78 72Z', fill: '#4f7d68' }, parent);
   shape('path', { d: 'M8 70Q50 62 92 70A46 46 0 0 1 8 70Z', fill: '#fbf8f1' }, parent);
   shape('path', { d: 'M10 120L16 92H84L90 120Z', fill: '#8f5a3c' }, parent);
@@ -51,7 +51,8 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
   const sprite = soft('255, 255, 255'), shadow = soft('84, 114, 142');
   // `churn` is how stirred up the water still is (0–1): while it lasts each flake wanders its own way through the whole
   // globe; as it calms they begin to sink.
-  let angle = 0, swing = 0, frame = 0, last = 0, drag = null, scale = 1, stirred = 0, swirl = 0, churn = 0;
+  // `told`: whether this shake's settling has been told (once most of the snow is down, not waiting for the last flake).
+  let angle = 0, swing = 0, frame = 0, last = 0, drag = null, scale = 1, stirred = 0, swirl = 0, churn = 0, told = false;
   const inside = flake => { const dx = flake.x - DOME.x, dy = flake.y - DOME.y; return Math.hypot(dx, dy) <= DOME.r - 3; };
   function layout() {
     const rect = cabin.globeRect(); if (!rect) return;
@@ -83,7 +84,7 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
   // snow fills the globe instead of flying as one clump (or piling against the top); flakes lying on the mound are lifted
   // off it. It also churns the water, and sets it turning.
   function stir(push) {
-    const strength = Math.max(-40, Math.min(40, push)); onUse();
+    const strength = Math.max(-40, Math.min(40, push)); onUse(); told = false;
     swirl = Math.max(-1.2, Math.min(1.2, swirl + strength * .008)); churn = Math.min(1, churn + Math.abs(strength) / 40 * .3);
     for (const flake of flakes) {
       const toss = Math.abs(strength) * (.3 + Math.random() * .7), way = Math.random() * Math.PI * 2;
@@ -104,14 +105,14 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
     const delta = Math.min(.05, (now - last) / 1000); last = now; let moving = Boolean(drag);
     // The globe rocks back upright like a weight on a spring; the water's turning slowly dies away.
     if (!drag) { swing += (-angle * 60 - swing * 7) * delta; angle += swing * delta; if (Math.abs(angle) > .1 || Math.abs(swing) > .5) moving = true; else { angle = 0; swing = 0; } }
-    tilt.style.rotate = `${angle}deg`; swirl *= Math.exp(-.7 * delta); churn *= Math.exp(-.55 * delta);
+    tilt.style.rotate = `${angle}deg`; swirl *= Math.exp(-1 * delta); churn *= Math.exp(-.95 * delta);
     for (const flake of flakes) {
       if (flake.still) continue;
       const dx = flake.x - DOME.x, dy = flake.y - DOME.y, flat = Math.abs(Math.cos(flake.turn));
       // Each flake drifts with the water: round the centre, its own wandering while the water is churned, and a sway; and
       // sinks, slower lying flat, and hardly at all while the water still churns.
       flake.drift += (Math.random() - .5) * 5 * delta;
-      const sink = (7 + flake.r * 6) * (1 - .4 * flat) * (1 - .8 * churn), sway = Math.sin(now / 1000 * flake.wobble + flake.sway) * 3.5, wander = churn * 26;
+      const sink = (10 + flake.r * 8) * (1 - .4 * flat) * (1 - .8 * churn), sway = Math.sin(now / 1000 * flake.wobble + flake.sway) * 3.5, wander = churn * 26;
       flake.vx += (-dy * swirl + Math.cos(flake.drift) * wander + sway - flake.vx) * Math.min(1, 2.2 * delta);
       flake.vy += (dx * swirl + (Math.sin(flake.drift) - .25) * wander + sink - flake.vy) * Math.min(1, 1.4 * delta);
       flake.turn += flake.spin * delta * (.35 + Math.min(1, Math.hypot(flake.vx, flake.vy) / 18));
@@ -130,7 +131,7 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
     }
     paint();
     frame = moving ? requestAnimationFrame(step) : 0;
-    if (!moving) settled();
+    if (!told && !drag && (!moving || flakes.filter(flake => flake.still).length >= flakes.length * .85)) { told = true; settled(); }
   }
   on(holder, 'pointerdown', event => {
     if (event.button > 0) return;

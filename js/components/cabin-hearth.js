@@ -59,7 +59,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, onUse = () 
       button.style.rotate = `${[-9, 4, 11][i]}deg`;
     });
     place(mouth, rects.mouth);
-    const plate = rects.mouth.width * .13; place(back, { left: rects.mouth.left + rects.mouth.width / 2 - plate / 2, top: rects.mouth.top + rects.mouth.height * 1.02, width: plate, height: plate * 1.04 });
+    const plate = Math.max(30, rects.mouth.width * .2); place(back, { left: rects.mouth.left + rects.mouth.width / 2 - plate / 2, top: rects.mouth.top + rects.mouth.height * 1.02, width: plate, height: plate * 1.04 });
     if (slip) place(slip, { left: Math.max(8, basket.left + basket.width * .1), top: Math.max(8, basket.top - size * .95), width: size * .9, height: size * .54 });
     const handle = rects.bellows, side = Math.max(56, handle.width, handle.height);
     place(grip, { left: handle.left + handle.width / 2 - side / 2, top: handle.top + handle.height / 2 - side / 2, width: side, height: side });

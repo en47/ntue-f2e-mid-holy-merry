@@ -27,6 +27,15 @@ export const NOTEBOOK = {
   tags: { place: '小房間的名牌板', text: '五個名牌，每個人的字都是自己的顏色：尼爾斯 N 深紅、克莉絲 K 藍、荷莉 H 綠、艾洛 E 紫、歐拉 O 金。' },
   rules: { place: '替身守則', text: '每一晚分前半夜、後半夜兩段，兩個人接力。替別人傳遞一個願望就蓋一個章，集到三個章能許一個願望。' },
 };
+// The welcome gifts not yet found, a hint each, asked for one at a time, in the order they can first be reached.
+export const GIFT_ORDER = ['N', 'E', 'O', 'K', 'H'];
+export const GIFT_HINTS = {
+  N: '尼爾斯最得意的作品，是做給克莉絲的那個音樂盒——看看它的底下。',
+  E: '艾洛最愛替雪人打扮。小房間的帽架上，好像夾著什麼。',
+  O: '歐拉管信。加入以後，把分揀架上的信分好，也許會有驚喜。',
+  K: '克莉絲常顧著摩天輪。修好它以後，看看動力箱裡面。',
+  H: '荷莉的見面禮，跟她那頂最小的帽子有關——先看過登記簿裡紅繩綁著的舊頁。',
+};
 // The four letters hidden on Santa's favourite things, by the clue that finds each.
 export const LETTERS = { 'letter-hearth': 'R', 'letter-desk': 'E', 'letter-musicbox': 'O', 'letter-globe': 'M' };
 export const GOALS = {
