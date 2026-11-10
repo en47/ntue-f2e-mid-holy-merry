@@ -74,6 +74,8 @@ export function createSound(widget = document.querySelector('.music-widget'), au
       step();
     },
     tick() { if (boxReady()) try { tone(2600, 0, .03, { type: 'square', gain: .04 }); } catch { /* fine */ } },
+    // One tine of the music box's hidden comb, in the box's own voice (so, like its tune, only while the music is off).
+    pluck(note) { if (PITCH[note] && boxReady()) try { tone(PITCH[note], 0, 1.2, { type: 'sine', gain: .22 }); tone(PITCH[note] * 2, 0, .45, { type: 'triangle', gain: .05 }); } catch { /* fine */ } },
     get musicOn() { return on(); },
     play(name) {
       if (!on() || !SOUNDS[name] || !start()) return;

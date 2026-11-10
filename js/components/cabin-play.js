@@ -143,7 +143,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // Each tells the room when it has been used (`onUse`): Santa goes out once enough has been done there.
     hearth: () => hearthGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('hearth'), progress, save, clue }),
     desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk'), onTask: () => task('letters'), clue }),
-    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows, clue }),
+    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows, clue, progress, save }),
     globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe'), knows, knownLine: () => progress.finale.twist ? GLOBE : null, clue }),
     secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit, onInvite: invite, onTwist: twist, onWish: grant, onStay: stay, onReplay: kind => ending(kind, true), clue }),
     shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened'), toggle: open => swing(open), restart: () => start('shelf') }),

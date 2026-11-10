@@ -90,4 +90,8 @@ test('the cord\'s lock is kept open, and the blank slip taken or read; an older 
   assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { slip: 'eaten' } }) })).finale.slip, 'none');
   assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { twist: true } }) })).finale.unlocked, true);
 });
+test('the photograph\'s pieces found are kept, known ones once each', () => {
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ pieces: ['hat', 'music', 'nope', 'music'] }) })).pieces, ['music', 'hat']);
+  assert.deepEqual(readProgress(memory()).pieces, []);
+});
 

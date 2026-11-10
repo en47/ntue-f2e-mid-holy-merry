@@ -704,3 +704,25 @@ html.theatre-open { overflow: hidden; }
 .chair-line { margin: 0; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.9; }
 .chair-sign { margin: .3rem 0 .9rem; color: #8f3b36; font-family: var(--font-hand); text-align: right; }
 @media (prefers-reduced-motion: reduce) { .hearth-letter, .blotter-print, .musicbox-letter, .desk-drawer .drawer-front { transition: none; } .blotter-pad.is-turned { animation: none; } .hearth-letter.is-lit, .musicbox-letter.is-up .art-layer, .globe-glint.is-on, .books-tile.is-found, .books-found.is-solved .books-tile { animation: none; } }
+/* 音樂盒底的小抽屜：五根刻著縮寫的音梳（長的低、短的高），照那一季大家第一次飛的順序彈，抽屜彈開，裡面是撕下來的舊照片一角。 */
+.musicbox-drawer { position: absolute; padding: 0; border: 0; background: none; pointer-events: auto; cursor: pointer; animation: drawer-peek 1.2s ease-in-out 1.4s 2; }
+@keyframes drawer-peek { 50% { translate: 0 8%; } }
+.musicbox-drawer:hover { translate: 0 5%; }
+.musicbox-drawer:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.comb-card { width: min(24rem, calc(100% - 2rem)); }
+.comb-title { margin: 0 0 .3rem; color: #a8423b; font-size: var(--fs-small); letter-spacing: .1em; }
+.comb-words { margin: 0 0 .6rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; }
+.comb { position: relative; width: 100%; aspect-ratio: 2 / 1; margin: 0 0 .3rem; }
+.comb-tine { position: absolute; top: 21.3%; width: 13.3%; padding: 0; border: 0; background: none; transform-origin: 50% 0; cursor: pointer; }
+.comb-tine:hover { translate: 0 2%; }
+.comb-tine:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.comb-mark { position: absolute; left: 0; right: 0; bottom: 6%; font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; text-align: center; text-shadow: 0 1px 0 #fff6dc; }
+.comb-tine.is-ringing { animation: tine-ring .7s ease-out; }
+@keyframes tine-ring { 12% { rotate: 5deg; } 30% { rotate: -4deg; } 50% { rotate: 2.5deg; } 70% { rotate: -1.2deg; } }
+.comb.is-buzz { animation: shift-wrong .5s ease; }
+.comb-notes { display: flex; justify-content: center; gap: .45rem; margin: 0 0 .8rem; }
+.comb-dot { position: relative; width: .95rem; aspect-ratio: 1; opacity: .18; transition: opacity .2s ease; }
+.comb-dot.is-on { opacity: 1; }
+.comb-found { position: relative; width: min(9rem, 50%); aspect-ratio: 108 / 109; margin: .2rem auto .8rem; animation: found-lift 1s cubic-bezier(.3,1.4,.5,1) both; }
+@keyframes found-lift { from { translate: 0 40%; rotate: -16deg; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .musicbox-drawer, .comb-tine.is-ringing, .comb.is-buzz, .comb-found { animation: none; } .comb-dot { transition: none; } }

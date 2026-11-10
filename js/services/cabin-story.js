@@ -37,6 +37,12 @@ export const SUBSTITUTES = ['N', 'K', 'H', 'E', 'O'];
 export const readLog = saved => LOG_ANSWER.map((mark, i) => i === LOG_GIVEN ? mark : Array.isArray(saved) && SUBSTITUTES.includes(saved[i]) ? saved[i] : '');
 export const logWrong = log => log.filter((mark, i) => mark !== LOG_ANSWER[i]).length;
 export const logSolved = log => logWrong(log) === 0;
+// The music box's hidden drawer opens to its comb played in the order the substitutes first flew that season, as the
+// shift log has it (E, O, N, K, H).
+export const FLIGHT_ORDER = [...new Set(LOG_ANSWER)];
+export const playsOpen = notes => Array.isArray(notes) && notes.join('') === FLIGHT_ORDER.join('');
+// The old photograph from 2003, torn into five pieces found around the village (cabin-photo.js draws them).
+export const PHOTO = ['music', 'wheel', 'hat', 'rack', 'snowman'];
 // Once the secret is known, the visitor may sign the register with an initial of their own (not one already on a name
 // tag, nor Santa's S) and help: four jobs around the village, each earning a wish point the first time it is done while
 // signed up. Leaving is always allowed and keeps the points earned (they come back on signing again).
