@@ -1,15 +1,16 @@
 // The end of the cabin's story, laid over the scene: a wish being granted by another substitute (a little paper scene for
-// each wish, then the note they leave in their own hand), and the cards that tell each ending. Everything is cut from the
-// same paper as the rest of the site; under reduced motion each scene simply stands still. When they appear is decided by
-// cabin-story.js (through cabin-play.js).
+// each wish, then the note they leave in their own hand). The endings themselves are told in their own theatre
+// (cabin-ending.js). Everything is cut from the same paper as the rest of the site; under reduced motion each scene simply
+// stands still. When they appear is decided by cabin-story.js (through cabin-play.js).
 import { paperLayer, shape } from './paper-art.js';
-import { ENDINGS, HOLLY, WISHES } from '../data/cabin-finale.js';
+import { flakeDot } from './cabin-backdrop.js';
+import { WISHES } from '../data/cabin-finale.js';
 
 const PAPER = { paper: { scale: .5, grain: .45, shadow: .2 }, eager: true };
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const W = 200, H = 120;
 
-// The scenes, each in a 200 × 120 box.
+// The scenes, each in a 200 × 120 box (the balloon is lent to the endings' theatre too).
 function night(parent) {
   shape('rect', { x: 0, y: 0, width: W, height: H, fill: '#2f4a6b' }, parent);
   shape('circle', { cx: 160, cy: 26, r: 12, fill: '#fbf3df' }, parent); shape('circle', { cx: 165, cy: 22, r: 11, fill: '#2f4a6b' }, parent);
@@ -69,7 +70,7 @@ function sky(parent) {
   for (const [x, y, s] of [[30, 30, 1], [140, 20, 1.3], [170, 70, .9], [60, 80, .8]]) shape('path', { d: `M${x} ${y}q${8 * s} ${-10 * s} ${18 * s} 0q${10 * s} ${-6 * s} ${16 * s} ${4 * s}q${6 * s} ${8 * s} ${-4 * s} ${8 * s}H${x - 2 * s}q${-8 * s} 0 ${2 * s} ${-12 * s}Z`, fill: '#fbf8f1' }, parent);
   shape('path', { d: 'M0 104Q60 96 120 102T200 100V120H0Z', fill: '#fbf8f1' }, parent);
 }
-function balloon(parent) {
+export function balloon(parent) {
   shape('path', { d: 'M30 4C10 4 4 22 8 34C12 44 22 50 26 56H34C38 50 48 44 52 34C56 22 50 4 30 4Z', fill: '#b5443c' }, parent);
   shape('path', { d: 'M30 4C24 14 22 40 26 56H34C38 40 36 14 30 4Z', fill: '#fbf3df' }, parent);
   shape('path', { d: 'M26 56L24 64M34 56L36 64', stroke: '#8f6a4c', 'stroke-width': 1.2 }, parent);
@@ -130,24 +131,6 @@ export function wishScene({ layer, wish, mark, sound, later, onDone }) {
 // More snow over the whole village for a while (the flat sky behind the scene, cabin-backdrop.js), then as before.
 function storm(ms) {
   const host = document.querySelector('.cabin-backdrop'); if (!host || !ms) return;
-  const flakes = Array.from({ length: 36 }, (_, i) => { const flake = element('span', 'cabin-flake is-storm', host); flake.style.left = `${(i * 29) % 100}%`; flake.style.animationDelay = `${-(i * .61) % 6}s`; return flake; });
+  const dot = flakeDot(), flakes = Array.from({ length: 36 }, (_, i) => { const flake = element('span', 'cabin-flake is-storm', host); flake.append(dot.cloneNode(true)); flake.style.left = `${(i * 29) % 100}%`; flake.style.animationDelay = `${-(i * .61) % 6}s`; return flake; });
   setTimeout(() => flakes.forEach(flake => flake.remove()), ms);
-}
-
-// A card telling one ending; D carries Holly's letter. `both`: the visitor wished and stayed.
-export function endingCard({ layer, ending, mark, both = false, sound, onClose = () => {} }) {
-  const { title, lines, sign } = ENDINGS[ending];
-  const card = element('article', 'finale-card', layer); card.dataset.ending = ending; card.setAttribute('aria-label', title);
-  element('h3', 'finale-title', card, title);
-  for (const line of lines) element('p', 'finale-line', card, line);
-  if (sign) element('p', 'finale-sign', card, sign);
-  if (ending === 'D') {
-    const letter = element('div', 'finale-letter', card);
-    element('p', 'finale-line', letter, HOLLY.greeting(mark)); element('p', 'finale-line', letter, HOLLY.body);
-    element('p', 'finale-line', letter, both ? HOLLY.both : HOLLY.one); element('p', 'finale-sign', letter, HOLLY.sign);
-  }
-  const close = element('button', 'cabin-letter-close', card, '收好 ✓'); close.type = 'button';
-  close.addEventListener('click', () => { card.remove(); sound.play('remove'); onClose(); });
-  sound.play(ending === 'D' ? 'jingle' : 'open'); close.focus({ preventScroll: true });
-  return card;
 }

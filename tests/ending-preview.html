@@ -1,0 +1,14 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Santa 結局劇場預覽</title><link rel="stylesheet" href="../css/tokens.css"><link rel="stylesheet" href="../css/shared.css"><link rel="stylesheet" href="../css/santa.css"><style>
+body{margin:0;background:#c9dfeb}#review{padding:10px;font:13px system-ui;display:flex;gap:12px;flex-wrap:wrap;align-items:center}#review a{padding:6px}.cabin{height:70svh}
+</style></head><body class="santa-page"><div id="review"><b>結局劇場預覽</b><a href="?ending=A">A</a><a href="?ending=B&amp;wish=sleigh">B 雪橇</a><a href="?ending=B&amp;wish=snow">B 大雪</a><a href="?ending=B&amp;wish=gift">B 禮物</a><a href="?ending=B&amp;wish=blessing">B 祝福</a><a href="?ending=C">C</a><a href="?ending=D">D</a><a href="?ending=D&amp;both=1">D（許願又留下）</a><span>只在本機播放；不讀寫存檔、不連雲端。</span><button id="again" type="button">再播一次</button></div>
+<section class="cabin"><div class="cabin-play"></div></section>
+<script type="module">
+import { mountCabinPaper } from '../js/components/cabin-paper.js';
+import { endingTheatre } from '../js/components/cabin-ending.js';
+const q = new URLSearchParams(location.search), layer = document.querySelector('.cabin-play');
+mountCabinPaper(document.querySelector('.cabin'));
+const sound = { play() {}, tune() {}, musicOn: false };
+const show = () => endingTheatre({ host: layer, ending: q.get('ending') || 'A', mark: q.get('mark') || 'J', both: q.has('both'), wish: q.get('wish') || 'gift', sound, next: q.has('next') });
+document.querySelector('#again').addEventListener('click', show);
+show();
+</script></body></html>

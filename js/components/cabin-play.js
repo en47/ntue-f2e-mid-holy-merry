@@ -14,7 +14,8 @@ import { globeGame } from './cabin-globe.js';
 import { booksGame } from './cabin-books.js';
 import { secretGame } from './cabin-secret.js';
 import { wheelGame } from './cabin-wheel.js';
-import { endingCard, wishScene } from './cabin-finale.js';
+import { wishScene } from './cabin-finale.js';
+import { endingTheatre } from './cabin-ending.js';
 import { TASKS, canStay, canWish, goesHome, knowsSantas, pending, points, record, santaGoes, santaReturns, trueMiracle } from '../services/cabin-story.js';
 import { DONE, JOBS, NOTES } from '../data/cabin-secret.js';
 import { GLOBE, NEXT, SANTA_ON_HOLLY, TWIST } from '../data/cabin-finale.js';
@@ -141,7 +142,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk'), onTask: () => task('letters') }),
     musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows }),
     globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe'), knows, knownLine: () => progress.finale.twist ? GLOBE : null }),
-    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit, onInvite: invite, onTwist: twist, onWish: grant, onStay: stay }),
+    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit, onInvite: invite, onTwist: twist, onWish: grant, onStay: stay, onReplay: kind => ending(kind, true) }),
     shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened'), toggle: open => swing(open), restart: () => start('shelf') }),
   };
 
@@ -173,16 +174,20 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     });
   }
   // The end (the rules are in cabin-story.js). The second twist is told once; a wish is granted in a little scene of its
-  // own; staying on is signed on the shift log. Each ending counts the moment it is reached, and is told on a card; D
-  // follows B or C once the old page is known.
+  // own; staying on is signed on the shift log. Each ending counts the moment it is reached, and is told in its paper
+  // theatre (cabin-ending.js); D follows B or C once the old page is known. An ending seen can be watched again from the
+  // register (`replay`: nothing is reached, nothing follows).
   const finale = progress.finale;
   function invite() { if (!finale.invited) { finale.invited = true; save(); } }
   let heardHolly = false;
   function twist() { if (finale.twist) return; finale.twist = true; save(); heardHolly = true; later(500, () => { sound.play('jingle'); say(TWIST); }); }
   const reach = kind => { if (!finale.endings.includes(kind)) { finale.endings.push(kind); save(); } };
-  function ending(kind) {
-    reach(kind);
-    endingCard({ layer, ending: kind, mark: progress.volunteer.mark, both: Boolean(finale.wish && finale.stayed), sound, onClose: () => { if ((kind === 'B' || kind === 'C') && trueMiracle(finale)) ending('D'); } });
+  let theatre = null;
+  function ending(kind, replay = false) {
+    if (!replay) reach(kind);
+    const next = !replay && (kind === 'B' || kind === 'C') && trueMiracle(finale);
+    theatre?.close();
+    theatre = endingTheatre({ host: layer, ending: kind, mark: progress.volunteer.mark, both: Boolean(finale.wish && finale.stayed), wish: finale.wish, sound, next, onClose: () => { theatre = null; if (next) ending('D'); } });
   }
   function grant(id) {
     if (!canWish(progress.volunteer, finale)) return;
@@ -198,7 +203,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const used = new Set(), knows = () => knowsSantas(progress.story.seen);
   let visited = false;
   function start(id) { leave(); if (!games[id]) return; layer.dataset.game = id; cleanup = games[id]() || (() => {}); }
-  function leave() { timers.forEach(clearTimeout); timers.clear(); cleanup(); cleanup = () => {}; layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
+  function leave() { timers.forEach(clearTimeout); timers.clear(); theatre?.close(); theatre = null; cleanup(); cleanup = () => {}; layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
   return {
     enter: start,
     leave,
