@@ -398,11 +398,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   glow(new THREE.Vector3(DESK.x + .03, DESK.h * (1 - (DESK.items.lamp[1] + DESK.items.lamp[3]) / 2.6), DESK.z + (.5 - (DESK.items.lamp[0] + DESK.items.lamp[2]) / 2) * DESK.w), .5);
   // The little room behind the bookcase: plain warm walls and a lamp; what is in it is laid out by cabin-secret.js.
   (() => {
-    const { left, width, height, depth } = SECRET, back = BACK_WALL - depth, mid = left + width / 2, walls = 0xb98f63;
+    const { left, width, height, depth, wall } = SECRET, back = BACK_WALL - depth, mid = left + width / 2, walls = 0xb98f63;
     solid(new THREE.BoxGeometry(width, .02, depth), 0x8f6444, new THREE.Vector3(mid, -.01, BACK_WALL - depth / 2), secret);
-    solid(new THREE.BoxGeometry(width, .02, depth), 0x7a5236, new THREE.Vector3(mid, height + .01, BACK_WALL - depth / 2), secret);
-    solid(new THREE.BoxGeometry(width, height, .02), walls, new THREE.Vector3(mid, height / 2, back), secret);
-    for (const x of [left - .01, left + width + .01]) solid(new THREE.BoxGeometry(.02, height, depth), walls, new THREE.Vector3(x, height / 2, BACK_WALL - depth / 2), secret);
+    // The ceiling and side walls stand just inside the doorway: lined up with the back wall's own face they would flicker
+    // against it along the doorway's edges.
+    solid(new THREE.BoxGeometry(width, wall, depth), 0x7a5236, new THREE.Vector3(mid, height - wall / 2, BACK_WALL - depth / 2), secret);
+    solid(new THREE.BoxGeometry(width, height, wall), walls, new THREE.Vector3(mid, height / 2, back), secret);
+    for (const x of [left + wall / 2, left + width - wall / 2]) solid(new THREE.BoxGeometry(wall, height, depth), walls, new THREE.Vector3(x, height / 2, BACK_WALL - depth / 2), secret);
     const lamp = new THREE.PointLight(0xffc98a, 1.6, 2.2, 1.5); lamp.position.set(mid, height - .15, back + .3); secret.add(lamp);
     glow(new THREE.Vector3(mid, height - .2, back + .32), .7, secret);
   })();
