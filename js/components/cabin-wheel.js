@@ -10,8 +10,9 @@ const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 // Two turns of the crank set the wheel going.
 const TURNS = 2;
 
-// The sheet in a 160 × 120 box: snow, the stand's legs and the crank's box behind; the rim and spokes turn about the hub
-// (80, 40); the hub's housing in front of them.
+// The sheet in a 160 × 120 box: snow, the stand's legs and the crank's box behind; the hub's housing (80, 40) in front.
+// The rim and spokes are drawn on a square of their own, 120 across round the hub, so none of the rim is cut off
+// (the part above the sheet would otherwise turn into view as a gap).
 function back(parent) {
   shape('path', { d: 'M80 40L50 106M80 40L110 106', stroke: WOOD, 'stroke-width': 7, 'stroke-linecap': 'round' }, parent);
   shape('path', { d: 'M0 100Q40 93 80 98T160 95V120H0Z', fill: '#fbf8f1' }, parent);
@@ -19,9 +20,9 @@ function back(parent) {
   shape('rect', { x: 118, y: 92, width: 28, height: 4, fill: '#e0b04f' }, parent);
 }
 function spokes(parent) {
-  shape('circle', { cx: 80, cy: 40, r: 56, fill: 'none', stroke: RIM, 'stroke-width': 4 }, parent);
-  shape('circle', { cx: 80, cy: 40, r: 30, fill: 'none', stroke: RIM, 'stroke-width': 2 }, parent);
-  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; shape('path', { d: `M80 40L${80 + Math.cos(a) * 56} ${40 + Math.sin(a) * 56}`, stroke: RIM, 'stroke-width': 2.5 }, parent); }
+  shape('circle', { cx: 60, cy: 60, r: 56, fill: 'none', stroke: RIM, 'stroke-width': 4 }, parent);
+  shape('circle', { cx: 60, cy: 60, r: 30, fill: 'none', stroke: RIM, 'stroke-width': 2 }, parent);
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; shape('path', { d: `M60 60L${60 + Math.cos(a) * 56} ${60 + Math.sin(a) * 56}`, stroke: RIM, 'stroke-width': 2.5 }, parent); }
 }
 function hub(parent) {
   shape('circle', { cx: 80, cy: 40, r: 13, fill: '#6b4a33' }, parent);
@@ -47,7 +48,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, onMended, on
   const guide = element('p', 'wheel-guide', card, '把雪地裡的齒輪拖回輪軸上（或直接點它）。');
   const sheet = element('div', 'wheel-sheet', card);
   paperLayer(element('span', 'wheel-art', sheet), '0 0 160 120', '', back, PAPER);
-  const rim = element('span', 'wheel-art wheel-spokes', sheet); paperLayer(rim, '0 0 160 120', '', spokes, PAPER);
+  const rim = element('span', 'wheel-spokes', sheet); paperLayer(rim, '0 0 120 120', '', spokes, PAPER);
   paperLayer(element('span', 'wheel-art', sheet), '0 0 160 120', '', hub, PAPER);
   const slot = element('span', 'wheel-slot', sheet); slot.setAttribute('aria-hidden', 'true');
   const cog = element('button', 'wheel-gear', sheet); cog.type = 'button'; cog.setAttribute('aria-label', '掉在雪地裡的齒輪：拖回輪軸上，或按 Enter 裝回去');
