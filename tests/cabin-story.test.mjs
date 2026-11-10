@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BOOK_IDS, GAPS, goal, homeShelf, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
+import { BOOK_IDS, GAPS, LOG_ANSWER, LOG_GIVEN, goal, homeShelf, logSolved, logWrong, readLog, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
 import { GOALS } from '../js/data/cabin-clues.js';
 
 const place = id => homeShelf().indexOf(id);
@@ -78,12 +78,23 @@ test('the clue book hints at the first thing the story is still waiting on', () 
   const at = (changes = {}) => goal({ story: { ...story, ...changes.story }, volunteer: { ...volunteer, ...changes.volunteer }, finale: { ...finale, ...changes.finale } });
   const known = { opened: true, left: true, seen: ['tags', 'log', 'rules'] }, signed = tasks => ({ mark: 'J', tasks });
   assert.equal(at(), 'room'); assert.equal(at({ story: { left: true } }), 'bookcase');
-  assert.equal(at({ story: { opened: true, left: true, seen: ['tags'] } }), 'secret');
+  assert.equal(at({ story: { opened: true, left: true, seen: ['tags'] } }), 'log', 'the wet shift log first');
+  assert.equal(at({ story: { opened: true, left: true, seen: ['tags', 'log'] } }), 'secret');
   assert.equal(at({ story: known }), 'join'); assert.equal(at({ story: known, finale: { endings: ['A'] } }), 'endings', 'went home: other endings');
   assert.equal(at({ story: known, volunteer: signed(['hay']) }), 'jobs'); assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']) }), 'cord');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']), finale: { twist: true } }), 'jobs');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true } }), 'wish');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true, wish: 'snow', endings: ['B', 'D'] } }), 'endings');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C', 'D'] } }), 'done');
-  for (const id of ['room', 'bookcase', 'secret', 'join', 'jobs', 'cord', 'wish', 'endings', 'done']) assert.ok(GOALS[id]?.hints.length, `${id} has hints`);
+  for (const id of ['room', 'bookcase', 'log', 'secret', 'join', 'jobs', 'cord', 'wish', 'endings', 'done']) assert.ok(GOALS[id]?.hints.length, `${id} has hints`);
+});
+test('the wet shift log: one cell still reads, the rest are written back in, and only the right initials put it right', () => {
+  const blank = readLog();
+  assert.equal(blank.filter(Boolean).length, 1); assert.equal(blank[LOG_GIVEN], LOG_ANSWER[LOG_GIVEN]);
+  assert.deepEqual(readLog(['X', 'O', 'E', 'K', 7]), ['', 'O', LOG_ANSWER[LOG_GIVEN], 'K', '', '', '', ''], 'only known initials; the clear cell stays as it reads');
+  assert.equal(logSolved(blank), false); assert.equal(logWrong(blank), 7);
+  const swapped = [...LOG_ANSWER]; [swapped[6], swapped[7]] = [swapped[7], swapped[6]];
+  assert.equal(logWrong(swapped), 2); assert.equal(logSolved(LOG_ANSWER), true);
+  assert.equal(goal({ story: { left: true, opened: true, seen: ['tags', 'rules'] }, volunteer: { mark: '', tasks: [] }, finale: { endings: [] } }), 'log');
+  assert.equal(goal({ story: { left: true, opened: true, seen: ['log'] }, volunteer: { mark: '', tasks: [] }, finale: { endings: [] } }), 'secret');
 });

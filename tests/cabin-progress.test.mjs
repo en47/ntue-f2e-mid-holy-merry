@@ -79,3 +79,9 @@ test('the clue book is kept: known clues once each, hints asked for by goal, not
   assert.deepEqual(progress.clues, ['barn-note', 'tags']); assert.deepEqual(progress.hints, { room: 2, jobs: 3 });
   assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ clues: 'tags', hints: [1] }) })).hints, {});
 });
+test('the shift log is kept as far as it has been written; one read before it got wet is whole', () => {
+  const kept = readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ story: { opened: true, seen: ['tags'], log: ['E', 'Z', 'K', 'K'] } }) })).story.log;
+  assert.deepEqual(kept.slice(0, 4), ['E', '', 'N', 'K']);
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ story: { opened: true, seen: ['log'] } }) })).story.log, ['E', 'O', 'N', 'K', 'H', 'N', 'K', 'H']);
+});
+

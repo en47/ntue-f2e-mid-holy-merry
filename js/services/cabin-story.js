@@ -24,10 +24,19 @@ export const solved = shelf => spelled(shelf) === 'MORE';
 // seen him go before), and only while he is at home and the shelf is not yet open.
 export const santaGoes = ({ used, left, home, opened }) => home && !opened && used >= (left ? 1 : 2);
 // In the little room behind the bookcase three things tell the secret: the name tags, the shift log and the rulebook.
-// Seen all three, the visitor knows there is more than one Santa; then he comes home from the reindeer.
+// Seen all three, the visitor knows there is more than one Santa; then he comes home from the reindeer. The log only counts
+// once it has been put right (below): snow melted on it and the ink ran.
 export const CLUES = ['tags', 'log', 'rules'];
 export const knowsSantas = seen => CLUES.every(clue => seen.includes(clue));
 export const santaReturns = ({ home, opened, seen }) => !home && opened && knowsSantas(seen);
+// The shift log: four nights before Christmas, each flown in two halves (who started, who took over). The visitor writes
+// the ink back in, a substitute's initial in each cell, from what they have seen around the village; one cell still reads.
+export const NIGHTS = [['12/21', 'E', 'O'], ['12/22', 'N', 'K'], ['12/23', 'H', 'N'], ['12/24', 'K', 'H']];
+export const LOG_ANSWER = NIGHTS.flatMap(([, first, second]) => [first, second]), LOG_GIVEN = 2;
+export const SUBSTITUTES = ['N', 'K', 'H', 'E', 'O'];
+export const readLog = saved => LOG_ANSWER.map((mark, i) => i === LOG_GIVEN ? mark : Array.isArray(saved) && SUBSTITUTES.includes(saved[i]) ? saved[i] : '');
+export const logWrong = log => log.filter((mark, i) => mark !== LOG_ANSWER[i]).length;
+export const logSolved = log => logWrong(log) === 0;
 // Once the secret is known, the visitor may sign the register with an initial of their own (not one already on a name
 // tag, nor Santa's S) and help: four jobs around the village, each earning a wish point the first time it is done while
 // signed up. Leaving is always allowed and keeps the points earned (they come back on signing again).
@@ -52,7 +61,7 @@ export const goesHome = ({ volunteer, finale }) => finale.invited && !signedUp(v
 // What the story is waiting on now, for the clue book's hints (data/cabin-clues.js): the first thing not yet done.
 export function goal({ story, volunteer, finale }) {
   if (!story.opened) return story.left ? 'bookcase' : 'room';
-  if (!knowsSantas(story.seen)) return 'secret';
+  if (!knowsSantas(story.seen)) return story.seen.includes('log') ? 'secret' : 'log';
   if (!signedUp(volunteer)) return finale.endings.length ? 'endings' : 'join';
   if (!finale.twist) return canUntie(volunteer) ? 'cord' : 'jobs';
   if (!finale.wish && !finale.stayed) return points(volunteer) >= WISH_COST ? 'wish' : 'jobs';

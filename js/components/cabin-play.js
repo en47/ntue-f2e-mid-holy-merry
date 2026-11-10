@@ -134,7 +134,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       });
       open.focus();
     },
-    reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen') }),
+    reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen'), clue }),
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti }),
     stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask: () => task('hay'), clue }),
     // The broken big wheel, mended up close (a sheet laid over the yard: it is too far off to walk up to).

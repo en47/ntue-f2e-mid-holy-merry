@@ -11,7 +11,7 @@ const centre = rect => ({ x: rect.left + rect.width / 2, y: rect.top + rect.heig
 const near = (point, rect, pad) => rect && point.x >= rect.left - pad && point.x <= rect.left + rect.width + pad && point.y >= rect.top - pad && point.y <= rect.top + rect.height + pad;
 
 // A volunteer still owing him his lichen (`wants`) finds the basket holding only that, even once he is full for the day.
-export function feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art, paper, wants = () => false, onTask = () => {} }) {
+export function feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art, paper, wants = () => false, onTask = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
   const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
@@ -106,7 +106,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (kind === 'lichen') {
       cabin.reindeerAct('happy'); sound.play('happy'); later(1800, () => { cabin.reindeerAct('chew'); sound.play('chew'); });
       burst(mouth, 'heart', 3); speak('是地衣！我最愛吃這個！'); onTask();
-      later(1200, () => say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」'));
+      later(1200, () => { say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」往前翻，還有一行金色的字：「12/21 後半夜，地衣餵過了。—— O.」'); clue('care-log'); });
     } else {
       cabin.reindeerAct('chew'); sound.play('chew'); burst(mouth, 'heart', 1); speak(['喀滋喀滋！', '好甜的胡蘿蔔！', '再一根好不好？'][eaten % 3]);
     }

@@ -5,11 +5,25 @@
 import { SUBSTITUTES } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { shape } from './paper-art.js';
-import { CLUES, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, points, signedUp } from '../services/cabin-story.js';
-import { JOBS, MORNING, NAMES, NOTES, REGISTER, RULES, SHIFTS } from '../data/cabin-secret.js';
+import { CLUES, LOG_GIVEN, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, logSolved, logWrong, points, signedUp } from '../services/cabin-story.js';
+import { COLOUR_NAMES, INK, JOBS, LOG, MORNING, NAMES, NOTES, REGISTER, RULES } from '../data/cabin-secret.js';
 import { CORD, OLD_PAGE, PENCIL, SEEN, STAY, WISH, WISHES } from '../data/cabin-finale.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
+const noise = index => { const value = Math.sin(index * 12.9898) * 43758.5453; return value - Math.floor(value); };
+const COLOURS = Object.fromEntries(SUBSTITUTES);
+// What the snow left of a cell of the shift log, in an 80 × 44 box: a blot of its writer's ink, running, or a pale stain
+// where it washed out altogether.
+function blot(ink, colour, seed) {
+  const round = (cx, cy, r, sx, sy) => { let d = ''; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, rr = r * (.72 + noise(seed + i) * .5); d += `${i ? 'L' : 'M'}${(cx + Math.cos(a) * rr * sx).toFixed(1)} ${(cy + Math.sin(a) * rr * sy).toFixed(1)}`; } return `${d}Z`; };
+  shape('path', { d: round(40, 20, 14, 1.6, .85), fill: colour, opacity: .32 }, ink);
+  shape('path', { d: round(38, 20, 8, 1.5, .8), fill: colour, opacity: .38 }, ink);
+  for (const [x, l] of [[30 + noise(seed) * 8, 10], [48 + noise(seed + 1) * 8, 7]]) shape('path', { d: `M${x - 1.6} 28Q${x} ${28 + l} ${x + 1.6} 28Z`, fill: colour, opacity: .35 }, ink);
+}
+function stain(ink, seed) {
+  shape('ellipse', { cx: 40 + noise(seed) * 4, cy: 22, rx: 30, ry: 13, fill: '#9fb3c4', opacity: .16 }, ink);
+  shape('ellipse', { cx: 38, cy: 21, rx: 24, ry: 10, fill: 'none', stroke: '#9fb3c4', 'stroke-width': 1.2, opacity: .4 }, ink);
+}
 // Each thing: the sheet it is on, where on that sheet ([left, top, right, bottom]), and its name.
 const THINGS = {
   tags: ['secret-tags', [0, .15, 1, .95], '名牌板'], log: ['secret-log', undefined, '班表'], rules: ['secret-desk', [.27, .3, .5, .46], '守則小冊'],
@@ -60,9 +74,10 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       if (finale.stayed) { const item = element('li', 'is-you', list); element('span', 'secret-initial', item, volunteer.mark ? `${volunteer.mark}.` : ''); element('span', '', item, '你'); }
       element('p', 'secret-note', page, finale.stayed ? STAY.tag : '最右邊還有一個空掛勾。');
     } else if (id === 'log') {
-      element('h3', 'secret-title', page, '夜班交接表');
-      const list = element('ol', 'secret-log', page);
-      for (const [date, shift, sign, handover, hand] of SHIFTS) { const item = element('li', '', list); item.dataset.hand = hand; item.textContent = `${date}　${shift}　${sign}　${handover}`; }
+      element('h3', 'secret-title', page, LOG.title);
+      shiftLog(page);
+      // Under the four nights, the early shift on Christmas morning.
+      const list = element('ul', 'secret-log', page);
       const morning = element('li', finale.stayed ? 'is-morning is-you' : 'is-morning', list); morning.textContent = `${MORNING.date}　${MORNING.shift}　${finale.stayed ? `${volunteer.mark || ''}${volunteer.mark ? '.' : ''}（你）` : progress.combos.includes('santa') ? MORNING.snowman : MORNING.empty}`;
       // Every job done: the early shift can be signed, and the visitor stays on.
       if (canStay(volunteer, finale)) {
@@ -79,6 +94,55 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     else element('p', 'secret-note', page, id === 'hats' && finale.twist ? NOTES.hatsKnown : NOTES[id]);
     const done = element('button', 'cabin-letter-close', card, id === 'oldpage' ? CORD.back : '放回去 ✓'); done.type = 'button';
     on(done, 'click', () => id === 'oldpage' ? open('register', from) : close(id, from)); done.focus({ preventScroll: true });
+  }
+  // The shift log, wet: a grid of the four nights, first and second half. A cell is chosen, then a name tag below writes
+  // that initial in. Filled in, it is checked by the rules (cabin-story.js): put right, the ink comes back and it counts as
+  // read; otherwise it says only how many cells are wrong.
+  function shiftLog(page) {
+    const log = story.log, solved = () => logSolved(log);
+    const note = element('p', 'secret-note shift-note', page, solved() ? LOG.solved : `${LOG.wet}${LOG.how}`);
+    const grid = element('div', solved() ? 'shift-grid is-solved' : 'shift-grid', page); grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', LOG.title);
+    element('span', 'shift-head', grid); for (const half of LOG.halves) element('span', 'shift-head', grid, half);
+    let chosen = -1;
+    const cells = [];
+    NIGHTS.forEach(([date], night) => {
+      element('span', 'shift-date', grid, date);
+      for (const half of [0, 1]) {
+        // The blot keeps the colour of whoever really wrote there.
+        const index = night * 2 + half, state = INK[index], writer = NIGHTS[night][half + 1];
+        const cell = element('button', 'shift-cell', grid); cell.type = 'button'; cell.dataset.ink = state; cells.push(cell);
+        inked(cell, '0 0 80 44', ink => state === 'blot' ? blot(ink, COLOURS[writer], index * 7 + 3) : state === 'washed' ? stain(ink, index * 5 + 1) : null);
+        const mark = element('span', 'shift-mark', cell);
+        const hint = state === 'blot' ? `暈開的${COLOUR_NAMES[writer]}色墨水` : state === 'washed' ? '整個洗掉了' : '還看得清楚';
+        if (state === 'blot') element('span', 'shift-ink', cell, `${COLOUR_NAMES[writer]}色`);
+        const show = () => { const value = log[index]; mark.textContent = value ? `${value}.` : ''; mark.style.color = value ? COLOURS[value] : ''; cell.setAttribute('aria-label', `${date} ${LOG.halves[half]}：${hint}${value ? `，寫著 ${value}.` : '，空著'}`); };
+        show(); cell.show = show;
+        if (index === LOG_GIVEN || solved()) { cell.disabled = true; continue; }
+        cell.setAttribute('aria-pressed', 'false');
+        on(cell, 'click', () => { chosen = index; sound.play('pick'); cells.forEach((each, i) => each.hasAttribute('aria-pressed') && each.setAttribute('aria-pressed', String(i === index))); });
+      }
+    });
+    if (solved()) return;
+    // The name tags to write with, and an eraser.
+    const picks = element('div', 'shift-picks', page);
+    const write = mark => {
+      const empty = log.findIndex((value, i) => !value && i !== LOG_GIVEN), at = chosen >= 0 ? chosen : empty;
+      if (at < 0) return;
+      log[at] = mark; save(); cells[at].show(); sound.play(mark ? 'snap' : 'remove');
+      // Next, the next empty cell.
+      const next = log.findIndex((value, i) => !value && i !== LOG_GIVEN);
+      chosen = next; cells.forEach((each, i) => each.hasAttribute('aria-pressed') && each.setAttribute('aria-pressed', String(i === next)));
+      if (next < 0) check();
+    };
+    for (const mark of WHO) { const pick = element('button', 'shift-pick', picks, `${mark}.`); pick.type = 'button'; pick.style.color = COLOURS[mark]; pick.setAttribute('aria-label', `寫上 ${mark}.（${NAMES[mark]}）`); on(pick, 'click', () => write(mark)); }
+    const erase = element('button', 'shift-pick shift-erase', picks, LOG.erase); erase.type = 'button';
+    on(erase, 'click', () => { if (chosen >= 0 && log[chosen]) { log[chosen] = ''; save(); cells[chosen].show(); sound.play('remove'); } });
+    function check() {
+      if (!logSolved(log)) { note.textContent = LOG.wrong(logWrong(log)); sound.play('nope'); grid.classList.remove('is-wrong'); void grid.offsetWidth; grid.classList.add('is-wrong'); return; }
+      // Put right: the ink comes back a row at a time, and the log counts as read.
+      grid.classList.add('is-solved'); picks.remove(); cells.forEach(cell => { cell.disabled = true; cell.removeAttribute('aria-pressed'); });
+      note.textContent = LOG.solved; sound.play('cheer'); learn('log');
+    }
   }
   // The register's newest page: each substitute's stamps this season, then the visitor's row, or a blank one to sign.
   function register(card, from) {
@@ -155,12 +219,15 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   }
   function close(id, from) {
     card?.remove(); card = null; sound.play('remove');
+    // The name tags and the rules count as read once put back; the log once it has been put right (above).
+    if (id === 'tags' || id === 'rules') { clue(id); learn(id); }
+    layout(); from.focus({ preventScroll: true });
+  }
+  // A clue read. The first discovery, once all three are: more than one Santa. Told once, quietly.
+  function learn(id) {
     const before = knowsSantas(story.seen);
     if (CLUES.includes(id) && !story.seen.includes(id)) { story.seen.push(id); save(); }
-    if (id === 'tags' || id === 'rules') clue(id);
-    layout(); from.focus({ preventScroll: true });
-    // The first discovery: more than one Santa. Told once, quietly.
-    if (!before && knowsSantas(story.seen)) { later(400, () => { sound.play('jingle'); say(NOTES.known); onKnow(); }); later(4600, () => { if (!card && invited()) say(REGISTER.hint); }); }
+    if (!before && knowsSantas(story.seen)) { later(id === 'log' ? 2400 : 400, () => { sound.play('jingle'); say(NOTES.known); onKnow(); }); later(6600, () => { if (!card && invited()) say(REGISTER.hint); }); }
   }
   const follow = () => { layout(); frame = requestAnimationFrame(follow); };
   follow();
