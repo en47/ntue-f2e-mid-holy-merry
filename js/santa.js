@@ -75,7 +75,7 @@ async function mountCabin(fly = true) {
   try {
     const [{ mountCabin: build }, { mountPlay }] = await Promise.all([import('./components/cabin-scene.js'), import('./components/cabin-play.js')]);
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (id === 'wheel' && play?.wheelBroken) play.enter('wheel'); else if (note) play?.note(note); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
+    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (note) play?.note(note); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
     if (!result || run !== generation) { result?.destroy(); return; }
     cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; }, onSanta: state => { if (state === 'away' || state === 'home') chat.setAway(state === 'away'); } });
     cabin.setFound([...found]);

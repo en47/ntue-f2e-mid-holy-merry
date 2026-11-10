@@ -7,7 +7,7 @@
 import { paperLayer, shape } from './paper-art.js';
 import { DESK_LETTERS, REPLY, VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { NAMES } from '../data/cabin-secret.js';
-import { knowsSantas, pending } from '../services/cabin-story.js';
+import { knowsSantas, pending, signedUp } from '../services/cabin-story.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
 const CRAYON = { paper: { scale: .25, grain: .5, shadow: 0, rim: '#ffffff00' }, eager: true };
@@ -50,16 +50,19 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
   const desk = progress.desk, volunteer = progress.volunteer;
-  // What waits: the new letters on top of the bundle for a volunteer (until answered), then the usual ones in turn; on the
-  // rack, Santa's reply to Mia and any reply a volunteer has written, until each is sent.
-  const unanswered = () => pending(volunteer, 'letters') ? VOLUNTEER_LETTERS.filter(entry => !(entry.id in desk.answers)) : [];
-  const replyTo = entry => ({ id: `reply-${entry.id}`, to: `給${entry.name}`, greeting: `親愛的${entry.name}：`, body: entry.answers[desk.answers[entry.id]], sign: `替身 ${volunteer.mark}. 代筆`, seal: volunteer.mark, name: entry.name });
-  const outgoing = () => [...(desk.sent.includes(REPLY.id) ? [] : [{ ...REPLY, seal: 'S', name: '小米' }]), ...VOLUNTEER_LETTERS.filter(entry => entry.id in desk.answers && !desk.sent.includes(`reply-${entry.id}`)).map(replyTo)];
+  // What waits. While the job is still to do, the new letters lie on top of the bundle until answered; after that they come
+  // round in the bundle with the others and can be answered again (only the first time is stamped in the register). On
+  // the rack: Santa's reply to Mia until it is sent, and each reply a volunteer has written, until it is sent.
+  const answered = entry => entry.id in desk.answers;
+  const unanswered = () => pending(volunteer, 'letters') ? VOLUNTEER_LETTERS.filter(entry => !answered(entry) && !desk.sent.includes(`reply-${entry.id}`)) : [];
+  const bundle = () => [...DESK_LETTERS, ...(signedUp(volunteer) && !pending(volunteer, 'letters') ? VOLUNTEER_LETTERS.filter(entry => !answered(entry)) : [])];
+  const replyTo = entry => ({ id: `reply-${entry.id}`, letter: entry.id, to: `給${entry.name}`, greeting: `親愛的${entry.name}：`, body: entry.answers[desk.answers[entry.id]], sign: `替身 ${volunteer.mark}. 代筆`, seal: volunteer.mark, name: entry.name });
+  const outgoing = () => [...(desk.sent.includes(REPLY.id) ? [] : [{ ...REPLY, seal: 'S', name: '小米' }]), ...VOLUNTEER_LETTERS.filter(answered).map(replyTo)];
   say(unanswered().length ? '信堆最上面有兩封新來的信，要交給新替身回覆。點信堆抽一封來讀。' : outgoing().length ? '書桌上堆著收到的信；左邊架子上，還有等著寄出的回信。' : '書桌上堆著收到的信。點信堆抽一封來讀。');
 
   const pick = (label, run) => { const button = element('button', 'desk-pick', layer); button.type = 'button'; button.setAttribute('aria-label', label); on(button, 'click', run); return button; };
   let next = 0;
-  const stack = pick('從信堆抽一封信', () => take(unanswered()[0] ?? DESK_LETTERS[next++ % DESK_LETTERS.length], 'in', stack));
+  const stack = pick('從信堆抽一封信', () => { const letters = bundle(); take(unanswered()[0] ?? letters[next++ % letters.length], 'in', stack); });
   const outbox = pick('拿起架上等著寄出的回信', () => { const [reply] = outgoing(); if (reply) take(reply, 'out', outbox); else { sound.play('nope'); say('架上的回信都寄出去了。'); } });
   const tools = Object.fromEntries(Object.keys(TOOLS).map(kind => {
     const button = element('button', `desk-tool desk-${kind}`, layer); button.type = 'button';
@@ -99,14 +102,14 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   // Everything shown follows the letter on the desk and how far along it is.
   function refresh() {
     const { entry, kind, step } = current, out = kind === 'out', sealed = out && desk.sealed.includes(entry.id), marked = out && desk.marked.includes(entry.id), flipped = letter.classList.contains('is-flipped');
-    const answering = !out && unanswered().includes(entry);
+    const answering = !out && VOLUNTEER_LETTERS.includes(entry) && signedUp(volunteer) && !answered(entry), again = answering && !unanswered().includes(entry);
     envelope.hidden = step !== 'envelope'; letter.hidden = step !== 'read'; compose.hidden = step !== 'compose';
     envelope.dataset.kind = kind; envelope.dataset.open = String(out && !sealed); arrived.hidden = out; postage.hidden = false; postmark.hidden = !marked; wax.hidden = !sealed;
     bag.hidden = !out; count.textContent = `已寄出 ${desk.sent.length} 封`;
     guide.textContent = step === 'compose' ? `想跟${entry.name}說什麼？選一句寫進信裡（哪一句都好）。`
       : out ? (step === 'read' ? '讀完就摺好，放進信封。' : !sealed ? '把桌上的火漆印拖到信封的封口，封起來。' : !marked ? '再把郵戳拖到右上角的郵票上，蓋上北極郵局的郵戳。' : '封好、蓋好了！把信封拖進郵袋，就寄出去了。')
       : step === 'envelope' ? `${entry.from}寄來的信，郵局已經蓋好收件章。拆開來讀讀看。`
-      : flipped ? '背面是處理這封信的人寫的。' : answering ? '這封信還沒有人回。讀完按「寫回信」，替聖誕老人回一封。' : '讀完可以翻到背面，看看是誰處理的。';
+      : flipped ? '背面是處理這封信的人寫的。' : again ? '這封信你回過了。想再寫一封不一樣的，就按「寫回信」。' : answering ? '這封信還沒有人回。讀完按「寫回信」，替聖誕老人回一封。' : '讀完可以翻到背面，看看是誰處理的。';
     // Only the tool that can be used now stands out.
     tools.seal.classList.toggle('is-ready', out && step === 'envelope' && !sealed); tools.stamp.classList.toggle('is-ready', out && step === 'envelope' && sealed && !marked);
     envelope.classList.toggle('is-ready', out && marked);
@@ -161,7 +164,9 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   function fold() {
     const sheetOf = current.step === 'compose' ? compose : letter;
     if (current.step === 'compose') {
-      const answered = current.entry; desk.answers[answered.id] = current.choice; save();
+      // A reply just written goes into a fresh envelope, whatever an earlier one to the same child went through.
+      const answered = current.entry, reply = replyTo(answered); desk.answers[answered.id] = current.choice;
+      desk.sealed = desk.sealed.filter(id => id !== reply.id); desk.marked = desk.marked.filter(id => id !== reply.id); save();
       current = { entry: replyTo(answered), kind: 'out', source: outbox, step: 'compose' }; wax.textContent = volunteer.mark; to.textContent = current.entry.to; from.textContent = '寄件：北極　聖誕老人';
     }
     pop(sheetOf, 'is-folding'); sound.play('remove');
@@ -170,7 +175,10 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   // Into the sack: the envelope drops in, the sack takes it, and the count on its tag goes up.
   function send() {
     const { entry } = current;
-    desk.sent.push(entry.id); save(); sound.play('drop'); later(220, () => sound.play('jingle'));
+    // A volunteer's reply, once gone, leaves its letter free to be answered again, with a fresh envelope.
+    if (!desk.sent.includes(entry.id)) desk.sent.push(entry.id);
+    if (entry.letter) { delete desk.answers[entry.letter]; desk.sealed = desk.sealed.filter(id => id !== entry.id); desk.marked = desk.marked.filter(id => id !== entry.id); }
+    save(); sound.play('drop'); later(220, () => sound.play('jingle'));
     pop(envelope, 'is-sent'); pop(bag, 'is-taking'); count.textContent = `已寄出 ${desk.sent.length} 封`;
     say(`寄出去了！${entry.name}會在平安夜前收到${entry.id === REPLY.id ? '聖誕老人的' : '你寫的'}回信。`);
     if (VOLUNTEER_LETTERS.every(each => desk.sent.includes(`reply-${each.id}`))) onTask();
