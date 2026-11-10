@@ -362,7 +362,7 @@ await test('Santa 替身工作：登記簿簽縮寫加入，四件工作各在�
   const { JOBS, REGISTER } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { VOLUNTEER_LETTERS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href), { TASKS } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
   assert.deepEqual(Object.keys(JOBS), TASKS); assert.equal(VOLUNTEER_LETTERS.length, 2); assert.ok(VOLUNTEER_LETTERS.every(entry => !entry.back.sign && entry.back.hand === 'you'), 'The new letters are signed with the visitor\'s own initial');
   assert.ok(REGISTER.rows.some(([mark, count]) => mark === 'H' && count === REGISTER.full), 'Holly\'s row is already full, and she is still on the shift log');
-  assert.ok(secret.includes("else if (id === 'register' && knowsSantas(story.seen)) register(card, from);") && secret.includes('if (!canSign(char)) { tile.disabled = true;') && secret.includes("if (!leave.dataset.sure)"), 'The register is signed once the secret is known; taken initials cannot be chosen; leaving takes a second press');
+  assert.ok(secret.includes("else if (id === 'register' && knowsSantas(story.seen)) register(page, from);") && secret.includes('if (!canSign(char)) { tile.disabled = true;') && secret.includes("if (!leave.dataset.sure)"), 'The register is signed once the secret is known; taken initials cannot be chosen; leaving takes a second press');
   assert.ok(play.includes("if (!record(progress.volunteer, id)) return;") && play.includes("onTask: () => task('lichen')") && play.includes("onTask: () => task('hay')") && play.includes("onTask: () => task('letters')") && play.includes("onMended: () => { task('wheel'); cabin.wheelBroken(false); }"), 'Each of the four jobs reports to one place, where the rule decides');
   assert.ok(feed.includes("const lichenOnly = full(progress) && wants();") && pulley.includes("settle(); onTask();") && desk.includes('if (VOLUNTEER_LETTERS.every(each => desk.sent.includes(`reply-${each.id}`))) onTask();'), 'Lichen even when he is full, the hay hooked, both new letters answered and sent');
   assert.ok(scene.includes('fair.speed += ((fair.broken ? 0 : 1) - fair.speed)') && scene.includes('wheelBroken(broken, animate = true)') && page.includes("if (id === 'wheel' && play?.wheelOpen) play.enter('wheel');"), 'Signed up, the big wheel slows to a stop, and a tap on it opens it to be mended');
@@ -394,6 +394,14 @@ await test('Santa 替身工作都能重玩：只有第一次蓋章（摩天輪�
   assert.ok(play.includes("get wheelOpen() { return pending(progress.volunteer, 'wheel') || progress.volunteer.tasks.includes('wheel'); }") && play.includes("again: !pending(progress.volunteer, 'wheel')") && wheel.includes('again = false'), 'Once mended, the wheel\'s gearbox opens again to be played');
   assert.ok(desk.includes("signedUp(volunteer) && !pending(volunteer, 'letters') ? VOLUNTEER_LETTERS.filter(entry => !answered(entry))") && desk.includes('if (entry.letter) { delete desk.answers[entry.letter];'), 'Once the letters are answered, they come round in the bundle and can be answered again, with a fresh envelope');
   assert.ok(play.includes('if (!record(progress.volunteer, id)) return;'), 'Only the first time counts: record() stamps a job once');
+});
+await test('Santa 卡片的字只在內頁裡捲，不會跑到封面或木框上；帳本內頁沒有不跟著捲的線', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [secret, wheel, paper, css] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-wheel.js', 'js/components/cabin-paper.js', 'css/santa.css'].map(read));
+  assert.ok(secret.includes("const page = element('div', 'secret-body', card);") && wheel.includes("const inside = element('div', 'gearbox-body', box);"), 'The words go in a page of their own inside the card and the case');
+  assert.ok(css.includes('.cabin .secret-card { display: flex; flex-direction: column; overflow: hidden; }') && css.includes('.secret-body { min-height: 0; overflow: auto;') && css.includes('.gearbox-body { min-height: 0; overflow: auto;'), 'The card and the case stand still; only their page scrolls');
+  const ledger = paper.slice(paper.indexOf('ledger(paper, width, height, seed)'), paper.indexOf('booklet(paper'));
+  assert.ok(!ledger.includes('#e8a3a0') && !ledger.includes('#e5d8bc') && ledger.includes('long = 26'), 'The ledger page has no margin line or rules standing still under scrolling words; its ribbon stays on the cover');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {
   const html = await fs.readFile(path.join(project, 'wish.html'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/wish-lights.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/wish.css'), 'utf8');

@@ -118,9 +118,11 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
   say('');
   const box = element('article', 'gearbox', layer); box.setAttribute('aria-label', '摩天輪的動力箱');
   paperLayer(element('span', 'gearbox-garland', box), '0 0 400 44', '', garland, { ...PAPER, preserveAspectRatio: 'none' });
-  const banner = element('h3', 'gearbox-banner', box); paperLayer(banner, '0 0 300 72', '', ribbon, PAPER); element('span', 'gearbox-name', banner, '摩天輪動力箱');
-  const guide = element('p', 'gearbox-guide', box, again ? '摩天輪轉得好好的。想再排一次齒輪，就把它們裝回三根軸釘上，再轉轉曲柄。' : '輪軸和曲柄之間少了齒輪。把齒輪裝到三根軸釘上，再轉轉右下角的曲柄。');
-  const board = element('div', 'gearbox-board', box);
+  // Everything else scrolls within the case (when the screen is short), never over its frame.
+  const inside = element('div', 'gearbox-body', box);
+  const banner = element('h3', 'gearbox-banner', inside); paperLayer(banner, '0 0 300 72', '', ribbon, PAPER); element('span', 'gearbox-name', banner, '摩天輪動力箱');
+  const guide = element('p', 'gearbox-guide', inside, again ? '摩天輪轉得好好的。想再排一次齒輪，就把它們裝回三根軸釘上，再轉轉曲柄。' : '輪軸和曲柄之間少了齒輪。把齒輪裝到三根軸釘上，再轉轉右下角的曲柄。');
+  const board = element('div', 'gearbox-board', inside);
   const place = (node, [x, y], size) => Object.assign(node.style, { left: `${(x - size) / W * 100}%`, top: `${(y - size) / H * 100}%`, width: `${size * 2 / W * 100}%`, height: `${size * 2 / H * 100}%` });
   paperLayer(element('span', 'gearbox-art', board), `0 0 ${W} ${H}`, '', panel, PAPER);
   // The wheel's hub and spokes (turning with its gear), its lamps, and its gear.
@@ -147,7 +149,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
   crank.setAttribute('aria-label', '曲柄：繞著它順時針拖曳，或按方向鍵右、Enter 轉半圈');
   const handle = element('span', 'gearbox-arm', board); place(handle, CRANK.at, 24); paperLayer(handle, '0 0 100 100', '', arm, PAPER);
   const knob = element('span', 'gearbox-knob', handle);
-  const actions = element('div', 'gearbox-actions', box), hintButton = element('button', 'gearbox-hint', actions, '需要提示嗎？'), quit = element('button', 'gearbox-quit', actions, '先不修了');
+  const actions = element('div', 'gearbox-actions', inside), hintButton = element('button', 'gearbox-hint', actions, '需要提示嗎？'), quit = element('button', 'gearbox-quit', actions, '先不修了');
   hintButton.type = quit.type = 'button'; hintButton.hidden = true;
   on(quit, 'click', () => onClose());
   // The gearbox's door swings open first.
