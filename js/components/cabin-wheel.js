@@ -111,14 +111,15 @@ function arm(parent) {
   shape('circle', { cx: 47.5, cy: 7.5, r: 2.6, fill: '#d97a6c' }, parent);
 }
 
-export function wheelGame({ layer, stage, cabin, say, later, sound, onMended, onClose }) {
+// `again`: the wheel was mended before and runs; its gearbox is opened to set the gears once more.
+export function wheelGame({ layer, stage, cabin, say, later, sound, again = false, onMended, onClose }) {
   const events = new AbortController(), on = (node, type, handler, options = {}) => node.addEventListener(type, handler, { ...options, signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   say('');
   const box = element('article', 'gearbox', layer); box.setAttribute('aria-label', '摩天輪的動力箱');
   paperLayer(element('span', 'gearbox-garland', box), '0 0 400 44', '', garland, { ...PAPER, preserveAspectRatio: 'none' });
   const banner = element('h3', 'gearbox-banner', box); paperLayer(banner, '0 0 300 72', '', ribbon, PAPER); element('span', 'gearbox-name', banner, '摩天輪動力箱');
-  const guide = element('p', 'gearbox-guide', box, '輪軸和曲柄之間少了齒輪。把齒輪裝到三根軸釘上，再轉轉右下角的曲柄。');
+  const guide = element('p', 'gearbox-guide', box, again ? '摩天輪轉得好好的。想再排一次齒輪，就把它們裝回三根軸釘上，再轉轉曲柄。' : '輪軸和曲柄之間少了齒輪。把齒輪裝到三根軸釘上，再轉轉右下角的曲柄。');
   const board = element('div', 'gearbox-board', box);
   const place = (node, [x, y], size) => Object.assign(node.style, { left: `${(x - size) / W * 100}%`, top: `${(y - size) / H * 100}%`, width: `${size * 2 / W * 100}%`, height: `${size * 2 / H * 100}%` });
   paperLayer(element('span', 'gearbox-art', board), `0 0 ${W} ${H}`, '', panel, PAPER);
@@ -261,7 +262,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, onMended, on
   later(40000, () => { if (!mended && hints < HINTS.length) hintButton.hidden = false; });
   function mend() {
     mended = true; crank.disabled = true; box.classList.add('is-running'); sound.play('jingle'); onMended();
-    guide.textContent = '喀啦——輪軸咬住了！摩天輪的燈一盞盞亮起來，又慢慢轉起來了。'; say('摩天輪修好了，又慢慢地轉了起來。');
+    guide.textContent = again ? '齒輪又排好了！輪軸上的燈一盞盞亮起來。' : '喀啦——輪軸咬住了！摩天輪的燈一盞盞亮起來，又慢慢轉起來了。'; say(again ? '齒輪排好了，燈又亮了一次。' : '摩天輪修好了，又慢慢地轉了起來。');
     hintButton.hidden = true; quit.textContent = '好了 ✓'; quit.focus({ preventScroll: true });
     if (still()) return;
     let last = performance.now();

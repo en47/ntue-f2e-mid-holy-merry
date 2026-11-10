@@ -132,7 +132,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti }),
     stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask: () => task('hay') }),
     // The broken big wheel, mended up close (a sheet laid over the yard: it is too far off to walk up to).
-    wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, onMended: () => { task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
+    wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, again: !pending(progress.volunteer, 'wheel'), onMended: () => { task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
     // In the room: the hearth to tend, the desk's letters, the music box and the snow globe, and the bookcase to look over.
     // Each tells the room when it has been used (`onUse`): Santa goes out once enough has been done there.
     hearth: () => hearthGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('hearth') }),
@@ -197,8 +197,10 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // Leaving the house before the bookcase has opened, Santa is back in his chair the next time you come in.
     outside() { if (!progress.story.opened && !cabin.santaHome) { cabin.santaBack(); onSanta('home'); } },
     get opened() { return progress.story.opened; },
-    // Tapped while it stands broken, the big wheel opens to be mended instead of saying its line.
+    // Tapped while it stands broken, the big wheel opens to be mended instead of saying its line; once mended, its gearbox
+    // can be opened and its gears set again (stamped only the first time).
     get wheelBroken() { return pending(progress.volunteer, 'wheel'); },
+    get wheelOpen() { return pending(progress.volunteer, 'wheel') || progress.volunteer.tasks.includes('wheel'); },
     // Coming back shows the yard as it was left: the snowman in his outfit, finished corners finished.
     restore(ids) {
       for (const place of Object.keys(PLACES)) cabin.dress(place, progress.outfit[place]);
