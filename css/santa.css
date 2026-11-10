@@ -287,31 +287,56 @@
 /* 完成一件替身工作：一枚郵戳從畫面上方蓋下來。 */
 .volunteer-stamp { position: absolute; top: 4.6rem; right: 1.2rem; display: grid; place-items: center; width: 6.2rem; aspect-ratio: 1; margin: 0; color: #a84a42; background: #fffdf6e6; border: 4px double #a84a42; border-radius: 50%; font-family: var(--font-hand); font-size: var(--fs-small); text-align: center; white-space: pre-line; line-height: 1.4; rotate: -12deg; pointer-events: none; animation: stamp-down .45s cubic-bezier(.3, 1.6, .5, 1) both; }
 @keyframes stamp-down { from { opacity: 0; scale: 1.6; } to { opacity: 1; scale: 1; } }
-/* 摩天輪的輪軸：一張紙上的雪地、支架與曲柄箱，輪輻繞著輪軸轉；齒輪掉在雪裡，拖回輪軸上再轉曲柄。 */
-.wheel-guide { margin: 0 0 .6rem; color: #6b5a4c; font-size: var(--fs-small); }
-.wheel-sheet { position: relative; aspect-ratio: 4 / 3; margin: 0 0 .8rem; overflow: hidden; background: linear-gradient(#cfe3ec, #eaf3f6); border-radius: 8px; }
-.wheel-art { position: absolute; inset: 0; } .wheel-art .art-layer, .wheel-art img { width: 100%; height: 100%; }
-.wheel-spokes { position: absolute; left: 12.5%; top: -16.667%; width: 75%; height: 100%; transform-origin: 50% 50%; } .wheel-spokes :is(.art-layer, img) { width: 100%; height: 100%; }
-.wheel-slot { position: absolute; left: 45%; top: 26.667%; width: 10%; height: 13.333%; border: 2px dashed #e0b04f; border-radius: 50%; }
-.wheel-slot.is-open { background: #e0b04f55; border-style: solid; }
-.wheel-gear { position: absolute; left: 13.75%; top: 76.667%; width: 15%; height: 20%; padding: 0; background: none; border: 0; cursor: grab; touch-action: none; transition: left .3s ease, top .3s ease; }
-.wheel-gear.is-dragging { cursor: grabbing; transition: none; z-index: 1; }
-.wheel-gear.is-placed { left: 42.5%; top: 23.333%; cursor: default; }
-.wheel-gear :is(.art-layer, img), .wheel-crank :is(.art-layer, img) { width: 100%; height: 100%; pointer-events: none; }
-.wheel-crank { position: absolute; left: 69.375%; top: 51.667%; width: 25%; height: 33.333%; padding: 0; background: none; border: 0; border-radius: 50%; cursor: grab; touch-action: none; }
-.wheel-crank:disabled { opacity: .55; cursor: default; }
-.wheel-crank.is-resisting { animation: crank-resist .25s ease; }
-@keyframes crank-resist { 30% { translate: -3px 0; } 70% { translate: 2px 0; } }
-.wheel-gear:focus-visible, .wheel-crank:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
-.wheel-spokes.is-turning, .wheel-gear.is-turning { animation: wheel-spin 24s linear infinite; }
-.wheel-gear.is-turning { animation-duration: 6s; }
-@keyframes wheel-spin { to { transform: rotate(360deg); } }
+/* 摩天輪動力箱：木框裡一塊深色金屬面板，黃銅銘牌；三根軸釘、工具盒裡的齒輪、雪堆裡半埋的特大齒輪，右下角的曲柄。 */
+.gearbox { position: absolute; left: 50%; top: 50%; width: min(34rem, calc(100% - 1.5rem)); max-height: calc(100% - 1.5rem); overflow: auto; padding: .8rem .9rem .9rem; translate: -50% -50%; color: #f4ead4; background: linear-gradient(#7a5236, #5d3d28); border-radius: 14px; box-shadow: inset 0 0 0 3px #8f6646, inset 0 0 0 6px #4a3020, 0 18px 40px #1d140e88; pointer-events: auto; }
+.gearbox-plaque { width: fit-content; margin: 0 auto .45rem; padding: .2rem 1.1rem; color: #4a3020; background: linear-gradient(#ecd28b, #c9a14a); border-radius: 6px; box-shadow: inset 0 0 0 2px #f6e3a8, 0 2px 0 #8a6a2c; font-family: var(--font-display); font-size: var(--fs-body); letter-spacing: .12em; }
+.gearbox-guide { min-height: 3em; margin: 0 0 .5rem; font-size: var(--fs-small); line-height: 1.5; text-align: center; }
+.gearbox-board { position: relative; aspect-ratio: 200 / 170; overflow: hidden; border-radius: 8px; box-shadow: inset 0 0 0 2px #1d262e; perspective: 900px; touch-action: none; }
+.gearbox-board > * { position: absolute; }
+.gearbox-art { inset: 0; pointer-events: none; }
+.gearbox-spokes, .gearbox-gear, .gearbox-arm { pointer-events: none; }
+.gearbox-lamp { position: absolute; width: 4%; aspect-ratio: 1; translate: -50% -50%; background: #6b6250; border-radius: 50%; box-shadow: 0 0 0 2px #00000033; }
+.gearbox.is-running .gearbox-lamp { background: #ffe39a; box-shadow: 0 0 10px 3px #ffd36e; animation: lamp-on .5s ease both; }
+@keyframes lamp-on { from { background: #6b6250; box-shadow: none; } }
+.gearbox-label, .gearbox-tray-label { translate: -50% 0; color: #f4ead4cc; font-size: var(--fs-small); letter-spacing: .1em; pointer-events: none; }
+.gearbox-tray-label { left: 64%; bottom: 0; translate: -50% 0; color: #fbe9d6; }
+.gearbox-peg { padding: 0; background: radial-gradient(circle, #f1d68f 0 30%, #a37b34 32% 42%, transparent 44%); border: 2px dashed #d8c08a66; border-radius: 50%; cursor: pointer; }
+.gearbox-peg::before { content: ''; position: absolute; inset: -40%; border-radius: 50%; }
+.gearbox-peg.is-ready { border-color: #f1d68f; animation: peg-ready 1.2s ease-in-out infinite; }
+.gearbox-peg.is-near { background: radial-gradient(circle, #fff1c2 0 34%, #f1d68f 36% 60%, transparent 62%); border-style: solid; }
+.gearbox-peg.is-missing { animation: peg-missing .7s ease; }
+@keyframes peg-ready { 50% { scale: 1.25; } }
+@keyframes peg-missing { 30%, 70% { box-shadow: 0 0 0 6px #e0605088; border-color: #e06050; } }
+.gearbox-piece { z-index: 1; padding: 0; background: none; border: 0; border-radius: 50%; cursor: grab; transition: left .28s ease, top .28s ease, scale .2s ease; }
+.gearbox-piece::before { content: ''; position: absolute; inset: -12%; border-radius: 50%; }
+.gearbox-piece.is-buried { z-index: 0; }
+.gearbox-piece.is-placed { z-index: 2; }
+.gearbox-piece.is-picked { z-index: 3; scale: 1.08; filter: drop-shadow(0 0 6px #f1d68f); }
+.gearbox-piece.is-lifted { z-index: 4; scale: 1.1; cursor: grabbing; transition: scale .2s ease; filter: drop-shadow(0 8px 8px #0008); }
+.gearbox-piece.is-meshed { filter: drop-shadow(0 0 8px #ffd36e); }
+.gearbox-piece.is-jammed { animation: gear-jam .45s ease; filter: drop-shadow(0 0 8px #e06050); }
+.gearbox-piece:focus-visible, .gearbox-peg:focus-visible, .gearbox-crank:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+@keyframes gear-jam { 25% { translate: -3px 0; } 75% { translate: 3px 0; } }
+.gearbox-front { z-index: 1; }
+.gearbox-gear.is-missing { animation: peg-missing .7s ease; border-radius: 50%; }
+.gearbox-crank { z-index: 5; padding: 0; background: none; border: 0; border-radius: 50%; cursor: grab; touch-action: none; }
+.gearbox-crank.is-winding { cursor: grabbing; }
+.gearbox-arm { z-index: 5; }
+.gearbox-knob { position: absolute; left: 38%; top: 0; width: 24%; height: 24%; border-radius: 50%; pointer-events: auto; cursor: grab; }
+.gearbox-crank.is-resisting, .gearbox-arm.is-resisting { animation: gear-jam .3s ease; }
+.gearbox-door { z-index: 9; inset: 0; display: grid; place-items: center; background: linear-gradient(135deg, #5f6f7b, #45535e); box-shadow: inset 0 0 0 3px #7d8c97, inset -10px 0 0 #3a4650; transform-origin: 0 50%; animation: door-open .9s .25s cubic-bezier(.5, 0, .3, 1) both; }
+.gearbox-door::after { content: ''; position: absolute; right: 7%; top: 46%; width: 4%; height: 10%; background: #d8c08a; border-radius: 4px; }
+.gearbox-door-sign { padding: .2rem .8rem; color: #fbf3df; background: #a84a42; border-radius: 4px; font-weight: 700; letter-spacing: .2em; rotate: -4deg; }
+@keyframes door-open { to { transform: rotateY(-105deg); opacity: .2; } }
+.gearbox-actions { display: flex; justify-content: center; gap: .5rem; margin-top: .6rem; }
+.gearbox-actions button { padding: .4rem 1.1rem; color: #4a3020; background: linear-gradient(#ecd28b, #c9a14a); border: 0; border-radius: 8px; box-shadow: 0 3px 0 #8a6a2c; font-size: var(--fs-small); font-weight: 700; }
+.gearbox-actions .gearbox-hint { color: #f4ead4; background: none; box-shadow: none; text-decoration: underline; }
 /* 手機：紙卡往下讓出左上角的返回鈕。 */
-@media (max-width: 700px) { .secret-card, .wheel-card { top: calc(50% + 1.6rem); max-height: calc(100% - 5.2rem); } }
-@media (prefers-reduced-motion: reduce) { .volunteer-stamp, .wheel-crank.is-resisting, .wheel-spokes.is-turning, .wheel-gear.is-turning { animation: none; } .wheel-gear { transition: none; } }
+@media (max-width: 700px) { .secret-card, .gearbox { top: calc(50% + 1.6rem); max-height: calc(100% - 5.2rem); } }
+@media (prefers-reduced-motion: reduce) { .volunteer-stamp, .gearbox-peg.is-ready, .gearbox-peg.is-missing, .gearbox-piece.is-jammed, .gearbox-gear.is-missing, .gearbox-crank.is-resisting, .gearbox-arm.is-resisting, .gearbox.is-running .gearbox-lamp { animation: none; } .gearbox-piece { transition: none; } }
 /* 觸控螢幕：每個按鈕至少 44px 見方，手指點得準。 */
 @media (pointer: coarse) {
-  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send, .desk-actions button, .books-tools button, .books-enter, .register-letter, .register-sign, .register-leave { min-width: 44px; min-height: 44px; }
+  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send, .desk-actions button, .books-tools button, .books-enter, .register-letter, .register-sign, .register-leave, .gearbox-actions button { min-width: 44px; min-height: 44px; }
 }
 /* 橫拿的手機：小屋和螢幕一樣高（點進角落或屋裡時捲到剛好整個露出），衣櫃、食物籃、對話框改成右側窄欄，提示放到左上。 */
 @media (orientation: landscape) and (max-height: 500px) {
