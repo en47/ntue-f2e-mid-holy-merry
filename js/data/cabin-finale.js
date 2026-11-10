@@ -16,7 +16,7 @@ export const TWIST = '荷莉的願望，二十多年前就實現了，她卻每�
 export const PENCIL = '（最下面的鉛筆字，現在看得清楚了：「我的願望已經實現了。不過，我想再多幫一個人。—— H.」）';
 
 // Three stamps buy a wish; another substitute grants it and leaves a note in their own hand.
-export const WISH = { title: '用三個章，許一個願望', invite: '守則上寫著：集滿章的人，可以帶著自己的願望回家。你已經有三個章了，要許一個願望嗎？', sign: '蓋章許願', made: wish => `你許了願：${wish}。` };
+export const WISH = { title: '用三個章，許一個願望', invite: '守則上寫著：集到三個章，就能許一個願望，帶著它回家。你已經有三個章了，要許一個願望嗎？', sign: '蓋章許願', made: wish => `你許了願：${wish}。` };
 export const WISHES = [
   { id: 'sleigh', name: '坐一次聖誕老人的雪橇', by: 'K.', hand: 'k', note: '你的願望，交給我了。抓緊扶手，我們繞村子一圈！' },
   { id: 'snow', name: '看一場好大的雪', by: 'E.', hand: 'e', note: '你的願望，交給我了。今天下的雪，都是給你的。' },
@@ -43,3 +43,7 @@ export const HOLLY = {
   sign: '—— H.',
 };
 export const SEEN = '看過的結局';
+// After a stamp, where the story goes next (by how many stamps there are), and what Santa says once the old page is known.
+export const NEXT = { 2: '登記簿上綁著舊頁的紅繩，好像鬆開了一點。', 3: '三個章了！回登記簿看看，可以許一個願望。', 4: '四件工作都做完了。小房間的班表上，12/25 早班還空著。' };
+export const SANTA_ON_HOLLY = '聖誕老人看著你，笑了笑：「你看到荷莉的那一頁了吧。她呀，是我們這裡最可靠的人。」';
+export const GLOBE = '雪慢慢落定了。底座刻著「H. · 2003」——荷莉的願望實現的那一年。';

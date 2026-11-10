@@ -5,7 +5,12 @@
 // stamps and wax; the gearbox's wooden case. Each gets one whole sheet drawn at its own size, so there are no seams; when
 // it changes size (a new caption, a drawer opening) or kind (another letter) its sheet is drawn again. The page marks
 // itself data-paper while this is running.
-import { paperFilter, shape } from './paper-art.js';
+import { paperFilter, paperLayer, shape } from './paper-art.js';
+
+// Ink stamped onto paper (a postmark, a register's stamps, WISH FULFILLED): the same grain and wavering edge, but no rim
+// and no shadow, since ink lies in the paper rather than on it. The words stay text, over it.
+const INK = { paper: { scale: .25, grain: .6, shadow: 0, rim: '#ffffff00' }, eager: true };
+export const inked = (host, viewBox, draw) => paperLayer(host, viewBox, 'ink-layer', draw, INK);
 
 // fill, the shadow under it, and an optional trim: a strip of 'tape' holding a caption up, a sprig of 'holly' in the corner
 // of Santa's letter. Buttons stay plain paper: no stitched lines, no snow, nothing to tire the eye.

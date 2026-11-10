@@ -215,9 +215,8 @@
 .envelope-to { position: absolute; left: 22%; top: 58%; margin: 0; color: var(--ink); font-family: var(--font-hand); font-size: var(--fs-body); }
 .desk-envelope[data-kind="in"] .envelope-to { color: #2e6da4; rotate: -2deg; }
 .envelope-stamp { position: absolute; right: 7%; top: 9%; z-index: 1; width: 15%; aspect-ratio: 4 / 5; background: conic-gradient(from 150deg at 50% 26%, #4f7d68 0 60deg, transparent 0) 0 0 / 100% 78% no-repeat, radial-gradient(circle at 50% 22%, #e0b04f 0 5%, transparent 6%), #a84a42; border: 4px dotted #fbf3df; border-radius: 3px; }
-.envelope-arrived { position: absolute; right: 15%; top: 6%; z-index: 2; width: 21%; aspect-ratio: 1; display: grid; place-items: center; color: #3f5a7a; border: 2px solid #3f5a7a; border-radius: 50%; font-size: var(--fs-small); opacity: .55; rotate: 14deg; pointer-events: none; }
-.envelope-postmark { position: absolute; right: 2%; top: 3%; z-index: 2; width: 27%; aspect-ratio: 1; display: grid; place-items: center; margin: 0; color: #b5443c; border: 3px double #b5443c; border-radius: 50%; font-size: var(--fs-small); line-height: 1.2; text-align: center; white-space: pre-line; opacity: .8; rotate: -14deg; pointer-events: none; }
-.envelope-postmark::after { content: ''; position: absolute; right: 88%; top: 28%; width: 120%; height: 44%; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 24'%3E%3Cpath d='M0 4q5-4 10 0t10 0t10 0t10 0t10 0t10 0M0 12q5-4 10 0t10 0t10 0t10 0t10 0t10 0M0 20q5-4 10 0t10 0t10 0t10 0t10 0t10 0' fill='none' stroke='%23b5443c' stroke-width='1.6'/%3E%3C/svg%3E") center / 100% 100% no-repeat; opacity: .8; }
+.envelope-arrived { position: absolute; right: 15%; top: 6%; z-index: 2; width: 21%; aspect-ratio: 1; display: grid; place-items: center; color: #3f5a7a; font-size: var(--fs-small); opacity: .55; rotate: 14deg; pointer-events: none; }
+.envelope-postmark { position: absolute; right: 14%; top: 3%; z-index: 2; width: 58%; aspect-ratio: 220 / 100; padding-left: 31.3%; display: grid; place-items: center; margin: 0; color: #b5443c; font-size: var(--fs-small); line-height: 1.2; text-align: center; white-space: pre-line; opacity: .8; rotate: -14deg; pointer-events: none; }
 .envelope-wax { position: absolute; left: 50%; top: 52%; z-index: 2; width: 17%; aspect-ratio: 1; display: grid; place-items: center; translate: -50% -50%; color: #f0c4b4; background: radial-gradient(circle at 40% 35%, #c45a4f, #8f3b36 70%); border-radius: 50% 46% 52% 48%; box-shadow: 0 3px 0 #6e2c28; font-family: var(--font-display); font-size: var(--fs-body); }
 .envelope-postmark.is-new, .envelope-wax.is-new { animation: desk-press .32s ease-out both; }
 @keyframes desk-press { from { opacity: 0; scale: 1.5; } to { scale: 1; } }
@@ -328,9 +327,7 @@
 .register-rows li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: .25rem; border-bottom: 1px solid #d9c9a8; }
 .register-rows [data-hand="n"] .register-mark { color: #8f3b36; } .register-rows [data-hand="k"] .register-mark { color: #3f5a7a; } .register-rows [data-hand="h"] .register-mark { color: #3f6653; } .register-rows [data-hand="e"] .register-mark { color: #6e4a6b; } .register-rows [data-hand="o"] .register-mark { color: #9a6b2f; }
 .register-rows .is-you .register-mark { color: var(--red); }
-.register-stamps { display: inline-flex; gap: .3rem; }
-.register-stamps span { width: 1.1rem; aspect-ratio: 1; border: 2px solid #d9c9a8; border-radius: 50%; }
-.register-stamps .is-stamped { background: radial-gradient(circle, #fffdf6 28%, #b5544c 30%); border: 2px solid #b5544c; rotate: -12deg; }
+.register-stamps { position: relative; width: 6rem; aspect-ratio: 100 / 24; }
 .register-heading { margin: .2rem 0 .4rem; font-family: var(--font-hand); font-size: var(--fs-body); }
 .register-jobs { display: grid; gap: .45rem; margin: 0 0 .9rem; padding: 0; list-style: none; font-size: var(--fs-small); }
 .register-jobs li { display: grid; gap: .1rem; padding-left: 2rem; position: relative; }
@@ -360,12 +357,13 @@
    願望被實現的小場景與替身的字條；結局卡（紙雕證書，D 附荷莉的信）。 */
 .register-cord { margin: .2rem 0 .8rem; }
 .register-endings { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin: .4rem 0 .9rem; color: #6b5a4c; font-size: var(--fs-small); }
-.register-endings span:not(:first-child) { width: 1.6rem; aspect-ratio: 1; display: grid; place-items: center; color: #c9b48f; border: 2px solid #d9c9a8; border-radius: 50%; font-family: var(--font-display); }
-.register-endings .is-seen { color: #fffaf0; background: #b5443c; border-color: #b5443c; rotate: -10deg; }
+.register-endings > span:not(:first-child) { position: relative; width: 1.7rem; aspect-ratio: 1; display: grid; place-items: center; color: #c9b48f; font-family: var(--font-display); }
+.register-endings .is-seen { color: #fffaf0; rotate: -10deg; }
+.ending-letter, .ink-words { position: relative; }
 .register-wishes { margin-bottom: .6rem; }
 .old-entry { position: relative; margin: 0 0 .8rem; padding: .6rem 0 .4rem; }
 .old-line { margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; color: #3f6653; }
-.old-stamp { position: absolute; right: 0; top: .4rem; padding: .15rem .55rem; color: #b5443c; border: 3px double #b5443c; border-radius: 6px; font-family: var(--font-display); font-size: var(--fs-small); letter-spacing: .08em; opacity: .85; rotate: -12deg; }
+.old-stamp { position: absolute; right: 0; top: .4rem; display: grid; place-items: center; width: 9.5rem; aspect-ratio: 160 / 40; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-small); letter-spacing: .08em; opacity: .85; rotate: -12deg; }
 .old-since { margin: 0 0 .8rem; padding-left: 1.1rem; color: #3f6653; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.9; }
 .old-pencil { margin: 0; color: #7d7468; font-family: var(--font-hand); font-size: var(--fs-small); rotate: -1.5deg; }
 .secret-log .is-you, .secret-tags .is-you { color: var(--red); }
@@ -385,7 +383,7 @@
 .wish-note[data-hand="k"] { color: #3f5a7a; } .wish-note[data-hand="e"] { color: #6e4a6b; } .wish-note[data-hand="o"] { color: #9a6b2f; } .wish-note[data-hand="n"] { color: #8f3b36; }
 .wish-sleigh { left: 32%; top: 22%; width: 36%; aspect-ratio: 100 / 36; animation: sleigh-fly 4.2s ease-in-out both; }
 @keyframes sleigh-fly { from { left: -38%; top: 46%; } 50% { left: 32%; top: 14%; } to { left: 104%; top: 30%; } }
-.wish-flake { top: -6%; width: 2.2%; aspect-ratio: 1; background: #fffdf6; border-radius: 50%; box-shadow: 0 0 0 1px #d6e3e9aa; animation: wish-snow 6s linear infinite; }
+.wish-flake { top: -6%; width: 3.4%; aspect-ratio: 1; animation: wish-snow 6s linear infinite; }
 @keyframes wish-snow { to { translate: 12px 680%; } }
 .cabin-flake.is-storm { width: 6px; height: 6px; animation-duration: 6s; }
 .wish-gift { left: 26%; bottom: 8%; width: 34%; aspect-ratio: 100 / 80; padding: 0; background: none; border: 0; cursor: pointer; }

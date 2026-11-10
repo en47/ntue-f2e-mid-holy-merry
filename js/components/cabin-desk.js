@@ -5,6 +5,7 @@
 // stamp) and dropped into the mail sack (drag the envelope there, or press). A volunteer finds two new letters on top of
 // the bundle and writes their replies, choosing what to say. Sealed, postmarked and sent are kept (cabin-progress.js).
 import { paperLayer, shape } from './paper-art.js';
+import { inked } from './cabin-paper.js';
 import { DESK_LETTERS, REPLY, VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { NAMES } from '../data/cabin-secret.js';
 import { knowsSantas, pending, signedUp } from '../services/cabin-story.js';
@@ -77,6 +78,9 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   const flap = element('span', 'envelope-flap', envelope), from = element('p', 'envelope-from', envelope), to = element('p', 'envelope-to', envelope);
   const postage = element('span', 'envelope-stamp', envelope), arrived = element('span', 'envelope-arrived', envelope, '收件'), postmark = element('span', 'envelope-postmark', envelope, '北極郵局\n12·25'), wax = element('span', 'envelope-wax', envelope);
   for (const node of [flap, postage, arrived, postmark, wax]) node.setAttribute('aria-hidden', 'true');
+  // The two marks are ink: the post office's blue ring on letters that came in, the red postmark (rings and wavy lines) on replies.
+  inked(arrived, '0 0 60 60', ink => shape('circle', { cx: 30, cy: 30, r: 26, fill: 'none', stroke: '#3f5a7a', 'stroke-width': 2.4 }, ink));
+  inked(postmark, '0 0 220 100', ink => { shape('circle', { cx: 170, cy: 50, r: 44, fill: 'none', stroke: '#b5443c', 'stroke-width': 3 }, ink); shape('circle', { cx: 170, cy: 50, r: 37, fill: 'none', stroke: '#b5443c', 'stroke-width': 1.4 }, ink); for (const y of [30, 44, 58, 72]) shape('path', { d: `M4 ${y}q8 -6 16 0t16 0t16 0t16 0t16 0t16 0t16 0t14 0`, fill: 'none', stroke: '#b5443c', 'stroke-width': 2 }, ink); });
   const letter = element('article', 'desk-letter', sheet), front = element('div', 'letter-face', letter);
   const head = element('p', 'letter-head', front, '北極　聖誕老人'), greeting = element('p', 'letter-greeting', front), body = element('p', 'letter-body', front), signed = element('p', 'letter-signed', front);
   const doodle = element('span', 'letter-doodle', front); doodle.setAttribute('aria-hidden', 'true');
