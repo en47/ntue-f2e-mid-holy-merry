@@ -16,12 +16,13 @@ import { secretGame } from './cabin-secret.js';
 import { wheelGame } from './cabin-wheel.js';
 import { wishScene } from './cabin-finale.js';
 import { endingTheatre } from './cabin-ending.js';
-import { TASKS, canStay, canWish, goesHome, knowsSantas, pending, points, record, santaGoes, santaReturns, trueMiracle } from '../services/cabin-story.js';
+import { GIFTS, TASKS, canStay, canWish, goesHome, knowsSantas, pending, points, record, santaGoes, santaReturns, trueMiracle } from '../services/cabin-story.js';
 import { CHAIR, DONE, JOBS, NOTES } from '../data/cabin-secret.js';
 import { GLOBE, NEXT, SANTA_ON_HOLLY, TWIST } from '../data/cabin-finale.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 import { mountNotebook } from './cabin-notebook.js';
+import { treeCard } from './cabin-ornaments.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -67,6 +68,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   let cleanup = () => {};
   // The clue book in the corner: games write what they show into it (`clue`).
   const notebook = mountNotebook(stage, { progress, save, sound }), clue = id => notebook.add(id);
+  // A substitute's welcome ornament, found: kept and written down (false if it was found before).
+  const gift = mark => { if (progress.ornaments.includes(mark)) return false; progress.ornaments.push(mark); save(); clue(`gift-${mark}`); return true; };
   function say(text) { caption.textContent = text; caption.hidden = !text; if (text) announce(text); }
   const point = event => { const rect = stage.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; };
   function prop(kind, parent, label) {
@@ -135,17 +138,17 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       open.focus();
     },
     reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen'), clue }),
-    snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti, clue }),
+    snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti, clue, gift }),
     stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask: () => task('hay'), clue }),
     // The broken big wheel, mended up close (a sheet laid over the yard: it is too far off to walk up to).
-    wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, again: !pending(progress.volunteer, 'wheel'), onMended: () => { task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
+    wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, again: !pending(progress.volunteer, 'wheel'), round: progress.wheelRounds, progress, save, clue, gift, onMended: () => { progress.wheelRounds += 1; save(); task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
     // In the room: the hearth to tend, the desk's letters, the music box and the snow globe, and the bookcase to look over.
     // Each tells the room when it has been used (`onUse`): Santa goes out once enough has been done there.
     hearth: () => hearthGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('hearth'), progress, save, clue }),
     desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, onUse: () => used.add('desk'), onTask: () => task('letters'), clue }),
-    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows, clue, progress, save }),
+    musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('musicbox'), knows, clue, gift, progress, save }),
     globe: () => globeGame({ layer, stage, cabin, say, later, sound, onUse: () => used.add('globe'), knows, knownLine: () => progress.finale.twist ? GLOBE : null, clue }),
-    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit, onInvite: invite, onTwist: twist, onWish: grant, onStay: stay, onReplay: kind => ending(kind, true), clue }),
+    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit, onInvite: invite, onTwist: twist, onWish: grant, onStay: stay, onReplay: kind => ending(kind, true), clue, gift }),
     shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened'), toggle: open => swing(open), restart: () => start('shelf') }),
   };
 
@@ -202,6 +205,19 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     finale.stayed = true; reach('C'); if (trueMiracle(finale)) reach('D'); cabin.repaint('secret-tags', { mine: true });
     later(400, () => ending('C'));
   }
+  // All five ornaments found: back in the room, they are on the tree, and at its top a red one with your initial.
+  function trimmed() {
+    if (layer.dataset.game) return;
+    progress.tree = true; save(); sound.play('cheer');
+    const card = element('article', 'cabin-letter tree-card', layer); card.setAttribute('aria-label', '小屋的聖誕樹');
+    element('h3', 'chair-title', card).textContent = '小屋的聖誕樹';
+    element('p', 'piece-words', card).textContent = '五位替身的吊飾都找齊了。你把它們掛上小屋的聖誕樹——最上面，不知道什麼時候，多了一個紅色的，寫著你的縮寫。';
+    treeCard(card, progress.volunteer.mark);
+    element('p', 'piece-words tree-last', card).textContent = '從今天起，你也是我們的一員。';
+    const done = element('button', 'cabin-letter-close', card); done.type = 'button'; done.textContent = '好 ✓';
+    done.addEventListener('click', () => { card.remove(); sound.play('remove'); });
+    done.focus({ preventScroll: true });
+  }
   // The note on the empty chair: the bookcase's riddle, in Santa's hand. It goes in the clue book as it is read.
   function chairNote() {
     if (layer.dataset.game) return;
@@ -229,6 +245,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // in cabin-story.js). The story is decided here, never by the chat.
     inRoom() {
       const story = progress.story; visited = true;
+      if (GIFTS.every(mark => progress.ornaments.includes(mark)) && !progress.tree) { later(900, trimmed); return; }
       // Back with Santa still out: his note is still on the chair (and in the clue book).
       if (story.left && !story.opened && !cabin.santaHome) clue('chair-note');
       // Back from the old page, Santa (if he is in) has a word about Holly; once.

@@ -51,8 +51,9 @@ export const sortWrong = placed => Object.entries(placed).filter(([id, box]) => 
 // shift log has it (E, O, N, K, H).
 export const FLIGHT_ORDER = [...new Set(LOG_ANSWER)];
 export const playsOpen = notes => Array.isArray(notes) && notes.join('') === FLIGHT_ORDER.join('');
-// The old photograph from 2003, torn into five pieces found around the village (cabin-photo.js draws them).
-export const PHOTO = ['music', 'wheel', 'hat', 'rack', 'snowman'];
+// The welcome gifts: an ornament from each substitute, hidden somewhere for whoever comes to help next
+// (cabin-ornaments.js); found, each is kept by its maker's initial.
+export const GIFTS = SUBSTITUTES;
 // Once the secret is known, the visitor may sign the register with an initial of their own (not one already on a name
 // tag, nor Santa's S) and help: four jobs around the village, each earning a wish point the first time it is done while
 // signed up. Leaving is always allowed and keeps the points earned (they come back on signing again).

@@ -90,9 +90,10 @@ test('the cord\'s lock is kept open, and the blank slip taken or read; an older 
   assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { slip: 'eaten' } }) })).finale.slip, 'none');
   assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { twist: true } }) })).finale.unlocked, true);
 });
-test('the photograph\'s pieces found are kept, known ones once each', () => {
-  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ pieces: ['hat', 'music', 'nope', 'music'] }) })).pieces, ['music', 'hat']);
-  assert.deepEqual(readProgress(memory()).pieces, []);
+test('the welcome ornaments found are kept by their makers\' initials; an older record\'s photo pieces carry over', () => {
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ ornaments: ['O', 'N', 'Z', 'N'], tree: true }) })).ornaments, ['N', 'O']);
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ pieces: ['hat', 'music', 'nope'] }) })).ornaments, ['N', 'H']);
+  assert.deepEqual(readProgress(memory()).ornaments, []); assert.equal(readProgress(memory()).tree, false);
 });
 test('the rack sorted is kept; letters already answered or the job done count as sorted', () => {
   assert.equal(readProgress(memory()).desk.sorted, false);
