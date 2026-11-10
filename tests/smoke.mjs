@@ -368,7 +368,7 @@ await test('Santa 替身工作：登記簿簽縮寫加入，四件工作各在�
   assert.ok(scene.includes('settings = settingsOf(name);') && scene.includes('const home = () => { const settings = settingsOf(view);'), 'The aim and the turning limit read the same settings, so a resize or a drag does not swing the view back and forth');
   assert.ok(wheel.includes("place(wheel, WHEEL.at, 90); paperLayer(wheel, '0 0 180 180', '', spokes, PAPER)"), 'The wheel\'s spokes are drawn whole round its hub, so no gap turns into view');
   const paper = await read('js/components/cabin-paper.js');
-  assert.ok(paper.includes("['.gearbox-actions button, .desk-actions button', 'holly']") && paper.includes("if (trim === 'snow')") && wheel.includes("paperLayer(banner, '0 0 300 72', '', ribbon, PAPER)") && play.includes("paperLayer(stamp, '0 0 120 144', '', postage, STAMP)"), 'The gearbox has a ribbon banner and snow-capped paper buttons; a job done lands as a postage stamp');
+  assert.ok(paper.includes(".gearbox-actions button, .desk-actions button, .register-sign', 'tag']") && wheel.includes("paperLayer(banner, '0 0 300 72', '', ribbon, PAPER)") && wheel.includes('function door(parent)') && play.includes("paperLayer(stamp, '0 0 120 144', '', postage, STAMP)"), 'The gearbox has a ribbon banner, a paper door and plain paper buttons; a job done lands as a postage stamp');
 });
 await test('Santa 回信桌：收到的信換紙讀、翻面；回信摺進航空信封、封口、蓋郵戳、投進郵袋；替身挑一句回覆', async () => {
   const desk = await fs.readFile(path.join(project, 'js/components/cabin-desk.js'), 'utf8'), paper = await fs.readFile(path.join(project, 'js/components/cabin-paper.js'), 'utf8');
@@ -376,12 +376,13 @@ await test('Santa 回信桌：收到的信換紙讀、翻面；回信摺進航�
   assert.ok([...DESK_LETTERS, ...VOLUNTEER_LETTERS].every(entry => ['kid', 'pad'].includes(entry.paper)) && VOLUNTEER_LETTERS.every(entry => entry.name && entry.answers.length === 3), 'Each letter has its own paper; each new letter has three things a volunteer may answer');
   assert.ok(desk.includes("if (kind === 'stamp' && sealed && !desk.marked.includes(id)) return postage;") && desk.includes("if (!current || current.kind !== 'out' || current.step !== 'envelope') return null;"), 'Only a reply in its envelope takes the seal, then the postmark: letters that came in are never stamped');
   assert.ok(desk.includes('desk.answers[answered.id] = current.choice; save();') && desk.includes("buttons.fold.disabled = step === 'compose' && current.choice === undefined;"), 'A volunteer\'s answer counts once the reply is folded in');
-  assert.ok(!paper.includes('.desk-letter') && !paper.includes('.desk-envelope') && paper.includes("['.gearbox-actions button, .desk-actions button', 'holly']"), 'The desk\'s papers are its own (not the shared stitched sheet); its buttons are snow-capped paper');
+  assert.ok(paper.includes("['.desk-letter[data-paper=\"kid\"] .letter-face', 'lined']") && paper.includes("['.desk-envelope[data-kind=\"out\"]', 'airmail']") && paper.includes("['.envelope-wax', 'wax']") && paper.includes("attributeFilter: ['aria-pressed', 'data-paper', 'data-kind', 'data-thing']"), 'The desk\'s papers, envelopes, stamps and wax are drawn as paper, and drawn again when the letter or envelope changes');
 });
-await test('Santa 紙片不再一律信紙加虛線：按鈕積雪、字幕貼膠帶、信角冬青，小房間的東西各有樣子', async () => {
+await test('Santa 紙片不再一律信紙加虛線：按鈕是素紙、字幕貼膠帶、信角冬青，小房間的東西各畫成自己的樣子', async () => {
   const css = await fs.readFile(path.join(project, 'css/santa.css'), 'utf8'), paper = await fs.readFile(path.join(project, 'js/components/cabin-paper.js'), 'utf8'), secret = await fs.readFile(path.join(project, 'js/components/cabin-secret.js'), 'utf8');
   assert.ok(!css.includes('dashed') && !paper.includes('stroke-dasharray'), 'No dashed lines round the boxes and buttons');
-  assert.ok(paper.includes("tag: ['#b5443c', '#7f312c', 'snow']") && paper.includes("pinned: ['#fbf3df', '#dccaa9', 'tape']") && paper.includes("letter: ['#fffdf6', '#e4d6bf', 'holly']"), 'Buttons are snow-capped, captions taped up, letters have holly');
+  assert.ok(paper.includes("tag: ['#b5443c', '#7f312c'],") && paper.includes("pinned: ['#fbf3df', '#dccaa9', 'tape']") && paper.includes("letter: ['#fffdf6', '#e4d6bf', 'holly']"), 'Buttons are plain paper (nothing to tire the eye), captions taped up, Santa\'s letter has holly');
+  assert.ok(["['.secret-card[data-thing=\"tags\"] .secret-tags li', 'label']", "['.secret-card[data-thing=\"tags\"], .gearbox', 'board']", "['.secret-card[data-thing=\"log\"]', 'clipboard']", "['.secret-card[data-thing=\"register\"]', 'ledger']", "['.secret-card[data-thing=\"rules\"]', 'booklet']"].every(kind => paper.includes(kind)) && css.includes('.cabin[data-paper] :is(.secret-card,'), 'The name board and its tags, the clipboard, the ledger and the booklet are drawn as paper, not flat boxes');
   assert.ok(secret.includes("card.dataset.thing = id === 'register'") && ['register', 'tags', 'log', 'rules', 'note'].every(thing => css.includes(`.secret-card[data-thing="${thing}"]`)), 'The ledger, the name board, the clipboard, the booklet and index cards each look like themselves');
 });
 await test('Wish 夜景：紙雕場景、滑鼠點亮聖誕燈、收藏區已移除', async () => {

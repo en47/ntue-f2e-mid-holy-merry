@@ -79,7 +79,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       row(volunteer.mark, points(volunteer), true);
       element('h4', 'register-heading', card, REGISTER.jobs);
       const jobs = element('ul', 'register-jobs', card);
-      for (const task of TASKS) { const item = element('li', volunteer.tasks.includes(task) ? 'is-done' : '', jobs); element('strong', '', item, JOBS[task][0]); element('span', '', item, JOBS[task][1]); }
+      for (const task of TASKS) { const done = volunteer.tasks.includes(task), item = element('li', done ? 'is-done' : '', jobs); element('span', 'job-box', item, done ? '✓' : '').setAttribute('aria-hidden', 'true'); element('strong', '', item, JOBS[task][0]); element('span', '', item, JOBS[task][1]); }
       // Leaving takes a second press, and keeps the stamps.
       const leave = element('button', 'register-leave', card, REGISTER.leave); leave.type = 'button';
       on(leave, 'click', () => {
