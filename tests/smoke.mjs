@@ -171,7 +171,7 @@ await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村�
   const santaCss = await fs.readFile(path.join(project, 'css/santa.css'), 'utf8'), paperUi = await fs.readFile(path.join(project, 'js/components/cabin-paper.js'), 'utf8');
   assert.ok(entry.includes('mountCabinPaper(') && paperUi.includes('paperFilter') && paperUi.includes('ResizeObserver') && ['note', 'tag', 'letter', 'wood'].every(name => paperUi.includes(`${name}: [`)) && !santaCss.includes('border-image') && santaCss.includes('.cabin[data-paper] :where('), 'Every box of words in the yard is one whole sheet of paper drawn at its own size (no sliced seams), with a plain fallback until the paper is ready');
   const hoisting = await fs.readFile(path.join(project, 'js/components/cabin-pulley.js'), 'utf8');
-  assert.ok(hoisting.includes('setPointerCapture') && hoisting.includes('ArrowDown:') && hoisting.includes('12/24 — 夜班交接') && hoisting.includes('state.locked') && hoisting.includes('events.abort()') && !hoisting.includes('innerHTML') && scene.includes('rise / HOIST.radius') && scene.includes('placeHoist'), 'The hoist is pulled by hand (or arrow keys), the wheel turns by the rope it pays out, and the note waits behind the bale');
+  assert.ok(hoisting.includes('setPointerCapture') && hoisting.includes("['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft', 'Enter', ' ']") && hoisting.includes('12/24 夜班：禮物已分類') && hoisting.includes('state.locked') && hoisting.includes("accepts: id => id === 'handle'") && hoisting.includes('events.abort()') && !hoisting.includes('innerHTML') && scene.includes('rise / HOIST.radius') && scene.includes('rise / WINCH.spool') && scene.includes('placeHoist'), 'The winch turns only with its crank fitted (by hand, or arrow keys), the pulley and spool turn by the rope they wind, and the note waits in the drawer behind the bale');
   const { WORLD } = await import(pathToFileURL(path.join(project, 'js/components/cabin-world.js')).href), adrift = WORLD.filter(board => !board.at && !board.rig && !board.texture).map(board => board.id);
   assert.deepEqual(adrift, [], 'Every village board starts somewhere: one without a place waits at the origin, inside the cabin');
   assert.ok(scene.includes("sheets.get('balloon-green')"), 'The single green balloon is moved too, not left behind');
@@ -208,7 +208,7 @@ await test('Santa 紙板預先畫成 WebP：圖片對應目前畫法、手機用
   const { CUTS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-cuts.js')).href), names = [...new Set(cuts.map(cut => cut.name))];
   assert.deepEqual(CUTS.sets, SETS); assert.deepEqual(Object.keys(CUTS.sheets).sort(), names.sort());
   for (const name of names) assert.equal(CUTS.sheets[name], createHash('sha256').update(Object.keys(SETS).map(set => manifest.files[`${set}/${name}.webp`].sha256).join()).digest('hex').slice(0, 10), `${name} 的網址版本過期`);
-  for (const name of ['sign--stars-4', 'mailbox--open-true', 'hoist-hatch--open-true', 'smoke', 'hoist-bale', 'outfit-red-scarf']) assert.ok(names.includes(name), `${name} 也事先畫好`);
+  for (const name of ['sign--stars-4', 'mailbox--open-true', 'hoist-drawer--open-true--matches-true', 'hoist-drawer--open-true--matches-false', 'trough--eaten-true', 'trough--eaten-true--taken-true', 'snow-pile--dug-true', 'smoke', 'hoist-bale', 'hoist-crank', 'outfit-red-scarf']) assert.ok(names.includes(name), `${name} 也事先畫好`);
   assert.ok(names.filter(name => name.startsWith('outfit-')).length === 21, 'Every accessory has its picture');
   const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), paint = await fs.readFile(path.join(project, 'js/components/cabin-paint.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8');
   assert.ok(!scene.includes('paperFilter') && !scene.includes('XMLSerializer') && scene.includes('cutBoard(') && paint.includes('return paintBoard(board, CUTS.sets[set], state)'), 'The scene only loads pictures; a missing or broken one is cut in the browser instead');
@@ -482,6 +482,26 @@ await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會�
   assert.ok(paper.includes("['.inspect-card', 'frame']") && paper.includes('frame(paper, width, height, seed)') && paper.includes('.bag-item, .bag-look, .inspect-flip') && paper.includes('.bag-item[aria-pressed="true"]'), 'Slots and the inspect card are paper');
   assert.ok(css.includes('@media (prefers-reduced-motion: reduce) { .bag-pocket.is-new, .bag-finger, .bag-ghost.is-fitted, .inspect-card { animation: none; }'), 'Reduced motion stills the pocket');
   assert.ok(!/\.(?:bag|inspect)-[\w-]+[^{]*\{[^}]*font-size: (?!var\()/.test(css), 'Pocket and card use the site\'s font sizes');
+});
+await test('Santa 第一章：院子裡先看到缺了什麼，再找到補上它的東西（地衣、鑰匙、把手、火柴）', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [play, feed, snowman, pulley, css] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-feed.js', 'js/components/cabin-snowman.js', 'js/components/cabin-pulley.js', 'css/santa.css'].map(read));
+  const { ITEMS } = await import(pathToFileURL(path.join(project, 'js/services/cabin-bag.js')).href);
+  const { YARD, goal } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { NOTEBOOK, GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.deepEqual(YARD, ['lichen', 'key', 'handle', 'matches']); assert.ok(YARD.every(id => ITEMS[id]), 'Four things from the yard, each a pocket item');
+  assert.equal(goal({ story: { opened: false, left: false, seen: [] }, volunteer: { mark: '', tasks: [] }, finale: { endings: [] }, bag: { held: [], used: [] } }), 'yard', 'The hints start in the yard');
+  // Each is found where something else shows the way, and only by tapping (nothing is picked up by itself).
+  assert.ok(play.includes("bag.give('lichen', from)") && play.includes('別忘了餵麋鹿。上次輪到你時，牠可是等了好久！'), 'The mailbox parcel: the care note and the lichen');
+  assert.ok(feed.includes("bag.target(trough, { accepts: id => id === 'lichen'") && feed.indexOf("if (!fed())") < feed.indexOf("bag.give('key'") && feed.includes('cabin.reindeerStep(true)'), 'Lichen in the trough; he steps aside; the key only once he has eaten, and only when the hay is brushed');
+  assert.ok(snowman.includes("bag.give('handle', from)") && snowman.includes("cabin.repaint('snow-pile', { dug: true })"), 'The handle in the snowman\'s drift');
+  assert.ok(pulley.includes('function stuck()') && pulley.includes("clue('repair-tag')") && pulley.includes("bag.give('matches', matches)") && pulley.indexOf('const fitted = () =>') < pulley.indexOf('crank.hidden = !ready'), 'The winch will not turn without its crank; the matches in the drawer behind the bale');
+  for (const id of ['care-note', 'repair-tag', 'barn-note', 'care-log']) assert.ok(NOTEBOOK[id], `${id} goes in the clue book`);
+  assert.equal(GOALS.yard.hints.length, 3, 'Three hints, plainer each time');
+  // Coming back, the yard is as it was left; on a phone the pocket sits above the wardrobe and the basket.
+  assert.ok(play.includes("cabin.reindeerStep(true, true)") && play.includes("cabin.fitCrank(gone('handle'))") && play.includes("cabin.repaint('snow-pile', { dug: true })"), 'Restored as left');
+  assert.ok(css.includes('.cabin-play[data-game="snowman"] ~ .cabin-bag { bottom: calc(38% + 1.1rem); }') && css.includes('.cabin-play[data-game="reindeer"] ~ .cabin-bag'), 'The pocket keeps clear of the trays on a phone');
+  assert.ok(![play, feed, snowman, pulley].some(code => code.includes('innerHTML')), 'Words only through textContent');
 });
 await test('Santa 弄濕的交接表：看墨水顏色與別處線索補回縮寫，補對才算讀過', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');

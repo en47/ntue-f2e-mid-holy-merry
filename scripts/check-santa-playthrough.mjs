@@ -1,4 +1,4 @@
-// Santa 頁從空白存檔整套玩一遍：院子、屋裡四個字母、書櫃、弄濕的交接表、加入、四件替身工作、紅繩小鎖與烤紙條、舊頁、
+// Santa 頁從空白存檔整套玩一遍：院子（郵筒包裹、餵食槽鑰匙、雪堆把手、絞盤與抽屜）、屋裡四個字母、書櫃、弄濕的交接表、加入、四件替身工作、紅繩小鎖與烤紙條、舊頁、
 // 五位替身的見面禮與聖誕樹，最後走到結局 B→D、C→D、A。每一步都按頁面上的按鈕或拖曳，不改存檔。只讀寫這個瀏覽器的
 // localStorage，不連任何雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
@@ -34,11 +34,16 @@ await page.waitForFunction(() => !document.querySelector('.site-loader') && docu
 await page.evaluate(() => document.querySelector('.cabin').scrollIntoView()); await wait(1500);
 log.push(`notebook at start hidden: ${await page.evaluate(() => document.querySelector('.notebook-button').hidden)}`);
 
-// The yard: the reindeer's lichen (the care log), the barn's hoist (the note in the hatch).
-await spot('reindeer'); await page.click('.feed-basket [data-kind="lichen"]'); await wait(4500); await note('lichen');
-await spot('stable'); await page.waitForSelector('.hoist-grip');
-let grip = await page.locator('.hoist-grip').boundingBox(); await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2); await page.mouse.down(); await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2 + 420, { steps: 22 }); await page.mouse.up(); await wait(500);
-await page.click('.hoist-hook'); await wait(600); await page.click('.hoist-hatch'); await wait(900); await shot('barn-note'); await closeCard('.cabin-note'); await note('hoist');
+// The yard: the mailbox's parcel (lichen), the trough (the key, the care log), the snowman's drift (the handle), the barn's
+// winch (the matches and the note in the drawer). Pocket things are used by tapping them, then the place.
+const use = async (id, place) => { if (await page.evaluate(() => document.querySelector('.cabin-bag').dataset.open === 'false')) await page.click('.bag-pocket'); await page.click(`.bag-item[data-item="${id}"]`); await wait(200); await page.click(place); };
+const crank = async () => { for (let i = 0; i < 8 && !(await page.isVisible('.hoist-hook')); i++) { await page.focus('.hoist-crank'); await page.keyboard.press('Enter'); await wait(150); } };
+await spot('mailbox'); await page.click('.play-target'); await wait(800); await page.click('.play-parcel'); await wait(600); await page.click('.parcel-pouch'); await wait(1200); await closeCard('.parcel-card'); await note('parcel');
+await spot('reindeer'); await use('lichen', '.feed-trough'); await wait(4000); await page.click('.feed-trough'); await wait(3500); await note('trough');
+await spot('snowman'); await page.click('.snow-pile'); await wait(1200);
+await spot('stable'); await use('handle', '.hoist-winch'); await wait(900); await crank(); await page.click('.hoist-hook'); await wait(600);
+await page.click('.hoist-drawer'); await wait(900); await page.click('.drawer-matches'); await wait(1200); await page.click('.drawer-note'); await wait(800); await shot('barn-note'); await closeCard('.cabin-note'); await note('hoist');
+log.push(`pocket after the yard: ${JSON.stringify((await save()).bag)}`);
 // Into the house: the hearth (R), the desk's drawer (E), and the letters' backs; back in the middle, Santa goes out.
 await spot('hearth', 7000); for (let i = 0; i < 2; i++) { await page.evaluate(i => document.querySelectorAll('.hearth-log')[i].click(), i); await wait(400); } await wait(2600); await note('hearth');
 await spot('desk'); await page.click('.desk-drawer'); await wait(900); await page.click('.blotter-pad'); await wait(1400); await note('blotter'); await closeCard('.blotter-card');
@@ -64,8 +69,8 @@ await must('離開，關上書櫃'); await wait(4500); await toRoom(); await wai
 // Jobs: lichen, hay, the rack and the desk's letters, the wheel.
 await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(6000);
 await spot('reindeer'); await page.click('.feed-basket [data-kind="lichen"]'); await wait(4500);
-await spot('stable'); await page.waitForSelector('.hoist-grip'); await page.evaluate(() => document.querySelector('.hoist-release')?.click()); await wait(1800);
-grip = await page.locator('.hoist-grip').boundingBox(); await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2); await page.mouse.down(); await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2 + 420, { steps: 22 }); await page.mouse.up(); await wait(500); await page.click('.hoist-hook'); await wait(2500);
+await spot('stable'); await page.waitForSelector('.hoist-release'); await page.click('.hoist-release'); await wait(2400);
+await crank(); await page.click('.hoist-hook'); await wait(2500);
 log.push(`jobs after yard: ${(await save()).volunteer.tasks}`);
 await enterSecret();
 await thing('rack');
@@ -126,6 +131,6 @@ log.push(`finale ${JSON.stringify(end.finale)} | ornaments ${end.ornaments} tree
 await page.evaluate(() => document.querySelector('.notebook-button').click()); await wait(600); await shot('notebook-end');
 log.push(`goal: ${await page.evaluate(() => document.querySelector('.notebook-goal:last-of-type')?.textContent)}`);
 // Everything reached: four endings, five gifts on the tree, no page errors.
-const whole = ['A', 'B', 'C', 'D'].every(kind => end.finale.endings.includes(kind)) && end.ornaments.length === 5 && end.tree && !errors.length;
-console.log(whole ? 'PASS  從空白存檔玩到四個結局、五個見面禮、聖誕樹，沒有頁面錯誤' : `FAIL  ${JSON.stringify({ endings: end.finale.endings, ornaments: end.ornaments, tree: end.tree, errors })}`);
+const whole = ['A', 'B', 'C', 'D'].every(kind => end.finale.endings.includes(kind)) && end.ornaments.length === 5 && end.tree && ['lichen', 'key', 'handle', 'matches'].every(id => [...end.bag.held, ...end.bag.used].includes(id)) && !errors.length;
+console.log(whole ? 'PASS  從空白存檔玩到院子四樣東西、四個結局、五個見面禮、聖誕樹，沒有頁面錯誤' : `FAIL  ${JSON.stringify({ endings: end.finale.endings, ornaments: end.ornaments, tree: end.tree, bag: end.bag, errors })}`);
 await browser.close(); process.exitCode = whole ? 0 : 1;

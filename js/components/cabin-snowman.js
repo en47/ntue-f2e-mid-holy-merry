@@ -1,6 +1,7 @@
 // The snowman's dress-up game. A paper wardrobe opens beside him with four drawers (head, neck, face, hand): tap an
 // accessory and it flies onto him; tap it again, or tap it on him, to take it off; or start over. Every change is kept
-// (cabin-progress.js), so he is still dressed the next time you come by.
+// (cabin-progress.js), so he is still dressed the next time you come by. At his feet a drift is a little too round, with
+// the end of a wooden handle sticking out: brushed aside, the handle goes in the pocket (cabin-bag.js keeps it found).
 import { paperLayer } from './paper-art.js';
 import { COMBOS, PLACES, REMEMBERED, WARDROBE, itemFor } from './cabin-wardrobe.js';
 import { showOrnament } from './cabin-ornaments.js';
@@ -12,7 +13,7 @@ const centre = rect => ({ x: rect.left + rect.width / 2, y: rect.top + rect.heig
 // The picture in the drawer: most accessories show their own drawing; a pair of mittens has a tidier icon of its own.
 const picture = item => item.icon ?? [item.thumb, item.draw];
 
-export function snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti, clue = () => {}, gift = () => false }) {
+export function snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound, confetti, clue = () => {}, gift = () => false }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const outfit = progress.outfit, local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
   let drawer = 'head';
@@ -31,7 +32,14 @@ export function snowmanGame({ layer, stage, cabin, say, later, sound, progress, 
     const spot = element('button', 'wardrobe-place', layer); spot.type = 'button'; spot.dataset.place = place; spots[place] = spot;
     on(spot, 'click', () => remove(place));
   }
+  const pile = element('button', 'play-target snow-pile', layer); pile.type = 'button'; pile.setAttribute('aria-label', '雪人腳邊的雪堆'); pile.hidden = bag.ever('handle');
+  on(pile, 'click', () => {
+    const from = local(pile.getBoundingClientRect());
+    sound.play('whoosh'); cabin.repaint('snow-pile', { dug: true }); pile.hidden = true; bag.give('handle', from);
+  });
   function layout() {
+    const drift = cabin.boardRect('snow-pile');
+    if (drift) Object.assign(pile.style, { left: `${drift.left}px`, top: `${drift.top}px`, width: `${drift.width}px`, height: `${drift.height}px` });
     for (const [place, spot] of Object.entries(spots)) {
       const rect = cabin.placeRect(place); if (!rect) continue;
       Object.assign(spot.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });

@@ -616,26 +616,40 @@
       "height": 143,
       "bytes": 4898
     },
-    "hi/hoist-hatch--open-true.webp": {
-      "fingerprint": "657ebfee659e9f130a8e143409388afeb627218a29e5c38e1611d16cd7c0c6de",
-      "sha256": "149b0e1f9ae80d03c0a53c44d7b3b57a95fd8919d6b608f9e0db39d315d2a222",
-      "width": 185,
-      "height": 151,
-      "bytes": 6970
+    "hi/hoist-crank.webp": {
+      "fingerprint": "2395a9f5fb206668a04d1916d5afd231a5dd04e24c2af538b5c22242b848e299",
+      "sha256": "62bed1b661416024a051d0c56f2676061cdb087d4e8ce50db40e795ba05f6ddb",
+      "width": 51,
+      "height": 160,
+      "bytes": 2546
     },
-    "hi/hoist-hatch.webp": {
-      "fingerprint": "94655d6d823cca32b89d1d79d834087bb2c16eec79c75783936d1fe78fa206e2",
-      "sha256": "244475a6ac6484545be33a06a13ee5fb537e7bcc7e9abdde57c45ffc632eea06",
-      "width": 185,
-      "height": 151,
-      "bytes": 7096
+    "hi/hoist-drawer--open-true--matches-false.webp": {
+      "fingerprint": "899b381c90169f2b1f79e8d1f92ae06a3144a9b07af6bb171feb38f6c3c02bd2",
+      "sha256": "8eaeaf9f08b22abf4d640bcd557b4c5ee8b5436aeb0d84e7fe73d1e8778309cd",
+      "width": 282,
+      "height": 230,
+      "bytes": 12506
     },
-    "hi/hoist-toggle.webp": {
-      "fingerprint": "4340da2067616760ede17d91663ed613033d343d5d13874253ee5aed560bf6c8",
-      "sha256": "4d8a1d46b8f2d0735844c67b0f6eb28347ccca3cbe59b6e110d003be3ba4fa8b",
-      "width": 55,
-      "height": 101,
-      "bytes": 1706
+    "hi/hoist-drawer--open-true--matches-true.webp": {
+      "fingerprint": "ab7bbdf41cb2121ee8b2ccbda82c1ea3f957d35bf5f61c5f052241479f733072",
+      "sha256": "3a5ad5ee8bf9445d8be63865f43bf9434e0de2f8f134dc3be7806f126fdfae8d",
+      "width": 282,
+      "height": 230,
+      "bytes": 13616
+    },
+    "hi/hoist-drawer.webp": {
+      "fingerprint": "298497823f5f8c24cebb45803f83de0aebf97c2b49e459580718202ed21de45f",
+      "sha256": "5c357dc85573d546fec0cbf75b6afbeb81492960603d5defebfc7c89b25a98e1",
+      "width": 282,
+      "height": 230,
+      "bytes": 13346
+    },
+    "hi/hoist-tag.webp": {
+      "fingerprint": "7c7bf755bb19f7bea52c312133e5387833c82c81822b02d3ab9d74499a06d92e",
+      "sha256": "ad95f9499eafe5eb1ebb61a1d62f6389396a4b830408704ad3eca430604815b5",
+      "width": 109,
+      "height": 96,
+      "bytes": 2714
     },
     "hi/hoist-wheel.webp": {
       "fingerprint": "a5de1b3164a1ea07e85b2bc4f62ccd21abc91a068a234d529f452e74a604f8d5",
@@ -643,6 +657,13 @@
       "width": 135,
       "height": 135,
       "bytes": 5068
+    },
+    "hi/hoist-winch.webp": {
+      "fingerprint": "67b9569140ebefb73a0c5add02c8a5ae188cd1f7f20c9979d7f52a2113a24e4c",
+      "sha256": "839b97276501ba294767dea165dd8b776828dd316e1ceb7b465807991c99bf4e",
+      "width": 192,
+      "height": 192,
+      "bytes": 9218
     },
     "hi/hoofprints.webp": {
       "fingerprint": "1db551b64ad257661eda81ad7df3ff3be95aca416192241ae8be17fa2568c1d0",
@@ -1190,6 +1211,20 @@
       "height": 140,
       "bytes": 3140
     },
+    "hi/snow-pile--dug-true.webp": {
+      "fingerprint": "06bc46057bca0b99c1751c3b2f9a220e45cd7c5fc4cb2567171889cbe26852a2",
+      "sha256": "6d8fa6016eeda49f6f9acb3f4e17b402b9ec94dd77c5eb54594e93673dc4a479",
+      "width": 558,
+      "height": 270,
+      "bytes": 3488
+    },
+    "hi/snow-pile.webp": {
+      "fingerprint": "c9c8ec29ad6219cbdae5700172a30951279968c3d4d196c2034d4adadbb336cb",
+      "sha256": "d71dd03c968ff54b5a77c766f2536c565adf3d30ee23086ae72a2a7196c47687",
+      "width": 558,
+      "height": 270,
+      "bytes": 6086
+    },
     "hi/snowglobe.webp": {
       "fingerprint": "dd93eb800139d83c02c4600408c94c681ae25beb4d9127bcf9c0c631518aaaa0",
       "sha256": "dfae30eb48df51aaece0103491cac8501ad8fdb766d125df1799d7da977ffd89",
@@ -1252,6 +1287,27 @@
       "width": 370,
       "height": 680,
       "bytes": 36730
+    },
+    "hi/trough--eaten-true--taken-true.webp": {
+      "fingerprint": "779c349ff706322d57ac9f5187400b2957907c3f1da22d1aaee2d00c9236f35a",
+      "sha256": "3d3861e38988bd37544f40141d80599ca278dfe609fac4ab0f146a24e6b82ae0",
+      "width": 855,
+      "height": 414,
+      "bytes": 36828
+    },
+    "hi/trough--eaten-true.webp": {
+      "fingerprint": "d5bfebc0609752c66b552cf2fa5e7e1f89c80214a9bfdd12e7d205679e8ac069",
+      "sha256": "4160b272ffade4ee130da723e1a9b52cdb094d0224298065bec0f59e4e6318b3",
+      "width": 855,
+      "height": 414,
+      "bytes": 38008
+    },
+    "hi/trough.webp": {
+      "fingerprint": "8b2cd6b2794d670d6501034b7523971c39a0ca13b4189035605b25d679c37b6b",
+      "sha256": "50284eafed18206ecbe8bafcfee5183d39b73ef702b1a16538f9d9d79471726a",
+      "width": 855,
+      "height": 414,
+      "bytes": 39698
     },
     "hi/village.webp": {
       "fingerprint": "186cb96f96cd35d69f8127d44c9166fa75af7b97dc489a81bccf3d14313dceab",
@@ -1932,26 +1988,40 @@
       "height": 107,
       "bytes": 3560
     },
-    "large/hoist-hatch--open-true.webp": {
-      "fingerprint": "3984c6b571fac8793d6c15d0a926543546b539294448fd11040c79459e1d45f5",
-      "sha256": "f226ca0427c2dfef5c1756b844a387badf3d27eb44d8d050a13d0a6d7d2dcd26",
-      "width": 139,
-      "height": 113,
-      "bytes": 4350
+    "large/hoist-crank.webp": {
+      "fingerprint": "54ef44ebe7860329b33fe2f8a56452ef28b8e0c1eff3a6ecc17c45e56d027e4f",
+      "sha256": "d982f6169e367121f48ba1aaa9844529874e5a2242459f8a10ce0f891b53f848",
+      "width": 38,
+      "height": 120,
+      "bytes": 1832
     },
-    "large/hoist-hatch.webp": {
-      "fingerprint": "94c3485b9510bdce450588c54d81b556d35f09ff09546c48e4034029c6c071b2",
-      "sha256": "1bf54c34988b9103a23b1d56b7c3b3ad90fffa1094ea358eed5227fbed40b747",
-      "width": 139,
-      "height": 113,
-      "bytes": 4418
+    "large/hoist-drawer--open-true--matches-false.webp": {
+      "fingerprint": "b8f3f4fddadb02479e437423d45c8506581b17d8022e2993da4b318fc3be8c88",
+      "sha256": "19aecd2765a5ea6a68df355d92d0516db7082bd2e66593b0a7d50e2959da4472",
+      "width": 212,
+      "height": 173,
+      "bytes": 7790
     },
-    "large/hoist-toggle.webp": {
-      "fingerprint": "84a82f71efd6cac1fb1c69e93563eff2a7039edd7816ac561490ec0a6726b9ae",
-      "sha256": "e4978be7f8ed62420d857120df42c4b9cb80bf2f82ffe8adc1737a676fb99fb5",
-      "width": 41,
-      "height": 76,
-      "bytes": 1280
+    "large/hoist-drawer--open-true--matches-true.webp": {
+      "fingerprint": "7ab7a8e040153af457831a8e29ed57c532836e841446bea284d4b086430e163d",
+      "sha256": "478343e53cc028694c611d9e37ff4b2ae9994aea1be28ab2f624a85a06329a04",
+      "width": 212,
+      "height": 173,
+      "bytes": 8528
+    },
+    "large/hoist-drawer.webp": {
+      "fingerprint": "d05d149390c5a220234e6b5c7dcbeb73f2bc96ae0799e77c4a874a799c9d1132",
+      "sha256": "11afc8f246a9739ac71e04a9b6b4a11a415d609ba22f7fb926054208d3d74448",
+      "width": 212,
+      "height": 173,
+      "bytes": 7686
+    },
+    "large/hoist-tag.webp": {
+      "fingerprint": "41028822ecf12c7688dd762df59d37452be4e0f731f3bc053d248b13e6da73a7",
+      "sha256": "5b89ca73b0eb699e2b45e5cd1ecce184599a135aef91ad1cce8f13a6241d6e9d",
+      "width": 82,
+      "height": 72,
+      "bytes": 2110
     },
     "large/hoist-wheel.webp": {
       "fingerprint": "ecd52c6cc4667524123f588553a31849265ff780f68f9d52abea925472aef450",
@@ -1959,6 +2029,13 @@
       "width": 101,
       "height": 101,
       "bytes": 3626
+    },
+    "large/hoist-winch.webp": {
+      "fingerprint": "4e896df69051ec303479a2c2fa140092114303ee36baa6f66900b649de099478",
+      "sha256": "5a36f071740def6e498a91e9f1498d9505ee28bb63c248fa8bd3d870c1bbd394",
+      "width": 144,
+      "height": 144,
+      "bytes": 6002
     },
     "large/hoofprints.webp": {
       "fingerprint": "718ec56ff16acd150ff6a4392d7d84c61472ecdcdde80813f36e6be361844e74",
@@ -2506,6 +2583,20 @@
       "height": 105,
       "bytes": 2512
     },
+    "large/snow-pile--dug-true.webp": {
+      "fingerprint": "536d51a15d93113a9c250d6b39fb586e239d8716bb6f29923c53935ea098f742",
+      "sha256": "85ed46c8fa52dc08bc062cf4986926dd77d4c48b2ca4f683644bbb6f7b4db6d2",
+      "width": 419,
+      "height": 203,
+      "bytes": 2690
+    },
+    "large/snow-pile.webp": {
+      "fingerprint": "a4cd672daba410d9130ad079e8b962689dcc7e9020d31d6e15ce2b41a8ecb0db",
+      "sha256": "aad8908deda25f7f956d1ff0b69d57f885201c24086304a745c78e07480b7037",
+      "width": 419,
+      "height": 203,
+      "bytes": 4570
+    },
     "large/snowglobe.webp": {
       "fingerprint": "c427b8348494b276e38f8a08f243b07ca380226133882e58768182191f7f1473",
       "sha256": "348640728b472ef62237e0e8003c5780186084626244a6fde01c8bcee7a84a58",
@@ -2568,6 +2659,27 @@
       "width": 278,
       "height": 510,
       "bytes": 24658
+    },
+    "large/trough--eaten-true--taken-true.webp": {
+      "fingerprint": "4a75491f8ef0c17d7356da74cc72a613989bb19c2c33746e035ad52c8dea4175",
+      "sha256": "cdcb8f3c37820b58cb69436e7422e5f4d80706411753008c1977e6b70b683e4e",
+      "width": 641,
+      "height": 311,
+      "bytes": 24440
+    },
+    "large/trough--eaten-true.webp": {
+      "fingerprint": "6a454764e65a34939d348468000047332cb51be3fc66e2bafac96088785a0f36",
+      "sha256": "0dd1f512699e1da9904bdf867cefb78ed866139dcf8f75426049598679db722a",
+      "width": 641,
+      "height": 311,
+      "bytes": 25488
+    },
+    "large/trough.webp": {
+      "fingerprint": "38fa62f62807e44d8c3ac54734e8b7c0dcb2c6c36642465e196d4db832b7ecdc",
+      "sha256": "82e71ffcbd7810cfb6592a8009c31519fc760b2f13083528ddc622b95f797390",
+      "width": 641,
+      "height": 311,
+      "bytes": 26162
     },
     "large/village.webp": {
       "fingerprint": "0bb1fc0c8db31adefde36c02787506b0daae122600a3157deb1c78e126d48dfc",
@@ -3248,26 +3360,40 @@
       "height": 72,
       "bytes": 1620
     },
-    "small/hoist-hatch--open-true.webp": {
-      "fingerprint": "f9bc860219fbe807930846705f5f62fbb330e3b5b5de99d5f619994cc56e59df",
-      "sha256": "89abe5786ec98d625093c7f39f5b10a13348d2ea825f0c256d57d530785a1fb8",
-      "width": 93,
-      "height": 76,
-      "bytes": 1554
+    "small/hoist-crank.webp": {
+      "fingerprint": "eff96bda54c563b085c52bb1c220967afee16c01e694437dee9bc3c72bd472cd",
+      "sha256": "8fa9d1af8b24ee23bd5e787f3529b629da28a834af8e39347c51634080d870a6",
+      "width": 26,
+      "height": 80,
+      "bytes": 794
     },
-    "small/hoist-hatch.webp": {
-      "fingerprint": "7ac1ad126de1b6926994d8f80fe517f2208a873968b899b90f7b9f1a35479d99",
-      "sha256": "3e4b73c6e7ed93ae8f27052bba21e9b8ff6c6452dbca793f6fd996798b21ae71",
-      "width": 93,
-      "height": 76,
-      "bytes": 1534
+    "small/hoist-drawer--open-true--matches-false.webp": {
+      "fingerprint": "8e207d691a852aac0bbca8b6b518d1f98d77c96f1df808758d8ce533439b6da1",
+      "sha256": "a6844759074a776d3f753b64abfb59d56352bfe1a7f754ea8071ce132d79ed19",
+      "width": 141,
+      "height": 115,
+      "bytes": 2360
     },
-    "small/hoist-toggle.webp": {
-      "fingerprint": "666313d41d520d2d2f90ca4c10bd3f977a5be15651e8201e575955c1be0f1f4a",
-      "sha256": "14d5962fcedf44f5820c77be893d420bd88e9e5eef03f419acf7f1538e44d1ca",
-      "width": 28,
-      "height": 51,
-      "bytes": 632
+    "small/hoist-drawer--open-true--matches-true.webp": {
+      "fingerprint": "6850ec0f1665cd17d129a3d6e6b637bfd47f02d6dc8777c751106a4493c627b8",
+      "sha256": "b8d20586898f62659ad250cdd83314dc3cee59a22ec479af7b19214151e52a55",
+      "width": 141,
+      "height": 115,
+      "bytes": 2738
+    },
+    "small/hoist-drawer.webp": {
+      "fingerprint": "5d8801d258c019eabba68e68215df51da820eabdd7e45d539fe458a8ef33acde",
+      "sha256": "0b37bcb0a10c883dbf54d2b66e7bff78a225cde8c7b12475ca68d153f1ea520f",
+      "width": 141,
+      "height": 115,
+      "bytes": 2172
+    },
+    "small/hoist-tag.webp": {
+      "fingerprint": "d137166219f8a6a24765a633b98827a503c19c0feb148c63f071c768dd3b177a",
+      "sha256": "5058779455640c81246887cdeb611a614822e853c1a2c22fcdbbb674b8d3cd5e",
+      "width": 55,
+      "height": 48,
+      "bytes": 1044
     },
     "small/hoist-wheel.webp": {
       "fingerprint": "b6b13426be5d8dca430561665ad27ccecddf641199a712fafc5db673def662a1",
@@ -3275,6 +3401,13 @@
       "width": 68,
       "height": 68,
       "bytes": 1618
+    },
+    "small/hoist-winch.webp": {
+      "fingerprint": "6759ff6f3b5a1d90093f5fa3d32b2c6bfb7f9038ac01e735fde8e5d06268e9ee",
+      "sha256": "11573520248dd2df4c41f4c5232665f37b998389ff7437bb942d8a4a71eb9cef",
+      "width": 96,
+      "height": 96,
+      "bytes": 2226
     },
     "small/hoofprints.webp": {
       "fingerprint": "2c0ef08a38a9cca24ea168a654b8ba98d5b3049d60b250041024b6c62d8bbb32",
@@ -3822,6 +3955,20 @@
       "height": 70,
       "bytes": 1158
     },
+    "small/snow-pile--dug-true.webp": {
+      "fingerprint": "a33da89f091c1fb6a4f33e0a4688fc47aca29fde9c5008430f6e771d4025f321",
+      "sha256": "19b8cba7e75cdf5c26854c3a119dc94f0cb81a95ef9a1557506574c08e18628f",
+      "width": 279,
+      "height": 135,
+      "bytes": 1366
+    },
+    "small/snow-pile.webp": {
+      "fingerprint": "817d70eb03d3fe55973afb764c9a79f1d5deab2cafb339093206d8d16658606a",
+      "sha256": "67e3e48ebcedf1a7e6a7f49859bf1e713ff8fcc99ab7bb28a6ed471bc2e31214",
+      "width": 279,
+      "height": 135,
+      "bytes": 2220
+    },
     "small/snowglobe.webp": {
       "fingerprint": "7ad46ff218b829a16f43090aa2d3401f7db062b04dab97405ac1e10d5dce250d",
       "sha256": "f5c3e827d856352b58bbab012e27976cf27bba0733454c9a97d68c0346ac5914",
@@ -3884,6 +4031,27 @@
       "width": 185,
       "height": 340,
       "bytes": 9638
+    },
+    "small/trough--eaten-true--taken-true.webp": {
+      "fingerprint": "a1203f89de3369f41f16b5525e7e6ba04b8d72aeee8091310c61e0754f664d21",
+      "sha256": "f36eb6e02283802c73e4c195ad91cca2d1fdd03a1fe47fbe59684710049c610d",
+      "width": 428,
+      "height": 207,
+      "bytes": 8074
+    },
+    "small/trough--eaten-true.webp": {
+      "fingerprint": "97f3310d69c5b13193ea38add0543a8aa71fee4a7221ca31723099241f1741f9",
+      "sha256": "16b32982fdd257391cba3be5840916c46bb2af162f829f65a11161e20648135c",
+      "width": 428,
+      "height": 207,
+      "bytes": 8456
+    },
+    "small/trough.webp": {
+      "fingerprint": "d72afb46b4c3c719586a1a84b3c3169a55628f91e7f39622aa99d96ec90a7739",
+      "sha256": "ffe9350b487a83659359e1ef2f2891e93ae4ce901b4156ee805a85181386e6e7",
+      "width": 428,
+      "height": 207,
+      "bytes": 8600
     },
     "small/village.webp": {
       "fingerprint": "e975d18181ba7a8c3ec3b2a26a9db1cda77a21fd1bc00472dafe54f207fb6c0f",

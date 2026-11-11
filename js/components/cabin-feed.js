@@ -1,7 +1,9 @@
-// Feeding the reindeer. Three foods wait in a basket: drag one to his mouth (it is taken once it comes close) or simply press
-// it. A carrot he chews with a nod; lichen, his favourite, makes him hop; gingerbread he turns his head away from and it goes
-// back in the basket. After five meals he is full until tomorrow (this computer's calendar, cabin-progress.js). He does not
-// sleep: the model has no eyelids, and a drooping head with open eyes looked wrong.
+// Feeding the reindeer. Two foods wait in a basket: drag one to his mouth (it is taken once it comes close) or simply press
+// it. A carrot he chews with a nod; gingerbread he turns his head away from and it goes back in the basket. After five meals
+// he is full until tomorrow (this computer's calendar, cabin-progress.js). He does not sleep: the model has no eyelids, and
+// a drooping head with open eyes looked wrong. Lichen, his favourite, is not in the basket: the pouch from the mailbox goes
+// in the trough behind him (from the pocket, cabin-bag.js). He eats it there, steps aside, and where he stood a little gold
+// shows in the hay; brushed aside, it is a little key. Fed and found are the pocket's to keep (lichen used, key had).
 import { paperLayer } from './paper-art.js';
 import { MEALS, eat, full, mealsToday } from '../services/cabin-progress.js';
 
@@ -10,8 +12,8 @@ const element = (tag, className, parent) => { const node = document.createElemen
 const centre = rect => ({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
 const near = (point, rect, pad) => rect && point.x >= rect.left - pad && point.x <= rect.left + rect.width + pad && point.y >= rect.top - pad && point.y <= rect.top + rect.height + pad;
 
-// A volunteer still owing him his lichen (`wants`) finds the basket holding only that, even once he is full for the day.
-export function feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art, paper, wants = () => false, onTask = () => {}, clue = () => {} }) {
+// A volunteer still owing him his lichen (`wants`) finds some in the basket too, and only that once he is full for the day.
+export function feedGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound, burst, art, paper, wants = () => false, onTask = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
   const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
@@ -25,14 +27,47 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     bubble.classList.remove('is-popping'); void bubble.offsetWidth; bubble.classList.add('is-popping');
     clearTimeout(hush); hush = setTimeout(() => { bubble.hidden = true; }, 2400);
   }
+  // The trough: the pocket's lichen goes in it (offered at his mouth, he looks round at it instead).
+  const fed = () => bag.ever('lichen') && !bag.holds('lichen'), trough = element('button', 'play-target feed-trough', layer), mouthSpot = element('span', 'feed-mouth-spot', layer);
+  trough.type = 'button'; trough.setAttribute('aria-label', '麋鹿身後的餵食槽'); mouthSpot.setAttribute('aria-hidden', 'true');
+  const glint = element('span', 'feed-glint', layer); glint.setAttribute('aria-hidden', 'true'); paperLayer(glint, '0 0 100 100', '', art.star, paper);
+  const place = (node, rect) => rect && Object.assign(node.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
+  function layout() {
+    place(trough, cabin.boardRect('trough', [0, 0, 1, .8])); place(mouthSpot, cabin.mouthRect()); place(glint, cabin.boardRect('trough', [.7, 0, .9, .4]));
+    glint.hidden = !fed() || bag.ever('key');
+  }
+  const forget = [
+    bag.target(trough, { accepts: id => id === 'lichen' || (id === 'key' ? '鑰匙不是給麋鹿的。' : '麋鹿聞了聞，把頭轉開了。'), use: eatAtTrough }),
+    bag.target(mouthSpot, { accepts: id => id === 'lichen' ? '麋鹿聞了聞地衣，回頭看了看身後的餵食槽。' : '麋鹿聞了聞，把頭轉開了。', use: () => {} }),
+  ];
+  function eatAtTrough() {
+    const rect = trough.getBoundingClientRect(), box = stage.getBoundingClientRect();
+    cabin.reindeerLook({ x: rect.left - box.left + rect.width * .7, y: rect.top - box.top + rect.height * .4 }); cabin.reindeerAct('chew'); sound.play('chew');
+    speak('是地衣！我最愛吃這個！'); burst(local(rect), 'heart', 3);
+    later(1700, () => { cabin.repaint('trough', { eaten: true }); cabin.reindeerLook(null); cabin.reindeerStep(true); cabin.reindeerAct('happy'); sound.play('happy'); });
+    later(3000, () => { layout(); say('麋鹿把地衣吃得乾乾淨淨，心滿意足地往旁邊挪了一步。牠剛才站的那頭，乾草裡好像有一點金色。'); });
+    return '你把地衣放進餵食槽。';
+  }
+  // Brushing the hay aside where the gold shows: the little key, once.
+  on(trough, 'click', () => {
+    if (!fed()) { say('餵食槽裡堆著乾草。麋鹿聞了聞，好像在等什麼更好吃的。'); return; }
+    if (bag.ever('key')) { say('餵食槽裡的乾草被翻得亂七八糟。'); return; }
+    sound.play('remove'); cabin.repaint('trough', { eaten: true, taken: true }); glint.hidden = true;
+    bag.give('key', local(glint.getBoundingClientRect()));
+    later(2600, () => { clue('care-log'); say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」往前翻，還有一行金色的字：「12/21 後半夜，地衣餵過了。—— O.」'); });
+  });
+  layout(); later(600, layout); later(1300, layout);
+  const watch = new ResizeObserver(() => layout()); watch.observe(stage);
+  const done = () => { events.abort(); clearTimeout(hush); watch.disconnect(); forget.forEach(each => each()); cabin.reindeerLook(null); cabin.reindeerAct(null); };
+
   const lichenOnly = full(progress) && wants();
   if (full(progress) && !lichenOnly) {
-    say('麋鹿今天已經吃飽了，明天再來餵牠吧。');
+    say(bag.holds('lichen') ? '麋鹿今天已經吃飽了……不過聞到你口袋裡的味道，牠回頭看了看餵食槽。' : '麋鹿今天已經吃飽了，明天再來餵牠吧。');
     later(500, () => { cabin.reindeerAct('nod'); speak('今天吃飽囉，明天再來餵我！'); });
-    return () => { events.abort(); clearTimeout(hush); };
+    return done;
   }
 
-  say(lichenOnly ? '麋鹿今天已經吃飽了……不過牠最愛的地衣，好像還吃得下一點。' : '從籃子拿食物，拖到麋鹿嘴邊餵牠吃吧！');
+  say(lichenOnly ? '麋鹿今天已經吃飽了……不過牠最愛的地衣，好像還吃得下一點。' : bag.holds('lichen') ? '麋鹿聞到你口袋裡的地衣，抽了抽鼻子。牠身後有個餵食槽。' : '從籃子拿食物，拖到麋鹿嘴邊餵牠吃吧！');
   const tray = element('div', 'feed-tray', layer), meter = element('p', 'feed-meter', tray), basket = element('div', 'feed-basket', tray);
   const meals = Array.from({ length: MEALS }, () => element('span', 'feed-meal', meter));
   const ring = element('span', 'feed-mouth', layer); ring.setAttribute('aria-hidden', 'true');
@@ -118,7 +153,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     });
   }
 
-  for (const [kind, label] of FOODS) if (!lichenOnly || kind === 'lichen') piece(kind, label);
+  for (const [kind, label] of FOODS) if (lichenOnly ? kind === 'lichen' : kind !== 'lichen' || wants()) piece(kind, label);
   count();
-  return () => { events.abort(); clearTimeout(hush); cabin.reindeerLook(null); cabin.reindeerAct(null); };
+  return done;
 }
