@@ -2,7 +2,9 @@
 // presents go one on another, and at each stop only the top one can be got at. The route is on the desk (the work note
 // in the bundle): the first stop has to go on last. Tap a sack to put it on top of the rack, tap the top one to take it
 // back off; all four on, the rules check (cabin-story.js `loadedRight`). Loaded right, the job is stamped (the first
-// time, cabin-play.js) and the sleigh in the yard stands loaded from then on; wrong, the sacks come back off.
+// time, cabin-play.js) and the sleigh in the yard stands loaded from then on; wrong, the sacks come back off. The sleigh
+// stands behind the reindeer: for a volunteer he steps aside to make room (as he does once fed at his trough), and only
+// the part of the sleigh clear of him can be tapped. Before signing up there is nothing to load, and nothing to tap.
 import { paperLayer, shape } from './paper-art.js';
 import { ROUTE, loadedRight, signedUp } from '../services/cabin-story.js';
 import { SLEIGH } from '../data/cabin-jobs.js';
@@ -25,13 +27,13 @@ const sack = colour => g => {
 export function sleighGame({ layer, stage, cabin, say, sound, later, progress, onLoaded = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const volunteer = progress.volunteer, loaded = () => volunteer.tasks.includes('hay');
+  if (!signedUp(volunteer) && !loaded()) return () => {};
+  cabin.reindeerStep(true);
   const spot = element('button', 'play-target sleigh-spot', layer); spot.type = 'button'; spot.setAttribute('aria-label', SLEIGH.label);
-  const layout = () => { const rect = cabin.sheetRect('sleigh', [.05, .3, .9, 1]); if (rect) Object.assign(spot.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` }); };
+  // The sleigh's left part, out from behind him once he has stepped aside.
+  const layout = () => { const rect = cabin.sheetRect('sleigh', [.04, .35, .58, 1]); if (rect) Object.assign(spot.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` }); };
   let card = null, stack = [];
-  on(spot, 'click', () => {
-    if (!signedUp(volunteer) && !loaded()) { say(SLEIGH.idle); return; }
-    open();
-  });
+  on(spot, 'click', open);
   function open() {
     card?.remove(); sound.play('open'); say('');
     card = element('article', 'cabin-letter sleigh-card', layer); card.setAttribute('aria-label', SLEIGH.title);

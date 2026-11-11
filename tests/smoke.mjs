@@ -530,6 +530,7 @@ await test('Santa 第四章：四件替身工作各有真的操作（餵食表�
   // The route on the desk, the sleigh loaded the other way round, the first stop on top.
   assert.ok(DESK_LETTERS.find(entry => entry.id === 'route').body.startsWith(ROUTE.join(' → ')) && desk.includes("if (current.entry.id === 'route') clue('route');"), 'The route note gives the stops in order, and goes in the clue book');
   assert.ok(sleigh.includes('if (loadedRight(stack))') && SLEIGH.rule.includes('最上面') && !Object.values(SLEIGH).join('').includes('反'), 'The sleigh\'s rule is the narrow rack, never the answer');
+  assert.ok(sleigh.includes("if (!signedUp(volunteer) && !loaded()) return () => {};") && sleigh.includes('cabin.reindeerStep(true);') && sleigh.includes("cabin.sheetRect('sleigh', [.04, .35, .58, 1])"), 'The sleigh stands behind the reindeer: only a volunteer can tap it, he steps aside first, and only the part clear of him is tapped');
   assert.ok(paint.includes('sleigh: [{ loaded: true }]') && play.includes("if (progress.volunteer.tasks.includes('hay')) cabin.repaint('sleigh', { loaded: true });"), 'Loaded, the sleigh in the yard stays loaded');
   // The big gear: in the snow by the gearbox, to the pocket, into the box.
   assert.ok(wheel.includes("bag.give('gear'") && wheel.includes("accepts: id => id === 'gear'") && wheel.includes('node.hidden = snow && !fitted()'), 'The big gear is picked up from the snow and put in the box from the pocket');
