@@ -21,7 +21,10 @@ export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'car
 // have been hung on the tree; how many times the big wheel's gearbox has been put right (each opens a new board). The
 // pocket: what is in it now and what has been used for good (cabin-bag.js); a record from before it had a pocket starts empty,
 // except that a barn hoisted then has its winch's crank fitted (the crank is the snowman's handle, so that is found too).
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog() }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0, bag: emptyBag() });
+// What has been set right in the room for good that the pocket does not show (`placed`): the music box's catch undone by the
+// brass pin (a tool, kept). A record whose music box drawer was opened before it had a catch counts it undone.
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog() }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0, bag: emptyBag(), placed: [] });
+export const PLACED = ['musicbox-catch'];
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
 export const dayOf = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -62,6 +65,7 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   progress.ornaments = GIFTS.filter(mark => found.includes(mark)); progress.tree = saved.tree === true;
   progress.bag = readBag(saved.bag);
   if ((progress.hoist.locked || progress.hoist.found) && !ever(progress.bag, 'handle')) progress.bag.used.push('handle');
+  progress.placed = PLACED.filter(id => (Array.isArray(saved.placed) && saved.placed.includes(id)) || (id === 'musicbox-catch' && progress.ornaments.includes('N')));
   if (Array.isArray(saved.clues)) progress.clues = Object.keys(NOTEBOOK).filter(id => saved.clues.includes(id));
   const hints = saved.hints && typeof saved.hints === 'object' && !Array.isArray(saved.hints) ? saved.hints : {};
   // `gifts`: how many hints about the welcome gifts have been asked for.

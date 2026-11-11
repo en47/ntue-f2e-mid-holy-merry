@@ -33,7 +33,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
   const glint = element('span', 'feed-glint', layer); glint.setAttribute('aria-hidden', 'true'); paperLayer(glint, '0 0 100 100', '', art.star, paper);
   const place = (node, rect) => rect && Object.assign(node.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
   function layout() {
-    place(trough, cabin.boardRect('trough', [0, 0, 1, .8])); place(mouthSpot, cabin.mouthRect()); place(glint, cabin.boardRect('trough', [.7, 0, .9, .4]));
+    place(trough, cabin.sheetRect('trough', [0, 0, 1, .8])); place(mouthSpot, cabin.mouthRect()); place(glint, cabin.sheetRect('trough', [.7, 0, .9, .4]));
     glint.hidden = !fed() || bag.ever('key');
   }
   const forget = [

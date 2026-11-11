@@ -1,9 +1,12 @@
 // The music box up close. Wind its key by dragging round it clockwise (three turns at most; it will not go back the other
 // way, it only clicks and springs), or press the arrow keys or Enter for a quarter turn. Let go and the little scene on
-// top turns while the tune plays, both slowing as the spring runs down; wind it again whenever you like. The box keeps
-// playing if you step away (the scene and cabin-sound.js keep it going).
+// top turns while the tune plays, both slowing as the spring runs down; wind it again whenever you like. While it plays,
+// four blank gold bookmarks rise under the scene, cut like the ribbons hanging in the bookcase's four empty places. The box
+// keeps playing if you step away (the scene and cabin-sound.js keep it going). Under the box a little drawer is held shut
+// by a brass catch with a pinhole beside it: the brass pin from the little room's postmark tray (cabin-bag.js) undoes it,
+// for good (`placed`, cabin-progress.js).
 import { paperLayer, shape } from './paper-art.js';
-import { SUBSTITUTES, letter } from './cabin-art.js';
+import { SUBSTITUTES, ribbon } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { showOrnament } from './cabin-ornaments.js';
 import { FLIGHT_ORDER, playsOpen } from '../services/cabin-story.js';
@@ -14,12 +17,18 @@ const COLOURS = Object.fromEntries(SUBSTITUTES);
 // The hidden comb under the box, low to high: each tine engraved with an initial and tuned so that the order the
 // substitutes first flew (E, O, N, K, H) falls down in fourths, E A D G C.
 const COMB = [['H', 'C5', 92], ['N', 'D5', 82], ['E', 'E5', 72], ['K', 'G5', 62], ['O', 'A5', 54]];
-// The drawer front under the music box: red-brown wood, a brass pull, the engraved line along it.
+// The drawer front under the music box: red-brown wood, a brass pull, the engraved line along it; and the brass catch
+// across its edge with the pinhole beside it, a layer of its own (gone once undone).
 function drawerFront(parent) {
   shape('rect', { x: 2, y: 2, width: 116, height: 26, rx: 4, fill: '#8a3530' }, parent);
   shape('rect', { x: 8, y: 6, width: 104, height: 18, rx: 3, fill: '#a8423b' }, parent);
   shape('path', { d: 'M18 15H48M72 15H102', stroke: '#e0b04f', 'stroke-width': 1.2, opacity: .7 }, parent);
   shape('rect', { x: 52, y: 10, width: 16, height: 9, rx: 4, fill: '#e0b04f' }, parent);
+}
+function drawerCatch(parent) {
+  shape('rect', { x: 92, y: 0, width: 9, height: 20, rx: 2, fill: '#c9a24f' }, parent);
+  shape('circle', { cx: 96.5, cy: 15, r: 1.6, fill: '#6b5226' }, parent);
+  shape('circle', { cx: 108, cy: 15, r: 2.2, fill: '#2a1a14' }, parent); shape('circle', { cx: 108, cy: 15, r: 3.6, fill: 'none', stroke: '#c9a24f', 'stroke-width': 1.2 }, parent);
 }
 // The comb's brass bar and the pinned drum behind it, 300 × 150; the tines are pieces of their own (they ring).
 function combBar(parent) {
@@ -32,31 +41,41 @@ const tine = length => parent => {
   shape('path', { d: `M8 0H32V${length - 6}Q20 ${length + 4} 8 ${length - 6}Z`, fill: '#e0b04f' }, parent);
   shape('path', { d: `M12 0H17V${length - 8}H12Z`, fill: '#f4d98c', opacity: .8 }, parent);
 };
-// The gold medallion under the little turning scene, with its letter O: it rises while the box plays.
-function medallion(parent) {
-  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; shape('path', { d: `M${50 + Math.cos(a) * 34} ${50 + Math.sin(a) * 34}L${50 + Math.cos(a + .13) * 46} ${50 + Math.sin(a + .13) * 46}L${50 + Math.cos(a + .26) * 34} ${50 + Math.sin(a + .26) * 34}Z`, fill: '#e9c162' }, parent); }
-  shape('circle', { cx: 50, cy: 50, r: 34, fill: '#e0b04f' }, parent); shape('circle', { cx: 50, cy: 50, r: 26, fill: '#fff6dc' }, parent);
-  letter(parent, 'O', 50, 51, 28, 30, { fill: '#a84a42' });
+// The four gold bookmarks that rise under the little turning scene: blank, side by side from a little brass bar.
+function bookmarks(parent) {
+  shape('rect', { x: 10, y: 8, width: 80, height: 8, rx: 4, fill: '#8f6a2c' }, parent);
+  for (const x of [22, 41, 60, 79]) ribbon(parent, x, 12, 11, 76);
 }
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 
-export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, knows = () => false, clue = () => {}, gift = () => false, progress, save = () => {} }) {
+export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUse = () => {}, knows = () => false, clue = () => {}, gift = () => false, progress, save = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   say('把音樂盒的發條鑰匙順時針轉幾圈，放手它就會開始轉。');
   const knob = element('button', 'musicbox-knob', layer); knob.type = 'button';
   knob.setAttribute('aria-label', '音樂盒的發條：繞著它順時針拖曳上緊，或按方向鍵右、Enter 轉四分之一圈');
   let turn = null, clicks = 0;
-  // Once the secret is known: a little drawer under the box, with a comb inside that opens it.
-  const drawer = knows() && progress ? element('button', 'musicbox-drawer', layer) : null;
-  if (drawer) { drawer.type = 'button'; drawer.setAttribute('aria-label', '音樂盒底下的小抽屜'); paperLayer(drawer, '0 0 120 30', '', drawerFront, PAPER); on(drawer, 'click', () => combCard()); later(1600, () => { if (!progress.ornaments.includes('N')) say('咦，音樂盒底下有一個小抽屜，上面刻著一行小字。'); }); }
+  // A little drawer under the box, held by its catch until the brass pin undoes it; inside, a comb that opens it.
+  const undone = () => progress.placed.includes('musicbox-catch');
+  const drawer = element('button', 'musicbox-drawer', layer); drawer.type = 'button'; drawer.setAttribute('aria-label', '音樂盒底下的小抽屜');
+  paperLayer(drawer, '0 0 120 30', '', drawerFront, PAPER); paperLayer(drawer, '0 0 120 30', 'drawer-catch', drawerCatch, PAPER); drawer.classList.toggle('is-undone', undone());
+  on(drawer, 'click', () => {
+    if (undone()) { combCard(); return; }
+    sound.play('nope'); clue('music-catch'); say('音樂盒底下有個小抽屜，被一根黃銅卡榫卡住了。卡榫旁邊，有一個很小的孔。');
+  });
+  const forget = bag.target(drawer, {
+    accepts: id => undone() ? '卡榫已經鬆開了。' : id === 'pin' || '孔太小了，這個伸不進去。',
+    use: () => { progress.placed.push('musicbox-catch'); save(); later(400, () => { drawer.classList.add('is-undone'); sound.play('snap'); }); later(1100, combCard); return '撥針伸進小孔，輕輕一撥——卡榫鬆開了。'; },
+  });
+  if (knows() && !undone()) later(1600, () => say('音樂盒底下的小抽屜，還被那根黃銅卡榫卡著。'));
   const gold = element('span', 'musicbox-letter', layer); gold.setAttribute('aria-hidden', 'true');
-  paperLayer(gold, '0 0 100 100', '', medallion, { paper: { scale: .35, grain: .4, shadow: .25 }, eager: true });
+  paperLayer(gold, '0 0 100 100', '', bookmarks, { paper: { scale: .35, grain: .4, shadow: .25 }, eager: true });
   function layout() {
     const rects = cabin.musicRects(); if (!rects) return;
     const { key } = rects, size = Math.max(96, key.width * 2.4), x = key.left + key.width / 2, y = key.top + key.height / 2;
     Object.assign(knob.style, { left: `${x - size / 2}px`, top: `${y - size / 2}px`, width: `${size}px`, height: `${size}px` });
-    if (drawer) { const w = Math.max(88, rects.box.width * .7), h = w / 4; Object.assign(drawer.style, { left: `${rects.box.left + rects.box.width / 2 - w / 2}px`, top: `${rects.box.top + rects.box.height * .9 - h}px`, width: `${w}px`, height: `${h}px` }); }
-    const { box } = rects, medal = Math.max(44, box.width * .55); Object.assign(gold.style, { left: `${box.left + box.width / 2 - medal / 2}px`, top: `${box.top - medal * .9}px`, width: `${medal}px`, height: `${medal}px` });
+    { const w = Math.max(88, rects.box.width * .7), h = w / 4; Object.assign(drawer.style, { left: `${rects.box.left + rects.box.width / 2 - w / 2}px`, top: `${rects.box.top + rects.box.height * .9 - h}px`, width: `${w}px`, height: `${h}px` }); }
+    // The bookmarks stand up over the box, kept clear of the caption along the top.
+    const { box } = rects, medal = Math.max(44, box.width * .4); Object.assign(gold.style, { left: `${box.left + box.width / 2 - medal / 2}px`, top: `${Math.max(76, box.top - medal * .78)}px`, width: `${medal}px`, height: `${medal}px` });
   }
   const played = () => (knows() ? '盒蓋內側刻著 N 和 K：尼爾斯和克莉絲。' : '') + (sound.musicOn ? '小紙雕轉起來了。（網站音樂開著時，音樂盒的歌聲會被蓋過；關掉右下角的音樂就聽得到。）' : '叮叮咚咚……小紙雕跟著音樂慢慢轉。');
   // Each 30° of winding clicks the ratchet once.
@@ -71,7 +90,8 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
     cabin.holdKey(false);
     if (cabin.wound > 0) { sound.tune(() => cabin.wound); say(played()); onUse(); clue('music-lid'); }
   }
-  // While it plays, the gold O rises under the turning scene; the first time, it is told and written in the clue book.
+  // While it plays, the four gold bookmarks rise under the turning scene; the first time, they are told and written in the
+  // clue book.
   // The drawer's comb, up close: five tines to pluck; five plucked in the right order and the drawer springs open on a
   // welcome ornament Nils hid for the next new substitute. Played wrong, the comb buzzes and starts again.
   let card = null;
@@ -117,7 +137,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
   }
   function playing() {
     const up = cabin.wound > 0; gold.classList.toggle('is-up', up);
-    if (up && clue('letter-musicbox')) later(2600, () => say('小紙雕轉著轉著，底下升起一個金色的字母：O。'));
+    if (up && clue('music-bookmarks')) later(2600, () => say('小紙雕轉著轉著，底下升起四枚金色的書籤，上面一個字也沒有。'));
     later(500, playing);
   }
   playing();
@@ -144,5 +164,5 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, onUse = (
   });
   layout(); later(500, layout); later(1200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
-  return () => { card?.remove(); events.abort(); watch.disconnect(); clearTimeout(clicks); if (turn || cabin.wound > 0) release(); };
+  return () => { card?.remove(); events.abort(); watch.disconnect(); clearTimeout(clicks); forget(); if (turn || cabin.wound > 0) release(); };
 }

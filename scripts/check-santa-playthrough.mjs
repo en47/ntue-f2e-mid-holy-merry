@@ -1,4 +1,4 @@
-// Santa 頁從空白存檔整套玩一遍：院子（郵筒包裹、餵食槽鑰匙、雪堆把手、絞盤與抽屜）、屋裡四個字母、書櫃、弄濕的交接表、加入、四件替身工作、紅繩小鎖與烤紙條、舊頁、
+// Santa 頁從空白存檔整套玩一遍：院子（郵筒包裹、餵食槽鑰匙、雪堆把手、絞盤與抽屜）、屋裡（火柴點火、鑰匙開抽屜拿放大鏡、吸墨器、音樂盒書籤、放大鏡看雪花球）、書櫃、弄濕的交接表、加入、四件替身工作、紅繩小鎖與烤紙條、舊頁、
 // 五位替身的見面禮與聖誕樹，最後走到結局 B→D、C→D、A。每一步都按頁面上的按鈕或拖曳，不改存檔。只讀寫這個瀏覽器的
 // localStorage，不連任何雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
@@ -44,15 +44,18 @@ await spot('snowman'); await page.click('.snow-pile'); await wait(1200);
 await spot('stable'); await use('handle', '.hoist-winch'); await wait(900); await crank(); await page.click('.hoist-hook'); await wait(600);
 await page.click('.hoist-drawer'); await wait(900); await page.click('.drawer-matches'); await wait(1200); await page.click('.drawer-note'); await wait(800); await shot('barn-note'); await closeCard('.cabin-note'); await note('hoist');
 log.push(`pocket after the yard: ${JSON.stringify((await save()).bag)}`);
-// Into the house: the hearth (R), the desk's drawer (E), and the letters' backs; back in the middle, Santa goes out.
-await spot('hearth', 7000); for (let i = 0; i < 2; i++) { await page.evaluate(i => document.querySelectorAll('.hearth-log')[i].click(), i); await wait(400); } await wait(2600); await note('hearth');
-await spot('desk'); await page.click('.desk-drawer'); await wait(900); await page.click('.blotter-pad'); await wait(1400); await note('blotter'); await closeCard('.blotter-card');
+// Into the house: the hearth lit with a match (R, the gold spines), the desk's drawer opened with the little key (the
+// magnifier, the blotter turned over), and the letters' backs; back in the middle, Santa goes out.
+await spot('hearth', 7000); await use('matches', '.hearth-fire'); await wait(4000); for (let i = 0; i < 2; i++) { await page.evaluate(i => document.querySelectorAll('.hearth-log')[i].click(), i); await wait(400); } await note('hearth');
+await spot('desk'); await use('key', '.desk-drawer'); await wait(900); await page.click('.desk-drawer'); await wait(1100);
+await page.click('.drawer-thing[aria-label="黃銅框的放大鏡"]'); await wait(1300); await page.click('.drawer-thing[aria-label^="搖擺式吸墨器"]'); await wait(800); await page.click('.inspect-flip'); await wait(700); await shot('blotter'); await page.click('.inspect-close'); await wait(400); await closeCard('.drawer-card'); await note('blotter');
 await page.evaluate(() => document.querySelector('.desk-pick[aria-label="從信堆抽一封信"]').click()); await wait(700); await button('拆開信'); await wait(400); await button('翻到背面'); await wait(400); await button('放回');  await wait(600);
 await toRoom(); await wait(9000); log.push(`chair card: ${await page.evaluate(() => Boolean(document.querySelector('.chair-card')))}`); await shot('chair-note'); await closeCard('.chair-card');
 await spot('musicbox'); for (let i = 0; i < 8; i++) { await page.focus('.musicbox-knob'); await page.keyboard.press('Enter'); await wait(120); } await wait(3600); await note('music box');
 await spot('globe'); await page.focus('.snow-globe'); for (let i = 0; i < 4; i++) { await page.keyboard.press(i % 2 ? 'ArrowLeft' : 'ArrowRight'); await wait(150); }
 await page.waitForFunction(() => document.querySelector('.cabin-caption').textContent.includes('落定'), null, { timeout: 30000 }); await note('globe');
-log.push(`letters found: ${(await save()).clues.filter(id => id.startsWith('letter-'))}`);
+await use('magnifier', '.snow-globe'); await wait(1300); await shot('lens'); await closeCard('.lens-card');
+log.push(`room clues: ${(await save()).clues.filter(id => ['letter-hearth', 'blotter', 'music-bookmarks', 'globe-village', 'globe-base', 'chair-note'].includes(id))}`);
 // The bookcase: MORE, and in.
 await spot('shelf', 7000); await shot('shelf-strip');
 for (const [from, to] of [[4, 9], [1, 10], [6, 11], [5, 12]]) { await page.click(`.books-place[data-place="${from}"]`); await wait(150); await page.click(`.books-place[data-place="${to}"]`); await wait(700); }
@@ -76,6 +79,8 @@ await enterSecret();
 await thing('rack');
 for (const [id, mark] of [['m1', 'E'], ['m2', 'O'], ['m3', 'N'], ['m4', 'K'], ['m5', 'H'], ['m6', 'N'], ['tomas', 'you'], ['aya', 'you']]) { await page.click(`.rack-letter[data-id="${id}"]`); await wait(100); await page.evaluate(m => document.querySelector(`.rack-slot[data-mark="${m}"]`).click(), mark); await wait(220); }
 await wait(2600); await shot('rack-done'); await putBack();
+// The brass pin on the postmark tray, for the music box's catch.
+await thing('stamps'); await page.click('.secret-pin'); await wait(1300); await putBack();
 // The cord: the slip, and the lock (it opens with the hearth's help later).
 await thing('register'); await shot('register-cord'); await button('拿起紙條', '.register-sign'); await wait(800); await putBack();
 await must('離開，關上書櫃'); await wait(4500); await toRoom();
@@ -106,7 +111,7 @@ await wait(2600); await shot('snowman-gift'); await closeCard('.piece-card');
 // Back in: the music box's drawer (N), the cord's lock and the old page, the smallest hat (H).
 await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(6000);
 await spot('inside', 7000); await spot('musicbox');
-await page.click('.musicbox-drawer'); await wait(700);
+await use('pin', '.musicbox-drawer'); await wait(1900);
 for (const m of ['E', 'O', 'N', 'K', 'H']) { await page.evaluate(m => [...document.querySelectorAll('.comb-tine')].find(b => b.textContent === `${m}.`).click(), m); await wait(260); }
 await wait(2000); await shot('comb-open'); await closeCard('.comb-card');
 await enterSecret();
@@ -131,6 +136,6 @@ log.push(`finale ${JSON.stringify(end.finale)} | ornaments ${end.ornaments} tree
 await page.evaluate(() => document.querySelector('.notebook-button').click()); await wait(600); await shot('notebook-end');
 log.push(`goal: ${await page.evaluate(() => document.querySelector('.notebook-goal:last-of-type')?.textContent)}`);
 // Everything reached: four endings, five gifts on the tree, no page errors.
-const whole = ['A', 'B', 'C', 'D'].every(kind => end.finale.endings.includes(kind)) && end.ornaments.length === 5 && end.tree && ['lichen', 'key', 'handle', 'matches'].every(id => [...end.bag.held, ...end.bag.used].includes(id)) && !errors.length;
-console.log(whole ? 'PASS  從空白存檔玩到院子四樣東西、四個結局、五個見面禮、聖誕樹，沒有頁面錯誤' : `FAIL  ${JSON.stringify({ endings: end.finale.endings, ornaments: end.ornaments, tree: end.tree, bag: end.bag, errors })}`);
+const whole = ['A', 'B', 'C', 'D'].every(kind => end.finale.endings.includes(kind)) && end.ornaments.length === 5 && end.tree && ['lichen', 'key', 'handle', 'matches', 'magnifier', 'pin'].every(id => [...end.bag.held, ...end.bag.used].includes(id)) && ['blotter', 'music-bookmarks', 'globe-village'].every(id => end.clues.includes(id)) && !errors.length;
+console.log(whole ? 'PASS  從空白存檔玩到院子四樣東西、屋裡的放大鏡與線索、撥針、四個結局、五個見面禮、聖誕樹，沒有頁面錯誤' : `FAIL  ${JSON.stringify({ endings: end.finale.endings, ornaments: end.ornaments, tree: end.tree, bag: end.bag, errors })}`);
 await browser.close(); process.exitCode = whole ? 0 : 1;

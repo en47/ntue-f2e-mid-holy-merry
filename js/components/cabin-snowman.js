@@ -38,7 +38,7 @@ export function snowmanGame({ layer, stage, cabin, say, later, sound, progress, 
     sound.play('whoosh'); cabin.repaint('snow-pile', { dug: true }); pile.hidden = true; bag.give('handle', from);
   });
   function layout() {
-    const drift = cabin.boardRect('snow-pile');
+    const drift = cabin.sheetRect('snow-pile');
     if (drift) Object.assign(pile.style, { left: `${drift.left}px`, top: `${drift.top}px`, width: `${drift.width}px`, height: `${drift.height}px` });
     for (const [place, spot] of Object.entries(spots)) {
       const rect = cabin.placeRect(place); if (!rect) continue;

@@ -2,22 +2,15 @@
 // they can be taken down: drag a book (it follows the hand, lifted off the shelf) and let it go over a place, or tap a book
 // and then a place. A book goes into an empty place or swaps with the one there. When the four places left of the SANTA
 // picture book spell MORE (cabin-story.js decides, not the AI), those four books light up and the bookcase swings open.
-// Which four is the riddle on Santa's chair: a letter hidden on each of his favourite things in the room; the ones found
-// so far wait at the top, in the order they were found, as little paper tiles.
-import { paperLayer, shape } from './paper-art.js';
-import { letter } from './cabin-art.js';
+// Nothing here says which: the gold spines that gleam in the firelight, the blotter's backwards line, the music box's four
+// blank bookmarks (like the ribbons in the four empty places), the old village in the snow globe and the note on Santa's
+// chair each point a little of the way. Either R will do.
 import { GAPS, homeShelf, moveBook, solved } from '../services/cabin-story.js';
-import { LETTERS } from '../data/cabin-clues.js';
+import { BOOKCASE_HINTS } from '../data/cabin-clues.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
-const HINTS = ['搖椅上的紙條說，屋裡四樣東西上各藏著一個字母：壁爐、書桌、音樂盒、雪花球。', 'SANTA 繪本左邊，正好空著四個位置。', '把找到的四個字母排成一個英文字，放在 SANTA 前面。'];
-const TILE = { paper: { scale: .3, grain: .4, shadow: .3 }, eager: true };
-// A letter tile: cream card, the letter cut in red; one not found yet is a faint question mark.
-const tile = char => paper => {
-  shape('rect', { x: 4, y: 4, width: 52, height: 60, rx: 7, fill: char ? '#fffaf0' : '#f1e6cf' }, paper);
-  if (char) letter(paper, char, 30, 35, 34, 38, { fill: '#a84a42' });
-  else shape('path', { d: 'M22 26C22 16 38 16 38 26 38 33 30 33 30 40M30 47V48', fill: 'none', stroke: '#cdbb98', 'stroke-width': 4, 'stroke-linecap': 'round' }, paper);
-};
+// Hints one at a time (the same as the clue book's); the last, the answer, only when asked for twice.
+const HINTS = BOOKCASE_HINTS.slice(0, -1), ANSWER = BOOKCASE_HINTS.at(-1);
 
 export function booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen, toggle, restart }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
@@ -42,13 +35,6 @@ export function booksGame({ layer, stage, cabin, say, later, sound, progress, sa
   const home = cabin.santaHome && !replay;
   say(replay ? (solved(shelf) ? '書還排著 MORE SANTA，可以直接推開；想再玩一次，就全部放回重拼。' : '書櫃關上了。把書重新排好，再拼一次看看。') : home ? '書背上的字拼出 HOLY MERRY……聖誕老人就坐在旁邊，不好意思亂動他的書。' : '聖誕老人出門了。書櫃上的書，好像可以抽出來。');
   tools.hidden = home;
-  // The letters found so far, while the shelf can be played.
-  if (!home) {
-    const found = progress.clues.filter(id => id in LETTERS).map(id => LETTERS[id]);
-    const strip = element('div', 'books-found', layer); strip.setAttribute('aria-label', found.length ? `找到的字母：${found.join('、')}` : '還沒找到任何字母');
-    element('span', 'books-found-label', strip, '找到的字母');
-    for (let i = 0; i < 4; i++) { const each = element('span', found[i] ? 'books-tile is-found' : 'books-tile', strip); each.setAttribute('aria-hidden', 'true'); each.style.setProperty('--i', i); paperLayer(each, '0 0 60 68', '', tile(found[i]), TILE); }
-  }
 
   function layout() {
     const rects = cabin.bookRects(shelf);
@@ -68,7 +54,6 @@ export function booksGame({ layer, stage, cabin, say, later, sound, progress, sa
     if (!solved(shelf)) { if (++moves >= 8 && hints < HINTS.length) hint.hidden = false; return; }
     // MORE SANTA: the four books light up, a wooden click and a shudder, and the case swings open.
     done = true; tools.hidden = true; for (const button of places) button.hidden = true; sound.play('click'); cabin.glintBooks(GAPS.map(place => shelf[place])); say('');
-    layer.querySelector('.books-found')?.classList.add('is-solved');
     later(700, () => { sound.play('thud'); say('喀——書櫃裡傳來木頭機關的聲音。'); });
     later(1500, () => { sound.play('creak'); cabin.openBookcase(true); story.opened = true; story.shut = false; save(); onOpen(); });
     later(4200, () => {
@@ -122,7 +107,7 @@ export function booksGame({ layer, stage, cabin, say, later, sound, progress, sa
   // Hints come one at a time, and the answer only when asked for twice.
   on(hint, 'click', () => {
     if (hints < HINTS.length) { say(HINTS[hints++]); return; }
-    if (hint.dataset.sure) { say('完整解法：依序把 M、O、R、E 放在 SANTA 前面。'); hint.hidden = true; return; }
+    if (hint.dataset.sure) { say(ANSWER); hint.hidden = true; return; }
     hint.dataset.sure = '1'; hint.textContent = '真的要看答案嗎？'; say('再按一次就會看到完整解法。');
   });
   later(45000, () => { if (!done && !home) hint.hidden = false; });
