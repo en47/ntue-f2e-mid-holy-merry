@@ -25,11 +25,11 @@ export const solved = shelf => spelled(shelf) === 'MORE';
 // Santa goes out to the reindeer once the visitor has used two different things in the room (one, for someone who has
 // seen him go before), and only while he is at home and the shelf is not yet open.
 export const santaGoes = ({ used, left, home, opened }) => home && !opened && used >= (left ? 1 : 2);
-// In the little room behind the bookcase three things tell the secret: the name tags, the shift log and the rulebook.
-// Seen all three, the visitor knows there is more than one Santa; then he comes home from the reindeer. The log only counts
-// once it has been put right (below): snow melted on it and the ink ran.
+// In the little room behind the bookcase: the name tags, the shift log and the duty rules (the booklet's first page). The
+// secret is known the moment the log is put right (below: snow melted on it and the ink ran); the tags and the rules are
+// what it takes to put it right. Then Santa comes home from the reindeer (or, already in, speaks from his chair).
 export const CLUES = ['tags', 'log', 'rules'];
-export const knowsSantas = seen => CLUES.every(clue => seen.includes(clue));
+export const knowsSantas = seen => seen.includes('log');
 export const santaReturns = ({ home, opened, seen }) => !home && opened && knowsSantas(seen);
 // The shift log: four nights before Christmas, each flown in two halves (who started, who took over). The visitor writes
 // the ink back in, a substitute's initial in each cell, from what they have seen around the village; one cell still reads.
@@ -67,12 +67,12 @@ export const points = volunteer => TASKS.filter(task => volunteer.tasks.includes
 export const pending = (volunteer, task) => signedUp(volunteer) && TASKS.includes(task) && !volunteer.tasks.includes(task);
 // A job done: it counts once, and only while signed up. Returns whether it counted.
 export function record(volunteer, task) { if (!pending(volunteer, task)) return false; volunteer.tasks.push(task); return true; }
-// The end of the story. Two jobs done, the register's old pages can be untied: Holly's wish, granted long ago, and her on
-// the shift log every year since (the second twist). Three stamps buy a wish (granted by another substitute); all four
+// The end of the story. The old record book opens to its code whenever it is found (`finale.unlocked`): Holly's wish,
+// granted long ago, and her on the night shift every year since. Understood (`finale.twist`, the second twist) once it has
+// been read with the secret known, in either order. Three stamps buy a wish (granted by another substitute); all four
 // jobs done, the early shift on Christmas morning can be signed (staying on). Endings: A, a visitor who saw the register's
 // blank row and went home without signing; B, a wish granted; C, staying on; D, either of those knowing what Holly knew.
 export const WISH_COST = 3;
-export const canUntie = volunteer => signedUp(volunteer) && points(volunteer) >= 2;
 // The cord's little lock: four dials, opened by the year Holly's wish came true (the snow globe's base, H. · 2003).
 export const LOCK = '2003';
 export const opens = dials => Array.isArray(dials) && dials.join('') === LOCK;
@@ -89,9 +89,10 @@ export const yardDone = bag => YARD.every(id => ever(bag, id));
 // What the story is waiting on now, for the clue book's hints (data/cabin-clues.js): the first thing not yet done.
 export function goal({ story, volunteer, finale, bag }) {
   if (!story.opened) return !yardDone(bag) ? 'yard' : story.left ? 'bookcase' : 'room';
-  if (!knowsSantas(story.seen)) return story.seen.includes('log') ? 'secret' : 'log';
+  if (!knowsSantas(story.seen)) return 'log';
+  if (!story.told) return 'secret';
   if (!signedUp(volunteer)) return finale.endings.length ? 'endings' : 'join';
-  if (!finale.twist) return canUntie(volunteer) ? 'cord' : 'jobs';
+  if (!finale.twist) return points(volunteer) >= 2 ? 'cord' : 'jobs';
   if (!finale.wish && !finale.stayed) return points(volunteer) >= WISH_COST ? 'wish' : 'jobs';
   return finale.endings.length === 4 ? 'done' : 'endings';
 }

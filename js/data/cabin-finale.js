@@ -1,24 +1,29 @@
-// The end of the cabin's story: what is written on the register's old pages, the wishes a volunteer may make, and the
-// endings. All made up. When each appears is decided by cabin-story.js, never by the chat.
+// The end of the cabin's story: what is written in the old record book, the wishes a volunteer may make, and the endings.
+// All made up. When each appears is decided by cabin-story.js, never by the chat.
 
-// Tied with red cord until the visitor has done two jobs: Holly's wish, granted in 2003, and her on the night shift
-// every year since. Her initial is the one on the snow globe's base (H. · 2003).
-// Once two jobs are done the cord can be got at, but it is held by a little four-dial lock; a blank slip tucked under it
-// smells of lemon, and held to the fire it shows Holly's hand: the year the snow globe remembers is the code.
+// The old record book on the little room's desk, tied with red cord and held by a four-dial lock: it opens to the year
+// Holly's wish came true (the snow globe's base, H. · 2003), whenever that is found; no jobs are needed. A volunteer finds a
+// blank slip tucked in their own row of the register: it smells of lemon, and held to the fire it shows Holly's hand.
 export const CORD = {
-  tied: '前面的舊頁用紅繩綁著。', soon: '（再多做一件替身工作，紅繩好像就解得開了。）', untie: '解開紅繩，翻到舊的一頁', again: '再翻開舊的一頁', back: '翻回最新的一頁',
-  locked: '紅繩鬆了，卻被一個小小的四位數密碼鎖扣著。', dial: (place, digit) => `第 ${place} 個轉輪：${digit}（按一下加一）`, opened: '喀！小鎖彈開了，紅繩滑了下來。',
-  slip: '繩上夾著一張空白的紙條，聞起來有一點檸檬的味道。', take: '拿起紙條', took: '你把空白紙條收進口袋了。檸檬的味道……好像在哪裡聽過，這種紙要用火烤一烤？',
+  title: '舊紀錄簿', locked: '一本舊紀錄簿，用紅繩綁著，被一個小小的四位數密碼鎖扣著。', again: '翻開舊紀錄簿', close: '闔上舊紀錄簿',
+  dial: (place, digit) => `第 ${place} 個轉輪：${digit}（按一下加一）`, opened: '喀！小鎖彈開了，紅繩滑了下來。',
+  slip: '你那一列夾著一張空白的紙條，聞起來有一點檸檬的味道。', take: '拿起紙條', took: '你把空白紙條收進口袋了。檸檬的味道……好像在哪裡聽過，這種紙要用火烤一烤？',
   pocket: '（空白紙條還在你口袋裡。）',
   warm: '火不夠旺，紙條只是溫溫的。再添一點柴，用風箱把火吹旺。', toFire: '把空白紙條靠近火烤一烤',
   lemon: ['我的願望實現的那一年，', '雪花球一直記得。'], sign: '—— H.', read: '紙條上浮出淡褐色的字：「我的願望實現的那一年，雪花球一直記得。」—— H.',
+  known: '雪花球記得的那一年……你已經知道了。',
 };
-export const OLD_PAGE = {
-  title: '登記簿　舊的一頁',
-  entry: ['2003', 'H.', '荷莉', '願望：讓住院的媽媽，回家過聖誕節。'],
+// Inside: Holly's record, her wish in 2003 stamped fulfilled, and every year since on the night shift under her initial
+// (trainee for her first five years). It never says what the night shift is: read before the shift log is put right it
+// is only a child's wish and a row of nights (`surface`); read after, it is the second twist.
+export const RECORD = {
+  title: 'CHRISTMAS RECORD · 024',
+  entry: ['2003/12/24', 'H.', '荷莉', '願望：讓住院的媽媽，回家過聖誕節。'],
   stamp: 'WISH FULFILLED',
-  since: ['2004　夜班　H. ✓', '2011　夜班　H. ✓', '2018　夜班　H. ✓', '2025　夜班　H. ✓'],
+  since: ['2003/12/25　幫忙包禮物（見習）', '2004　夜班（見習）', '2008　第一次自己值夜班 ✓', '2011　夜班 ✓', '2018　夜班 ✓', '2025　夜班 ✓'],
   pencil: '我的願望已經實現了。不過，我想再多幫一個人。—— H.',
+  card: ['Someone once made Christmas special for me. I wanted to do the same.', '曾經有人讓我的聖誕節變得特別，所以我也想這樣做。'],
+  surface: '2003 年，一個孩子的願望實現了。後面一整排夜班，都簽著 H.……夜班是什麼？',
 };
 export const TWIST = '荷莉的願望，二十多年前就實現了，她卻每年都還在交接表上……原來，有人的願望早就實現了，卻還是留了下來。';
 // The rules booklet's pencil line, readable once the old page has been seen.
@@ -56,6 +61,6 @@ export const HOLLY = {
 };
 export const SEEN = '看過的結局';
 // After a stamp, where the story goes next (by how many stamps there are), and what Santa says once the old page is known.
-export const NEXT = { 2: '登記簿上綁著舊頁的紅繩，好像鬆開了一點。', 3: '三個章了！回登記簿看看，可以許一個願望。', 4: '四件工作都做完了。小房間的班表上，12/25 早班還空著。' };
-export const SANTA_ON_HOLLY = '聖誕老人看著你，笑了笑：「你看到荷莉的那一頁了吧。她呀，是我們這裡最可靠的人。」';
+export const NEXT = { 2: '兩個章了。再一個章，就能在登記簿許一個願望。', 3: '三個章了！回登記簿看看，可以許一個願望。', 4: '四件工作都做完了。小房間的班表上，12/25 早班還空著。' };
+export const SANTA_ON_HOLLY = '聖誕老人看著你，笑了笑：「你讀了荷莉的紀錄了吧。她呀，是我們這裡最可靠的人。」';
 export const GLOBE = '雪慢慢落定了。底座刻著「H. · 2003」——荷莉的願望實現的那一年。';

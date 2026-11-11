@@ -33,12 +33,26 @@ test('Santa goes out after two things used in the room (one if he has gone befor
   assert.equal(santaGoes({ used: 3, left: true, home: false, opened: false }), false);
   assert.equal(santaGoes({ used: 3, left: true, home: true, opened: true }), false);
 });
-test('the secret is known once the name tags, the shift log and the rulebook have all been read', async () => {
+test('the secret is known the moment the shift log is put right; the tags and the rules are only what it takes', async () => {
   const { knowsSantas, santaReturns } = await import('../js/services/cabin-story.js');
-  assert.equal(knowsSantas(['tags', 'log']), false); assert.equal(knowsSantas(['rules', 'log', 'tags']), true);
-  assert.equal(santaReturns({ home: false, opened: true, seen: ['tags', 'log', 'rules'] }), true);
-  assert.equal(santaReturns({ home: false, opened: true, seen: ['tags'] }), false, 'not before the secret is known');
-  assert.equal(santaReturns({ home: true, opened: true, seen: ['tags', 'log', 'rules'] }), false, 'not when he is already home');
+  assert.equal(knowsSantas(['tags', 'rules']), false); assert.equal(knowsSantas(['log']), true); assert.equal(knowsSantas(['rules', 'log', 'tags']), true);
+  assert.equal(santaReturns({ home: false, opened: true, seen: ['log'] }), true);
+  assert.equal(santaReturns({ home: false, opened: true, seen: ['tags', 'rules'] }), false, 'not before the log is put right');
+  assert.equal(santaReturns({ home: true, opened: true, seen: ['log'] }), false, 'not when he is already home');
+});
+// Every way of writing the eight cells with the five name tags, checked against the evidence and the duty rules: only one
+// fits (docs/SANTA-PUZZLE-DESIGN.md §5). Looked at: the clear cell, two coloured blots, a spanner mark. Matched with notes
+// found elsewhere: the care log, the barn note's two inks, the route note. The rest by the duty rules: no one flies two
+// halves running (across midnight too), and a trainee (joined under five years before the 2026 season) flies one half.
+test('the wet shift log has exactly one answer, and it needs the duty rules and the join years', async () => {
+  const { LOG_ANSWER, SUBSTITUTES } = await import('../js/services/cabin-story.js'), { REGISTER } = await import('../js/data/cabin-secret.js');
+  const seen = { 0: 'E', 2: 'N', 4: 'H', 5: 'N', 1: 'O', 6: 'K', 7: 'H' };
+  const trainees = REGISTER.rows.filter(([, , year]) => 2026 - year < 5).map(([mark]) => mark);
+  assert.deepEqual(trainees.sort(), ['E', 'O']);
+  const fits = (log, rules) => log.every((mark, i) => !(i in seen) || seen[i] === mark) && (!rules || (log.every((mark, i) => i === 0 || mark !== log[i - 1]) && trainees.every(mark => log.filter(each => each === mark).length <= 1)));
+  const answers = rules => { const found = []; for (let n = 0; n < 5 ** 8; n++) { const log = Array.from({ length: 8 }, (_, i) => SUBSTITUTES[Math.floor(n / 5 ** i) % 5]); if (fits(log, rules)) found.push(log.join('')); } return found; };
+  assert.deepEqual(answers(true), [LOG_ANSWER.join('')], 'one answer with the rules');
+  assert.ok(answers(false).length > 1, 'without the duty rules and the join years, 12/22 second half could be anyone');
 });
 test('volunteering: an initial of your own, four jobs, a point each the first time while signed up', async () => {
   const { TASKS, canSign, signedUp, points, pending, record } = await import('../js/services/cabin-story.js');
@@ -55,12 +69,11 @@ test('volunteering: an initial of your own, four jobs, a point each the first ti
   volunteer.mark = ''; assert.equal(signedUp(volunteer), false); assert.equal(points(volunteer), 2, 'leaving keeps the points');
   assert.equal(record(volunteer, 'lichen'), false, 'nothing counts after leaving');
 });
-test('the end: two jobs untie the old pages, three stamps buy a wish, all four let you stay; D needs the old page too', async () => {
-  const { canUntie, canWish, canStay, trueMiracle, goesHome } = await import('../js/services/cabin-story.js');
+test('the end: three stamps buy a wish, all four let you stay; D needs the old record understood too', async () => {
+  const { canWish, canStay, trueMiracle, goesHome, opens } = await import('../js/services/cabin-story.js');
   const finale = { invited: true, twist: false, wish: null, stayed: false, endings: [] };
   const volunteer = tasks => ({ mark: 'J', tasks });
-  assert.equal(canUntie(volunteer(['hay'])), false); assert.equal(canUntie(volunteer(['hay', 'wheel'])), true);
-  assert.equal(canUntie({ mark: '', tasks: ['hay', 'wheel'] }), false, 'not after leaving');
+  assert.equal(opens(['2', '0', '0', '3']), true, 'the old record book opens to its year, jobs or no jobs');
   assert.equal(canWish(volunteer(['hay', 'wheel']), finale), false); assert.equal(canWish(volunteer(['hay', 'wheel', 'lichen']), finale), true);
   assert.equal(canWish(volunteer(['hay', 'wheel', 'lichen']), { ...finale, wish: 'snow' }), false, 'one wish');
   assert.equal(canStay(volunteer(['hay', 'wheel', 'lichen']), finale), false); assert.equal(canStay(volunteer(['hay', 'wheel', 'lichen', 'letters']), finale), true);
@@ -78,13 +91,13 @@ test('the clue book hints at the first thing the story is still waiting on', () 
   // The yard's four things found (the lichen fed, the handle on the winch, the key and matches still in the pocket).
   const yard = { held: ['key', 'matches'], used: ['lichen', 'handle'] }, empty = { held: [], used: [] };
   const at = (changes = {}) => goal({ story: { ...story, ...changes.story }, volunteer: { ...volunteer, ...changes.volunteer }, finale: { ...finale, ...changes.finale }, bag: changes.bag ?? yard });
-  const known = { opened: true, left: true, seen: ['tags', 'log', 'rules'] }, signed = tasks => ({ mark: 'J', tasks });
+  const known = { opened: true, left: true, seen: ['tags', 'log', 'rules'], told: true }, signed = tasks => ({ mark: 'J', tasks });
   assert.equal(at({ bag: empty }), 'yard', 'the yard first'); assert.equal(at({ bag: { held: ['lichen', 'key', 'matches'], used: [] } }), 'yard', 'until the handle is found too');
   assert.equal(at({ story: { left: true }, bag: { held: ['key'], used: ['lichen', 'handle'] } }), 'yard', 'the matches still in the barn');
   assert.equal(at({ story: known, bag: empty }), 'join', 'past the bookcase the yard no longer matters');
+  assert.equal(at({ story: { ...known, told: false } }), 'secret', 'the log put right: Santa has something to tell you first');
   assert.equal(at(), 'room'); assert.equal(at({ story: { left: true } }), 'bookcase');
-  assert.equal(at({ story: { opened: true, left: true, seen: ['tags'] } }), 'log', 'the wet shift log first');
-  assert.equal(at({ story: { opened: true, left: true, seen: ['tags', 'log'] } }), 'secret');
+  assert.equal(at({ story: { opened: true, left: true, seen: ['tags', 'rules'] } }), 'log', 'the wet shift log first');
   assert.equal(at({ story: known }), 'join'); assert.equal(at({ story: known, finale: { endings: ['A'] } }), 'endings', 'went home: other endings');
   assert.equal(at({ story: known, volunteer: signed(['hay']) }), 'jobs'); assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']) }), 'cord');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']), finale: { twist: true } }), 'jobs');
@@ -101,7 +114,7 @@ test('the wet shift log: one cell still reads, the rest are written back in, and
   const swapped = [...LOG_ANSWER]; [swapped[6], swapped[7]] = [swapped[7], swapped[6]];
   assert.equal(logWrong(swapped), 2); assert.equal(logSolved(LOG_ANSWER), true);
   assert.equal(goal({ story: { left: true, opened: true, seen: ['tags', 'rules'] }, volunteer: { mark: '', tasks: [] }, finale: { endings: [] } }), 'log');
-  assert.equal(goal({ story: { left: true, opened: true, seen: ['log'] }, volunteer: { mark: '', tasks: [] }, finale: { endings: [] } }), 'secret');
+  assert.equal(goal({ story: { left: true, opened: true, seen: ['log'], told: false }, volunteer: { mark: '', tasks: [] }, finale: { endings: [] } }), 'secret');
 });
 test('the cord\'s lock opens to the year on the snow globe, and nothing else', () => {
   assert.equal(opens([2, 0, 0, 3]), true); assert.equal(opens([2, 0, 0, 4]), false); assert.equal(opens('2003'), false); assert.equal(LOCK, '2003');

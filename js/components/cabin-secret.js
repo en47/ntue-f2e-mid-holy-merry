@@ -3,15 +3,15 @@
 // rack. Each opens as a sheet of paper over the scene. Once the three have been read, the visitor knows (cabin-story.js),
 // and the register's newest page has a blank row they may sign to volunteer (`join`, `quit`: cabin-play.js).
 import { ITEM_ART } from './cabin-items.js';
-import { SUBSTITUTES } from './cabin-art.js';
+import { SUBSTITUTES, workMark } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { paperLayer, shape } from './paper-art.js';
-import { CLUES, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canUntie, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
-import { COLOUR_NAMES, INK, JOBS, LOG, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
+import { CLUES, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
+import { COLOUR_NAMES, DUTY, INK, JOBS, LOG, MARKS, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
 import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { polaroid } from './cabin-photo.js';
 import { showOrnament } from './cabin-ornaments.js';
-import { CORD, OLD_PAGE, PENCIL, SEEN, STAY, WISH, WISHES } from '../data/cabin-finale.js';
+import { CORD, PENCIL, RECORD, SEEN, STAY, WISH, WISHES } from '../data/cabin-finale.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const noise = index => { const value = Math.sin(index * 12.9898) * 43758.5453; return value - Math.floor(value); };
@@ -59,8 +59,9 @@ function stain(ink, seed) {
 }
 // Each thing: the sheet it is on, where on that sheet ([left, top, right, bottom]), and its name.
 const THINGS = {
-  tags: ['secret-tags', [0, .15, 1, .95], '名牌板'], log: ['secret-log', undefined, '班表'], rules: ['secret-desk', [.27, .3, .5, .46], '守則小冊'],
-  register: ['secret-desk', [.08, .18, .27, .44], '登記簿'], stamps: ['secret-desk', [.52, .2, .9, .45], '郵戳章'], hats: ['secret-hats', undefined, '聖誕帽'], rack: ['secret-rack', undefined, '分揀架'],
+  tags: ['secret-tags', [0, .15, 1, .95], '名牌板'], log: ['secret-log', undefined, '交接表'], rules: ['secret-desk', [.27, .3, .5, .46], '小冊'],
+  register: ['secret-desk', [.08, .18, .27, .44], '登記簿'], stamps: ['secret-desk', [.52, .2, .83, .45], '郵戳章'], record: ['secret-desk', [.84, .2, .97, .45], '舊紀錄簿'],
+  hats: ['secret-hats', undefined, '聖誕帽'], rack: ['secret-rack', undefined, '分揀架'],
 };
 
 // The end of the story starts here too (`onInvite`, `onTwist`, `onWish`, `onStay`: cabin-play.js): the register's old page,
@@ -94,7 +95,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     };
     on(node, 'pointerup', end); on(node, 'pointercancel', end); on(node, 'lostpointercapture', end);
   }
-  const story = progress.story, volunteer = progress.volunteer, finale = progress.finale, invited = () => knowsSantas(story.seen) && !signedUp(volunteer);
+  const story = progress.story, volunteer = progress.volunteer, finale = progress.finale, invited = () => story.told && !signedUp(volunteer);
   say(knowsSantas(story.seen) ? `小房間裡還是老樣子：名牌、班表、守則，和那一排郵戳章。${invited() ? REGISTER.hint : ''}` : '書櫃後面是一個小房間。牆上掛著東西，桌上也擺著東西。');
   const buttons = Object.entries(THINGS).map(([id, [, , name]]) => {
     const button = element('button', 'secret-thing', layer); button.type = 'button'; button.dataset.id = id; button.setAttribute('aria-label', `看看${name}`);
@@ -121,18 +122,22 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   }
   function open(id, from) {
     card?.remove(); sound.play('open'); say('');
-    card = element('article', 'cabin-letter secret-card', layer); card.setAttribute('aria-label', THINGS[id]?.[2] ?? '登記簿的舊頁');
-    // Each is its own thing: the register a ledger, the name tags on their board, the log on a clipboard, the rules a
-    // little booklet, anything else an index card.
-    card.dataset.thing = id === 'register' ? (knowsSantas(story.seen) ? 'register' : 'note') : id === 'rack' && signedUp(volunteer) ? 'rack' : ['tags', 'log', 'rules', 'oldpage'].includes(id) ? id : 'note';
+    card = element('article', 'cabin-letter secret-card', layer); card.setAttribute('aria-label', THINGS[id][2]);
+    // Each is its own thing: the register a ledger, the name tags on their board, the log on a clipboard, the booklet a
+    // little booklet, the old record its own book, anything else an index card.
+    card.dataset.thing = id === 'rack' && !signedUp(volunteer) ? 'note' : id === 'record' ? 'oldpage' : ['tags', 'log', 'rules', 'register', 'rack'].includes(id) ? id : 'note';
     // The words scroll within the page, never over the cover or the board round it.
     const page = element('div', 'secret-body', card);
     if (id === 'tags') {
       element('h3', 'secret-title', page, '名牌');
       const list = element('ul', 'secret-tags', page);
-      for (const [char, colour] of SUBSTITUTES) { const item = element('li', '', list); const mark = element('span', 'secret-initial', item, `${char}.`); mark.style.color = colour; element('span', '', item, NAMES[char]); }
+      for (const [char, colour] of SUBSTITUTES) {
+        const item = element('li', '', list), mark = element('span', 'secret-initial', item, `${char}.`); mark.style.color = colour;
+        const sign = element('span', 'secret-workmark', item); sign.setAttribute('role', 'img'); sign.setAttribute('aria-label', `工作記號：${MARKS[char][1]}`);
+        inked(sign, '0 0 20 20', ink => workMark(ink, MARKS[char][0], 10, 10, 18, colour)); element('span', '', item, NAMES[char]);
+      }
       if (finale.stayed) { const item = element('li', 'is-you', list); element('span', 'secret-initial', item, volunteer.mark ? `${volunteer.mark}.` : ''); element('span', '', item, '你'); }
-      element('p', 'secret-note', page, finale.stayed ? STAY.tag : '最右邊還有一個空掛勾。');
+      element('p', 'secret-note', page, finale.stayed ? STAY.tag : NOTES.tags);
     } else if (id === 'log') {
       element('h3', 'secret-title', page, LOG.title);
       shiftLog(page);
@@ -146,24 +151,26 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
         on(sign, 'click', () => { sound.play('thud'); onStay(); open('log', from); });
       }
     } else if (id === 'rules') {
-      element('h3', 'secret-title', page, RULES.title);
-      for (const line of RULES.lines) element('p', 'secret-rule', page, line);
-      element('p', 'secret-note', page, finale.twist ? PENCIL : RULES.margin);
-    } else if (id === 'register' && knowsSantas(story.seen)) register(page, from);
-    else if (id === 'oldpage') oldPage(page);
+      // The duty rules on the first page; the pages after, stuck with snowmelt until Santa has opened them for you.
+      element('h3', 'secret-title', page, DUTY.title);
+      for (const line of DUTY.lines) element('p', 'secret-rule', page, line);
+      element('p', 'secret-note', page, DUTY.margin);
+      if (!story.told) element('p', 'secret-note', page, DUTY.stuck);
+      else {
+        element('h3', 'secret-title', page, RULES.title);
+        for (const line of RULES.lines) element('p', 'secret-rule', page, line);
+        element('p', 'secret-note', page, finale.twist ? PENCIL : RULES.margin);
+      }
+    } else if (id === 'register') register(page, from);
+    else if (id === 'record') record(page);
     else if (id === 'rack' && signedUp(volunteer)) sorting(page);
     // On the hat rack, an old polaroid of the snowman, dressed; its back says to dress him so again.
     if (id === 'hats') {
       const picture = element('div', 'hats-polaroid', page); picture.setAttribute('role', 'img'); picture.setAttribute('aria-label', '舊拍立得：雪人戴著耳罩、格紋圍巾、圓框眼鏡，手裡提著燈');
       paperLayer(picture, '-4 -4 128 158', '', polaroid, { paper: { scale: .3, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true });
       element('p', 'secret-note', page, NOTES.polaroid); clue('snowman-photo');
-    }
-    // Once Holly's old page has been read: the smallest hat was hers, and something is tucked inside it.
-    if (id === 'hats' && finale.twist) {
-      if (progress.ornaments.includes('H')) showOrnament(page, 'H');
-      else { const look = element('button', 'register-sign', page, NOTES.hatLook); look.type = 'button'; on(look, 'click', () => { look.remove(); gift('H'); sound.play('open'); element('p', 'secret-note', page, NOTES.hatGift); showOrnament(page, 'H'); }); }
-    }
-    else element('p', 'secret-note', page, id === 'hats' && finale.twist ? NOTES.hatsKnown : NOTES[id]);
+      element('p', 'secret-note', page, NOTES.hats); hat(page);
+    } else if (['stamps', 'rack'].includes(id) && !(id === 'rack' && signedUp(volunteer))) element('p', 'secret-note', page, NOTES[id]);
     // On the postmark tray, a brass pin (it undoes the music box's catch, cabin-musicbox.js): to the pocket.
     if (id === 'stamps' && !bag.ever('pin')) {
       element('p', 'secret-note', page, NOTES.pin);
@@ -171,8 +178,22 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       paperLayer(pin, '0 0 100 100', '', ITEM_ART.pin, { paper: { scale: .4, grain: .45, shadow: .25 }, eager: true });
       on(pin, 'click', () => { const box = stage.getBoundingClientRect(), rect = pin.getBoundingClientRect(); pin.remove(); bag.give('pin', { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }); });
     }
-    const done = element('button', 'cabin-letter-close', card, id === 'oldpage' ? CORD.back : '放回去 ✓'); done.type = 'button';
-    on(done, 'click', () => id === 'oldpage' ? open('register', from) : close(id, from)); done.focus({ preventScroll: true });
+    const done = element('button', 'cabin-letter-close', card, id === 'record' ? CORD.close : '放回去 ✓'); done.type = 'button';
+    on(done, 'click', () => close(id, from)); done.focus({ preventScroll: true });
+  }
+  // The smallest hat, Holly's: turned over, her welcome ornament is tucked inside, and something is stitched there too
+  // small to read; the magnifier (from the pocket) reads it.
+  let forgetHat = () => {};
+  function hat(page) {
+    const look = () => {
+      if (progress.ornaments.includes('H')) showOrnament(page, 'H');
+      const inside = element('button', 'register-sign hat-inside', page, progress.clues.includes('hat-2003') ? NOTES.hatsKnown : NOTES.hatInside); inside.type = 'button';
+      on(inside, 'click', () => say(progress.clues.includes('hat-2003') ? NOTES.hatsKnown : NOTES.hatInside));
+      forgetHat(); forgetHat = bag.target(inside, { accepts: id => id === 'magnifier' || '這個看不清楚帽子裡的字。', use: () => { clue('hat-2003'); inside.textContent = NOTES.hatsKnown; return NOTES.hatsKnown; } });
+    };
+    if (progress.ornaments.includes('H')) { look(); return; }
+    const turn = element('button', 'register-sign', page, NOTES.hatLook); turn.type = 'button';
+    on(turn, 'click', () => { turn.remove(); gift('H'); sound.play('open'); element('p', 'secret-note', page, NOTES.hatGift); look(); });
   }
   // The shift log, wet: a grid of the four nights, first and second half. A cell is chosen, then a name tag below writes
   // that initial in. Filled in, it is checked by the rules (cabin-story.js): put right, the ink comes back and it counts as
@@ -190,10 +211,11 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
         // The blot keeps the colour of whoever really wrote there.
         const index = night * 2 + half, state = INK[index], writer = NIGHTS[night][half + 1];
         const cell = element('button', 'shift-cell', grid); cell.type = 'button'; cell.dataset.ink = state; cells.push(cell);
-        inked(cell, '0 0 80 44', ink => state === 'blot' ? blot(ink, COLOURS[writer], index * 7 + 3) : state === 'washed' ? stain(ink, index * 5 + 1) : null);
+        // Washed out but for a work mark: the stain, and the little mark its writer draws by their initial, its colour gone.
+        inked(cell, '0 0 80 44', ink => state === 'blot' ? blot(ink, COLOURS[writer], index * 7 + 3) : state === 'washed' ? stain(ink, index * 5 + 1) : state === 'mark' ? (stain(ink, index * 5 + 1), workMark(ink, MARKS[writer][0], 62, 30, 14, '#8a8f96')) : null);
         inked(cell, '0 0 80 44', ink => shape('ellipse', { cx: 40, cy: 22, rx: 34, ry: 17, fill: 'none', stroke: '#b5443c', 'stroke-width': 2, transform: 'rotate(-4 40 22)' }, ink)).classList.add('shift-ring');
         const mark = element('span', 'shift-mark', cell);
-        const hint = state === 'blot' ? `暈開的${COLOUR_NAMES[writer]}色墨水` : state === 'washed' ? '整個洗掉了' : '還看得清楚';
+        const hint = state === 'blot' ? `暈開的${COLOUR_NAMES[writer]}色墨水` : state === 'washed' ? '整個洗掉了' : state === 'mark' ? `顏色洗掉了，只剩一個小小的${MARKS[writer][1]}記號` : '還看得清楚';
         if (state === 'blot') element('span', 'shift-ink', cell, `${COLOUR_NAMES[writer]}色`);
         const show = () => { const value = log[index]; mark.textContent = value ? `${value}.` : ''; mark.style.color = value ? COLOURS[value] : ''; cell.setAttribute('aria-label', `${date} ${LOG.halves[half]}：${hint}${value ? `，寫著 ${value}.` : '，空著'}`); };
         show(); cell.show = show;
@@ -278,10 +300,10 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       if (!progress.ornaments.includes('O')) later(1000, () => { gift('O'); sound.play('open'); element('p', 'secret-note', page, RACK.gift); showOrnament(page, 'O'); });
     }
   }
-  // The cord, loose but locked: four dials to turn (a tap, or the arrow keys), and the blank slip tucked under it.
-  function lock(cord, from) {
-    element('p', 'secret-note', cord, CORD.locked);
-    const padlock = element('div', 'cord-lock', cord);
+  // The old record book's lock: four dials to turn (a tap, or the arrow keys). Its code opens it whenever it is found.
+  function lock(page) {
+    element('p', 'secret-note', page, CORD.locked);
+    const padlock = element('div', 'cord-lock', page);
     paperLayer(padlock, '0 0 120 130', 'lock-shackle', lockShackle, BRASS); paperLayer(padlock, '0 0 120 130', 'lock-body', lockBody, BRASS);
     const row = element('div', 'lock-dials', padlock), dials = [0, 0, 0, 0];
     dials.forEach((_, i) => {
@@ -290,42 +312,45 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
         if (padlock.classList.contains('is-open')) return;
         dials[i] = (dials[i] + by + 10) % 10; dial.textContent = String(dials[i]); dial.setAttribute('aria-label', CORD.dial(i + 1, dials[i])); sound.play('click');
         if (!opens(dials)) return;
-        // Open: the shackle springs up, the cord slides off; the register opens again with the way to the old page.
+        // Open: the shackle springs up, the cord slides off, and the book opens.
         padlock.classList.add('is-open'); finale.unlocked = true; save(); sound.play('snap'); say(CORD.opened);
-        later(1100, () => { open('register', from); say(CORD.opened); });
+        later(1100, () => open('record', buttons.find(([each]) => each === 'record')[1]));
       };
       on(dial, 'click', () => turn(1));
       on(dial, 'keydown', event => { const by = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[event.key]; if (by) { event.preventDefault(); turn(by); } });
     });
-    // The slip: taken once; in the pocket until it has been held to the fire (cabin-hearth.js); then what it said.
-    if (finale.slip === 'none') {
-      element('p', 'secret-note', cord, CORD.slip);
-      const take = element('button', 'register-sign', cord, CORD.take); take.type = 'button';
-      on(take, 'click', () => { finale.slip = 'taken'; save(); sound.play('pick'); clue('blank-slip'); open('register', from); say(CORD.took); });
-    } else element('p', 'secret-note', cord, finale.slip === 'read' ? CORD.read : CORD.pocket);
+    row.querySelector('.lock-dial').focus({ preventScroll: true });
   }
-  // The register's newest page: each substitute's stamps this season, then the visitor's row, or a blank one to sign.
+  // The register's newest page: the season, then each substitute's initial, the year they joined and their stamps this
+  // season, then the visitor's row, or a blank one (to sign once Santa has told you what it is for).
   function register(card, from) {
-    element('h3', 'secret-title', card, REGISTER.title);
+    element('h3', 'secret-title', card, REGISTER.title); element('p', 'register-season', card, REGISTER.season); clue('register-years');
     const list = element('ul', 'register-rows', card);
-    const row = (mark, count, you = false) => {
+    const row = (mark, count, year, you = false) => {
       const item = element('li', you ? 'is-you' : '', list); item.dataset.hand = you ? 'you' : mark.toLowerCase();
       element('span', 'register-mark', item, `${mark}.${you ? REGISTER.you : ''}`);
+      element('span', 'register-year', item, `${REGISTER.joined} ${year}`);
       const stamps = element('span', 'register-stamps', item); stamps.setAttribute('aria-label', `${count}／${REGISTER.full} 個章`);
       // Each stamp in red ink, the places still to fill as faint rings.
       inked(stamps, `0 0 ${REGISTER.full * 25} 24`, ink => { for (let i = 0; i < REGISTER.full; i++) { const cx = 12 + i * 25; if (i < count) { shape('circle', { cx, cy: 12, r: 9.5, fill: 'none', stroke: '#b5443c', 'stroke-width': 2.2 }, ink); shape('circle', { cx, cy: 12, r: 5, fill: '#b5443c' }, ink); } else shape('circle', { cx, cy: 12, r: 9.5, fill: 'none', stroke: '#d6c6a4', 'stroke-width': 1.6 }, ink); } });
+      return item;
     };
-    for (const [mark, count] of REGISTER.rows) row(mark, count);
+    for (const [mark, count, year] of REGISTER.rows) row(mark, count, year);
+    if (!story.told) { element('li', 'register-blank', list, REGISTER.blank); return; }
     if (signedUp(volunteer)) {
-      row(volunteer.mark, points(volunteer), true);
+      row(volunteer.mark, points(volunteer), 2026, true);
+      // Tucked in the visitor's own row: the blank slip, taken once; in the pocket until it has been held to the fire
+      // (cabin-hearth.js); then what it said.
+      const slip = element('div', 'register-cord', card);
+      if (finale.slip === 'none') {
+        element('p', 'secret-note', slip, CORD.slip);
+        const take = element('button', 'register-sign', slip, CORD.take); take.type = 'button';
+        on(take, 'click', () => { finale.slip = 'taken'; save(); sound.play('pick'); clue('blank-slip'); open('register', from); say(CORD.took); });
+      } else element('p', 'secret-note', slip, finale.slip === 'read' ? CORD.read : CORD.pocket);
       element('h4', 'register-heading', card, REGISTER.jobs);
       const jobs = element('ul', 'register-jobs', card);
       for (const task of TASKS) { const done = volunteer.tasks.includes(task), item = element('li', done ? 'is-done' : '', jobs); element('span', 'job-box', item, done ? '✓' : '').setAttribute('aria-hidden', 'true'); element('strong', '', item, JOBS[task][0]); element('span', '', item, JOBS[task][1]); }
-      // The old pages, tied with red cord (two jobs untie them); a wish for three stamps; the endings seen so far.
-      const cord = element('div', 'register-cord', card);
-      if (finale.twist || finale.unlocked) { const untie = element('button', 'register-sign', cord, finale.twist ? CORD.again : CORD.untie); untie.type = 'button'; on(untie, 'click', () => { sound.play('remove'); open('oldpage', from); }); }
-      else if (canUntie(volunteer)) lock(cord, from);
-      else element('p', 'secret-note', cord, `${CORD.tied}${CORD.soon}`);
+      // A wish for three stamps; the endings seen so far.
       if (canWish(volunteer, finale)) {
         element('h4', 'register-heading', card, WISH.title); element('p', 'secret-note', card, WISH.invite);
         const choices = element('div', 'compose-choices register-wishes', card), make = element('button', 'register-sign', card, WISH.sign); make.type = 'button'; make.disabled = true;
@@ -365,32 +390,46 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
         sign.disabled = false; sign.textContent = `${REGISTER.sign}：${char}.`;
       });
     }
-    on(sign, 'click', () => { if (!chosen) return; join(chosen); sound.play('thud'); open('register', from); say(REGISTER.joined(chosen)); });
+    on(sign, 'click', () => { if (!chosen) return; join(chosen); sound.play('thud'); open('register', from); say(REGISTER.welcome(chosen)); });
   }
-  // The old page under the red cord: Holly's wish in 2003, stamped fulfilled, and her on the night shift every year since.
-  function oldPage(page) {
-    const [year, mark, name, wish] = OLD_PAGE.entry;
-    element('h3', 'secret-title', page, OLD_PAGE.title);
+  // The old record book: locked until its code is turned; open, Holly's record. Read with the secret known, it is understood
+  // (the second twist, `onTwist`); read before, it is only a child's wish and a row of night shifts.
+  function record(page) {
+    element('h3', 'secret-title', page, CORD.title);
+    if (!finale.unlocked) { lock(page); return; }
+    const [date, mark, name, wish] = RECORD.entry;
+    element('p', 'old-title', page, RECORD.title);
     const entry = element('div', 'old-entry', page);
-    element('p', 'old-line', entry, `${year}　${mark}　${name}`); element('p', 'old-line', entry, wish);
-    const fulfilled = element('span', 'old-stamp', entry); inked(fulfilled, '0 0 160 40', ink => { shape('rect', { x: 3, y: 3, width: 154, height: 34, rx: 6, fill: 'none', stroke: '#b5443c', 'stroke-width': 2.4 }, ink); shape('rect', { x: 8, y: 8, width: 144, height: 24, rx: 4, fill: 'none', stroke: '#b5443c', 'stroke-width': 1.2 }, ink); }); element('span', 'ink-words', fulfilled, OLD_PAGE.stamp);
-    const since = element('ul', 'old-since', page); for (const line of OLD_PAGE.since) element('li', '', since, line);
-    element('p', 'old-pencil', page, OLD_PAGE.pencil);
-    if (!finale.twist) onTwist();
+    element('p', 'old-line', entry, `${date}　${mark}　${name}`); element('p', 'old-line', entry, wish);
+    const fulfilled = element('span', 'old-stamp', entry); inked(fulfilled, '0 0 160 40', ink => { shape('rect', { x: 3, y: 3, width: 154, height: 34, rx: 6, fill: 'none', stroke: '#b5443c', 'stroke-width': 2.4 }, ink); shape('rect', { x: 8, y: 8, width: 144, height: 24, rx: 4, fill: 'none', stroke: '#b5443c', 'stroke-width': 1 }, ink); });
+    element('span', 'ink-words', fulfilled, RECORD.stamp);
+    const since = element('ul', 'old-since', page); for (const line of RECORD.since) element('li', '', since, line);
+    element('p', 'old-pencil', page, RECORD.pencil);
+    const note = element('div', 'old-card', page); element('p', 'old-card-en', note, RECORD.card[0]); element('p', 'old-card-zh', note, RECORD.card[1]);
+    clue('old-record'); glintRecord();
+    if (knowsSantas(story.seen)) { if (!finale.twist) onTwist(); }
+    else later(600, () => say(RECORD.surface));
   }
   function close(id, from) {
-    card?.remove(); card = null; sound.play('remove');
-    // The name tags and the rules count as read once put back; the log once it has been put right (above).
-    if (id === 'tags' || id === 'rules') { clue(id); learn(id); }
+    card?.remove(); card = null; forgetHat(); forgetHat = () => {}; sound.play('remove');
+    // The name tags and the duty rules count as read once put back (the rules for substitutes too, once opened); the log
+    // once it has been put right (above).
+    if (id === 'tags') clue('tags');
+    if (id === 'rules') { clue('duty'); if (story.told) clue('rules'); }
+    if (id === 'tags' || id === 'rules') learn(id);
     layout(); from.focus({ preventScroll: true });
   }
-  // A clue read. The first discovery, once all three are: more than one Santa. Told once, quietly.
+  // A clue read. The log put right is the first discovery: more than one Santa. Told once, quietly; then Santa is heard
+  // coming home.
   function learn(id) {
     const before = knowsSantas(story.seen);
     if (CLUES.includes(id) && !story.seen.includes(id)) { story.seen.push(id); save(); }
-    if (!before && knowsSantas(story.seen)) { later(id === 'log' ? 2400 : 400, () => { sound.play('jingle'); say(NOTES.known); onKnow(); }); later(6600, () => { if (!card && invited()) say(REGISTER.hint); }); }
+    if (!before && knowsSantas(story.seen)) { later(2400, () => { sound.play('jingle'); say(NOTES.known); onKnow(); glintRecord(); }); later(7600, () => { if (!card) say(NOTES.coming); }); }
   }
+  // Opened before the secret was known and not yet understood: once Santa has spoken of it, the old record book's corner
+  // lifts and catches the light, to be read again.
+  function glintRecord() { buttons.find(([each]) => each === 'record')?.[1].classList.toggle('is-glinting', finale.unlocked && !finale.twist && story.told); }
   const follow = () => { layout(); frame = requestAnimationFrame(follow); };
-  follow();
+  follow(); glintRecord();
   return () => { events.abort(); cancelAnimationFrame(frame); card?.remove(); };
 }

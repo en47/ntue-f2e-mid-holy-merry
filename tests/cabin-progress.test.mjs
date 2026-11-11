@@ -57,6 +57,11 @@ test('the music box catch stays undone once the brass pin has undone it; a drawe
   assert.deepEqual(read({ ornaments: ['N'] }), ['musicbox-catch'], 'Nils\'s ornament found before: the catch was never in the way');
   assert.deepEqual(read({ placed: 'musicbox-catch' }), []);
 });
+test('Santa having told you the secret is kept; a record from before counts it told once the log was put right', () => {
+  const read = story => readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ story }) })).story.told;
+  assert.equal(read({ seen: ['log'], told: false }), false); assert.equal(read({ seen: ['log'], told: true }), true);
+  assert.equal(read({ seen: ['tags', 'log', 'rules'] }), true, 'an older record, the secret known'); assert.equal(read({ seen: ['tags'] }), false);
+});
 test('the desk remembers which replies were sealed, postmarked and sent, and what was chosen to say', () => {
   assert.deepEqual(readProgress(memory()).desk, { sealed: [], marked: [], sent: [], answers: {}, sorted: false });
   const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sealed: ['reply', 'reply', 7], marked: ['reply'], sent: ['reply-tomas'], answers: { tomas: 2, aya: 5, ole: 'x' } } }) });
