@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Santa 口袋預覽</title><link rel="stylesheet" href="../css/tokens.css"><link rel="stylesheet" href="../css/shared.css"><link rel="stylesheet" href="../css/santa.css"><style>
+body{margin:0;background:#c9dfeb}#review{padding:10px;font:13px system-ui;display:flex;gap:12px;flex-wrap:wrap;align-items:center}.cabin{height:70svh;min-height:520px}
+.try-thing,.try-place{position:absolute;padding:0;border:0;background:none;cursor:pointer}.try-thing{width:64px;height:64px}.try-place{width:120px;height:110px}
+.try-thing:focus-visible,.try-place:focus-visible{outline:3px solid #b5443c;outline-offset:3px}.try-place .try-name{position:absolute;left:0;right:0;bottom:-1.4rem;font:13px system-ui;text-align:center}
+</style></head><body class="santa-page"><div id="review"><b>口袋預覽（第一階段驗收）</b><span>撿起 → 檢查 → 拖到目標／點選再點目標 → 成功或彈回；重新整理後口袋還在。存檔用預覽專用的 key，不影響真正的 Santa 存檔。</span><button id="reset" type="button">清空預覽存檔</button></div>
+<section class="cabin"><div class="cabin-stage" id="stage"></div></section>
+<p id="said" aria-live="polite" style="padding:8px 12px;font:14px system-ui"></p>
+<script type="module">
+import { mountCabinPaper } from '../js/components/cabin-paper.js';
+import { paperLayer, shape } from '../js/components/paper-art.js';
+import { mountBag } from '../js/components/cabin-bag.js';
+import { ITEM_ART } from '../js/components/cabin-items.js';
+import { readProgress, writeProgress } from '../js/services/cabin-progress.js';
+const KEY = 'holy-merry:cabin:bag-preview', stage = document.querySelector('#stage'), said = document.querySelector('#said');
+const storage = { getItem: () => localStorage.getItem(KEY), setItem: (key, value) => localStorage.setItem(KEY, value) };
+mountCabinPaper(document.querySelector('.cabin'));
+const progress = readProgress(storage), save = () => writeProgress(progress, storage), sound = { play() {} };
+const bag = mountBag(stage, { progress, save, sound, say: text => { said.textContent = text; } });
+document.querySelector('#reset').addEventListener('click', () => { localStorage.removeItem(KEY); location.reload(); });
+const PAPER = { paper: { scale: .5, grain: .45, shadow: .25 }, eager: true };
+// Three things lying about, each picked up once.
+[['key', 18, 22], ['matches', 30, 22], ['magnifier', 42, 22]].forEach(([id, x, y]) => {
+  if (bag.ever(id)) return;
+  const thing = Object.assign(document.createElement('button'), { type: 'button', className: 'try-thing' }); thing.setAttribute('aria-label', `撿起 ${id}`);
+  Object.assign(thing.style, { left: `${x}%`, top: `${y}%` }); paperLayer(thing, '0 0 100 100', '', ITEM_ART[id], PAPER); stage.append(thing);
+  thing.addEventListener('click', () => { bag.give(id, thing); thing.remove(); });
+});
+// Three places: a little locked box (the key fits and stays), a cold stove (the matches are used up), a note too small to read (the magnifier is kept).
+const PLACES = {
+  box: { name: '上鎖的小盒子', x: 20, takes: 'key', draw: g => { shape('rect', { x: 14, y: 30, width: 72, height: 50, rx: 5, fill: '#a8774d' }, g); shape('rect', { x: 14, y: 30, width: 72, height: 14, rx: 5, fill: '#8f5a3c' }, g); shape('circle', { cx: 50, cy: 60, r: 7, fill: '#3b2a24' }, g); }, done: '鑰匙轉了一圈，盒子開了。' },
+  stove: { name: '冷冷的小火爐', x: 45, takes: 'matches', draw: g => { shape('rect', { x: 22, y: 26, width: 56, height: 58, rx: 6, fill: '#5a4232' }, g); shape('rect', { x: 34, y: 50, width: 32, height: 24, rx: 4, fill: '#2c211b' }, g); }, done: '火柴劃亮了，爐子暖了起來。' },
+  note: { name: '小字的紙條', x: 70, takes: 'magnifier', draw: g => { shape('rect', { x: 20, y: 24, width: 60, height: 56, rx: 3, fill: '#fffaf0', transform: 'rotate(-4 50 52)' }, g); shape('path', { d: 'M30 44H70M30 54H64M30 64H58', stroke: '#c9b48c', 'stroke-width': 2 }, g); }, done: '放大鏡下看清楚了：「Look within our name.」' },
+};
+for (const [id, place] of Object.entries(PLACES)) {
+  const node = Object.assign(document.createElement('button'), { type: 'button', className: 'try-place' }); node.setAttribute('aria-label', place.name);
+  Object.assign(node.style, { left: `${place.x}%`, top: '55%' }); paperLayer(node, '0 0 100 100', '', place.draw, PAPER);
+  node.append(Object.assign(document.createElement('span'), { className: 'try-name', textContent: place.name })); stage.append(node);
+  node.addEventListener('click', () => { said.textContent = `${place.name}：好像需要用什麼東西。`; });
+  bag.target(node, { accepts: item => item === place.takes || (id === 'stove' && item === 'key' ? '鑰匙放不進火爐裡。' : false), use: () => place.done });
+}
+</script></body></html>

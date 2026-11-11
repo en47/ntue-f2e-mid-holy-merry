@@ -57,11 +57,12 @@ const KINDS = [
   ['.cabin-caption, .cabin-tip, .cabin-away, .books-found', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
   ['.feed-basket, .play-basket', 'wood'],
-  ['.wardrobe-item[aria-pressed="true"]', 'picked'],
-  ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send, .books-tools button, .books-enter, .gearbox-actions button, .desk-actions button, .register-sign, .theatre-close, .notebook-close', 'tag'],
-  ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .theatre-again, .theatre-skip, .notebook-hint, .shift-pick', 'pale'],
+  ['.wardrobe-item[aria-pressed="true"], .bag-item[aria-pressed="true"]', 'picked'],
+  ['.inspect-card', 'frame'],
+  ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-fold, .chat-send, .books-tools button, .books-enter, .gearbox-actions button, .desk-actions button, .register-sign, .theatre-close, .notebook-close, .inspect-close', 'tag'],
+  ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .theatre-again, .theatre-skip, .notebook-hint, .shift-pick, .bag-item, .bag-look, .inspect-flip', 'pale'],
   ['.notebook-card', 'notebook'],
-  ['.cabin-noscript, .theatre-words, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble', 'note'],
+  ['.cabin-noscript, .theatre-words, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble, .bag-empty', 'note'],
 ];
 const ALL = KINDS.map(([selector]) => selector).join(', ');
 const kindOf = node => KINDS.find(([selector]) => node.matches(selector))?.[1];
@@ -216,6 +217,13 @@ const OBJECTS = {
     cut(paper, outline(width, height, seed), '#c9a46a', '#a8865a');
     shape('path', { d: rounded(9, 9, width - 9, height - SHADOW - 9, seed + 3, 6), fill: '#fffaf0' }, paper);
     shape('path', { d: `M${width - 46} 0V50L${width - 40} 44L${width - 34} 50V0Z`, fill: '#b5443c' }, paper);
+  },
+  // Looking closely: a kraft mount round a cream card, with a darker paper corner holding each corner of the card.
+  frame(paper, width, height, seed) {
+    cut(paper, outline(width, height, seed), '#c9a46a', '#a8865a');
+    shape('path', { d: rounded(12, 12, width - 12, height - SHADOW - 12, seed + 5, 6), fill: '#fffaf0' }, paper);
+    const bottom = height - SHADOW - 12;
+    for (const [x, y, dx, dy] of [[12, 12, 1, 1], [width - 12, 12, -1, 1], [12, bottom, 1, -1], [width - 12, bottom, -1, -1]]) shape('path', { d: `M${x} ${y}h${dx * 26}L${x} ${y + dy * 26}Z`, fill: '#a8774d' }, paper);
   },
   // The register's old page: yellowed, foxed here and there, and the red cord that tied it lying loose along its edge.
   oldpage(paper, width, height, seed) {

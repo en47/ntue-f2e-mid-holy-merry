@@ -22,6 +22,7 @@ import { GLOBE, NEXT, SANTA_ON_HOLLY, TWIST } from '../data/cabin-finale.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 import { mountNotebook } from './cabin-notebook.js';
+import { mountBag } from './cabin-bag.js';
 import { treeCard } from './cabin-ornaments.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
@@ -68,6 +69,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   let cleanup = () => {};
   // The clue book in the corner: games write what they show into it (`clue`).
   const notebook = mountNotebook(stage, { progress, save, sound }), clue = id => notebook.add(id);
+  // The pocket in the other corner: what has been picked up, to be used where it fits (cabin-bag.js).
+  const bag = mountBag(stage, { progress, save, sound, say: text => say(text) });
   // A substitute's welcome ornament, found: kept and written down (false if it was found before).
   const gift = mark => { if (progress.ornaments.includes(mark)) return false; progress.ornaments.push(mark); save(); clue(`gift-${mark}`); return true; };
   function say(text) { caption.textContent = text; caption.hidden = !text; if (text) announce(text); }
@@ -234,7 +237,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const used = new Set(), knows = () => knowsSantas(progress.story.seen);
   let visited = false;
   function start(id) { leave(); if (!games[id]) return; layer.dataset.game = id; cleanup = games[id]() || (() => {}); }
-  function leave() { timers.forEach(clearTimeout); timers.clear(); theatre?.close(); theatre = null; cleanup(); cleanup = () => {}; layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
+  function leave() { timers.forEach(clearTimeout); timers.clear(); theatre?.close(); theatre = null; cleanup(); cleanup = () => {}; bag.clear(); layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
   return {
     enter: start,
     leave,
@@ -283,6 +286,6 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       cabin.wheelBroken(pending(progress.volunteer, 'wheel'), false);
       if (progress.finale.stayed) cabin.repaint('secret-tags', { mine: true });
     },
-    destroy() { leave(); notebook.destroy(); sound.destroy(); layer.remove(); },
+    destroy() { leave(); notebook.destroy(); bag.destroy(); sound.destroy(); layer.remove(); },
   };
 }
