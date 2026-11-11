@@ -1,4 +1,4 @@
-// Santa 頁從空白存檔整套玩一遍：院子（郵筒包裹、餵食槽鑰匙、雪堆把手、絞盤與抽屜）、屋裡（火柴點火、鑰匙開抽屜拿放大鏡、吸墨器、音樂盒書籤、放大鏡看雪花球）、書櫃、弄濕的交接表、聖誕老人回來說明、加入、四件替身工作、空白紙條烤火、紅繩舊紀錄簿、
+// Santa 頁從空白存檔整套玩一遍：院子（郵筒包裹、餵食槽鑰匙、雪堆把手、絞盤與抽屜）、屋裡（火柴點火、鑰匙開抽屜拿放大鏡、吸墨器、音樂盒書籤、放大鏡看雪花球）、書櫃、弄濕的交接表、聖誕老人回來說明、加入、四件替身工作（餵食表、裝雪橇、分信回一封、雪地的齒輪）、空白紙條放在熱石板上、紅繩舊紀錄簿、
 // 五位替身的見面禮與聖誕樹，最後走到結局 B→D、C→D、A。每一步都按頁面上的按鈕或拖曳，不改存檔。只讀寫這個瀏覽器的
 // localStorage，不連任何雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
@@ -74,9 +74,9 @@ log.push(`signed: ${(await save()).volunteer.mark}`);
 await must('離開，關上書櫃'); await wait(4500); await toRoom(); await wait(2500);
 // Jobs: lichen, hay, the rack and the desk's letters, the wheel.
 await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(6000);
-await spot('reindeer'); await page.click('.feed-basket [data-kind="lichen"]'); await wait(4500);
-await spot('stable'); await page.waitForSelector('.hoist-release'); await page.click('.hoist-release'); await wait(2400);
-await crank(); await page.click('.hoist-hook'); await wait(2500);
+// Jobs: the reindeer fed by the barn's table (by the clock: oats, carrot, lichen); the sleigh loaded, first stop on top.
+await spot('reindeer'); for (const kind of ['oats', 'carrot', 'lichen']) { await page.click(`.feed-basket [data-kind="${kind}"]`); await wait(1600); } await wait(2600);
+await page.click('.sleigh-spot'); await wait(700); for (const city of ['多倫多', '雷克雅維克', '東京', '台北']) { await page.click(`.sleigh-pile .sleigh-sack[data-city="${city}"]`); await wait(250); } await wait(2400); await shot('sleigh'); await closeCard('.sleigh-card');
 log.push(`jobs after yard: ${(await save()).volunteer.tasks}`);
 await enterSecret();
 await thing('rack');
@@ -89,20 +89,22 @@ await thing('register'); await shot('register-cord'); await button('拿起紙條
 await must('離開，關上書櫃'); await wait(4500); await toRoom();
 const press = name => page.evaluate(name => [...document.querySelectorAll('.desk-actions button')].find(b => b.textContent === name && !b.hidden)?.click(), name);
 await spot('desk', 7000);
-for (let n = 0; n < 2; n++) {
+// One of the two new letters answered and sent does the job.
+for (let n = 0; n < 1; n++) {
   await page.evaluate(() => document.querySelector('.desk-pick[aria-label="從信堆抽一封信"]').click()); await wait(700);
   await press('拆開信'); await wait(300); await press('寫回信 ✎'); await wait(300); await page.locator('.compose-choice').first().click(); await press('摺好放進信封'); await wait(800);
   await page.evaluate(() => document.querySelector('.desk-seal').click()); await wait(200); await page.evaluate(() => document.querySelector('.desk-stamp').click()); await wait(300); await press('投進郵袋'); await wait(2500);
 }
 log.push(`jobs after desk: ${(await save()).volunteer.tasks}`);
 await spot('hearth', 7000); for (let i = 0; i < 2; i++) { await page.evaluate(i => document.querySelectorAll('.hearth-log')[i].click(), i); await wait(400); }
-await page.click('.hearth-slip'); await wait(5000); await shot('lemon'); await closeCard('.lemon-card'); log.push(`slip: ${(await save()).finale.slip}`);
+await use('slip', '.hearth-stone'); await wait(5200); await shot('lemon'); await closeCard('.lemon-card'); log.push(`slip: ${(await save()).finale.slip}`);
 // The wheel, from out in the yard.
 await toRoom(); await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(7000);
 await page.locator('.cabin-gesture').focus(); for (let i = 0; i < 8; i++) { await page.keyboard.press('ArrowLeft'); await wait(120); } await wait(3000);
 for (const [x, y] of mobile ? [[326, 297], [310, 262], [345, 330]] : [[1050, 190], [880, 160], [1000, 250], [1150, 200]]) { if (await page.$('.gearbox')) break; await page.mouse.click(x, y); await wait(2200); }
 const pick = name => page.evaluate(name => [...document.querySelectorAll('.gearbox-piece')].find(b => b.getAttribute('aria-label').startsWith(name)).click(), name);
 const peg = i => page.evaluate(i => document.querySelectorAll('.gearbox-peg')[i].click(), i);
+await page.click('.gearbox-snow'); await wait(1300); await use('gear', '.gearbox-board'); await wait(700);
 await pick('小齒輪'); await peg(2); await pick('特大齒輪'); await peg(1); await pick('中齒輪'); await peg(0);
 for (let i = 0; i < 12 && !(await page.evaluate(() => document.querySelector('.gearbox')?.classList.contains('is-running'))); i++) { await page.evaluate(() => document.querySelector('.gearbox-crank')?.focus()); await page.keyboard.press('Enter'); await wait(160); }
 await wait(3500); await shot('wheel-mended'); await button('好了'); await wait(1500);
@@ -139,6 +141,6 @@ log.push(`finale ${JSON.stringify(end.finale)} | ornaments ${end.ornaments} tree
 await page.evaluate(() => document.querySelector('.notebook-button').click()); await wait(600); await shot('notebook-end');
 log.push(`goal: ${await page.evaluate(() => document.querySelector('.notebook-goal:last-of-type')?.textContent)}`);
 // Everything reached: four endings, five gifts on the tree, no page errors.
-const whole = ['A', 'B', 'C', 'D'].every(kind => end.finale.endings.includes(kind)) && end.ornaments.length === 5 && end.tree && ['lichen', 'key', 'handle', 'matches', 'magnifier', 'pin'].every(id => [...end.bag.held, ...end.bag.used].includes(id)) && ['blotter', 'music-bookmarks', 'globe-village'].every(id => end.clues.includes(id)) && !errors.length;
+const whole = ['A', 'B', 'C', 'D'].every(kind => end.finale.endings.includes(kind)) && end.ornaments.length === 5 && end.tree && ['lichen', 'key', 'handle', 'matches', 'magnifier', 'pin', 'slip', 'gear'].every(id => [...end.bag.held, ...end.bag.used].includes(id)) && ['blotter', 'music-bookmarks', 'globe-village'].every(id => end.clues.includes(id)) && !errors.length;
 console.log(whole ? 'PASS  從空白存檔玩到院子四樣東西、屋裡的放大鏡與線索、撥針、四個結局、五個見面禮、聖誕樹，沒有頁面錯誤' : `FAIL  ${JSON.stringify({ endings: end.finale.endings, ornaments: end.ornaments, tree: end.tree, bag: end.bag, errors })}`);
 await browser.close(); process.exitCode = whole ? 0 : 1;

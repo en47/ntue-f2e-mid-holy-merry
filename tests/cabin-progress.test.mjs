@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { DEFAULT_OUTFIT, MEALS, dayOf, dressed, eat, full, mealsToday, readProgress, writeProgress } from '../js/services/cabin-progress.js';
+import { GOALS } from '../js/data/cabin-clues.js';
 
 const memory = (initial = {}) => { const data = { ...initial }; return { getItem: key => data[key] ?? null, setItem: (key, value) => { data[key] = String(value); }, data }; };
 
@@ -62,6 +63,13 @@ test('Santa having told you the secret is kept; a record from before counts it t
   assert.equal(read({ seen: ['log'], told: false }), false); assert.equal(read({ seen: ['log'], told: true }), true);
   assert.equal(read({ seen: ['tags', 'log', 'rules'] }), true, 'an older record, the secret known'); assert.equal(read({ seen: ['tags'] }), false);
 });
+test('the blank slip and the big gear, from before the pocket: in it (or used) as they were', () => {
+  const bag = saved => readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify(saved) })).bag;
+  assert.deepEqual(bag({ finale: { slip: 'taken' } }), { held: ['slip'], used: [] }); assert.deepEqual(bag({ finale: { slip: 'read' } }), { held: [], used: ['slip'] });
+  assert.deepEqual(bag({ volunteer: { mark: 'J', tasks: ['wheel'] } }), { held: [], used: ['gear'] }, 'the wheel mended: its gear is in the box');
+  assert.deepEqual(bag({ wheelRounds: 2 }), { held: [], used: ['gear'] });
+  assert.deepEqual(bag({ finale: { slip: 'taken' }, bag: { held: ['slip'], used: [] } }), { held: ['slip'], used: [] }, 'once only');
+});
 test('the desk remembers which replies were sealed, postmarked and sent, and what was chosen to say', () => {
   assert.deepEqual(readProgress(memory()).desk, { sealed: [], marked: [], sent: [], answers: {}, sorted: false });
   const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sealed: ['reply', 'reply', 7], marked: ['reply'], sent: ['reply-tomas'], answers: { tomas: 2, aya: 5, ole: 'x' } } }) });
@@ -96,7 +104,7 @@ test('the end is kept: offered, untied, the wish, staying, the endings seen; not
 test('the clue book is kept: known clues once each, hints asked for by goal, nothing else', () => {
   const storage = memory({ 'holy-merry:cabin:v1': JSON.stringify({ clues: ['tags', 'barn-note', 'nonsense', 'tags', 3], hints: { room: 2, jobs: 9, bookcase: -1, nonsense: 1, secret: 'x' } }) });
   const progress = readProgress(storage);
-  assert.deepEqual(progress.clues, ['barn-note', 'tags']); assert.deepEqual(progress.hints, { room: 2, jobs: 3 });
+  assert.deepEqual(progress.clues, ['barn-note', 'tags']); assert.deepEqual(progress.hints, { room: 2, jobs: GOALS.jobs.hints.length }, 'capped at the hints there are');
   assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ clues: 'tags', hints: [1] }) })).hints, {});
 });
 test('the shift log is kept as far as it has been written; one read before it got wet is whole', () => {

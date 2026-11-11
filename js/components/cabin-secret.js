@@ -345,7 +345,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       if (finale.slip === 'none') {
         element('p', 'secret-note', slip, CORD.slip);
         const take = element('button', 'register-sign', slip, CORD.take); take.type = 'button';
-        on(take, 'click', () => { finale.slip = 'taken'; save(); sound.play('pick'); clue('blank-slip'); open('register', from); say(CORD.took); });
+        on(take, 'click', () => { const box = stage.getBoundingClientRect(), rect = take.getBoundingClientRect(); finale.slip = 'taken'; save(); clue('blank-slip'); bag.give('slip', { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }); open('register', from); say(CORD.took); });
       } else element('p', 'secret-note', slip, finale.slip === 'read' ? CORD.read : CORD.pocket);
       element('h4', 'register-heading', card, REGISTER.jobs);
       const jobs = element('ul', 'register-jobs', card);

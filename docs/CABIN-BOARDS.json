@@ -1190,6 +1190,13 @@
       "height": 251,
       "bytes": 11658
     },
+    "hi/sleigh--loaded-true.webp": {
+      "fingerprint": "24bccffc14dceeca70bc4214e58454b03dd2a43ff6c24504233ba3403ae1af66",
+      "sha256": "19c58271280f8e1abe26c59f7459a9baeb9e43557f9fcc44beee63276d41d567",
+      "width": 650,
+      "height": 400,
+      "bytes": 21578
+    },
     "hi/sleigh.webp": {
       "fingerprint": "d7d68dc2502c222726df1bc50b9f53b9cd80280c9498bc967a46d9caf54617a2",
       "sha256": "63c67ad7fedf3595df9a08df7c5d90d7e9c9ca64fdd5955fe1ce0c086064f2d2",
@@ -2562,6 +2569,13 @@
       "height": 188,
       "bytes": 8058
     },
+    "large/sleigh--loaded-true.webp": {
+      "fingerprint": "3c95fba87ed41050623037f30a963ec0dbdcda6fc3aee778b20cac80cb07274a",
+      "sha256": "eca158f05f5cf89ee1c4c5398427c496df70b8ad69573941c0556a993b13d0c9",
+      "width": 488,
+      "height": 300,
+      "bytes": 15172
+    },
     "large/sleigh.webp": {
       "fingerprint": "3f4893bae4a32a063d5f5dec1bfaf2456717871261b9fe59c2c99a41ba1ada23",
       "sha256": "889bfd67b6acb646533ad52878de0738669251c8e472be26adaccd3b671344ed",
@@ -3933,6 +3947,13 @@
       "width": 234,
       "height": 125,
       "bytes": 3658
+    },
+    "small/sleigh--loaded-true.webp": {
+      "fingerprint": "c8280201964f1d9552f9fdb06aef2b92c766349b40dfd1be9fac753b65cdd4f4",
+      "sha256": "60cc5efdb7c355685b6f47e4264f33ceb7ecfb4b7d4f3d4bdf9b8e8423e88861",
+      "width": 325,
+      "height": 200,
+      "bytes": 5166
     },
     "small/sleigh.webp": {
       "fingerprint": "4831fb1cae3c713f21c08058e7326e692d3b45094e4758ce0bf573cc5b5b3f72",

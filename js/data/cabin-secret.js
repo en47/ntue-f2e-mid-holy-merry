@@ -80,9 +80,9 @@ export const REGISTER = {
 };
 // The four jobs, each with where to go. Done while signed up, each earns a stamp (a wish point) once (cabin-story.js).
 export const JOBS = {
-  lichen: ['照顧麋鹿', '院子裡的麋鹿：餵牠最愛吃的地衣。'],
-  hay: ['收好乾草', '馴鹿小屋：用滑輪把乾草拉上去掛好。'],
-  letters: ['處理信件', '小房間的分揀架：先把信分給對的人；交給你的兩封，拿到書桌回信、寄出去。'],
+  lichen: ['照顧麋鹿', '穀倉門上貼著今天的餵食表：照上面的時間，一樣一樣餵麋鹿。'],
+  hay: ['裝載雪橇', '麋鹿旁的雪橇：照書桌上的平安夜路線，把四袋禮物裝上去。'],
+  letters: ['處理信件', '小房間的分揀架：先把信分給對的人；交給你的信，挑一封拿到書桌回信、寄出去。'],
   wheel: ['修摩天輪', '遊樂場的摩天輪停了，去看看哪裡壞了。'],
 };
 export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿上多了一個章（願望點數 ${count}／${of}）。`;

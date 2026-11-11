@@ -60,6 +60,16 @@ export const GIFTS = SUBSTITUTES;
 // tag, nor Santa's S) and help: four jobs around the village, each earning a wish point the first time it is done while
 // signed up. Leaving is always allowed and keeps the points earned (they come back on signing again).
 export const TASKS = ['lichen', 'hay', 'letters', 'wheel'];
+// Two of the jobs, as rules. Looking after the reindeer: the feeding table on the barn wall gives his Christmas-morning
+// meals by the clock, written out of order; he takes them only in the order of their times. Loading the sleigh: its rack
+// is narrow, so the sacks stand one on another and at each stop only the top one can be got at; the first stop of the
+// route (the desk's route note) goes on last, the last stop first (`stack` is from the bottom up). The ids stay as they
+// were (`lichen`, `hay`) so stamps already earned keep counting.
+export const FEED_TABLE = [['07:30', 'carrot'], ['06:00', 'oats'], ['09:00', 'lichen']];
+export const FEED_ORDER = [...FEED_TABLE].sort(([a], [b]) => a.localeCompare(b)).map(([, food]) => food);
+export const feedsNext = (fed, food) => FEED_ORDER[fed.length] === food;
+export const ROUTE = ['台北', '東京', '雷克雅維克', '多倫多'];
+export const loadedRight = stack => Array.isArray(stack) && stack.join() === [...ROUTE].reverse().join();
 export const TAKEN = ['N', 'K', 'H', 'E', 'O', 'S'];
 export const canSign = mark => typeof mark === 'string' && /^[A-Z]$/.test(mark) && !TAKEN.includes(mark);
 export const signedUp = volunteer => canSign(volunteer.mark);

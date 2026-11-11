@@ -3,13 +3,14 @@
 
 // The old record book on the little room's desk, tied with red cord and held by a four-dial lock: it opens to the year
 // Holly's wish came true (the snow globe's base, H. · 2003), whenever that is found; no jobs are needed. A volunteer finds a
-// blank slip tucked in their own row of the register: it smells of lemon, and held to the fire it shows Holly's hand.
+// blank slip tucked in their own row of the register (to the pocket): it smells of lemon, and laid on the hearthstone the
+// fire has warmed (not in the fire) it shows Holly's hand.
 export const CORD = {
   title: '舊紀錄簿', locked: '一本舊紀錄簿，用紅繩綁著，被一個小小的四位數密碼鎖扣著。', again: '翻開舊紀錄簿', close: '闔上舊紀錄簿',
   dial: (place, digit) => `第 ${place} 個轉輪：${digit}（按一下加一）`, opened: '喀！小鎖彈開了，紅繩滑了下來。',
-  slip: '你那一列夾著一張空白的紙條，聞起來有一點檸檬的味道。', take: '拿起紙條', took: '你把空白紙條收進口袋了。檸檬的味道……好像在哪裡聽過，這種紙要用火烤一烤？',
+  slip: '你那一列夾著一張空白的紙條，聞起來有一點檸檬的味道。', take: '拿起紙條', took: '你把空白紙條收進口袋了。檸檬的味道……好像在哪裡聽過，這種紙要烘熱了才看得見字？',
   pocket: '（空白紙條還在你口袋裡。）',
-  warm: '火不夠旺，紙條只是溫溫的。再添一點柴，用風箱把火吹旺。', toFire: '把空白紙條靠近火烤一烤',
+  cold: '壁爐前的石板還是冷冰冰的。', fire: '放進火裡，紙條就燒掉了。壁爐前那塊被火烘熱的石板，應該剛剛好。', stone: '壁爐前被火烘熱的石板',
   lemon: ['我的願望實現的那一年，', '雪花球一直記得。'], sign: '—— H.', read: '紙條上浮出淡褐色的字：「我的願望實現的那一年，雪花球一直記得。」—— H.',
   known: '雪花球記得的那一年……你已經知道了。',
 };

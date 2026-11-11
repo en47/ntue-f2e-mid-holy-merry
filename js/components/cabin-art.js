@@ -1074,8 +1074,19 @@ export function mailbox({ paper }, { width, height }, state = {}) {
   if (state.open) { shape('rect', { x: cx + 96, y: 150, width: 14, height: 80, fill: GOLD }, paper); shape('rect', { x: cx + 96, y: 210, width: 50, height: 20, fill: GOLD }, paper); }
   else { shape('rect', { x: cx + 96, y: 80, width: 14, height: 150, fill: GOLD }, paper); shape('rect', { x: cx + 96, y: 80, width: 50, height: 26, fill: GOLD }, paper); star(paper, cx, 190, 28, GOLD); }
 }
-export function sleigh({ paper }, { width, height }) {
+// The sleigh beside the reindeer; loaded (`state.loaded`, the volunteer job done), four sacks of presents stand on its
+// rack one on another, the first stop's on top.
+export function sleigh({ paper }, { width, height }, state = {}) {
   const ground = height - 16;
+  if (state.loaded) {
+    // Behind the seat, from the bottom up: Toronto, Reykjavík, Tokyo, Taipei (cabin-sleigh.js SACKS colours).
+    [['#b98a3c', .52, 186], ['#3f5a7a', .56, 238], ['#3f6653', .52, 288], ['#b5443c', .56, 336]].forEach(([tag, x, lift]) => {
+      const cx = width * x, top = ground - lift;
+      shape('path', { d: `M${cx - 58} ${top + 52}Q${cx - 66} ${top + 18} ${cx - 40} ${top + 8}H${cx + 40}Q${cx + 66} ${top + 18} ${cx + 58} ${top + 52}Z`, fill: '#c9a46a' }, paper);
+      shape('path', { d: `M${cx - 30} ${top + 12}Q${cx} ${top + 20} ${cx + 30} ${top + 12}`, fill: 'none', stroke: RED, 'stroke-width': 5, 'stroke-linecap': 'round' }, paper);
+      shape('rect', { x: cx - 18, y: top + 24, width: 36, height: 18, rx: 3, fill: tag }, paper);
+    });
+  }
   shape('path', { d: `M30 ${ground - 20}H${width - 120}C${width - 60} ${ground - 20} ${width - 30} ${ground - 60} ${width - 30} ${ground - 110}`, stroke: '#a9845b', 'stroke-width': 14, fill: 'none', 'stroke-linecap': 'round' }, paper);
   shape('path', { d: `M90 ${ground - 20}V${ground - 70}M${width - 180} ${ground - 20}V${ground - 70}`, stroke: '#a9845b', 'stroke-width': 12 }, paper);
   shape('path', { d: `M40 ${ground - 70}H${width - 90}L${width - 130} ${ground - 170}H${width * .35}C${width * .2} ${ground - 200} 80 ${ground - 170} 40 ${ground - 70}Z`, fill: RED }, paper);

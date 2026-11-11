@@ -3,15 +3,28 @@
 // hub (from the pocket, cabin-bag.js). Turned round (dragged about the hub, or arrow keys), it winds the bale up as far
 // as the rope goes; at the top a catch holds it. Up there the bale no longer hides the drawer in the wall: pulled out, it
 // holds a box of matches and a note in two hands. Hooked and read stay kept (cabin-progress.js); the crank stays fitted.
-import { shape } from './paper-art.js';
+// Pinned on the barn door: the reindeer's feeding table for Christmas morning (a volunteer job, cabin-feed.js),
+// ticked once he has been fed by it.
+import { paperLayer, shape } from './paper-art.js';
 import { HOIST, WINCH } from './cabin-art.js';
+import { FEED } from '../data/cabin-jobs.js';
 
-const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
+const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 // One full turn of the crank winds in this much of the way up.
 const PER_TURN = Math.PI * 2 * WINCH.spool / HOIST.lift;
+// The feeding table as pinned up: a sheet with a red pin, lines of writing, a small reindeer in the corner; and the red
+// ticks once the job is done (a layer of its own).
+function notice(parent) {
+  shape('path', { d: 'M8 10L92 6 94 92 6 94Z', fill: '#fffaf0' }, parent);
+  shape('rect', { x: 14, y: 14, width: 52, height: 7, rx: 3, fill: '#b5443c', opacity: .8 }, parent);
+  for (const y of [34, 50, 66]) shape('path', { d: `M14 ${y}h10M30 ${y}q12 -3 24 0t24 0`, fill: 'none', stroke: '#6f5a48', 'stroke-width': 3, 'stroke-linecap': 'round' }, parent);
+  shape('path', { d: 'M70 84q4-10 12-8 6 2 4 8M74 78l-3-8m6 8l2-8', fill: 'none', stroke: '#8f5a3c', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, parent);
+  shape('circle', { cx: 50, cy: 8, r: 5, fill: '#c63a33' }, parent);
+}
+const ticks = parent => { for (const y of [34, 50, 66]) shape('path', { d: `M84 ${y - 2}l4 5 8-11`, fill: 'none', stroke: '#b5443c', 'stroke-width': 3.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, parent); };
 
-export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound, onTask = () => {}, clue = () => {} }) {
+export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound, fed = () => false, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const state = progress.hoist, still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fitted = () => bag.ever('handle') && !bag.holds('handle');
@@ -25,6 +38,9 @@ export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, s
   const matches = element('button', 'play-target drawer-matches', layer); matches.type = 'button'; matches.setAttribute('aria-label', '抽屜裡的火柴盒'); matches.hidden = true;
   const paper = element('button', 'play-target drawer-note', layer); paper.type = 'button'; paper.setAttribute('aria-label', '抽屜裡摺起來的紙條'); paper.hidden = true;
   const loosen = element('button', 'hoist-release', layer); loosen.type = 'button'; loosen.textContent = '鬆開卡榫 ↺'; loosen.hidden = true;
+  const table = element('button', 'play-target feed-table', layer); table.type = 'button'; table.setAttribute('aria-label', FEED.title);
+  paperLayer(table, '0 0 100 100', '', notice, { paper: { scale: .3, grain: .45, shadow: .3 }, eager: true }); paperLayer(table, '0 0 100 100', 'feed-ticks', ticks, { paper: { scale: .2, grain: .5, shadow: 0, rim: '#ffffff00' }, eager: true });
+  table.classList.toggle('is-done', fed());
 
   const place = (node, rect, pad = 0) => Object.assign(node.style, { left: `${rect.left - pad}px`, top: `${rect.top - pad}px`, width: `${rect.width + pad * 2}px`, height: `${rect.height + pad * 2}px` });
   // Part of a rect, as fractions of it: where the matchbox and the note lie in the open drawer.
@@ -32,6 +48,8 @@ export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, s
   function layout() {
     const rects = cabin.hoistRects(); if (!rects) return;
     place(winch, rects.winch, 4); place(tag, rects.tag, 6); place(crank, rects.crank); place(drawer, rects.drawer, 6);
+    // Pinned on the barn door's left leaf: in sight on a phone too, where the view shows only the barn's left half.
+    const pinned = cabin.sheetRect('stable', [.375, .5, .485, .66]); if (pinned) place(table, pinned);
     place(matches, part(rects.drawer, [.12, .2, .48, .55])); place(paper, part(rects.drawer, [.5, .18, .86, .55]));
     const right = rects.crank.left + rects.crank.width + 10;
     Object.assign(hint.style, { left: `${right}px`, top: `${rects.crank.top + rects.crank.height * .3}px` });
@@ -63,6 +81,19 @@ export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, s
     use: () => { cabin.fitCrank(true); later(400, () => { settle(); layout(); crank.focus({ preventScroll: true }); }); return '把手的方榫剛好插進絞盤中間的方孔。抓住把手繞著轉轉看。'; },
   });
   on(winch, 'click', () => { if (!fitted()) stuck(); });
+  // The feeding table, read up close: its lines as pinned, by the clock but not in that order.
+  let sheet = null;
+  on(table, 'click', () => {
+    sheet?.remove(); sound.play('open'); clue('feed-table');
+    sheet = element('article', 'cabin-letter feed-card', layer); sheet.setAttribute('aria-label', FEED.title);
+    element('h3', 'chair-title', sheet, FEED.title);
+    const list = element('ul', 'feed-lines', sheet);
+    for (const [time, food] of FEED.lines) { const item = element('li', fed() ? 'is-done' : '', list); element('span', 'feed-time', item, time); element('span', '', item, food); }
+    element('p', 'feed-never', sheet, FEED.never); element('p', 'secret-note', sheet, fed() ? FEED.checked : FEED.note);
+    const done = element('button', 'cabin-letter-close', sheet, '貼回去 ✓'); done.type = 'button';
+    on(done, 'click', () => { sheet.remove(); sheet = null; sound.play('remove'); table.focus({ preventScroll: true }); });
+    done.focus({ preventScroll: true });
+  });
   on(tag, 'click', () => { cabin.swingTag(); sound.play('pick'); clue('repair-tag'); say('維修標籤：「下次使用前，記得把把手裝回去。」'); });
 
   // Turning the crank: the drag's angle about the hub, every bit of turn either way winds the rope in.
@@ -86,7 +117,7 @@ export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, s
     event.preventDefault(); wind(Math.PI);
   });
   on(hook, 'click', () => {
-    state.locked = true; save(); set(1); sound.play('snap'); settle(); onTask();
+    state.locked = true; save(); set(1); sound.play('snap'); settle();
     say('卡榫扣上了，乾草穩穩吊在半空中。牆腳原本被擋住的地方，露出一個小抽屜。'); drawer.focus({ preventScroll: true });
   });
   function openDrawer() {
@@ -137,7 +168,7 @@ export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, s
   later(600, layout); later(1300, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
   return () => {
-    events.abort(); watch.disconnect(); cancelAnimationFrame(fall); forget();
+    events.abort(); watch.disconnect(); cancelAnimationFrame(fall); forget(); sheet?.remove();
     // Leaving with the catch undone lets the bale back down to the snow; the drawer is pushed shut behind it.
     if (!state.locked && pull > 0) cabin.hoist(0);
     if (drawerOpen) cabin.openDrawer({});

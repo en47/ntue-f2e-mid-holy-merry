@@ -366,8 +366,8 @@ await test('Santa 替身工作：登記簿簽縮寫加入，四件工作各在�
   assert.ok(REGISTER.rows.some(([mark, count]) => mark === 'H' && count === REGISTER.full), 'Holly\'s row is already full, and she is still on the shift log');
   assert.ok(secret.includes("if (!story.told) { element('li', 'register-blank', list, REGISTER.blank); return; }") && secret.includes('if (!canSign(char)) { tile.disabled = true;') && secret.includes("if (!leave.dataset.sure)"), 'The register is signed once Santa has told you the secret; taken initials cannot be chosen; leaving takes a second press');
   assert.ok(REGISTER.season === '2026 年聖誕季' && REGISTER.rows.every(([, , year]) => year >= 2003 && year <= 2023), 'The register\'s page: the season at the top, the year each one joined');
-  assert.ok(play.includes("if (!record(progress.volunteer, id)) return;") && play.includes("onTask: () => task('lichen')") && play.includes("onTask: () => task('hay')") && play.includes("onTask: () => task('letters')") && play.includes("onMended: () => { progress.wheelRounds += 1; save(); task('wheel'); cabin.wheelBroken(false); }"), 'Each of the four jobs reports to one place, where the rule decides');
-  assert.ok(feed.includes("const lichenOnly = full(progress) && wants();") && pulley.includes("settle(); onTask();") && desk.includes('if (VOLUNTEER_LETTERS.every(each => desk.sent.includes(`reply-${each.id}`))) onTask();'), 'Lichen even when he is full, the hay hooked, both new letters answered and sent');
+  assert.ok(play.includes("if (!record(progress.volunteer, id)) return;") && play.includes("onTask: () => task('lichen')") && play.includes("onLoaded: () => task('hay')") && play.includes("onTask: () => task('letters')") && play.includes("onMended: () => { progress.wheelRounds += 1; save(); task('wheel'); cabin.wheelBroken(false); }"), 'Each of the four jobs reports to one place, where the rule decides');
+  assert.ok(feed.includes("let job = wants(), served = [];") && feed.includes('if (!feedsNext(served, kind))') && !pulley.includes('onTask') && desk.includes('if (VOLUNTEER_LETTERS.some(each => desk.sent.includes(`reply-${each.id}`))) onTask();'), 'Fed by the feeding table\'s clock even when he is full; the winch is no job any more; one new letter answered and sent');
   assert.ok(scene.includes('fair.speed += ((fair.broken ? 0 : 1) - fair.speed)') && scene.includes('wheelBroken(broken, animate = true)') && page.includes("if (id === 'wheel' && play?.wheelOpen) play.enter('wheel');"), 'Signed up, the big wheel slows to a stop, and a tap on it opens it to be mended');
   assert.ok(wheel.includes("import { BOARDS, PIECES, WHEEL, drive, link, radius } from '../services/cabin-gears.js';") && wheel.includes('drive(teethOnPegs(), setup)') && wheel.includes("on(piece.node, 'lostpointercapture', drop)") && wheel.includes("['ArrowRight', 'ArrowDown', 'Enter', ' ']") && wheel.includes('if (run.stop === \'jam\')'), 'The wheel is mended in its gearbox, by pointer or keyboard, with the rules in cabin-gears.js');
   assert.ok(art.includes('open: { target: [SECRET.left + SECRET.width * .62, .7, BOOKCASE.z + .15], yaw: .55 }') && scene.includes("if (view === 'shelf') aim('shelf');"), 'Standing open, the bookcase is looked at from the side, into the doorway');
@@ -519,6 +519,25 @@ await test('Santa 第三章：一進工作室沒有「替身」字樣；聖誕�
   assert.ok(play.includes('story.told = true; save();') && play.includes('if (progress.finale.unlocked && !progress.finale.twist) later(8800, () => say(NOTES.record));') && NOTES.record.includes('再讀一次'), 'Santa tells you once; having opened the old record early, you are told to read it again');
   assert.ok(secret.includes("classList.toggle('is-glinting', finale.unlocked && !finale.twist && story.told)") && CORD.known.includes('你已經知道了'), 'Its corner catches the light to be read again; the lemon slip knows you know the year already');
 });
+await test('Santa 第四章：四件替身工作各有真的操作（餵食表、雪橇反序、分信回一封、雪地的齒輪），紙條放進口袋烘在石板上', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [feed, sleigh, pulley, wheel, desk, secret, hearth, play, paint] = await Promise.all(['js/components/cabin-feed.js', 'js/components/cabin-sleigh.js', 'js/components/cabin-pulley.js', 'js/components/cabin-wheel.js', 'js/components/cabin-desk.js', 'js/components/cabin-secret.js', 'js/components/cabin-hearth.js', 'js/components/cabin-play.js', 'js/components/cabin-paint.js'].map(read));
+  const { FEED_TABLE, FEED_ORDER, ROUTE, TASKS } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { FEED, SLEIGH } = await import(pathToFileURL(path.join(project, 'js/data/cabin-jobs.js')).href), { JOBS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href), { DESK_LETTERS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href);
+  // The feeding table is pinned up out of order; the order is the clock's.
+  assert.notDeepEqual(FEED_TABLE.map(([, food]) => food), FEED_ORDER, 'The table is not written in the order he eats');
+  assert.deepEqual(FEED.lines.map(([time]) => time), FEED_TABLE.map(([time]) => time)); assert.ok(pulley.includes("clue('feed-table')") && NOTEBOOK['feed-table'], 'The table on the barn wall, read and written down');
+  // The route on the desk, the sleigh loaded the other way round, the first stop on top.
+  assert.ok(DESK_LETTERS.find(entry => entry.id === 'route').body.startsWith(ROUTE.join(' → ')) && desk.includes("if (current.entry.id === 'route') clue('route');"), 'The route note gives the stops in order, and goes in the clue book');
+  assert.ok(sleigh.includes('if (loadedRight(stack))') && SLEIGH.rule.includes('最上面') && !Object.values(SLEIGH).join('').includes('反'), 'The sleigh\'s rule is the narrow rack, never the answer');
+  assert.ok(paint.includes('sleigh: [{ loaded: true }]') && play.includes("if (progress.volunteer.tasks.includes('hay')) cabin.repaint('sleigh', { loaded: true });"), 'Loaded, the sleigh in the yard stays loaded');
+  // The big gear: in the snow by the gearbox, to the pocket, into the box.
+  assert.ok(wheel.includes("bag.give('gear'") && wheel.includes("accepts: id => id === 'gear'") && wheel.includes('node.hidden = snow && !fitted()'), 'The big gear is picked up from the snow and put in the box from the pocket');
+  // The slip: to the pocket from the register, onto the warm stone.
+  assert.ok(secret.includes("bag.give('slip'") && hearth.includes('bag.target(stone,') && !hearth.includes('hearth-slip'), 'The blank slip goes in the pocket and onto the warm hearthstone');
+  assert.deepEqual(Object.keys(JOBS), TASKS); assert.ok(JOBS.lichen[1].includes('餵食表') && JOBS.hay[1].includes('平安夜路線') && JOBS.letters[1].includes('挑一封'), 'Each job says where its puzzle is, not its answer');
+  assert.ok(![feed, sleigh].some(code => code.includes('innerHTML')), 'Words only through textContent');
+});
 await test('Santa 弄濕的交接表：看墨水顏色與工作記號、對照別處的紀錄、照值班須知排除，補對才算讀過', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [secret, feed, css] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-feed.js', 'css/santa.css'].map(read));
@@ -540,7 +559,7 @@ await test('Santa 弄濕的交接表：看墨水顏色與工作記號、對照�
   assert.ok(secret.includes("if (!logSolved(log)) { note.textContent = LOG.wrong(logWrong(log));") && secret.includes("learn('log');") && secret.includes("if (id === 'tags' || id === 'rules') learn(id);"), 'Wrong, it says only how many; right, the log counts as read');
   assert.ok(feed.includes("clue('care-log')") && css.includes('.shift-grid.is-solved .shift-mark { animation: shift-dry'), 'The care log goes in the clue book; put right, the ink dries back a row at a time');
 });
-await test('Santa 紅繩小鎖：空白紙條烤火浮出荷莉的字，密碼是雪花球底座的年份', async () => {
+await test('Santa 紅繩小鎖：空白紙條在烘熱的石板上浮出荷莉的字，密碼是雪花球底座的年份', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [secret, hearth, globe, css] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-hearth.js', 'js/components/cabin-globe.js', 'css/santa.css'].map(read));
   const { LOCK } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href), { RECORD, CORD } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href), { REGISTER } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href);
@@ -549,7 +568,7 @@ await test('Santa 紅繩小鎖：空白紙條烤火浮出荷莉的字，密碼�
   assert.ok(CORD.lemon.join('').includes('雪花球') && NOTEBOOK['lemon-note'].text.includes('雪花球') && GOALS.cord.hints.at(-1).includes(LOCK), 'The lemon writing points to the snow globe; the last hint gives the code');
   assert.ok(!secret.includes('canUntie') && secret.includes('if (!opens(dials)) return;') && secret.includes("finale.unlocked = true; save();"), 'No jobs needed for the cord; only the code opens the lock, for good');
   assert.ok(secret.includes("paperLayer(padlock, '0 0 120 130', 'lock-shackle', lockShackle, BRASS)") && css.includes('.cord-lock.is-open .lock-shackle'), 'The lock is paper SVG, its shackle a piece that springs open');
-  assert.ok(hearth.includes('if (cabin.heat < 1.5)') && hearth.includes("finale.slip = 'read'; save(); clue('lemon-note');") && css.includes('@keyframes lemon-ink'), 'Held to a fire of two logs, the lemon writing comes up a character at a time');
+  assert.ok(hearth.includes("accepts: id => id === 'slip' ? (cabin.lit || CORD.cold)") && hearth.includes("id === 'slip' ? CORD.fire") && hearth.includes("finale.slip = 'read'; save(); clue('lemon-note');") && css.includes('@keyframes lemon-ink'), 'Laid on the hearthstone the lit fire has warmed (not in the fire, not on a cold stone), the lemon writing comes up a character at a time');
 });
 await test('Santa 第二章：書櫃的謎題由火光金書脊、反寫吸墨器、四枚空白書籤、舊村子與英文紙條拼出，字幕不說答案', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');

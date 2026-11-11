@@ -3,8 +3,9 @@
 // or press Enter on it) makes it climb, up to three logs, and the bellows (press their handles down and let go) make it
 // flare. In its light the R cut in the hearthstone shows, and across the room a few book spines gleam gold. The fire itself
 // lives in the scene (cabin-scene.js), so it keeps burning down (never out) while you are elsewhere in the room. The blank
-// slip from the register, once it is in the visitor's pocket, waits here too: held to a fire with two logs burning, the
-// lemon writing on it comes up brown, a character at a time.
+// slip from the register (from the pocket, cabin-bag.js) is laid on the hearthstone the lit fire has warmed: the lemon
+// writing on it comes up brown, a character at a time. Into the fire it would burn, and on a cold stone nothing shows; it
+// springs back to the pocket either way.
 import { paperLayer, shape } from './paper-art.js';
 import { letter } from './cabin-art.js';
 import { CORD } from '../data/cabin-finale.js';
@@ -21,13 +22,6 @@ function log(parent) {
   shape('ellipse', { cx: 84, cy: 22, rx: 6, ry: 8, fill: 'none', stroke: '#a8774d', 'stroke-width': 2 }, parent);
 }
 
-// The blank slip: cream paper folded once, a faint lemon mark at one corner.
-function slipArt(parent) {
-  shape('path', { d: 'M6 10L86 4 94 50 12 56Z', fill: '#fffaf0' }, parent);
-  shape('path', { d: 'M86 4L94 50 80 40Z', fill: '#efe3c8' }, parent);
-  shape('circle', { cx: 24, cy: 22, r: 8, fill: '#f6ecc4', opacity: .8 }, parent);
-}
-
 // The letter carved in the hearthstone in front of the fire, R: too shallow to see until the firelight catches its edges.
 function carving(parent) {
   letter(parent, 'R', 50, 52, 46, 52, { fill: '#9a6343', stroke: '#ffcf73', 'stroke-width': 2.6, 'stroke-linejoin': 'round' });
@@ -37,8 +31,8 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, bag, onUse 
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
-  const finale = progress?.finale, pocket = finale?.slip === 'taken';
-  say(!cabin.lit ? '壁爐裡只剩一點快熄的小火苗。柴籃裡有木柴，風箱掛在一旁。' : pocket ? '從柴籃拿木柴放進爐口、用風箱把火吹旺。口袋裡那張空白紙條，也可以拿出來靠近火。' : '從柴籃拿一根木柴放進爐口；把風箱往下壓再放開，火會竄高。');
+  const finale = progress?.finale;
+  say(!cabin.lit ? '壁爐裡只剩一點快熄的小火苗。柴籃裡有木柴，風箱掛在一旁。' : '從柴籃拿一根木柴放進爐口；把風箱往下壓再放開，火會竄高。');
   const mouth = element('span', 'hearth-mouth', layer); mouth.setAttribute('aria-hidden', 'true');
   // The fire's mouth, for what the pocket holds: the matches light it.
   const grate = element('button', 'play-target hearth-fire', layer); grate.type = 'button'; grate.setAttribute('aria-label', '壁爐裡的火');
@@ -49,8 +43,8 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, bag, onUse 
   const grip = element('button', 'hearth-bellows', layer); grip.type = 'button'; grip.setAttribute('aria-label', '風箱：往下壓再放開，把火吹旺（也可以按 Enter）');
   let size = 60;
   const back = element('span', 'hearth-letter', layer); back.setAttribute('aria-hidden', 'true'); paperLayer(back, '0 0 100 104', '', carving, { paper: { scale: .3, grain: .6, shadow: 0, rim: '#ffd88a00' }, eager: true });
-  const slip = pocket ? element('button', 'hearth-slip', layer) : null;
-  if (slip) { slip.type = 'button'; slip.setAttribute('aria-label', CORD.toFire); paperLayer(slip, '0 0 100 60', '', slipArt, PAPER); }
+  // The hearthstone in front of the fire, warmed once it is lit: where the slip goes.
+  const stone = element('button', 'play-target hearth-stone', layer); stone.type = 'button'; stone.setAttribute('aria-label', CORD.stone);
 
   const place = (node, rect) => Object.assign(node.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
   function layout() {
@@ -64,7 +58,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, bag, onUse 
     });
     place(mouth, rects.mouth); place(grate, rects.mouth);
     const plate = Math.max(30, rects.mouth.width * .2); place(back, { left: rects.mouth.left + rects.mouth.width / 2 - plate / 2, top: rects.mouth.top + rects.mouth.height * 1.02, width: plate, height: plate * 1.04 });
-    if (slip) place(slip, { left: Math.max(8, basket.left + basket.width * .1), top: Math.max(8, basket.top - size * .95), width: size * .9, height: size * .54 });
+    place(stone, { left: rects.mouth.left + rects.mouth.width * .15, top: rects.mouth.top + rects.mouth.height * .98, width: rects.mouth.width * .7, height: Math.max(36, rects.mouth.height * .4) });
     const handle = rects.bellows, side = Math.max(56, handle.width, handle.height);
     place(grip, { left: handle.left + handle.width / 2 - side / 2, top: handle.top + handle.height / 2 - side / 2, width: side, height: side });
   }
@@ -159,11 +153,9 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, bag, onUse 
     event.preventDefault(); cabin.bellows(1); blow(); later(160, () => release(1));
   });
 
-  // Held to the fire: with two logs burning (they burn down slowly, so a little under two), the writing comes up;
-  // otherwise it only warms.
+  // Laid on the warm stone: the writing comes up.
   function roast() {
-    if (cabin.heat < 1.5) { say(CORD.warm); sound.play('nope'); slip.classList.remove('is-warm'); void slip.offsetWidth; slip.classList.add('is-warm'); return; }
-    slip.remove(); finale.slip = 'read'; save(); clue('lemon-note'); sound.play('open'); say('');
+    finale.slip = 'read'; save(); clue('lemon-note'); sound.play('open');
     const card = element('article', 'cabin-letter lemon-card', layer); card.setAttribute('aria-label', '烤過的紙條');
     const words = element('p', 'lemon-words', card), text = CORD.lemon.join('');
     const full = element('span', 'sr-only', words); full.textContent = `${text}${CORD.sign}`;
@@ -173,10 +165,11 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, bag, onUse 
     on(done, 'click', () => { card.remove(); sound.play('remove'); say(finale.unlocked ? CORD.known : '雪花球記得的那一年……'); });
     done.focus({ preventScroll: true });
   }
-  if (slip) on(slip, 'click', roast);
+  const forgetStone = bag.target(stone, { accepts: id => id === 'slip' ? (cabin.lit || CORD.cold) : '石板上不用放這個。', use: () => { later(500, roast); return '紙條放在烘熱的石板上，慢慢浮出淡褐色的字……'; } });
+  on(stone, 'click', () => say(cabin.lit ? '壁爐前的石板被火烘得熱熱的。' : CORD.cold));
   // A match struck and held to the grate: the fire catches, and stays lit.
   const forget = bag.target(grate, {
-    accepts: id => id === 'matches' || (cabin.lit ? '火已經燒起來了。' : '這個放進火裡不太好。'),
+    accepts: id => id === 'matches' || (id === 'slip' ? CORD.fire : cabin.lit ? '火已經燒起來了。' : '這個放進火裡不太好。'),
     use: () => { cabin.light(); sound.play('crackle'); later(300, () => sound.play('whoosh')); sparks(); onUse(); return '嚓——火柴點著了。火苗舔上木柴，一下子旺了起來。'; },
   });
   on(grate, 'click', () => { if (!cabin.lit) { sound.play('nope'); say('爐子裡只剩一點小火苗，快要熄了。木柴放上去也點不著。'); } else say(line()); });
@@ -194,5 +187,5 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, bag, onUse 
 
   layout(); later(500, layout); later(1200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
-  return () => { events.abort(); watch.disconnect(); cancelAnimationFrame(spring); cabin.bellows(0); forget(); };
+  return () => { events.abort(); watch.disconnect(); cancelAnimationFrame(spring); cabin.bellows(0); forget(); forgetStone(); };
 }

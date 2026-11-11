@@ -5,7 +5,7 @@
 //   一、先補交接表、再開舊紀錄：讀完就理解。
 //   二、先開舊紀錄（只讀得懂表面）、再補交接表：聖誕老人提醒、書角發光，再翻一次才理解。
 //   三、補好交接表但一直不開舊紀錄：主線照常，可以加入。
-//   四、加入前就開過，加入後拿到空白紙條烤出字：字幕說你已經知道了。
+//   四、加入前就開過，加入後拿到空白紙條（收進口袋）放在烘熱的石板上：字幕說你已經知道了。
 // 也檢查最小那頂帽子隨時翻得開、用放大鏡讀出 H. 2003。手機尺寸用真的觸控事件。只讀寫這個瀏覽器的 localStorage，不連雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
 // 執行：BASE=http://127.0.0.1:5511 node scripts/check-santa-secret.mjs（WIDTH=390 HEIGHT=844 是手機；SHOTS=資料夾 會存截圖）
@@ -107,7 +107,8 @@ await load({ ...opened, story: { ...opened.story, seen: ['log'], told: true }, f
 await enter(); await thing('register'); await press('.register-cord .register-sign'); await wait(600); await putBack();
 check((await saved()).finale.slip === 'taken', '拿起空白紙條');
 await leave(); await spot('hearth'); for (let i = 0; i < 2; i++) { await page.evaluate(i => document.querySelectorAll('.hearth-log')[i].click(), i); await wait(400); }
-await press('.hearth-slip'); await wait(4800); await press('.lemon-card .cabin-letter-close'); await wait(400);
+if (await page.evaluate(() => document.querySelector('.cabin-bag').dataset.open === 'false')) await tap('.bag-pocket');
+await drag('.bag-item[data-item="slip"]', '.hearth-stone'); await wait(5200); await press('.lemon-card .cabin-letter-close'); await wait(400);
 check((await caption()).includes('你已經知道了'), `加入前就開過舊紀錄，紙條烤出字時：${await caption()}`);
 
 console.log(errors.length ? `FAIL  ${errors.length} 項沒通過` : `PASS  小房間第三章（${mobile ? '手機觸控' : '桌機滑鼠'}）`);

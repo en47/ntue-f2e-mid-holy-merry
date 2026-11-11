@@ -1,6 +1,7 @@
 // The big wheel's gearbox, mended up close. The wheel stands too far off to walk up to, so its gearbox is opened over the
 // yard: a metal door swings aside on a dark panel with three empty pegs between the crank's gear and the wheel's. Loose
-// gears wait in the toolbox, and the big one lies half buried in the snow where it fell. Put gears on the pegs (drag them,
+// gears wait in the toolbox; the big one fell into the snow beside the gearbox, where something glints: picked up (to the
+// pocket, cabin-bag.js) and put in the box, it stays there for good. Put gears on the pegs (drag them,
 // or press one and then a peg) and turn the crank (drag round it, or press the arrow keys or Enter): the gears that mesh
 // turn, each the other way from the last, until the chain breaks off or jams; when it reaches the wheel, the wheel's
 // lamps come on and it turns again. The rules (which gears mesh, how far the turning reaches) are in cabin-gears.js.
@@ -24,7 +25,7 @@ const CATCH = Math.PI * 3;
 // goes by the crank and by the wheel.
 const SIZE = { 8: '最小的', 12: '中等的', 15: '大的', 19: '最大的' };
 const hintsFor = ({ teeth }) => [
-  teeth.includes(19) ? '工具盒裡好像少了最大的那個……角落的雪堆裡，是不是埋著什麼？' : '這一次，雪堆裡那個最大的齒輪用不到。',
+  teeth.includes(19) ? '工具盒裡好像少了最大的那個……動力箱旁邊的雪地裡，是不是有東西在發亮？' : '這一次，最大的那個齒輪用不到。',
   '齒輪要剛好咬在一起：太大會擠住，太小碰不到。從曲柄旁邊開始，一格一格接上去。',
   `最靠近曲柄的那一格放${SIZE[teeth[2]]}齒輪，靠輪軸的那一格放${SIZE[teeth[0]]}，中間放${SIZE[teeth[1]]}。`,
 ];
@@ -121,7 +122,7 @@ function arm(parent) {
 
 // `again`: the wheel was mended before and runs; its gearbox is opened to set the gears once more.
 // `round`: how many times it has been mended; each time it opens on the next board.
-export function wheelGame({ layer, stage, cabin, say, later, sound, again = false, round = 0, progress, save = () => {}, clue = () => {}, gift = () => false, onMended, onClose }) {
+export function wheelGame({ layer, stage, cabin, say, later, sound, bag, again = false, round = 0, progress, save = () => {}, clue = () => {}, gift = () => false, onMended, onClose }) {
   const events = new AbortController(), on = (node, type, handler, options = {}) => node.addEventListener(type, handler, { ...options, signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const setup = BOARDS[round % BOARDS.length], { pegs: PEGS, crank: CRANK } = setup, hintLines = hintsFor(setup);
@@ -147,10 +148,19 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
     const peg = element('button', 'gearbox-peg', board); peg.type = 'button'; place(peg, at, 7);
     peg.setAttribute('aria-label', `軸釘${['一（靠輪軸）', '二（中間）', '三（靠曲柄）'][i]}`); return peg;
   });
+  // The big gear is in the box once it has been put there from the pocket; until then it lies in the snow, glinting.
+  const fitted = () => bag.ever('gear') && !bag.holds('gear');
   const pieces = PIECES.map(({ id, teeth, snow }) => {
-    const node = element('button', `gearbox-piece${snow ? ' is-buried' : ''}`, board); node.type = 'button';
+    const node = element('button', 'gearbox-piece', board); node.type = 'button'; node.hidden = snow && !fitted();
     paperLayer(node, `${-reach(teeth)} ${-reach(teeth)} ${reach(teeth) * 2} ${reach(teeth) * 2}`, '', cog(teeth, COLOURS[id]), GEAR);
     return { id, teeth, snow, node, peg: null, angle: 0 };
+  });
+  const glint = element('button', 'gearbox-snow', board); glint.type = 'button'; glint.setAttribute('aria-label', '動力箱旁的雪地裡，有東西在發亮'); glint.hidden = bag.ever('gear');
+  place(glint, HOME.xl, reach(19));
+  on(glint, 'click', () => { const box = stage.getBoundingClientRect(), rect = glint.getBoundingClientRect(); glint.hidden = true; sound.play('remove'); bag.give('gear', { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }); });
+  const forget = bag.target(board, {
+    accepts: id => id === 'gear' || '這個裝不進動力箱。',
+    use: () => { const big = pieces.find(piece => piece.snow); big.node.hidden = false; later(300, draw); return '特大齒輪放進工具盒了。'; },
   });
   paperLayer(element('span', 'gearbox-art gearbox-front', board), `0 0 ${W} ${H}`, '', front, PAPER);
   element('span', 'gearbox-tray-label', board, '工具盒');
@@ -172,7 +182,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
     for (const piece of pieces) {
       if (!piece.node.classList.contains('is-lifted')) place(piece.node, piece.peg === null ? HOME[piece.id] : PEGS[piece.peg], reach(piece.teeth));
       piece.node.classList.toggle('is-placed', piece.peg !== null); piece.node.classList.toggle('is-picked', piece === selected);
-      piece.node.setAttribute('aria-label', `${NAMES[piece.teeth]}（${piece.teeth} 齒）${piece.peg !== null ? `，裝在軸釘${'一二三'[piece.peg]}上` : piece.node.classList.contains('is-buried') ? '，半埋在雪裡' : '，在工具盒裡'}`);
+      piece.node.setAttribute('aria-label', `${NAMES[piece.teeth]}（${piece.teeth} 齒）${piece.peg !== null ? `，裝在軸釘${'一二三'[piece.peg]}上` : '，在工具盒裡'}`);
     }
     pegs.forEach((peg, i) => peg.classList.toggle('is-ready', Boolean(selected) && selected.peg !== i));
     const run = drive(teethOnPegs(), setup), chain = [{ at: CRANK.at, teeth: CRANK.teeth, angle: crankAngle }];
@@ -194,7 +204,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
   function put(piece, peg) {
     const there = pieces.find(each => each.peg === peg && each !== piece);
     if (there) there.peg = piece.peg;
-    piece.peg = peg; selected = null; piece.node.classList.remove('is-buried');
+    piece.peg = peg; selected = null;
     const run = draw(), me = { at: PEGS[peg], teeth: piece.teeth };
     const near = [peg === 0 ? WHEEL : null, peg === PEGS.length - 1 ? CRANK : null, ...[peg - 1, peg + 1].map(i => { const each = pieces.find(other => other.peg === i); return each ? { at: PEGS[i], teeth: each.teeth } : null; })].filter(Boolean);
     const meets = near.map(other => link(me, other));
@@ -218,7 +228,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
     on(piece.node, 'pointermove', event => {
       if (!drag || drag.piece !== piece || event.pointerId !== drag.id) return;
       if (!drag.point && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 6) return;
-      if (!drag.point) { piece.node.classList.add('is-lifted'); piece.node.classList.remove('is-buried'); sound.play('pick'); selected = null; draw(); }
+      if (!drag.point) { piece.node.classList.add('is-lifted'); sound.play('pick'); selected = null; draw(); }
       drag.point = units(event); place(piece.node, drag.point, reach(piece.teeth));
       const peg = nearestPeg(drag.point); pegs.forEach((each, i) => each.classList.toggle('is-near', i === peg));
     });
@@ -235,7 +245,7 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
     on(piece.node, 'click', () => {
       if (performance.now() - dragEnded < 350 || mended) return;
       if (selected && selected !== piece && piece.peg !== null) { put(selected, piece.peg); return; }
-      selected = selected === piece ? null : piece; piece.node.classList.remove('is-buried');
+      selected = selected === piece ? null : piece;
       if (selected) { sound.play('pick'); guide.textContent = `拿起${NAMES[piece.teeth]}了，再點一根軸釘裝上去${piece.peg !== null ? '；再點它一次，就放回原位' : ''}。`; draw(); }
       else if (piece.peg !== null) home(piece);
       else draw();
@@ -306,5 +316,5 @@ export function wheelGame({ layer, stage, cabin, say, later, sound, again = fals
   on(crank, 'keydown', event => { if (['ArrowRight', 'ArrowDown', 'Enter', ' '].includes(event.key)) { event.preventDefault(); for (let i = 0; i < 6; i++) turn(Math.PI / 12); } });
   draw();
   pieces[0].node.focus({ preventScroll: true });
-  return () => { events.abort(); cancelAnimationFrame(frame); };
+  return () => { events.abort(); cancelAnimationFrame(frame); forget(); };
 }

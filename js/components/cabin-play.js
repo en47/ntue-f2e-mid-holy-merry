@@ -7,6 +7,7 @@ import { perforated } from './cabin-paper.js';
 import { snowmanGame } from './cabin-snowman.js';
 import { feedGame } from './cabin-feed.js';
 import { pulleyGame } from './cabin-pulley.js';
+import { sleighGame } from './cabin-sleigh.js';
 import { hearthGame } from './cabin-hearth.js';
 import { deskGame } from './cabin-desk.js';
 import { musicboxGame } from './cabin-musicbox.js';
@@ -45,6 +46,8 @@ const ART = {
   // The little signs that float up: a paper heart, a star.
   heart: parent => shape('path', { d: 'M50 86C20 64 8 46 14 30 20 16 40 14 50 30 60 14 80 16 86 30 92 46 80 64 50 86Z', fill: '#d9614f', stroke: '#fbf3df', 'stroke-width': 6 }, parent),
   star: parent => shape('path', { d: 'M50 8L61 36 92 38 68 58 76 90 50 72 24 90 32 58 8 38 39 36Z', fill: '#e0b04f', stroke: '#fbf3df', 'stroke-width': 5, 'stroke-linejoin': 'round' }, parent),
+  // North Pole oat cake, for the reindeer's breakfast: a round biscuit flecked with oats, a bite gone.
+  oats: parent => { shape('path', { d: 'M50 16A36 36 0 1 0 86 52 10 10 0 0 1 76 40 9 9 0 0 1 66 26 8 8 0 0 1 50 16Z', fill: '#d8b277' }, parent); shape('path', { d: 'M50 24A28 28 0 1 0 78 54', fill: 'none', stroke: '#c49a52', 'stroke-width': 3, opacity: .6 }, parent); for (const [x, y, r] of [[36, 44, 4], [52, 60, 3.4], [40, 66, 3], [62, 46, 3.4], [30, 58, 2.6], [56, 74, 2.8]]) shape('ellipse', { cx: x, cy: y, rx: r, ry: r * .55, fill: '#f1dfb4', transform: `rotate(${x * 7} ${x} ${y})` }, parent); },
   gingerbread: parent => { shape('path', { d: 'M50 12C62 12 66 22 62 30 74 30 86 34 86 42 86 48 74 48 66 46L72 80C72 88 62 90 58 84L50 70 42 84C38 90 28 88 28 80L34 46C26 48 14 48 14 42 14 34 26 30 38 30 34 22 38 12 50 12Z', fill: '#b97a4a' }, parent); for (const [x, y] of [[44, 22], [56, 22]]) shape('circle', { cx: x, cy: y, r: 3, fill: '#fbf3df' }, parent); for (const y of [44, 56]) shape('circle', { cx: 50, cy: y, r: 4, fill: '#a84a42' }, parent); },
 };
 
@@ -181,11 +184,16 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       open.focus();
       return () => watch.disconnect();
     },
-    reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen'), clue }),
+    // By the reindeer: his feeding (and the job of feeding him by the barn's table), and the sleigh to load.
+    reindeer: () => {
+      const feeding = feedGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen'), clue });
+      const loading = sleighGame({ layer, stage, cabin, say, sound, later, progress, onLoaded: () => task('hay') });
+      return () => { feeding(); loading(); };
+    },
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, confetti, clue, gift }),
-    stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, onTask: () => task('hay'), clue }),
+    stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, fed: () => progress.volunteer.tasks.includes('lichen'), clue }),
     // The broken big wheel, mended up close (a sheet laid over the yard: it is too far off to walk up to).
-    wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, again: !pending(progress.volunteer, 'wheel'), round: progress.wheelRounds, progress, save, clue, gift, onMended: () => { progress.wheelRounds += 1; save(); task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
+    wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, bag, again: !pending(progress.volunteer, 'wheel'), round: progress.wheelRounds, progress, save, clue, gift, onMended: () => { progress.wheelRounds += 1; save(); task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
     // In the room: the hearth to tend, the desk's letters, the music box and the snow globe, and the bookcase to look over.
     // Each tells the room when it has been used (`onUse`): Santa goes out once enough has been done there.
     hearth: () => hearthGame({ layer, stage, cabin, say, later, sound, bag, onUse: () => use('hearth'), progress, save, clue }),
@@ -342,6 +350,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       if (ids.includes('mailbox') || had('lichen') || progress.clues.includes('care-note')) cabin.repaint('mailbox', { open: true });
       if (gone('lichen')) { cabin.repaint('trough', had('key') ? { eaten: true, taken: true } : { eaten: true }); cabin.reindeerStep(true, true); }
       if (had('handle')) cabin.repaint('snow-pile', { dug: true });
+      if (progress.volunteer.tasks.includes('hay')) cabin.repaint('sleigh', { loaded: true });
       cabin.placeBooks(progress.story.shelf); if (progress.story.opened) cabin.openBookcase(!progress.story.shut, false);
       cabin.wheelBroken(pending(progress.volunteer, 'wheel'), false);
       if (progress.finale.stayed) cabin.repaint('secret-tags', { mine: true });
