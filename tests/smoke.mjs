@@ -236,14 +236,16 @@ await test('Santa 手機版：觸控按鈕至少 44px、橫拿手機改右側窄
 await test('Santa 屋內：近看壁爐（添柴、風箱、火勢）、HOLY MERRY 書櫃與燙金書脊隨火光發亮', async () => {
   const { BOOKCASE, LETTER_BOOKS, SHELF_LAYOUT, BOOK_SHEETS, ROOM_SPOTS, ROOM_PROPS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
   assert.equal(LETTER_BOOKS.map(book => book.letter).join(''), 'HOLYMERRY', 'The books spell the site name');
-  assert.ok(LETTER_BOOKS.every(book => !book.gold) && ['M', 'O', 'R', 'E'].every(char => LETTER_BOOKS.some(book => book.letter === char)), 'No book stands out; MORE is all taken from HOLY MERRY itself');
+  assert.equal(LETTER_BOOKS.filter(book => book.gold).map(book => book.letter).join(''), 'OMERR', 'Five gold spines, four letters: M, O, E and both R books');
+  const [first, second] = LETTER_BOOKS.filter(book => book.letter === 'R');
+  assert.ok(first.colour === second.colour && first.w === second.w && first.h === second.h, 'The two R books are two volumes bound alike, so either will do');
   assert.equal(SHELF_LAYOUT.slots.length, 4); assert.ok(SHELF_LAYOUT.slots.every(x => x > 0 && x < SHELF_LAYOUT.santa && SHELF_LAYOUT.santa < BOOKCASE.width), 'Four empty places left of the SANTA picture book, inside the bookcase');
   assert.ok(BOOK_SHEETS.some(sheet => sheet.id === 'santa-book') && LETTER_BOOKS.every(book => BOOK_SHEETS.some(sheet => sheet.id === book.id)), 'Every book spine is a cut picture');
   assert.ok(['hearth', 'shelf'].every(id => ROOM_SPOTS.some(spot => spot.id === id))); assert.ok(!ROOM_PROPS.some(prop => prop.id === 'fireplace' || prop.id === 'bookshelf'), 'The hearth and the bookcase are places to step up to, not just a caption');
   const { cabinGlyphs } = await import(pathToFileURL(path.join(project, 'js/data/cabin-glyphs.js')).href);
   assert.ok([...'HOLYMERSANT'].every(char => cabinGlyphs[char]?.d), 'Every letter on the books comes from the display face');
   const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), hearth = await fs.readFile(path.join(project, 'js/components/cabin-hearth.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8'), html = await fs.readFile(path.join(project, 'santa.html'), 'utf8');
-  assert.ok(scene.includes('hearthAdd()') && scene.includes('blow()') && scene.includes("for (const [id, sheen] of sheens) sheen.opacity = story.glint?.ids.includes(id) ? glow * .85 : 0;") && scene.includes('fire.intensity = 2.2 + flicker * .4 + warmth'), 'One fire level drives the flames, the firelight and the gold glint');
+  assert.ok(scene.includes('hearthAdd()') && scene.includes('blow()') && scene.includes("golden.has(id) ? gleaming : 0") && scene.includes('const gleaming = hearth.lit ?') && scene.includes('fire.intensity = hearth.lit ? 2.2 + flicker * .4 + warmth'), 'One fire level drives the flames, the firelight and the gold spines\' gleam, once it is lit');
   assert.ok(scene.includes('roomAway') && scene.includes('function back()') && scene.includes("event.preventDefault(); back();"), 'Stepping back from the hearth faces the room as before, one step at a time');
   assert.ok(hearth.includes('setPointerCapture') && hearth.includes("event.key !== 'Enter'") && hearth.includes('events.abort()') && hearth.includes('cabin.bellows(0)') && !hearth.includes('innerHTML'), 'Logs and bellows work by pointer and keyboard and let go of everything on leaving');
   assert.ok(/ROOMS = \[[^\]]*'hearth'[^\]]*'shelf'/.test(entry) && entry.includes("'← 回到房間'") && entry.includes('cabin?.back()') && entry.includes('!event.defaultPrevented'), 'The back button and Escape step back from the hearth to the room');
@@ -276,7 +278,7 @@ await test('Santa 屋內：音樂盒上發條（棘輪、越轉越慢、原創�
 });
 await test('Santa 隱藏故事 P4：聖誕老人出門（固定規則）、MORE SANTA 書櫃解謎與轉開', async () => {
   const play = await fs.readFile(path.join(project, 'js/components/cabin-play.js'), 'utf8'), books = await fs.readFile(path.join(project, 'js/components/cabin-books.js'), 'utf8'), scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), chat = await fs.readFile(path.join(project, 'js/components/cabin-chat.js'), 'utf8');
-  assert.ok(play.includes('santaGoes({ used: used.size') && play.includes("onUse: () => used.add('hearth')") && play.includes("onUse: () => used.add('desk')"), 'Santa goes out by a fixed rule after things are used in the room, never by the chat');
+  assert.ok(play.includes('santaGoes({ used: used.size') && play.includes("onUse: () => use('hearth')") && play.includes("onUse: () => use('desk')") && play.includes('say(BELLS)') && play.includes('say(GOING)'), 'Santa goes out by a fixed rule after things are used in the room (the reindeer\'s bells first), never by the chat');
   assert.ok(!/santaGoes|solved\(|moveBook/.test(chat), 'The chat cannot move the story');
   assert.ok(books.includes('const home = cabin.santaHome') && books.includes('button.disabled = home || done') && books.includes('solved(shelf)') && books.includes("'需要提示嗎？'") && books.includes('真的要看答案嗎？'), 'Books stay put while Santa is home; MORE is checked by the rules; hints come one at a time and the answer only when asked twice');
   assert.ok(books.includes('setPointerCapture') && books.includes("event.key === 'Escape' && picked >= 0") && books.includes('events.abort()') && !books.includes('innerHTML'), 'Drag or tap-then-place, Escape puts a picked book back, every listener let go');
@@ -529,22 +531,30 @@ await test('Santa 紅繩小鎖：空白紙條烤火浮出荷莉的字，密碼�
   assert.ok(secret.includes("paperLayer(padlock, '0 0 120 130', 'lock-shackle', lockShackle, BRASS)") && css.includes('.cord-lock.is-open .lock-shackle'), 'The lock is paper SVG, its shackle a piece that springs open');
   assert.ok(hearth.includes('if (cabin.heat < 1.5)') && hearth.includes("finale.slip = 'read'; save(); clue('lemon-note');") && css.includes('@keyframes lemon-ink'), 'Held to a fire of two logs, the lemon writing comes up a character at a time');
 });
-await test('Santa 書櫃的謎題：搖椅紙條、四樣東西各藏一個字母、找到的字母紙片、MORE 四本書發光', async () => {
+await test('Santa 第二章：書櫃的謎題由火光金書脊、反寫吸墨器、四枚空白書籤、舊村子與英文紙條拼出，字幕不說答案', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
-  const [hearth, desk, music, globe, books, play, scene] = await Promise.all(['js/components/cabin-hearth.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-globe.js', 'js/components/cabin-books.js', 'js/components/cabin-play.js', 'js/components/cabin-scene.js'].map(read));
-  const { LETTERS, NOTEBOOK, GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href), { CHAIR } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href);
-  assert.deepEqual(Object.values(LETTERS).sort(), ['E', 'M', 'O', 'R'], 'The four hidden letters are MORE, in some other order');
-  assert.notEqual(Object.keys(NOTEBOOK).filter(id => id in LETTERS).map(id => LETTERS[id]).join(''), 'MORE', 'The clue book never lists them already spelled');
-  for (const [file, id] of [[hearth, 'letter-hearth'], [desk, 'letter-desk'], [music, 'letter-musicbox'], [globe, 'letter-globe']]) assert.ok(file.includes(`clue('${id}')`) && NOTEBOOK[id], `${id} is found in its own place and written down`);
-  assert.ok(hearth.includes('const lit = cabin.heat > .6;') && desk.includes("pad.classList.add('is-turned')") && music.includes("gold.classList.toggle('is-up', up)") && globe.includes("letter(parent, 'M',"), 'R only in firelight, E turned the right way round, O rising while it plays, M on the little house');
-  assert.ok(CHAIR.lines.join('').includes('四樣東西') && play.includes('later(2000, chairNote)') && GOALS.bookcase.hints.at(-1).includes('MORE'), 'Santa\'s note on the chair is the riddle; the last hint answers it');
-  assert.ok(books.includes("cabin.glintBooks(GAPS.map(place => shelf[place]))") && books.includes("progress.clues.filter(id => id in LETTERS)") && scene.includes('glintBooks(ids = [])'), 'The letters found wait as tiles; the four books that spell it light up');
+  const [hearth, desk, music, globe, books, play, scene, secret, art, inspectUi, css] = await Promise.all(['js/components/cabin-hearth.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-globe.js', 'js/components/cabin-books.js', 'js/components/cabin-play.js', 'js/components/cabin-scene.js', 'js/components/cabin-secret.js', 'js/components/cabin-art.js', 'js/components/cabin-inspect.js', 'css/santa.css'].map(read));
+  const { NOTEBOOK, GOALS, BOOKCASE_HINTS, GIFT_HINTS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href), { CHAIR, BELLS, GOING } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { BLOTTER } = await import(pathToFileURL(path.join(project, 'js/data/cabin-items.js')).href);
+  // The answer is nowhere: no letters to collect, the captions never spell it, the hints speak only of letters.
+  assert.ok(!['letter-desk', 'letter-musicbox', 'letter-globe'].some(id => NOTEBOOK[id]) && !books.includes('books-found'), 'No letters hidden around the room, no tiles of found letters at the shelf');
+  const captions = [hearth, desk, music, globe, play].join('').match(/say\('[^']*'\)/g) ?? [];
+  assert.ok(!captions.some(line => /MORE|M、O、R、E/.test(line)), 'No caption says the answer');
+  assert.deepEqual(GOALS.bookcase.hints, BOOKCASE_HINTS); assert.equal(BOOKCASE_HINTS.length, 4); assert.ok(BOOKCASE_HINTS.at(-1).includes('M、O、R、E') && !BOOKCASE_HINTS.slice(0, -1).some(hint => /金色那幾本|那一本 R/.test(hint)), 'Four hints about letters; only the last says it');
+  // Each piece of furniture gives one angle, and each needs what the yard gave (or the room).
+  assert.ok(hearth.includes("accepts: id => id === 'matches'") && scene.includes('if (!hearth.lit || hearth.heat > 2.5) return false') && scene.includes('Math.max(hearth.lit ? 1 : 0') && hearth.includes("clue('letter-hearth')"), 'The weak fire lit by a match, for good; then the R and the gold spines in its light');
+  assert.ok(desk.includes("id === 'key' || '鑰匙孔很小") && desk.includes("bag.give('magnifier', from)") && desk.includes("onTurn: () => clue('blotter')") && BLOTTER.writing.replace('\n', ' ') === 'Look within our name.' && inspectUi.includes("element('p', 'inspect-mirror', face, back.mirror)") && css.includes('transform: scaleX(-1)'), 'The desk drawer opens to the little key: a magnifier, and the blotter\'s line written backwards');
+  assert.ok(music.includes('function bookmarks(parent)') && music.includes("clue('music-bookmarks')") && art.includes('for (const x of SHELF_LAYOUT.slots) ribbon(paper'), 'Four blank gold bookmarks rise from the music box, cut like the ribbons in the four empty places');
+  assert.ok(music.includes("id === 'pin' ||") && music.includes("progress.placed.push('musicbox-catch')") && secret.includes("bag.give('pin'") && GIFT_HINTS.N.includes('撥針'), 'The music box drawer is caught until the brass pin from the postmark tray undoes it');
+  assert.ok(globe.includes("accepts: id => id === 'magnifier'") && globe.includes("clue('globe-village'); clue('globe-base')") && !globe.includes("letter(parent, 'M',") && art.includes('The village as it was in 2003'), 'The globe holds the old village, read only with the magnifier');
+  assert.deepEqual(CHAIR.lines, ["There's always room for more."]); assert.ok(NOTEBOOK['chair-note'].text.includes('留給更多'), 'The chair note in English, the clue book adds it in Chinese');
+  assert.ok(BELLS.includes('鈴鐺') && GOING.includes('麋鹿好像又把飼料弄翻了') && play.includes('later(2000, chairNote)'), 'Bells outside, Santa goes out, the note on the chair');
+  assert.ok(books.includes("cabin.glintBooks(GAPS.map(place => shelf[place]))") && scene.includes('glintBooks(ids = [])'), 'The four books that spell it light up');
 });
 await test('Santa 音樂盒底的抽屜：照交接表上第一次飛的順序彈音梳，抽屜彈開是尼爾斯留給新替身的吊飾', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [music, sound, css] = await Promise.all(['js/components/cabin-musicbox.js', 'js/components/cabin-sound.js', 'css/santa.css'].map(read));
   const { FLIGHT_ORDER } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
-  assert.ok(music.includes("const drawer = knows() && progress ? element('button', 'musicbox-drawer', layer) : null;") && music.includes('if (playsOpen(played))') && music.includes("gift('N'); clue('music-drawer');"), 'Only once the secret is known; the rules decide; the ornament is kept and written down');
+  assert.ok(music.includes("const drawer = element('button', 'musicbox-drawer', layer)") && music.includes('if (undone()) { combCard(); return; }') && music.includes('if (playsOpen(played))') && music.includes("gift('N'); clue('music-drawer');"), 'Opened only once its catch is undone; the rules decide; the ornament is kept and written down');
   const comb = music.slice(music.indexOf('const COMB = ['), music.indexOf('];', music.indexOf('const COMB = [')));
   assert.deepEqual([...comb.matchAll(/\['([A-Z])', '([A-G]\d)'/g)].map(([, mark]) => mark).sort(), [...FLIGHT_ORDER].sort(), 'One tine for each substitute');
   assert.ok(sound.includes('pluck(note) {') && sound.includes('if (boxReady()) try { tone(PITCH[note]') && css.includes('@keyframes tine-ring'), 'The tines ring in the box\'s own voice');

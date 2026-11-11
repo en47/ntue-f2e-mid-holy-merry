@@ -116,7 +116,7 @@ export function globeGame({ layer, stage, cabin, say, later, sound, bag, onUse =
   // The magnifier held to the glass (it goes back in the pocket): the village and the base, close up.
   let lens = null;
   function magnify() {
-    if (frame) { say('雪還在球裡打轉，等它落定再看。'); return; }
+    if (frame && !told) { say('雪還在球裡打轉，等它落定再看。'); return; }
     lens?.remove(); sound.play('open'); clue('globe-village'); clue('globe-base');
     lens = element('article', 'cabin-letter lens-card', layer); lens.setAttribute('aria-label', '放大鏡下的雪花球');
     element('h3', 'chair-title', lens, '放大鏡下的雪花球');

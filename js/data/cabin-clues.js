@@ -34,7 +34,7 @@ export const NOTEBOOK = {
 // The welcome gifts not yet found, a hint each, asked for one at a time, in the order they can first be reached.
 export const GIFT_ORDER = ['N', 'E', 'O', 'K', 'H'];
 export const GIFT_HINTS = {
-  N: '尼爾斯最得意的作品，是做給克莉絲的那個音樂盒——看看它的底下。',
+  N: '尼爾斯最得意的作品，是做給克莉絲的那個音樂盒——看看它的底下。卡住抽屜的卡榫，用小房間郵戳章盤上的黃銅撥針就撥得開。',
   E: '艾洛最愛替雪人打扮。小房間的帽架上，好像夾著什麼。',
   O: '歐拉管信。加入以後，把分揀架上的信分好，也許會有驚喜。',
   K: '克莉絲常顧著摩天輪。修好它以後，看看動力箱裡面。',

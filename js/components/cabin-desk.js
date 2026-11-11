@@ -131,7 +131,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   const actions = element('div', 'desk-actions', work);
   const action = (text, run) => { const button = element('button', '', actions, text); button.type = 'button'; on(button, 'click', run); return button; };
   const buttons = { open: action('拆開信', open), flip: action('翻到背面', flip), write: action('寫回信 ✎', write), fold: action('摺好放進信封', fold), send: action('投進郵袋', send), back: action('放回去', putBack) };
-  const bag = element('div', 'desk-sack', work); paperLayer(bag, '0 0 100 110', '', sack, PAPER); const count = element('span', 'sack-count', bag);
+  const mailbag = element('div', 'desk-sack', work); paperLayer(mailbag, '0 0 100 110', '', sack, PAPER); const count = element('span', 'sack-count', mailbag);
   let current = null;
   // The drawer over the kneehole: locked until the little key turns in it (and stays there); pulled out, what is inside
   // comes up on a card: the magnifier to take, the blotter to look at closely.
@@ -182,7 +182,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     const answering = !out && VOLUNTEER_LETTERS.includes(entry) && signedUp(volunteer) && !answered(entry), again = answering && !unanswered().includes(entry);
     envelope.hidden = step !== 'envelope'; letter.hidden = step !== 'read'; compose.hidden = step !== 'compose';
     envelope.dataset.kind = kind; envelope.dataset.open = String(out && !sealed); arrived.hidden = out; postage.hidden = false; postmark.hidden = !marked; wax.hidden = !sealed;
-    bag.hidden = !out; count.textContent = `已寄出 ${desk.sent.length} 封`;
+    mailbag.hidden = !out; count.textContent = `已寄出 ${desk.sent.length} 封`;
     guide.textContent = step === 'compose' ? `想跟${entry.name}說什麼？選一句寫進信裡（哪一句都好）。`
       : out ? (step === 'read' ? '讀完就摺好，放進信封。' : !sealed ? '把桌上的火漆印拖到信封的封口，封起來。' : !marked ? '再把郵戳拖到右上角的郵票上，蓋上北極郵局的郵戳。' : '封好、蓋好了！把信封拖進郵袋，就寄出去了。')
       : step === 'envelope' ? `${entry.from}寄來的信，郵局已經蓋好收件章。拆開來讀讀看。`
@@ -258,7 +258,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (!desk.sent.includes(entry.id)) desk.sent.push(entry.id);
     if (entry.letter) { delete desk.answers[entry.letter]; desk.sealed = desk.sealed.filter(id => id !== entry.id); desk.marked = desk.marked.filter(id => id !== entry.id); }
     save(); sound.play('drop'); later(220, () => sound.play('jingle'));
-    pop(envelope, 'is-sent'); pop(bag, 'is-taking'); count.textContent = `已寄出 ${desk.sent.length} 封`;
+    pop(envelope, 'is-sent'); pop(mailbag, 'is-taking'); count.textContent = `已寄出 ${desk.sent.length} 封`;
     say(`寄出去了！${entry.name}會在平安夜前收到${entry.id === REPLY.id ? '聖誕老人的' : '你寫的'}回信。`);
     if (VOLUNTEER_LETTERS.every(each => desk.sent.includes(`reply-${each.id}`))) onTask();
     later(still() ? 300 : 1300, () => { if (current?.entry !== entry) return; const { source } = current; current = null; envelope.classList.remove('is-sent'); fly(local(source.getBoundingClientRect()), true); source.focus({ preventScroll: true }); });
@@ -333,15 +333,15 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     const dx = event.clientX - carry.x, dy = event.clientY - carry.y;
     if (!carry.point && Math.hypot(dx, dy) < 6) return;
     carry.point = { x: event.clientX, y: event.clientY }; envelope.classList.add('is-carried'); envelope.style.translate = `${dx}px ${dy}px`;
-    bag.classList.toggle('is-open', near(carry.point, bag.getBoundingClientRect(), 20));
+    mailbag.classList.toggle('is-open', near(carry.point, mailbag.getBoundingClientRect(), 20));
   });
   const letGo = event => {
     if (!carry || event.pointerId !== carry.id) return;
-    const { point } = carry; carry = null; envelope.classList.remove('is-carried'); envelope.style.translate = ''; bag.classList.remove('is-open');
+    const { point } = carry; carry = null; envelope.classList.remove('is-carried'); envelope.style.translate = ''; mailbag.classList.remove('is-open');
     if (!point) return;
     carried = true;
     const end = event.type === 'lostpointercapture' ? point : { x: event.clientX, y: event.clientY };
-    if (event.type !== 'pointercancel' && near(end, bag.getBoundingClientRect(), 20)) send(); else sound.play('drop');
+    if (event.type !== 'pointercancel' && near(end, mailbag.getBoundingClientRect(), 20)) send(); else sound.play('drop');
   };
   on(envelope, 'pointerup', letGo); on(envelope, 'pointercancel', letGo); on(envelope, 'lostpointercapture', letGo);
   on(envelope, 'click', () => { if (carried) carried = false; });

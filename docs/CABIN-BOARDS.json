@@ -127,11 +127,11 @@
       "bytes": 19802
     },
     "hi/book-e1.webp": {
-      "fingerprint": "6d00eec38cb2e75ce5c6d047a7b992e192e31013405ef122da5e312d0957f871",
-      "sha256": "a36bce98f25631a2ef0aa4d4dcf8d03dc70776ed96004c3b722792eac74a942f",
+      "fingerprint": "5f23fd849a9fae4e89a15e41e3e9df16bb5e08c86cbf981eae423aa138e4f244",
+      "sha256": "513dc61f76c326ea6673064ebe5ebf91b586855b13d21f9fa2bfb8eccc78b1bf",
       "width": 112,
       "height": 408,
-      "bytes": 10028
+      "bytes": 10026
     },
     "hi/book-h1.webp": {
       "fingerprint": "9c8fdf47728bc152264f9e226e59089089ae7fc6a520abfa0fb0a8a6c0efff48",
@@ -148,18 +148,18 @@
       "bytes": 8748
     },
     "hi/book-m1.webp": {
-      "fingerprint": "6d4720e707df94a10511a6fb4e2d494144799f556a4a01c4d894f22c87bdddc7",
-      "sha256": "af8ffb494d65c18b9e2690d5e520c67d55c049c94db23e5ea5a60609000dcf42",
+      "fingerprint": "e1a24e2bfe93253ce8b10aa00b9b34547679b729826b877acd443009d799b8d6",
+      "sha256": "57b373edebd06c8f76bc8cb70351cd5a10630df437057aa2e82eaa4c7ed67060",
       "width": 122,
       "height": 448,
-      "bytes": 13170
+      "bytes": 13490
     },
     "hi/book-o1.webp": {
-      "fingerprint": "f4b3897a5dc43b78ecc571ad5bf609c7a9641af84b1af6e8d3e05947f32b4312",
-      "sha256": "fd68ac3b0045f0e5e568313b098ec77c624c0ef76d16fd472c803472eb0eb7d6",
+      "fingerprint": "4703ec2381ca2faae4f54acc338341213d34ed8e2d0c58979d62d43e07e4f2b0",
+      "sha256": "2554710cc8c7ef29c0a6da74fc536d3834eb6b52fa588de55e8305fc10a0cb93",
       "width": 118,
       "height": 432,
-      "bytes": 13032
+      "bytes": 11648
     },
     "hi/book-plain-0.webp": {
       "fingerprint": "16215673aa14140911b8e8df0d1a5ae8b9fcbea0c7842e11c30ffd291064df5a",
@@ -190,18 +190,18 @@
       "bytes": 3828
     },
     "hi/book-r1.webp": {
-      "fingerprint": "5e24c2ff2c25e1e042263c7f38eda4b09c0e6e43d3cdded9c9f12bec8dd7d318",
-      "sha256": "bf34de712e59612f8c83e9658a8801e1ba907a45009292a1a2834bcd737fe112",
+      "fingerprint": "961cbcfde6c76a7d52125b14866d3659068403dfdb99729f4619062ba0bafd00",
+      "sha256": "96f2863ee77d7f0cc1e6d75a7e5c275638c28fc8e23b511924c9aa057747b319",
       "width": 115,
       "height": 432,
-      "bytes": 12364
+      "bytes": 12592
     },
     "hi/book-r2.webp": {
-      "fingerprint": "b6dfc0568f4ce38ee64cc60df42e71a46a86851743f8d982130f4e25f53668a8",
-      "sha256": "f55b4efb7517b2dd0e12be2f24fb502be74f005fddf2e7f47c18dd98bd17de84",
-      "width": 99,
-      "height": 384,
-      "bytes": 9466
+      "fingerprint": "961cbcfde6c76a7d52125b14866d3659068403dfdb99729f4619062ba0bafd00",
+      "sha256": "96f2863ee77d7f0cc1e6d75a7e5c275638c28fc8e23b511924c9aa057747b319",
+      "width": 115,
+      "height": 432,
+      "bytes": 12592
     },
     "hi/book-y1.webp": {
       "fingerprint": "ab4229fd7442fdd86c4420a22d9d0c352cce0f48aed125045f620e5ff7c17e62",
@@ -218,11 +218,11 @@
       "bytes": 7478
     },
     "hi/bookshelf.webp": {
-      "fingerprint": "00a0519d0c0f1b0ba32ef74c7ae1cde9bbef3a7896e8805d2c3874e910a19489",
-      "sha256": "375fd5d384af163d1fb57fbab47e09f85e46a9c850db7248c7003a1836fc1af5",
+      "fingerprint": "2b6bb70d80045db81c056edfbbd8b9615f3857ba9389ffd4397a391c16a57f82",
+      "sha256": "cbe5f5665f8871c8caf24171cd2ee6cc26911210ae8b7cddcd49f0f428514430",
       "width": 855,
       "height": 1260,
-      "bytes": 219484
+      "bytes": 219676
     },
     "hi/bunting-stalls.webp": {
       "fingerprint": "2cb2d9e1642b16a91ab3247be36a6be3f3d4e9a54687d7883aba9639d1c2928f",
@@ -1226,11 +1226,11 @@
       "bytes": 6086
     },
     "hi/snowglobe.webp": {
-      "fingerprint": "dd93eb800139d83c02c4600408c94c681ae25beb4d9127bcf9c0c631518aaaa0",
-      "sha256": "dfae30eb48df51aaece0103491cac8501ad8fdb766d125df1799d7da977ffd89",
+      "fingerprint": "9a366b83757ca6cfe11b7a44f2d6ff7ac5354ee661b9ef62e1ab8192c9c3bddf",
+      "sha256": "0e6c9b77c841a23058a3a70a4ac148ec7b9a2ddc8b540bc34fac133b079b6903",
       "width": 270,
       "height": 324,
-      "bytes": 15588
+      "bytes": 15798
     },
     "hi/snowman.webp": {
       "fingerprint": "831bd375cf2166897cdd103384d41a8dbf4b8c8a51c7a841fcdb4a2275689912",
@@ -1499,11 +1499,11 @@
       "bytes": 12896
     },
     "large/book-e1.webp": {
-      "fingerprint": "ee215067b671addef2d9eda95683d0668adc7c885008f87d3df1cbee19e881b2",
-      "sha256": "6e86e14c692ddf25cae699604c7761dd43aef82e9ecaa865ebd86703a5d68bc7",
+      "fingerprint": "9fdc13b1629cf71ae1c6c57f5062179fadb51b640ec5b14ed4cf04837b431111",
+      "sha256": "0eb8756db9f9d7111549af3d09f3cc2a97a18c177f3131c5522c632742cf6df7",
       "width": 84,
       "height": 306,
-      "bytes": 6124
+      "bytes": 6532
     },
     "large/book-h1.webp": {
       "fingerprint": "e8e29d37adac69947c213f88820b1c1d16f6cf5760dbf67d5ff5d1d10d6f510e",
@@ -1520,18 +1520,18 @@
       "bytes": 5688
     },
     "large/book-m1.webp": {
-      "fingerprint": "cdb893e51af00ee76b8631a6e306cff1f7113dba65fa4dc2ee1328ef00eafbf4",
-      "sha256": "380f7732b531ee0bc4e6427c17038771fa8a1b139a67009c6dd89e15a1bf8311",
+      "fingerprint": "6bf9e4e86743416f5829d1cf5fe22b5d9b0f1329d4324b09c3c3d72794310bf4",
+      "sha256": "2bb38ec0b52884183b804cc1a19a08d6d849666fb09b3b0d152fb04da1b91878",
       "width": 92,
       "height": 336,
-      "bytes": 8064
+      "bytes": 8490
     },
     "large/book-o1.webp": {
-      "fingerprint": "15416e24d57cb61f91b689a673eec16364b95d6ecefdeeed7b7ec61c372496fa",
-      "sha256": "f74b7bb5f8462f4206c61927ac144f35992e54e2ccdb83240f7c8dac775ac4ad",
+      "fingerprint": "fe314611fbd81e76181c13162924eee20208b2dadf75f1fcd321dbfc36b98e71",
+      "sha256": "73b61cd738b31225c1deff12895fa406d7450e673aa68e138d36b2e95c0ce5a4",
       "width": 89,
       "height": 324,
-      "bytes": 7824
+      "bytes": 7344
     },
     "large/book-plain-0.webp": {
       "fingerprint": "8f5e084809e502a2b669ac6703fb3d94862b678bfbc450d7b00bea468edb15fd",
@@ -1562,18 +1562,18 @@
       "bytes": 2358
     },
     "large/book-r1.webp": {
-      "fingerprint": "5357884c5cafad47632b4f8aaad7ea061d3e65a46d6afeed4f7812c50c73eec9",
-      "sha256": "ec6948d9c29ccd2f2544deabe4d1a5bf14ce890fddcda7c35dddf1c47ebab11b",
+      "fingerprint": "dedf21cfe7ac1af5faf1a871fbab641a81313b71554a4a837e3a4e6070802b16",
+      "sha256": "4adb571da7e1e5a64eff9b60a2ea17ba7c4933a1e3a9f0ebd12e671f2df61f20",
       "width": 86,
       "height": 324,
-      "bytes": 8212
+      "bytes": 8076
     },
     "large/book-r2.webp": {
-      "fingerprint": "a07bbaad19c288ef91b3dbf216a54cb6873976eecb1d896c907d02cab51e82b4",
-      "sha256": "298280eaa01a96c73bfab7875d16c626e66a1e2c715f5e6dc207a7ad05b75f6e",
-      "width": 74,
-      "height": 288,
-      "bytes": 5946
+      "fingerprint": "dedf21cfe7ac1af5faf1a871fbab641a81313b71554a4a837e3a4e6070802b16",
+      "sha256": "4adb571da7e1e5a64eff9b60a2ea17ba7c4933a1e3a9f0ebd12e671f2df61f20",
+      "width": 86,
+      "height": 324,
+      "bytes": 8076
     },
     "large/book-y1.webp": {
       "fingerprint": "6c2685693e3d4cb97b7a1df01dbd75e593737ed01306f28c74bdf1f10a7e65dd",
@@ -1590,11 +1590,11 @@
       "bytes": 4670
     },
     "large/bookshelf.webp": {
-      "fingerprint": "ee30d1913523810755604be50f967c2e818b2bcdb8b1eb1d4c5c839a0f1e2e6e",
-      "sha256": "ae8e8af999fbcfe1a47690115f55ca58bf16aa86116233520b1c0ff97522a8e0",
+      "fingerprint": "9f1df1a0bd19f17071b7a864291c6d7e55189daed62c597b4d0bbec50e63d14e",
+      "sha256": "2f3ec4bddde11fd4fa76dbcf4522be5479821eff5c01486c61689f94ea9074ca",
       "width": 641,
       "height": 945,
-      "bytes": 128964
+      "bytes": 129378
     },
     "large/bunting-stalls.webp": {
       "fingerprint": "955093e63e60b3631cac42461bd2c92210295630a22742fcea9b3e4cfccf1293",
@@ -2598,11 +2598,11 @@
       "bytes": 4570
     },
     "large/snowglobe.webp": {
-      "fingerprint": "c427b8348494b276e38f8a08f243b07ca380226133882e58768182191f7f1473",
-      "sha256": "348640728b472ef62237e0e8003c5780186084626244a6fde01c8bcee7a84a58",
+      "fingerprint": "021f149e96ac8070a60029c11f8bcd2f53da99bdac9ad2da66534cca5d9a0ca9",
+      "sha256": "fe4ba2d8bd984976cd25521fc210faea9d265c9a926011594936681c9eb235bf",
       "width": 203,
       "height": 243,
-      "bytes": 10746
+      "bytes": 10780
     },
     "large/snowman.webp": {
       "fingerprint": "fb0fc66ffaddc8b4448f834a22e73ddb4ea3ca6b68afb3034eca854da0ee9ec5",
@@ -2871,11 +2871,11 @@
       "bytes": 4722
     },
     "small/book-e1.webp": {
-      "fingerprint": "f77c273a0e5b80bce2bd8e2c08564514773e6f2044ab006a8c45550bd0029ebf",
-      "sha256": "3a484be542321f9a38b59637a81fa9f8bf101971c3f6a45d8e955738e2dc081a",
+      "fingerprint": "1771efbb5b39660491ac077e4a058840ecc4e6a04ef31115fffc471e23694595",
+      "sha256": "e1c4475fde4a1138364ed994087fd691883990158fa591e7006ba04c098a7911",
       "width": 56,
       "height": 204,
-      "bytes": 1914
+      "bytes": 1936
     },
     "small/book-h1.webp": {
       "fingerprint": "fe72a173a01e0561c9889c7d060ed37fca9ffcc70689279151b5d5ded33d1383",
@@ -2892,18 +2892,18 @@
       "bytes": 1676
     },
     "small/book-m1.webp": {
-      "fingerprint": "6deececd509d946a66e6d87d959bba407948e973aa0f52a1a4d792b16c02bbc7",
-      "sha256": "fd3cbd6523fcced6c714c8a2fe92f08bdad16aeec24ef96a842159e3b0f682e0",
+      "fingerprint": "65bbb6c74e1d385894f312d3f75b1fef865500fde6758bfb0eb09137b2efc6c2",
+      "sha256": "eee9e528e8a66c76c2c65d16b7342a863b318c2bbe9b3ed87947d2fd370bab2d",
       "width": 61,
       "height": 224,
-      "bytes": 2318
+      "bytes": 2326
     },
     "small/book-o1.webp": {
-      "fingerprint": "3e8502345eefc3a429495f6d1373a34ae952687121f0ebdb4ad27e7a9a37898f",
-      "sha256": "d0493a7b85d47fbecf2d66aa59698ec824afb874d226010b53f137c12141e26d",
+      "fingerprint": "823c488d2a63c0db603c855970da3347435f0710f19497c971a5811c575547bf",
+      "sha256": "665378752241c2d1af4d8a3117731daf5b8b1ea3f993de5481f84aaf0614946f",
       "width": 59,
       "height": 216,
-      "bytes": 2428
+      "bytes": 2158
     },
     "small/book-plain-0.webp": {
       "fingerprint": "1602cb6f5fccb4d8b70d486221dfbd8fe6e3fd6ebacbc6e3f1b34e4dfe843a4d",
@@ -2934,18 +2934,18 @@
       "bytes": 704
     },
     "small/book-r1.webp": {
-      "fingerprint": "46ad87b9f01de90f1e7f9164dcd7d841ccd80eba617bc9c90ee8f3758f2e7fc0",
-      "sha256": "2727b5238a977cd658a4571e7e86c265598427d0ac7a5de2caeaf487cbd617fd",
+      "fingerprint": "557328240c47a27221fe83b753f0ff1c5774a34153891a706a8632f19d40ce12",
+      "sha256": "b890e51767bdc25bc996ab3a79f428784aaa91c9ccab402c267db78f96df7d3d",
       "width": 58,
       "height": 216,
       "bytes": 2450
     },
     "small/book-r2.webp": {
-      "fingerprint": "cc330f681389399d8c14e335bf620ceadc3cf225892e7e200e2cda54c2c2a85d",
-      "sha256": "afe9b89c70f8091fa78a082bd70e9f11c81397327078e60e042605266f3e248e",
-      "width": 50,
-      "height": 192,
-      "bytes": 1838
+      "fingerprint": "557328240c47a27221fe83b753f0ff1c5774a34153891a706a8632f19d40ce12",
+      "sha256": "b890e51767bdc25bc996ab3a79f428784aaa91c9ccab402c267db78f96df7d3d",
+      "width": 58,
+      "height": 216,
+      "bytes": 2450
     },
     "small/book-y1.webp": {
       "fingerprint": "7566b9a0c8453dcc7db57ad3461da1f06ffd2005becdfd325dccba8483bd49ad",
@@ -2962,11 +2962,11 @@
       "bytes": 1336
     },
     "small/bookshelf.webp": {
-      "fingerprint": "d8210a9878fe2e2c93b03718f46fa73159c7823ae1cf168c5ec0e09c34d35843",
-      "sha256": "6d91bc8f23d1995b631b578454fc5fd4038bda28417fd470d2610df08af732dc",
+      "fingerprint": "80e417683fabad85cf1d612094f748a189c25a749e5418ed353e4749a5468123",
+      "sha256": "2a45ad36ebff33684bba0f845e7758ed3a63e8092e8800f758d65bdb05a75121",
       "width": 428,
       "height": 630,
-      "bytes": 30708
+      "bytes": 29912
     },
     "small/bunting-stalls.webp": {
       "fingerprint": "72e789302667b721ede6f6a02b1238d4d8a8d90b768510b1d3b199b1dc92dbb4",
@@ -3970,11 +3970,11 @@
       "bytes": 2220
     },
     "small/snowglobe.webp": {
-      "fingerprint": "7ad46ff218b829a16f43090aa2d3401f7db062b04dab97405ac1e10d5dce250d",
-      "sha256": "f5c3e827d856352b58bbab012e27976cf27bba0733454c9a97d68c0346ac5914",
+      "fingerprint": "82dbd76d4ecec036694932ba9d46717432a320cbf8f535aed969f135ebc36475",
+      "sha256": "0c79796bddafe76da5fe812ba7489a042318a88e127b579da5fcb1841fa73f46",
       "width": 135,
       "height": 162,
-      "bytes": 4730
+      "bytes": 4760
     },
     "small/snowman.webp": {
       "fingerprint": "fd94c4b812ec1194b4ced8b55880fd9c4e00cff0ff7a82c34ffd1a980fee1b27",

@@ -74,7 +74,8 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUs
     const { key } = rects, size = Math.max(96, key.width * 2.4), x = key.left + key.width / 2, y = key.top + key.height / 2;
     Object.assign(knob.style, { left: `${x - size / 2}px`, top: `${y - size / 2}px`, width: `${size}px`, height: `${size}px` });
     { const w = Math.max(88, rects.box.width * .7), h = w / 4; Object.assign(drawer.style, { left: `${rects.box.left + rects.box.width / 2 - w / 2}px`, top: `${rects.box.top + rects.box.height * .9 - h}px`, width: `${w}px`, height: `${h}px` }); }
-    const { box } = rects, medal = Math.max(44, box.width * .55); Object.assign(gold.style, { left: `${box.left + box.width / 2 - medal / 2}px`, top: `${box.top - medal * .9}px`, width: `${medal}px`, height: `${medal}px` });
+    // The bookmarks stand up over the box, kept clear of the caption along the top.
+    const { box } = rects, medal = Math.max(44, box.width * .4); Object.assign(gold.style, { left: `${box.left + box.width / 2 - medal / 2}px`, top: `${Math.max(76, box.top - medal * .78)}px`, width: `${medal}px`, height: `${medal}px` });
   }
   const played = () => (knows() ? '盒蓋內側刻著 N 和 K：尼爾斯和克莉絲。' : '') + (sound.musicOn ? '小紙雕轉起來了。（網站音樂開著時，音樂盒的歌聲會被蓋過；關掉右下角的音樂就聽得到。）' : '叮叮咚咚……小紙雕跟著音樂慢慢轉。');
   // Each 30° of winding clicks the ratchet once.
