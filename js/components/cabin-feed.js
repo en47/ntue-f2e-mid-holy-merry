@@ -6,13 +6,17 @@
 // shows in the hay; brushed aside, it is a little key. Fed and found are the pocket's to keep (lichen used, key had).
 import { paperLayer } from './paper-art.js';
 import { MEALS, eat, full, mealsToday } from '../services/cabin-progress.js';
+import { FEED_ORDER, feedsNext } from '../services/cabin-story.js';
+import { FEED } from '../data/cabin-jobs.js';
 
-const FOODS = [['carrot', '胡蘿蔔'], ['lichen', '地衣'], ['gingerbread', '薑餅']];
+const FOODS = [['oats', '北極燕麥餅'], ['carrot', '胡蘿蔔'], ['lichen', '地衣'], ['gingerbread', '薑餅']];
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
 const centre = rect => ({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
 const near = (point, rect, pad) => rect && point.x >= rect.left - pad && point.x <= rect.left + rect.width + pad && point.y >= rect.top - pad && point.y <= rect.top + rect.height + pad;
 
-// A volunteer still owing him his lichen (`wants`) finds some in the basket too, and only that once he is full for the day.
+// A volunteer owing him his care (`wants`) finds in the basket what the barn's feeding table lists (and the gingerbread):
+// he takes them only in the order of their times (cabin-story.js); a wrong one and the round starts again. Fed for the
+// job, it does not count among the day's meals, so it can be done even once he is full.
 export function feedGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound, burst, art, paper, wants = () => false, onTask = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
@@ -60,14 +64,14 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
   const done = () => { events.abort(); clearTimeout(hush); watch.disconnect(); forget.forEach(each => each()); cabin.reindeerLook(null); cabin.reindeerAct(null); };
 
-  const lichenOnly = full(progress) && wants();
-  if (full(progress) && !lichenOnly) {
+  let job = wants(), served = [];
+  if (full(progress) && !job) {
     say(bag.holds('lichen') ? '麋鹿今天已經吃飽了……不過聞到你口袋裡的味道，牠回頭看了看餵食槽。' : '麋鹿今天已經吃飽了，明天再來餵牠吧。');
     later(500, () => { cabin.reindeerAct('nod'); speak('今天吃飽囉，明天再來餵我！'); });
     return done;
   }
 
-  say(lichenOnly ? '麋鹿今天已經吃飽了……不過牠最愛的地衣，好像還吃得下一點。' : bag.holds('lichen') ? '麋鹿聞到你口袋裡的地衣，抽了抽鼻子。牠身後有個餵食槽。' : '從籃子拿食物，拖到麋鹿嘴邊餵牠吃吧！');
+  say(job ? FEED.start : bag.holds('lichen') ? '麋鹿聞到你口袋裡的地衣，抽了抽鼻子。牠身後有個餵食槽。' : '從籃子拿食物，拖到麋鹿嘴邊餵牠吃吧！');
   const tray = element('div', 'feed-tray', layer), meter = element('p', 'feed-meter', tray), basket = element('div', 'feed-basket', tray);
   const meals = Array.from({ length: MEALS }, () => element('span', 'feed-meal', meter));
   const ring = element('span', 'feed-mouth', layer); ring.setAttribute('aria-hidden', 'true');
@@ -126,8 +130,22 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     later(320, () => ghost.remove());
   }
 
+  // The job's round: the next by the table's clock is eaten; anything else, he shakes his head and it starts again.
+  function serve(kind, button, ghost, mouth) {
+    if (!feedsNext(served, kind)) {
+      served = []; cabin.reindeerAct('shake'); sound.play('refuse'); speak('嗯……現在還不是吃這個的時候。');
+      fly(ghost, centre(local(button.getBoundingClientRect())), false); say(FEED.wrong); return;
+    }
+    served.push(kind); if (mouth) fly(ghost, centre(mouth), true);
+    button.classList.add('is-gone'); later(700, () => button.classList.remove('is-gone'));
+    cabin.reindeerAct(kind === 'lichen' ? 'happy' : 'chew'); sound.play(kind === 'lichen' ? 'happy' : 'chew'); burst(mouth, 'heart', served.length);
+    speak(kind === 'lichen' ? '是地衣！我最愛吃這個！' : FEED.good(served.length - 1) || '喀滋喀滋！');
+    say(`${FEED.foods[kind]}，照餵食表餵了 ${served.length}／${FEED_ORDER.length} 樣。`);
+    if (served.length === FEED_ORDER.length) { job = false; meter.hidden = false; later(1600, () => { say(FEED.done); onTask(); }); }
+  }
   function offer(kind, button, ghost) {
     const mouth = cabin.mouthRect();
+    if (job && kind !== 'gingerbread') { serve(kind, button, ghost, mouth); return; }
     if (kind === 'gingerbread') {
       // Not for him: he turns away and the biscuit floats back to the basket.
       cabin.reindeerAct('refuse'); sound.play('refuse'); speak('不要不要，這是聖誕老人的點心！');
@@ -153,7 +171,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     });
   }
 
-  for (const [kind, label] of FOODS) if (lichenOnly ? kind === 'lichen' : kind !== 'lichen' || wants()) piece(kind, label);
-  count();
+  for (const [kind, label] of FOODS) if (job || kind === 'carrot' || kind === 'gingerbread') piece(kind, label);
+  count(); meter.hidden = job;
   return done;
 }

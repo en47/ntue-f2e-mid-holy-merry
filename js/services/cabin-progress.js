@@ -68,6 +68,9 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   progress.ornaments = GIFTS.filter(mark => found.includes(mark)); progress.tree = saved.tree === true;
   progress.bag = readBag(saved.bag);
   if ((progress.hoist.locked || progress.hoist.found) && !ever(progress.bag, 'handle')) progress.bag.used.push('handle');
+  // The blank slip and the big gear were not in the pocket before: taken (or read) and fitted (the wheel mended) as before.
+  if (progress.finale.slip !== 'none' && !ever(progress.bag, 'slip')) progress.bag[progress.finale.slip === 'read' ? 'used' : 'held'].push('slip');
+  if ((progress.volunteer.tasks.includes('wheel') || progress.wheelRounds > 0) && !ever(progress.bag, 'gear')) progress.bag.used.push('gear');
   progress.placed = PLACED.filter(id => (Array.isArray(saved.placed) && saved.placed.includes(id)) || (id === 'musicbox-catch' && progress.ornaments.includes('N')));
   if (Array.isArray(saved.clues)) progress.clues = Object.keys(NOTEBOOK).filter(id => saved.clues.includes(id));
   const hints = saved.hints && typeof saved.hints === 'object' && !Array.isArray(saved.hints) ? saved.hints : {};

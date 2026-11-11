@@ -96,7 +96,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   const bundle = () => [...DESK_LETTERS, ...(signedUp(volunteer) && !pending(volunteer, 'letters') ? VOLUNTEER_LETTERS.filter(entry => !answered(entry)) : [])];
   const replyTo = entry => ({ id: `reply-${entry.id}`, letter: entry.id, to: `給${entry.name}`, greeting: `親愛的${entry.name}：`, body: entry.answers[desk.answers[entry.id]], sign: `替身 ${volunteer.mark}. 代筆`, seal: volunteer.mark, name: entry.name });
   const outgoing = () => [...(desk.sent.includes(REPLY.id) ? [] : [{ ...REPLY, seal: 'S', name: '小米' }]), ...VOLUNTEER_LETTERS.filter(answered).map(replyTo)];
-  say(unanswered().length ? '信堆最上面有兩封新來的信，要交給新替身回覆。點信堆抽一封來讀。' : pending(volunteer, 'letters') && !desk.sorted ? '信堆裡還沒有新的信。小房間的分揀架上，好像還有一疊信沒分。' : outgoing().length ? '書桌上堆著收到的信；左邊架子上，還有等著寄出的回信。' : '書桌上堆著收到的信。點信堆抽一封來讀。');
+  say(unanswered().length ? '信堆最上面有兩封寄給新替身的信，挑一封回覆。點信堆抽一封來讀。' : pending(volunteer, 'letters') && !desk.sorted ? '信堆裡還沒有新的信。小房間的分揀架上，好像還有一疊信沒分。' : outgoing().length ? '書桌上堆著收到的信；左邊架子上，還有等著寄出的回信。' : '書桌上堆著收到的信。點信堆抽一封來讀。');
 
   const pick = (label, run) => { const button = element('button', 'desk-pick', layer); button.type = 'button'; button.setAttribute('aria-label', label); on(button, 'click', run); return button; };
   let next = 0;
@@ -219,6 +219,8 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   }
   function open() {
     current.step = 'read'; refresh(); sound.play('open'); onUse(); pop(letter, 'is-unfolding');
+    // The route note's stops, for loading the sleigh, go in the clue book as it is read.
+    if (current.entry.id === 'route') clue('route');
     buttons.flip.focus({ preventScroll: true });
   }
   function flip() {
@@ -260,7 +262,8 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     save(); sound.play('drop'); later(220, () => sound.play('jingle'));
     pop(envelope, 'is-sent'); pop(mailbag, 'is-taking'); count.textContent = `已寄出 ${desk.sent.length} 封`;
     say(`寄出去了！${entry.name}會在平安夜前收到${entry.id === REPLY.id ? '聖誕老人的' : '你寫的'}回信。`);
-    if (VOLUNTEER_LETTERS.every(each => desk.sent.includes(`reply-${each.id}`))) onTask();
+    // One reply written and sent does the job (the other letter can be answered too, for its own sake).
+    if (VOLUNTEER_LETTERS.some(each => desk.sent.includes(`reply-${each.id}`))) onTask();
     later(still() ? 300 : 1300, () => { if (current?.entry !== entry) return; const { source } = current; current = null; envelope.classList.remove('is-sent'); fly(local(source.getBoundingClientRect()), true); source.focus({ preventScroll: true }); });
   }
   function putBack() {

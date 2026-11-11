@@ -132,4 +132,10 @@ test('the sorting rack: a letter goes to whoever was flying when it was postmark
   assert.equal(sortWrong(right), 0); assert.equal(sortWrong({ ...right, m2: 'E' }), 1);
   assert.deepEqual([...new Set(MAIL.map(([id]) => mailFor(id)))].sort(), ['E', 'H', 'K', 'N', 'O'], 'every substitute gets a letter');
 });
-
+test('two volunteer jobs as rules: the feeding table by the clock, the sleigh loaded the other way round', async () => {
+  const { FEED_ORDER, feedsNext, ROUTE, loadedRight } = await import('../js/services/cabin-story.js');
+  assert.deepEqual(FEED_ORDER, ['oats', 'carrot', 'lichen'], 'by the times on the table');
+  assert.equal(feedsNext([], 'oats'), true); assert.equal(feedsNext([], 'lichen'), false); assert.equal(feedsNext(['oats'], 'carrot'), true); assert.equal(feedsNext(['oats', 'carrot', 'lichen'], 'oats'), false);
+  assert.equal(loadedRight([...ROUTE].reverse()), true, 'the last stop at the bottom, the first on top');
+  assert.equal(loadedRight(ROUTE), false, 'in route order, the first stop would be at the bottom'); assert.equal(loadedRight(ROUTE.slice(1)), false); assert.equal(loadedRight(null), false);
+});
