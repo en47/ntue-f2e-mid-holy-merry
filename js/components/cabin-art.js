@@ -372,8 +372,16 @@ export function letter(parent, char, cx, cy, width, height, style) {
 }
 const shade = (parent, x, y, width, height, opacity, fill = '#000') => shape('rect', { x, y, width, height, fill, opacity }, parent);
 
+// A gold silk bookmark ribbon hanging from (x, y), `w` wide and `h` long, its end cut in a swallowtail. The bookcase's four
+// empty places each have one, and the music box raises four just like them (cabin-musicbox.js).
+export function ribbon(parent, x, y, w, h) {
+  const notch = w * .7;
+  shape('path', { d: `M${x - w / 2} ${y}H${x + w / 2}V${y + h}L${x} ${y + h - notch}L${x - w / 2} ${y + h}Z`, fill: '#c9a24f' }, parent);
+  shape('path', { d: `M${x - w * .12} ${y}V${y + h - notch * .9}`, stroke: '#ead08a', 'stroke-width': w * .16, opacity: .8 }, parent);
+}
 // The bookcase's painted back: wood planks, a shadow under each shelf, and on the second shelf four paler marks in the
-// dust where books once stood. The shelves, sides and books in front of it are solid (cabin-scene.js).
+// dust where books once stood, a gold bookmark ribbon hanging into each from the shelf above. The shelves, sides and books
+// in front of it are solid (cabin-scene.js).
 export function bookcaseBack({ paper }, { width, height }) {
   const unit = width / BOOKCASE.width;
   shape('rect', { x: 0, y: 0, width, height, rx: 10, fill: '#7a5236' }, paper);
@@ -386,17 +394,19 @@ export function bookcaseBack({ paper }, { width, height }) {
   shade(paper, 0, 0, width, 46, .25);
   const base = height - BOOKCASE.shelves[1] * unit;
   for (const x of SHELF_LAYOUT.slots) shape('rect', { x: (x - .036) * unit, y: base - .25 * unit, width: .072 * unit, height: .25 * unit, rx: 6, fill: '#a07752', opacity: .55 }, paper);
+  const top = height - (BOOKCASE.shelves[2] - .012) * unit;
+  for (const x of SHELF_LAYOUT.slots) ribbon(paper, x * unit, top, .024 * unit, .15 * unit);
 }
-// A book's spine: cloth of its colour, two pairs of bands, and its letter in the middle. A gold book has gold bands and a
-// gold-stamped letter; the others are printed in cream.
+// A book's spine: cloth of its colour, two pairs of bands, and its letter in the middle. A gold book has dull gold bands
+// and a dull gold-stamped letter (it gleams only in the firelight, cabin-scene.js); the others are printed in cream.
 export function letterSpine({ letter: char, colour, gold }) {
   return ({ paper }, { width, height }) => {
     shape('rect', { x: 0, y: 0, width, height, rx: 8, fill: colour }, paper);
     shade(paper, 0, 0, width * .3, height, .1, '#fff');
     shade(paper, width * .82, 0, width * .18, height, .14);
-    const band = gold ? '#e3c27a' : '#f6ecd6', bandOpacity = gold ? 1 : .55;
+    const band = gold ? '#b89a5a' : '#f6ecd6', bandOpacity = gold ? .9 : .55;
     for (const y of [.07, .11, .87, .91]) shape('rect', { x: 0, y: height * y, width, height: height * .018, fill: band, opacity: bandOpacity }, paper);
-    letter(paper, char, width / 2, height * .45, width * .7, height * .24, gold ? { fill: '#f0cf7e', stroke: '#8f6a2c', 'stroke-width': 1.6 } : { fill: '#f6ecd6', opacity: .9 });
+    letter(paper, char, width / 2, height * .45, width * .7, height * .24, gold ? { fill: '#c9a75e', stroke: '#6b5226', 'stroke-width': 1.4 } : { fill: '#f6ecd6', opacity: .9 });
     for (const [y, w] of [[.66, .5], [.7, .34]]) shape('rect', { x: width * (1 - w) / 2, y: height * y, width: width * w, height: height * .012, rx: 2, fill: band, opacity: bandOpacity * .8 }, paper);
   };
 }
@@ -436,11 +446,12 @@ export function santaCover({ paper }, { width, height }) {
 }
 
 // Where everything sits on the bookcase, in metres from its hinge edge: HOLY MERRY along the third shelf (a little gap
-// between the words), and on the second the four empty places and the SANTA picture book at the right.
-const SPINE = { red: '#8f3b36', green: '#3f6653', navy: '#3f5a7a', plum: '#6e4a6b', teal: '#4a7d80', brown: '#7d5636', mustard: '#b98a3c' };
+// between the words), and on the second the four empty places and the SANTA picture book at the right. M, O, E and both
+// R books (two volumes of one set, bound alike) have gold spines.
+const SPINE = { red: '#8f3b36', green: '#3f6653', navy: '#3f5a7a', plum: '#6e4a6b', teal: '#4a7d80', brown: '#7d5636', mustard: '#b98a3c', olive: '#5f6b3c' };
 export const LETTER_BOOKS = [
-  ['H', SPINE.green, .064, .25], ['O', SPINE.red, .074, .27], ['L', SPINE.navy, .058, .23], ['Y', SPINE.brown, .066, .26],
-  ['M', SPINE.plum, .076, .28], ['E', SPINE.teal, .07, .255], ['R', SPINE.red, .072, .27], ['R', SPINE.green, .062, .24], ['Y', SPINE.mustard, .066, .26],
+  ['H', SPINE.green, .064, .25], ['O', SPINE.olive, .074, .27, true], ['L', SPINE.navy, .058, .23], ['Y', SPINE.brown, .066, .26],
+  ['M', SPINE.plum, .076, .28, true], ['E', SPINE.teal, .07, .255, true], ['R', SPINE.red, .072, .27, true], ['R', SPINE.red, .072, .27, true], ['Y', SPINE.mustard, .066, .26],
 ].map(([char, colour, w, h, gold = false], index, all) => ({ id: `book-${char.toLowerCase()}${all.slice(0, index).filter(([other]) => other === char).length + 1}`, letter: char, colour, w, h, gold }));
 export const SHELF_LAYOUT = (() => {
   const gap = .006, word = .05, total = LETTER_BOOKS.reduce((sum, book) => sum + book.w + gap, -gap) + word;
@@ -541,9 +552,12 @@ export function musicBoxKey({ paper }, { width, height }) {
 // The snow globe as it stands on the mantel: a glass dome over a little red house and a fir, snow lying at its foot,
 // on a turned wooden base. Up close it is replaced by one that can be shaken (cabin-globe.js).
 export function snowGlobe({ paper }, { width, height }) {
+  // The village as it was in 2003: the old cabin with a little room built on at its back left (one lit window), a fir.
   const r = width * .46, cx = width / 2, cy = r + 4;
   shape('circle', { cx, cy, r, fill: '#dbeaf2', opacity: .75 }, paper);
   shape('path', { d: `M${cx - r * .92} ${cy + r * .4}Q${cx} ${cy + r * .2} ${cx + r * .92} ${cy + r * .4}A${r} ${r} 0 0 1 ${cx - r * .92} ${cy + r * .4}Z`, fill: SNOW }, paper);
+  shape('rect', { x: cx - r * .62, y: cy + r * .02, width: r * .22, height: r * .26, fill: '#87302f' }, paper);
+  shape('rect', { x: cx - r * .56, y: cy + r * .08, width: r * .08, height: r * .08, fill: '#f4cf74' }, paper);
   shape('rect', { x: cx - r * .42, y: cy - r * .02, width: r * .5, height: r * .4, fill: RED }, paper);
   shape('path', { d: `M${cx - r * .5} ${cy}L${cx - r * .17} ${cy - r * .32}L${cx + r * .16} ${cy}Z`, fill: SNOW }, paper);
   shape('path', { d: `M${cx + r * .22} ${cy + r * .36}L${cx + r * .4} ${cy - r * .3}L${cx + r * .58} ${cy + r * .36}Z`, fill: GREEN }, paper);

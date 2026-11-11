@@ -1,29 +1,42 @@
 // The snow globe up close: the one on the mantel steps aside for one that can be shaken. Hold it and move it from side to
 // side (or press the arrow keys): it tilts, the snow inside whirls up, and when let go it rocks back upright while the
-// snow drifts down and settles at the foot of the little house. Something is engraved on its base.
+// snow drifts down and settles at the foot of the little houses. Inside is the village as it was in 2003, too small to
+// make out, and something too small to read is engraved on its base: the magnifier from the desk drawer (from the pocket,
+// cabin-bag.js) shows both, close up on a card of its own.
 import { paperLayer, shape } from './paper-art.js';
-import { letter } from './cabin-art.js';
 import { star } from './paper-props.js';
 
 const PAPER = { paper: { scale: .5, grain: .4, shadow: .2 }, eager: true };
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
-// The globe in a 100 × 120 box: the dome (centre 50, 48, radius 46), a red house and a fir on a snowy mound, the base.
+// The globe in a 100 × 120 box: the dome (centre 50, 48, radius 46), the old village on a snowy mound (the cabin with a
+// little room built on at its back left, one window lit, and a fir), the base.
 const DOME = { x: 50, y: 48, r: 46 };
+function cabin2003(parent, x, y, s) {
+  shape('rect', { x: x - 13 * s, y: y - 14 * s, width: 9 * s, height: 10 * s, fill: '#87302f' }, parent);
+  shape('path', { d: `M${x - 14 * s} ${y - 13.5 * s}L${x - 8.5 * s} ${y - 19 * s}L${x - 3 * s} ${y - 13.5 * s}Z`, fill: '#fbf8f1' }, parent);
+  shape('rect', { x: x - 11 * s, y: y - 11.5 * s, width: 3.4 * s, height: 3.4 * s, fill: '#f4cf74' }, parent);
+  shape('rect', { x: x - 6 * s, y: y - 18 * s, width: 24 * s, height: 18 * s, fill: '#a84a42' }, parent);
+  shape('path', { d: `M${x - 10 * s} ${y - 17 * s}L${x + 6 * s} ${y - 32 * s}L${x + 22 * s} ${y - 17 * s}Z`, fill: '#fbf8f1' }, parent);
+  shape('rect', { x: x + 3 * s, y: y - 11 * s, width: 7 * s, height: 11 * s, fill: '#6b4a33' }, parent);
+}
 function globe(parent) {
   shape('circle', { cx: DOME.x, cy: DOME.y, r: DOME.r, fill: '#c9dfea' }, parent);
-  shape('rect', { x: 30, y: 52, width: 24, height: 20, fill: '#a84a42' }, parent);
-  shape('path', { d: 'M26 53L42 38L58 53Z', fill: '#fbf8f1' }, parent);
-  shape('rect', { x: 39, y: 61, width: 7, height: 11, fill: '#6b4a33' }, parent);
-  // A little sign over the door: M.
-  shape('rect', { x: 33.5, y: 52.6, width: 18, height: 8, rx: 1.5, fill: '#fbf3df' }, parent);
-  letter(parent, 'M', 42.5, 56.6, 12, 6.2, { fill: '#a84a42' });
+  cabin2003(parent, 36, 72, 1);
   shape('path', { d: 'M60 72L69 42L78 72Z', fill: '#4f7d68' }, parent);
   shape('path', { d: 'M8 70Q50 62 92 70A46 46 0 0 1 8 70Z', fill: '#fbf8f1' }, parent);
   shape('path', { d: 'M10 120L16 92H84L90 120Z', fill: '#8f5a3c' }, parent);
   shape('rect', { x: 14, y: 90, width: 72, height: 5, rx: 2, fill: '#e0b04f' }, parent);
 }
+// Under the magnifier, 200 × 200: the old cabin large, the little room at its back left with its lit window plain to see.
+function magnified(parent) {
+  shape('circle', { cx: 100, cy: 100, r: 96, fill: '#dbeaf2' }, parent);
+  shape('path', { d: 'M8 132Q100 112 192 132A96 96 0 0 1 8 132Z', fill: '#fbf8f1' }, parent);
+  cabin2003(parent, 92, 136, 3.4);
+  shape('path', { d: 'M150 136L166 70L182 136Z', fill: '#4f7d68' }, parent);
+  for (const [x, y] of [[40, 50], [70, 34], [120, 46], [160, 40], [30, 90], [176, 96]]) shape('circle', { cx: x, cy: y, r: 2.6, fill: '#fff' }, parent);
+}
 
-export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () => {}, knows = () => false, knownLine = () => null, clue = () => {} }) {
+export function globeGame({ layer, stage, cabin, say, later, sound, bag, onUse = () => {}, knows = () => false, knownLine = () => null, clue = () => {}, seen = () => false }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   say('按住雪花球左右搖一搖。');
@@ -31,7 +44,7 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
   const tilt = element('span', 'globe-tilt', holder); paperLayer(tilt, '0 0 100 120', 'globe-art', globe, PAPER);
   const canvas = element('canvas', 'globe-snow', tilt); canvas.setAttribute('aria-hidden', 'true');
   element('span', 'globe-engraving', tilt, 'H. · 2003').setAttribute('aria-hidden', 'true');
-  // A glint on the sign over the door once the snow has settled.
+  // A glint over the little houses once the snow has settled.
   const glint = element('span', 'globe-glint', tilt); glint.setAttribute('aria-hidden', 'true'); paperLayer(glint, '0 0 20 20', '', paper => star(paper, 10, 10, 8, '#fff4cc'), { paper: { scale: .15, grain: .2, shadow: 0, rim: '#ffffff00' }, eager: true });
   const context = canvas.getContext('2d');
   // Snow in dome units (the 100 × 120 box), as snow in water is: many small flat flakes and a few bigger ones, some nearer
@@ -95,11 +108,27 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
     run();
   }
   function settle() { flakes.forEach(rest); churn = swirl = 0; paint(); }
-  // Settled: the sign over the little house's door glints, and the base can be read (both go in the clue book).
+  // Settled: the little village glints; too small to make out without the magnifier.
   function settled() {
-    say(knownLine() ?? (knows() ? '雪慢慢落定了。底座刻著「H. · 2003」——是荷莉。' : '雪慢慢落定了。小屋門上掛著一塊小牌子，寫著 M；底座上好像還刻著什麼。'));
-    clue('globe-base'); clue('letter-globe'); glint.classList.remove('is-on'); void glint.offsetWidth; glint.classList.add('is-on');
+    say(knownLine() ?? (seen() ? (knows() ? '雪慢慢落定了。底座刻著「H. · 2003」——是荷莉。' : '雪慢慢落定了。球裡那座小小的舊村子，和底座的「H. · 2003」。') : '雪慢慢落定了。球裡是一座小小的聖誕村，小得看不清楚；底座上好像也刻著什麼。'));
+    glint.classList.remove('is-on'); void glint.offsetWidth; glint.classList.add('is-on');
   }
+  // The magnifier held to the glass (it goes back in the pocket): the village and the base, close up.
+  let lens = null;
+  function magnify() {
+    if (frame) { say('雪還在球裡打轉，等它落定再看。'); return; }
+    lens?.remove(); sound.play('open'); clue('globe-village'); clue('globe-base');
+    lens = element('article', 'cabin-letter lens-card', layer); lens.setAttribute('aria-label', '放大鏡下的雪花球');
+    element('h3', 'chair-title', lens, '放大鏡下的雪花球');
+    const view = element('div', 'lens-view', lens); view.setAttribute('role', 'img'); view.setAttribute('aria-label', '球裡的舊小屋，左後方多了一個有窗的小房間，窗裡亮著燈');
+    paperLayer(view, '0 0 200 200', '', magnified, PAPER);
+    element('p', 'lens-base', lens, 'H. · 2003');
+    element('p', 'piece-words', lens, '球裡的舊小屋，左後方多了一個小房間，小窗裡亮著燈。底座刻著一行小字。');
+    const done = element('button', 'cabin-letter-close', lens, '收起放大鏡 ✓'); done.type = 'button';
+    on(done, 'click', () => { lens.remove(); lens = null; sound.play('remove'); holder.focus({ preventScroll: true }); });
+    done.focus({ preventScroll: true });
+  }
+  const forget = bag.target(holder, { accepts: id => id === 'magnifier' || '這個對雪花球沒什麼用。', use: () => { later(450, magnify); } });
   function run() { if (!frame) { last = performance.now(); frame = requestAnimationFrame(step); } }
   function step(now) {
     const delta = Math.min(.05, (now - last) / 1000); last = now; let moving = Boolean(drag);
@@ -156,5 +185,5 @@ export function globeGame({ layer, stage, cabin, say, later, sound, onUse = () =
 
   cabin.showGlobe(false); layout(); later(500, layout); later(1200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
-  return () => { events.abort(); watch.disconnect(); cancelAnimationFrame(frame); cabin.showGlobe(true); };
+  return () => { events.abort(); watch.disconnect(); cancelAnimationFrame(frame); forget(); lens?.remove(); cabin.showGlobe(true); };
 }

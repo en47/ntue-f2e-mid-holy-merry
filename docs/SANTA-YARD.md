@@ -22,7 +22,7 @@
 | --- | --- |
 | `js/components/cabin-art.js` | 新紙板：餵食槽（`TROUGH`，三種樣子）、雪人腳邊的雪堆（`PILE`，兩種樣子）；穀倉的拉繩握把換成絞盤 `WINCH`（底板、把手、維修標籤），暗格換成抽屜（關、開著有火柴、開著只剩紙條）。手機上雪人的鏡頭拉遠一點，讓腳邊的雪堆露在衣櫃上方 |
 | `js/components/cabin-paint.js` | 新紙板與各種樣子事先剪好（`build-cabin-boards.mjs` 重新產生，`CABIN-BOARDS.json` 更新） |
-| `js/components/cabin-scene.js` | 絞盤：繩子捲進多少、滑輪與捲筒就轉多少；`fitCrank`、`swingTag`、`openDrawer`（抽屜滑出一點）、`boardRect`（紙板某一塊在螢幕上的位置）、`reindeerStep`（麋鹿挪開一步並一直站在那裡） |
+| `js/components/cabin-scene.js` | 絞盤：繩子捲進多少、滑輪與捲筒就轉多少；`fitCrank`、`swingTag`、`openDrawer`（抽屜滑出一點）、`reindeerStep`（麋鹿挪開一步並一直站在那裡） |
 | `js/components/cabin-play.js` | 郵筒的信與包裹；把口袋交給院子的遊戲；回來時照存檔恢復：郵筒開著、餵食槽吃過、麋鹿挪開、雪堆撥開、把手裝在絞盤上 |
 | `js/components/cabin-feed.js` | 餵食槽、嘴邊的提示、乾草裡的金色與鑰匙 |
 | `js/components/cabin-snowman.js` | 雪堆與木把手 |

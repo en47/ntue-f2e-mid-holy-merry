@@ -9,12 +9,14 @@ export const NOTEBOOK = {
   'route-note': { place: '書桌的工作筆記', text: '平安夜路線的背面，綠色的字：「收到，後半段換我飛。」—— H.' },
   'care-log': { place: '麋鹿的柵欄', text: '照顧紀錄往前翻，有一行金色的字：「12/21 後半夜，地衣餵過了。—— O.」' },
   'music-lid': { place: '音樂盒', text: '盒蓋內側刻著一顆小愛心，兩邊是 N 和 K。' },
-  'globe-base': { place: '雪花球', text: '雪落定以後，底座刻著「H. · 2003」。' },
-  'chair-note': { place: '搖椅上的紙條', text: '「這屋子裡，我最喜歡的四樣東西上，各藏著一個字母。把它們排在我的繪本前面，你就會知道這間屋子的小秘密。」—— S.' },
-  'letter-hearth': { place: '壁爐', text: '火燒起來時，壁爐前的石板上，淺淺的刻痕亮了起來：一個字母 R。' },
-  'letter-desk': { place: '書桌', text: '吸墨紙上印著一個反過來的字母；翻過來看，是 E。' },
-  'letter-musicbox': { place: '音樂盒', text: '音樂響起、小紙雕轉起來時，底下升起一個金色的字母 O。' },
-  'letter-globe': { place: '雪花球', text: '雪落定以後，球裡小屋的門上掛著一塊小牌子：M。' },
+  'letter-hearth': { place: '壁爐', text: '用火柴把火點旺以後，壁爐前的石板上，淺淺的刻痕亮了起來：一個字母 R。書櫃上有幾本書的書脊，在火光裡閃著金光。' },
+  'desk-lock': { place: '書桌抽屜', text: '抽屜鎖著，鑰匙孔兩邊各刻著一小枝冬青葉。' },
+  blotter: { place: '書桌抽屜裡的吸墨器', text: '翻過來，吸墨紙上印著一行反過來的字：「.eman ruo nihtiw kooL」' },
+  'music-bookmarks': { place: '音樂盒', text: '音樂響起、小紙雕轉起來時，底下升起四枚金色的書籤，一個字也沒有。' },
+  'music-catch': { place: '音樂盒底下', text: '有個小抽屜被一根黃銅卡榫卡住了，卡榫旁邊有一個很小的孔。' },
+  'globe-village': { place: '雪花球（放大鏡）', text: '球裡是從前的聖誕村：舊小屋的左後方，多了一個有窗的小房間，窗裡亮著燈。' },
+  'globe-base': { place: '雪花球（放大鏡）', text: '底座刻著「H. · 2003」。' },
+  'chair-note': { place: '搖椅上的紙條', text: '「There\'s always room for more.」—— S.（這裡永遠還有位置，留給更多。）' },
   'wish-board': { place: '許願角的留言板', text: '「謝謝昨晚幫忙修好摩天輪的人。」沒有署名。' },
   'blank-slip': { place: '登記簿的紅繩', text: '紅繩被一個四位數的小鎖扣著。繩上夾著一張空白的紙條，聞起來有一點檸檬的味道。' },
   'lemon-note': { place: '壁爐', text: '空白紙條烤過火，浮出淡褐色的字：「我的願望實現的那一年，雪花球一直記得。」—— H.' },
@@ -38,12 +40,12 @@ export const GIFT_HINTS = {
   K: '克莉絲常顧著摩天輪。修好它以後，看看動力箱裡面。',
   H: '荷莉的見面禮，跟她那頂最小的帽子有關——先看過登記簿裡紅繩綁著的舊頁。',
 };
-// The four letters hidden on Santa's favourite things, by the clue that finds each.
-export const LETTERS = { 'letter-hearth': 'R', 'letter-desk': 'E', 'letter-musicbox': 'O', 'letter-globe': 'M' };
+// The bookcase's hints, the same in the clue book and at the shelf: only about letters, never "the gold ones" or one R.
+export const BOOKCASE_HINTS = ['有幾本書的書脊，在火光下特別亮。', '這些金色書脊上的字母，是 HOLY MERRY 裡的哪幾個？', '那四個字母可以組成一個英文單字，放在 SANTA 前面。', '將 M、O、R、E 排在 SANTA 左側。'];
 export const GOALS = {
   yard: { title: '院子裡的小秘密', hints: ['院子裡有幾樣東西少了什麼：郵筒的旗子豎著、麋鹿身後有個餵食槽、穀倉牆上的絞盤轉不動。雪人腳邊的雪堆也看看。', '郵筒裡的小包裹是給麋鹿的點心，放進牠身後的餵食槽；絞盤少了把手，雪人腳邊的雪堆露出一截木頭。', '麋鹿吃完挪開後，撥開餵食槽乾草裡發亮的地方；把手裝上絞盤，繞著轉到頂、扣上卡榫，拉開乾草後面的抽屜。'] },
-  room: { title: '在小屋裡待一會兒', hints: ['屋裡的東西都可以碰碰看：壁爐、書桌、音樂盒、雪花球。', '玩過兩樣以後，聖誕老人好像會想出門走走。', '到壁爐前添一根柴，再到書桌讀一封信，然後回到房間中間。'] },
-  bookcase: { title: '搖椅上的謎題', hints: ['搖椅上的紙條說：屋裡他最喜歡的四樣東西上，各藏著一個字母。壁爐、書桌、音樂盒、雪花球都再仔細看看。', '壁爐要生火才看得見；書桌吸墨紙上的字是反的；音樂盒要轉起來；雪花球裡的小屋門上有塊牌子。找到的字母會記在線索本裡。', '四個字母是 M、O、R、E：在 HOLY MERRY 那排書裡找出它們，照 MORE 的順序放進 SANTA 繪本左邊的空位。'] },
+  room: { title: '在小屋裡待一會兒', hints: ['屋裡的東西都可以碰碰看：壁爐、書桌、音樂盒、雪花球。', '壁爐的火快熄了，書桌抽屜上了鎖：院子裡找到的東西派得上用場。', '玩過兩樣東西以後回到房間中間，聖誕老人好像會想出門。'] },
+  bookcase: { title: '書櫃的空位', hints: BOOKCASE_HINTS },
   log: { title: '弄濕的交接表', hints: ['班表被雪水弄濕了。先看看牆上的名牌：每個人的字都是自己的顏色。', '暈開的格子看墨水的顏色；整個洗掉的三格：12/21 後半夜去看麋鹿柵欄的照顧紀錄，12/24 那晚找穀倉抽屜裡的紙條（藍色先寫、綠色接著寫）。', '12/21 E.→O.、12/22 N.→K.、12/23 H.→N.、12/24 K.→H.'] },
   secret: { title: '書櫃後面的小房間', hints: ['牆上的名牌、桌上的班表和守則，每一樣都拿起來讀讀看。', '三樣都讀完，就會明白一件事。讀過的東西會打上勾。', '還沒讀的是名牌板或守則小冊：點它，讀完按「放回去」。'] },
   join: { title: '登記簿的空格', hints: ['小房間桌上的登記簿，最新的一頁最下面還空著一格。', '選一個沒人用過的字母當縮寫，蓋章就能加入；不想加入，也可以直接走出門。', '加入以後，登記簿上會寫著今天可以幫忙的四件事。'] },

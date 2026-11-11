@@ -2,6 +2,7 @@
 // the shift log and the rulebook (these three tell the secret), and the register, the stamps, the hats and the sorting
 // rack. Each opens as a sheet of paper over the scene. Once the three have been read, the visitor knows (cabin-story.js),
 // and the register's newest page has a blank row they may sign to volunteer (`join`, `quit`: cabin-play.js).
+import { ITEM_ART } from './cabin-items.js';
 import { SUBSTITUTES } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { paperLayer, shape } from './paper-art.js';
@@ -64,7 +65,7 @@ const THINGS = {
 
 // The end of the story starts here too (`onInvite`, `onTwist`, `onWish`, `onStay`: cabin-play.js): the register's old page,
 // a wish for three stamps, the early shift to sign (and then the visitor's own tag on the board's empty hook).
-export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, onKnow, onShut, join, quit, onInvite, onTwist, onWish, onStay, onReplay, clue = () => {}, gift = () => false }) {
+export function secretGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onKnow, onShut, join, quit, onInvite, onTwist, onWish, onStay, onReplay, clue = () => {}, gift = () => false }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   // A paper thing dragged by pointer: it follows the hand and, let go over a target (`over`, a selector), `drop` gets that
   // target; anywhere else it springs back. A press without moving is still a click. A release swallowed before it reaches
@@ -163,6 +164,13 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       else { const look = element('button', 'register-sign', page, NOTES.hatLook); look.type = 'button'; on(look, 'click', () => { look.remove(); gift('H'); sound.play('open'); element('p', 'secret-note', page, NOTES.hatGift); showOrnament(page, 'H'); }); }
     }
     else element('p', 'secret-note', page, id === 'hats' && finale.twist ? NOTES.hatsKnown : NOTES[id]);
+    // On the postmark tray, a brass pin (it undoes the music box's catch, cabin-musicbox.js): to the pocket.
+    if (id === 'stamps' && !bag.ever('pin')) {
+      element('p', 'secret-note', page, NOTES.pin);
+      const pin = element('button', 'secret-pin', page); pin.type = 'button'; pin.setAttribute('aria-label', NOTES.pinTake);
+      paperLayer(pin, '0 0 100 100', '', ITEM_ART.pin, { paper: { scale: .4, grain: .45, shadow: .25 }, eager: true });
+      on(pin, 'click', () => { const box = stage.getBoundingClientRect(), rect = pin.getBoundingClientRect(); pin.remove(); bag.give('pin', { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }); });
+    }
     const done = element('button', 'cabin-letter-close', card, id === 'oldpage' ? CORD.back : '放回去 ✓'); done.type = 'button';
     on(done, 'click', () => id === 'oldpage' ? open('register', from) : close(id, from)); done.focus({ preventScroll: true });
   }

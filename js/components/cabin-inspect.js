@@ -19,9 +19,10 @@ export function reverse(draw) {
   };
 }
 
-// `from`: where it was on the stage (a rect), so it rises from there. `back`: { words, draw? } (draw defaults to the
-// cut-out's reverse). `words`: what is seen on its face. Returns { close }.
-export function inspect({ host, sound, title, draw, words, back = null, from = null, turn = '', flip = '翻面', done = '收好 ✓', onClose = () => {} }) {
+// `from`: where it was on the stage (a rect), so it rises from there. `back`: { words, draw?, mirror? } (draw defaults to
+// the cut-out's reverse; `mirror`, writing soaked in backwards, is written over it in the site's hand, the wrong way
+// round). `words`: what is seen on its face. `onTurn` hears each time it is turned over to its back. Returns { close }.
+export function inspect({ host, sound, title, draw, words, back = null, from = null, turn = '', flip = '翻面', done = '收好 ✓', onClose = () => {}, onTurn = () => {} }) {
   const opener = document.activeElement, events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const veil = element('div', 'inspect-veil', host), card = element('article', 'inspect-card', veil);
   card.setAttribute('role', 'dialog'); card.setAttribute('aria-label', title);
@@ -29,7 +30,7 @@ export function inspect({ host, sound, title, draw, words, back = null, from = n
   const view = element('div', 'inspect-view', card), object = element('div', 'inspect-object', view);
   object.tabIndex = 0; object.setAttribute('role', 'img'); object.setAttribute('aria-label', `${title}。${turn}`);
   paperLayer(element('div', 'inspect-face is-front', object), '0 0 100 100', '', draw, PAPER);
-  if (back) paperLayer(element('div', 'inspect-face is-back', object), '0 0 100 100', '', back.draw ?? reverse(draw), PAPER);
+  if (back) { const face = element('div', 'inspect-face is-back', object); paperLayer(face, '0 0 100 100', '', back.draw ?? reverse(draw), PAPER); if (back.mirror) element('p', 'inspect-mirror', face, back.mirror); }
   const said = element('p', 'inspect-words', card, words); said.setAttribute('aria-live', 'polite');
   const actions = element('div', 'inspect-actions', card);
   const turnOver = back && element('button', 'inspect-flip', actions, flip), close = element('button', 'inspect-close', actions, done);
@@ -51,7 +52,7 @@ export function inspect({ host, sound, title, draw, words, back = null, from = n
     const step = { ArrowLeft: [0, -12], ArrowRight: [0, 12], ArrowUp: [10, 0], ArrowDown: [-10, 0] }[event.key];
     if (step) { event.preventDefault(); tilt = { x: clamp(tilt.x + step[0], TILT.x), y: clamp(tilt.y + step[1], TILT.y) }; pose(); rest(900); }
   });
-  function turnAround() { over = !over; turnOver.setAttribute('aria-pressed', String(over)); said.textContent = over ? back.words : words; sound?.play('pick'); pose(); }
+  function turnAround() { over = !over; turnOver.setAttribute('aria-pressed', String(over)); said.textContent = over ? back.words : words; sound?.play('pick'); pose(); if (over) onTurn(); }
   if (turnOver) on(turnOver, 'click', turnAround);
   function shut() {
     if (!veil.isConnected) return;

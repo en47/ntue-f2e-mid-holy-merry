@@ -14,9 +14,12 @@ export const LOG = {
   solved: '最後一格補上，墨水乾了，字一行一行回來：每一晚，都是兩個人接力飛完的。',
   erase: '擦掉',
 };
-// The note Santa leaves on his chair when he goes out: the bookcase's riddle. His four favourite things in the room (the
-// hearth, the desk, the music box, the snow globe) each hide a letter (cabin-clues.js LETTERS).
-export const CHAIR = { title: '搖椅上的紙條', lines: ['我去看看麋鹿，馬上回來。', '這屋子裡，我最喜歡的四樣東西上，各藏著一個字母。', '把它們排在我的繪本前面，你就會知道這間屋子的小秘密。'], sign: '—— S.' };
+// The note left on Santa's chair, hidden while he sat on it: one line in English in his hand (the clue book adds it in
+// Chinese). With what the room shows, it points the bookcase's way.
+export const CHAIR = { title: '搖椅上的紙條', lines: ["There's always room for more."], sign: '—— S.' };
+// Out of the window, before he goes: the reindeer's bells; and what he says going out (back in the middle of the room).
+export const BELLS = '窗外傳來一陣叮叮噹噹的麋鹿鈴鐺聲。';
+export const GOING = '聖誕老人站起來，往窗外看了看：「哎呀，麋鹿好像又把飼料弄翻了！我出去看看。」';
 // The sorting rack, once signed up: the rule on its sign, and what is said as the letters go in (cabin-story.js decides).
 export const RACK = {
   title: '分揀架', sign: '分信守則：信交給郵戳上那個時間正在飛的人。過了午夜，還算前一晚。',
@@ -35,6 +38,7 @@ export const NOTES = {
   tags: '名牌板上掛著五個名牌：尼爾斯、克莉絲、荷莉、艾洛、歐拉。最右邊還有一個空掛勾。',
   register: '登記簿翻開在最新的一頁，上面蓋滿了郵戳。前面的頁用紅繩綁著，暫時打不開。',
   stamps: '桌上排著四顆郵戳章，印面各刻著一個字母：N、K、H、E。歐拉的那顆，好像被誰帶出門了。',
+  pin: '章盤邊上別著一根細細的黃銅撥針，尖端可以伸進很小的孔裡。', pinTake: '拿起黃銅撥針',
   hats: '牆上掛著四頂聖誕帽，一頂比一頂小。最小的那頂，只有小孩子戴得下。',
   // Once the old page has been read (cabin-finale.js): the smallest hat was Holly's, the year her wish came true.
   hatsKnown: '最小的那頂聖誕帽內側，用紅線繡著「H. 2003」。原來荷莉許願的那年，她還是個孩子。',

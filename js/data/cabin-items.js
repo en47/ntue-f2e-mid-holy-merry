@@ -10,6 +10,9 @@ export const ITEM_TEXT = {
   slip: { name: '空白紙條', look: '看起來什麼都沒寫，聞起來有一點檸檬的味道。', back: '背面也是空白的。' },
   gear: { name: '特大齒輪', look: '一個比手掌還大的木頭齒輪，齒都還很完整。', back: '背面刻著一座小小的摩天輪。' },
 };
+// The rocker blotter in the desk drawer, looked at closely (cabin-desk.js): on top and turned over, and the line soaked
+// into its pad, which shows backwards (the English as on the object; the clue book keeps it backwards too).
+export const BLOTTER = { name: '搖擺式吸墨器', look: '木頭搖擺式吸墨器，黃銅握柄擦得發亮。', back: '底下的吸墨紙印著一行字——反過來的。', writing: 'Look within\nour name.' };
 // The pocket's own words. `got` when something goes in; `wrong` for a place that does not take it (a place may say why).
 export const BAG = {
   label: '口袋', empty: '口袋裡空空的。', look: '檢查', flip: '翻面', close: '收好 ✓',
