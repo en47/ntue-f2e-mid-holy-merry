@@ -60,7 +60,8 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     bag.give('key', local(glint.getBoundingClientRect()));
     later(2600, () => { clue('care-log'); say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」往前翻，還有一行金色的字：「12/21 後半夜，地衣餵過了。—— O.」'); });
   });
-  layout(); later(600, layout); later(1300, layout);
+  // He may step aside as the corner opens (for the sleigh, cabin-sleigh.js): his mouth is followed until he stands still.
+  layout(); later(600, layout); later(1300, layout); later(3200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
   const done = () => { events.abort(); clearTimeout(hush); watch.disconnect(); forget.forEach(each => each()); cabin.reindeerLook(null); cabin.reindeerAct(null); };
 
