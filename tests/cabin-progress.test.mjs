@@ -42,6 +42,14 @@ test('the hoist remembers being hooked and the note being read, and nothing else
   const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ hoist: { locked: true, found: 'yes' } }) });
   assert.deepEqual(readProgress(store).hoist, { locked: true, found: false });
 });
+test('a barn hoisted before the pocket existed keeps its winch\'s crank (the snowman\'s handle) fitted', () => {
+  const old = hoist => readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ hoist }) })).bag;
+  assert.deepEqual(old({ locked: true, found: true }), { held: [], used: ['handle'] });
+  assert.deepEqual(old({ locked: false, found: true }), { held: [], used: ['handle'] }, 'read, then let down again');
+  assert.deepEqual(old({ locked: false, found: false }), { held: [], used: [] }, 'never hoisted: the handle is still in the snow');
+  const fitted = readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ hoist: { locked: true, found: false }, bag: { held: ['key'], used: ['handle'] } }) })).bag;
+  assert.deepEqual(fitted, { held: ['key'], used: ['handle'] }, 'once only');
+});
 test('the desk remembers which replies were sealed, postmarked and sent, and what was chosen to say', () => {
   assert.deepEqual(readProgress(memory()).desk, { sealed: [], marked: [], sent: [], answers: {}, sorted: false });
   const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sealed: ['reply', 'reply', 7], marked: ['reply'], sent: ['reply-tomas'], answers: { tomas: 2, aya: 5, ole: 'x' } } }) });

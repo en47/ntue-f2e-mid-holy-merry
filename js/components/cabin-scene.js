@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -388,7 +388,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     catch (error) { if (!WORLD.includes(board)) throw error; console.error('Village board failed', board.id, error); }
     painted++; report();
   });
-  const hoistParts = Promise.all(['hoist-bracket', 'hoist-wheel', 'hoist-bale', 'hoist-toggle', 'hoist-hatch'].map(name => cutBoard(name, PIECES[name], set)));
+  const hoistParts = Promise.all(['hoist-bracket', 'hoist-wheel', 'hoist-bale', 'hoist-winch', 'hoist-crank', 'hoist-tag', 'hoist-drawer'].map(name => cutBoard(name, PIECES[name], set)));
 
   // Warm glows: the fire, the lantern, the reading lamp, the porch and the lighthouse lamp. Sprites always face the camera.
   const warm = keep(textures, radialTexture([[0, 'rgba(255,190,110,.8)'], [.45, 'rgba(255,150,70,.28)'], [1, 'rgba(255,140,60,0)']]));
@@ -437,7 +437,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const roomTargets = [caseTarget, ...ROOM_SPOTS.map(spot => target(spot.box, { spot: spot.id })), ...ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }))];
   const glint = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: keep(textures, radialTexture([[0, 'rgba(255,255,240,1)'], [.25, 'rgba(255,230,150,.8)'], [1, 'rgba(255,220,120,0)']], 64)), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })));
   glint.visible = false; world.add(glint);
-  let snowmanMove = null, found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null;
+  let snowmanMove = null, found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null, reindeerAside = 0, reindeerShift = 0;
   const wiggles = new Map(), runs = RUNS.map(points => new THREE.SplineCurve(points.map(([x, y]) => new THREE.Vector2(x, y)))), track = new THREE.SplineCurve(TRACK.map(([x, y]) => new THREE.Vector2(x, y)));
   // The coaster's timetable, worked out once. The chain pulls the train slowly to the top of the lift hill; from there it
   // coasts, its speed set by how far it has dropped below the crest (v² = v₀² + 2g·drop) less a little friction for the
@@ -469,7 +469,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // The reindeer's mouth has no bone of its own: it sits at a fixed point in the frame of the bone behind his ears (Head_3),
   // so it follows every nod and turn. Measured on the model from his red nose and smile.
   const MOUTH = new THREE.Vector3(0, -.24, .14);
-  let santaModel, spine, spineRest, tracker, reindeerHolder, reindeerHead, reindeerRest, reindeerSkull, reindeerScale = 1;
+  let santaModel, spine, spineRest, tracker, reindeerHolder, reindeerHead, reindeerRest, reindeerSkull, reindeerShadow, reindeerScale = 1;
+  // Fed at his trough, he steps this far aside (x, z) and stays there, off the end of it he stood over.
+  const ASIDE = [.34, .12];
   const loadSanta = () => loader.loadAsync(new URL('../../assets/models/santa-seated-web.glb', import.meta.url).href)
     .then(gltf => {
       if (disposed) { free(gltf.scene); return false; }
@@ -482,7 +484,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const loadReindeer = () => loader.loadAsync(new URL('../../assets/models/reindeer-web.glb', import.meta.url).href, event => { if (event.total && reindeerFirst) { reindeerShare = event.loaded / event.total; report(); } })
     .then(gltf => {
       if (disposed) { free(gltf.scene); return false; }
-      const holder = fitModel(gltf.scene, REINDEER.height); holder.position.set(REINDEER.x, GROUND, REINDEER.z); holder.rotation.y = REINDEER.turn; world.add(holder); shadow(REINDEER.x, REINDEER.z, 1.2, .6, 1);
+      const holder = fitModel(gltf.scene, REINDEER.height); holder.position.set(REINDEER.x, GROUND, REINDEER.z); holder.rotation.y = REINDEER.turn; world.add(holder); reindeerShadow = shadow(REINDEER.x, REINDEER.z, 1.2, .6, 1);
       reindeerHolder = holder; reindeerScale = holder.scale.x; gltf.scene.traverse(node => { if (node.isBone && /Head_0$/.test(node.name)) reindeerHead = node; if (node.isBone && /Head_3$/.test(node.name)) reindeerSkull = node; }); reindeerRest = reindeerHead?.quaternion.clone();
       if (ready) redraw();
       return true;
@@ -503,27 +505,33 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     }
   }
   // The hay hoist on the barn: paper pieces on the barn's own sheet, so they stand and turn with it. One number, how far
-  // the toggle has been pulled (0 to 1), places everything: the bale rises as far as the toggle comes down, the wheel turns
-  // by the same length of rope, and each rope runs from the wheel's rim to what it holds.
-  const barn = sheets.get('stable'), hoist = { pull: 0 };
+  // the bale has been wound up (0 to 1), places everything: the bale rises as far as the winch's spool winds rope in, the
+  // spool (with the crank, once it is fitted) and the pulley turn by that length of rope, and the rope to the bale runs
+  // from the wheel's rim down to it. The repair tag swings when the winch is tried without its crank; the drawer behind the
+  // bale slides out a little when it is pulled open.
+  const barn = sheets.get('stable'), hoist = { pull: 0, swing: -10, slide: 0, out: 0 };
   if (barn) {
-    const sheet = (map, w, h, lift = 0) => { const geometry = keep(geometries, new THREE.PlaneGeometry(w, h)); geometry.translate(0, lift * h, 0); const mesh = new THREE.Mesh(geometry, keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false }))); barn.holder.add(mesh); return mesh; };
-    const [bracket, wheel, bale, toggle, hatch] = (await hoistParts).map(texture);
-    const hang = HOIST.x - HOIST.radius, pull = HOIST.x + HOIST.radius;
-    hoist.hatch = sheet(hatch, ...HOIST.hatch, .5); hoist.hatch.position.set(hang, 0, .03);
+    const sheet = (map, w, h, lift = 0, shift = 0) => { const geometry = keep(geometries, new THREE.PlaneGeometry(w, h)); geometry.translate(shift * w, lift * h, 0); const mesh = new THREE.Mesh(geometry, keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false }))); barn.holder.add(mesh); return mesh; };
+    const [bracket, wheel, bale, winch, crank, tag, drawer] = (await hoistParts).map(texture);
+    const hang = HOIST.x - HOIST.radius, pull = HOIST.x + HOIST.radius, [cw, ch] = WINCH.crank, [gw, gh] = WINCH.tag;
+    hoist.drawer = sheet(drawer, ...HOIST.drawer, .5); hoist.drawer.position.set(hang, 0, .03);
     hoist.bale = sheet(bale, ...HOIST.bale, .5); hoist.bale.position.set(hang, 0, .16);
-    hoist.toggle = sheet(toggle, ...HOIST.toggle, -.5); hoist.toggle.position.set(pull, HOIST.rest, .2);
+    sheet(winch, ...WINCH.plate).position.set(WINCH.x, WINCH.y, .18);
+    // The tag hangs from the top of its string, the crank turns about its square hole.
+    hoist.tag = sheet(tag, gw, gh, -.5, .44); hoist.tag.position.set(...WINCH.tagAt, .19);
+    hoist.crank = sheet(crank, cw, ch, cw / ch / 2 - .5); hoist.crank.position.set(WINCH.x, WINCH.y, .21); hoist.crank.visible = false;
     hoist.wheel = sheet(wheel, HOIST.radius * 2.3, HOIST.radius * 2.3); hoist.wheel.position.set(HOIST.x, HOIST.wheel, .21);
     sheet(bracket, .62, .34).position.set(HOIST.x, HOIST.wheel + .11, .13);
     const rope = keep(geometries, new THREE.PlaneGeometry(.022, 1).translate(0, -.5, 0)), cord = flat(0xb98a52);
     hoist.ropes = [hang, pull].map(x => { const mesh = new THREE.Mesh(rope, cord); mesh.position.set(x, HOIST.wheel, .19); barn.holder.add(mesh); return mesh; });
+    hoist.ropes[1].scale.y = HOIST.wheel - WINCH.y;
   }
   function placeHoist() {
     if (!hoist.bale) return;
-    const rise = hoist.pull * HOIST.lift, baleTop = rise + HOIST.bale[1], toggleTop = HOIST.rest - rise;
-    hoist.bale.position.y = rise; hoist.toggle.position.y = toggleTop;
-    hoist.wheel.rotation.z = -rise / HOIST.radius;
-    hoist.ropes[0].scale.y = HOIST.wheel - baleTop; hoist.ropes[1].scale.y = HOIST.wheel - toggleTop;
+    const rise = hoist.pull * HOIST.lift, baleTop = rise + HOIST.bale[1];
+    hoist.bale.position.y = rise;
+    hoist.wheel.rotation.z = -rise / HOIST.radius; hoist.crank.rotation.z = hoist.turn ?? rise / WINCH.spool;
+    hoist.ropes[0].scale.y = HOIST.wheel - baleTop;
   }
   placeHoist();
   function outfitTexture(item) {
@@ -672,7 +680,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       }
       // At rest he is never quite still: breathing, shifting his weight, his head drifting a little.
       if (!still) { extraYaw += Math.sin(t * .6) * .07; extraPitch += Math.sin(t * 1.3 + 1) * .03; }
-      reindeerHolder.position.y = GROUND + hop;
+      reindeerShift += (reindeerAside - reindeerShift) * (still ? 1 : .05);
+      reindeerHolder.position.set(REINDEER.x + ASIDE[0] * reindeerShift, GROUND + hop, REINDEER.z + ASIDE[1] * reindeerShift);
+      reindeerShadow?.position.set(REINDEER.x + ASIDE[0] * reindeerShift + .28, GROUND + .003, REINDEER.z + ASIDE[1] * reindeerShift - .12);
       reindeerHolder.rotation.z = still ? 0 : Math.sin(t * .9) * .015;
       reindeerHolder.scale.set(reindeerScale, reindeerScale * (still ? 1 : 1 + Math.sin(t * 1.7) * .01), reindeerScale);
       reindeerHead.quaternion.copy(reindeerRest);
@@ -681,6 +691,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const delta = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), reindeerTurn[0] + extraYaw).multiply(new THREE.Quaternion().setFromAxisAngle(across, reindeerTurn[1] + extraPitch));
       reindeerHead.quaternion.premultiply(parent.clone().invert().multiply(delta).multiply(parent));
     }
+    // The barn's repair tag swings for a moment; its drawer, pulled open, stands a little out of the wall.
+    if (hoist.tag) { const u = (t - hoist.swing) / 1.4; hoist.tag.rotation.z = !still && u < 1 ? Math.sin(u * Math.PI * 5) * .35 * (1 - u) : 0; }
+    if (hoist.drawer) { hoist.out += (hoist.slide - hoist.out) * (still ? 1 : .12); hoist.drawer.position.z = .03 + hoist.out * .07; hoist.drawer.scale.setScalar(1 + hoist.out * .04); }
     for (const puff of smoke) {
       const life = still ? puff.userData.phase : (t * .18 + puff.userData.phase) % 1;
       puff.position.set(FIRE.x + life * 1.25, 3.38 + life * .6, FIRE.z); puff.scale.set(.3 + life * .4, .22 + life * .28, 1);
@@ -1210,12 +1223,16 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       }
       return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
     },
-    // The hay hoist: how far the toggle is pulled (0–1), where its parts are on screen, and the hatch's lid.
-    hoist(pull) { hoist.pull = THREE.MathUtils.clamp(pull, 0, 1); placeHoist(); wake(); if (motion.matches || frame === undefined) draw(); },
+    // The hay hoist: how far the bale is wound up (0–1) and where the crank stands (radians; by default as far as the
+    // rope wound in has turned it); whether the crank is fitted; a swing of the repair tag; the drawer behind the bale
+    // (shut, or pulled out with or without the matchbox); and where its parts are on screen.
+    hoist(pull, turn) { hoist.pull = THREE.MathUtils.clamp(pull, 0, 1); hoist.turn = turn; placeHoist(); wake(); if (motion.matches || frame === undefined) draw(); },
+    fitCrank(fitted) { if (!hoist.crank) return; hoist.crank.visible = fitted; redraw(); },
+    swingTag() { hoist.swing = clock; wake(); },
     hoistRects() {
       if (!barn || !hoist.bale) return null;
       barn.holder.updateMatrixWorld(true);
-      const rise = hoist.pull * HOIST.lift, hang = HOIST.x - HOIST.radius, pull = HOIST.x + HOIST.radius, [tw, th] = HOIST.toggle, [hw, hh] = HOIST.hatch;
+      const hang = HOIST.x - HOIST.radius, [dw, dh] = HOIST.drawer, [gw, gh] = WINCH.tag, reach = WINCH.arm + WINCH.crank[0] / 2;
       const local = (center, size) => {
         const rect = stage.getBoundingClientRect(), xs = [], ys = [];
         for (const dx of [-.5, .5]) for (const dy of [-.5, .5]) {
@@ -1224,15 +1241,26 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
         }
         return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
       };
-      // `reach` is how many stage pixels the toggle travels from rest to fully pulled, to turn a drag into a pull.
-      const top = local([pull, HOIST.rest, .2], [.01, .01]), bottom = local([pull, HOIST.rest - HOIST.lift, .2], [.01, .01]);
-      return { toggle: local([pull, HOIST.rest - rise - th / 2, .2], [tw, th]), hatch: local([hang, hh / 2, .03], [hw, hh]), wheel: local([HOIST.x, HOIST.wheel, .21], [HOIST.radius * 2, HOIST.radius * 2]), reach: bottom.top - top.top };
+      // `crank` is the circle its knob runs round, to turn a drag about the hub into turns of the winch.
+      return { winch: local([WINCH.x, WINCH.y, .2], WINCH.plate), crank: local([WINCH.x, WINCH.y, .21], [reach * 2, reach * 2]), tag: local([WINCH.tagAt[0] + gw * .44, WINCH.tagAt[1] - gh / 2, .19], [gw, gh]), drawer: local([hang, dh / 2, .03], [dw, dh]), wheel: local([HOIST.x, HOIST.wheel, .21], [HOIST.radius * 2, HOIST.radius * 2]) };
     },
-    async openHatch(open) {
-      if (!hoist.hatch) return;
-      const map = texture(await cutBoard('hoist-hatch', PIECES['hoist-hatch'], set, open ? { open: true } : {}));
+    async openDrawer(state) {
+      if (!hoist.drawer) return;
+      hoist.slide = state.open ? 1 : 0;
+      const map = texture(await cutBoard('hoist-drawer', PIECES['hoist-drawer'], set, state.open ? { open: true, matches: Boolean(state.matches) } : {}));
       if (disposed) return;
-      const old = hoist.hatch.material.map; hoist.hatch.material.map = map; textures.delete(old); old.dispose(); wake(); if (motion.matches || frame === undefined) draw();
+      const old = hoist.drawer.material.map; hoist.drawer.material.map = map; textures.delete(old); old.dispose(); redraw();
+    },
+    // Part of a board on screen (stage pixels): [left, top, right, bottom] as fractions of its drawing.
+    boardRect(id, [left, top, right, bottom] = [0, 0, 1, 1]) {
+      const sheet = sheets.get(id); if (!sheet) return null;
+      sheet.holder.updateMatrixWorld(true);
+      const { w, h } = sheet.board, rect = stage.getBoundingClientRect(), xs = [], ys = [];
+      for (const fx of [left, right]) for (const fy of [top, bottom]) {
+        const point = new THREE.Vector3((fx - .5) * w, (1 - fy) * h, 0).applyMatrix4(sheet.holder.matrixWorld).project(camera);
+        xs.push((point.x + 1) / 2 * rect.width); ys.push((1 - point.y) / 2 * rect.height);
+      }
+      return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
     },
     snowmanAct(kind) { if (motion.matches || !snowman) return; snowmanMove = { kind, start: clock }; wake(); },
     // Turn to face one side of the village: 'left' (the fair), 'right' (the coast) or 'back' (the house and the mountain).
@@ -1245,6 +1273,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // Points the reindeer's head at a spot on the stage (stage pixels); null looks straight ahead again.
     reindeerLook(point) { const rect = stage.getBoundingClientRect(); gaze(point && rect.left + point.x, point && rect.top + point.y); },
     reindeerAct(kind) { reindeerAction = kind ? { kind, start: clock } : null; wake(); },
+    // Steps aside from his trough (or back to where he stood); at once when `now`.
+    reindeerStep(aside, now = false) { reindeerAside = aside ? 1 : 0; if (now) reindeerShift = reindeerAside; redraw(); },
     // His mouth on screen (stage pixels), a little generous, for the food to be dropped into.
     mouthRect() {
       if (!reindeerSkull) return null;

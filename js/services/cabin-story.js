@@ -2,6 +2,8 @@
 // places for its nine letter books: the nine along HOLY MERRY's shelf (0–8) and the four empty ones left of the SANTA
 // picture book (9–12). A book moves to an empty place, or swaps with the book already there; the shelf opens when the four
 // places spell MORE (the two R books are alike, either will do).
+import { ever } from './cabin-bag.js';
+
 export const LETTERS = ['H', 'O', 'L', 'Y', 'M', 'E', 'R', 'R', 'Y'];
 export const BOOK_IDS = ['book-h1', 'book-o1', 'book-l1', 'book-y1', 'book-m1', 'book-e1', 'book-r1', 'book-r2', 'book-y2'];
 export const PLACES = 13, GAPS = [9, 10, 11, 12];
@@ -80,9 +82,13 @@ export const canWish = (volunteer, finale) => signedUp(volunteer) && points(volu
 export const canStay = (volunteer, finale) => signedUp(volunteer) && points(volunteer) === TASKS.length && !finale.stayed;
 export const trueMiracle = finale => finale.twist && Boolean(finale.wish || finale.stayed);
 export const goesHome = ({ volunteer, finale }) => finale.invited && !signedUp(volunteer) && !finale.endings.includes('A');
+// The yard, where the story starts: four things to find there, each shown the way by something else (the mailbox's
+// parcel, the trough, the snowman's drift, the barn's drawer). The house needs the last two (the hearth, the desk).
+export const YARD = ['lichen', 'key', 'handle', 'matches'];
+export const yardDone = bag => YARD.every(id => ever(bag, id));
 // What the story is waiting on now, for the clue book's hints (data/cabin-clues.js): the first thing not yet done.
-export function goal({ story, volunteer, finale }) {
-  if (!story.opened) return story.left ? 'bookcase' : 'room';
+export function goal({ story, volunteer, finale, bag }) {
+  if (!story.opened) return !yardDone(bag) ? 'yard' : story.left ? 'bookcase' : 'room';
   if (!knowsSantas(story.seen)) return story.seen.includes('log') ? 'secret' : 'log';
   if (!signedUp(volunteer)) return finale.endings.length ? 'endings' : 'join';
   if (!finale.twist) return canUntie(volunteer) ? 'cord' : 'jobs';

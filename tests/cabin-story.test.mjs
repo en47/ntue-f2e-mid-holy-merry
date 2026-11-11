@@ -75,8 +75,13 @@ test('the end: two jobs untie the old pages, three stamps buy a wish, all four l
 });
 test('the clue book hints at the first thing the story is still waiting on', () => {
   const story = { left: false, opened: false, seen: [] }, volunteer = { mark: '', tasks: [] }, finale = { invited: false, twist: false, wish: null, stayed: false, endings: [] };
-  const at = (changes = {}) => goal({ story: { ...story, ...changes.story }, volunteer: { ...volunteer, ...changes.volunteer }, finale: { ...finale, ...changes.finale } });
+  // The yard's four things found (the lichen fed, the handle on the winch, the key and matches still in the pocket).
+  const yard = { held: ['key', 'matches'], used: ['lichen', 'handle'] }, empty = { held: [], used: [] };
+  const at = (changes = {}) => goal({ story: { ...story, ...changes.story }, volunteer: { ...volunteer, ...changes.volunteer }, finale: { ...finale, ...changes.finale }, bag: changes.bag ?? yard });
   const known = { opened: true, left: true, seen: ['tags', 'log', 'rules'] }, signed = tasks => ({ mark: 'J', tasks });
+  assert.equal(at({ bag: empty }), 'yard', 'the yard first'); assert.equal(at({ bag: { held: ['lichen', 'key', 'matches'], used: [] } }), 'yard', 'until the handle is found too');
+  assert.equal(at({ story: { left: true }, bag: { held: ['key'], used: ['lichen', 'handle'] } }), 'yard', 'the matches still in the barn');
+  assert.equal(at({ story: known, bag: empty }), 'join', 'past the bookcase the yard no longer matters');
   assert.equal(at(), 'room'); assert.equal(at({ story: { left: true } }), 'bookcase');
   assert.equal(at({ story: { opened: true, left: true, seen: ['tags'] } }), 'log', 'the wet shift log first');
   assert.equal(at({ story: { opened: true, left: true, seen: ['tags', 'log'] } }), 'secret');
@@ -86,7 +91,7 @@ test('the clue book hints at the first thing the story is still waiting on', () 
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true } }), 'wish');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true, wish: 'snow', endings: ['B', 'D'] } }), 'endings');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C', 'D'] } }), 'done');
-  for (const id of ['room', 'bookcase', 'log', 'secret', 'join', 'jobs', 'cord', 'wish', 'endings', 'done']) assert.ok(GOALS[id]?.hints.length, `${id} has hints`);
+  for (const id of ['yard', 'room', 'bookcase', 'log', 'secret', 'join', 'jobs', 'cord', 'wish', 'endings', 'done']) assert.ok(GOALS[id]?.hints.length, `${id} has hints`);
 });
 test('the wet shift log: one cell still reads, the rest are written back in, and only the right initials put it right', () => {
   const blank = readLog();

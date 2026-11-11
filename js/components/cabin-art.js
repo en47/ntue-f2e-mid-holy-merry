@@ -783,9 +783,13 @@ export function stable({ paper }, { width, height }) {
   }
 }
 // The hay hoist on the barn's face, left of the door (stable-board units: x from the board's middle, y up from the snow).
-// A single pulley under the eave: one rope runs down to a bale, the other to a wooden toggle you pull, so the bale rises
-// exactly as far as the toggle comes down. At rest the bale sits on the snow, hiding a little hatch in the wall behind it.
-export const HOIST = { x: -.9, wheel: 1.55, radius: .14, lift: .9, bale: [.5, .42], toggle: [.13, .24], rest: 1.05, hatch: [.44, .36] };
+// A single pulley under the eave: one rope runs down to a bale, the other to a winch on the wall, so the bale rises
+// exactly as far as the winch's spool winds in. At rest the bale sits on the snow, hiding a little drawer set in the wall.
+export const HOIST = { x: -.9, wheel: 1.55, radius: .14, lift: .9, bale: [.5, .42], drawer: [.44, .36] };
+// The winch, under the pulley's other side: its spool's middle, the spool's radius (the rope winds on it, so the crank
+// turns lift / spool radians from bottom to top), its plate, and the crank (hub to knob `arm`) that fits on its square
+// hub. The crank is missing when the visitor first comes; a repair tag hangs below the plate (`tag`: size, then where).
+export const WINCH = { x: HOIST.x + HOIST.radius + .07, y: .7, spool: .07, plate: [.3, .3], arm: .17, crank: [.08, .25], tag: [.17, .15], tagAt: [-.79, .57] };
 export function hoistBracket({ paper }, { width, height }) {
   shape('rect', { x: width * .1, y: height * .2, width: width * .8, height: height * .22, rx: 6, fill: TIMBER }, paper);
   shape('path', { d: `M${width * .82} ${height * .42}V${height * .9}L${width * .3} ${height * .42}`, stroke: '#3b302a', 'stroke-width': 9, fill: 'none', 'stroke-linejoin': 'round' }, paper);
@@ -808,22 +812,66 @@ export function hayBale({ paper }, { width, height }) {
   shape('circle', { cx: width / 2, cy: 10, r: 8, fill: 'none', stroke: '#3b302a', 'stroke-width': 5 }, paper);
   shape('path', { d: `M14 ${height * .24}C${width * .3} ${height * .12} ${width * .7} ${height * .16} ${width - 14} ${height * .26}V${height * .32}H14Z`, fill: SNOW }, paper);
 }
-export function hoistToggle({ paper }, { width, height }) {
-  shape('rect', { x: width * .2, y: height * .12, width: width * .6, height: height * .82, rx: width * .3, fill: '#a86b47' }, paper);
-  shape('rect', { x: width * .34, y: height * .22, width: width * .14, height: height * .62, rx: 4, fill: '#c39466' }, paper);
-  shape('circle', { cx: width / 2, cy: height * .08, r: width * .16, fill: 'none', stroke: '#3b302a', 'stroke-width': 5 }, paper);
+// The winch: a bolted plate, an iron ratchet wheel with its pawl, the wooden spool with the rope wound on it, and in the
+// middle the square hub the crank fits on (an empty socket until it is fitted).
+export function hoistWinch({ paper }, { width, height }) {
+  const c = width / 2;
+  shape('rect', { x: width * .05, y: height * .05, width: width * .9, height: height * .9, rx: width * .12, fill: TIMBER }, paper);
+  for (const [x, y] of [[.16, .16], [.84, .16], [.16, .84], [.84, .84]]) shape('circle', { cx: width * x, cy: height * y, r: width * .035, fill: '#3b302a' }, paper);
+  let teeth = '';
+  for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, b = (i + .55) / 14 * Math.PI * 2; teeth += `${i ? 'L' : 'M'}${c + Math.cos(a) * width * .3} ${c + Math.sin(a) * width * .3}L${c + Math.cos(b) * width * .37} ${c + Math.sin(b) * width * .37}`; }
+  shape('path', { d: `${teeth}Z`, fill: '#5d554f' }, paper);
+  shape('path', { d: `M${width * .93} ${height * .14}L${width * .7} ${height * .2}L${width * .78} ${height * .3}Z`, fill: '#3b302a' }, paper);
+  shape('circle', { cx: c, cy: c, r: width * .27, fill: '#c39466' }, paper);
+  for (const r of [.235, .2, .165]) shape('circle', { cx: c, cy: c, r: width * r, fill: 'none', stroke: '#b98a52', 'stroke-width': width * .028 }, paper);
+  shape('circle', { cx: c, cy: c, r: width * .11, fill: '#8f5a3c' }, paper);
+  shape('rect', { x: c - width * .045, y: c - width * .045, width: width * .09, height: width * .09, fill: '#241a16' }, paper);
 }
-// The hatch behind the bale: a small dark cubby in the wall with a little crate tucked inside. `state.open` lifts its lid.
-export function hoistHatch({ paper }, { width, height }, state = {}) {
+// The winch's crank, the wooden handle found in the snow, seen from the front as it turns: the block with its square
+// tenon over the hub (at the top of the sheet), the arm, and the grip seen end on (at the bottom).
+export function hoistCrank({ paper }, { width, height }) {
+  const c = width / 2, hub = width / 2, knob = height - width / 2;
+  shape('rect', { x: c - width * .2, y: hub, width: width * .4, height: knob - hub, rx: width * .14, fill: '#a8774d' }, paper);
+  shape('path', { d: `M${c} ${hub + width * .3}V${knob - width * .3}`, stroke: '#8f5a3c', 'stroke-width': width * .06, opacity: .6 }, paper);
+  shape('rect', { x: c - width * .36, y: hub - width * .36, width: width * .72, height: width * .72, rx: width * .1, fill: '#6b4a33' }, paper);
+  shape('rect', { x: c - width * .14, y: hub - width * .14, width: width * .28, height: width * .28, fill: '#3b2a24' }, paper);
+  shape('circle', { cx: c, cy: knob, r: width * .44, fill: '#c08a5a' }, paper);
+  shape('circle', { cx: c, cy: knob, r: width * .3, fill: '#8f5a3c' }, paper);
+}
+// The repair tag on a loop of string from the winch's plate: a manila tag with a few lines in pencil and a little
+// drawing of the crank (it says the crank is to be put back before the winch is used: cabin-pulley.js reads it out).
+export function hoistTag({ paper }, { width, height }) {
+  shape('path', { d: `M${width * .06} ${height * .02}C${width * .1} ${height * .2} ${width * .16} ${height * .3} ${width * .22} ${height * .42}`, fill: 'none', stroke: '#9c8a6e', 'stroke-width': width * .025, 'stroke-linecap': 'round' }, paper);
+  shape('path', { d: `M${width * .28} ${height * .22}L${width * .95} ${height * .26}L${width * .93} ${height * .96}L${width * .26} ${height * .92}L${width * .08} ${height * .58}Z`, fill: '#e6cf9c' }, paper);
+  shape('circle', { cx: width * .22, cy: height * .58, r: height * .05, fill: '#8f7556' }, paper);
+  for (const [y, w] of [[.42, .55], [.56, .6], [.7, .34]]) shape('path', { d: `M${width * .34} ${height * y}q${width * w * .25} ${-height * .03} ${width * w * .5} 0t${width * w * .5} 0`, fill: 'none', stroke: '#6f5a48', 'stroke-width': height * .035, 'stroke-linecap': 'round' }, paper);
+  shape('path', { d: `M${width * .72} ${height * .76}h${width * .12}v${height * .1}`, fill: 'none', stroke: '#b5443c', 'stroke-width': height * .035, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, paper);
+  shape('circle', { cx: width * .84, cy: height * .87, r: height * .035, fill: '#b5443c' }, paper);
+}
+// The drawer behind the bale, set in the barn wall. Shut, its front and a knob; pulled out (`state.open`), its inside
+// shows: a folded note, and the matchbox beside it until it has been taken (`state.matches`).
+export function hoistDrawer({ paper }, { width, height }, state = {}) {
   shape('rect', { x: 0, y: 0, width, height, rx: 10, fill: TIMBER }, paper);
   shape('rect', { x: 12, y: 12, width: width - 24, height: height - 18, rx: 6, fill: '#2f1d18' }, paper);
-  const crate = { x: width * .22, y: height * .44, w: width * .56, h: height * .48 };
-  shape('rect', { x: crate.x, y: crate.y, width: crate.w, height: crate.h, rx: 6, fill: '#c39466' }, paper);
-  shape('path', { d: `M${crate.x} ${crate.y + crate.h / 2}h${crate.w}M${crate.x + crate.w / 2} ${crate.y}v${crate.h}`, stroke: '#a8774d', 'stroke-width': 6 }, paper);
-  if (state.open) {
-    shape('path', { d: `M${crate.x - 6} ${crate.y}L${crate.x + 14} ${crate.y - crate.h * .55}H${crate.x + crate.w + 2}L${crate.x + crate.w} ${crate.y}Z`, fill: '#d9b48a' }, paper);
-    shape('rect', { x: crate.x + crate.w * .28, y: crate.y - 14, width: crate.w * .44, height: 22, rx: 3, fill: '#fffdf6', transform: `rotate(-6 ${crate.x + crate.w / 2} ${crate.y})` }, paper);
-  } else shape('rect', { x: crate.x - 4, y: crate.y - 12, width: crate.w + 8, height: 16, rx: 5, fill: '#d9b48a' }, paper);
+  const knob = (y, r) => { shape('circle', { cx: width / 2, cy: y, r, fill: '#3b302a' }, paper); shape('circle', { cx: width / 2 - r * .3, cy: y - r * .3, r: r * .35, fill: '#7a6a5e' }, paper); };
+  if (!state.open) {
+    shape('rect', { x: 18, y: height * .3, width: width - 36, height: height * .62, rx: 5, fill: '#c39466' }, paper);
+    shape('path', { d: `M26 ${height * .48}H${width - 26}`, stroke: '#a8774d', 'stroke-width': 4, opacity: .6 }, paper);
+    knob(height * .64, 9); return;
+  }
+  const front = height * .58;
+  shape('path', { d: `M20 ${front}L34 ${height * .2}H${width - 34}L${width - 20} ${front}Z`, fill: '#a8774d' }, paper);
+  shape('path', { d: `M30 ${front - 4}L40 ${height * .26}H${width - 40}L${width - 30} ${front - 4}Z`, fill: '#d9b48a' }, paper);
+  shape('rect', { x: width * .5, y: height * .28, width: width * .3, height: height * .2, rx: 2, fill: '#fffdf6', transform: `rotate(7 ${width * .65} ${height * .38})` }, paper);
+  shape('path', { d: `M${width * .53} ${height * .34}h${width * .2}M${width * .53} ${height * .4}h${width * .14}`, stroke: '#7d9bc9', 'stroke-width': 3, 'stroke-linecap': 'round', transform: `rotate(7 ${width * .65} ${height * .38})` }, paper);
+  if (state.matches) {
+    shape('rect', { x: width * .16, y: height * .3, width: width * .28, height: height * .18, rx: 3, fill: '#b5443c', transform: `rotate(-6 ${width * .3} ${height * .39})` }, paper);
+    shape('rect', { x: width * .21, y: height * .34, width: width * .17, height: height * .1, rx: 2, fill: '#fbf3df', transform: `rotate(-6 ${width * .3} ${height * .39})` }, paper);
+    star(paper, width * .295, height * .39, 6, GOLD);
+  }
+  shape('rect', { x: 4, y: front, width: width - 8, height: height - front - 2, rx: 6, fill: '#c39466' }, paper);
+  shape('path', { d: `M12 ${front + 10}H${width - 12}`, stroke: '#a8774d', 'stroke-width': 4, opacity: .6 }, paper);
+  knob(front + (height - front) * .55, 10);
 }
 export function snowman({ paper }, { width, height }) {
   // Only the snowman himself: what he wears is laid over him in four places by the wardrobe game (cabin-wardrobe.js).
@@ -833,6 +881,49 @@ export function snowman({ paper }, { width, height }) {
   ball(y1, r1); ball(y2, r2); ball(y3, r3);
   for (const dx of [-.35, .3]) shape('circle', { cx: cx + r3 * dx, cy: y3 - r3 * .3, r: r3 * .1, fill: '#3b2a24' }, paper);
   for (const dy of [-.45, 0, .45]) shape('circle', { cx, cy: y1 + r1 * dy - r1 * .1, r: r1 * .08, fill: '#3b2a24' }, paper);
+}
+// The reindeer's feeding trough, just behind him on his right: a plank box on crossed legs, heaped with hay. Fed
+// (`state.eaten`), the hay is pushed about, and at the end he stood over a little gold shows in it until it is taken
+// (`state.taken`).
+export const TROUGH = { x: REINDEER.x - .42, z: REINDEER.z - .42, w: .95, h: .46, turn: -.3 };
+export function trough({ paper }, { width, height }, state = {}) {
+  const rim = height * .36, bottom = height * .74, straw = (x, y, length, lean) => shape('path', { d: `M${x} ${y}l${lean} ${-length}`, stroke: '#c49a52', 'stroke-width': 4, 'stroke-linecap': 'round' }, paper);
+  for (const x of [.15, .85]) shape('path', { d: `M${width * (x - .07)} ${height - 4}L${width * (x + .05)} ${bottom - 6}M${width * (x + .07)} ${height - 4}L${width * (x - .05)} ${bottom - 6}`, stroke: TIMBER, 'stroke-width': 13, 'stroke-linecap': 'round' }, paper);
+  if (!state.eaten) {
+    shape('path', { d: `M${width * .05} ${rim + 10}C${width * .1} ${height * .02} ${width * .3} ${height * .06} ${width * .42} ${height * .1}C${width * .55} ${-4} ${width * .8} ${height * .04} ${width * .95} ${rim + 10}Z`, fill: '#d9b36a' }, paper);
+    for (let i = 0; i < 14; i++) straw(width * (.1 + noise(i + 40) * .8), rim + 4, 24 + noise(i + 41) * 40, (noise(i + 42) - .5) * 40);
+  } else {
+    shape('path', { d: `M${width * .05} ${rim + 10}C${width * .08} ${height * .12} ${width * .25} ${height * .1} ${width * .4} ${height * .2}C${width * .5} ${height * .26} ${width * .58} ${rim - 2} ${width * .66} ${rim + 10}Z`, fill: '#d9b36a' }, paper);
+    shape('path', { d: `M${width * .86} ${rim + 10}C${width * .88} ${rim - 22} ${width * .93} ${rim - 18} ${width * .95} ${rim + 10}Z`, fill: '#d9b36a' }, paper);
+    for (let i = 0; i < 8; i++) straw(width * (.1 + noise(i + 50) * .5), rim + 4, 14 + noise(i + 51) * 26, (noise(i + 52) - .5) * 40);
+    for (const [x, y, r] of [[.7, rim - 3, 5], [.76, rim - 1, 4], [.63, rim - 5, 3.5]]) shape('circle', { cx: width * x, cy: y, r, fill: '#b9cfa8' }, paper);
+    if (!state.taken) {
+      const kx = width * .8, ky = rim - 26;
+      shape('path', { d: `M${kx + 12} ${ky + 14}L${kx + 40} ${rim + 6}`, stroke: '#c48f32', 'stroke-width': 10, 'stroke-linecap': 'round' }, paper);
+      shape('circle', { cx: kx, cy: ky, r: 18, fill: 'none', stroke: '#d9a441', 'stroke-width': 10 }, paper);
+      shape('path', { d: `M${kx - 13} ${ky - 6}a14 14 0 0 1 12 -8`, fill: 'none', stroke: '#f4d58a', 'stroke-width': 4, 'stroke-linecap': 'round' }, paper);
+    }
+    for (let i = 0; i < 5; i++) straw(width * (.7 + noise(i + 60) * .22), rim + 4, 10 + noise(i + 61) * 14, (noise(i + 62) - .5) * 30);
+  }
+  shape('path', { d: `M${width * .02} ${rim}H${width * .98}L${width * .92} ${bottom}H${width * .08}Z`, fill: WOOD_LIT }, paper);
+  shape('path', { d: `M${width * .05} ${(rim + bottom) / 2}H${width * .95}`, stroke: WOOD, 'stroke-width': 4, opacity: .7 }, paper);
+  for (const x of [.2, .8]) shape('rect', { x: width * x - 5, y: rim, width: 10, height: bottom - rim, fill: '#5d554f' }, paper);
+  shape('path', { d: `M${width * .02} ${rim + 2}C${width * .2} ${rim - 10} ${width * .5} ${rim - 4} ${width * .7} ${rim - 8}C${width * .85} ${rim - 10} ${width * .95} ${rim - 4} ${width * .98} ${rim + 2}V${rim + 9}H${width * .02}Z`, fill: SNOW }, paper);
+}
+// A drift at the snowman's feet, a little too round, with the end of a wooden handle sticking out of it (the winch's
+// crank, cabin-pulley.js). Dug (`state.dug`), it is a scuffed hollow with the snow thrown aside.
+export const PILE = { x: -4.82, z: -1.5, w: .62, h: .3, turn: .35 };
+export function snowPile({ paper }, { width, height }, state = {}) {
+  const ground = height - 4;
+  if (state.dug) {
+    shape('ellipse', { cx: width * .5, cy: ground - 10, rx: width * .3, ry: 12, fill: '#cfdbe4' }, paper);
+    for (const [x, w, h] of [[.12, .2, .32], [.78, .22, .4], [.62, .1, .2], [.3, .08, .16]]) shape('path', { d: `M${width * (x - w / 2)} ${ground}C${width * (x - w / 3)} ${ground - height * h} ${width * (x + w / 3)} ${ground - height * h} ${width * (x + w / 2)} ${ground}Z`, fill: SNOW }, paper);
+    return;
+  }
+  shape('path', { d: `M${width * .56} ${height * .62}L${width * .74} ${height * .2}`, stroke: '#a8774d', 'stroke-width': 16, 'stroke-linecap': 'round' }, paper);
+  shape('ellipse', { cx: width * .76, cy: height * .17, rx: 12, ry: 6.5, fill: '#8f5a3c', transform: `rotate(-66 ${width * .76} ${height * .17})` }, paper);
+  shape('path', { d: `M${width * .02} ${ground}C${width * .12} ${height * .5} ${width * .38} ${height * .44} ${width * .55} ${height * .52}C${width * .75} ${height * .6} ${width * .92} ${height * .7} ${width * .98} ${ground}Z`, fill: SNOW }, paper);
+  shape('path', { d: `M${width * .5} ${height * .54}C${width * .72} ${height * .6} ${width * .9} ${height * .72} ${width * .98} ${ground}H${width * .72}C${width * .74} ${height * .8} ${width * .66} ${height * .64} ${width * .5} ${height * .54}Z`, fill: '#dbe5ec' }, paper);
 }
 export function lampPost({ paper }, { width, height }) {
   const cx = width / 2, ground = height - 6, head = 70;
@@ -1198,6 +1289,8 @@ export const BOARDS = [
   { id: 'cane-near', w: .3, h: .95, at: [5, GROUND, -3], turn: -.4, draw: candyCane },
   { id: 'cane-far', w: .3, h: .95, at: [5.9, GROUND, -6.1], turn: -.45, draw: candyCane },
   { id: 'snowman', w: .9, h: 1.4, at: [-5.4, GROUND, -1.2], turn: .35, draw: snowman },
+  { id: 'snow-pile', w: PILE.w, h: PILE.h, px: 900, at: [PILE.x, GROUND, PILE.z], turn: PILE.turn, draw: snowPile, state: {} },
+  { id: 'trough', w: TROUGH.w, h: TROUGH.h, px: 900, at: [TROUGH.x, GROUND, TROUGH.z], turn: TROUGH.turn, draw: trough, state: {} },
   { id: 'workshop', w: 5.2, h: 3.2, at: [-8.4, GROUND, -13.5], turn: .35, draw: workshop },
   { id: 'yard-tree', w: 1.4, h: 2.8, at: [-9.6, GROUND, -6.8], turn: .4, draw: yardTree },
   { id: 'bench', w: 1.4, h: .9, at: [-7.6, GROUND, -3.4], turn: .5, draw: bench },
@@ -1215,7 +1308,7 @@ export const SMOKE = { w: .55, h: .4, draw: smokePuff };
 export const SPOTS = [
   { id: 'mailbox', name: '郵筒', box: [[SIGN.x, .45, SIGN.z + .45], [.8, 1.1, .6]], view: { target: [SIGN.x, .75, SIGN.z + .45], distance: 3, pitch: .1, yaw: .28 } },
   { id: 'reindeer', name: '麋鹿', box: [[REINDEER.x, .55, REINDEER.z], [1.3, 1.4, 1.2]], view: { target: [REINDEER.x, .62, REINDEER.z], distance: 3.4, pitch: .1, yaw: -.12 } },
-  { id: 'snowman', name: '雪人', box: [[-5.4, .55, -1.2], [1.1, 1.5, .8]], view: { target: [-5.4, .82, -1.2], distance: 3.5, pitch: .06, yaw: .32, aside: .42, tallDrop: .5, tallDistance: 5.6 } },
+  { id: 'snowman', name: '雪人', box: [[-5.4, .55, -1.2], [1.1, 1.5, .8]], view: { target: [-5.4, .82, -1.2], distance: 3.5, pitch: .06, yaw: .32, aside: .42, tallDrop: .62, tallDistance: 6.9 } },
   { id: 'stable', name: '馴鹿小屋', box: [[7.4, 1.2, -7], [3.6, 2.8, 1.4]], view: { target: [7.05, .95, -7.05], distance: 4.4, pitch: .08, yaw: -.05, tallDistance: 6.4 } },
 ];
 

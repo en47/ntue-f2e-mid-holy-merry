@@ -2,29 +2,33 @@
 // the snowman's accessories. scripts/build-cabin-boards.mjs cuts them all ahead of time at two sizes (images/cabin/), so
 // the page only downloads finished pictures instead of running the paper filter on every board while it opens. A sheet
 // with no picture, or whose picture fails to load, is cut here in the browser exactly as before.
-import { BOARDS, BOOK_SHEETS, HOIST, PX, SMOKE, SPOTS, hayBale, hoistBracket, hoistHatch, hoistToggle, hoistWheel } from './cabin-art.js';
+import { BOARDS, BOOK_SHEETS, HOIST, PX, SMOKE, SPOTS, WINCH, hayBale, hoistBracket, hoistCrank, hoistDrawer, hoistTag, hoistWheel, hoistWinch } from './cabin-art.js';
 import { RIGS, VIEWPOINT, WORLD } from './cabin-world.js';
 import { PLACES, WARDROBE } from './cabin-wardrobe.js';
 import { paperFilter, shape } from './paper-art.js';
 import { CUTS } from '../data/cabin-cuts.js';
 
-// The hay hoist's loose parts and the chimney's puff, cut finer than the boards: they are small and seen close.
+// The hay hoist's loose parts (its winch, the crank that fits it and the repair tag) and the chimney's puff, cut finer
+// than the boards: they are small and seen close.
 export const PIECES = {
   smoke: SMOKE,
   'hoist-bracket': { w: .62, h: .34, px: 420, draw: hoistBracket },
   'hoist-wheel': { w: HOIST.radius * 2.3, h: HOIST.radius * 2.3, px: 420, draw: hoistWheel },
   'hoist-bale': { w: HOIST.bale[0], h: HOIST.bale[1], px: 420, draw: hayBale },
-  'hoist-toggle': { w: HOIST.toggle[0], h: HOIST.toggle[1], px: 420, draw: hoistToggle },
-  'hoist-hatch': { w: HOIST.hatch[0], h: HOIST.hatch[1], px: 420, draw: hoistHatch, state: {} },
+  'hoist-winch': { w: WINCH.plate[0], h: WINCH.plate[1], px: 640, draw: hoistWinch },
+  'hoist-crank': { w: WINCH.crank[0], h: WINCH.crank[1], px: 640, draw: hoistCrank },
+  'hoist-tag': { w: WINCH.tag[0], h: WINCH.tag[1], px: 640, draw: hoistTag },
+  'hoist-drawer': { w: HOIST.drawer[0], h: HOIST.drawer[1], px: 640, draw: hoistDrawer, state: {} },
 };
 // An accessory is cut at the size of its place on the snowman; its drawing is in a 100-unit-wide box.
 export function outfitBoard(item) {
   const { size: [w, h], box } = PLACES[item.place];
   return { w, h, px: 640, draw: ({ paper }, { width, height }) => item.draw(shape('g', { transform: `scale(${width / 100} ${height / box})` }, paper)) };
 }
-// The other looks a sheet can take, cut ahead too: the sign with one to four stars lit, the mailbox and the hatch open, the
-// coat gone from its peg while Santa is out, and the back wall open behind the bookcase.
-const VARIANTS = { sign: [1, 2, 3, 4].map(stars => ({ stars })), mailbox: [{ open: true }], 'hoist-hatch': [{ open: true }], 'front-in': [{ coat: false }], back: [{ secret: true }], 'secret-tags': [{ mine: true }] };
+// The other looks a sheet can take, cut ahead too: the sign with one to four stars lit, the mailbox open, the reindeer's
+// trough eaten from (its gold showing, then taken), the snow at the snowman's feet dug, the barn's drawer pulled out (with
+// the matchbox, then without), the coat gone from its peg while Santa is out, and the back wall open behind the bookcase.
+const VARIANTS = { sign: [1, 2, 3, 4].map(stars => ({ stars })), mailbox: [{ open: true }], trough: [{ eaten: true }, { eaten: true, taken: true }], 'snow-pile': [{ dug: true }], 'hoist-drawer': [{ open: true, matches: true }, { open: true, matches: false }], 'front-in': [{ coat: false }], back: [{ secret: true }], 'secret-tags': [{ mine: true }] };
 const SHEETS = [...[...BOARDS, ...WORLD].map(board => [board.id, board]), ...Object.entries(PIECES), ...BOOK_SHEETS.map(sheet => [sheet.id, sheet]), ...WARDROBE.map(item => [`outfit-${item.id}`, outfitBoard(item)])];
 // Each sheet's look when the page opened: a game changes board.state later, and the picture only matches the first look.
 const FIRST = new Map(SHEETS.map(([name, board]) => [name, JSON.stringify(board.state ?? null)]));

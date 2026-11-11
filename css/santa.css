@@ -81,10 +81,21 @@
 .reindeer-bubble.is-popping { animation: bubble-pop .32s cubic-bezier(.3, 1.4, .5, 1) both; }
 @keyframes bubble-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
 /* 穀倉滑輪：木頭握把上的抓取區（往下拉）、掛鉤與鬆開的紙標籤、暗格的亮點，和兩種筆跡的紙條。 */
-.hoist-grip { position: absolute; padding: 0; background: radial-gradient(#ffe8a466, transparent 70%); border: 0; box-shadow: 0 0 0 2px #ffe8a455, 0 0 14px 2px #ffe8a433; border-radius: 16px; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
-.hoist-grip.is-pulling { cursor: grabbing; animation: none; border-color: #c08a3e; }
-.hoist-grip.is-locked { border-color: transparent; background: none; animation: none; cursor: default; }
-.hoist-grip:focus-visible, .hoist-hook:focus-visible, .hoist-release:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.hoist-crank { position: absolute; padding: 0; background: radial-gradient(#ffe8a455, transparent 70%); border: 0; border-radius: 50%; cursor: grab; touch-action: none; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
+.hoist-crank.is-turning { cursor: grabbing; animation: none; background: none; }
+.hoist-crank:focus-visible, .hoist-hook:focus-visible, .hoist-release:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+/* The trough's little gold, the mailbox's letter and parcel, and the parcel opened on a card. */
+.feed-mouth-spot { position: absolute; pointer-events: auto; }
+.feed-glint { position: absolute; pointer-events: none; animation: feed-glint 2.2s ease-in-out infinite; }
+.feed-glint .art-layer { position: absolute; left: 50%; top: 0; width: 46%; height: auto; aspect-ratio: 1; translate: -50% 0; }
+@keyframes feed-glint { 0%, 100% { opacity: .2; scale: .55; } 50% { opacity: 1; scale: 1; } }
+.mail-thing { position: absolute; width: auto; cursor: pointer; pointer-events: auto; }
+.mail-thing .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.parcel-note { margin: .2rem 0 1rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; color: #4f5d6b; rotate: -1deg; }
+.parcel-pouch { position: relative; display: block; width: 7rem; aspect-ratio: 1; margin: 0 auto 1rem; padding: 0; background: none; border: 0; cursor: pointer; }
+.parcel-pouch .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.parcel-pouch:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.parcel-label { position: absolute; left: 50%; bottom: -.6rem; translate: -50% 0; white-space: nowrap; font-family: var(--font-hand); font-size: var(--fs-small); color: #8f3b36; }
 .hoist-hint { position: absolute; padding: .4rem .8rem; color: var(--ink); background: var(--cream); border-radius: 12px; font-size: var(--fs-small); font-weight: 700; pointer-events: none; rotate: 3deg; }
 .hoist-hook, .hoist-release { position: absolute; translate: 0 -50%; padding: .45rem 1rem; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; white-space: nowrap; pointer-events: auto; }
 .hoist-hook { animation: bubble-pop .32s cubic-bezier(.3, 1.4, .5, 1) both; }
@@ -129,7 +140,7 @@
   /* 衣櫃在下方時，「恢復原樣」右端讓開音樂按鈕。 */
   .wardrobe-reset { margin-right: 3.8rem; }
 }
-@media (prefers-reduced-motion: reduce) { .play-target, .play-burst, .play-confetti { animation: none; } .play-item, .wardrobe-item, .wardrobe-ghost.is-flying, .feed-ghost.is-flying, .feed-meal, .feed-mouth { transition: none; } .reindeer-bubble.is-popping, .hoist-grip, .hoist-hook { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .play-target, .play-burst, .play-confetti { animation: none; } .play-item, .wardrobe-item, .wardrobe-ghost.is-flying, .feed-ghost.is-flying, .feed-meal, .feed-mouth { transition: none; } .reindeer-bubble.is-popping, .hoist-crank, .hoist-hook, .feed-glint { animation: none; } .feed-glint { opacity: 1; } }
 /* 紙雕聖誕老人替身：3D 小屋準備好之前先站在雪地上。 */
 .cabin-stage .santa-placeholder-host { position: absolute; left: 50%; bottom: 22%; width: min(220px, 30%); aspect-ratio: 300 / 270; translate: -50% 0; transition: opacity .4s ease; pointer-events: none; }
 .cabin-stage:not([data-state='loading']) .santa-placeholder-host { opacity: 0; }
@@ -835,6 +846,9 @@ html.theatre-open { overflow: hidden; }
 :is(.inspect-flip, .inspect-close):hover { translate: 0 -2px; }
 @media (max-width: 700px) {
   .cabin-bag { left: .6rem; bottom: .6rem; max-width: calc(100% - 1.2rem); gap: .35rem; }
+  /* Over a game's tray along the bottom, the pocket sits just above it: the snowman's wardrobe, the reindeer's basket. */
+  .cabin-play[data-game="snowman"] ~ .cabin-bag { bottom: calc(38% + 1.1rem); }
+  .cabin-play[data-game="reindeer"] ~ .cabin-bag { bottom: 8.2rem; }
   .bag-pocket { width: 48px; height: 50px; }
   .bag-item { width: 46px; height: 50px; }
   .inspect-card { padding: 1.4rem 1.3rem 1.1rem; }

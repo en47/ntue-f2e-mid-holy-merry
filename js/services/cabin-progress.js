@@ -1,7 +1,7 @@
 // What a visitor has done in Santa's yard, kept in this browser only and never sent anywhere. One versioned record, so a
 // Christmas passport or the cabin's story can later read the same place. Every function takes the storage, so tests pass a stand-in.
 import { CLUES, GIFTS, LOG_ANSWER, SLIP, TASKS, canSign, homeShelf, readLog, readShelf } from './cabin-story.js';
-import { emptyBag, readBag } from './cabin-bag.js';
+import { emptyBag, ever, readBag } from './cabin-bag.js';
 import { WISHES } from '../data/cabin-finale.js';
 import { GOALS, NOTEBOOK } from '../data/cabin-clues.js';
 
@@ -19,7 +19,8 @@ export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'car
 // signed, and which endings have been seen; the cord's lock opened, and the blank slip under it taken or read. The clue book: what has been written in it, and how many hints have been asked
 // for, by what the story was waiting on. The substitutes' welcome ornaments found so far (by initial), and whether they
 // have been hung on the tree; how many times the big wheel's gearbox has been put right (each opens a new board). The
-// pocket: what is in it now and what has been used for good (cabin-bag.js); a record from before it had a pocket starts empty.
+// pocket: what is in it now and what has been used for good (cabin-bag.js); a record from before it had a pocket starts empty,
+// except that a barn hoisted then has its winch's crank fitted (the crank is the snowman's handle, so that is found too).
 const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog() }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0, bag: emptyBag() });
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
@@ -60,6 +61,7 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   const OLD = { music: 'N', rack: 'O', snowman: 'E', wheel: 'K', hat: 'H' }, found = Array.isArray(saved.ornaments) ? saved.ornaments : Array.isArray(saved.pieces) ? saved.pieces.map(id => OLD[id]) : [];
   progress.ornaments = GIFTS.filter(mark => found.includes(mark)); progress.tree = saved.tree === true;
   progress.bag = readBag(saved.bag);
+  if ((progress.hoist.locked || progress.hoist.found) && !ever(progress.bag, 'handle')) progress.bag.used.push('handle');
   if (Array.isArray(saved.clues)) progress.clues = Object.keys(NOTEBOOK).filter(id => saved.clues.includes(id));
   const hints = saved.hints && typeof saved.hints === 'object' && !Array.isArray(saved.hints) ? saved.hints : {};
   // `gifts`: how many hints about the welcome gifts have been asked for.

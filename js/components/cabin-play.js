@@ -23,6 +23,8 @@ import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 import { mountNotebook } from './cabin-notebook.js';
 import { mountBag } from './cabin-bag.js';
+import { ITEM_ART } from './cabin-items.js';
+import { ever, holds } from '../services/cabin-bag.js';
 import { treeCard } from './cabin-ornaments.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
@@ -37,6 +39,9 @@ const ART = {
   scarf: parent => { shape('path', { d: 'M10 30C36 42 64 42 90 30V48C64 60 36 60 10 48Z', fill: '#a84a42' }, parent); shape('path', { d: 'M58 48L70 90H54L48 50Z', fill: '#87302f' }, parent); shape('path', { d: 'M20 40v10M34 43v10M66 43v10M80 40v10', stroke: '#fbf3df', 'stroke-width': 4 }, parent); },
   hay: parent => { shape('rect', { x: 8, y: 26, width: 84, height: 54, rx: 16, fill: '#d9b36a' }, parent); shape('path', { d: 'M14 44h72M14 62h72', stroke: '#b98f48', 'stroke-width': 4 }, parent); shape('path', { d: 'M36 26v54M64 26v54', stroke: '#a8774d', 'stroke-width': 5 }, parent); },
   lichen: parent => { for (const [x, y, r] of [[34, 56, 18], [54, 46, 20], [70, 60, 16], [48, 66, 16]]) shape('circle', { cx: x, cy: y, r, fill: '#b9cfa8' }, parent); for (const [x, y] of [[40, 50], [58, 40], [66, 58]]) shape('circle', { cx: x, cy: y, r: 5, fill: '#e3edd8' }, parent); },
+  // In the mailbox: Santa's letter in a cream envelope with a red seal, and a small kraft parcel tied with string and tagged.
+  envelope: parent => { shape('path', { d: 'M10 28H90V78H10Z', fill: '#fbf3df' }, parent); shape('path', { d: 'M10 28L50 56 90 28', fill: 'none', stroke: '#d8c49c', 'stroke-width': 4, 'stroke-linejoin': 'round' }, parent); shape('path', { d: 'M10 78L40 52M90 78L60 52', stroke: '#e8dcc2', 'stroke-width': 3 }, parent); shape('circle', { cx: 50, cy: 56, r: 9, fill: '#b5443c' }, parent); shape('path', { d: 'M46 56h8M50 52v8', stroke: '#e6a59a', 'stroke-width': 2, 'stroke-linecap': 'round' }, parent); },
+  parcel: parent => { shape('path', { d: 'M14 36H86V84H14Z', fill: '#c9a46a' }, parent); shape('path', { d: 'M14 36L24 24H76L86 36Z', fill: '#d9b98a' }, parent); shape('path', { d: 'M50 24V84M14 58H86', stroke: '#8f5a3c', 'stroke-width': 4 }, parent); shape('path', { d: 'M50 24C40 12 32 20 44 26M50 24C60 12 68 20 56 26', fill: 'none', stroke: '#8f5a3c', 'stroke-width': 3.4, 'stroke-linecap': 'round' }, parent); shape('path', { d: 'M62 64L84 66 83 80 61 78Z', fill: '#fbf3df' }, parent); shape('path', { d: 'M66 71h12', stroke: '#b5443c', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, parent); },
   // The little signs that float up: a paper heart, a star.
   heart: parent => shape('path', { d: 'M50 86C20 64 8 46 14 30 20 16 40 14 50 30 60 14 80 16 86 30 92 46 80 64 50 86Z', fill: '#d9614f', stroke: '#fbf3df', 'stroke-width': 6 }, parent),
   star: parent => shape('path', { d: 'M50 8L61 36 92 38 68 58 76 90 50 72 24 90 32 58 8 38 39 36Z', fill: '#e0b04f', stroke: '#fbf3df', 'stroke-width': 5, 'stroke-linejoin': 'round' }, parent),
@@ -75,6 +80,9 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const gift = mark => { if (progress.ornaments.includes(mark)) return false; progress.ornaments.push(mark); save(); clue(`gift-${mark}`); return true; };
   function say(text) { caption.textContent = text; caption.hidden = !text; if (text) announce(text); }
   const point = event => { const rect = stage.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; };
+  const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
+  // The yard's corners finished so far (a star each on the name sign): restored from santa.js, and added to as they are.
+  const corners = new Set(), found = id => { corners.add(id); onFound(id); };
   function prop(kind, parent, label) {
     const button = element('button', `play-item play-${kind}`, parent); button.type = 'button'; button.setAttribute('aria-label', label);
     paperLayer(button, '0 0 100 100', '', ART[kind], PAPER); return button;
@@ -124,25 +132,58 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   }
 
   const games = {
+    // The mailbox: Santa's letter for the visitor, and a little parcel for Santa himself, tied with string: a note from
+    // whoever looked after the reindeer last, and a pouch of his favourite lichen (to the pocket, cabin-bag.js). Both stay
+    // in the open mailbox, to be read again.
     mailbox() {
-      say('郵筒的旗子豎起來了，裡面有信！點一下郵筒打開它。');
+      // The two lie in the open mailbox, kept on it while the camera settles or the stage changes size.
+      const shown = [], watch = new ResizeObserver(() => lay());
+      function lay() {
+        const spot = cabin.boardRect('mailbox', [.12, .12, .88, .6]) ?? cabin.rect('mailbox'), size = Math.min(spot.height * .9, spot.width * .48, 110);
+        for (const [thing, x] of shown) Object.assign(thing.style, { left: `${spot.left + spot.width * x - size / 2}px`, top: `${spot.top + spot.height / 2 - size / 2}px`, width: `${size}px`, height: `${size}px` });
+      }
+      const things = () => {
+        cabin.repaint('mailbox', { open: true });
+        for (const [kind, label, x, read] of [['envelope', '聖誕老人的信', .27, letter], ['parcel', '寄給聖誕老人的小包裹', .73, parcel]]) {
+          const thing = prop(kind, layer, label); thing.classList.add('mail-thing'); thing.addEventListener('click', read); shown.push([thing, x]);
+        }
+        lay(); later(600, lay); later(1300, lay); watch.observe(stage);
+      };
+      function letter() {
+        sound.play('open');
+        const card = element('article', 'cabin-letter', layer); card.setAttribute('aria-label', '聖誕老人的信');
+        const body = element('p', 'cabin-letter-body', card);
+        body.textContent = '親愛的朋友：\n昨晚送了一整夜的禮物，現在終於能坐下來烤火了，謝謝你來看我！\n院子裡還藏著幾個小秘密：麋鹿肚子餓了、雪人還沒打扮好、馴鹿小屋的乾草也還沒人收。\n—— 聖誕老人';
+        const done = element('button', 'cabin-letter-close', card); done.type = 'button'; done.textContent = '收好信 ✓';
+        done.addEventListener('click', () => { card.remove(); sound.play('remove'); say(bag.ever('lichen') ? '信收好了。到院子別處逛逛吧！' : '信收好了。郵筒裡還有一個用麻繩綁著的小包裹。'); found('mailbox'); });
+        done.focus({ preventScroll: true });
+      }
+      function parcel() {
+        sound.play('open'); clue('care-note');
+        const card = element('article', 'cabin-letter parcel-card', layer); card.setAttribute('aria-label', '寄給聖誕老人的小包裹');
+        element('h3', 'chair-title', card).textContent = '寄給聖誕老人的小包裹';
+        element('p', 'parcel-note', card).textContent = '別忘了餵麋鹿。上次輪到你時，牠可是等了好久！';
+        if (!bag.ever('lichen')) {
+          const pouch = element('button', 'parcel-pouch', card); pouch.type = 'button'; pouch.setAttribute('aria-label', '一小包地衣，寫著「給麋鹿的點心」');
+          paperLayer(pouch, '0 0 100 100', '', ITEM_ART.lichen, PAPER); element('span', 'parcel-label', pouch).textContent = '給麋鹿的點心';
+          pouch.addEventListener('click', () => { const from = local(pouch.getBoundingClientRect()); pouch.remove(); bag.give('lichen', from); done.focus({ preventScroll: true }); });
+        }
+        const done = element('button', 'cabin-letter-close', card); done.type = 'button'; done.textContent = '收好便條 ✓';
+        done.addEventListener('click', () => { card.remove(); sound.play('remove'); say(bag.ever('lichen') ? '便條放回包裹裡了。' : '包裹裡還留著那包「給麋鹿的點心」。'); });
+        (card.querySelector('.parcel-pouch') ?? done).focus({ preventScroll: true });
+      }
+      if (corners.has('mailbox') || bag.ever('lichen') || progress.clues.includes('care-note')) { say('郵筒開著：聖誕老人的信，和一個寄給他的小包裹。'); things(); return () => watch.disconnect(); }
+      say('郵筒的旗子豎起來了，裡面有東西！點一下郵筒打開它。');
       const rect = cabin.rect('mailbox'), open = element('button', 'play-target', layer);
       open.type = 'button'; open.setAttribute('aria-label', '打開郵筒');
       Object.assign(open.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
-      open.addEventListener('click', () => {
-        open.remove(); cabin.repaint('mailbox', { open: true }); say('');
-        const letter = element('article', 'cabin-letter', layer); letter.setAttribute('aria-label', '聖誕老人的信');
-        const body = element('p', 'cabin-letter-body', letter);
-        body.textContent = '親愛的朋友：\n昨晚送了一整夜的禮物，現在終於能坐下來烤火了，謝謝你來看我！\n院子裡還藏著幾個小秘密：麋鹿肚子餓了、雪人還沒打扮好、馴鹿小屋的乾草也還沒人收。\n—— 聖誕老人';
-        const done = element('button', 'cabin-letter-close', letter); done.type = 'button'; done.textContent = '收好信 ✓';
-        done.addEventListener('click', () => { letter.remove(); say('信收好了。到院子別處逛逛吧！'); onFound('mailbox'); });
-        done.focus();
-      });
+      open.addEventListener('click', () => { open.remove(); sound.play('open'); say('郵筒裡有一封信，和一個用麻繩綁著的小包裹。'); things(); });
       open.focus();
+      return () => watch.disconnect();
     },
-    reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen'), clue }),
-    snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, confetti, clue, gift }),
-    stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, onFound, onTask: () => task('hay'), clue }),
+    reindeer: () => feedGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen'), clue }),
+    snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, confetti, clue, gift }),
+    stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, onTask: () => task('hay'), clue }),
     // The broken big wheel, mended up close (a sheet laid over the yard: it is too far off to walk up to).
     wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, again: !pending(progress.volunteer, 'wheel'), round: progress.wheelRounds, progress, save, clue, gift, onMended: () => { progress.wheelRounds += 1; save(); task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
     // In the room: the hearth to tend, the desk's letters, the music box and the snow globe, and the bookcase to look over.
@@ -277,11 +318,16 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // can be opened and its gears set again (stamped only the first time).
     get wheelBroken() { return pending(progress.volunteer, 'wheel'); },
     get wheelOpen() { return pending(progress.volunteer, 'wheel') || progress.volunteer.tasks.includes('wheel'); },
-    // Coming back shows the yard as it was left: the snowman in his outfit, finished corners finished.
+    // Coming back shows the yard as it was left: the snowman in his outfit, finished corners finished, the reindeer fed at
+    // his trough (and stepped aside), the snowman's drift dug, the crank on the barn's winch.
     restore(ids) {
+      ids.forEach(id => corners.add(id));
+      const had = id => ever(progress.bag, id), gone = id => had(id) && !holds(progress.bag, id);
       for (const place of Object.keys(PLACES)) cabin.dress(place, progress.outfit[place]);
-      cabin.hoist(progress.hoist.locked ? 1 : 0); if (progress.hoist.locked && progress.hoist.found) cabin.openHatch(true);
-      if (ids.includes('mailbox')) cabin.repaint('mailbox', { open: true });
+      cabin.hoist(progress.hoist.locked ? 1 : 0); cabin.fitCrank(gone('handle'));
+      if (ids.includes('mailbox') || had('lichen') || progress.clues.includes('care-note')) cabin.repaint('mailbox', { open: true });
+      if (gone('lichen')) { cabin.repaint('trough', had('key') ? { eaten: true, taken: true } : { eaten: true }); cabin.reindeerStep(true, true); }
+      if (had('handle')) cabin.repaint('snow-pile', { dug: true });
       cabin.placeBooks(progress.story.shelf); if (progress.story.opened) cabin.openBookcase(!progress.story.shut, false);
       cabin.wheelBroken(pending(progress.volunteer, 'wheel'), false);
       if (progress.finale.stayed) cabin.repaint('secret-tags', { mine: true });
