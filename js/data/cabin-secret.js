@@ -2,10 +2,19 @@
 // the ones on the desk's letters, the music box and the snow globe; the night of 12/24 matches the note in the barn.
 export const NAMES = { N: '尼爾斯', K: '克莉絲', H: '荷莉', E: '艾洛', O: '歐拉' };
 // The shift log since the snow got to it (who flew is in cabin-story.js `NIGHTS`): each cell, first and second half of
-// each night in turn, is a blot still in its writer's colour, washed out altogether, or still clear. The colours are the
+// each night in turn, is a blot still in its writer's colour, washed out altogether, washed out but for the little work
+// mark its writer draws by their initial, or still clear. Three ways to put it right (docs/SANTA-PUZZLE-DESIGN.md §5):
+// looked at (a colour, a mark, the clear cell), matched with notes found elsewhere (the care log, the barn note, the route
+// note), and the one left by the duty rules and the join years in the register (12/22, second half). The colours are the
 // name tags' (cabin-art.js SUBSTITUTES), and their names are said too, for anyone who cannot tell them apart.
-export const INK = ['blot', 'washed', 'clear', 'blot', 'blot', 'blot', 'washed', 'washed'];
+export const INK = ['blot', 'washed', 'clear', 'washed', 'blot', 'mark', 'washed', 'washed'];
 export const COLOUR_NAMES = { N: '深紅', K: '藍', H: '綠', E: '紫', O: '金' };
+// Each substitute's work mark, drawn on their name tag and by their initial in the log: a spanner (mends the sleigh), the
+// sleigh (drives it), a star (the route), a snowflake (the village's snow), an envelope (the letters).
+export const MARKS = { N: ['spanner', '扳手'], K: ['sleigh', '雪橇'], H: ['star', '星星'], E: ['snowflake', '雪花'], O: ['envelope', '信封'] };
+// The booklet on the desk: its first page, the duty rules, can be read from the start; the pages after are stuck together
+// with snowmelt until Santa opens them for you (the rules for substitutes, below). Neither page says who they are for.
+export const DUTY = { title: '值班須知', lines: ['一、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在交接表上簽名。', '二、同一個人不能連著值兩段（跨過午夜也一樣），要讓下一位接手。', '三、新夥伴的前五年是見習期：一季只負責一段，其他時間跟著前輩學。'], margin: '（登記簿上的加入年份，就是見習期從哪一年算起。）', stuck: '後面幾頁被雪水黏在一起，翻不開。' };
 export const LOG = {
   title: '夜班交接表', halves: ['前半夜', '後半夜'],
   wet: '班表被雪水弄濕了。暈開的地方還看得出是什麼顏色的墨水；有幾格整個洗掉了。',
@@ -33,30 +42,39 @@ export const RACK = {
 };
 // The early shift on Christmas morning: nobody has signed yet (unless the snowman has been dressed as Santa).
 export const MORNING = { date: '12/25', shift: '早班', empty: '（還沒有人簽名）', snowman: '雪人？（實習）' };
-export const RULES = { title: '聖誕老人替身守則', lines: ['一、自願加入，隨時都可以離開。', '二、每替別人傳遞一個願望，就在登記簿上蓋一個章。', '三、集到三個章，就能許一個願望，帶著它回家。', '四、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在班表上簽名。'], margin: '（最下面有人用鉛筆加了一行小字，太淡了，看不清楚。）' };
+export const RULES = { title: '聖誕老人替身守則', lines: ['一、自願加入，隨時都可以離開。', '二、每替別人傳遞一個願望，就在登記簿上蓋一個章。', '三、集到三個章，就能許一個願望，帶著它回家。'], margin: '（最下面有人用鉛筆加了一行小字，太淡了，看不清楚。）' };
 export const NOTES = {
-  tags: '名牌板上掛著五個名牌：尼爾斯、克莉絲、荷莉、艾洛、歐拉。最右邊還有一個空掛勾。',
-  register: '登記簿翻開在最新的一頁，上面蓋滿了郵戳。前面的頁用紅繩綁著，暫時打不開。',
+  tags: '名牌板上掛著五個名牌，每個人的字是自己的顏色，旁邊畫著一個小記號。最右邊還有一個空掛勾。',
   stamps: '桌上排著四顆郵戳章，印面各刻著一個字母：N、K、H、E。歐拉的那顆，好像被誰帶出門了。',
   pin: '章盤邊上別著一根細細的黃銅撥針，尖端可以伸進很小的孔裡。', pinTake: '拿起黃銅撥針',
-  hats: '牆上掛著四頂聖誕帽，一頂比一頂小。最小的那頂，只有小孩子戴得下。',
-  // Once the old page has been read (cabin-finale.js): the smallest hat was Holly's, the year her wish came true.
-  hatsKnown: '最小的那頂聖誕帽內側，用紅線繡著「H. 2003」。原來荷莉許願的那年，她還是個孩子。',
+  hats: '帽架上六個掛鉤，五個各掛著一頂聖誕帽，第六個空著。荷莉那一鉤掛的是最小的一頂，只有小孩子戴得下。',
+  // Turned over, the smallest hat has something stitched inside, too small to read without the magnifier; read, it is the
+  // year Holly's wish came true. (Kept as `hatsKnown` for the clue book's wording once read.)
+  hatInside: '帽子內側用紅線繡著一行小字，太小了，看不清楚。', hatsKnown: '最小的那頂聖誕帽內側，用紅線繡著「H. 2003」。',
   rack: '分揀架上塞滿了信，每一格的郵戳都不一樣。',
   polaroid: '帽架上夾著一張舊拍立得：一個打扮好的雪人。翻到背面，有人寫著：「照這樣打扮，它會想起來。」',
   hatLook: '把最小的那頂帽子翻過來看看', hatGift: '帽子裡藏著一個綠色的紙鈴鐺吊飾，綁著一張小卡片。',
-  known: '名牌、班表、守則……原來，聖誕老人不只一位。',
-  back: '門開了，聖誕老人拍掉身上的雪走進來：「我回來了——咦，書櫃怎麼開著？……看來你都看見了。呵呵，這是我們村子的小秘密。」',
+  known: '最後一格補上，墨水一行一行乾回來……每一晚，都是兩個人接力飛完的。原來，聖誕老人不只一位。',
+  // Santa back from the reindeer once the log is put right (or, if he is already in, from his chair): he knows that you
+  // know, and opens the booklet's stuck pages for you. Having opened the old record already, you hear a word about it too.
+  back: '門開了，聖誕老人拍掉身上的雪走進來：「看來，你已經發現我們的小秘密了。」',
+  chair: '聖誕老人從搖椅上看著你，笑了：「看來，你已經發現我們的小秘密了。」',
+  told: '「小房間那本小冊，後面黏住的幾頁，我幫你翻開了。上面寫著我們是怎麼開始的。」',
+  coming: '門外好像傳來麋鹿的鈴鐺聲……聖誕老人回來了嗎？回房間看看吧。',
+  record: '他看了書櫃後面一眼：「……那本舊紀錄，你也翻開過了啊。那時候你還不知道我們的小秘密吧？現在再讀一次，說不定會讀出不一樣的東西。」',
 };
 // The register's newest page, once the secret is known: how many stamps each substitute has this season (four fill a row;
 // Holly's is full, and she is still on the shift log), then a blank row the visitor may sign.
+// The register's newest page: the season at the top, then each one's initial, the year they joined and their stamps this
+// season (four fill a row; Holly's is full, and she joined long before anyone else), then a blank row.
 export const REGISTER = {
-  title: '登記簿　最新的一頁', full: 4,
-  rows: [['N', 3], ['K', 2], ['H', 4], ['E', 1], ['O', 2]],
+  title: '登記簿　最新的一頁', season: '2026 年聖誕季', full: 4, joined: '加入',
+  rows: [['N', 3, 2015], ['K', 2, 2016], ['H', 4, 2003], ['E', 1, 2022], ['O', 2, 2023]],
+  blank: '（空白）',
   invite: '最下面還空著一格。想一起幫忙，把願望送到大家手上嗎？選一個字母當你的縮寫，蓋上章就加入了。不加入也沒關係。',
   taken: '已經有人用了', sign: '蓋章加入',
   jobs: '今天可以幫忙的事', you: '（你）',
-  joined: mark => `蓋好了。從今天起，你也是一位替身：${mark}.。登記簿上寫著今天可以幫忙的事。`,
+  welcome: mark => `蓋好了。從今天起，你也是一位替身：${mark}.。登記簿上寫著今天可以幫忙的事。`,
   leave: '離開替身工作', sure: '確定要離開嗎？蓋過的章會留著，想回來隨時可以。', left: '你把縮寫輕輕劃掉了。蓋過的章，還留在登記簿上。',
   hint: '登記簿最新的一頁，最下面好像還空著一格。',
 };

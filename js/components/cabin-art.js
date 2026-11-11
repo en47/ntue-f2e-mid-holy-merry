@@ -578,6 +578,18 @@ export function chairNote({ paper }, { width, height }) {
 export const SUBSTITUTES = [['N', '#8f3b36'], ['K', '#3f5a7a'], ['H', '#3f6653'], ['E', '#6e4a6b'], ['O', '#b98a3c']];
 // `mine`: the visitor has signed the early shift, and their tag hangs on the sixth hook (a red band and a gold star: the
 // board's letters are cut from a fixed set, so their initial is on the card, cabin-secret.js).
+// A substitute's work mark, centred on (cx, cy) and `size` across, in their colour: a spanner, a sleigh, a star, a
+// snowflake or an envelope (data/cabin-secret.js MARKS). On their name tag, and by their initial in the shift log.
+export function workMark(parent, kind, cx, cy, size, fill) {
+  const s = size / 20, at = `translate(${cx - 10 * s} ${cy - 10 * s}) scale(${s})`, g = shape('g', { transform: at }, parent);
+  const line = (d, width = 2.6) => shape('path', { d, fill: 'none', stroke: fill, 'stroke-width': width, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+  if (kind === 'spanner') { line('M5 15L13 7', 3.2); shape('path', { d: 'M12 3a5 5 0 1 0 5 5l-3 1-2-2z', fill }, g); }
+  if (kind === 'sleigh') { line('M3 15H15Q18 15 18 12'); line('M5 12V8H13L15 12Z'); }
+  if (kind === 'star') shape('path', { d: 'M10 2L12.4 7.6 18.4 8 13.8 11.8 15.2 17.6 10 14.4 4.8 17.6 6.2 11.8 1.6 8 7.6 7.6Z', fill }, g);
+  if (kind === 'snowflake') for (let i = 0; i < 3; i++) line(`M${10 + Math.cos(i * Math.PI / 3) * 8} ${10 + Math.sin(i * Math.PI / 3) * 8}L${10 - Math.cos(i * Math.PI / 3) * 8} ${10 - Math.sin(i * Math.PI / 3) * 8}`, 2.2);
+  if (kind === 'envelope') { shape('rect', { x: 3, y: 5, width: 14, height: 10, rx: 1.5, fill }, g); line('M3.6 5.6L10 10.4 16.4 5.6', 1.6).setAttribute('stroke', '#fffdf6'); }
+}
+const MARK_OF = { N: 'spanner', K: 'sleigh', H: 'star', E: 'snowflake', O: 'envelope' };
 export function nameTags({ paper }, { width, height }, state = {}) {
   shape('rect', { x: 0, y: height * .18, width, height: height * .1, rx: 8, fill: WOOD_LIT }, paper);
   const step = width / 6.4;
@@ -587,7 +599,9 @@ export function nameTags({ paper }, { width, height }, state = {}) {
     shape('path', { d: `M${cx} ${top}L${cx - step * .3} ${top + height * .2}M${cx} ${top}L${cx + step * .3} ${top + height * .2}`, stroke: '#c9a77f', 'stroke-width': 3 }, paper);
     shape('rect', { x: cx - step * .38, y: top + height * .2, width: step * .76, height: height * .44, rx: 10, fill: '#fffdf6', transform: `rotate(${(i % 2 ? 1 : -1) * 4} ${cx} ${top})` }, paper);
     shape('rect', { x: cx - step * .38, y: top + height * .2, width: step * .76, height: height * .1, rx: 8, fill: colour, transform: `rotate(${(i % 2 ? 1 : -1) * 4} ${cx} ${top})` }, paper);
-    letter(paper, char, cx, top + height * .47, step * .44, height * .22, { fill: colour });
+    const tilt = shape('g', { transform: `rotate(${(i % 2 ? 1 : -1) * 4} ${cx} ${top})` }, paper);
+    letter(tilt, char, cx, top + height * .43, step * .4, height * .17, { fill: colour });
+    workMark(tilt, MARK_OF[char], cx, top + height * .57, step * .3, colour);
   });
   // The sixth hook, empty until the visitor stays on.
   const cx = step * 5.9, top = height * .23;
@@ -609,10 +623,9 @@ export function secretDesk({ paper }, { width, height }) {
   const top = height * .42;
   shape('rect', { x: width * .04, y: top, width: width * .92, height: 24, rx: 6, fill: WOOD_LIT }, paper);
   for (const x of [.08, .86]) shape('rect', { x: width * x, y: top + 20, width: width * .06, height: height - top - 20, fill: WOOD }, paper);
-  // The register on its lectern, open; red string round the older pages.
+  // The register on its lectern, open at its newest page.
   shape('path', { d: `M${width * .1} ${top}L${width * .16} ${top - height * .2}H${width * .46}L${width * .5} ${top}Z`, fill: WOOD }, paper);
   shape('path', { d: `M${width * .14} ${top - height * .18}Q${width * .22} ${top - height * .24} ${width * .3} ${top - height * .19}Q${width * .38} ${top - height * .24} ${width * .46} ${top - height * .18}L${width * .44} ${top - height * .04}H${width * .16}Z`, fill: '#fffdf6' }, paper);
-  shape('path', { d: `M${width * .14} ${top - height * .1}H${width * .2}M${width * .4} ${top - height * .1}H${width * .46}`, stroke: RED, 'stroke-width': 5 }, paper);
   // A row of postmark stamps, each with its own initial, and the little rulebook.
   SUBSTITUTES.slice(0, 4).forEach(([char, colour], i) => {
     const cx = width * (.56 + i * .085);
@@ -621,6 +634,12 @@ export function secretDesk({ paper }, { width, height }) {
     shape('rect', { x: cx - 20, y: top - 22, width: 40, height: 20, rx: 4, fill: colour }, paper);
   });
   shape('rect', { x: width * .3, y: top - 26, width: width * .16, height: 24, rx: 4, fill: '#3f6653', transform: `rotate(-6 ${width * .38} ${top})` }, paper);
+  // At the far end, the old record book standing up: dark red cloth, tied round with red cord, a little brass lock.
+  const bx = width * .855, bw = width * .085, bh = height * .2;
+  shape('rect', { x: bx, y: top - bh, width: bw, height: bh, rx: 4, fill: '#6b2a2a' }, paper);
+  shape('rect', { x: bx + bw * .08, y: top - bh + 4, width: bw * .12, height: bh - 8, fill: '#8f3b36' }, paper);
+  shape('path', { d: `M${bx - 3} ${top - bh * .45}H${bx + bw + 3}`, stroke: '#c63a33', 'stroke-width': 5 }, paper);
+  shape('rect', { x: bx + bw * .3, y: top - bh * .45 - 10, width: bw * .4, height: 20, rx: 4, fill: '#c99a3c' }, paper);
 }
 export function sortingRack({ paper }, { width, height }) {
   shape('rect', { x: 0, y: 0, width, height, rx: 8, fill: WOOD }, paper);
@@ -631,15 +650,20 @@ export function sortingRack({ paper }, { width, height }) {
     for (let k = 0; k < 1 + (r * 3 + c) % 3; k++) shape('rect', { x: x + 12 + k * 6, y: y + rh * .3 - k * 4, width: cw - 28, height: rh * .6, rx: 3, fill: ['#fffdf6', '#f3e6c8', '#eadcc0'][k], transform: `rotate(${(k - 1) * 4} ${x + cw / 2} ${y + rh})` }, paper);
   }
 }
+// Six pegs: a hat on each of the first five, one for each substitute in the name tags' order, Holly's the smallest (the
+// one she wore the year she first came); the sixth is empty.
+export const HAT_SIZES = { N: 1, K: .9, H: .46, E: .82, O: .78 };
 export function hatPegs({ paper }, { width, height }) {
   shape('rect', { x: 0, y: height * .12, width, height: height * .1, rx: 6, fill: WOOD_LIT }, paper);
-  [1, .82, .64, .44].forEach((size, i) => {
-    const cx = width * (.14 + i * .24), top = height * .2, h = height * .7 * size, w = width * .2 * size;
+  for (let i = 0; i < 6; i++) {
+    const cx = width * (.09 + i * .164), top = height * .2;
     shape('circle', { cx, cy: top, r: 7, fill: WOOD }, paper);
+    const char = SUBSTITUTES[i]?.[0]; if (!char) continue;
+    const size = HAT_SIZES[char], h = height * .7 * size, w = width * .15 * size;
     shape('path', { d: `M${cx - w / 2} ${top + h}C${cx - w * .4} ${top + h * .3} ${cx + w * .2} ${top} ${cx + w * .55} ${top + h * .35}L${cx + w / 2} ${top + h}Z`, fill: RED }, paper);
     shape('rect', { x: cx - w * .58, y: top + h - h * .16, width: w * 1.16, height: h * .2, rx: h * .1, fill: SNOW }, paper);
-    shape('circle', { cx: cx + w * .56, cy: top + h * .38, r: Math.max(6, w * .12), fill: SNOW }, paper);
-  });
+    shape('circle', { cx: cx + w * .56, cy: top + h * .38, r: Math.max(5, w * .12), fill: SNOW }, paper);
+  }
 }
 
 // The writing desk under the left window, turned to face the room. On top, from the door end: the rack with the reply

@@ -1,4 +1,4 @@
-// Santa 頁從空白存檔整套玩一遍：院子（郵筒包裹、餵食槽鑰匙、雪堆把手、絞盤與抽屜）、屋裡（火柴點火、鑰匙開抽屜拿放大鏡、吸墨器、音樂盒書籤、放大鏡看雪花球）、書櫃、弄濕的交接表、加入、四件替身工作、紅繩小鎖與烤紙條、舊頁、
+// Santa 頁從空白存檔整套玩一遍：院子（郵筒包裹、餵食槽鑰匙、雪堆把手、絞盤與抽屜）、屋裡（火柴點火、鑰匙開抽屜拿放大鏡、吸墨器、音樂盒書籤、放大鏡看雪花球）、書櫃、弄濕的交接表、聖誕老人回來說明、加入、四件替身工作、空白紙條烤火、紅繩舊紀錄簿、
 // 五位替身的見面禮與聖誕樹，最後走到結局 B→D、C→D、A。每一步都按頁面上的按鈕或拖曳，不改存檔。只讀寫這個瀏覽器的
 // localStorage，不連任何雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
@@ -65,6 +65,9 @@ await thing('tags'); await putBack(); await thing('rules'); await putBack();
 await thing('log'); for (const mark of ['E', 'O', 'K', 'H', 'N', 'K', 'H']) { await page.evaluate(m => [...document.querySelectorAll('.shift-pick')].find(b => b.textContent === `${m}.`).click(), mark); await wait(150); }
 await wait(1500); await shot('log-solved'); await putBack(); await wait(2600); await note('known');
 await thing('hats'); await putBack();
+// Back in the middle of the room, Santa comes home and tells you the secret; then the register can be signed.
+await must('離開，關上書櫃'); await wait(4500); await toRoom(); await wait(14000); log.push(`told: ${(await save()).story.told}`);
+await enterSecret();
 // Volunteer: J.
 await thing('register'); await page.evaluate(() => [...document.querySelectorAll('.register-letter')].find(b => b.textContent === 'J').click()); await wait(200); await must('蓋章加入'); await wait(800); await putBack();
 log.push(`signed: ${(await save()).volunteer.mark}`);
@@ -115,8 +118,8 @@ await use('pin', '.musicbox-drawer'); await wait(1900);
 for (const m of ['E', 'O', 'N', 'K', 'H']) { await page.evaluate(m => [...document.querySelectorAll('.comb-tine')].find(b => b.textContent === `${m}.`).click(), m); await wait(260); }
 await wait(2000); await shot('comb-open'); await closeCard('.comb-card');
 await enterSecret();
-await thing('register'); for (const [i, n] of [[0, 2], [3, 3]]) for (let k = 0; k < n; k++) { await page.evaluate(i => document.querySelectorAll('.lock-dial')[i].click(), i); await wait(80); }
-await wait(1600); await must('解開紅繩'); await wait(1200); await shot('old-page'); await must('翻回最新的一頁'); await wait(600); await putBack();
+await thing('record'); for (const [i, n] of [[0, 2], [3, 3]]) for (let k = 0; k < n; k++) { await page.evaluate(i => document.querySelectorAll('.lock-dial')[i].click(), i); await wait(80); }
+await wait(2200); await shot('old-record'); await putBack();
 await thing('hats'); await button('把最小的那頂帽子翻過來看看', '.register-sign'); await wait(1400); await shot('hat-gift'); await putBack();
 log.push(`twist ${(await save()).finale.twist} | ornaments ${(await save()).ornaments}`);
 // Out of the little room: back in the middle, the tree.

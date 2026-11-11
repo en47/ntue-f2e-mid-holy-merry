@@ -380,6 +380,18 @@
 .old-stamp { position: absolute; right: 0; top: .4rem; display: grid; place-items: center; width: 9.5rem; aspect-ratio: 160 / 40; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-small); letter-spacing: .08em; opacity: .85; rotate: -12deg; }
 .old-since { margin: 0 0 .8rem; padding-left: 1.1rem; color: #3f6653; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.9; }
 .old-pencil { margin: 0; color: #7d7468; font-family: var(--font-hand); font-size: var(--fs-small); rotate: -1.5deg; }
+/* 第三章：登記簿頁首與加入年份、名牌的工作記號、舊紀錄簿的編號與夾在最後的便條、讀過以後書角發光。 */
+.register-season { margin: -.2rem 0 .6rem; color: #7d5636; font-family: var(--font-hand); font-size: var(--fs-small); letter-spacing: .15em; }
+.register-year { margin-left: auto; color: #8a7a6a; font-size: var(--fs-small); white-space: nowrap; }
+.register-blank { color: #b9a988; }
+.secret-workmark { position: relative; display: inline-block; width: 1.3rem; aspect-ratio: 1; margin-right: .3rem; vertical-align: middle; }
+.old-title { margin: 0 0 .2rem; color: #7d5636; font-family: var(--font-display); font-size: var(--fs-small); letter-spacing: .12em; }
+.old-card { margin: .8rem auto 0; padding: .7rem .9rem; max-width: 18rem; background: #fffaf0; rotate: 1.5deg; box-shadow: 0 2px 6px #3b2a2433; }
+.old-card-en { margin: 0 0 .3rem; color: #3f5a7a; font-family: var(--font-hand); font-size: var(--fs-small); font-style: italic; }
+.old-card-zh { margin: 0; color: var(--ink); font-family: var(--font-hand); font-size: var(--fs-small); }
+.secret-thing.is-glinting { animation: record-glint 1.6s ease-in-out infinite alternate; }
+@keyframes record-glint { from { box-shadow: 0 0 0 2px #ffe8a455, 0 0 10px 2px #ffe8a433; } to { box-shadow: 0 0 0 3px #f4cf74, 0 0 22px 6px #f4cf7499; } }
+@media (prefers-reduced-motion: reduce) { .secret-thing.is-glinting { animation: none; box-shadow: 0 0 0 3px #f4cf74; } }
 .secret-log .is-you, .secret-tags .is-you { color: var(--red); }
 .wish-card { position: absolute; left: 50%; top: 50%; z-index: 8; width: min(28rem, calc(100% - 2rem)); max-height: calc(100% - 2rem); overflow: auto; display: grid; gap: .5rem; padding: 2.6rem 2.2rem 1.5rem; translate: -50% -50%; background: #fffaf0; border-radius: 6px; box-shadow: 0 18px 40px #3b2a2455; pointer-events: auto; animation: finale-in .5s ease-out both; }
 .finale-title { margin: 0; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-body); letter-spacing: .1em; text-align: center; }

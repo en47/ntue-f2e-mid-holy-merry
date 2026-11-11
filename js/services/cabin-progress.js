@@ -1,6 +1,6 @@
 // What a visitor has done in Santa's yard, kept in this browser only and never sent anywhere. One versioned record, so a
 // Christmas passport or the cabin's story can later read the same place. Every function takes the storage, so tests pass a stand-in.
-import { CLUES, GIFTS, LOG_ANSWER, SLIP, TASKS, canSign, homeShelf, readLog, readShelf } from './cabin-story.js';
+import { CLUES, GIFTS, LOG_ANSWER, SLIP, TASKS, canSign, homeShelf, knowsSantas, readLog, readShelf } from './cabin-story.js';
 import { emptyBag, ever, readBag } from './cabin-bag.js';
 import { WISHES } from '../data/cabin-finale.js';
 import { GOALS, NOTEBOOK } from '../data/cabin-clues.js';
@@ -23,7 +23,7 @@ export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'car
 // except that a barn hoisted then has its winch's crank fitted (the crank is the snowman's handle, so that is found too).
 // What has been set right in the room for good that the pocket does not show (`placed`): the music box's catch undone by the
 // brass pin (a tool, kept). A record whose music box drawer was opened before it had a catch counts it undone.
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog() }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0, bag: emptyBag(), placed: [] });
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog(), told: false }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0, bag: emptyBag(), placed: [] });
 export const PLACED = ['musicbox-catch'];
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
@@ -51,6 +51,9 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   progress.desk = { sealed: desk.sealed === true ? ['reply'] : ids(desk.sealed), marked: ids(desk.marked), sent: ids(desk.sent), answers: Object.fromEntries(answers), sorted: desk.sorted === true || answers.length > 0 };
   const seen = saved.story?.seen;
   progress.story = { left: saved.story?.left === true, opened: saved.story?.opened === true, shut: saved.story?.shut === true, shelf: readShelf(saved.story?.shelf), seen: Array.isArray(seen) ? CLUES.filter(clue => seen.includes(clue)) : [] };
+  // Whether Santa has told you, the secret known, about the substitutes (and opened the booklet's stuck pages); a record
+  // from before he did so counts it told once the secret was known.
+  progress.story.told = saved.story?.told === true || (saved.story?.told === undefined && knowsSantas(progress.story.seen));
   // The shift log as far as it has been written back in; one read before it got wet (an older record) is whole.
   progress.story.log = progress.story.seen.includes('log') ? [...LOG_ANSWER] : readLog(saved.story?.log);
   const tasks = saved.volunteer?.tasks;

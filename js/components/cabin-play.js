@@ -16,7 +16,7 @@ import { secretGame } from './cabin-secret.js';
 import { wheelGame } from './cabin-wheel.js';
 import { wishScene } from './cabin-finale.js';
 import { endingTheatre } from './cabin-ending.js';
-import { GIFTS, TASKS, canStay, canWish, goesHome, knowsSantas, pending, points, record, santaGoes, santaReturns, trueMiracle } from '../services/cabin-story.js';
+import { GIFTS, TASKS, canStay, canWish, goesHome, knowsSantas, pending, points, record, santaGoes, trueMiracle } from '../services/cabin-story.js';
 import { BELLS, CHAIR, DONE, GOING, JOBS, NOTES } from '../data/cabin-secret.js';
 import { GLOBE, NEXT, SANTA_ON_HOLLY, TWIST } from '../data/cabin-finale.js';
 import { PLACES, known } from './cabin-wardrobe.js';
@@ -301,9 +301,16 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       if (story.left && !story.opened && !cabin.santaHome) clue('chair-note');
       // Back from the old page, Santa (if he is in) has a word about Holly; once.
       if (heardHolly && cabin.santaHome) { heardHolly = false; later(900, () => say(SANTA_ON_HOLLY)); return; }
-      // Once the secret is known, Santa comes home from the reindeer, and knows that you know.
-      if (santaReturns({ home: cabin.santaHome, opened: story.opened, seen: story.seen })) {
-        later(700, async () => { say('門外傳來踩雪的腳步聲……'); if (await cabin.santaReturn()) { say(NOTES.back); onSanta('home'); } });
+      // Once the secret is known, Santa tells you about it: home from the reindeer (or from his chair, already in), he opens
+      // the booklet's stuck pages for you; the old record opened before, he has a word about that too. Told once (kept).
+      if (story.opened && knowsSantas(story.seen) && !story.told) {
+        later(700, async () => {
+          if (!cabin.santaHome) { say('門外傳來踩雪的腳步聲……'); if (!(await cabin.santaReturn())) return; say(NOTES.back); onSanta('home'); }
+          else say(NOTES.chair);
+          story.told = true; save(); notebook.refresh();
+          later(4200, () => say(NOTES.told));
+          if (progress.finale.unlocked && !progress.finale.twist) later(8800, () => say(NOTES.record));
+        });
         return;
       }
       if (!santaGoes({ used: used.size, left: story.left, home: cabin.santaHome, opened: story.opened })) return;

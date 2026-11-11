@@ -1072,18 +1072,18 @@
       "bytes": 5034
     },
     "hi/secret-desk.webp": {
-      "fingerprint": "50c90416453d41bdd82f37016abda6359130f2502be2135994f8482617dcdde5",
-      "sha256": "5ed26f3144d3a840ee0733048a2aca63fcb58aa2d19083eeb5228d479196cb67",
+      "fingerprint": "6a8b84d7970a1f21e40b95b8c5e448adf10562b62e7e881f93fd661d95c590fe",
+      "sha256": "77e9c46789d08ce03c7977500a6dc537ed6dba9d4238a8efa1819eb8afe77fff",
       "width": 840,
       "height": 744,
-      "bytes": 27576
+      "bytes": 30232
     },
     "hi/secret-hats.webp": {
-      "fingerprint": "7c5f768b396ced6c7759d039c751f7d5b10cd656a79ffd3de909d203a1200f1f",
-      "sha256": "8bf3d05b0d8faadd62d487326ab0d5a686215b8834a54a5303275208c27f003a",
+      "fingerprint": "d3663db3e205eb6fd7f47d1fbe3dd9c04becd8e6d3a72640f3808c8f44fd9ce6",
+      "sha256": "00a331cc8e5721ea69b600ad249b072a4baa8a6bf734acd3d3d36d7608e6cd3b",
       "width": 550,
       "height": 330,
-      "bytes": 19478
+      "bytes": 21982
     },
     "hi/secret-log.webp": {
       "fingerprint": "96102080d684fa0d2c51c628c2eb1d86fefd464cde62a556e1fde8aeac18e6a0",
@@ -1100,18 +1100,18 @@
       "bytes": 43948
     },
     "hi/secret-tags--mine-true.webp": {
-      "fingerprint": "856d6f52dee7121bc13f96ea1a75f2fb0e55d8d8a479bb236ed93e688782756b",
-      "sha256": "218f04220b38d17ca11a873b7226904648ea7eef0e1d81a2ac0785e44de4c782",
+      "fingerprint": "06487c554a7b55591b8a0fa3538bb4d457d67348218310e500d7fd01980d18eb",
+      "sha256": "82f1135d02c2f46fd3abf6f2ba6b7add30f7f585fc4c106d6cf75bb571cf06b6",
       "width": 792,
       "height": 504,
-      "bytes": 44438
+      "bytes": 45654
     },
     "hi/secret-tags.webp": {
-      "fingerprint": "ba616bca1e39d8de3ba1054fd02d1e490b9c17101060a66d03cf5518c29f76d5",
-      "sha256": "3faaa4efb5ec6638df29faf2207ec228cc90ed72bbb9b9c5291ccec2e6737ba4",
+      "fingerprint": "3cb4bb159c0ea5099bed9d348f82ecd5963d0a975a04cf6dafcb1ab57d60d1e7",
+      "sha256": "72907ec23589884df25786d5d71e4a1bda06d83a45f322c3f1e674afc52d8730",
       "width": 792,
       "height": 504,
-      "bytes": 39658
+      "bytes": 40792
     },
     "hi/sign--stars-1.webp": {
       "fingerprint": "cb6a768f43ea73d13747014a1b4ef4c1dfd2d2f4d8b52381d2200683672ef1ae",
@@ -2444,18 +2444,18 @@
       "bytes": 3758
     },
     "large/secret-desk.webp": {
-      "fingerprint": "955618130a2ffdce1c7b70a9fba56be1c4e6a4785a6633bd77e284863d82c02a",
-      "sha256": "963a36a3e8ec22af125dac49bbeca459e95dfe135e4f11200ed8e008942c3876",
+      "fingerprint": "3896b3a80e7b1bd066756bc25229d1df6044828c755cc8bc63ff84f3c783fab8",
+      "sha256": "46aa91d8564b3f56cdb1c9f89d4f17735a598320c3e2c491baf66fc83f5cefed",
       "width": 630,
       "height": 558,
-      "bytes": 17584
+      "bytes": 20078
     },
     "large/secret-hats.webp": {
-      "fingerprint": "021813e079011ae91cb260743659227c122f0bedbae389db2f9b5b2097946b9a",
-      "sha256": "3c8845dc483dcceaaea87fed51fdcaaadc6455373d9177dfbbdafcd0b65e8aae",
+      "fingerprint": "deb0f197cfc2384abe11ecd978963c3f8adbd9027ad1bcb3b3ea12b2b5502ded",
+      "sha256": "4b58a4a03f19f0efc771def6b93a30b5b2d147c2fc98213e4040efb92075abbc",
       "width": 413,
       "height": 248,
-      "bytes": 13322
+      "bytes": 15178
     },
     "large/secret-log.webp": {
       "fingerprint": "6f13c1298d0615d19e7c0531596b67a6d8b8c6451902ce42075157841c5913e9",
@@ -2472,18 +2472,18 @@
       "bytes": 27196
     },
     "large/secret-tags--mine-true.webp": {
-      "fingerprint": "c975b7cff333ee1db37f7792a08b0913796c46d7ec3755784ee952fa9e283c46",
-      "sha256": "7fb533fb77082acfd2e0aba6cc910bb8a3f18924390e415775c4b79e02fee75a",
+      "fingerprint": "8c1c752bd13f9b0cb89d691e300deb21e5262e97b87ceb4ca832ec7f5d52c5cc",
+      "sha256": "f04c1d60cddbaefb542905a046fa563f2c16d345d0457c288266c87ea5ba30ae",
       "width": 594,
       "height": 378,
-      "bytes": 30678
+      "bytes": 32002
     },
     "large/secret-tags.webp": {
-      "fingerprint": "c3be1764c4c90d65e32692df653c233bace292a420aa34e28e4a304010e50c45",
-      "sha256": "7cb905c5a4abcd41a246251dcc8862f0b381fd4a448ec8b41aeab4e8d1d2550a",
+      "fingerprint": "aaa556c991867f72bca3decf9ed8fb90de58329162ef85f406fb13c46fd125b8",
+      "sha256": "7f27f50dcfd48a28734a704c11f613cae1b3d3ed903c059616594960f526c774",
       "width": 594,
       "height": 378,
-      "bytes": 27112
+      "bytes": 28454
     },
     "large/sign--stars-1.webp": {
       "fingerprint": "cf1579cae5981b7b0a1b686ab59037a4d26feb8195caed55d24c5182efe5ac28",
@@ -3816,18 +3816,18 @@
       "bytes": 1484
     },
     "small/secret-desk.webp": {
-      "fingerprint": "8ae83baa0180086bed403172d1a9ff9d7eb07737fdf8e6e25e12f2418555f14b",
-      "sha256": "074de81a2f882807ce2063c7b3a2a3462a93c45b3751dca61a2bd0990783cf5d",
+      "fingerprint": "7149caf665c8c0493aab321e258c71618e0cf2b901cc5befd4ef2604c529083c",
+      "sha256": "1ab503e2e5136007ebd6e10a54fac726bdcca75fcbdd53b42f02a8e8c916763d",
       "width": 420,
       "height": 372,
-      "bytes": 5954
+      "bytes": 6514
     },
     "small/secret-hats.webp": {
-      "fingerprint": "c92fd28e294e8d8fc54f186732b778c5afe812219338715e9d75e6c421d981c7",
-      "sha256": "8be29dfc39eacd74e6dd83629c9a7307fda2fbead782812f52bb79c88f406ad2",
+      "fingerprint": "47fc063306f2d585fb6a1b62be70953c994a1c6c1a58a4f3028b102d3ef9ed8c",
+      "sha256": "1ce63424b37aad73ba2f1e7c06ea26cbb9e1eb688bbbdd4c076497d65e155552",
       "width": 275,
       "height": 165,
-      "bytes": 5076
+      "bytes": 5806
     },
     "small/secret-log.webp": {
       "fingerprint": "1f1a2209c698ad5515c4be3c2f893aa115e8033734efc2a648012ef8ae09a626",
@@ -3844,18 +3844,18 @@
       "bytes": 8624
     },
     "small/secret-tags--mine-true.webp": {
-      "fingerprint": "3002d9e74185c87a97304c5c09145f1267922fe9e9c61fb545bc13a47efc17f8",
-      "sha256": "0a1af7f414ac3dd9d0b7c4794be1f9922509113ec9b2efa9c38f6136bd7f6802",
+      "fingerprint": "8c89c55e688789b18f208157aee0b7a79991bd1239db3bbdb55ef850950c6881",
+      "sha256": "27e711ecaa9787bf5332129b060896ad4876fd91479f3616ec8a032ed46ed558",
       "width": 396,
       "height": 252,
-      "bytes": 13040
+      "bytes": 13532
     },
     "small/secret-tags.webp": {
-      "fingerprint": "1e20ba2048f650f0147f60d1b9d9c3fde81e8b283588b3a0da23341b932959d3",
-      "sha256": "7f3e43f81ad1b02cf21359d886da7f97675255a251aced3a2bcef51ae97b5aca",
+      "fingerprint": "ab4866be5990d3a104530f9c1fb1078ee99e9f5aa9fce2167afe83bf1a8fae8c",
+      "sha256": "dac350902efd53d0ac7e5e00ea774287e4bb46c36286badb3a72cb490d9c3cc8",
       "width": 396,
       "height": 252,
-      "bytes": 11500
+      "bytes": 11922
     },
     "small/sign--stars-1.webp": {
       "fingerprint": "bfa9e6d1e88d8e19239004679a16a9db46cff57c2b9fe2cf41236ba71b347775",

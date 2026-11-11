@@ -170,7 +170,7 @@ export function hearthGame({ layer, stage, cabin, say, later, sound, bag, onUse 
     const ink = element('span', '', words); ink.setAttribute('aria-hidden', 'true');
     [...CORD.lemon.join('\n'), '\n', ...CORD.sign].forEach((char, i) => { const each = element('span', 'lemon-char', ink); each.textContent = char; each.style.setProperty('--at', `${(.6 + i * .12).toFixed(2)}s`); });
     const done = element('button', 'cabin-letter-close', card); done.type = 'button'; done.textContent = '收好紙條 ✓';
-    on(done, 'click', () => { card.remove(); sound.play('remove'); say('雪花球記得的那一年……'); });
+    on(done, 'click', () => { card.remove(); sound.play('remove'); say(finale.unlocked ? CORD.known : '雪花球記得的那一年……'); });
     done.focus({ preventScroll: true });
   }
   if (slip) on(slip, 'click', roast);
