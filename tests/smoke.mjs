@@ -461,6 +461,28 @@ await test('Santa 線索本：看到的線索自動記下、分段提示依故�
   for (const id of Object.keys(NOTEBOOK)) assert.ok(named.has(id), `${id} is written into the book somewhere`);
   assert.ok(paper.includes("['.notebook-card', 'notebook']") && paper.includes('notebook(paper, width, height, seed)'), 'Its open page is cut like every other sheet');
 });
+await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [bagUi, inspectUi, play, paper, css] = await Promise.all(['js/components/cabin-bag.js', 'js/components/cabin-inspect.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'css/santa.css'].map(read));
+  const { ITEMS, ITEM_IDS } = await import(pathToFileURL(path.join(project, 'js/services/cabin-bag.js')).href);
+  const { ITEM_TEXT, BAG } = await import(pathToFileURL(path.join(project, 'js/data/cabin-items.js')).href);
+  const { ITEM_ART } = await import(pathToFileURL(path.join(project, 'js/components/cabin-items.js')).href);
+  // Every thing has a kind, paper art, a name, a close look and another side.
+  assert.deepEqual(Object.keys(ITEM_TEXT), ITEM_IDS); assert.deepEqual(Object.keys(ITEM_ART), ITEM_IDS);
+  for (const id of ITEM_IDS) assert.ok(['tool', 'spent', 'fitted'].includes(ITEMS[id]) && ITEM_TEXT[id].name && ITEM_TEXT[id].look && ITEM_TEXT[id].back, id);
+  assert.ok(BAG.wrong && BAG.tip && BAG.picked('x').includes('x'), 'The pocket says what happened');
+  // Words go in as text; a place that does not take a thing shakes it off and costs nothing (spend only after accepts).
+  assert.ok(![bagUi, inspectUi].some(code => code.includes('innerHTML')), 'Words only through textContent');
+  assert.ok(/if \(verdict !== true\) \{[^}]*shake\(node\)/.test(bagUi) && bagUi.indexOf('const kind = spend(bag, id)') > bagUi.indexOf('if (verdict !== true)'), 'Only a use that works spends it');
+  assert.ok(bagUi.includes("on(stage, 'click', event => { const node = picked && placeOf(event.target);") && bagUi.includes("on(item, 'pointerdown'") && css.includes('.bag-item { position: relative; display: block; width: 54px; height: 58px; padding: 0; border: 0; background: transparent no-repeat 0 0 / 100% 100%; cursor: grab; touch-action: none;'), 'Dragged by mouse or touch, or tapped and then the place tapped');
+  assert.ok(inspectUi.includes("if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); shut(); }"), 'Esc puts the card away without leaving the room');
+  // Mounted with the clue book; a closed game's places are forgotten.
+  assert.ok(play.includes('const bag = mountBag(stage, { progress, save, sound, say: text => say(text) });') && play.includes('bag.clear(); layer.replaceChildren(caption);') && play.includes('bag.destroy();'), 'The pocket lives with the yard, and forgets a game\'s places when it closes');
+  // Cut from the same paper; only transform and opacity move, and not at all with reduced motion.
+  assert.ok(paper.includes("['.inspect-card', 'frame']") && paper.includes('frame(paper, width, height, seed)') && paper.includes('.bag-item, .bag-look, .inspect-flip') && paper.includes('.bag-item[aria-pressed="true"]'), 'Slots and the inspect card are paper');
+  assert.ok(css.includes('@media (prefers-reduced-motion: reduce) { .bag-pocket.is-new, .bag-finger, .bag-ghost.is-fitted, .inspect-card { animation: none; }'), 'Reduced motion stills the pocket');
+  assert.ok(!/\.(?:bag|inspect)-[\w-]+[^{]*\{[^}]*font-size: (?!var\()/.test(css), 'Pocket and card use the site\'s font sizes');
+});
 await test('Santa 弄濕的交接表：看墨水顏色與別處線索補回縮寫，補對才算讀過', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [secret, feed, css] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-feed.js', 'css/santa.css'].map(read));
