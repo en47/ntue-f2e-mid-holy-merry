@@ -79,7 +79,11 @@ await leave(); await wait(16000);
 const told = await saved(); check(told.story.told, '聖誕老人回來，說明了秘密'); await shot('santa-back');
 await enter();
 check(await page.evaluate(() => document.querySelector('.secret-thing[data-id="record"]').classList.contains('is-glinting')), '舊紀錄簿的書角在發光');
-await thing('rules'); check((await text('.secret-card')).includes('替身守則'), '小冊黏住的後半本翻開了：替身守則'); await putBack();
+await thing('rules'); check((await text('.secret-card')).includes('替身守則'), '小冊黏住的後半本翻開了：替身守則');
+// The card is over everything behind it: nowhere on it does a tap reach a thing in the room (the old record, the register).
+// The card is turned a little, so its corners are left out.
+{ const hits = await page.evaluate(() => { const box = document.querySelector('.secret-card').getBoundingClientRect(), hits = new Set(); for (let x = box.left + 28; x < box.right - 28; x += 16) for (let y = box.top + 28; y < box.bottom - 28; y += 16) { const top = document.elementFromPoint(x, y); if (top?.closest('.secret-thing')) hits.add(top.closest('.secret-thing').dataset.id); } return [...hits]; });
+  check(!hits.length, `小冊打開時，卡片上任何地方都點不到後面的東西（舊紀錄簿、登記簿）${hits.length ? `：${hits}` : ''}`); } await putBack();
 await thing('record'); await wait(800); check((await saved()).finale.twist, '再翻一次舊紀錄簿：理解第二次反轉'); await shot('twist'); await putBack();
 // The smallest hat, turned over whenever; its stitching read with the magnifier.
 await thing('hats'); await press('.secret-card .register-sign'); await wait(900);

@@ -57,11 +57,13 @@ function stain(ink, seed) {
   shape('ellipse', { cx: 40 + noise(seed) * 4, cy: 22, rx: 30, ry: 13, fill: '#9fb3c4', opacity: .16 }, ink);
   shape('ellipse', { cx: 38, cy: 21, rx: 24, ry: 10, fill: 'none', stroke: '#9fb3c4', 'stroke-width': 1.2, opacity: .4 }, ink);
 }
-// Each thing: the sheet it is on, where on that sheet ([left, top, right, bottom]), and its name.
+// Each thing: the sheet it is on, where on that sheet ([left, top, right, bottom]), and its name. The old record book comes
+// after the rack: their places overlap a little from some angles, and the small book is put over the big rack (still under
+// any card that opens).
 const THINGS = {
   tags: ['secret-tags', [0, .15, 1, .95], '名牌板'], log: ['secret-log', undefined, '交接表'], rules: ['secret-desk', [.27, .3, .5, .46], '小冊'],
-  register: ['secret-desk', [.08, .18, .27, .44], '登記簿'], stamps: ['secret-desk', [.52, .2, .83, .45], '郵戳章'], record: ['secret-desk', [.84, .2, .97, .45], '舊紀錄簿'],
-  hats: ['secret-hats', undefined, '聖誕帽'], rack: ['secret-rack', undefined, '分揀架'],
+  register: ['secret-desk', [.08, .18, .27, .44], '登記簿'], stamps: ['secret-desk', [.52, .2, .83, .45], '郵戳章'],
+  hats: ['secret-hats', undefined, '聖誕帽'], rack: ['secret-rack', undefined, '分揀架'], record: ['secret-desk', [.84, .2, .97, .45], '舊紀錄簿'],
 };
 
 // The end of the story starts here too (`onInvite`, `onTwist`, `onWish`, `onStay`: cabin-play.js): the register's old page,

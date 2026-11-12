@@ -436,11 +436,22 @@ await test('Santa 第七階段：觸控點擊範圍至少 44px、手指放開的
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [css, bag, story, clues, audit, playthrough] = await Promise.all(['css/santa.css', 'js/components/cabin-bag.js', 'js/services/cabin-story.js', 'js/data/cabin-clues.js', 'scripts/santa-audit.mjs', 'scripts/check-santa-playthrough.mjs'].map(read));
   const coarse = css.slice(css.lastIndexOf('@media (pointer: coarse) {'));
-  assert.ok(coarse.includes(":is(.play-target, .hearth-log, .desk-drawer)::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }") && coarse.includes('.theatre-skip') && coarse.includes('.register-endings > :is(span, button):not(:first-child) { width: 2.75rem; }'), 'Small things in the scene reach 44px by an invisible area; the card buttons, 跳過 and the ending stamps are 44px');
-  assert.ok(css.includes('.notebook-button { top: .6rem; right: .6rem; width: 44px; height: 52px; }') && css.includes('.secret-thing[data-id="record"] { z-index: 1; }') && css.includes('.drawer-card { z-index: 6; }'), 'The clue book is big enough on a phone; the old record and the drawer card are not covered');
+  assert.ok(coarse.includes(":is(.play-target, .hearth-log, .desk-drawer, .musicbox-drawer)::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }") && coarse.includes('.theatre-skip') && coarse.includes('.register-endings > :is(span, button):not(:first-child) { width: 2.75rem; }'), 'Small things in the scene reach 44px by an invisible area; the card buttons, 跳過 and the ending stamps are 44px');
+  assert.ok(css.includes('.notebook-button { top: .6rem; right: .6rem; width: 44px; height: 52px; }') && !css.includes('.secret-thing[data-id="record"] { z-index') && css.includes('.drawer-card { z-index: 6; }'), 'The clue book is big enough on a phone; the old record and the drawer card are not covered');
   assert.ok(bag.includes("pad: event.pointerType === 'mouse' ? 8 : 16") && bag.includes('return best ?? near;'), 'A finger may land a little off a place, but never takes the one beside the place it is right over');
   assert.ok(story.includes("finale.unlocked ? 'reread' : 'cord'") && clues.includes("reread: { title: '再讀一次舊紀錄簿'") && clues.includes('分信：台北 E.'), 'Opened the old record early: the hint says to read it again; the last job hint gives the sorting too');
   assert.ok(audit.includes("const file = process.env.AUDIT;") && audit.includes('if (!file) return async () => {};') && playthrough.includes('const RELOAD = Boolean(process.env.RELOAD)') && playthrough.includes("await checkpoint('the room',"), 'The browser checks can look for covered and small controls (AUDIT), and the playthrough can reload at every chapter (RELOAD)');
+});
+await test('Santa 回饋修正：真的抽屜（書桌、音樂盒）、卡片蓋過小房間的熱區、信架、從頭再玩一次', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [art, paint, scene, desk, music, play, secret, notebook, progress, santa] = await Promise.all(['js/components/cabin-art.js', 'js/components/cabin-paint.js', 'js/components/cabin-scene.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-play.js', 'js/components/cabin-secret.js', 'js/components/cabin-notebook.js', 'js/services/cabin-progress.js', 'js/santa.js'].map(read));
+  assert.ok(art.includes('export const DRAWERS = {') && art.includes("fill: '#2b1d16'") && art.includes("fill: '#2a1412'") && paint.includes("'desk-drawer-front': [{ key: true }], 'desk-drawer-inside': [{ taken: true }], 'musicbox-drawer-front': [{ undone: true }], 'musicbox-drawer-inside': [{ empty: true }]"), 'Each drawer is a box of paper pieces (cut ahead, with their looks) in a dark slot drawn on its furniture');
+  assert.ok(scene.includes('async function buildDrawer(id)') && scene.includes('drawer.inside.visible = drawer.out > .01;') && scene.includes('drawerRect(id) {'), 'The drawers slide in the scene; while shut only the front is there');
+  assert.ok(!desk.includes("paperLayer(drawer,") && !music.includes("paperLayer(drawer,") && desk.includes("cabin.drawer('desk', { open })") && music.includes("cabin.drawer('musicbox', { open })") && play.includes("cabin.drawer('desk', { front: gone('key') ? { key: true } : {}"), 'The buttons are only where the fronts are; the games and the save drive the drawers in the scene');
+  const things = secret.slice(secret.indexOf('const THINGS = {'), secret.indexOf('};', secret.indexOf('const THINGS = {')));
+  assert.ok(things.indexOf("rack: ['secret-rack'") < things.indexOf("record: ['secret-desk'"), 'The old record book comes after the rack, so it is over the rack and under any card');
+  assert.ok(art.includes("const [ox, oy, ox2, oy2] = box('outbox'), ocx = (ox + ox2) / 2, foot = oy2 - 30, lean = `rotate(-3 ${ocx} ${foot})`;"), 'The reply stands in its letter rack, its foot hidden by the front board');
+  assert.ok(progress.includes("export const FOUND = 'holy-merry:cabin:found';") && santa.includes("FOUND = 'holy-merry:cabin:found'") && notebook.includes("yes.addEventListener('click', () => { resetProgress(); location.reload(); });") && notebook.includes('RESTART.ask'), 'Starting over is at the bottom of the clue book, asked once more, and forgets only the village');
 });
 await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
@@ -619,7 +630,7 @@ await test('Santa 音樂盒底的抽屜：照交接表上第一次飛的順序�
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [music, sound, css] = await Promise.all(['js/components/cabin-musicbox.js', 'js/components/cabin-sound.js', 'css/santa.css'].map(read));
   const { FLIGHT_ORDER } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
-  assert.ok(music.includes("const drawer = element('button', 'musicbox-drawer', layer)") && music.includes('if (undone()) { combCard(); return; }') && music.includes('if (playsOpen(played))') && music.includes("gift('N'); clue('music-drawer');"), 'Opened only once its catch is undone; the rules decide; the ornament is kept and written down');
+  assert.ok(music.includes("const drawer = element('button', 'musicbox-drawer', layer)") && music.includes("if (undone()) { if (card) return; slide(true); sound.play('open'); later(still() ? 0 : 750, combCard); return; }") && music.includes('if (playsOpen(played))') && music.includes("gift('N'); cabin.drawer('musicbox', { inside: { empty: true } }); clue('music-drawer');"), 'Opened only once its catch is undone (the drawer slides out, then its comb comes up close); the rules decide; the ornament is kept and written down');
   const comb = music.slice(music.indexOf('const COMB = ['), music.indexOf('];', music.indexOf('const COMB = [')));
   assert.deepEqual([...comb.matchAll(/\['([A-Z])', '([A-G]\d)'/g)].map(([, mark]) => mark).sort(), [...FLIGHT_ORDER].sort(), 'One tine for each substitute');
   assert.ok(sound.includes('pluck(note) {') && sound.includes('if (boxReady()) try { tone(PITCH[note]') && css.includes('@keyframes tine-ring'), 'The tines ring in the box\'s own voice');
@@ -732,6 +743,23 @@ await test('背景音樂：五頁選單一致、不寫死 autoplay、壓縮音�
   const player = await fs.readFile(path.join(project, 'js/components/music-player.js'), 'utf8');
   assert.ok(player.includes('NotAllowedError') && player.includes('waitForGesture') && !player.includes('innerHTML'));
   assert.ok((await fs.readFile(path.join(project, 'css/shared.css'), 'utf8')).includes('prefers-reduced-motion'));
+});
+await test('手寫字型：芫荽 Iansui（OFL），網站用到的每個字都在子集裡，常用字另一檔只在需要時下載', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [tokens, shared, license, manifestText] = await Promise.all(['css/tokens.css', 'css/shared.css', 'assets/fonts/IANSUI-LICENSE.txt', 'docs/HAND-FONT.json'].map(read));
+  const manifest = JSON.parse(manifestText);
+  assert.ok(tokens.includes("--font-hand: Iansui, 'Noto Sans TC'") && !shared.includes('WishHand') && license.includes('SIL Open Font License'), 'The hand is Iansui under its own licence; the old subset is no longer used');
+  const faces = shared.slice(shared.indexOf('/* hand-font:start'), shared.indexOf('/* hand-font:end */'));
+  assert.ok(faces.indexOf('iansui-common.woff2') < faces.indexOf('iansui-site.woff2') && faces.includes('unicode-range: U+3000-303F,U+3400-4DBF,U+4E00-9FFF'), 'The common characters cover the CJK blocks; the site face comes after, so it wins for its own characters');
+  for (const [name, sha] of Object.entries(manifest.files)) assert.equal(createHash('sha256').update(await fs.readFile(path.join(project, 'assets/fonts', name))).digest('hex'), sha, `${name} is the one scripts/build-hand-font.py cut`);
+  // Every character the pages, scripts and styles use (but the generated glyph tables) was cut into the site face.
+  const skip = new Set(['js/data/title-glyphs.js', 'js/data/heading-glyphs.js', 'js/data/cabin-cuts.js']);
+  const walk = async dir => (await fs.readdir(path.join(project, dir), { withFileTypes: true })).flatMap(entry => entry.isDirectory() ? [] : [`${dir}/${entry.name}`]);
+  const js = async dir => { const out = []; for (const entry of await fs.readdir(path.join(project, dir), { withFileTypes: true })) { if (entry.isDirectory()) out.push(...await js(`${dir}/${entry.name}`)); else if (entry.name.endsWith('.js')) out.push(`${dir}/${entry.name}`); } return out; };
+  const files = [...(await fs.readdir(project)).filter(name => name.endsWith('.html')), ...(await walk('games')).filter(name => name.endsWith('.html')), ...await js('js'), ...(await walk('css')).filter(name => name.endsWith('.css'))].filter(name => !skip.has(name));
+  const used = new Set((await Promise.all(files.map(read))).join(''));
+  const missing = [...used].filter(char => char.codePointAt(0) > 0x2E7F && !manifest.site.includes(char));
+  assert.deepEqual(missing, [], `Characters not in the hand font's subset (run scripts/build-hand-font.py): ${missing.join('')}`);
 });
 await test('設計規格：三種字型、三級字級，全部走設計變數', async () => {
   const tokens = await fs.readFile(path.join(project, 'css/tokens.css'), 'utf8'), families = new Set();

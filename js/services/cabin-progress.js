@@ -6,6 +6,8 @@ import { WISHES } from '../data/cabin-finale.js';
 import { GOALS, NOTEBOOK } from '../data/cabin-clues.js';
 
 const KEY = 'holy-merry:cabin:v1';
+// The yard's corners already found (the stars on the name sign, santa.js): the other thing this browser keeps of the village.
+export const FOUND = 'holy-merry:cabin:found';
 export const PLACES = ['head', 'neck', 'face', 'hand'];
 // The snowman as he was built: only a carrot nose.
 export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'carrot', hand: null });
@@ -82,6 +84,10 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   return progress;
 }
 // Returns false when the browser will not keep it (private mode, full storage); the yard still plays for this visit.
+// Starting over: the village's record and its found corners are forgotten (nothing else this browser keeps is touched).
+export function resetProgress(storage = globalThis.localStorage) {
+  try { for (const key of [KEY, FOUND]) storage?.removeItem(key); return true; } catch { return false; }
+}
 export function writeProgress(progress, storage = globalThis.localStorage) {
   try { storage?.setItem(KEY, JSON.stringify(progress)); return true; } catch { return false; }
 }

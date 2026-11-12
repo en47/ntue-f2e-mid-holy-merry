@@ -6,7 +6,8 @@ import { paperLayer, shape } from './paper-art.js';
 import { star } from './paper-props.js';
 import { ornament } from './cabin-ornaments.js';
 import { GIFTS, goal, knowsSantas } from '../services/cabin-story.js';
-import { GIFT_HINTS, GIFT_ORDER, GOALS, NOTEBOOK } from '../data/cabin-clues.js';
+import { GIFT_HINTS, GIFT_ORDER, GOALS, NOTEBOOK, RESTART } from '../data/cabin-clues.js';
+import { resetProgress } from '../services/cabin-progress.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const PAPER = { paper: { scale: .25, grain: .4, shadow: .3 }, eager: true }, GIFT_PAPER = { paper: { scale: .3, grain: .45, shadow: .25, rim: '#fbf6ea' }, eager: true };
@@ -90,6 +91,18 @@ export function mountNotebook(stage, { progress, save, sound }) {
     element('div', 'notebook-body', card);
     const done = element('button', 'notebook-close', card, '收好 ✓'); done.type = 'button';
     done.addEventListener('click', close);
+    // At the very bottom, starting over: asked once more, then this browser's record of the village is cleared and the page
+    // opens from the first chapter.
+    const again = element('button', 'notebook-restart', card, RESTART.ask); again.type = 'button';
+    again.addEventListener('click', () => {
+      again.hidden = true; sound.play('pick');
+      const sure = element('p', 'notebook-hint-line notebook-sure', null, RESTART.sure), row = element('div', 'signpost-actions notebook-sure-row');
+      const yes = element('button', 'register-sign', row, RESTART.yes), no = element('button', 'register-sign is-quiet', row, RESTART.no);
+      yes.type = no.type = 'button'; again.after(sure, row);
+      yes.addEventListener('click', () => { resetProgress(); location.reload(); });
+      no.addEventListener('click', () => { sure.remove(); row.remove(); again.hidden = false; sound.play('remove'); again.focus({ preventScroll: true }); });
+      no.focus({ preventScroll: true });
+    });
     // Esc closes the book and stops there, so the room behind keeps its own Esc.
     card.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); } });
     render(); dot.hidden = true; sound.play('open'); button.setAttribute('aria-expanded', 'true');

@@ -50,24 +50,6 @@ function sack(parent) {
   shape('path', { d: 'M38 66H62M38 72H58M38 78H54', stroke: '#fbf3df', 'stroke-width': 1.6 }, parent);
 }
 
-// The shallow drawer over the kneehole, cut to match the one drawn on the desk: its front slides out. Shut, a brass
-// keyhole plate with a sprig of holly carved either side; unlocked, the little key stands in it (a layer of its own).
-function drawerFront(parent) {
-  shape('rect', { x: 0, y: 0, width: 200, height: 24, rx: 4, fill: '#9a6343' }, parent);
-  shape('rect', { x: 6, y: 4, width: 188, height: 16, rx: 3, fill: '#a86b47' }, parent);
-  for (const side of [-1, 1]) {
-    shape('path', { d: `M${100 + side * 12} 12c${side * 6}-6 ${side * 14}-6 ${side * 20}-1c${-side * 6} 1 ${-side * 9} 5 ${-side * 20} 1Z`, fill: '#7d4f33' }, parent);
-    shape('circle', { cx: 100 + side * 33, cy: 12, r: 1.8, fill: '#8f3b36' }, parent);
-  }
-  shape('rect', { x: 94, y: 5, width: 12, height: 14, rx: 3, fill: '#e0b04f' }, parent);
-  shape('path', { d: 'M100 8.5a2 2 0 1 1 0 4l1 4h-2l1-4', fill: '#3b2a24' }, parent);
-}
-const drawerKey = parent => { shape('rect', { x: 99, y: 2, width: 2.4, height: 8, fill: '#c48f32' }, parent); shape('circle', { cx: 100.2, cy: 4, r: 4, fill: 'none', stroke: '#d9a441', 'stroke-width': 2.2 }, parent); shape('path', { d: 'M103 4C108 6 107 11 103 10', fill: 'none', stroke: '#b5443c', 'stroke-width': 1.2 }, parent); };
-function drawerInside(parent) {
-  shape('rect', { x: 0, y: 0, width: 200, height: 24, rx: 3, fill: '#4a3226' }, parent);
-  shape('path', { d: 'M110 18C118 8 152 8 160 18Z', fill: '#8f5a3c' }, parent); shape('rect', { x: 131, y: 4, width: 8, height: 7, rx: 3, fill: '#6b4a33' }, parent);
-  shape('circle', { cx: 56, cy: 12, r: 7, fill: '#cfe3ec', stroke: '#c48f32', 'stroke-width': 2.4 }, parent); shape('rect', { x: 62, y: 14, width: 18, height: 4, rx: 2, fill: '#8f5a3c', transform: 'rotate(18 62 14)' }, parent);
-}
 // The rocker blotter, each side in a 100 × 100 box: on top its rocker of turned wood with a brass knob; turned over, its
 // curved pad of blotting paper, soaked with ink stains (the writing on it is laid over in the site's hand, backwards).
 function rockerTop(parent) {
@@ -133,30 +115,31 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   const buttons = { open: action('拆開信', open), flip: action('翻到背面', flip), write: action('寫回信 ✎', write), fold: action('摺好放進信封', fold), send: action('投進郵袋', send), back: action('放回去', putBack) };
   const mailbag = element('div', 'desk-sack', work); paperLayer(mailbag, '0 0 100 110', '', sack, PAPER); const count = element('span', 'sack-count', mailbag);
   let current = null;
-  // The drawer over the kneehole: locked until the little key turns in it (and stays there); pulled out, what is inside
-  // comes up on a card: the magnifier to take, the blotter to look at closely.
+  // The drawer over the kneehole: a real one in the scene (cabin-scene.js `drawer`), this button only where its front is.
+  // Locked until the little key turns in it (and stays there); pulled out, it slides out of the desk with what is inside in
+  // view, and that comes up on a card too: the magnifier to take, the blotter to look at closely.
   const unlocked = () => bag.ever('key') && !bag.holds('key');
   const drawer = element('button', 'desk-drawer', layer); drawer.type = 'button'; drawer.setAttribute('aria-label', '書桌中間的抽屜');
-  paperLayer(drawer, '0 0 200 24', 'drawer-inside', drawerInside, PAPER); paperLayer(drawer, '0 0 200 24', 'drawer-front', drawerFront, PAPER); paperLayer(drawer, '0 0 200 24', 'drawer-key', drawerKey, PAPER);
   drawer.classList.toggle('is-unlocked', unlocked());
+  const slide = open => { drawer.classList.toggle('is-open', open); cabin.drawer('desk', { open }); later(700, layout); };
   const forget = bag.target(drawer, {
     accepts: id => unlocked() ? '抽屜已經打開了。' : id === 'key' || '鑰匙孔很小，這個插不進去。',
-    use: () => { later(450, () => { drawer.classList.add('is-unlocked'); sound.play('click'); }); onUse(); return '鑰匙插進去剛剛好，輕輕一轉——喀，抽屜的鎖開了。'; },
+    use: () => { later(450, () => { drawer.classList.add('is-unlocked'); cabin.drawer('desk', { front: { key: true } }); sound.play('click'); }); onUse(); return '鑰匙插進去剛剛好，輕輕一轉——喀，抽屜的鎖開了。'; },
   });
   on(drawer, 'click', () => {
     if (!unlocked()) { sound.play('nope'); clue('desk-lock'); say('抽屜鎖著。鑰匙孔的兩邊，各刻著一小枝冬青葉。'); return; }
-    if (drawer.classList.contains('is-open')) { drawer.classList.remove('is-open'); sound.play('drop'); return; }
-    drawer.classList.add('is-open'); sound.play('open'); later(650, drawerCard);
+    if (drawer.classList.contains('is-open')) { card?.remove(); card = null; slide(false); sound.play('drop'); return; }
+    slide(true); sound.play('open'); later(650, drawerCard);
   });
-  let looking = null;
+  let looking = null, card = null;
   function drawerCard() {
-    const card = element('article', 'cabin-letter drawer-card', layer); card.setAttribute('aria-label', '書桌抽屜裡');
+    card?.remove(); card = element('article', 'cabin-letter drawer-card', layer); card.setAttribute('aria-label', '書桌抽屜裡');
     element('h3', 'chair-title', card, '書桌抽屜裡');
     const things = element('div', 'drawer-things', card);
     if (!bag.ever('magnifier')) {
       const glass = element('button', 'drawer-thing', things); glass.type = 'button'; glass.setAttribute('aria-label', '黃銅框的放大鏡');
       paperLayer(glass, '0 0 100 100', '', ITEM_ART.magnifier, PAPER); element('span', 'drawer-label', glass, '放大鏡');
-      on(glass, 'click', () => { const from = local(glass.getBoundingClientRect()); glass.remove(); bag.give('magnifier', from); });
+      on(glass, 'click', () => { const from = local(glass.getBoundingClientRect()); glass.remove(); bag.give('magnifier', from); cabin.drawer('desk', { inside: { taken: true } }); });
     }
     const rocker = element('button', 'drawer-thing', things); rocker.type = 'button'; rocker.setAttribute('aria-label', '搖擺式吸墨器：拿起來看看');
     paperLayer(rocker, '0 0 100 100', '', rockerTop, PAPER); element('span', 'drawer-label', rocker, '吸墨器');
@@ -165,7 +148,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
       looking = inspect({ host: stage, sound, title: BLOTTER.name, draw: rockerTop, words: BLOTTER.look, back: { draw: rockerPad, words: BLOTTER.back, mirror: BLOTTER.writing }, from: local(rocker.getBoundingClientRect()), turn: '拖曳或用方向鍵可以轉動，按「翻過來」看底下。', flip: '翻過來', done: '放回抽屜 ✓', onTurn: () => clue('blotter'), onClose: () => { looking = null; } });
     });
     const done = element('button', 'cabin-letter-close', card, '關上抽屜 ✓'); done.type = 'button';
-    on(done, 'click', () => { card.remove(); drawer.classList.remove('is-open'); sound.play('drop'); drawer.focus({ preventScroll: true }); });
+    on(done, 'click', () => { card.remove(); card = null; slide(false); sound.play('drop'); drawer.focus({ preventScroll: true }); });
     (things.firstElementChild ?? done).focus({ preventScroll: true });
   }
 
@@ -173,7 +156,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     const rects = cabin.deskRects(); if (!rects) return;
     const place = (node, rect, least) => { const w = Math.max(least, rect.width), h = Math.max(least, rect.height); Object.assign(node.style, { left: `${rect.left + rect.width / 2 - w / 2}px`, top: `${rect.top + rect.height / 2 - h / 2}px`, width: `${w}px`, height: `${h}px` }); };
     place(stack, rects.stack, 48); place(outbox, rects.outbox, 48);
-    const { drawer: slot } = rects; Object.assign(drawer.style, { left: `${slot.left}px`, top: `${slot.top}px`, width: `${slot.width}px`, height: `${Math.max(slot.height, 20)}px` });
+    const slot = cabin.drawerRect('desk') ?? rects.drawer; Object.assign(drawer.style, { left: `${slot.left}px`, top: `${slot.top}px`, width: `${slot.width}px`, height: `${Math.max(slot.height, 20)}px` });
     for (const [kind, button] of Object.entries(tools)) if (!button.classList.contains('is-dragging')) place(button, rects[kind], 52);
   }
   // Everything shown follows the letter on the desk and how far along it is.
@@ -352,5 +335,6 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
   layout(); later(500, layout); later(1200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
   events.signal.addEventListener('abort', () => { forget(); looking?.close(); });
-  return () => { events.abort(); watch.disconnect(); };
+  // Stepping away from the desk pushes its drawer shut.
+  return () => { events.abort(); watch.disconnect(); if (drawer.classList.contains('is-open')) cabin.drawer('desk', { open: false }); };
 }

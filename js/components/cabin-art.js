@@ -40,7 +40,20 @@ export const DESK = { x: -1.15, z: .82, w: .95, h: 1.25, top: .76, items: { outb
 export const SECRET = { left: -1.4, width: .76, height: 1.28, depth: 1.15, wall: .02 };
 // Things in the room that move about a pivot of their own: the bellows hang beside the fire, nozzle down toward it.
 // The music box stands on the candle shelf of the right wall, facing the room; its little scene turns on a rig of its own.
-export const MUSICBOX = { x: 1.49, y: .96, z: -.02 };
+export const MUSICBOX = { x: 1.49, y: .96, z: -.02, body: [.26, .14] };
+// The two drawers that really slide out (cabin-scene.js): the desk's over the kneehole and the little one at the foot of
+// the music box. Each is a box of paper pieces (its front, its floor seen from above, its sides and back) set into a slot
+// drawn dark on its furniture's sheet: `slot` is where on that sheet ([left, top, right, bottom]), `size` the sheet's,
+// `depth` how deep the box goes in and `slide` how far it comes out.
+export const DRAWERS = {
+  desk: { sheet: 'desk', size: [DESK.w, DESK.h], slot: DESK.items.drawer, depth: .2, slide: .15, wood: '#7d4f33' },
+  musicbox: { sheet: 'musicbox-body', size: MUSICBOX.body, slot: [.1, .7, .9, .93], depth: .062, slide: .042, wood: '#6e2a26' },
+};
+// A drawer's pieces, in scene units: the front, the floor and a side (the back is a side's width across).
+export function drawerPieces(id) {
+  const { size: [w, h], slot: [x0, y0, x1, y1], depth } = DRAWERS[id], front = [(x1 - x0) * w, (y1 - y0) * h];
+  return { front, floor: [front[0] * .94, depth], side: [depth, front[1] * .86] };
+}
 // The snow globe stands on the mantel, at its left end.
 export const GLOBE = { x: .52, y: .72, z: -HOUSE.depth / 2 + .17, w: .15, h: .18 };
 export const ROOM_RIGS = {
@@ -524,9 +537,13 @@ export function bellowsLeather({ paper }, { width, height }) {
 export function musicBoxBody({ paper }, { width, height }) {
   shape('rect', { x: 0, y: height * .12, width, height: height * .88, rx: 10, fill: '#8f3b36' }, paper);
   shape('rect', { x: 0, y: 0, width, height: height * .16, rx: 8, fill: '#a84a42' }, paper);
-  shape('rect', { x: width * .06, y: height * .3, width: width * .88, height: height * .56, rx: 8, fill: 'none', stroke: GOLD, 'stroke-width': 5 }, paper);
+  shape('rect', { x: width * .06, y: height * .24, width: width * .88, height: height * .38, rx: 8, fill: 'none', stroke: GOLD, 'stroke-width': 5 }, paper);
   for (const x of [.04, .96]) for (const y of [.18, .94]) shape('circle', { cx: width * x, cy: height * y, r: 9, fill: GOLD }, paper);
-  for (let i = 0; i < 5; i++) shape('path', { d: `M${width * (.2 + i * .1)} ${height * .58}l${width * .02} -${height * .1} ${width * .02} ${height * .1}Z`, fill: GOLD, opacity: .8 }, paper);
+  for (let i = 0; i < 5; i++) shape('path', { d: `M${width * (.2 + i * .1)} ${height * .5}l${width * .02} -${height * .1} ${width * .02} ${height * .1}Z`, fill: GOLD, opacity: .8 }, paper);
+  // The opening at its foot, dark inside, for the little drawer (a box of its own) to slide out of; a gold rim round it.
+  const [x0, y0, x1, y1] = DRAWERS.musicbox.slot;
+  shape('rect', { x: width * x0 - 4, y: height * y0 - 4, width: width * (x1 - x0) + 8, height: height * (y1 - y0) + 8, rx: 5, fill: GOLD }, paper);
+  shape('rect', { x: width * x0, y: height * y0, width: width * (x1 - x0), height: height * (y1 - y0), rx: 3, fill: '#2a1412' }, paper);
 }
 export function musicBoxLid({ paper }, { width, height }) {
   shape('rect', { x: 0, y: 0, width, height, rx: 10, fill: '#a84a42' }, paper);
@@ -687,15 +704,21 @@ export function desk({ paper }, { width, height }) {
       shape('circle', { cx: width * (x + w / 2), cy: y + (height - top - 90) / 6, r: 9, fill: GOLD }, paper);
     }
   }
-  shape('rect', { x: width * .33, y: top + 30, width: width * .34, height: 70, fill: '#9a6343' }, paper);
+  // The drawer's opening over the kneehole, dark inside: the drawer itself is a box of its own that slides out of it.
+  shape('rect', { x: width * .33, y: top + 30, width: width * .34, height: 70, fill: '#2b1d16' }, paper);
+  shape('rect', { x: width * .33, y: top + 30, width: width * .34, height: 12, fill: '#1e140f' }, paper);
   // The kneehole's back panel, solid: a see-through shadow let the wall show through speckled with the paper's grain.
   shape('rect', { x: width * .33, y: top + 100, width: width * .34, height: height - top - 100, fill: TIMBER }, paper);
   shade(paper, width * .33, top + 100, width * .34, height - top - 100, .22);
-  // The reply waiting in its rack.
-  const [ox, oy, ox2, oy2] = box('outbox');
-  shape('rect', { x: ox + 8, y: oy + 24, width: ox2 - ox - 16, height: oy2 - oy - 24, rx: 6, fill: '#fffdf6', transform: `rotate(-6 ${(ox + ox2) / 2} ${oy2})` }, paper);
-  shape('path', { d: `M${ox + 8} ${oy + 30}L${(ox + ox2) / 2} ${oy + 70}L${ox2 - 8} ${oy + 30}`, fill: 'none', stroke: '#d9c9a8', 'stroke-width': 4, transform: `rotate(-6 ${(ox + ox2) / 2} ${oy2})` }, paper);
-  shape('rect', { x: ox, y: oy2 - 46, width: ox2 - ox, height: 46, rx: 6, fill: WOOD }, paper);
+  // The reply waiting in its letter rack: a back board, the envelope standing in the slot (only just leaning), a front
+  // board with a scalloped top that hides the envelope's foot, and the rack's base on the desk.
+  const [ox, oy, ox2, oy2] = box('outbox'), ocx = (ox + ox2) / 2, foot = oy2 - 30, lean = `rotate(-3 ${ocx} ${foot})`;
+  shape('rect', { x: ox + 6, y: oy + 62, width: ox2 - ox - 12, height: oy2 - oy - 74, rx: 6, fill: '#7d4f33' }, paper);
+  shape('rect', { x: ox + 14, y: oy + 30, width: ox2 - ox - 28, height: foot - oy - 30, rx: 5, fill: '#fffdf6', transform: lean }, paper);
+  shape('path', { d: `M${ox + 14} ${oy + 36}L${ocx} ${oy + 74}L${ox2 - 14} ${oy + 36}`, fill: 'none', stroke: '#d9c9a8', 'stroke-width': 4, 'stroke-linejoin': 'round', transform: lean }, paper);
+  shape('circle', { cx: ocx, cy: oy + 76, r: 9, fill: RED, transform: lean }, paper);
+  shape('path', { d: `M${ox + 2} ${oy2 - 12}V${oy2 - 54}Q${ox + (ox2 - ox) * .25} ${oy2 - 66} ${ocx} ${oy2 - 58}Q${ox + (ox2 - ox) * .75} ${oy2 - 66} ${ox2 - 2} ${oy2 - 54}V${oy2 - 12}Z`, fill: WOOD }, paper);
+  shape('rect', { x: ox - 4, y: oy2 - 14, width: ox2 - ox + 8, height: 14, rx: 4, fill: '#6b4430' }, paper);
   // The postmark stamp standing on its ink pad.
   const [sx, sy, sx2, sy2] = box('stamp'), scx = (sx + sx2) / 2;
   shape('rect', { x: sx, y: sy2 - 20, width: sx2 - sx, height: 20, rx: 5, fill: '#3b2a24' }, paper);
@@ -725,6 +748,69 @@ export function desk({ paper }, { width, height }) {
   shape('rect', { x: pcx - 7, y: py + (py2 - py) * .42, width: 14, height: (py2 - py) * .58 - 8, fill: GOLD }, paper);
   shape('path', { d: `M${px} ${py + (py2 - py) * .45}L${px + (px2 - px) * .22} ${py}H${px2 - (px2 - px) * .22}L${px2} ${py + (py2 - py) * .45}Z`, fill: '#fbe9c2' }, paper);
 }
+
+// The desk drawer's pieces. Its front, in 200 units across: wood, a panel, holly carved either side of a brass keyhole
+// plate; `key`: the little key stands in the keyhole once it has turned.
+export function deskDrawerFront({ paper }, { width, height }, state = {}) {
+  const g = shape('g', { transform: `scale(${width / 200})` }, paper), h = 200 * height / width;
+  shape('rect', { x: 0, y: 0, width: 200, height: h, rx: 4, fill: '#9a6343' }, g);
+  shape('rect', { x: 6, y: 5, width: 188, height: h - 10, rx: 3, fill: '#a86b47' }, g);
+  shape('path', { d: `M7 6H193`, stroke: '#c08a5a', 'stroke-width': 1.4, opacity: .7 }, g);
+  for (const side of [-1, 1]) {
+    shape('path', { d: `M${100 + side * 12} ${h / 2}c${side * 6}-6 ${side * 14}-6 ${side * 20}-1c${-side * 6} 1 ${-side * 9} 5 ${-side * 20} 1Z`, fill: '#7d4f33' }, g);
+    shape('circle', { cx: 100 + side * 33, cy: h / 2, r: 1.8, fill: '#8f3b36' }, g);
+  }
+  shape('rect', { x: 93, y: h / 2 - 8, width: 14, height: 16, rx: 3, fill: GOLD }, g);
+  shape('path', { d: `M100 ${h / 2 - 4}a2 2 0 1 1 0 4l1 4h-2l1-4`, fill: '#3b2a24' }, g);
+  if (!state.key) return;
+  shape('rect', { x: 98.8, y: h / 2 - 11, width: 2.4, height: 9, fill: '#c48f32' }, g);
+  shape('circle', { cx: 100, cy: h / 2 - 13, r: 4.2, fill: 'none', stroke: '#d9a441', 'stroke-width': 2.2 }, g);
+}
+// Its floor, seen from above (the front edge at the bottom): bare boards, darker toward the back, the brass-rimmed
+// magnifier on the left (until it is taken: `taken`) and the rocker blotter on the right, both near the front so they show
+// as it slides out.
+export function deskDrawerInside({ paper }, { width, height }, state = {}) {
+  const g = shape('g', { transform: `scale(${width / 100})` }, paper), h = 100 * height / width;
+  shape('rect', { x: 0, y: 0, width: 100, height: h, fill: '#6b4430' }, g);
+  shape('rect', { x: 0, y: 0, width: 100, height: h * .3, fill: '#553524' }, g);
+  for (const x of [25, 50, 75]) shape('path', { d: `M${x} 0V${h}`, stroke: '#553524', 'stroke-width': .8 }, g);
+  shape('path', { d: `M60 ${h * .62}Q74 ${h * .54} 88 ${h * .62}V${h * .74}Q74 ${h * .66} 60 ${h * .74}Z`, fill: '#8f5a3c' }, g);
+  shape('rect', { x: 71, y: h * .6, width: 6, height: h * .06, rx: 2, fill: '#6b4430' }, g); shape('circle', { cx: 74, cy: h * .6, r: 3.4, fill: GOLD }, g);
+  if (state.taken) return;
+  shape('rect', { x: 30, y: h * .7, width: 22, height: 4, rx: 2, fill: '#8f5a3c', transform: `rotate(24 30 ${h * .7})` }, g);
+  shape('circle', { cx: 26, cy: h * .66, r: 9, fill: '#cfe3ec', stroke: '#c48f32', 'stroke-width': 2.6 }, g);
+  shape('path', { d: `M21 ${h * .63}q4 -4 9 -2`, fill: 'none', stroke: '#fffdf6', 'stroke-width': 1.6, opacity: .8 }, g);
+}
+// The music box drawer's front, in 200 units across: red lacquer, an engraved gold line, a gold pull; until the brass pin
+// undoes it (`undone`), the catch lies across its edge with the pinhole beside it; undone, the catch hangs down.
+export function musicDrawerFront({ paper }, { width, height }, state = {}) {
+  const g = shape('g', { transform: `scale(${width / 200})` }, paper), h = 200 * height / width;
+  shape('rect', { x: 0, y: 0, width: 200, height: h, rx: 4, fill: '#8a3530' }, g);
+  shape('rect', { x: 8, y: 5, width: 184, height: h - 10, rx: 3, fill: '#a8423b' }, g);
+  shape('path', { d: `M24 ${h / 2}H80M120 ${h / 2}H176`, stroke: GOLD, 'stroke-width': 1.4, opacity: .7 }, g);
+  shape('rect', { x: 88, y: h / 2 - 5, width: 24, height: 10, rx: 5, fill: GOLD }, g);
+  shape('circle', { cx: 186, cy: h / 2 + 4, r: 2.6, fill: '#2a1a14' }, g); shape('circle', { cx: 186, cy: h / 2 + 4, r: 4.4, fill: 'none', stroke: '#c9a24f', 'stroke-width': 1.4 }, g);
+  if (state.undone) shape('rect', { x: 166, y: h - 9, width: 14, height: 7, rx: 2, fill: '#c9a24f', transform: `rotate(12 166 ${h - 9})` }, g);
+  else { shape('rect', { x: 168, y: 0, width: 9, height: h * .78, rx: 2, fill: '#c9a24f' }, g); shape('circle', { cx: 172.5, cy: h * .6, r: 1.8, fill: '#6b5226' }, g); }
+}
+// Its floor, lined with dark red velvet: the brass comb and its pinned drum across it, and Nils's red paper star in front
+// (until it is found: `empty`).
+export function musicDrawerInside({ paper }, { width, height }, state = {}) {
+  const g = shape('g', { transform: `scale(${width / 100})` }, paper), h = 100 * height / width;
+  shape('rect', { x: 0, y: 0, width: 100, height: h, fill: '#6b2a2a' }, g);
+  shape('rect', { x: 0, y: 0, width: 100, height: h * .3, fill: '#4f1d1d' }, g);
+  shape('rect', { x: 12, y: h * .36, width: 52, height: h * .14, rx: 2, fill: '#c9a24f' }, g);
+  for (let i = 0; i < 5; i++) shape('rect', { x: 16 + i * 9.5, y: h * .5, width: 4, height: h * .22, rx: 1, fill: '#e0b04f' }, g);
+  if (state.empty) return;
+  const cx = 80, cy = h * .66, r = Math.min(9, h * .26);
+  shape('path', { d: Array.from({ length: 10 }, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? r * .45 : r; return `${i ? 'L' : 'M'}${(cx + Math.cos(a) * d).toFixed(1)} ${(cy + Math.sin(a) * d).toFixed(1)}`; }).join('') + 'Z', fill: '#c63a33' }, g);
+  shape('path', { d: `M${cx} ${cy - r}q-6 -2 -10 -${h * .1}`, fill: 'none', stroke: '#e0b04f', 'stroke-width': 1 }, g);
+}
+// A drawer's side or back: plain wood of its colour, a lighter top edge.
+export const drawerSide = colour => ({ paper }, { width, height }) => {
+  shape('rect', { x: 0, y: 0, width, height, fill: colour }, paper);
+  shape('rect', { x: 0, y: 0, width, height: Math.max(3, height * .12), fill: '#c08a5a', opacity: .5 }, paper);
+};
 
 export function treeLights({ paper }, { width, height }) {
   // Only the bulbs, drawn over the tree so they can twinkle on their own layer.
@@ -1303,7 +1389,7 @@ export const BOARDS = [
   { id: 'desk', w: DESK.w, h: DESK.h, px: 1400, at: [DESK.x, 0, DESK.z], turn: Math.PI / 2, draw: desk, room: true },
   // The music box on its rigs (the box, its lid and key; the turning scene), and the snow globe on the mantel.
   { id: 'musicbox-lid', w: .25, h: .15, px: 1800, at: [0, .1, -.075], rig: 'musicbox', draw: musicBoxLid, room: true },
-  { id: 'musicbox-body', w: .26, h: .14, px: 1800, at: [0, 0, 0], rig: 'musicbox', draw: musicBoxBody, room: true },
+  { id: 'musicbox-body', w: MUSICBOX.body[0], h: MUSICBOX.body[1], px: 1800, at: [0, 0, 0], rig: 'musicbox', draw: musicBoxBody, room: true },
   { id: 'musicbox-key', w: .07, h: .05, px: 1800, at: [.095, .07, .008], rig: 'musicbox', center: true, draw: musicBoxKey, room: true },
   { id: 'musicbox-scene', w: .13, h: .11, px: 1800, at: [0, 0, 0], rig: 'turntable', clones: 2, draw: musicBoxScene, room: true },
   { id: 'snowglobe', w: GLOBE.w, h: GLOBE.h, px: 1800, at: [GLOBE.x, GLOBE.y, GLOBE.z], draw: snowGlobe, room: true },

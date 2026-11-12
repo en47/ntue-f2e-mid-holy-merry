@@ -82,7 +82,7 @@ function inspect({ mobile }) {
   const words = [...document.querySelectorAll(`:is(${FRONT}) :is(p, li, h2, h3, h4, label, strong), .cabin-caption`)].filter(node => inGame(node) && shown(node) && node.textContent.trim() && !node.closest('.sr-only'));
   for (const node of words) {
     const view = seen(node); if (!view) continue;
-    const covers = points(view).map(point => coverAt(node, point)).filter(by => by && wrong(node, by) && !by.closest('button, a'));
+    const covers = points(view).map(point => coverAt(node, point)).filter(by => by && wrong(node, by));
     if (covers.length >= 2) issues.push({ kind: 'text', what: describe(node), by: describe(covers[0].closest('button, a, .cabin-bag, .notebook-button, .cabin-back, .cabin-caption, .cabin-chat, .music-toggle, ' + FRONT) ?? covers[0]), part: `${covers.length}/5` });
   }
   return issues;
