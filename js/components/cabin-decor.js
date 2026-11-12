@@ -60,18 +60,22 @@ export const windowFrame = ({ glass: [gx0, gy0, gx1, gy1] }) => ({ paper }, { wi
     for (let i = 1; i < 4; i++) shape('path', { d: `M${edge + inward * bar * .6 * i} ${y0 - bar}V${y1 + bar * .5}`, stroke: '#d9614f', 'stroke-width': bar * .22, opacity: .55 }, paper);
     shape('path', { d: `M${edge} ${tie - bar * .5}h${inward * bar * 1.1}v${bar}h${-inward * bar * 1.1}Z`, fill: RED }, paper);
   }
-  // The garland across the top: two greens of fir in tufts, holly at the ends and a red bow in the middle.
-  const top = y0 - bar * 1.2;
-  for (let i = 0; i <= 26; i++) {
-    const x = x0 - bar * 2 + (x1 - x0 + bar * 4) * i / 26, y = top + Math.sin(Math.PI * i / 26) * bar * .9;
-    shape('path', { d: 'M0-14C8-10 10-2 7 6 4 12 1 14 0 16-1 14-4 12-7 6-10-2-8-10 0-14Z', fill: i % 2 ? GREEN : DEEP_GREEN, transform: `translate(${x} ${y}) rotate(${(noise(i) - .5) * 120}) scale(${bar / 14})` }, paper);
-  }
-  for (const x of [x0 - bar * 1.6, x1 + bar * 1.6]) holly(paper, x, top + bar * .2, bar / 34);
-  const bx = (x0 + x1) / 2, by = top + bar * .9;
-  for (const side of [-1, 1]) shape('path', { d: `M${bx} ${by}c${side * bar * 1.2} -${bar * .9} ${side * bar * 1.6} ${bar * .3} ${side * bar * 1.2} ${bar * .6}c-${side * bar * .4} ${bar * .2} -${side * bar * .8} -${bar * .1} -${side * bar * 1.2} -${bar * .6}Z`, fill: RED }, paper);
-  for (const side of [-1, 1]) shape('path', { d: `M${bx} ${by}l${side * bar * .7} ${bar * 1.6}l${side * bar * .2} -${bar * .3}l${side * bar * .2} ${bar * .2}Z`, fill: DEEP_RED }, paper);
-  shape('circle', { cx: bx, cy: by, r: bar * .32, fill: DEEP_RED }, paper);
+  // The garland across the top.
+  swag(paper, x0 - bar * 2, x1 + bar * 2, y0 - bar * 1.2, bar);
 };
+// A garland of fir across from x0 to x1 along `top` (sagging a little): two greens of fir in tufts `size` across, holly at
+// the ends and a red bow in the middle. Over the windows, and over the front door inside.
+export function swag(parent, x0, x1, top, size) {
+  for (let i = 0; i <= 26; i++) {
+    const x = x0 + (x1 - x0) * i / 26, y = top + Math.sin(Math.PI * i / 26) * size * .9;
+    shape('path', { d: 'M0-14C8-10 10-2 7 6 4 12 1 14 0 16-1 14-4 12-7 6-10-2-8-10 0-14Z', fill: i % 2 ? GREEN : DEEP_GREEN, transform: `translate(${x} ${y}) rotate(${(noise(i) - .5) * 120}) scale(${size / 14})` }, parent);
+  }
+  for (const x of [x0 + size * .4, x1 - size * .4]) holly(parent, x, top + size * .2, size / 34);
+  const bx = (x0 + x1) / 2, by = top + size * .9;
+  for (const side of [-1, 1]) shape('path', { d: `M${bx} ${by}c${side * size * 1.2} -${size * .9} ${side * size * 1.6} ${size * .3} ${side * size * 1.2} ${size * .6}c-${side * size * .4} ${size * .2} -${side * size * .8} -${size * .1} -${side * size * 1.2} -${size * .6}Z`, fill: RED }, parent);
+  for (const side of [-1, 1]) shape('path', { d: `M${bx} ${by}l${side * size * .7} ${size * 1.6}l${side * size * .2} -${size * .3}l${side * size * .2} ${size * .2}Z`, fill: DEEP_RED }, parent);
+  shape('circle', { cx: bx, cy: by, r: size * .32, fill: DEEP_RED }, parent);
+}
 // The garland's bulbs, a layer of their own (they twinkle): one every so often along the top of the frame. Glass, not
 // paper: drawn without the paper's cut rim, which on bulbs this small reads as a blurred halo.
 export const windowLights = ({ glass: [gx0, gy0, gx1] }) => ({ plain: paper }, { width: w, height: h }) => {
@@ -123,7 +127,7 @@ export function framedReindeer({ paper }, { width: w, height: h }) {
   shape('path', { d: 'M-26 0V-18C-24-27 4-29 18-25L24-31 30-29 26-20 24 0H18V-14H-18V0Z', fill: '#8a6a55' }, deer);
   shape('path', { d: 'M24-31L22-44 16-50M22-44L30-52M27-30L33-46 40-52M33-46L28-56', stroke: '#8a6a55', 'stroke-width': 2.6, 'stroke-linecap': 'round', fill: 'none' }, deer);
   shape('circle', { cx: 30, cy: -27, r: 2.2, fill: '#c63a33' }, deer);
-  holly(paper, w * .9, top + h * .06, w / 180);
+  holly(paper, w * .85, top + h * .07, w / 230);
 }
 // A small oval photograph by the door: a sleigh flying across a full moon over snowy roofs. A sprig of holly over it.
 export function framedSleigh({ paper }, { width: w, height: h }) {
@@ -138,7 +142,7 @@ export function framedSleigh({ paper }, { width: w, height: h }) {
   shape('path', { d: 'M-30 4H6Q14 4 14-4M-26 0V-10H-2L4 0Z', fill: '#2a1a14' }, sleigh);
   for (let i = 0; i < 2; i++) shape('path', { d: `M${18 + i * 16} -2V-10L${24 + i * 16} -14 ${30 + i * 16} -10V-2Z`, fill: '#2a1a14' }, sleigh);
   shape('path', { d: 'M4-6H46', stroke: '#2a1a14', 'stroke-width': 1.4 }, sleigh);
-  holly(paper, w * .5, h * .1, w / 150);
+  holly(paper, w * .5, h * .16, w / 210);
 }
 // The wreath on the arched door: a full ring of fir in two greens, pine cones, clusters of red berries and two gold bells,
 // a red velvet bow with long tails, hung from a loop of ribbon (it sways on it).
