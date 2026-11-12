@@ -101,13 +101,14 @@ test('the clue book hints at the first thing the story is still waiting on', () 
   assert.equal(at({ story: { opened: true, left: true, seen: ['tags', 'rules'] } }), 'log', 'the wet shift log first');
   assert.equal(at({ story: known }), 'join'); assert.equal(at({ story: known, finale: { endings: ['A'] } }), 'endings', 'went home: other endings');
   assert.equal(at({ story: known, volunteer: signed(['hay']) }), 'jobs'); assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']) }), 'cord');
+  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']), finale: { unlocked: true } }), 'reread', 'opened before the log was put right: read it again, no code to find');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']), finale: { twist: true } }), 'jobs');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true } }), 'wish');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true, wish: 'snow', endings: ['B'], truth: true } }), 'endings');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C'], truth: true } }), 'done');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C'] } }), 'endings', 'the truth still to see');
   assert.equal(at({ story: known, finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C'], truth: true } }), 'done', 'all seen, then signed off: still done');
-  for (const id of ['yard', 'room', 'bookcase', 'log', 'secret', 'join', 'jobs', 'cord', 'wish', 'endings', 'done']) assert.ok(GOALS[id]?.hints.length, `${id} has hints`);
+  for (const id of ['yard', 'room', 'bookcase', 'log', 'secret', 'join', 'jobs', 'cord', 'reread', 'wish', 'endings', 'done']) assert.ok(GOALS[id]?.hints.length, `${id} has hints`);
 });
 test('the wet shift log: one cell still reads, the rest are written back in, and only the right initials put it right', () => {
   const blank = readLog();

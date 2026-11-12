@@ -432,6 +432,16 @@ await test('Santa 第五章最終選擇：世界路標回家、許願與早班�
   assert.ok(card.includes("import { holly, rasterize, shape, paperFilter } from './paper-art.js';") && card.includes("canvas.toDataURL('image/png')") && card.includes('link.download = POSTCARD.file(kind)') && card.includes("home.href = 'index.html'") && !card.includes('innerHTML'), 'The postcard is cut from paper, saved as the very PNG shown, and leads back Home');
   assert.ok(play.includes('if (!replay) card = postcard({') && play.includes("theatre = null; card = null; cleanup();"), 'A postcard after each ending reached (not after a replay); leaving clears it');
 });
+await test('Santa 第七階段：觸控點擊範圍至少 44px、手指放開的容許範圍、舊紀錄簿先開過的提示、遮擋檢查與存檔恢復驗收', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [css, bag, story, clues, audit, playthrough] = await Promise.all(['css/santa.css', 'js/components/cabin-bag.js', 'js/services/cabin-story.js', 'js/data/cabin-clues.js', 'scripts/santa-audit.mjs', 'scripts/check-santa-playthrough.mjs'].map(read));
+  const coarse = css.slice(css.lastIndexOf('@media (pointer: coarse) {'));
+  assert.ok(coarse.includes(":is(.play-target, .hearth-log, .desk-drawer)::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }") && coarse.includes('.theatre-skip') && coarse.includes('.register-endings > :is(span, button):not(:first-child) { width: 2.75rem; }'), 'Small things in the scene reach 44px by an invisible area; the card buttons, 跳過 and the ending stamps are 44px');
+  assert.ok(css.includes('.notebook-button { top: .6rem; right: .6rem; width: 44px; height: 52px; }') && css.includes('.secret-thing[data-id="record"] { z-index: 1; }') && css.includes('.drawer-card { z-index: 6; }'), 'The clue book is big enough on a phone; the old record and the drawer card are not covered');
+  assert.ok(bag.includes("pad: event.pointerType === 'mouse' ? 8 : 16") && bag.includes('return best ?? near;'), 'A finger may land a little off a place, but never takes the one beside the place it is right over');
+  assert.ok(story.includes("finale.unlocked ? 'reread' : 'cord'") && clues.includes("reread: { title: '再讀一次舊紀錄簿'") && clues.includes('分信：台北 E.'), 'Opened the old record early: the hint says to read it again; the last job hint gives the sorting too');
+  assert.ok(audit.includes("const file = process.env.AUDIT;") && audit.includes('if (!file) return async () => {};') && playthrough.includes('const RELOAD = Boolean(process.env.RELOAD)') && playthrough.includes("await checkpoint('the room',"), 'The browser checks can look for covered and small controls (AUDIT), and the playthrough can reload at every chapter (RELOAD)');
+});
 await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const { RULES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { WISH, NEXT } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href), { WISH_COST } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);

@@ -5,15 +5,17 @@
 // 執行：BASE=http://127.0.0.1:5511 node scripts/check-santa-bag.mjs（WIDTH=390 HEIGHT=844 是手機；SHOTS=資料夾 會存截圖）
 import { chromium } from 'playwright';
 import fs from 'node:fs/promises';
+import { auditor } from './santa-audit.mjs';
 
 const BASE = process.env.BASE ?? 'http://127.0.0.1:5511', w = Number(process.env.WIDTH ?? 1440), h = Number(process.env.HEIGHT ?? 900), mobile = w < 800, SHOTS = process.env.SHOTS;
 if (SHOTS) await fs.mkdir(SHOTS, { recursive: true });
 const browser = await chromium.launch({ args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] });
 const context = await browser.newContext({ viewport: { width: w, height: h }, isMobile: mobile, hasTouch: mobile }), page = await context.newPage(), errors = [];
+const audit = auditor(page, { mobile, width: w, script: 'bag' });
 page.on('pageerror', e => { errors.push(String(e)); console.log('PAGE ERROR', String(e)); });
 const cdp = await context.newCDPSession(page);
 const wait = ms => page.waitForTimeout(ms);
-let shots = 0; const shot = name => (SHOTS ? page.screenshot({ path: `${SHOTS}/${String(++shots).padStart(2, '0')}-${name}-${w}.png` }) : null);
+let shots = 0; const shot = name => audit(name).then(() => (SHOTS ? page.screenshot({ path: `${SHOTS}/${String(++shots).padStart(2, '0')}-${name}-${w}.png` }) : null));
 const check = (ok, label) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}`); if (!ok) errors.push(label); };
 const centre = async selector => { const box = await page.locator(selector).first().boundingBox(); return [box.x + box.width / 2, box.y + box.height / 2]; };
 // A tap and a drag, by touch on a phone and by mouse on a desktop.
