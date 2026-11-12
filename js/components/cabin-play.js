@@ -396,6 +396,9 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       if (gone('lichen')) { cabin.repaint('trough', had('key') ? { eaten: true, taken: true } : { eaten: true }); cabin.reindeerStep(true, true); }
       if (had('handle')) cabin.repaint('snow-pile', { dug: true });
       if (progress.volunteer.tasks.includes('hay')) cabin.repaint('sleigh', { loaded: true });
+      // The desk's drawer with its key turned and its magnifier taken; the music box's drawer, its catch undone and Nils's star found.
+      cabin.drawer('desk', { front: gone('key') ? { key: true } : {}, inside: had('magnifier') ? { taken: true } : {} });
+      cabin.drawer('musicbox', { front: progress.placed.includes('musicbox-catch') ? { undone: true } : {}, inside: progress.ornaments.includes('N') ? { empty: true } : {} });
       cabin.placeBooks(progress.story.shelf); if (progress.story.opened) cabin.openBookcase(!progress.story.shut, false);
       cabin.wheelBroken(pending(progress.volunteer, 'wheel'), false);
       if (progress.finale.stayed) { cabin.repaint('secret-tags', { mine: true }); cabin.repaint('secret-hats', { mine: true }); }

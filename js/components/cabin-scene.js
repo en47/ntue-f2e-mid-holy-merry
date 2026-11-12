@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, DRAWERS, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS, drawerPieces } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -506,6 +506,47 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       mesh.position.set(x, y, nudge); mesh.visible = false; snowman.holder.add(mesh); worn.set(place, { mesh, id: null });
     }
   }
+  // The desk's and the music box's drawers (cabin-art.js DRAWERS): each a little box of paper pieces (front, floor seen
+  // from above, two sides, back) set into its furniture's dark slot, on the furniture's own sheet so it stands and turns
+  // with it. Shut, only its front shows: the rest is inside, behind the sheet. Pulled out, the box slides toward the room
+  // and its floor shows from above. Each eases toward `open` (0 or 1); its front's and floor's looks are states of their
+  // pieces, cut ahead. What a game asks before the room is ready is kept (`drawerLooks`) and used when it is.
+  const drawers = new Map(), drawerLooks = new Map();
+  const piece = (id, part, state) => { const name = `${id}-drawer-${part}`; return cutBoard(name, PIECES[name], set, state ?? PIECES[name].state); };
+  async function buildDrawer(id) {
+    const { sheet: under, slot: [x0, , x1, y1], depth, slide } = DRAWERS[id], host = sheets.get(under);
+    if (!host || disposed) return;
+    const { board, holder } = host, { front: [fw, fh], floor: [lw, lh], side: [sw, sh] } = drawerPieces(id), look = drawerLooks.get(id) ?? {};
+    const [front, floor, side] = (await Promise.all([piece(id, 'front', look.front), piece(id, 'inside', look.inside), piece(id, 'side')])).map(texture);
+    if (disposed) return;
+    const plane = (map, w, h) => {
+      const material = keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false, side: THREE.DoubleSide }));
+      warmed.push([material, material.color.clone()]);
+      return new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(w, h)), material);
+    };
+    const base = board.nudge ?? 0, box = new THREE.Group(), floorY = fh * .14;
+    box.position.set(((x0 + x1) / 2 - .5) * board.w, (1 - y1) * board.h, base);
+    // The furniture is a standing sheet with its top painted on: whatever of the box is still inside would show through
+    // above it, so all but the front is only there while the drawer is out.
+    const face = plane(front, fw, fh), inside = new THREE.Group(); face.position.set(0, fh / 2, .004);
+    const bottom = plane(floor, lw, lh); bottom.rotation.x = -Math.PI / 2; bottom.position.set(0, floorY, .004 - lh / 2);
+    for (const x of [-1, 1]) { const wall = plane(side, sw, sh); wall.rotation.y = Math.PI / 2; wall.position.set(x * lw / 2, floorY + sh / 2, .004 - sw / 2); inside.add(wall); }
+    const back = plane(side, lw, sh); back.position.set(0, floorY + sh / 2, .004 - depth);
+    inside.add(back, bottom); box.add(inside, face); holder.add(box);
+    const open = look.open ? 1 : 0; inside.visible = Boolean(open);
+    drawers.set(id, { box, face, bottom, inside, base, slide, open, out: open, shown: { front: look.front ?? {}, inside: look.inside ?? {} } });
+    restyleDrawer(id); redraw();
+  }
+  // A drawer's front or floor changed: its piece in its new look.
+  async function restyleDrawer(id) {
+    const drawer = drawers.get(id), look = drawerLooks.get(id) ?? {}; if (!drawer) return;
+    for (const [part, mesh] of [['front', drawer.face], ['inside', drawer.bottom]]) {
+      const state = look[part] ?? {}; if (JSON.stringify(state) === JSON.stringify(drawer.shown[part])) continue;
+      drawer.shown[part] = state;
+      const map = texture(await piece(id, part, state)); if (disposed) return;
+      const old = mesh.material.map; mesh.material.map = map; textures.delete(old); old.dispose(); redraw();
+    }
+  }
   // The hay hoist on the barn: paper pieces on the barn's own sheet, so they stand and turn with it. One number, how far
   // the bale has been wound up (0 to 1), places everything: the bale rises as far as the winch's spool winds rope in, the
   // spool (with the crank, once it is fitted) and the pulley turn by that length of rope, and the rope to the bale runs
@@ -698,6 +739,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // The barn's repair tag swings for a moment; its drawer, pulled open, stands a little out of the wall.
     if (hoist.tag) { const u = (t - hoist.swing) / 1.4; hoist.tag.rotation.z = !still && u < 1 ? Math.sin(u * Math.PI * 5) * .35 * (1 - u) : 0; }
     if (hoist.drawer) { hoist.out += (hoist.slide - hoist.out) * (still ? 1 : .12); hoist.drawer.position.z = .03 + hoist.out * .07; hoist.drawer.scale.setScalar(1 + hoist.out * .04); }
+    // The desk's and the music box's drawers slide out of their slots, or back in.
+    for (const drawer of drawers.values()) { drawer.out += (drawer.open - drawer.out) * (still ? 1 : .14); if (Math.abs(drawer.open - drawer.out) < .002) drawer.out = drawer.open; drawer.box.position.z = drawer.base + drawer.out * drawer.slide; drawer.inside.visible = drawer.out > .01; }
     for (const puff of smoke) {
       const life = still ? puff.userData.phase : (t * .18 + puff.userData.phase) % 1;
       puff.position.set(FIRE.x + life * 1.25, 3.38 + life * .6, FIRE.z); puff.scale.set(.3 + life * .4, .22 + life * .28, 1);
@@ -1042,7 +1085,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   renderer.domElement.addEventListener('webglcontextrestored', draw, { signal: events.signal });
   stage.dataset.view = view;
   if (!motion.matches) start();
-  const roomReady = Promise.all([...after.filter(indoor).map(board => addBoard(board).catch(error => console.error('Room board failed', board.id, error))), buildBookcase().catch(error => console.error('Bookcase failed', error))]).then(() => { roomIn = true; redraw(); });
+  const roomReady = Promise.all([...after.filter(indoor).map(board => addBoard(board).catch(error => console.error('Room board failed', board.id, error))), buildBookcase().catch(error => console.error('Bookcase failed', error))]).then(() => { roomIn = true; redraw(); return Promise.all(Object.keys(DRAWERS).map(id => buildDrawer(id).catch(error => console.error('Drawer failed', id, error)))); });
   for (const board of after.filter(board => !indoor(board))) addBoard(board).then(redraw, error => console.error('Village board failed', board.id, error));
   const santaReady = loadSanta();
   if (!reindeer) loadReindeer();
@@ -1111,6 +1154,27 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       });
     },
     // Where something on one of the room's sheets is on screen: `place` is [left, top, right, bottom] as fractions.
+    // The two drawers that slide out (the desk's, the music box's): open or shut, and the look of their front and floor
+    // (`front`, `inside`: states of their pieces).
+    drawer(id, { open, front, inside } = {}) {
+      const look = { ...(drawerLooks.get(id) ?? {}) };
+      if (open !== undefined) look.open = open;
+      if (front) look.front = front;
+      if (inside) look.inside = inside;
+      drawerLooks.set(id, look);
+      const drawer = drawers.get(id); if (!drawer) return;
+      drawer.open = look.open ? 1 : 0; restyleDrawer(id); redraw();
+    },
+    // Where a drawer's front is on screen (stage pixels), wherever it has slid to; null before it is there.
+    drawerRect(id) {
+      const drawer = drawers.get(id); if (!drawer) return null;
+      const { face } = drawer, { width: w, height: h } = face.geometry.parameters; face.updateMatrixWorld(true);
+      const rect = stage.getBoundingClientRect(), points = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => face.localToWorld(new THREE.Vector3(sx * w / 2, sy * h / 2, 0)).project(camera));
+      if (points.some(point => point.z > 1)) return null;
+      const xs = points.map(p => (p.x + 1) / 2 * rect.width), ys = points.map(p => (1 - p.y) / 2 * rect.height);
+      return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+    },
+    get drawersReady() { return drawers.size === Object.keys(DRAWERS).length; },
     sheetRect(id, [x0, y0, x1, y1] = [0, 0, 1, 1]) {
       const sheet = sheets.get(id); if (!sheet) return null;
       const { holder, board } = sheet; holder.updateMatrixWorld(true);

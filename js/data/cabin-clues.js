@@ -39,6 +39,8 @@ export const NOTEBOOK = {
 };
 // The welcome gifts not yet found, a hint each, asked for one at a time, in the order they can first be reached.
 export const GIFT_ORDER = ['N', 'E', 'O', 'K', 'H'];
+// Starting over, from the bottom of the clue book: asked once more, since it cannot be undone.
+export const RESTART = { ask: '從頭再玩一次', sure: '這會清掉這個瀏覽器裡聖誕村的所有進度：線索、口袋裡的東西、章、結局和見面禮都會不見，從第一章重新開始。確定嗎？', yes: '確定重新開始', no: '再想想' };
 export const GIFT_HINTS = {
   N: '尼爾斯最得意的作品，是做給克莉絲的那個音樂盒——看看它的底下。卡住抽屜的卡榫，用小房間郵戳章盤上的黃銅撥針就撥得開。',
   E: '艾洛最愛替雪人打扮。小房間的帽架上，好像夾著什麼。',
@@ -60,5 +62,5 @@ export const GOALS = {
   reread: { title: '再讀一次舊紀錄簿', hints: ['舊紀錄簿已經打開過了；交接表補好以後，它的書角翹了起來。', '再翻開舊紀錄簿讀一次，不用再轉密碼：想想你現在知道的「每晚兩個人接力」。', '荷莉的願望在 2003 年就實現了，之後她卻每年都還在交接表上。再讀一次，就會明白。'] },
   wish: { title: '三個章', hints: ['守則上說，集到三個章就能許一個願望。', '登記簿上有四個願望可以選，選一個再蓋章許願。', '也可以先不許願：四件工作都做完，班表上 12/25 早班還空著。'] },
   endings: { title: '還有別的結局', hints: ['登記簿下方蓋著你看過的結局；還沒蓋章的，換個選擇試試。', 'A：知道秘密、沒有加入（或在登記簿劃掉縮寫），到院子的世界路標選「踏上回家的路」；B：用三個章許願；C：四件工作都做完，簽 12/25 早班。', '金色的「真相」星：補好交接表、也讀懂舊紀錄簿以後，再走到 B 或 C。'] },
-  done: { title: '三個結局和真相都看過了', hints: ['謝謝你陪聖誕村過了這個聖誕節。登記簿上看過的結局和真相星，點一下就能再看一次。'] },
+  done: { title: '三個結局和真相都看過了', hints: ['謝謝你陪聖誕村過了這個聖誕節。登記簿上看過的結局和真相星，點一下就能再看一次；想從頭再玩一次，線索本最下面有「從頭再玩一次」。'] },
 };

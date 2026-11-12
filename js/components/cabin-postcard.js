@@ -54,8 +54,10 @@ async function render({ kind, truth, mark }) {
   const image = rasterize(card(truth)); await image.decode();
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   const pen = canvas.getContext('2d'); pen.drawImage(image, 0, 0, W, H);
-  await document.fonts?.ready;
+  // The hand is only fetched for characters a page shows: ask for these words before writing them on the canvas.
   const hand = getComputedStyle(document.documentElement).getPropertyValue('--font-hand').trim() || 'sans-serif';
+  const words = ['Holy Merry!', POSTCARD.from, ...(truth ? POSTCARD.truth : POSTCARD.lines[kind]), POSTCARD.sign.truth, POSTCARD.sign[kind], `To: ${mark}.你`, POSTCARD.date].join('');
+  await document.fonts?.load(`32px ${hand}`, words).catch(() => {}); await document.fonts?.ready;
   // Each line in the hand, made smaller where it would run past the right-hand column (650–1110).
   const write = (text, x, y, size, colour = '#3b2a24', align = 'left', room = 450) => {
     pen.font = `${size}px ${hand}`; const fit = Math.min(size, Math.floor(size * room / pen.measureText(text).width));

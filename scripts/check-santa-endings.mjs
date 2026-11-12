@@ -2,7 +2,7 @@
 // 選「踏上回家的路」再確認才是 A，「再逛逛」什麼都不發生；已加入的人看到路標上的小卡，還不知道秘密的人只看到說明。
 // 登記簿許願、交接表簽早班都要再確認一次；四件工作都做完，聖誕老人只問一次。每個選擇只播一段結局，理解第二次反轉後
 // 是真相版（第二幕），演完有紀念明信片（存成 PNG、回到 Home、留在村子），重看不給明信片。結局 C 名牌與帽子掛上第六鉤；
-// 舊存檔的結局 D 換成真相金星。手機尺寸用真的觸控事件。只讀寫這個瀏覽器的 localStorage，不連任何雲端。
+// 舊存檔的結局 D 換成真相金星。最後從線索本「從頭再玩一次」（先問一次），只清聖誕村的進度。手機尺寸用真的觸控事件。只讀寫這個瀏覽器的 localStorage，不連任何雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
 // 執行：BASE=http://127.0.0.1:5511 node scripts/check-santa-endings.mjs（WIDTH=390 HEIGHT=844 是手機；SHOTS=資料夾 會存截圖）
 import { chromium } from 'playwright';
@@ -139,4 +139,15 @@ await load(await saved()); await enter(); await thing('hats'); check((await text
 await load({ ...base, volunteer: { mark: 'J', tasks: ['wheel', 'hay', 'lichen'] }, finale: { invited: true, unlocked: true, twist: true, wish: 'snow', endings: ['A', 'B', 'D'] } });
 await enter(); await thing('register');
 check(await page.evaluate(() => [...document.querySelectorAll('.register-endings button.is-seen')].map(m => m.textContent).join()) === 'A,B,真相', '舊存檔的結局 D：換成真相金星，A、B 照算');
+// Starting over, from the bottom of the clue book: asked once more ("再想想" keeps everything); then the village is
+// forgotten and the page opens from the first chapter. What the Wish page keeps is left alone.
+await page.evaluate(() => localStorage.setItem('holy-merry:wishes:v1', '["kept"]'));
+await press('.notebook-button'); await wait(700);
+await press('.notebook-restart'); await wait(300); check((await text('.notebook-card')).includes('確定嗎'), '從頭再玩一次：先問一次');
+await must('再想想'); check(Boolean((await saved()).finale) && await exists('.notebook-restart:not([hidden])'), '再想想：進度都還在');
+await press('.notebook-restart'); await wait(300); await shot('restart');
+await Promise.all([page.waitForNavigation({ timeout: 30000 }), must('確定重新開始')]);
+await page.waitForFunction(() => !document.querySelector('.site-loader') && document.querySelector('#cabin-stage').dataset.state === 'ready', null, { timeout: 120000 });
+check(await page.evaluate(() => !localStorage.getItem('holy-merry:cabin:v1') && !localStorage.getItem('holy-merry:cabin:found') && localStorage.getItem('holy-merry:wishes:v1') === '["kept"]'), '確定重新開始：聖誕村的進度清空，Wish 的資料不動');
+check(await page.evaluate(() => document.querySelector('.notebook-button').hidden && !document.querySelector('.cabin-bag:not([hidden]) .bag-item')), '重新開始後回到第一章：線索本和口袋都還沒出現');
 console.log(errors.length ? `FAIL  ${errors.length} 項` : 'PASS  第五章：路標回家、確認步驟、只問一次、每個選擇只播一段、真相版、明信片、帽子、舊存檔'); await browser.close(); process.exitCode = errors.length ? 1 : 0;

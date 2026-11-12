@@ -13,23 +13,11 @@ import { FLIGHT_ORDER, playsOpen } from '../services/cabin-story.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const PAPER = { paper: { scale: .35, grain: .4, shadow: .25 }, eager: true };
+const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const COLOURS = Object.fromEntries(SUBSTITUTES);
 // The hidden comb under the box, low to high: each tine engraved with an initial and tuned so that the order the
 // substitutes first flew (E, O, N, K, H) falls down in fourths, E A D G C.
 const COMB = [['H', 'C5', 92], ['N', 'D5', 82], ['E', 'E5', 72], ['K', 'G5', 62], ['O', 'A5', 54]];
-// The drawer front under the music box: red-brown wood, a brass pull, the engraved line along it; and the brass catch
-// across its edge with the pinhole beside it, a layer of its own (gone once undone).
-function drawerFront(parent) {
-  shape('rect', { x: 2, y: 2, width: 116, height: 26, rx: 4, fill: '#8a3530' }, parent);
-  shape('rect', { x: 8, y: 6, width: 104, height: 18, rx: 3, fill: '#a8423b' }, parent);
-  shape('path', { d: 'M18 15H48M72 15H102', stroke: '#e0b04f', 'stroke-width': 1.2, opacity: .7 }, parent);
-  shape('rect', { x: 52, y: 10, width: 16, height: 9, rx: 4, fill: '#e0b04f' }, parent);
-}
-function drawerCatch(parent) {
-  shape('rect', { x: 92, y: 0, width: 9, height: 20, rx: 2, fill: '#c9a24f' }, parent);
-  shape('circle', { cx: 96.5, cy: 15, r: 1.6, fill: '#6b5226' }, parent);
-  shape('circle', { cx: 108, cy: 15, r: 2.2, fill: '#2a1a14' }, parent); shape('circle', { cx: 108, cy: 15, r: 3.6, fill: 'none', stroke: '#c9a24f', 'stroke-width': 1.2 }, parent);
-}
 // The comb's brass bar and the pinned drum behind it, 300 × 150; the tines are pieces of their own (they ring).
 function combBar(parent) {
   shape('rect', { x: 14, y: 8, width: 272, height: 30, rx: 10, fill: '#8f6a2c' }, parent);
@@ -54,17 +42,19 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUs
   const knob = element('button', 'musicbox-knob', layer); knob.type = 'button';
   knob.setAttribute('aria-label', '音樂盒的發條：繞著它順時針拖曳上緊，或按方向鍵右、Enter 轉四分之一圈');
   let turn = null, clicks = 0;
-  // A little drawer under the box, held by its catch until the brass pin undoes it; inside, a comb that opens it.
+  // A little drawer at the foot of the box (a real one in the scene, cabin-scene.js `drawer`; this button is where its front
+  // is), held by its catch until the brass pin undoes it; it slides out with a comb inside that opens it.
   const undone = () => progress.placed.includes('musicbox-catch');
   const drawer = element('button', 'musicbox-drawer', layer); drawer.type = 'button'; drawer.setAttribute('aria-label', '音樂盒底下的小抽屜');
-  paperLayer(drawer, '0 0 120 30', '', drawerFront, PAPER); paperLayer(drawer, '0 0 120 30', 'drawer-catch', drawerCatch, PAPER); drawer.classList.toggle('is-undone', undone());
+  drawer.classList.toggle('is-undone', undone());
+  const slide = open => { drawer.classList.toggle('is-open', open); cabin.drawer('musicbox', { open }); later(700, layout); };
   on(drawer, 'click', () => {
-    if (undone()) { combCard(); return; }
+    if (undone()) { if (card) return; slide(true); sound.play('open'); later(still() ? 0 : 750, combCard); return; }
     sound.play('nope'); clue('music-catch'); say('音樂盒底下有個小抽屜，被一根黃銅卡榫卡住了。卡榫旁邊，有一個很小的孔。');
   });
   const forget = bag.target(drawer, {
     accepts: id => undone() ? '卡榫已經鬆開了。' : id === 'pin' || '孔太小了，這個伸不進去。',
-    use: () => { progress.placed.push('musicbox-catch'); save(); later(400, () => { drawer.classList.add('is-undone'); sound.play('snap'); }); later(1100, combCard); return '撥針伸進小孔，輕輕一撥——卡榫鬆開了。'; },
+    use: () => { progress.placed.push('musicbox-catch'); save(); later(400, () => { drawer.classList.add('is-undone'); cabin.drawer('musicbox', { front: { undone: true } }); sound.play('snap'); }); later(1100, () => slide(true)); later(1850, combCard); return '撥針伸進小孔，輕輕一撥——卡榫鬆開了。'; },
   });
   if (knows() && !undone()) later(1600, () => say('音樂盒底下的小抽屜，還被那根黃銅卡榫卡著。'));
   const gold = element('span', 'musicbox-letter', layer); gold.setAttribute('aria-hidden', 'true');
@@ -73,7 +63,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUs
     const rects = cabin.musicRects(); if (!rects) return;
     const { key } = rects, size = Math.max(96, key.width * 2.4), x = key.left + key.width / 2, y = key.top + key.height / 2;
     Object.assign(knob.style, { left: `${x - size / 2}px`, top: `${y - size / 2}px`, width: `${size}px`, height: `${size}px` });
-    { const w = Math.max(88, rects.box.width * .7), h = w / 4; Object.assign(drawer.style, { left: `${rects.box.left + rects.box.width / 2 - w / 2}px`, top: `${rects.box.top + rects.box.height * .9 - h}px`, width: `${w}px`, height: `${h}px` }); }
+    { const front = cabin.drawerRect('musicbox'), w = front?.width ?? Math.max(88, rects.box.width * .7), h = front?.height ?? w / 4; Object.assign(drawer.style, { left: `${front?.left ?? rects.box.left + rects.box.width / 2 - w / 2}px`, top: `${front?.top ?? rects.box.top + rects.box.height * .9 - h}px`, width: `${w}px`, height: `${h}px` }); }
     // The bookmarks stand up over the box, kept clear of the caption along the top.
     const { box } = rects, medal = Math.max(44, box.width * .4); Object.assign(gold.style, { left: `${box.left + box.width / 2 - medal / 2}px`, top: `${Math.max(76, box.top - medal * .78)}px`, width: `${medal}px`, height: `${medal}px` });
   }
@@ -96,11 +86,11 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUs
   // welcome ornament Nils hid for the next new substitute. Played wrong, the comb buzzes and starts again.
   let card = null;
   function combCard() {
-    card?.remove(); sound.play('open'); say('');
+    card?.remove(); say(''); slide(true);
     card = element('article', 'cabin-letter comb-card', layer); card.setAttribute('aria-label', '音樂盒底的小抽屜');
     element('h3', 'comb-title', card, '音樂盒底的小抽屜');
     const words = element('p', 'comb-words', card);
-    const close = () => { card?.remove(); card = null; sound.play('remove'); drawer.focus({ preventScroll: true }); };
+    const close = () => { card?.remove(); card = null; slide(false); sound.play('remove'); drawer.focus({ preventScroll: true }); };
     if (progress.ornaments.includes('N')) words.textContent = '抽屜開著，尼爾斯的吊飾你已經收好了。';
     else {
       words.textContent = '抽屜上刻著一行小字：「照我們那一季飛的順序，彈一次。」裡面是一排小小的音梳，每一根都刻著一個字母。';
@@ -118,7 +108,7 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUs
           sound.pluck(note); button.classList.remove('is-ringing'); void button.offsetWidth; button.classList.add('is-ringing');
           played.push(mark); dots[played.length - 1].classList.add('is-on');
           if (played.length < FLIGHT_ORDER.length) return;
-          if (playsOpen(played)) { later(500, () => { gift('N'); clue('music-drawer'); sound.play('snap'); words.textContent = '喀噠——抽屜彈開了！'; comb.remove(); notes.remove(); opened(card, true); }); return; }
+          if (playsOpen(played)) { later(500, () => { gift('N'); cabin.drawer('musicbox', { inside: { empty: true } }); clue('music-drawer'); sound.play('snap'); words.textContent = '喀噠——抽屜彈開了！'; comb.remove(); notes.remove(); opened(card, true); }); return; }
           later(450, () => { sound.play('nope'); comb.classList.remove('is-buzz'); void comb.offsetWidth; comb.classList.add('is-buzz'); words.textContent = '音梳「嗡」地響了一聲，抽屜還是卡著。照那一季飛的順序，再彈一次。'; });
           later(1100, () => { played = []; dots.forEach(dot => dot.classList.remove('is-on')); });
         });
@@ -164,5 +154,5 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUs
   });
   layout(); later(500, layout); later(1200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
-  return () => { card?.remove(); events.abort(); watch.disconnect(); clearTimeout(clicks); forget(); if (turn || cabin.wound > 0) release(); };
+  return () => { card?.remove(); if (drawer.classList.contains('is-open')) cabin.drawer('musicbox', { open: false }); events.abort(); watch.disconnect(); clearTimeout(clicks); forget(); if (turn || cabin.wound > 0) release(); };
 }

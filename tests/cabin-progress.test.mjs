@@ -1,9 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { DEFAULT_OUTFIT, MEALS, dayOf, dressed, eat, full, mealsToday, readProgress, writeProgress } from '../js/services/cabin-progress.js';
+import { DEFAULT_OUTFIT, FOUND, MEALS, dayOf, dressed, eat, full, mealsToday, readProgress, resetProgress, writeProgress } from '../js/services/cabin-progress.js';
 import { GOALS } from '../js/data/cabin-clues.js';
 
-const memory = (initial = {}) => { const data = { ...initial }; return { getItem: key => data[key] ?? null, setItem: (key, value) => { data[key] = String(value); }, data }; };
+const memory = (initial = {}) => { const data = { ...initial }; return { getItem: key => data[key] ?? null, setItem: (key, value) => { data[key] = String(value); }, removeItem: key => { delete data[key]; }, data }; };
+test('starting over forgets the village and its found corners, and nothing else this browser keeps', () => {
+  const store = memory({ 'holy-merry:cabin:v1': '{"story":{}}', [FOUND]: '["mailbox"]', 'holy-merry:wishes:v1': '[1]', 'holy-merry:music': 'on' });
+  assert.equal(resetProgress(store), true); assert.deepEqual(Object.keys(store.data).sort(), ['holy-merry:music', 'holy-merry:wishes:v1']);
+  assert.equal(FOUND, 'holy-merry:cabin:found');
+});
 
 test('an empty or broken record starts as the plain snowman', () => {
   assert.deepEqual(readProgress(memory()).outfit, DEFAULT_OUTFIT);

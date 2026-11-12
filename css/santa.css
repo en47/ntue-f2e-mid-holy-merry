@@ -303,8 +303,6 @@
 /* 書櫃後的小房間：可以拿起來看的東西（看過的變淡），和打開後的紙卡：名牌、交接表（不同筆跡）、守則。 */
 .secret-thing { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 0; box-shadow: 0 0 0 2px #ffe8a455, 0 0 14px 2px #ffe8a433; border-radius: 12px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .secret-thing.is-read { animation: none; opacity: .55; }
-/* 舊紀錄簿立在書桌另一頭，和分揀架的點擊範圍有一點重疊：小的那本在上面。 */
-.secret-thing[data-id="record"] { z-index: 1; }
 .secret-thing:focus-visible, .books-enter:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .books-enter { position: absolute; left: 50%; bottom: 1rem; padding: .5rem 1.1rem; translate: -50% 0; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; pointer-events: auto; }
 .secret-card { max-height: calc(100% - 2rem); overflow: auto; }
@@ -650,6 +648,11 @@ html.theatre-open { overflow: hidden; }
 .notebook-hint, .notebook-close { justify-self: start; padding: .45rem 1rem; border: 0; border-radius: 0; font-weight: 700; font-size: var(--fs-small); background: transparent no-repeat 0 0 / 100% 100%; cursor: pointer; }
 .notebook-hint { color: var(--ink); }
 .notebook-close { align-self: flex-end; color: #fffaf0; }
+/* 線索本最下面的「從頭再玩一次」：低調的文字鈕，按了先問一次。 */
+.notebook-restart { align-self: center; padding: .3rem .7rem; color: #6b5a4c; background: none; border: 0; font-size: var(--fs-small); text-decoration: underline; cursor: pointer; }
+.notebook-restart[hidden] { display: none; }
+.notebook-restart:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.notebook-sure { margin: 0; color: #8f3b36; }
 .notebook-hint:hover, .notebook-close:hover { translate: 0 -2px; }
 .notebook-hint:focus-visible, .notebook-close:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 @media (max-width: 700px) { .notebook-button { top: .6rem; right: .6rem; width: 44px; height: 52px; } .notebook-card { max-height: calc(100% - 8rem); padding: 1.4rem 1.3rem 1.1rem; } }
@@ -703,11 +706,10 @@ html.theatre-open { overflow: hidden; }
 .hearth-letter.is-lit { opacity: 1; animation: fireback 2.4s ease-in-out infinite alternate; }
 .hearth-letter .art-layer { filter: drop-shadow(0 0 6px #ffcf7399); }
 @keyframes fireback { from { opacity: .72; } to { opacity: 1; } }
-.desk-drawer { position: absolute; padding: 0; border: 0; background: none; pointer-events: auto; cursor: pointer; }
-.desk-drawer .drawer-front { transition: translate .55s cubic-bezier(.3,1.3,.5,1), scale .55s cubic-bezier(.3,1.3,.5,1); }
-.desk-drawer:hover .drawer-front { translate: 0 8%; }
-.desk-drawer.is-open .drawer-front { translate: 0 70%; scale: 1.06; }
-.desk-drawer:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+/* 書桌和音樂盒的抽屜是場景裡真的抽屜（cabin-scene.js），這兩個按鈕只是蓋在抽屜前板上的點擊範圍，滑過時亮一圈。 */
+:is(.desk-drawer, .musicbox-drawer) { position: absolute; padding: 0; border: 0; border-radius: 6px; background: none; pointer-events: auto; cursor: pointer; transition: box-shadow .2s ease; }
+:is(.desk-drawer, .musicbox-drawer):hover { box-shadow: 0 0 0 2px #ffe8a488, 0 0 14px 2px #ffe8a444; }
+:is(.desk-drawer, .musicbox-drawer):focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
 .musicbox-letter { position: absolute; opacity: 0; translate: 0 45%; scale: .4; transition: opacity .6s ease, translate .9s cubic-bezier(.3,1.5,.5,1), scale .9s cubic-bezier(.3,1.5,.5,1); pointer-events: none; }
 .musicbox-letter.is-up { opacity: 1; translate: 0 0; scale: 1; }
 .musicbox-letter.is-up .art-layer { transform-origin: 50% 8%; animation: bookmarks-sway 3.4s ease-in-out infinite alternate; }
@@ -718,9 +720,6 @@ html.theatre-open { overflow: hidden; }
 .chair-title { margin: 0 0 .4rem; color: #8f3b36; font-size: var(--fs-small); letter-spacing: .1em; }
 .chair-line { margin: 0; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.9; }
 .chair-sign { margin: .3rem 0 .9rem; color: #8f3b36; font-family: var(--font-hand); text-align: right; }
-.desk-drawer .drawer-key { opacity: 0; }
-.desk-drawer.is-unlocked .drawer-key { opacity: 1; transition: opacity .3s ease; }
-.desk-drawer.is-open .drawer-key { translate: 0 70%; scale: 1.06; }
 /* 書桌抽屜、放大鏡下的雪花球、郵戳章盤上的撥針：打開成一張紙卡，東西是可以點的紙片。 */
 .drawer-card, .lens-card { width: min(22rem, calc(100% - 2rem)); }
 /* 抽屜卡片蓋在桌上的火漆印與郵戳上面。 */
@@ -737,15 +736,11 @@ html.theatre-open { overflow: hidden; }
 .globe-engraving { opacity: .35; scale: .55; letter-spacing: .05em; filter: blur(.4px); }
 /* 吸墨紙上反過來的字：用網站的手寫字，左右翻轉，像真的從紙上印過來。 */
 .inspect-mirror { position: absolute; inset: 38% 12% auto; margin: 0; color: #2f3e4a; opacity: .72; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.3; text-align: center; white-space: pre-line; transform: scaleX(-1); pointer-events: none; }
-.musicbox-drawer .drawer-catch { transition: opacity .3s ease; }
-.musicbox-drawer.is-undone .drawer-catch { opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .hearth-letter, .musicbox-letter, .desk-drawer .drawer-front, .desk-drawer .drawer-key, .musicbox-drawer .drawer-catch { transition: none; } .hearth-letter.is-lit, .musicbox-letter.is-up .art-layer, .globe-glint.is-on { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .hearth-letter, .musicbox-letter, .desk-drawer, .musicbox-drawer { transition: none; } .hearth-letter.is-lit, .musicbox-letter.is-up .art-layer, .globe-glint.is-on { animation: none; } }
 /* 音樂盒底的小抽屜：五根刻著縮寫的音梳（長的低、短的高），照那一季大家第一次飛的順序彈，抽屜彈開，裡面是撕下來的舊照片一角。 */
-.musicbox-drawer { position: absolute; padding: 0; border: 0; background: none; pointer-events: auto; cursor: pointer; animation: drawer-peek 1.2s ease-in-out 1.4s 2; }
-@keyframes drawer-peek { 50% { translate: 0 8%; } }
-.musicbox-drawer:hover { translate: 0 5%; }
-.musicbox-drawer:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
 .comb-card { width: min(24rem, calc(100% - 2rem)); }
+/* 寬螢幕上，音梳的卡片放在音樂盒右邊，滑出來的抽屜還看得到。 */
+@media (min-width: 900px) { .comb-card { left: auto; right: 4%; translate: 0 -50%; } }
 .comb-title { margin: 0 0 .3rem; color: #a8423b; font-size: var(--fs-small); letter-spacing: .1em; }
 .comb-words { margin: 0 0 .6rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; }
 .comb { position: relative; width: 100%; aspect-ratio: 2 / 1; margin: 0 0 .3rem; }
@@ -760,7 +755,7 @@ html.theatre-open { overflow: hidden; }
 .comb-dot { position: relative; width: .95rem; aspect-ratio: 1; opacity: .18; transition: opacity .2s ease; }
 .comb-dot.is-on { opacity: 1; }
 @keyframes found-lift { from { translate: 0 40%; rotate: -16deg; opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .musicbox-drawer, .comb-tine.is-ringing, .comb.is-buzz { animation: none; } .comb-dot { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .comb-tine.is-ringing, .comb.is-buzz { animation: none; } .comb-dot { transition: none; } }
 /* 分揀架：六個木格子（N、K、H、E、O 和你），一疊信等著分。點信再點格子，信飛進去；放錯的會被退回來。 */
 .cabin .secret-card[data-thing="rack"] { width: min(34rem, calc(100% - 1.5rem)); }
 .rack-sign { color: #6b4a33; }
@@ -922,13 +917,13 @@ html.theatre-open { overflow: hidden; }
 /* 第七階段：觸控螢幕上，畫面裡的小東西（抽屜裡的火柴與紙條、絞盤標籤、木柴、石板、書桌抽屜）點擊範圍至少 44px 見方；
    放大的是看不見的範圍，畫面不變。卡片裡的按鈕、跳過、結局章也至少 44px。 */
 @media (pointer: coarse) {
-  :is(.play-target, .hearth-log, .desk-drawer)::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+  :is(.play-target, .hearth-log, .desk-drawer, .musicbox-drawer)::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
   /* 抽屜裡並排的火柴盒和紙條：各往外側放大，不吃掉對方。 */
   .drawer-matches::after { left: min(0px, calc(100% - 44px)); right: 0; }
   .drawer-note::after { left: 0; right: min(0px, calc(100% - 44px)); }
   .gearbox-peg::before { inset: -45%; }
   .gearbox-piece::before { inset: -14%; }
-  .compose-choice, .inspect-close, .inspect-flip, .notebook-close, .theatre-skip, .theatre-actions button { min-height: 44px; }
+  .compose-choice, .inspect-close, .inspect-flip, .notebook-close, .notebook-restart, .theatre-skip, .theatre-actions button { min-height: 44px; }
   .register-endings > :is(span, button):not(:first-child) { width: 2.75rem; }
   .register-endings > .ending-truth:not(:first-child) { width: auto; min-height: 2.75rem; }
 }
