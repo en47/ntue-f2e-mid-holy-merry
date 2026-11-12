@@ -2,7 +2,7 @@
 // the front door. Every board is drawn here once, then stood up in 3D by cabin-scene.js. Units: 1 = Santa's seated height.
 // Light comes from the upper left. It is Christmas morning: Santa is home from the night's deliveries.
 import { holly, pine, shape } from './paper-art.js';
-import { ADVENT_WINDOWS, adventHouse as adventHouseSheet, calendar, candleFlame, candles, cookieJar, doorWreath, framedReindeer, framedSleigh, snowflakeBunting, windowFrame, windowLights, windowView } from './cabin-decor.js';
+import { ADVENT_WINDOWS, adventHouse as adventHouseSheet, swag, calendar, candleFlame, candles, cookieJar, doorWreath, framedReindeer, framedSleigh, snowflakeBunting, windowFrame, windowLights, windowView } from './cabin-decor.js';
 import { church, roofHouse, snowyFir, star } from './paper-props.js';
 import { headingGlyphs } from '../data/heading-glyphs.js';
 import { cabinGlyphs } from '../data/cabin-glyphs.js';
@@ -119,21 +119,16 @@ export function backWall({ plain, paper, svg }, { width, height }, state = {}) {
   beam(wall, 0, 250, width, 34);
   brace(wall, `M${width / 2} 268L${width / 2 - 250} ${eave - 20}M${width / 2} 268L${width / 2 + 250} ${eave - 20}`);
   for (const x of [0, 628, 948, width - 40]) beam(wall, x, eave, x === 0 || x === width - 40 ? 40 : 32, (x === 628 || x === 948 ? height : rail) - eave);
-  // A round window high in the gable, and a gold star above the collar beam.
-  const ox = width / 2, oy = 405;
-  shape('circle', { cx: ox, cy: oy, r: 86, fill: GREEN }, paper);
-  shape('circle', { cx: ox, cy: oy, r: 66, fill: '#cfe3ee' }, paper);
-  shape('path', { d: `M${ox - 66} ${oy + 18}C${ox - 20} ${oy} ${ox + 20} ${oy + 16} ${ox + 66} ${oy + 6}V${oy + 70}H${ox - 66}Z`, fill: SNOW }, paper);
-  shape('path', { d: `M${ox} ${oy - 66}V${oy + 66}M${ox - 66} ${oy}H${ox + 66}`, stroke: GREEN, 'stroke-width': 10 }, paper);
-  star(paper, ox, 150, 34, GOLD);
-  archedDoor(paper, 690, 880, 228, height);
+  // The round window high in the gable with the gold star over it, and the arched door, are sheets of their own (DECOR).
 }
 
 export function sideWall(side) {
   return ({ plain, paper, svg }, { width, height }) => {
     const rail = height - .42 * PX;
     plaster(plain, width, height); wainscot(plain, width, height, rail);
-    for (const x of [0, width / 2 - 16, width - 36]) beam(plain, x, 0, x ? 32 : 36, rail);
+    // The posts: at each corner and one between. On the left wall the one between stands past the window (a window is set
+    // between posts, not over one).
+    for (const x of [0, side === 'left' ? 960 : width / 2 - 16, width - 36]) beam(plain, x, 0, x ? 32 : 36, rail);
     beam(plain, 0, 0, width, 30);
     if (side === 'left') {
       // Texture left is the front of the room. Its window (with the advent house on the sill), the calendar and the paper
@@ -171,22 +166,14 @@ export function frontOutside({ plain, paper, svg }, { width, height }) {
   for (const [from, to] of [[0, x - 40], [x + w + 40, width]]) shape('path', { d: `M${from} ${height}C${from + (to - from) * .2} ${height - 60} ${from + (to - from) * .6} ${height - 30} ${to} ${height - 40}V${height}Z`, fill: SNOW }, paper);
 }
 // The same wall from inside: the window onto the morning on one side of the door, coat pegs with a spare red coat on the other.
-export function frontInside({ plain, paper, svg }, { width, height }, state = {}) {
+export function frontInside({ plain, svg }, { width, height }) {
   const cx = width / 2, eave = height - HOUSE.wall * PX, rail = height - .42 * PX;
   const wall = shape('g', { 'clip-path': cutDoor(svg, 'front-in', `M0 ${height}V${eave}L${cx} 0L${width} ${eave}V${height}Z`, cx, height) }, plain);
   plaster(wall, width, height); wainscot(wall, width, height, rail);
   beam(wall, 0, eave - 22, width, 44); beam(wall, 0, 250, width, 34);
   brace(wall, `M${cx} 268L${cx - 250} ${eave - 20}M${cx} 268L${cx + 250} ${eave - 20}`);
   for (const x of [0, width - 40]) beam(wall, x, eave, 40, rail - eave);
-  const oy = 405;
-  shape('circle', { cx, cy: oy, r: 76, fill: GREEN }, paper);
-  shape('circle', { cx, cy: oy, r: 58, fill: '#cfe3ee' }, paper);
-  shape('path', { d: `M${cx - 58} ${oy + 16}C${cx - 20} ${oy} ${cx + 20} ${oy + 14} ${cx + 58} ${oy + 6}V${oy + 60}H${cx - 58}Z`, fill: SNOW }, paper);
-  shape('path', { d: `M${cx} ${oy - 58}V${oy + 58}M${cx - 58} ${oy}H${cx + 58}`, stroke: GREEN, 'stroke-width': 9 }, paper);
-  const w = DOOR.width * PX, x = cx - w / 2, y = height - DOOR.height * PX;
-  shape('path', { d: `M${x - 30} ${height}V${y - 30}H${x + w + 30}V${height}ZM${x} ${height}V${y}H${x + w}V${height}Z`, fill: WOOD_LIT, 'fill-rule': 'evenodd' }, paper);
-  for (let i = 0; i < 5; i++) holly(paper, x - 20 + i * (w + 40) / 4, y - 34, .62);
-  coatPegs(paper, 1070, eave + 170, 390, height - 14, state.coat !== false);
+  // Its round gable window, the door's frame with a garland over it, and the coat pegs are sheets of their own (DECOR).
 }
 function litWindow(parent, x, y, width, height) {
   for (const sx of [x - 58, x + width + 14]) shape('rect', { x: sx, y: y - 6, width: 44, height: height + 12, rx: 6, fill: GREEN }, parent);
@@ -235,6 +222,11 @@ function coatPegs(parent, x, y, width, floor, coat = true) {
   shape('rect', { x: cx - 12, y: y + 40, width: 24, height: 290, rx: 10, fill: SNOW }, parent);
   shape('rect', { x: cx - 80, y: y + 180, width: 160, height: 26, fill: '#3b2a24' }, parent);
   shape('rect', { x: cx - 18, y: y + 176, width: 36, height: 34, rx: 4, fill: 'none', stroke: GOLD, 'stroke-width': 7 }, parent);
+  // A loop of cord over the peg, a fur collar, two pockets trimmed with fur, and the fur at the hem in soft tufts.
+  shape('path', { d: `M${cx - 10} ${y + 24}Q${cx} ${y + 6} ${cx + 10} ${y + 24}`, fill: 'none', stroke: '#3b2a24', 'stroke-width': 3 }, parent);
+  shape('path', { d: `M${cx - 48} ${y + 46}Q${cx} ${y + 70} ${cx + 48} ${y + 46}Q${cx + 30} ${y + 92} ${cx} ${y + 96}Q${cx - 30} ${y + 92} ${cx - 48} ${y + 46}Z`, fill: SNOW }, parent);
+  for (const side of [-1, 1]) { shape('rect', { x: cx + side * 50 - 22, y: y + 232, width: 44, height: 46, rx: 6, fill: '#7e2f2a' }, parent); shape('rect', { x: cx + side * 50 - 23, y: y + 226, width: 46, height: 13, rx: 6, fill: SNOW }, parent); }
+  for (let i = 0; i < 9; i++) shape('circle', { cx: cx - 80 + i * 20, cy: y + 345, r: 9, fill: SNOW }, parent);
   }
   const hx = x + width / 2;
   shape('path', { d: `M${hx - 50} ${y + 120}C${hx - 40} ${y + 60} ${hx + 20} ${y + 20} ${hx + 70} ${y + 70}L${hx + 50} ${y + 120}Z`, fill: RED }, parent);
@@ -244,10 +236,12 @@ function coatPegs(parent, x, y, width, floor, coat = true) {
   for (const [dx, len] of [[-14, 230], [14, 190]]) {
     shape('rect', { x: sx + dx - 14, y: y + 18, width: 28, height: len, rx: 8, fill: GREEN }, parent);
     for (let k = 1; k < 4; k++) shape('rect', { x: sx + dx - 14, y: y + 18 + len * k / 4, width: 28, height: 10, fill: CREAM }, parent);
+    for (let f = 0; f < 4; f++) shape('path', { d: `M${sx + dx - 11 + f * 7.3} ${y + 18 + len}v14`, stroke: GREEN, 'stroke-width': 3, 'stroke-linecap': 'round' }, parent);
   }
   for (const bx of [x + 110, x + 190]) {
     shape('path', { d: `M${bx} ${floor}V${floor - 120}h50V${floor - 30}h34c14 0 18 30 0 30Z`, fill: '#2f2622' }, parent);
     shape('rect', { x: bx - 6, y: floor - 132, width: 62, height: 22, rx: 10, fill: SNOW }, parent);
+    shape('path', { d: `M${bx} ${floor - 6}H${bx + 92}`, stroke: '#1e1714', 'stroke-width': 5 }, parent);
   }
 }
 // The door's two faces, back to back on one hinge. Seen from the snow the hinge is on the left; from inside, on the right.
@@ -1321,43 +1315,77 @@ export function chairFront({ paper }, { width, height }) {
 export function adventLit(date = new Date()) { return date.getMonth() === 11 ? Math.min(date.getDate(), 24) : date.getMonth() === 10 ? 0 : 24; }
 
 const wall = (id, w, h, at, extra) => ({ id, w, h, at, kind: 'wall', ...extra });
+// A piece drawn in its wall's own art units (as it was drawn on the wall), cut out as a sheet of its own: `box` is its place.
+const fromWall = ([x0, y0], draw) => ({ paper }, size, state = {}) => draw(shape('g', { transform: `translate(${-x0} ${-y0})` }, paper), state);
+// A round window high in a gable: a green frame, the morning sky and snow, its cross bars.
+function gableWindow(parent, ox, oy, r) {
+  const glass = r * .77;
+  shape('circle', { cx: ox, cy: oy, r, fill: GREEN }, parent);
+  shape('circle', { cx: ox, cy: oy, r: r * .88, fill: 'none', stroke: DEEP_GREEN, 'stroke-width': 3, opacity: .6 }, parent);
+  shape('circle', { cx: ox, cy: oy, r: glass, fill: '#cfe3ee' }, parent);
+  shape('path', { d: `M${ox - glass * .96} ${oy + glass * .27}C${ox - glass * .3} ${oy} ${ox + glass * .3} ${oy + glass * .24} ${ox + glass * .99} ${oy + glass * .1}A${glass} ${glass} 0 0 1 ${ox - glass * .96} ${oy + glass * .27}Z`, fill: SNOW }, parent);
+  shape('path', { d: `M${ox} ${oy - glass}V${oy + glass}M${ox - glass} ${oy}H${ox + glass}`, stroke: GREEN, 'stroke-width': r * .12 }, parent);
+}
+// The front door's frame inside, with a garland of fir, lights and holly draped over its top (as over the door outside).
+function doorFrame(parent) {
+  const width = HOUSE.width * PX, height = HOUSE.ridge * PX, w = DOOR.width * PX, x = width / 2 - w / 2, y = height - DOOR.height * PX;
+  shape('path', { d: `M${x - 30} ${height}V${y - 30}H${x + w + 30}V${height}ZM${x} ${height}V${y}H${x + w}V${height}Z`, fill: WOOD_LIT, 'fill-rule': 'evenodd' }, parent);
+  shape('path', { d: `M${x - 30} ${y - 30}H${x + w + 30}`, stroke: WOOD, 'stroke-width': 6 }, parent);
+  swag(parent, x - 50, x + w + 50, y - 34, 18);
+}
 // A sheet hung on a room wall: `box` is where it is drawn on that wall's own picture ([left, top, right, bottom], in the
 // wall's art units), `out` how far it stands off the wall. Centred on its box, or hung from its top (`hang`: it can sway),
 // or standing on its bottom edge (`stand`: on a shelf).
 const WALLS = { back: [HOUSE.width, HOUSE.ridge], 'front-in': [HOUSE.width, HOUSE.ridge], left: [HOUSE.depth, HOUSE.wall], right: [HOUSE.depth, HOUSE.wall] };
-function onWall(side, [x0, y0, x1, y1], { out = .012, hang = false, stand = false, ...extra } = {}) {
+// `pad`: a margin (art units) left round the drawing, so the paper's rim and shadow are never cut off at the sheet's edge
+// (none along the bottom of what stands on a shelf or the floor: `stand`, `floor`).
+function onWall(side, box, { out = .012, hang = false, stand = false, floor = false, pad = 0, ...extra } = {}) {
+  const below = stand || floor ? 0 : pad, [x0, y0, x1, y1] = [box[0] - pad, box[1] - pad, box[2] + pad, box[3] + below];
   const [width, height] = WALLS[side], u = (x0 + x1) / 2 / PX - width / 2, v = height - (hang ? y0 : stand ? y1 : (y0 + y1) / 2) / PX;
   const at = { back: [u, v, BACK + out], 'front-in': [-u, v, HOUSE.depth / 2 - out], left: [-HOUSE.width / 2 + out, v, -u], right: [HOUSE.width / 2 - out, v, u] }[side];
   const turn = { back: 0, 'front-in': Math.PI, left: Math.PI / 2, right: -Math.PI / 2 }[side];
-  return { w: (x1 - x0) / PX, h: (y1 - y0) / PX, at, turn, room: true, decor: true, ...(hang ? { hang: true } : stand ? {} : { center: true }), ...extra };
+  return { w: (x1 - x0) / PX, h: (y1 - y0) / PX, at, turn, room: true, decor: true, margin: [pad, below], ...(hang ? { hang: true } : stand ? {} : { center: true }), ...extra };
 }
+// A drawing made for its box, laid inside its sheet's margin.
+const inMargin = ({ draw, margin: [pad, below] }) => !pad ? draw : ({ plain, paper, svg }, { width, height }, state) => {
+  const shift = { transform: `translate(${pad} ${pad})` };
+  return draw({ plain: shape('g', shift, plain), paper: shape('g', shift, paper), svg }, { width: width - pad * 2, height: height - pad - below }, state);
+};
 // A window on a wall: its view (with the snow falling past it, cabin-scene.js), its frame and garland over that, and the
 // garland's bulbs, which twinkle. `glass` is the pane's place on the wall, `box` the whole frame's.
 function wallWindow(side, glass, box) {
   const [x0, y0, x1, y1] = box, frame = { glass: [(glass[0] - x0) / (x1 - x0), (glass[1] - y0) / (y1 - y0), (glass[2] - x0) / (x1 - x0), (glass[3] - y0) / (y1 - y0)] };
   return [
     { id: `decor-${side}-view`, ...onWall(side, glass, { out: .008 }), detail: 1.8, snowfall: true, draw: windowView },
-    { id: `decor-${side}-frame`, ...onWall(side, box, { out: .016 }), detail: 2, draw: windowFrame(frame) },
-    { id: `decor-${side}-lights`, ...onWall(side, box, { out: .019 }), detail: 1.6, twinkle: true, draw: windowLights(frame) },
+    { id: `decor-${side}-frame`, ...onWall(side, box, { out: .016, pad: 30 }), detail: 2, draw: windowFrame(frame) },
+    { id: `decor-${side}-lights`, ...onWall(side, box, { out: .019, pad: 30 }), detail: 1.4, twinkle: true, draw: windowLights(frame) },
   ];
 }
 // The room's wall decorations (cabin-decor.js), each cut finer than its wall so it stays crisp up close. The advent house's
 // windows lit for the day are laid over it in the scene (`advent`); the candle flames flicker (`candle`).
-export const DECOR = [
+export const DECOR = ([
   ...wallWindow('left', [560, 210, 860, 510], [505, 150, 915, 560]),
   ...wallWindow('right', [150, 230, 410, 490], [100, 160, 460, 535]),
   ...wallWindow('front-in', [175, 660, 425, 910], [125, 595, 475, 950]),
-  { id: 'decor-advent', ...onWall('left', [630, 372, 790, 527], { out: .028, stand: true }), detail: 3, advent: ADVENT_WINDOWS, draw: adventHouseSheet },
-  { id: 'decor-calendar', ...onWall('left', [120, 290, 260, 500], { hang: true, sway: true }), detail: 3, draw: calendar },
-  { id: 'decor-bunting', ...onWall('left', [60, 130, 500, 250], { hang: true, sway: true }), detail: 2, draw: snowflakeBunting },
-  { id: 'decor-picture', ...onWall('back', [70, 570, 290, 780], { out: .014 }), detail: 2.6, draw: framedReindeer },
-  { id: 'decor-wreath', ...onWall('back', [713, 920, 895, 1166], { out: .016, hang: true, sway: true }), detail: 2.6, draw: doorWreath },
-  { id: 'decor-photo', ...onWall('front-in', [465, 670, 625, 820], { out: .014 }), detail: 2.6, draw: framedSleigh },
-  { id: 'decor-candles', ...onWall('right', [575, 360, 700, 470], { out: .05, stand: true }), detail: 3, draw: candles },
-  { id: 'decor-flame-a', ...onWall('right', [598, 352, 626, 394], { out: .052, stand: true }), detail: 3, candle: true, draw: candleFlame },
-  { id: 'decor-flame-b', ...onWall('right', [646, 373, 674, 415], { out: .052, stand: true }), detail: 3, candle: true, draw: candleFlame },
-  { id: 'decor-jar', ...onWall('right', [755, 340, 865, 470], { out: .05, stand: true }), detail: 3, draw: cookieJar },
-];
+  { id: 'decor-advent', ...onWall('left', [630, 372, 790, 527], { out: .028, stand: true, pad: 14 }), detail: 3, advent: ADVENT_WINDOWS, draw: adventHouseSheet },
+  { id: 'decor-calendar', ...onWall('left', [120, 290, 260, 500], { hang: true, sway: true, pad: 14 }), detail: 3, draw: calendar },
+  { id: 'decor-bunting', ...onWall('left', [60, 130, 500, 250], { hang: true, sway: true, pad: 16 }), detail: 2, draw: snowflakeBunting },
+  { id: 'decor-picture', ...onWall('back', [70, 570, 290, 780], { out: .014, pad: 16 }), detail: 2.6, draw: framedReindeer },
+  { id: 'decor-wreath', ...onWall('back', [713, 920, 895, 1166], { out: .016, hang: true, sway: true, pad: 22 }), detail: 2.6, draw: doorWreath },
+  // Over the coat pegs, clear of the door's frame and the window.
+  { id: 'decor-photo', ...onWall('front-in', [1185, 585, 1325, 700], { out: .014, pad: 14 }), detail: 2.6, draw: framedSleigh },
+  // The gables' round windows (the back one under a gold star), the back wall's arched door (its wreath hangs on it), the
+  // front door's frame and garland, and the coat pegs by it (the red coat gone while Santa is out: `coat: false`).
+  { id: 'decor-gable-back', ...onWall('back', [700, 105, 900, 500], { out: .006, pad: 10 }), detail: 1.6, draw: fromWall([700, 105], parent => { gableWindow(parent, 800, 405, 86); star(parent, 800, 150, 34, GOLD); }) },
+  { id: 'decor-gable-front', ...onWall('front-in', [714, 320, 886, 490], { out: .006, pad: 10 }), detail: 1.6, draw: fromWall([714, 320], parent => gableWindow(parent, 800, 405, 76)) },
+  { id: 'decor-arched-door', ...onWall('back', [660, 850, 950, 1500], { out: .006, floor: true, pad: 10 }), detail: 1.4, draw: fromWall([660, 850], parent => archedDoor(parent, 690, 880, 228, 1500)) },
+  { id: 'decor-door', ...onWall('front-in', [590, 640, 1010, 1500], { out: .008, floor: true, pad: 30 }), detail: 1.6, draw: fromWall([590, 640], doorFrame) },
+  { id: 'decor-coat', ...onWall('front-in', [1040, 700, 1475, 1500], { out: .01, floor: true, pad: 10 }), detail: 1.7, state: {}, draw: fromWall([1040, 700], (parent, state) => coatPegs(parent, 1070, 720, 390, 1486, state.coat !== false)) },
+  { id: 'decor-candles', ...onWall('right', [575, 360, 700, 470], { out: .05, stand: true, pad: 12 }), detail: 3, draw: candles },
+  { id: 'decor-flame-a', ...onWall('right', [598, 352, 626, 394], { out: .052, stand: true, pad: 8 }), detail: 3, candle: true, draw: candleFlame },
+  { id: 'decor-flame-b', ...onWall('right', [646, 373, 674, 415], { out: .052, stand: true, pad: 8 }), detail: 3, candle: true, draw: candleFlame },
+  { id: 'decor-jar', ...onWall('right', [755, 340, 865, 470], { out: .05, stand: true, pad: 14 }), detail: 3, draw: cookieJar },
+]).map(board => ({ ...board, draw: inMargin(board) }));
 // Every board: art size in world units and where it stands. `kind` marks room surfaces (cut at a lower density, no paper edge).
 export const BOARDS = [
   wall('back', HOUSE.width, HOUSE.ridge, [0, 0, BACK], { draw: backWall, room: true }),
@@ -1369,7 +1397,8 @@ export const BOARDS = [
   wall('front-out', HOUSE.width + HOUSE.thick * 2, HOUSE.ridge, [0, 0, HOUSE.depth / 2 + HOUSE.thick], { draw: frontOutside }),
   // The door's faces hang on the door rig (its hinge), not on the house.
   { id: 'door-out', w: DOOR.width, h: DOOR.height, at: [DOOR.width / 2, 0, .012], rig: 'door', kind: 'wall', draw: doorOutside },
-  { id: 'door-in', w: DOOR.width, h: DOOR.height, at: [DOOR.width / 2, 0, -.012], turn: Math.PI, rig: 'door', kind: 'wall', draw: doorInside },
+  // Its inside face is seen close up from the room: cut finer than the walls.
+  { id: 'door-in', w: DOOR.width, h: DOOR.height, at: [DOOR.width / 2, 0, -.012], turn: Math.PI, rig: 'door', kind: 'wall', detail: 1.8, draw: doorInside },
   { id: 'floor', w: HOUSE.width, h: HOUSE.depth, at: [0, 0, 0], flat: 'floor', draw: floor, kind: 'floor', room: true },
   { id: 'roof-in-left', roof: 'left', layer: 'inner', w: HOUSE.slope, h: HOUSE.depth, draw: roofInside, kind: 'floor', room: true },
   { id: 'roof-in-right', roof: 'right', layer: 'inner', w: HOUSE.slope, h: HOUSE.depth, draw: roofInside, kind: 'floor', room: true },

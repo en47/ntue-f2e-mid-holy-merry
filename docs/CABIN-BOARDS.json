@@ -29,18 +29,18 @@
   },
   "files": {
     "hi/back--secret-true.webp": {
-      "fingerprint": "a84bd64f840d88df26959cef51099a986ecdad6ed41a6bdd13b9f1642259f1a8",
-      "sha256": "bf23ddd76d8abcff519a1448ca0ac9772ba6306c83584f4281a0f7d7761d8867",
+      "fingerprint": "b37ab5378882d100bc650afecbe93bc0472e7cb005f2db496f27702147c14ccd",
+      "sha256": "dc5ce95d8d7574a941aeadf5e6a18eaed1f0f7bc0bb48e4e7914729a6bd9d6f4",
       "width": 1120,
       "height": 1050,
-      "bytes": 38208
+      "bytes": 18334
     },
     "hi/back.webp": {
-      "fingerprint": "7fbac530581e671188f4707111f234d511d379f430ff5d34f22437899acadf3a",
-      "sha256": "5873b558988ff80283b1cfdf789dd2e02ee8a263064e646b7f4fcd14ceece14f",
+      "fingerprint": "258ebd51c45580bb2059678e3bc86c9c71efe696b893d12475d20cc03096bca6",
+      "sha256": "424aeb6563f1cbd3da045623b397ee587eedf18a0ee2d68acc28923814dc6cc9",
       "width": 1120,
       "height": 1050,
-      "bytes": 39046
+      "bytes": 19256
     },
     "hi/balloon-green.webp": {
       "fingerprint": "a939e301e072862dbff6539aae00e16acef226172b2572c1929435b0fc11d6b9",
@@ -379,60 +379,88 @@
       "bytes": 19278
     },
     "hi/decor-advent.webp": {
-      "fingerprint": "6955939918541b0bde75f4957b1152b82978206bfeb7b5ecfec5ccaf6f9999a5",
-      "sha256": "417511771f5f0faf43fb4b37ee40130d1349065a5d468031cd785f8535ec0985",
-      "width": 480,
-      "height": 465,
-      "bytes": 18394
+      "fingerprint": "2e9d626ca2cdbf7fbda2940bfd6266847210f9b0403435c6d4826c41de8a5447",
+      "sha256": "7ca6b6390a6f3078c344a8341445f70d217558f5f31e8856762fdc022bae129b",
+      "width": 564,
+      "height": 507,
+      "bytes": 18368
+    },
+    "hi/decor-arched-door.webp": {
+      "fingerprint": "46d7a6d8acf4dcbdbd43bc4e811bc7432a579425ceb0e31550f4ec14bb4d5a9f",
+      "sha256": "eb80887a13bb43061d17fb5e9967a62bb6128226ec13dd6304ac81c4fd3acac1",
+      "width": 434,
+      "height": 924,
+      "bytes": 62254
     },
     "hi/decor-bunting.webp": {
-      "fingerprint": "b14a8e0091220d27accb131c8bdf99b40fbce4115d13d62d8efa4a6d8beb6601",
-      "sha256": "de56b0053135e1bbcb7e937924722e926f7a9d1df03e737326bff1cf85478896",
-      "width": 880,
-      "height": 240,
-      "bytes": 22184
+      "fingerprint": "f3648f041e09cb0cc3675e42f111c80d2fc4c1ac966864c1d92889f64033a7db",
+      "sha256": "17f3ce3b39f057bd24015bf8d39b6465cf6cc5a6d5b60a3da8edc7479c0d727d",
+      "width": 944,
+      "height": 304,
+      "bytes": 23710
     },
     "hi/decor-calendar.webp": {
-      "fingerprint": "c6b8e29d0289e8d49e67edac13f67800d97aa7da45ce0af7e16ae04d99eff754",
-      "sha256": "e082224b60970f31bde4b5adcdfe66dcdeab33915d29a69304d9ffd4e42c4308",
-      "width": 420,
-      "height": 630,
-      "bytes": 19558
+      "fingerprint": "c3c440a505ad684ecb40e9fb068a552f2cd63a7673c3ed1e226ee656a89a70ed",
+      "sha256": "fb620c0785b93f8a76fe05f44f54c1a8eb5f76cdb7ea0928c24e3db27cb127e9",
+      "width": 504,
+      "height": 714,
+      "bytes": 22016
     },
     "hi/decor-candles.webp": {
-      "fingerprint": "f53ec5ffb3582c04d0e5ba341427b743d49155e0d9dc87c50271cf18d3b3290a",
-      "sha256": "2affac8650b4d7b1803ed0078ce773a0f20e88cf131d83c059013214a2782e93",
-      "width": 375,
-      "height": 330,
-      "bytes": 8870
+      "fingerprint": "5c60eaec52a69937f5e2e98d9d39457aef0f22b6fc2ef514b798241bebacfb29",
+      "sha256": "4fc364706897bdb273fcc596f7f0a0ab76e36d10aa770052c57ffb925034e5de",
+      "width": 447,
+      "height": 366,
+      "bytes": 9292
+    },
+    "hi/decor-coat--coat-false.webp": {
+      "fingerprint": "09cac47370c0cf9638cabb65d85a8c07335d528d14b73575cd9585cef50e4993",
+      "sha256": "25801b514999e3bea480967a517251c661f28bdbcaf485e5cdc1c9bdb4ed4fc9",
+      "width": 774,
+      "height": 1377,
+      "bytes": 33208
+    },
+    "hi/decor-coat.webp": {
+      "fingerprint": "5769ce68218191282c5f856768b29726f1dbd8f89be02d134210ce8c75e02183",
+      "sha256": "b0d3b4ab4b5a1f3084f34d28dc9212ba47eb05960d27269ec9fa130aa0bef739",
+      "width": 774,
+      "height": 1377,
+      "bytes": 58626
+    },
+    "hi/decor-door.webp": {
+      "fingerprint": "74177bb32b7fe964292c84809fb5d6c83c8eb892f8dd6dec0e51a12a1a581336",
+      "sha256": "ce70a8a65c512316968b6ad3ad166d08283ecd8c45ee6d0bdb9da62116792aca",
+      "width": 768,
+      "height": 1424,
+      "bytes": 40702
     },
     "hi/decor-flame-a.webp": {
-      "fingerprint": "0d558b93111d3a84709f9e101bea18a4f7f16785bd1bde0ef7cb3c68b4193bad",
-      "sha256": "40fc3a561ce4e9d0bef416870cd9053fe3550a4bbdff71cfe770ae32bb7ea917",
-      "width": 84,
-      "height": 126,
-      "bytes": 2852
+      "fingerprint": "67e05957b1ba7b05f416fc0776bb18bd281a33faff095655616c3a5862d0d876",
+      "sha256": "5cf5bc3d261b2a48fcb38649797ddb3a952c2209c8f0a9f90939d6cb8301adfa",
+      "width": 132,
+      "height": 150,
+      "bytes": 3196
     },
     "hi/decor-flame-b.webp": {
-      "fingerprint": "0d558b93111d3a84709f9e101bea18a4f7f16785bd1bde0ef7cb3c68b4193bad",
-      "sha256": "40fc3a561ce4e9d0bef416870cd9053fe3550a4bbdff71cfe770ae32bb7ea917",
-      "width": 84,
-      "height": 126,
-      "bytes": 2852
+      "fingerprint": "67e05957b1ba7b05f416fc0776bb18bd281a33faff095655616c3a5862d0d876",
+      "sha256": "5cf5bc3d261b2a48fcb38649797ddb3a952c2209c8f0a9f90939d6cb8301adfa",
+      "width": 132,
+      "height": 150,
+      "bytes": 3196
     },
     "hi/decor-front-in-frame.webp": {
-      "fingerprint": "63a4397ea3410e1d3d9eb8cbf252fe5fdf9682c432f385a6cd2b2cd66f661b52",
-      "sha256": "ffab4d770afc547bba0158d1a7df98275b6c65413e824cd320da206d0b4dbed2",
-      "width": 700,
-      "height": 710,
-      "bytes": 46076
+      "fingerprint": "caf904d4ee69c6345a228997f9326475088a91f2bef3187540e1fe26bca7abe8",
+      "sha256": "1ce30cc741a6343172e25409e2cf7defb5993d18c80b12d21f370ad0e19e1679",
+      "width": 820,
+      "height": 830,
+      "bytes": 44780
     },
     "hi/decor-front-in-lights.webp": {
-      "fingerprint": "605df8492552f8f9fd831e8c3a56bf8dd7cc06e99853cb92b5e7ba0cf0ad29a9",
-      "sha256": "8c1589cc8fc2f47a1b793c3884c3e0c33cf79dbaa103f2f5d1ac256e2e37bbc7",
-      "width": 560,
-      "height": 568,
-      "bytes": 4480
+      "fingerprint": "080154d48f2529f65f9eef9a6287618a7c6e27fce134a5f4ef36a817f61557f8",
+      "sha256": "cb435f23a9a882392268eaf9788ba5e234f9a9b640ca196a89ef81d53da979c4",
+      "width": 574,
+      "height": 581,
+      "bytes": 4064
     },
     "hi/decor-front-in-view.webp": {
       "fingerprint": "62d6c2e3bf9ba4b686bd8ba4fd95b8c0afde94d3c9ab0f17f8989d61d55454ac",
@@ -441,26 +469,40 @@
       "height": 450,
       "bytes": 14828
     },
+    "hi/decor-gable-back.webp": {
+      "fingerprint": "9f7c83a15a5149d9e545c990eeb8b901e44e31add760911b005f5be9b03fee9d",
+      "sha256": "9f12c67812111474499e1aa28d916f34dc4812c509b2269e74b07ffdae382f00",
+      "width": 352,
+      "height": 664,
+      "bytes": 15386
+    },
+    "hi/decor-gable-front.webp": {
+      "fingerprint": "01905a4e3344f74f4289d8868844f93c75847d9263361b3839148bae19c71795",
+      "sha256": "94daf2846664c777ae0a6645cadc0037b59e9677c99205bf26885d19857e6240",
+      "width": 307,
+      "height": 304,
+      "bytes": 11180
+    },
     "hi/decor-jar.webp": {
-      "fingerprint": "56f36c2893ecef6895fc2702adfd990080b7be6300cba4cee238bef2e8659215",
-      "sha256": "f221bf1a20d1601d0a3d36be9f18c84b6c2b408abfcf78121cf3d5a298afd04b",
-      "width": 330,
-      "height": 390,
-      "bytes": 13560
+      "fingerprint": "a629b1c3c4dc0c498453e2fa9bdc81bb19cb156dddc26a6ad4d6fcecda4f6118",
+      "sha256": "ba407b0a8538a01aad2b452c61b9142cb2b5b24858dab1c4a8b7717b78982607",
+      "width": 414,
+      "height": 432,
+      "bytes": 13362
     },
     "hi/decor-left-frame.webp": {
-      "fingerprint": "57d098c1f22cff3594280ca10af31c6f6cb68e17f6fef9cc67086b6b19f0e8ee",
-      "sha256": "71c434ad91486bfad8fd4ae46d862d41d1b72b565b2a458f651538575da4369e",
-      "width": 820,
-      "height": 820,
-      "bytes": 59758
+      "fingerprint": "2df04fbd2413e5af7f12dc5d2b4fc1520a8a76ed52cc8039c83838860d3b627e",
+      "sha256": "04113d0f9635bf1cd8bc07c09d096f9a7bd2c0777310b61ab6d9f978382e823e",
+      "width": 940,
+      "height": 940,
+      "bytes": 60244
     },
     "hi/decor-left-lights.webp": {
-      "fingerprint": "80af4294eb723624632f58988f117d090092bde578908dc3af27205580f650af",
-      "sha256": "7d6e0dde9519d3bace018f3b3a21f903b81c141e8a2b571045c3d190902d9d9e",
-      "width": 656,
-      "height": 656,
-      "bytes": 5108
+      "fingerprint": "a406c2386e04ca7a6b5cd01e5ebe54ad3f4d7ba296e2a3fb952f26cd5d5f04b6",
+      "sha256": "6c1806123c360e27af22d2f6adadcefed79ecb5f203e8bf79ff3063286075c5b",
+      "width": 658,
+      "height": 658,
+      "bytes": 4882
     },
     "hi/decor-left-view.webp": {
       "fingerprint": "f939fd5e755b65db42daab6b48641c67c967f6c2ab19f69e854be1d7870bb0a8",
@@ -470,32 +512,32 @@
       "bytes": 18560
     },
     "hi/decor-photo.webp": {
-      "fingerprint": "e7d9d13628747406b42d41b58e19c5d724f0c572064949a4dd17e17dafb722a6",
-      "sha256": "18e0cd15935fff62d30eb12493c783b1fd1f4930eacb0b14426d51071ae02706",
-      "width": 416,
-      "height": 390,
-      "bytes": 29712
+      "fingerprint": "60f1754e6b3b4592fce34b7fba82351c18e6b9cb6c3b150debac3545f47fcaa3",
+      "sha256": "a40d7b816e26f0a091783c31bc68ba3a5ab51620e437a85828be38d3eb2e3614",
+      "width": 437,
+      "height": 372,
+      "bytes": 23022
     },
     "hi/decor-picture.webp": {
-      "fingerprint": "08e00e6fe355a5d1f6e0b69d4736b9e8a29777f4d144502bf3e13d0d19a20e9b",
-      "sha256": "e019bbd8345f1db1e1cfb3bfdd45106f95df9a285695b79cc3657bccadcd4ceb",
-      "width": 572,
-      "height": 546,
-      "bytes": 46724
+      "fingerprint": "b4f293142e3c9db8ac22f05c802a281243cc38496d3c45075128320e984ee471",
+      "sha256": "c0f23be7c17775bf7081f143498ced4a77db864306195581104894083fceebfe",
+      "width": 655,
+      "height": 629,
+      "bytes": 49138
     },
     "hi/decor-right-frame.webp": {
-      "fingerprint": "40b1ba3ccb225c847c81bf4ac372328abb3e618dcc3c93677711308d80c06ab2",
-      "sha256": "8165cdcc2af3e22f53858f0ffcf0790bf0fde5247df32230dc64bbfac70b61a9",
-      "width": 720,
-      "height": 750,
-      "bytes": 48424
+      "fingerprint": "0d964f7a857023824ef235393d20e2e9fd9415700072558d15eeac11fd2e1791",
+      "sha256": "ec374f7029b4f4dedb988f93d853f3524e4c61b55dcc3108749bf7d25f318141",
+      "width": 840,
+      "height": 870,
+      "bytes": 47668
     },
     "hi/decor-right-lights.webp": {
-      "fingerprint": "30740a9abb4a73791f472eff8487b6e2d3302dcf6086d9eceeba728810f3ff11",
-      "sha256": "3cc732226123c5a704da1b6448a7fd353645a7183d806ff1e8bef816173d2db5",
-      "width": 576,
-      "height": 600,
-      "bytes": 4640
+      "fingerprint": "55dcc6af3a9ba52acc30cda33ce88338646e5a75987b0e2edacac1bd8896ef6b",
+      "sha256": "583681922a695c2064042359b6ce24849f4c199a9947e77ca1ac23f1008db9b8",
+      "width": 588,
+      "height": 609,
+      "bytes": 4290
     },
     "hi/decor-right-view.webp": {
       "fingerprint": "d9a4e7b966b9a916061f1af7231fa7510ac324f829c7b20a53d07433505327b2",
@@ -505,11 +547,11 @@
       "bytes": 15458
     },
     "hi/decor-wreath.webp": {
-      "fingerprint": "724c2df95193c1aaf8f5deb0931cb1a194b84edf08cb3ad383287d2677afdd2a",
-      "sha256": "d8f29341d6e62f9c6addd8ae73a7c56bf7a0c34eb60805090ffaa1b430e778fc",
-      "width": 473,
-      "height": 640,
-      "bytes": 35892
+      "fingerprint": "92fa01bebc82fb2b468ec0a2fbaab746e59cb2a1bc87587d73933c319ec79acb",
+      "sha256": "38888065a50dd5d9f3f1e66d581195d42330800960559a6a99d326c3cf998dac",
+      "width": 588,
+      "height": 754,
+      "bytes": 36920
     },
     "hi/desk-drawer-front--key-true.webp": {
       "fingerprint": "d9fa78eb4875f4c48305d3fcf17e97afdba387d821638de8d29e12449e3d210f",
@@ -568,11 +610,11 @@
       "bytes": 13226
     },
     "hi/door-in.webp": {
-      "fingerprint": "596fb0c487c6d21faa41f9923be6a8497ae9125760dacf7f35b1b5ca797921c7",
-      "sha256": "554472215201c14225e33e283d45b77564f0247847e56b38e2df181c2be0fcce",
-      "width": 231,
-      "height": 525,
-      "bytes": 22648
+      "fingerprint": "89cc07e2eb738495653624a768ab817060fe242ad5b5b1b64439393016f367b6",
+      "sha256": "1ce269543336ec9c169e2e95dec1def85c259f31187e7840e65629fa4d847054",
+      "width": 416,
+      "height": 945,
+      "bytes": 56188
     },
     "hi/door-out.webp": {
       "fingerprint": "5c70ba032de118c542d159e41f987fb182b47f7e74ab226f92e37a21db011fff",
@@ -686,19 +728,12 @@
       "height": 1050,
       "bytes": 39638
     },
-    "hi/front-in--coat-false.webp": {
-      "fingerprint": "e46c08ce45b35b6e8eeb4d9e49d46b029d25764ced192c8e46d12bcb48e81142",
-      "sha256": "bcf70e3f3894339c984014b97b70336bb8a2a1b8b74c91d18a2b4388aa5d6f84",
-      "width": 1120,
-      "height": 1050,
-      "bytes": 32440
-    },
     "hi/front-in.webp": {
-      "fingerprint": "342e24e95775dafea0c11b35e1cb83ce8ca9c204976af95080b52669bb89b3a3",
-      "sha256": "cdd185d91b58bb0866557bb73dac8f194499864f01fe32bb6ffb1f9d02fec70d",
+      "fingerprint": "5ce7d85d0f7aa3beba4804f8be13d4182a82c5be0631b2e288b0867d0f16df64",
+      "sha256": "df76d00499fc9305c7a80f22f0a8faccb60e54db571176f04afe09590348b5e2",
       "width": 1120,
       "height": 1050,
-      "bytes": 37842
+      "bytes": 13306
     },
     "hi/front-out.webp": {
       "fingerprint": "a79385bb3147fb9e2d4d95aaf612e8a36a1f25b253cf56eebaf8bdf48aa49d7e",
@@ -897,11 +932,11 @@
       "bytes": 21378
     },
     "hi/left.webp": {
-      "fingerprint": "c83b273bbb2543dde3e23f70f5f16b6e26173574d9455fce0e6b3e701d33300d",
-      "sha256": "cf0c9c2b192780228bf135a8436dec644fdc79a21e7d72f846374473ed37bc86",
+      "fingerprint": "1d10c5e0bbc84b5a363cbd9e034f6615976d8bd5a334f6864d44c9c38f0fad77",
+      "sha256": "fb62e116d9d15f00d2d422fec88b1b312ef95864c1a358f4d9e511c6979e4272",
       "width": 1050,
       "height": 665,
-      "bytes": 4322
+      "bytes": 4344
     },
     "hi/lighthouse.webp": {
       "fingerprint": "0efe3eb9bf6d10aec1f6ac2dc1eb313503d72ab8af5c8e430822927d161127b2",
@@ -1625,18 +1660,18 @@
       "bytes": 103790
     },
     "large/back--secret-true.webp": {
-      "fingerprint": "ce43a3b0dd900d1587f19e9caa322ef6b3d4678b4afdff548d8bc082a9038334",
-      "sha256": "f862e2bc3c20ddc61c902ae09e42d29520905d9f7edb4106c3bf079ada57d140",
+      "fingerprint": "701ae0e3016a38cec3de093f47186354955bf8c7c20ee38bfa6e808f8d506f15",
+      "sha256": "e5478210c4dca1d770bc2cce700607c0a3eefbd320f6d86507b76a9ccbdefb62",
       "width": 840,
       "height": 787,
-      "bytes": 28116
+      "bytes": 14832
     },
     "large/back.webp": {
-      "fingerprint": "db70cbd2f08bdb017e4276bfd42c96583b94ce30373794ee00d733ebda85f909",
-      "sha256": "1329c8c215c9166147401ac175fb68bee776372d862cfdb2a1a7eb6bc91cd37f",
+      "fingerprint": "108e32d2cef7300b95f6d141d53a0fd62e3824d5d69934e5204c1acc2a242722",
+      "sha256": "adaa82ca5748e743a7b519f1a738ccce6e8f6e056faeead8edab31b08e3ab1fc",
       "width": 840,
       "height": 787,
-      "bytes": 28500
+      "bytes": 15112
     },
     "large/balloon-green.webp": {
       "fingerprint": "e323e58639e4a1116a10f59b9ab4f4801169c28c50b9f7f5ccfa5e1f5717209e",
@@ -1975,60 +2010,88 @@
       "bytes": 13720
     },
     "large/decor-advent.webp": {
-      "fingerprint": "2ef4d892e1e86c51ed15005800aa61cd0d3faf808f3f72b59e43fe0cfa2f19b6",
-      "sha256": "7c679588f7e91f65ed99460f3e0df6f8c437d90e032c67430e0f2c10b45b6cda",
-      "width": 360,
-      "height": 349,
-      "bytes": 13194
+      "fingerprint": "38a754b3d60c50096ad075c3823ce616568640657ce2af73cc5e88a05900539c",
+      "sha256": "cab919deb0f5e984c65c3c07686700e0c9b8f0eb2a595a05a45d80171c745082",
+      "width": 423,
+      "height": 380,
+      "bytes": 13364
+    },
+    "large/decor-arched-door.webp": {
+      "fingerprint": "2d8699da1e687d1f5f9ab17f970c4c61ec5f32f8f0b04fabc6bbdb6b2b3f1a6a",
+      "sha256": "b0470f4c2793ce4229f5740e559e9b961928e726afbe9127adcf5954a1657d69",
+      "width": 325,
+      "height": 693,
+      "bytes": 39806
     },
     "large/decor-bunting.webp": {
-      "fingerprint": "c7db959fd89bbe0f5f1826e3009e9f2de94f26d9f9744cae6895fb0657807ee0",
-      "sha256": "ba19cd43c5f7baf61172fd101fdfb6ec711ef4bbafcb33a5734d2108873790cd",
-      "width": 660,
-      "height": 180,
-      "bytes": 16770
+      "fingerprint": "ab495dded40abce5d5a79d3f58200062f42c6e468fd826664bbc425117bb005e",
+      "sha256": "31a83463374225c88ecb749f50b3146dc5ccbf7e255223523315e6192ce051f6",
+      "width": 708,
+      "height": 228,
+      "bytes": 17750
     },
     "large/decor-calendar.webp": {
-      "fingerprint": "469881f99b360d0833cc658541a4dc982c646ab58844c3ec2ed1c7d6884cbef7",
-      "sha256": "e813f4f09cef644573f511a7c55848f3a600dbade09c2a54027c5cd71b2b1383",
-      "width": 315,
-      "height": 473,
-      "bytes": 13956
+      "fingerprint": "39d0460696ee327593eb1b7040f56144dc809984a5477194618f3b04dccdeb52",
+      "sha256": "7c9b635322a1d6ec8d12796314f2531edbce78843947086109cfe5de0a5b7e1d",
+      "width": 378,
+      "height": 536,
+      "bytes": 15744
     },
     "large/decor-candles.webp": {
-      "fingerprint": "31f061f2fe6fddc023c3dfd2786ecb7c76bfba9c7018bb9afb39ab52ddc787b2",
-      "sha256": "1d7c65fbed9eeef99542f83814131f0f0f7f8c1ad97683bb65d85710f226296b",
-      "width": 281,
-      "height": 248,
-      "bytes": 6510
+      "fingerprint": "5aced52a1b16abe03fce315f6a42527edb5fedae7861d1b6f7b30990899de51c",
+      "sha256": "40969a46dec79d461fa5ae2731f742573d87d0a36274db17457c4d6e9885da8c",
+      "width": 335,
+      "height": 275,
+      "bytes": 7010
+    },
+    "large/decor-coat--coat-false.webp": {
+      "fingerprint": "120f440e2edfc8dc84f02b42fc5ab4130e4b7b553209bc88828343a028067a29",
+      "sha256": "3b51da4bc069f5a96dbbef80e897c0b17b9786830680bc0a8277b6e5380d0115",
+      "width": 580,
+      "height": 1033,
+      "bytes": 22716
+    },
+    "large/decor-coat.webp": {
+      "fingerprint": "139542899e1b78a7795469888ea32f1e8a80ef1c43190c70d44866351c513ca3",
+      "sha256": "07b97d405f01a900fca708d6b361ad33c8b883ec2a492229146d261a71aacd93",
+      "width": 580,
+      "height": 1033,
+      "bytes": 41374
+    },
+    "large/decor-door.webp": {
+      "fingerprint": "a6a14a542679cbad214cfc4e71f0d5c16df235682df84e6aec4257ae636306d6",
+      "sha256": "b5772f04695afdf08cb22099792453c29a757c958376bda9f6355e0bb5c56db9",
+      "width": 576,
+      "height": 1068,
+      "bytes": 26748
     },
     "large/decor-flame-a.webp": {
-      "fingerprint": "7c3629d5894b194cb1f193ceee677e6e8f99d7e0e7ad46efa3d0bdba39826673",
-      "sha256": "56a1431bbc25c91f751d9453ed03c31674095ccd38e4bab14c18ccba1898c109",
-      "width": 63,
-      "height": 95,
-      "bytes": 2076
+      "fingerprint": "88fc841052074b4cfb29874008c47d8ab8633cd5d10af880791f2e0f2a7ea51f",
+      "sha256": "573a6b496816b8f8f0f2a2dde10822de88795e316be02c791609817a118893b1",
+      "width": 99,
+      "height": 113,
+      "bytes": 2340
     },
     "large/decor-flame-b.webp": {
-      "fingerprint": "7c3629d5894b194cb1f193ceee677e6e8f99d7e0e7ad46efa3d0bdba39826673",
-      "sha256": "56a1431bbc25c91f751d9453ed03c31674095ccd38e4bab14c18ccba1898c109",
-      "width": 63,
-      "height": 95,
-      "bytes": 2076
+      "fingerprint": "88fc841052074b4cfb29874008c47d8ab8633cd5d10af880791f2e0f2a7ea51f",
+      "sha256": "573a6b496816b8f8f0f2a2dde10822de88795e316be02c791609817a118893b1",
+      "width": 99,
+      "height": 113,
+      "bytes": 2340
     },
     "large/decor-front-in-frame.webp": {
-      "fingerprint": "df39bfee77f695b87985c7693234b39254fa946a42a080ef1b11dca2b5d0cbef",
-      "sha256": "6c3e1d8531cd7d1ef7856bb5a55ab342890f6ff356b28f454f24b7ccb038e825",
-      "width": 525,
-      "height": 533,
-      "bytes": 31936
+      "fingerprint": "965a842da5125e6eeac85fc86b7f6ea6398dd71160248d00583c865f77033d97",
+      "sha256": "9bf60954d31e39a89039111a6352087686b08d475c9cf96048fabadbf7fa3d10",
+      "width": 615,
+      "height": 623,
+      "bytes": 32852
     },
     "large/decor-front-in-lights.webp": {
-      "fingerprint": "ebce3e303a67d7b94e53e9426e34d2b3cbf58b884a8f0f46371548510f234c61",
-      "sha256": "b75173382006abbfa75a48c6a7c61c91a440962d9f347a5ba72343cd05852dbb",
-      "width": 420,
-      "height": 426,
-      "bytes": 2904
+      "fingerprint": "9c36c230f81c4cd30b827e1cf73130c6a0a0fd80a88a613c6bcaf886593db1c9",
+      "sha256": "3add7029f5804884c4eeba639275abd4fd41b82a5dbcbafef5abc0de248ff39c",
+      "width": 430,
+      "height": 436,
+      "bytes": 3072
     },
     "large/decor-front-in-view.webp": {
       "fingerprint": "17d39f5bf3a499c89bb917bec13020ec6b9a382bb98c2f0e97ab9e477ced359a",
@@ -2037,26 +2100,40 @@
       "height": 338,
       "bytes": 10074
     },
+    "large/decor-gable-back.webp": {
+      "fingerprint": "5976d231cdcf7f423bb753377718a55dde49c77bd5bec57a7f10f0efdccc4a21",
+      "sha256": "f01ad818789d21c7c02af9f9bb23de0f8b30509ebb01949f28a2e35366d197c8",
+      "width": 264,
+      "height": 498,
+      "bytes": 11028
+    },
+    "large/decor-gable-front.webp": {
+      "fingerprint": "c0a54e47185db5ef9ccfa980f47cf24fd660fd7a923e67498bc15f3cea4a72a7",
+      "sha256": "c719118fa74ba8f5dcd6a66e8e03dd44e0fcab9b0b08fa3034bfddeb8f36bb11",
+      "width": 230,
+      "height": 228,
+      "bytes": 7844
+    },
     "large/decor-jar.webp": {
-      "fingerprint": "4138b362677b6a342a2a565a39454873a3c290edcb80bab27e1a0613c0b8f8ce",
-      "sha256": "659a030920e6415423355a8a0bad0f9c679a941bf51dedcd2c4b2689fa791ca7",
-      "width": 248,
-      "height": 293,
-      "bytes": 9856
+      "fingerprint": "29e7c53f6df525c1a43884b7cba2c151b8c850be3fccadd3749424084120d6ae",
+      "sha256": "1cd7a99887ca63931092604eed084388f5f92ad6d459ec451c9a02a23bf90842",
+      "width": 311,
+      "height": 324,
+      "bytes": 9526
     },
     "large/decor-left-frame.webp": {
-      "fingerprint": "c0bf594322a44dd9e14fcc8f0662d0ff99d825fad5a8314b9d6a9c672e2c6e41",
-      "sha256": "3fc296a37d4ae9580e8b0b50f7ad54ad771825d8776f2799c3ed2a229bcbb777",
-      "width": 615,
-      "height": 615,
-      "bytes": 41812
+      "fingerprint": "b37f51af3c2bef5cb66c3a4637896a771d7f69e1defa4f66b98f3a9a8edededd",
+      "sha256": "3d552245ca2b074eda835504f974718635a9809a31e0099624bb3e5b7ed1c1ca",
+      "width": 705,
+      "height": 705,
+      "bytes": 42438
     },
     "large/decor-left-lights.webp": {
-      "fingerprint": "44c677617d5ca85432e21391662d42c19b08317bf6471692c5f0169254256f79",
-      "sha256": "0bd6f80f34ae1f7cf014a2d33ea0b83d34c26255e580fc7fcbfa17937861cd10",
-      "width": 492,
-      "height": 492,
-      "bytes": 3836
+      "fingerprint": "5ce92a2cc901dcf6f18066b5733152b8b7629830c2fae8746fc05686bfca2e5c",
+      "sha256": "562028f6f2813ec794edb9f606cfdbc64f898a2842bd508a8708283c3817232a",
+      "width": 493,
+      "height": 493,
+      "bytes": 3610
     },
     "large/decor-left-view.webp": {
       "fingerprint": "5ac0fccafbf274b4ca0df928c3eeb51b7b29f79cf231b3c68bdf46ea84dc9e14",
@@ -2066,32 +2143,32 @@
       "bytes": 12750
     },
     "large/decor-photo.webp": {
-      "fingerprint": "b4384d0a93a87dc08406912f2cf41642563437411b75fccd159c39c518f2d281",
-      "sha256": "d3402be81d9b5342180b3a3910c60945ee8871abf5f2f6959f6a10e86c976f88",
-      "width": 312,
-      "height": 293,
-      "bytes": 21416
+      "fingerprint": "d5a46cb8b038697dd0d33658e9bc16202ab46fd3ea7441226000c51d3257f299",
+      "sha256": "220d8373de5e2e8383551b69ee229cdebcd9261a94d58e363838bea59c59f7c0",
+      "width": 328,
+      "height": 279,
+      "bytes": 16512
     },
     "large/decor-picture.webp": {
-      "fingerprint": "000a50f60b38e45a5823bceab024edaf9bddd7f7621086eb189987323ea63dcb",
-      "sha256": "6e79aa0c4a6918d503aeb1e52ffb4e9f2687a28fa6e48050f50a5fd0886eb516",
-      "width": 429,
-      "height": 410,
-      "bytes": 32804
+      "fingerprint": "065022296ad3ed919d77ea2fca1887c4957a38c56c93c2614ce7ac805670ceab",
+      "sha256": "5642fed6e89bfdbf1851d3255be4c443a875d08a3863f9610c45c112d61c3aa0",
+      "width": 491,
+      "height": 472,
+      "bytes": 33856
     },
     "large/decor-right-frame.webp": {
-      "fingerprint": "f6ae70b7e1e306c7d619431f1f5d57c38cdb248f3c026ceaef2bf84dd46bcd28",
-      "sha256": "26f95f85a4acee09d1f7fb9550942b769680baaa779d87fbc118e01d044d6644",
-      "width": 540,
-      "height": 563,
-      "bytes": 34148
+      "fingerprint": "a57341e82a8f6710024c8a2d67dabbfedfcc2519ebdd55187f14123b07e4ec59",
+      "sha256": "e9edb7aead23f066ae383048c30a164dc6c04a9b025e1c99b58d107660d8a7c1",
+      "width": 630,
+      "height": 653,
+      "bytes": 35108
     },
     "large/decor-right-lights.webp": {
-      "fingerprint": "51a3440f6b7138f06cf6217714ffeb2476b8ae444f18bc9c8d22e4442375448c",
-      "sha256": "2d71f9e68b7a50e41a2c18b908500af5e8a6e5a1034e813bcef207c414a85335",
-      "width": 432,
-      "height": 450,
-      "bytes": 3392
+      "fingerprint": "c2670b7f31ba7d43f0b2d2e3f82083651f48bfff29ff4ea07f6419b777d1559f",
+      "sha256": "6225f80d757767f7a649541ae3a246cf10d4dd2947288ec9afec025d22ae74a5",
+      "width": 441,
+      "height": 457,
+      "bytes": 3226
     },
     "large/decor-right-view.webp": {
       "fingerprint": "7d72755edb35bd1f56764658d51a826ecb9891182a0db04e725dcade647b7ef1",
@@ -2101,11 +2178,11 @@
       "bytes": 10368
     },
     "large/decor-wreath.webp": {
-      "fingerprint": "9b5fc412aa771694148d14c9a55574856a814f153a2ebd36ee4dcc8c4eac1f9d",
-      "sha256": "33585fe6decdcad8875d5358aa0a273d779a4e4f406bf266a3a98bce0b50b2bb",
-      "width": 355,
-      "height": 480,
-      "bytes": 25310
+      "fingerprint": "6a38cc772b22450e9466766d54a5157a89c4e3b8f8585630672ee5fe14cda1e2",
+      "sha256": "3a1867bb25ae99d2e5749839da4a0d57d9cff04f82877994a1409dc6c2887b6b",
+      "width": 441,
+      "height": 566,
+      "bytes": 25826
     },
     "large/desk-drawer-front--key-true.webp": {
       "fingerprint": "a21525278d26cf3f7082f3bcb9525a1134673bd2f58fc2e7985ee18046dc39db",
@@ -2164,11 +2241,11 @@
       "bytes": 9192
     },
     "large/door-in.webp": {
-      "fingerprint": "98c725ba7a4e5be1a3acd4a1783c199302f4b0de3514b85281163a1e743e5c2d",
-      "sha256": "fcc634e4b06dc8fdfa4472d152d66b6a652b4c30bf63fe9166b987b231a0ed8c",
-      "width": 173,
-      "height": 394,
-      "bytes": 12966
+      "fingerprint": "b3e535701f9c4116a2759f8ba8cae0f65b859abc6246ffc46c4750235f0152df",
+      "sha256": "bc6b97005062f435ef6d41333c349e61592c3135e9f3a769c291804074317a7e",
+      "width": 312,
+      "height": 709,
+      "bytes": 36968
     },
     "large/door-out.webp": {
       "fingerprint": "9fd0384ffa9d0e41b1a0db08c045f6c590d32a9c30ad6f698756b3323a4ecd3f",
@@ -2282,19 +2359,12 @@
       "height": 787,
       "bytes": 25752
     },
-    "large/front-in--coat-false.webp": {
-      "fingerprint": "7ffda6819c3ae69828901fd77717005e2c6f549e4d48101a36feae0c97b29023",
-      "sha256": "c85e53cfe59187869cdb3c26d5183859568d972cb24ffd8453669f648622e3a1",
-      "width": 840,
-      "height": 787,
-      "bytes": 23674
-    },
     "large/front-in.webp": {
-      "fingerprint": "f7c100a9c2128919623f76467d4aecfb7ba9e8979c707ba96a47c39c16898093",
-      "sha256": "ef79105532c0cf3bc9181d5a00c7b7140e2d375262b4b58ffececd38b504df89",
+      "fingerprint": "e41dda31ea3e7b8686840318b8968ef93664bb374d25875cefb687ecfc064362",
+      "sha256": "8a7386b4ee6938f311a081df67ae20bd3107489244ec4c0ec3a04663341656b8",
       "width": 840,
       "height": 787,
-      "bytes": 27112
+      "bytes": 10604
     },
     "large/front-out.webp": {
       "fingerprint": "2584195d0d3d92aaf878a6164bf7bff016ce39a1c3825f0de6c8362e73141c92",
@@ -2493,11 +2563,11 @@
       "bytes": 15968
     },
     "large/left.webp": {
-      "fingerprint": "ad6f6c019a8af436f6242707cb6b75b87b381080812b3d1cce34c0e1a8a93667",
-      "sha256": "2b7aa0e6f59a476339ca61f734c1268e00246fda37fa3f4ebbe19a136570f783",
+      "fingerprint": "9533c7ef2aff04623efa2beb640694b0f512b24cd20ba0356a3d4c83675746b4",
+      "sha256": "c948b8f443f447116d05823c8276201bf492a061a681effa3ef58c95bf73550c",
       "width": 787,
       "height": 499,
-      "bytes": 3276
+      "bytes": 3336
     },
     "large/lighthouse.webp": {
       "fingerprint": "4f849d90b30be5cdcd08a9892c4c87595bc1885c26306ca740b2f50b69dbbc38",
@@ -3221,18 +3291,18 @@
       "bytes": 66844
     },
     "small/back--secret-true.webp": {
-      "fingerprint": "8cb98248d453fbec5ad8c5fc3478fd9bd6a6397d252df48393e15204692cb140",
-      "sha256": "2d96a927c47082cf1cb762ee46af3234e76067339892577fd9e20f6084f949c8",
+      "fingerprint": "5e88c3dc29c1fce53cd2f8129f000715e469590f3c884e3be4efc3f7db28bd48",
+      "sha256": "2a79663238c846df4c2cb4c8d1b6d851c81304f4536ef356316f1e87aba84ff6",
       "width": 560,
       "height": 525,
-      "bytes": 10426
+      "bytes": 6752
     },
     "small/back.webp": {
-      "fingerprint": "af147327915e59a137afd87aa9cbd5ec190c078b04ff61984632dad6b158e9ed",
-      "sha256": "a154dd553ce0f7dfeb1ef9ff607faa1ba0433fb45db3788da486639476545964",
+      "fingerprint": "b2d66dcee94a765d842b4d8918532588550d3dd530413f15e812901fa43c393f",
+      "sha256": "16928d2122f709f35d1da63ca548cead459588e201cad89cc13e32c4a29ecb4f",
       "width": 560,
       "height": 525,
-      "bytes": 10554
+      "bytes": 6892
     },
     "small/balloon-green.webp": {
       "fingerprint": "00fec8028b7542a340a17274d2a292ca67be0b6f7b08f35eb64f9c7336984cbb",
@@ -3571,60 +3641,88 @@
       "bytes": 4120
     },
     "small/decor-advent.webp": {
-      "fingerprint": "b0a5fac06fb523e1f73d010e1e9ed88b1cd6153e89c10e44d10f445320fe0080",
-      "sha256": "634d48c5654a952dcde9e33b84a2c2efe431efeedcc935fb4360c635ae062622",
-      "width": 240,
-      "height": 233,
-      "bytes": 5640
+      "fingerprint": "af27444ee9b63f2ae354266e5105651fb810011c15247b0fd16bb540a6ae3dad",
+      "sha256": "21c88e28c6ea11abeb2e767518ad6d110ae35b744d3952d9fda02361d2feb2c8",
+      "width": 282,
+      "height": 254,
+      "bytes": 5616
+    },
+    "small/decor-arched-door.webp": {
+      "fingerprint": "8ca3318e2c1bb3a8fed57ea98ab4d5fb4acd2fdaf3e675d5b80f0580e53b57e0",
+      "sha256": "768e4720f87270801d712ad29c181388444d1823bd2f63f438caf2f07a9fefb9",
+      "width": 217,
+      "height": 462,
+      "bytes": 10464
     },
     "small/decor-bunting.webp": {
-      "fingerprint": "54efa42367015cf5640e3179418d73bce4df2ab09f9b7bb57da924e8408326cd",
-      "sha256": "d18590367428b7805dc182dc3c365bf10b4e39ff9d8658b84bff72919834ef01",
-      "width": 440,
-      "height": 120,
-      "bytes": 8712
+      "fingerprint": "3228355f99a6a817966c38accefcd2dd7881aff08e0b074801a2e90aa08b82c2",
+      "sha256": "c3ea6bbe15a4898b6e7d8867eae0bc44f41d67bb214c0df61c73d9789070e308",
+      "width": 472,
+      "height": 152,
+      "bytes": 9058
     },
     "small/decor-calendar.webp": {
-      "fingerprint": "18e40c752edddf57f3f05f10e3fce86f411264b7ca684c16e9f825d68769f593",
-      "sha256": "c716359d2acf7e809cf16f806da64458eb40ecf892a9046bc118820cbda63838",
-      "width": 210,
-      "height": 315,
-      "bytes": 6180
+      "fingerprint": "79ba7568b2cc5a67ad91077ea330b312a9befa2e9e5ea0d4db74fc81970a5e76",
+      "sha256": "b3595908f44ce106059734eae5cedd4d8540c4562df93b51656c1aa0e245b563",
+      "width": 252,
+      "height": 357,
+      "bytes": 6882
     },
     "small/decor-candles.webp": {
-      "fingerprint": "6047782c942519b967e0db15444b5bf921bdb4e1349c8d64a05caae0ebbea93b",
-      "sha256": "6736a9e34c248e81927e33f4b952ff875a14c10f23675f110ba1c896c609f292",
-      "width": 188,
-      "height": 165,
-      "bytes": 3032
+      "fingerprint": "78fb1ce900ffbdaedcd17f52120abe33651b8ff6d577abbc5637432d0e6478c7",
+      "sha256": "a7b68b663cdf91369f465f985e084ac34e8e066021bcbf318865f595ccede6a5",
+      "width": 224,
+      "height": 183,
+      "bytes": 3190
+    },
+    "small/decor-coat--coat-false.webp": {
+      "fingerprint": "9fdfb57616639e8f87bab60c57f634c14943d99db5d0d3c70182ee1074ec0c1e",
+      "sha256": "599684b5b26a0f28b92e8814c42842601064e49d07b41d5a7e4dade5ba38d120",
+      "width": 387,
+      "height": 689,
+      "bytes": 8160
+    },
+    "small/decor-coat.webp": {
+      "fingerprint": "f8eada271154f8a7442d92c8741691e0c49ab303030f5b8eacb249ed6a53e6e3",
+      "sha256": "4059030858a04be2c3114a5e60dc796022e06b6a64c72b94341bf375b3a83faf",
+      "width": 387,
+      "height": 689,
+      "bytes": 15280
+    },
+    "small/decor-door.webp": {
+      "fingerprint": "256cf088360384f6e91952dea94ea7f69a767d2e52e4d63ce27ac45b7054b76a",
+      "sha256": "e1de658b597a553e56d27d0d224b853043223148acbf8202bd5a20dc65319745",
+      "width": 384,
+      "height": 712,
+      "bytes": 8158
     },
     "small/decor-flame-a.webp": {
-      "fingerprint": "db99b7de4134e21fa8c3de37288e2aaecfc6bab4d679e61e4da4c2791111414b",
-      "sha256": "9af9bea809bddacbaaddd8520c4a3b58814c124e98b8204b3e9dea58d21fa7ad",
-      "width": 42,
-      "height": 63,
-      "bytes": 1082
+      "fingerprint": "e06f889cb5f2fad2735108c1a8dae2bbd06d900bf47f9cf04442a0e312cad1d6",
+      "sha256": "4cb4caf36cda3a4616ef52f642781b06abb1ba9a12761a404b176daa6169bee2",
+      "width": 66,
+      "height": 75,
+      "bytes": 1228
     },
     "small/decor-flame-b.webp": {
-      "fingerprint": "db99b7de4134e21fa8c3de37288e2aaecfc6bab4d679e61e4da4c2791111414b",
-      "sha256": "9af9bea809bddacbaaddd8520c4a3b58814c124e98b8204b3e9dea58d21fa7ad",
-      "width": 42,
-      "height": 63,
-      "bytes": 1082
+      "fingerprint": "e06f889cb5f2fad2735108c1a8dae2bbd06d900bf47f9cf04442a0e312cad1d6",
+      "sha256": "4cb4caf36cda3a4616ef52f642781b06abb1ba9a12761a404b176daa6169bee2",
+      "width": 66,
+      "height": 75,
+      "bytes": 1228
     },
     "small/decor-front-in-frame.webp": {
-      "fingerprint": "102039847127773cc33fbaef3cb7793f6cc117f53fec0cc1291c0a67a030bb91",
-      "sha256": "cc75cb6306c3025e610952a9241e99ba8d366068460666539fa9a8f67c6cbe88",
-      "width": 350,
-      "height": 355,
-      "bytes": 13422
+      "fingerprint": "a8050568e557dfa17a83ccced520d0f5f90666be0fd389c968983cfd0aba6f39",
+      "sha256": "405823910950bb3625c33a5a6261fc2ed06fecf208036e4699b44d3709354afe",
+      "width": 410,
+      "height": 415,
+      "bytes": 13392
     },
     "small/decor-front-in-lights.webp": {
-      "fingerprint": "2f9560b9bd8d18e01c13456c30de55c4d17d2bae8f9afa72fa6856ac7470c63d",
-      "sha256": "39706771db657987e1dd1118b0c6179b7971030881aa32a9304d46df488e934a",
-      "width": 280,
-      "height": 284,
-      "bytes": 1728
+      "fingerprint": "2a319c840f670f87a4c1094585d26a55f7c4c52c0550f391ae83448630b7a353",
+      "sha256": "0ceb47f84c5c824043da50d9b6a356a807da8067ca39cb94f4eaf9e47eb35f41",
+      "width": 287,
+      "height": 291,
+      "bytes": 1636
     },
     "small/decor-front-in-view.webp": {
       "fingerprint": "e328627969dbfd313a5f77e258772cb96a2366b446b302cfb3dc822082d4f82a",
@@ -3633,26 +3731,40 @@
       "height": 225,
       "bytes": 4322
     },
+    "small/decor-gable-back.webp": {
+      "fingerprint": "3976f03c6c626e0a4d4138908736f7f98c22652a93dc7f0b52248d14ee7a3cca",
+      "sha256": "ccc406093fc93d0fa2130689d27a7f631ff8c327e7442b43b1791663a890d138",
+      "width": 176,
+      "height": 332,
+      "bytes": 4596
+    },
+    "small/decor-gable-front.webp": {
+      "fingerprint": "4b5bb56dc915677417f5d7d39e9f96c8a41439299077a9ff3b7bd0595051449c",
+      "sha256": "4a06223a3767cc2f7678fbeed6e6260b230423bcb04626fe7a78de995ecc55fa",
+      "width": 154,
+      "height": 152,
+      "bytes": 3462
+    },
     "small/decor-jar.webp": {
-      "fingerprint": "28569e390ef568368ef196e53cd441e17f9b6ba0043cdfbd766519a45a07a157",
-      "sha256": "3e0d142f4b36c200a6bb16b91433600546dedbcb6bd7e459a83643c787c1425c",
-      "width": 165,
-      "height": 195,
-      "bytes": 4386
+      "fingerprint": "a581482a6c26f40c6f46ae09c86c1a385681a0a6e107e5428efa1fbb9a8f7c18",
+      "sha256": "f3bfa1e416c648987b78813c7c4e9d1bde6bcc21d7f2dcfd3782464b55be0f1a",
+      "width": 207,
+      "height": 216,
+      "bytes": 4270
     },
     "small/decor-left-frame.webp": {
-      "fingerprint": "1e9cf8a1f1363189499a51b6c3473c8e0e0996d9e17154e73cda05e414977000",
-      "sha256": "ed01191225d96bed66ecad0b203a989b7f60a3393a7cb34f7c7c30fd986c78b5",
-      "width": 410,
-      "height": 410,
-      "bytes": 17260
+      "fingerprint": "6a84cbdd8ea59a5fe66826764e471646bac4343c8313ece8c5e195ec05dff432",
+      "sha256": "2b1291753d6596396c0c3c07984fd756ede3f01ae36e7dcb91cf9862edbaa8b8",
+      "width": 470,
+      "height": 470,
+      "bytes": 17104
     },
     "small/decor-left-lights.webp": {
-      "fingerprint": "fcc187ad5c7428ea18846f9e984c83279ccdc1a1db9f038939a4352fa3d575f6",
-      "sha256": "10a9613238e0d73163a905f5d7c9461868b8ff18d7963707d413c8cbf3f20936",
-      "width": 328,
-      "height": 328,
-      "bytes": 2128
+      "fingerprint": "d92e4f3225ed4bc94292be47bdc615a8d2e7447f6143ad156b634b6f892a7ccd",
+      "sha256": "769aea5f481507a2a271ad6636cc572c06b90cdc3a6557e64d80d2ad11639caa",
+      "width": 329,
+      "height": 329,
+      "bytes": 1926
     },
     "small/decor-left-view.webp": {
       "fingerprint": "49b5b69fd0c225fab9a71a99b18acd9b77393278f889aa36ba838c96283bf37e",
@@ -3662,32 +3774,32 @@
       "bytes": 5048
     },
     "small/decor-photo.webp": {
-      "fingerprint": "ac29470dff71ec57e1550f288d5fae522bcaf54c8da8f435717d991fb4f0a97d",
-      "sha256": "8591d20bd2f55f2ef2f7adcb74a0c7e9bfe4a07b252b7050edaa6f226f83158a",
-      "width": 208,
-      "height": 195,
-      "bytes": 8670
+      "fingerprint": "3ad48f6cbee6746b02d641f30382263eb391c31a7564623a2f35f7dce004000f",
+      "sha256": "d5c7b80a81311620b3066e0c183cd157143e70568294b7f4e2a2c3bb3d037f8e",
+      "width": 218,
+      "height": 186,
+      "bytes": 6614
     },
     "small/decor-picture.webp": {
-      "fingerprint": "b90190b4081a39027a528a932fc3ae795e6c501e3b162c26c6f2a5aefc0813ba",
-      "sha256": "1cf18c5168e4a25223020960cf4db08023bc38e76a86f62d28dae2fda430a481",
-      "width": 286,
-      "height": 273,
-      "bytes": 12278
+      "fingerprint": "1e1c595dfb579df192a305be89dbd3d2e978b39edd898572ca0e1f1607252fe7",
+      "sha256": "b73d68ca59cc8fdb96a7eda482bf86a44ec411f0ccefbcf8a7752c58d32889e3",
+      "width": 328,
+      "height": 315,
+      "bytes": 12936
     },
     "small/decor-right-frame.webp": {
-      "fingerprint": "a9d262cb21d902463cbf91d2f5bbce5c3ff74dcf50091fbe16b675fbdf743bab",
-      "sha256": "e725ad10fe0292f7c503ba05b0c0042f74a98863f0bb54c5036201a66c5beb82",
-      "width": 360,
-      "height": 375,
-      "bytes": 13640
+      "fingerprint": "99a0a1d97849c56447d96912613f14473f6a87db3e12199caf56cbc360aeb30f",
+      "sha256": "7475a563c9b73222abba89634fcf3cb2cf6131878d9a719a6384d8645e6b3b78",
+      "width": 420,
+      "height": 435,
+      "bytes": 13960
     },
     "small/decor-right-lights.webp": {
-      "fingerprint": "cfcac060c9d84ede5aa0d0c7d8dab58b0d5198f6bf423bd3e1e7efc8766a6edd",
-      "sha256": "5b64f45df008fd843fb409e418e5931a477d5b9a2cf961b704cdc1de928eb205",
-      "width": 288,
-      "height": 300,
-      "bytes": 2048
+      "fingerprint": "886fdb184e41d26b837b850291f9cc4e19a700e72ac5b45eb2dc29d76424fb37",
+      "sha256": "9278269292286f04c25b2691ee6077e294d98ba2459a11b57158c5ad5d937f55",
+      "width": 294,
+      "height": 305,
+      "bytes": 1866
     },
     "small/decor-right-view.webp": {
       "fingerprint": "e3f751ab40a82dd0188d433f73c203773203af81c45e709d3cf66c11e46dab66",
@@ -3697,11 +3809,11 @@
       "bytes": 4192
     },
     "small/decor-wreath.webp": {
-      "fingerprint": "2eff19900a94cc734a1c162178a6d55494d970d572422bf0a3acceafda2b669a",
-      "sha256": "b2add6d7486eb8139a855be34d5efb54f49c78014f480f1f6e4eeab5359b084c",
-      "width": 237,
-      "height": 320,
-      "bytes": 10466
+      "fingerprint": "1ba04a0e209a4762d9b071d34a4fbcc198a87fcf8e6c07146a6de4457013b302",
+      "sha256": "b29284bc8b0d2522441777fa4291f3e85f8157e903a80062a334e2527b6339a6",
+      "width": 294,
+      "height": 377,
+      "bytes": 10352
     },
     "small/desk-drawer-front--key-true.webp": {
       "fingerprint": "d6043aa048fd8c1cb3996d2a4b1a46da4b4d920654786ecc55f469265420faf1",
@@ -3760,11 +3872,11 @@
       "bytes": 3210
     },
     "small/door-in.webp": {
-      "fingerprint": "a51e12b304387e566df42c9059a57c29d311505e98b4936cfaea2a3c8876e343",
-      "sha256": "be1f96b7f7b6c2f96d53d63322fa1c76338bcd273ee2b8dac90d41903b98e7c3",
-      "width": 115,
-      "height": 263,
-      "bytes": 3612
+      "fingerprint": "6b1c4f225ac8287bc260fa655d102247af640d5d3d12b1b9a7f891b5f75bcb65",
+      "sha256": "39e55287ebc49dd67327793577ab79d55dcbce63c0bed2cf20ec695256a09b0b",
+      "width": 208,
+      "height": 473,
+      "bytes": 8102
     },
     "small/door-out.webp": {
       "fingerprint": "ec38f3b9f235d73bc9ebf3d0f83a1ebadea5b81ffbce2ad04b24ae6dfad20684",
@@ -3878,19 +3990,12 @@
       "height": 525,
       "bytes": 10084
     },
-    "small/front-in--coat-false.webp": {
-      "fingerprint": "3aacf936fa3b33d4431ba965ea2cb1a5f5ec137c826c968cb47390120e76848d",
-      "sha256": "0a861a7bef1c849efb1d1766430d38e8d88cdcb4432bc4e6659d3dc13b02f7bf",
-      "width": 560,
-      "height": 525,
-      "bytes": 8598
-    },
     "small/front-in.webp": {
-      "fingerprint": "2b1081e5d483328e04f187f67ace1604af06d40b6554714541dc40a4339cfd2a",
-      "sha256": "623eb980a328a9f03ca607ebaa24c736f8d00e2ca223513bddf83ba5166f226f",
+      "fingerprint": "e8583e234c4f065605a877470c7123fc6d5c028c8a77ead48e42a28878b5d3a7",
+      "sha256": "de13d6a8688c6626869f62ee83421a28c3bb25de19b1b10c78888de7742bb54c",
       "width": 560,
       "height": 525,
-      "bytes": 9630
+      "bytes": 4986
     },
     "small/front-out.webp": {
       "fingerprint": "3bdf8d8ba23dedb7f06362468dd7b065b1fcadcd9f524238782bb621d98133dd",
@@ -4089,11 +4194,11 @@
       "bytes": 6046
     },
     "small/left.webp": {
-      "fingerprint": "35628b6883dc4f7f92afb0c35a8b87a01d947d3f9674559027dcfabfdf8a5a66",
-      "sha256": "7bf5a858cf9d9f6091c6e9e07f872d8ed25ae2212355b12022138712b23bd423",
+      "fingerprint": "8d1c383dd524090cb07fe5babe11fbd55070fa6fe7daf439c797eca6be6820e1",
+      "sha256": "2c14f989540f41c3822a7196f3de172ac0bdce90afb27ed96a873abe9257bbfd",
       "width": 525,
       "height": 333,
-      "bytes": 1652
+      "bytes": 1608
     },
     "small/lighthouse.webp": {
       "fingerprint": "cb6ee4bf981c16bf81c8de14fb04fa595c5d1d81cafeb2b7f1db0e3a1bcf851f",

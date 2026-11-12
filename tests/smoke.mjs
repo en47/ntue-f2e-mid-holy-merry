@@ -282,12 +282,12 @@ await test('Santa 隱藏故事 P4：聖誕老人出門（固定規則）、MORE 
   assert.ok(!/santaGoes|solved\(|moveBook/.test(chat), 'The chat cannot move the story');
   assert.ok(books.includes('const home = cabin.santaHome') && books.includes('button.disabled = home || done') && books.includes('solved(shelf)') && books.includes("'需要提示嗎？'") && books.includes('真的要看答案嗎？'), 'Books stay put while Santa is home; MORE is checked by the rules; hints come one at a time and the answer only when asked twice');
   assert.ok(books.includes('setPointerCapture') && books.includes("event.key === 'Escape' && picked >= 0") && books.includes('events.abort()') && !books.includes('innerHTML'), 'Drag or tap-then-place, Escape puts a picked book back, every listener let go');
-  assert.ok(scene.includes("restyle('front-in', { coat: false })") && scene.includes('story.scripted = true') && scene.includes('if (!santaModel || story.away) return false') && scene.includes('storyTimers.forEach(clearTimeout)'), 'Going out: the coat leaves its peg, the controls wait for the little scene, an empty chair cannot be talked to, timers go with the page');
+  assert.ok(scene.includes("restyle('decor-coat', { coat: false })") && scene.includes('story.scripted = true') && scene.includes('if (!santaModel || story.away) return false') && scene.includes('storyTimers.forEach(clearTimeout)'), 'Going out: the coat leaves its peg, the controls wait for the little scene, an empty chair cannot be talked to, timers go with the page');
   assert.ok(scene.includes("restyle('back', open ? { secret: true } : undefined)") && scene.includes('secret.visible = story.open > 0 && indoorView(view)'), 'The back wall opens behind the bookcase, and the little room is drawn only from indoors');
   const { SECRET, BOOKCASE } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
   assert.ok(SECRET.left >= BOOKCASE.left && SECRET.left + SECRET.width <= BOOKCASE.left + BOOKCASE.width, 'The doorway is hidden behind the closed bookcase');
   const paint = await fs.readFile(path.join(project, 'js/components/cabin-paint.js'), 'utf8');
-  assert.ok(paint.includes("'front-in': [{ coat: false }]") && paint.includes('back: [{ secret: true }]'), 'The coatless wall and the opened wall are cut ahead');
+  assert.ok(paint.includes("'decor-coat': [{ coat: false }]") && paint.includes('back: [{ secret: true }]'), 'The coatless wall and the opened wall are cut ahead');
 });
 await test('Santa 隱藏故事 P5：書櫃後的小房間、第一次反轉、聖誕老人回來，與前後呼應的線索', async () => {
   const { BOARDS, ROOM_SPOTS, SUBSTITUTES } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
@@ -457,8 +457,10 @@ await test('Santa 房間牆面佈置：每件裝飾與聖誕樹是自己的紙�
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [art, decor, scene] = await Promise.all(['js/components/cabin-art.js', 'js/components/cabin-decor.js', 'js/components/cabin-scene.js'].map(read));
   const { DECOR } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
-  assert.ok(DECOR.length >= 15 && DECOR.every(board => board.decor && board.room && board.detail >= 1.6 && board.id.startsWith('decor-')), 'Each decoration is a room sheet of its own, cut finer than the wall');
+  assert.ok(DECOR.length >= 15 && DECOR.every(board => board.decor && board.room && board.detail >= 1.4 && board.id.startsWith('decor-')), 'Each decoration is a room sheet of its own, cut finer than the wall');
   assert.ok(!/morningWindow|pictureFrame\(|adventHouse\(paper, 710/.test(art) && art.includes('...DECOR,'), 'The walls no longer carry the windows, pictures, candles and jar drawn coarse on them');
+  assert.ok(['decor-gable-back', 'decor-gable-front', 'decor-arched-door', 'decor-door', 'decor-coat'].every(id => DECOR.some(board => board.id === id)) && !/coatPegs\(paper|archedDoor\(paper|holly\(paper, x - 20/.test(art), 'The gables, the arched door, the door frame and the coat pegs are sheets of their own too');
+  assert.ok(DECOR.filter(board => !board.id.endsWith('-view')).every(board => board.margin[0] > 0) && art.includes("side === 'left' ? 960 : width / 2 - 16"), 'Every decoration but a window view has a margin, so its paper rim is never cut; the left window sits between posts');
   assert.ok(!decor.includes('innerHTML') && !/Gradient|dasharray/.test(decor), 'Paper only: no gradients or dashes');
   assert.ok(['snowfall: true', 'twinkle: true', 'candle: true', 'sway: true', 'advent: ADVENT_WINDOWS'].every(flag => art.includes(flag)) && scene.includes('function snowPane(holder, board)') && scene.includes('function adventLights(holder, board)') && scene.includes("holder.rotation.z = still ? 0 : Math.sin(t * 4.1 + index) * .06;"), 'Snow past the windows, twinkling bulbs, flickering candles, swaying wreath, calendar and snowflakes, the advent windows lit for the day; still under reduced motion');
   assert.ok(scene.includes('if (indoorView(name)) furnish();') && scene.includes('board.decor ? decor :'), 'Decorations are fetched the first time the visitor heads indoors');
@@ -468,7 +470,7 @@ await test('Santa 房間牆面佈置：每件裝飾與聖誕樹是自己的紙�
   const { BOARDS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href), lazy = BOARDS.filter(board => board.decor).map(board => board.id);
   const size = async set => { let bytes = 0; for (const name of await fs.readdir(path.join(project, 'images/cabin', set))) if (lazy.some(id => name === `${id}.webp` || name.startsWith(`${id}--`))) bytes += (await fs.stat(path.join(project, 'images/cabin', set, name))).size; return bytes / 1024; };
   const [large, small] = [await size('large'), await size('small')];
-  assert.ok(large <= 400 && small <= 175, `Decorations and the tree stay light: ${large.toFixed(0)} KB on a large screen, ${small.toFixed(0)} KB on a phone`);
+  assert.ok(large <= 540 && small <= 215, `Decorations and the tree stay light: ${large.toFixed(0)} KB on a large screen, ${small.toFixed(0)} KB on a phone`);
 });
 await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');

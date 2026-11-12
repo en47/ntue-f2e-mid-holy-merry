@@ -1189,13 +1189,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
         const quick = motion.matches, at = (ms, run) => storyTimers.push(setTimeout(() => { if (!disposed) run(); }, quick ? 0 : ms));
         story.scripted = true; spin = 0; const facing = { heading: goalHeading, pitch: goalPitch };
         goalHeading = 2.5; goalPitch = .1; wake();
-        at(1500, () => { story.away = true; story.kick = clock; restyle('front-in', { coat: false }); story.door = { from: 0, to: -DOOR.swing * .75, start: clock, length: .45 }; wake(); });
+        at(1500, () => { story.away = true; story.kick = clock; restyle('decor-coat', { coat: false }); story.door = { from: 0, to: -DOOR.swing * .75, start: clock, length: .45 }; wake(); });
         at(2300, () => { story.door = { from: -DOOR.swing * .75, to: 0, start: clock, length: .45 }; wake(); });
         at(3000, () => { goalHeading = facing.heading; goalPitch = facing.pitch; wake(); });
         at(4300, () => { story.scripted = false; story.door = null; rigs.get('door').rotation.y = 0; redraw(); done(true); });
       });
     },
-    santaBack() { if (!story.away) return; story.away = false; restyle('front-in', undefined); redraw(); },
+    santaBack() { if (!story.away) return; story.away = false; restyle('decor-coat', {}); redraw(); },
     // He comes back in the same way, the other way round: the door, his coat on its peg again, and him in his chair.
     santaReturn() {
       if (!story.away || view !== 'inside' || trip) return Promise.resolve(false);
@@ -1204,7 +1204,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
         story.scripted = true; spin = 0; const facing = { heading: goalHeading, pitch: goalPitch };
         goalHeading = 2.5; goalPitch = .1; wake();
         at(1400, () => { story.door = { from: 0, to: -DOOR.swing * .75, start: clock, length: .45 }; wake(); });
-        at(2200, () => { story.door = { from: -DOOR.swing * .75, to: 0, start: clock, length: .45 }; story.away = false; restyle('front-in', undefined); wake(); });
+        at(2200, () => { story.door = { from: -DOOR.swing * .75, to: 0, start: clock, length: .45 }; story.away = false; restyle('decor-coat', {}); wake(); });
         at(2900, () => { goalHeading = facing.heading; goalPitch = facing.pitch; wake(); });
         at(4200, () => { story.scripted = false; story.door = null; rigs.get('door').rotation.y = 0; redraw(); done(true); });
       });
