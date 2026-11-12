@@ -792,11 +792,15 @@ export const drawerSide = colour => ({ paper }, { width, height }) => {
   shape('rect', { x: 0, y: 0, width, height: Math.max(3, height * .12), fill: '#c08a5a', opacity: .5 }, paper);
 };
 
-export function treeLights({ paper }, { width, height }) {
-  // Only the bulbs, drawn over the tree so they can twinkle on their own layer.
+export function treeLights({ plain }, { width, height }) {
+  // Only the bulbs, drawn over the tree so they can twinkle on their own layer: glass bulbs on a little green cap, each with
+  // a glint. They are glass, not paper, so they are drawn without the paper's cut rim (on so small a bulb the rim would
+  // read as a blurred halo).
   for (let i = 0; i < 26; i++) {
-    const t = noise(i + 7), y = 140 + t * (height - 280), half = (y - 80) / (height - 200) * width * .42;
-    shape('circle', { cx: width / 2 + (noise(i + 31) * 2 - 1) * half, cy: y, r: 7, fill: ['#ffd77a', '#ef6f5e', '#7fce9a', '#7cb8ec'][i % 4] }, paper);
+    const t = noise(i + 7), y = 140 + t * (height - 280), half = (y - 80) / (height - 200) * width * .42, x = width / 2 + (noise(i + 31) * 2 - 1) * half;
+    shape('rect', { x: x - 3.5, y: y - 13, width: 7, height: 5, rx: 1.5, fill: '#3f6653' }, plain);
+    shape('ellipse', { cx: x, cy: y, rx: 6.5, ry: 9, fill: ['#ffd77a', '#ef6f5e', '#7fce9a', '#7cb8ec'][i % 4] }, plain);
+    shape('ellipse', { cx: x - 2, cy: y - 3, rx: 1.8, ry: 3, fill: '#fffaf0', opacity: .75 }, plain);
   }
 }
 
@@ -1385,8 +1389,9 @@ export const BOARDS = [
   { id: 'bellows-left', w: .13, h: .4, px: 1100, at: [0, 0, .004], rig: 'bellows', draw: bellowsPaddle, room: true },
   { id: 'bellows-right', w: .13, h: .4, px: 1100, at: [0, 0, .008], rig: 'bellows', mirror: true, draw: bellowsPaddle, room: true },
   // Free-standing in the room, so they turn to face you wherever you stand: from the side they would be a sliver of paper.
-  { id: 'tree', w: .74, h: 1.36, at: [1.25, 0, .55], draw: tree, room: true, billboard: true },
-  { id: 'tree-lights', w: .74, h: 1.36, at: [1.25, 0, .55], draw: treeLights, twinkle: true, room: true, billboard: true, nudge: .01 },
+  // The tree is seen up close: cut finer than the room, and like the wall decorations only fetched on the way in.
+  { id: 'tree', w: .74, h: 1.36, at: [1.25, 0, .55], draw: tree, room: true, billboard: true, detail: 2.2, decor: true },
+  { id: 'tree-lights', w: .74, h: 1.36, at: [1.25, 0, .55], draw: treeLights, twinkle: true, room: true, billboard: true, nudge: .01, detail: 2.2, decor: true },
   { id: 'desk', w: DESK.w, h: DESK.h, px: 1400, at: [DESK.x, 0, DESK.z], turn: Math.PI / 2, draw: desk, room: true },
   // The music box on its rigs (the box, its lid and key; the turning scene), and the snow globe on the mantel.
   { id: 'musicbox-lid', w: .25, h: .15, px: 1800, at: [0, .1, -.075], rig: 'musicbox', draw: musicBoxLid, room: true },
