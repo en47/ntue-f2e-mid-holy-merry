@@ -2,14 +2,17 @@
 // 五位替身的見面禮與聖誕樹，最後走到結局 B＋真相、C＋真相（都要再確認），走出小屋不觸發，到世界路標確認回家才是 A；每個結局後有紀念明信片。每一步都按頁面上的按鈕或拖曳，不改存檔。只讀寫這個瀏覽器的
 // localStorage，不連任何雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
-// 執行：BASE=http://127.0.0.1:5511 node scripts/check-santa-playthrough.mjs（WIDTH=390 HEIGHT=844 是手機；SHOTS=資料夾 會存截圖）
+// 執行：BASE=http://127.0.0.1:5511 node scripts/check-santa-playthrough.mjs（WIDTH=390 HEIGHT=844 是手機；SHOTS=資料夾 會存截圖；
+// RELOAD=1 會在每一章結束時重新整理頁面，從存檔接著玩，檢查存檔恢復）
 import { chromium } from 'playwright';
 import fs from 'node:fs/promises';
+import { auditor } from './santa-audit.mjs';
 
 const BASE = process.env.BASE ?? 'http://127.0.0.1:5511', w = Number(process.env.WIDTH ?? 1440), h = Number(process.env.HEIGHT ?? 900), mobile = w < 800, SHOTS = process.env.SHOTS;
 if (SHOTS) await fs.mkdir(SHOTS, { recursive: true });
 const browser = await chromium.launch({ args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'] });
 const page = await (await browser.newContext({ viewport: { width: w, height: h }, isMobile: mobile, hasTouch: mobile })).newPage(), errors = [], log = { push: line => console.log(line) };
+const audit = auditor(page, { mobile, width: w, script: 'playthrough' });
 page.on('pageerror', e => { errors.push(String(e)); console.log('PAGE ERROR', String(e)); });
 const wait = ms => page.waitForTimeout(ms);
 const save = () => page.evaluate(() => JSON.parse(localStorage.getItem('holy-merry:cabin:v1') || '{}'));
@@ -18,7 +21,7 @@ const note = async label => log.push(`${label}: ${(await caption()).slice(0, 70)
 const button = (text, scope = 'button') => page.evaluate(([text, scope]) => { const b = [...document.querySelectorAll(scope)].find(b => b.textContent.trim().startsWith(text) && !b.hidden && !b.disabled && b.getClientRects().length); b?.click(); return Boolean(b); }, [text, scope]);
 const must = async (text, scope) => { if (!(await button(text, scope))) throw new Error(`no button: ${text}`); };
 const spot = async (id, ms = 6500) => { await page.evaluate(id => document.querySelector(`.cabin-explore [data-spot="${id}"]`).click(), id); await wait(ms); };
-const shot = name => (SHOTS ? page.screenshot({ path: `${SHOTS}/${String(++shots).padStart(2, '0')}-${name}-${w}.png` }) : null); let shots = 0;
+const shot = name => audit(name).then(() => (SHOTS ? page.screenshot({ path: `${SHOTS}/${String(++shots).padStart(2, '0')}-${name}-${w}.png` }) : null)); let shots = 0;
 const thing = async id => { await page.evaluate(id => document.querySelector(`.secret-thing[data-id="${id}"]`).click(), id); await wait(800); };
 const putBack = async () => { await page.evaluate(() => document.querySelector('.secret-card .cabin-letter-close')?.click()); await wait(500); };
 const closeCard = async sel => { await page.evaluate(sel => document.querySelector(`${sel} .cabin-letter-close`)?.click(), sel); await wait(500); };
@@ -26,6 +29,16 @@ const toRoom = async () => { for (let i = 0; i < 3 && (await page.evaluate(() =>
 const theatre = async () => { await page.waitForSelector('.ending-theatre[open]', { timeout: 20000 }); const kind = await page.evaluate(() => document.querySelector('.ending-theatre').dataset.ending); await wait(1500); await shot(`ending-${kind}`); await page.evaluate(() => document.querySelector('.theatre-skip')?.click()); await wait(800); return kind; };
 // Into the little room: through the open bookcase, or pushing it open again first.
 const enterSecret = async () => { await spot('shelf', 7000); if (!(await button('走進小房間'))) { await must('推開書櫃'); await wait(6500); if (!(await button('走進小房間'))) await must('走進書櫃後的小房間'); } await wait(3800); };
+// RELOAD=1: the page is reloaded where a chapter ends; the save must come back as it was, and play goes on from it (from
+// the yard, where a reload always lands; `resume` walks back to where play left off, as a player would).
+const RELOAD = Boolean(process.env.RELOAD), ready = () => page.waitForFunction(() => !document.querySelector('.site-loader') && document.querySelector('#cabin-stage').dataset.state === 'ready', null, { timeout: 120000 });
+async function checkpoint(name, resume = async () => {}) {
+  if (!RELOAD) return;
+  const before = await save(); await page.reload(); await ready(); await page.evaluate(() => document.querySelector('.cabin').scrollIntoView()); await wait(2500);
+  const after = await save(), changed = Object.keys({ ...before, ...after }).filter(key => JSON.stringify(before[key]) !== JSON.stringify(after[key]));
+  log.push(`reload after ${name}: ${changed.length ? `changed ${changed}` : 'save kept'}`); if (changed.length) errors.push(`reload after ${name}: ${changed}`);
+  await resume();
+}
 const leaveTheatre = async () => { await page.evaluate(() => [...document.querySelectorAll('.theatre-close')].at(-1)?.click()); await wait(1200); };
 
 await page.goto(`${BASE}/santa.html`);
@@ -44,6 +57,7 @@ await spot('snowman'); await page.click('.snow-pile'); await wait(1200);
 await spot('stable'); await use('handle', '.hoist-winch'); await wait(900); await crank(); await page.click('.hoist-hook'); await wait(600);
 await page.click('.hoist-drawer'); await wait(900); await page.click('.drawer-matches'); await wait(1200); await page.click('.drawer-note'); await wait(800); await shot('barn-note'); await closeCard('.cabin-note'); await note('hoist');
 log.push(`pocket after the yard: ${JSON.stringify((await save()).bag)}`);
+await checkpoint('the yard');
 // Into the house: the hearth lit with a match (R, the gold spines), the desk's drawer opened with the little key (the
 // magnifier, the blotter turned over), and the letters' backs; back in the middle, Santa goes out.
 await spot('hearth', 7000); await use('matches', '.hearth-fire'); await wait(4000); for (let i = 0; i < 2; i++) { await page.evaluate(i => document.querySelectorAll('.hearth-log')[i].click(), i); await wait(400); } await note('hearth');
@@ -56,10 +70,12 @@ await spot('globe'); await page.focus('.snow-globe'); for (let i = 0; i < 4; i++
 await page.waitForFunction(() => document.querySelector('.cabin-caption').textContent.includes('落定'), null, { timeout: 30000 }); await note('globe');
 await use('magnifier', '.snow-globe'); await wait(1300); await shot('lens'); await closeCard('.lens-card');
 log.push(`room clues: ${(await save()).clues.filter(id => ['letter-hearth', 'blotter', 'music-bookmarks', 'globe-village', 'globe-base', 'chair-note'].includes(id))}`);
+await checkpoint('the room', async () => { await spot('hearth', 7000); await page.evaluate(() => document.querySelector('.hearth-log')?.click()); await wait(600); await toRoom(); await wait(9000); log.push(`santa out again: ${await page.evaluate(() => Boolean(document.querySelector('.chair-card')))}`); await closeCard('.chair-card'); });
 // The bookcase: MORE, and in.
 await spot('shelf', 7000); await shot('shelf-strip');
 for (const [from, to] of [[4, 9], [1, 10], [6, 11], [5, 12]]) { await page.click(`.books-place[data-place="${from}"]`); await wait(150); await page.click(`.books-place[data-place="${to}"]`); await wait(700); }
 await wait(4800); await must('走進書櫃後的小房間'); await wait(4000); await note('secret room');
+await checkpoint('the bookcase', enterSecret);
 // The secret: the name tags, the rules, the wet log put right.
 await thing('tags'); await putBack(); await thing('rules'); await putBack();
 await thing('log'); for (const mark of ['E', 'O', 'K', 'H', 'N', 'K', 'H']) { await page.evaluate(m => [...document.querySelectorAll('.shift-pick')].find(b => b.textContent === `${m}.`).click(), mark); await wait(150); }
@@ -74,6 +90,7 @@ log.push(`signed: ${(await save()).volunteer.mark}`);
 await must('離開，關上書櫃'); await wait(4500); await toRoom(); await wait(2500);
 // Jobs: lichen, hay, the rack and the desk's letters, the wheel.
 await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(6000);
+await checkpoint('signing up');
 // Jobs: the reindeer fed by the barn's table (by the clock: oats, carrot, lichen); the sleigh loaded, first stop on top.
 await spot('reindeer'); for (const kind of ['oats', 'carrot', 'lichen']) { await page.click(`.feed-basket [data-kind="${kind}"]`); await wait(1600); } await wait(2600);
 await page.click('.sleigh-spot'); await wait(700); for (const city of ['多倫多', '雷克雅維克', '東京', '台北']) { await page.click(`.sleigh-pile .sleigh-sack[data-city="${city}"]`); await wait(250); } await wait(2400); await shot('sleigh'); await closeCard('.sleigh-card');
@@ -98,6 +115,7 @@ for (let n = 0; n < 1; n++) {
 log.push(`jobs after desk: ${(await save()).volunteer.tasks}`);
 await spot('hearth', 7000); for (let i = 0; i < 2; i++) { await page.evaluate(i => document.querySelectorAll('.hearth-log')[i].click(), i); await wait(400); }
 await use('slip', '.hearth-stone'); await wait(5200); await shot('lemon'); await closeCard('.lemon-card'); log.push(`slip: ${(await save()).finale.slip}`);
+await checkpoint('three jobs');
 // The wheel, from out in the yard.
 await toRoom(); await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(7000);
 await page.locator('.cabin-gesture').focus(); for (let i = 0; i < 8; i++) { await page.keyboard.press('ArrowLeft'); await wait(120); } await wait(3000);
@@ -129,6 +147,7 @@ log.push(`twist ${(await save()).finale.twist} | ornaments ${(await save()).orna
 // Out of the little room: back in the middle, the tree.
 await must('離開，關上書櫃'); await wait(4500); await toRoom(); await wait(2500);
 log.push(`tree card: ${await page.evaluate(() => Boolean(document.querySelector('.tree-card')))}`); await shot('tree'); await page.evaluate(() => document.querySelector('.tree-card .cabin-letter-close')?.click()); await wait(500);
+await checkpoint('the tree');
 // The endings, each confirmed and told once, then its postcard: a wish (B, told true), staying on (C, told true), and,
 // signed off, going home at the world signpost (A); walking out of the house tells nothing.
 const told = async () => { const kind = await theatre(), truth = await page.evaluate(() => Boolean(document.querySelector('.ending-theatre .theatre-act'))); await leaveTheatre(); const card = await page.evaluate(() => Boolean(document.querySelector('.postcard-card'))); await page.waitForFunction(() => document.querySelector('.postcard-image')?.src.startsWith('data:image/png'), null, { timeout: 15000 }); await shot(`postcard-${kind}`); await must('留在村子'); await wait(1500); return `${kind}${truth ? '＋真相' : ''}${card ? '（明信片）' : ''}${await page.evaluate(() => document.querySelector('.ending-theatre') ? '，又接了一段' : '')}`; };

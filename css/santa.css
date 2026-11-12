@@ -303,6 +303,8 @@
 /* 書櫃後的小房間：可以拿起來看的東西（看過的變淡），和打開後的紙卡：名牌、交接表（不同筆跡）、守則。 */
 .secret-thing { position: absolute; padding: 0; background: radial-gradient(#ffe8a440, transparent 70%); border: 0; box-shadow: 0 0 0 2px #ffe8a455, 0 0 14px 2px #ffe8a433; border-radius: 12px; cursor: pointer; pointer-events: auto; animation: play-glow 1.6s ease-in-out infinite alternate; }
 .secret-thing.is-read { animation: none; opacity: .55; }
+/* 舊紀錄簿立在書桌另一頭，和分揀架的點擊範圍有一點重疊：小的那本在上面。 */
+.secret-thing[data-id="record"] { z-index: 1; }
 .secret-thing:focus-visible, .books-enter:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .books-enter { position: absolute; left: 50%; bottom: 1rem; padding: .5rem 1.1rem; translate: -50% 0; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; pointer-events: auto; }
 .secret-card { max-height: calc(100% - 2rem); overflow: auto; }
@@ -650,7 +652,7 @@ html.theatre-open { overflow: hidden; }
 .notebook-close { align-self: flex-end; color: #fffaf0; }
 .notebook-hint:hover, .notebook-close:hover { translate: 0 -2px; }
 .notebook-hint:focus-visible, .notebook-close:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
-@media (max-width: 700px) { .notebook-button { top: .6rem; right: .6rem; width: 40px; height: 47px; } .notebook-card { padding: 1.4rem 1.3rem 1.1rem; } }
+@media (max-width: 700px) { .notebook-button { top: .6rem; right: .6rem; width: 44px; height: 52px; } .notebook-card { max-height: calc(100% - 8rem); padding: 1.4rem 1.3rem 1.1rem; } }
 @media (prefers-reduced-motion: reduce) { .notebook-button.is-new, .notebook-card { animation: none; } }
 /* 弄濕的交接表：四晚 × 前半夜／後半夜的格子。暈開的墨水留著寫字人的顏色，洗掉的只剩水痕；點格子再點名牌補字，補對了墨水一行行乾回來。 */
 .shift-note { margin-bottom: .4rem; }
@@ -721,6 +723,8 @@ html.theatre-open { overflow: hidden; }
 .desk-drawer.is-open .drawer-key { translate: 0 70%; scale: 1.06; }
 /* 書桌抽屜、放大鏡下的雪花球、郵戳章盤上的撥針：打開成一張紙卡，東西是可以點的紙片。 */
 .drawer-card, .lens-card { width: min(22rem, calc(100% - 2rem)); }
+/* 抽屜卡片蓋在桌上的火漆印與郵戳上面。 */
+.drawer-card { z-index: 6; }
 .drawer-things { display: flex; justify-content: center; gap: 1.2rem; margin: .4rem 0 1.4rem; }
 .drawer-thing, .secret-pin { position: relative; width: 6.5rem; aspect-ratio: 1; padding: 0; border: 0; background: none; cursor: pointer; }
 .drawer-thing .art-layer, .secret-pin .art-layer, .lens-view .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -915,3 +919,16 @@ html.theatre-open { overflow: hidden; }
 .postcard-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem .7rem; margin: 0 0 .4rem; }
 .postcard-actions .register-sign { margin: 0; }
 .postcard-home { display: inline-block; text-decoration: none; }
+/* 第七階段：觸控螢幕上，畫面裡的小東西（抽屜裡的火柴與紙條、絞盤標籤、木柴、石板、書桌抽屜）點擊範圍至少 44px 見方；
+   放大的是看不見的範圍，畫面不變。卡片裡的按鈕、跳過、結局章也至少 44px。 */
+@media (pointer: coarse) {
+  :is(.play-target, .hearth-log, .desk-drawer)::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+  /* 抽屜裡並排的火柴盒和紙條：各往外側放大，不吃掉對方。 */
+  .drawer-matches::after { left: min(0px, calc(100% - 44px)); right: 0; }
+  .drawer-note::after { left: 0; right: min(0px, calc(100% - 44px)); }
+  .gearbox-peg::before { inset: -45%; }
+  .gearbox-piece::before { inset: -14%; }
+  .compose-choice, .inspect-close, .inspect-flip, .notebook-close, .theatre-skip, .theatre-actions button { min-height: 44px; }
+  .register-endings > :is(span, button):not(:first-child) { width: 2.75rem; }
+  .register-endings > .ending-truth:not(:first-child) { width: auto; min-height: 2.75rem; }
+}

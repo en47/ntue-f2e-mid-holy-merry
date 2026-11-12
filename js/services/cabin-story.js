@@ -105,7 +105,8 @@ export function goal({ story, volunteer, finale, bag }) {
   if (!knowsSantas(story.seen)) return 'log';
   if (!story.told) return 'secret';
   if (!signedUp(volunteer)) return allEndings(finale) ? 'done' : finale.endings.length ? 'endings' : 'join';
-  if (!finale.twist) return points(volunteer) >= 2 ? 'cord' : 'jobs';
+  // The old record opened before the shift log was put right: it is only to be read again.
+  if (!finale.twist) return points(volunteer) < 2 ? 'jobs' : finale.unlocked ? 'reread' : 'cord';
   if (!finale.wish && !finale.stayed) return points(volunteer) >= WISH_COST ? 'wish' : 'jobs';
   return allEndings(finale) ? 'done' : 'endings';
 }

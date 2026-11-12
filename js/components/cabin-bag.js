@@ -57,15 +57,19 @@ export function mountBag(stage, { progress, save, sound, say = () => {} }) {
     if (picked) { sound.play('pick'); say(holding = BAG.picked(ITEM_TEXT[picked].name)); }
     else if (holding) { holding = ''; say(''); }
   }
-  // The place under a point (the smallest, if one lies inside another); places gone from the page are forgotten.
-  function placeAt(at) {
-    let best = null, area = Infinity;
+  // The place under a point (the smallest, if one lies inside another); places gone from the page are forgotten. A finger
+  // hides what it is over, so a touch may land a little further off (`pad`), when nothing is right under it.
+  function placeAt(at, pad = 8) {
+    // Places right under the point first; only when there are none, the ones just beside it.
+    let best = null, area = Infinity, near = null, nearArea = Infinity;
     for (const node of targets.keys()) {
       if (!node.isConnected) { targets.delete(node); continue; }
-      const rect = local(node.getBoundingClientRect());
-      if (rect.width && inside(at, rect, 8) && rect.width * rect.height < area) { best = node; area = rect.width * rect.height; }
+      const rect = local(node.getBoundingClientRect()), size = rect.width * rect.height;
+      if (!rect.width) continue;
+      if (inside(at, rect) && size < area) { best = node; area = size; }
+      else if (inside(at, rect, pad) && size < nearArea) { near = node; nearArea = size; }
     }
-    return best;
+    return best ?? near;
   }
   const placeOf = node => { for (let at = node; at && at !== stage; at = at.parentElement) if (targets.has(at)) return at; return null; };
   function aim(node) {
@@ -126,21 +130,21 @@ export function mountBag(stage, { progress, save, sound, say = () => {} }) {
   // A slot's thing: dragged out over the stage, or clicked to hold it (and clicked again to put it back).
   function bind(item, id) {
     let drag = null;
-    on(item, 'pointerdown', event => { if (event.button > 0) return; event.preventDefault(); item.setPointerCapture(event.pointerId); drag = { pointer: event.pointerId, from: point(event), last: point(event), copy: null }; });
+    on(item, 'pointerdown', event => { if (event.button > 0) return; event.preventDefault(); item.setPointerCapture(event.pointerId); drag = { pointer: event.pointerId, from: point(event), last: point(event), copy: null, pad: event.pointerType === 'mouse' ? 8 : 16 }; });
     on(item, 'pointermove', event => {
       if (!drag || event.pointerId !== drag.pointer) return;
       drag.last = point(event);
       if (!drag.copy && Math.hypot(drag.last[0] - drag.from[0], drag.last[1] - drag.from[1]) < 6) return;
       if (!drag.copy) { choose(null); drag.copy = ghost(id, drag.last); drag.copy.classList.add('is-held'); item.classList.add('is-out'); sound.play('pick'); }
-      place(drag.copy, drag.last, 'rotate(-6deg) scale(1.08)'); aim(placeAt(drag.last));
+      place(drag.copy, drag.last, 'rotate(-6deg) scale(1.08)'); aim(placeAt(drag.last, drag.pad));
     });
     const end = event => {
       if (!drag || event.pointerId !== drag.pointer) return;
-      const { copy, last } = drag; drag = null;
+      const { copy, last, pad } = drag; drag = null;
       if (!copy) return;
       item.dataset.dragged = '1'; setTimeout(() => delete item.dataset.dragged, 0);
       copy.classList.remove('is-held');
-      const node = event.type === 'pointercancel' ? null : placeAt(last);
+      const node = event.type === 'pointercancel' ? null : placeAt(last, pad);
       if (node) attempt(id, node, copy);
       else { aim(null); sound.play('drop'); glide(copy, home(id), { ms: 300, then: () => { copy.remove(); item.classList.remove('is-out'); } }); }
     };
