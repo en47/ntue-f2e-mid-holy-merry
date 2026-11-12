@@ -17,9 +17,10 @@ import { secretGame } from './cabin-secret.js';
 import { wheelGame } from './cabin-wheel.js';
 import { wishScene } from './cabin-finale.js';
 import { endingTheatre } from './cabin-ending.js';
-import { GIFTS, TASKS, canStay, canWish, goesHome, knowsSantas, pending, points, record, santaGoes, trueMiracle } from '../services/cabin-story.js';
+import { postcard } from './cabin-postcard.js';
+import { GIFTS, TASKS, canGoHome, canStay, canWish, knowsSantas, pending, points, record, santaGoes, signedUp, trueMiracle } from '../services/cabin-story.js';
 import { BELLS, CHAIR, DONE, GOING, JOBS, NOTES } from '../data/cabin-secret.js';
-import { GLOBE, NEXT, SANTA_ON_HOLLY, TWIST } from '../data/cabin-finale.js';
+import { ASK, GLOBE, NEXT, SANTA_ON_HOLLY, SIGNPOST, TWIST } from '../data/cabin-finale.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 import { mountNotebook } from './cabin-notebook.js';
@@ -200,7 +201,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     desk: () => deskGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onUse: () => use('desk'), onTask: () => task('letters'), clue }),
     musicbox: () => musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUse: () => use('musicbox'), knows, clue, gift, progress, save }),
     globe: () => globeGame({ layer, stage, cabin, say, later, sound, bag, onUse: () => use('globe'), knows, knownLine: () => progress.finale.twist ? GLOBE : null, clue, seen: () => progress.clues.includes('globe-base') }),
-    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit, onInvite: invite, onTwist: twist, onWish: grant, onStay: stay, onReplay: kind => ending(kind, true), clue, gift }),
+    secret: () => secretGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onKnow: () => onSanta('known'), onShut: () => swing(false), join, quit, onInvite: invite, onTwist: twist, onWish: grant, onStay: stay, onReplay: kind => kind === 'truth' ? ending(finale.stayed ? 'C' : 'B', { replay: true, truth: true }) : ending(kind, { replay: true }), clue, gift }),
     shelf: () => booksGame({ layer, stage, cabin, say, later, sound, progress, save, onOpen: () => onSanta('opened'), toggle: open => swing(open), restart: () => start('shelf') }),
   };
 
@@ -233,29 +234,71 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   }
   // The end (the rules are in cabin-story.js). The second twist is told once; a wish is granted in a little scene of its
   // own; staying on is signed on the shift log. Each ending counts the moment it is reached, and is told in its paper
-  // theatre (cabin-ending.js); D follows B or C once the old page is known. An ending seen can be watched again from the
-  // register (`replay`: nothing is reached, nothing follows).
+  // theatre (cabin-ending.js), told true (with Holly's letter, `finale.truth`) once what she knew is understood; after it,
+  // a postcard to keep (cabin-postcard.js). An ending seen can be watched again from the register (`replay`: nothing is
+  // reached, no postcard).
   const finale = progress.finale;
   function invite() { if (!finale.invited) { finale.invited = true; save(); } }
   let heardHolly = false;
   function twist() { if (finale.twist) return; finale.twist = true; save(); heardHolly = true; later(500, () => { sound.play('jingle'); say(TWIST); }); }
   const reach = kind => { if (!finale.endings.includes(kind)) { finale.endings.push(kind); save(); } };
-  let theatre = null;
-  function ending(kind, replay = false) {
-    if (!replay) reach(kind);
-    const next = !replay && (kind === 'B' || kind === 'C') && trueMiracle(finale);
-    theatre?.close();
-    theatre = endingTheatre({ host: layer, ending: kind, mark: progress.volunteer.mark, both: Boolean(finale.wish && finale.stayed), wish: finale.wish, sound, next, onClose: () => { theatre = null; if (next) ending('D'); } });
+  const tell = kind => { reach(kind); if (kind !== 'A' && trueMiracle(finale) && !finale.truth) { finale.truth = true; save(); } };
+  let theatre = null, card = null;
+  function ending(kind, { replay = false, truth = !replay && kind !== 'A' && finale.twist } = {}) {
+    if (!replay) tell(kind);
+    theatre?.close(); card?.close();
+    const mark = progress.volunteer.mark;
+    theatre = endingTheatre({ host: layer, ending: kind, truth, mark, both: Boolean(finale.wish && finale.stayed), wish: finale.wish, sound, onClose: () => { theatre = null; if (!replay) card = postcard({ host: layer, kind, truth, mark, sound, onClose: () => { card = null; } }); } });
   }
   function grant(id) {
     if (!canWish(progress.volunteer, finale)) return;
-    finale.wish = id; reach('B'); if (trueMiracle(finale)) reach('D');
+    finale.wish = id; tell('B');
     wishScene({ layer, wish: id, mark: progress.volunteer.mark, sound, later, onDone: () => ending('B') });
   }
   function stay() {
     if (!canStay(progress.volunteer, finale)) return;
-    finale.stayed = true; reach('C'); if (trueMiracle(finale)) reach('D'); cabin.repaint('secret-tags', { mine: true });
+    finale.stayed = true; tell('C'); cabin.repaint('secret-tags', { mine: true }); cabin.repaint('secret-hats', { mine: true });
     later(400, () => ending('C'));
+  }
+  // The world signpost in the yard: the only way home (A), chosen and then confirmed, for a visitor who knows the secret
+  // and is not signed up; a volunteer finds a card on it; anyone else reads only what it says.
+  function signpost(note) {
+    if (layer.dataset.game || card) return;
+    if (!finale.invited) { say(note); later(4200, () => say('')); return; }
+    sound.play('open');
+    const sheet = card = { close: () => node.remove() }, node = element('article', 'cabin-letter signpost-card', layer); node.setAttribute('aria-label', SIGNPOST.title);
+    element('h3', 'chair-title', node).textContent = SIGNPOST.title;
+    element('p', 'piece-words', node).textContent = signedUp(progress.volunteer) ? SIGNPOST.volunteer : note;
+    const close = () => { node.remove(); if (card === sheet) card = null; sound.play('remove'); };
+    if (canGoHome(progress)) {
+      const home = element('button', 'register-sign', node); home.type = 'button'; home.textContent = SIGNPOST.home;
+      home.addEventListener('click', () => {
+        home.remove(); sound.play('pick');
+        element('p', 'piece-words signpost-sure', node).textContent = SIGNPOST.sure;
+        const row = element('div', 'signpost-actions', node), yes = element('button', 'register-sign', row), no = element('button', 'register-sign is-quiet', row);
+        yes.type = no.type = 'button'; yes.textContent = SIGNPOST.yes; no.textContent = SIGNPOST.no;
+        yes.addEventListener('click', () => { node.remove(); card = null; ending('A'); });
+        no.addEventListener('click', close); yes.focus({ preventScroll: true });
+      });
+    }
+    const done = element('button', 'cabin-letter-close', node); done.type = 'button'; done.textContent = SIGNPOST.close;
+    done.addEventListener('click', close);
+    // It opens under the finger that tapped the signpost: the click a touch sends after it must not press what is now there.
+    node.inert = true; setTimeout(() => { node.inert = false; if (node.isConnected) (node.querySelector('.register-sign') ?? done).focus({ preventScroll: true }); }, 400);
+  }
+  // All four jobs done, back in the middle of the room: Santa asks once what comes next (kept, never asked again). Each
+  // answer only says where to go; nothing ends until it is chosen at the register or on the shift log.
+  function ask() {
+    if (layer.dataset.game) return;
+    finale.asked = true; save(); sound.play('open');
+    const node = element('article', 'cabin-letter ask-card', layer); node.setAttribute('aria-label', '聖誕老人的問題');
+    element('p', 'piece-words', node).textContent = ASK.question;
+    const row = element('div', 'signpost-actions', node);
+    for (const [id, label, reply] of ASK.options) {
+      const choice = element('button', 'register-sign', row); choice.type = 'button'; choice.textContent = label;
+      choice.addEventListener('click', () => { node.remove(); sound.play('pick'); say(id === 'wish' && finale.wish ? ASK.wished : reply); });
+    }
+    row.firstElementChild.focus({ preventScroll: true });
   }
   // All five ornaments found: back in the room, they are on the tree, and at its top a red one with your initial.
   function trimmed() {
@@ -291,24 +334,27 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     if (rang || !santaGoes({ used: used.size, left: story.left, home: cabin.santaHome, opened: story.opened })) return;
     rang = true; later(1200, () => { sound.play('jingle'); say(BELLS); });
   }
-  let visited = false;
   function start(id) { leave(); if (!games[id]) return; layer.dataset.game = id; cleanup = games[id]() || (() => {}); }
-  function leave() { timers.forEach(clearTimeout); timers.clear(); theatre?.close(); theatre = null; cleanup(); cleanup = () => {}; bag.clear(); layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
+  function leave() { timers.forEach(clearTimeout); timers.clear(); theatre?.close(); theatre = null; card = null; cleanup(); cleanup = () => {}; bag.clear(); layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
   return {
     enter: start,
     leave,
+    // The world signpost tapped in the yard: what it says, and for a visitor who knows the secret, the way home.
+    signpost,
     // A line about something tapped in the village or the room; it fades on its own and never covers a game.
     // `id`: what was tapped; the wish board's thank-you note goes in the clue book.
     note(text, id) { if (id === 'wish-board') clue('wish-board'); if (layer.dataset.game) return; timers.forEach(clearTimeout); timers.clear(); say(text); later(4200, () => { if (!layer.dataset.game) say(''); }); },
     // Back in the middle of the room: after enough has been used there, Santa goes out to see to the reindeer (the rule is
     // in cabin-story.js). The story is decided here, never by the chat.
     inRoom() {
-      const story = progress.story; visited = true;
+      const story = progress.story;
       if (GIFTS.every(mark => progress.ornaments.includes(mark)) && !progress.tree) { later(900, trimmed); return; }
       // Back with Santa still out: his note is still on the chair (and in the clue book).
       if (story.left && !story.opened && !cabin.santaHome) clue('chair-note');
       // Back from the old page, Santa (if he is in) has a word about Holly; once.
       if (heardHolly && cabin.santaHome) { heardHolly = false; later(900, () => say(SANTA_ON_HOLLY)); return; }
+      // All four jobs done, he asks once what comes next.
+      if (signedUp(progress.volunteer) && points(progress.volunteer) === TASKS.length && !progress.finale.asked && cabin.santaHome) { later(900, ask); return; }
       // Once the secret is known, Santa tells you about it: home from the reindeer (or from his chair, already in), he opens
       // the booklet's stuck pages for you; the old record opened before, he has a word about that too. Told once (kept).
       if (story.opened && knowsSantas(story.seen) && !story.told) {
@@ -332,8 +378,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // Leaving the house before the bookcase has opened, Santa is back in his chair the next time you come in.
     outside() {
       if (!progress.story.opened && !cabin.santaHome) { cabin.santaBack(); onSanta('home'); }
-      // Offered the register's blank row on this visit and going home unsigned: Santa sees the visitor off with a postcard.
-      if (visited && goesHome(progress)) later(1800, () => { if (!layer.dataset.game) ending('A'); });
+      // Going outside ends nothing: the way home is chosen at the world signpost (`signpost`).
     },
     get opened() { return progress.story.opened; },
     // Tapped while it stands broken, the big wheel opens to be mended instead of saying its line; once mended, its gearbox
@@ -353,7 +398,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       if (progress.volunteer.tasks.includes('hay')) cabin.repaint('sleigh', { loaded: true });
       cabin.placeBooks(progress.story.shelf); if (progress.story.opened) cabin.openBookcase(!progress.story.shut, false);
       cabin.wheelBroken(pending(progress.volunteer, 'wheel'), false);
-      if (progress.finale.stayed) cabin.repaint('secret-tags', { mine: true });
+      if (progress.finale.stayed) { cabin.repaint('secret-tags', { mine: true }); cabin.repaint('secret-hats', { mine: true }); }
     },
     destroy() { leave(); notebook.destroy(); bag.destroy(); sound.destroy(); layer.remove(); },
   };

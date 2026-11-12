@@ -374,6 +374,10 @@
 .register-endings button.is-seen:hover { translate: 0 -2px; rotate: -4deg; }
 .register-endings button.is-seen:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 .ending-letter, .ink-words { position: relative; }
+.register-endings > .ending-truth:not(:first-child) { width: auto; aspect-ratio: auto; display: inline-flex; align-items: center; gap: .2rem; margin-left: .3rem; padding: 0; color: #b9a585; font-family: var(--font-body); font-weight: 700; rotate: none; }
+.register-endings .ending-truth.is-seen { color: #9a6b2f; }
+.truth-star { position: relative; width: 1.7rem; aspect-ratio: 1; }
+.register-sign[hidden] { display: none; }
 .register-wishes { margin-bottom: .6rem; }
 .old-entry { position: relative; margin: 0 0 .8rem; padding: .6rem 0 .4rem; }
 .old-line { margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; color: #3f6653; }
@@ -580,7 +584,8 @@ html.theatre-open { overflow: hidden; }
 @keyframes c-hop { to { translate: 0 -1.4%; } }
 .c-flight { transform-origin: 36.667% 83%; translate: 41.667% -51.333%; scale: .36; rotate: -4deg; animation: c-fly 6s ease-in 8.6s both; }
 @keyframes c-fly { 0% { translate: 0 0; scale: 1; rotate: 0deg; } 15% { translate: 4% -1%; scale: .97; rotate: -5deg; } 40% { translate: 17% -14%; scale: .78; rotate: -10deg; } 70% { translate: 32% -35%; scale: .52; rotate: -8deg; } 100% { translate: 41.667% -51.333%; scale: .36; rotate: -4deg; } }
-/* 結局 D：六個名牌一個一個亮起來，光從小屋的門口傳到村裡每一扇窗。 */
+/* 真相版的第二幕（B／C 演完才接上，原本的結局 D）：夜裡的村子，六個名牌一個一個亮起來，光從小屋的門口傳到村裡每一扇窗。 */
+.theatre-act { position: absolute; inset: 0; z-index: 8; animation: theatre-appear 1.2s ease-out both; }
 .d-glow { animation: d-glow 1.2s ease-out var(--at) both; }
 @keyframes d-glow { from { opacity: 0; scale: .3; } }
 .d-tag { animation: theatre-sway 3.2s ease-in-out var(--sway) infinite alternate, d-pop .7s cubic-bezier(.3,1.6,.5,1) var(--at) both; }
@@ -613,7 +618,7 @@ html.theatre-open { overflow: hidden; }
 .theatre-skip { position: fixed; z-index: 2; top: 1rem; right: 1rem; }
 .ending-theatre.is-done .theatre-skip { display: none; }
 .ending-theatre.is-done .theatre-actions { animation: none; }
-.ending-theatre.is-skipped :is(.theatre-depth, .theatre-piece, .theatre-move, .theatre-tag, .theatre-char, .theatre-kicker, .theatre-title .title-letter) { animation-delay: -60s !important; }
+.ending-theatre.is-skipped :is(.theatre-act, .theatre-depth, .theatre-piece, .theatre-move, .theatre-tag, .theatre-char, .theatre-kicker, .theatre-title .title-letter) { animation-delay: -60s !important; }
 @media (max-width: 760px), (max-aspect-ratio: 5/4) {
   .ending-theatre[open] { flex-direction: column; justify-content: flex-start; gap: .9rem; padding: 3.6rem 16px 2rem; }
   .theatre-scene { height: auto; width: min(100%, 50svh); border-radius: 16px; }
@@ -896,3 +901,17 @@ html.theatre-open { overflow: hidden; }
   .sleigh-sack { width: 3.4rem; }
   .sleigh-card { max-height: calc(100% - 1.2rem); overflow-y: auto; }
 }
+/* 第五章：世界路標的卡、聖誕老人最後的詢問、確認步驟（「再想想」是淡色的紙籤）、結局後的紀念明信片。 */
+.signpost-card, .ask-card { width: min(24rem, calc(100% - 2rem)); }
+.signpost-card .piece-words, .ask-card .piece-words { margin: 0 0 .8rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; color: var(--ink); }
+.signpost-sure { color: #8f3b36; }
+.signpost-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem .7rem; margin: 0 0 .6rem; }
+.signpost-actions .register-sign { margin: 0; }
+.register-sign.is-quiet { color: var(--ink); background: #efe2c4; }
+.cabin[data-paper] .register-sign.is-quiet { color: var(--ink); }
+.postcard-card { width: min(36rem, calc(100% - 2rem)); }
+.postcard-image { display: block; width: 100%; aspect-ratio: 3 / 2; margin: 0 0 .8rem; object-fit: contain; }
+.postcard-image:not([src]) { visibility: hidden; }
+.postcard-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem .7rem; margin: 0 0 .4rem; }
+.postcard-actions .register-sign { margin: 0; }
+.postcard-home { display: inline-block; text-decoration: none; }

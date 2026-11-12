@@ -48,6 +48,7 @@ export const NOTES = {
   stamps: '桌上排著四顆郵戳章，印面各刻著一個字母：N、K、H、E。歐拉的那顆，好像被誰帶出門了。',
   pin: '章盤邊上別著一根細細的黃銅撥針，尖端可以伸進很小的孔裡。', pinTake: '拿起黃銅撥針',
   hats: '帽架上六個掛鉤，五個各掛著一頂聖誕帽，第六個空著。荷莉那一鉤掛的是最小的一頂，只有小孩子戴得下。',
+  hatsMine: '帽架上六個掛鉤都掛著聖誕帽了。荷莉那一鉤是最小的一頂；第六個掛鉤上，是你的帽子。',
   // Turned over, the smallest hat has something stitched inside, too small to read without the magnifier; read, it is the
   // year Holly's wish came true. (Kept as `hatsKnown` for the clue book's wording once read.)
   hatInside: '帽子內側用紅線繡著一行小字，太小了，看不清楚。', hatsKnown: '最小的那頂聖誕帽內側，用紅線繡著「H. 2003」。',

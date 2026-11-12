@@ -69,8 +69,8 @@ test('volunteering: an initial of your own, four jobs, a point each the first ti
   volunteer.mark = ''; assert.equal(signedUp(volunteer), false); assert.equal(points(volunteer), 2, 'leaving keeps the points');
   assert.equal(record(volunteer, 'lichen'), false, 'nothing counts after leaving');
 });
-test('the end: three stamps buy a wish, all four let you stay; D needs the old record understood too', async () => {
-  const { canWish, canStay, trueMiracle, goesHome, opens } = await import('../js/services/cabin-story.js');
+test('the end: three stamps buy a wish, all four let you stay; told true once the old record is understood; home only by the signpost', async () => {
+  const { canWish, canStay, trueMiracle, canGoHome, allEndings, opens } = await import('../js/services/cabin-story.js');
   const finale = { invited: true, twist: false, wish: null, stayed: false, endings: [] };
   const volunteer = tasks => ({ mark: 'J', tasks });
   assert.equal(opens(['2', '0', '0', '3']), true, 'the old record book opens to its year, jobs or no jobs');
@@ -81,10 +81,11 @@ test('the end: three stamps buy a wish, all four let you stay; D needs the old r
   assert.equal(trueMiracle({ ...finale, wish: 'snow' }), false, 'not without the old page');
   assert.equal(trueMiracle({ ...finale, twist: true }), false, 'not without a wish or staying');
   assert.equal(trueMiracle({ ...finale, twist: true, stayed: true }), true);
-  assert.equal(goesHome({ volunteer: { mark: '', tasks: [] }, finale }), true, 'offered the blank row, not signed: a visitor going home');
-  assert.equal(goesHome({ volunteer: { mark: '', tasks: [] }, finale: { ...finale, invited: false } }), false, 'not before the row was offered');
-  assert.equal(goesHome({ volunteer: volunteer([]), finale }), false, 'not when signed up');
-  assert.equal(goesHome({ volunteer: { mark: '', tasks: [] }, finale: { ...finale, endings: ['A'] } }), false, 'told once');
+  assert.equal(canGoHome({ volunteer: { mark: '', tasks: [] }, finale }), true, 'offered the blank row, not signed: the signpost shows the way home');
+  assert.equal(canGoHome({ volunteer: { mark: '', tasks: [] }, finale: { ...finale, invited: false } }), false, 'not before the row was offered');
+  assert.equal(canGoHome({ volunteer: volunteer([]), finale }), false, 'not when signed up');
+  assert.equal(canGoHome({ volunteer: { mark: '', tasks: [] }, finale: { ...finale, endings: ['A'] } }), true, 'chosen again, it is told again: nothing else ever tells it');
+  assert.equal(allEndings({ ...finale, endings: ['A', 'B', 'C'] }), false, 'the three, and the truth too'); assert.equal(allEndings({ ...finale, endings: ['C', 'A', 'B'], truth: true }), true);
 });
 test('the clue book hints at the first thing the story is still waiting on', () => {
   const story = { left: false, opened: false, seen: [] }, volunteer = { mark: '', tasks: [] }, finale = { invited: false, twist: false, wish: null, stayed: false, endings: [] };
@@ -102,8 +103,10 @@ test('the clue book hints at the first thing the story is still waiting on', () 
   assert.equal(at({ story: known, volunteer: signed(['hay']) }), 'jobs'); assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']) }), 'cord');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen']), finale: { twist: true } }), 'jobs');
   assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true } }), 'wish');
-  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true, wish: 'snow', endings: ['B', 'D'] } }), 'endings');
-  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C', 'D'] } }), 'done');
+  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel']), finale: { twist: true, wish: 'snow', endings: ['B'], truth: true } }), 'endings');
+  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C'], truth: true } }), 'done');
+  assert.equal(at({ story: known, volunteer: signed(['hay', 'lichen', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C'] } }), 'endings', 'the truth still to see');
+  assert.equal(at({ story: known, finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C'], truth: true } }), 'done', 'all seen, then signed off: still done');
   for (const id of ['yard', 'room', 'bookcase', 'log', 'secret', 'join', 'jobs', 'cord', 'wish', 'endings', 'done']) assert.ok(GOALS[id]?.hints.length, `${id} has hints`);
 });
 test('the wet shift log: one cell still reads, the rest are written back in, and only the right initials put it right', () => {

@@ -81,7 +81,8 @@ export function record(volunteer, task) { if (!pending(volunteer, task)) return 
 // granted long ago, and her on the night shift every year since. Understood (`finale.twist`, the second twist) once it has
 // been read with the secret known, in either order. Three stamps buy a wish (granted by another substitute); all four
 // jobs done, the early shift on Christmas morning can be signed (staying on). Endings: A, a visitor who saw the register's
-// blank row and went home without signing; B, a wish granted; C, staying on; D, either of those knowing what Holly knew.
+// blank row and, not signed up, chose the way home at the world signpost (nothing else ends the visit); B, a wish granted;
+// C, staying on. B and C have a truer telling (`finale.truth`) for whoever understood what Holly knew (the second twist).
 export const WISH_COST = 3;
 // The cord's little lock: four dials, opened by the year Holly's wish came true (the snow globe's base, H. · 2003).
 export const LOCK = '2003';
@@ -91,7 +92,9 @@ export const SLIP = ['none', 'taken', 'read'];
 export const canWish = (volunteer, finale) => signedUp(volunteer) && points(volunteer) >= WISH_COST && !finale.wish;
 export const canStay = (volunteer, finale) => signedUp(volunteer) && points(volunteer) === TASKS.length && !finale.stayed;
 export const trueMiracle = finale => finale.twist && Boolean(finale.wish || finale.stayed);
-export const goesHome = ({ volunteer, finale }) => finale.invited && !signedUp(volunteer) && !finale.endings.includes('A');
+export const canGoHome = ({ volunteer, finale }) => finale.invited && !signedUp(volunteer);
+export const ENDING_KINDS = ['A', 'B', 'C'];
+export const allEndings = finale => ENDING_KINDS.every(kind => finale.endings.includes(kind)) && finale.truth === true;
 // The yard, where the story starts: four things to find there, each shown the way by something else (the mailbox's
 // parcel, the trough, the snowman's drift, the barn's drawer). The house needs the last two (the hearth, the desk).
 export const YARD = ['lichen', 'key', 'handle', 'matches'];
@@ -101,8 +104,8 @@ export function goal({ story, volunteer, finale, bag }) {
   if (!story.opened) return !yardDone(bag) ? 'yard' : story.left ? 'bookcase' : 'room';
   if (!knowsSantas(story.seen)) return 'log';
   if (!story.told) return 'secret';
-  if (!signedUp(volunteer)) return finale.endings.length ? 'endings' : 'join';
+  if (!signedUp(volunteer)) return allEndings(finale) ? 'done' : finale.endings.length ? 'endings' : 'join';
   if (!finale.twist) return points(volunteer) >= 2 ? 'cord' : 'jobs';
   if (!finale.wish && !finale.stayed) return points(volunteer) >= WISH_COST ? 'wish' : 'jobs';
-  return finale.endings.length === 4 ? 'done' : 'endings';
+  return allEndings(finale) ? 'done' : 'endings';
 }

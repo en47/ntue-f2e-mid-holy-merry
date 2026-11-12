@@ -31,7 +31,7 @@ export const TWIST = '荷莉的願望，二十多年前就實現了，她卻每�
 export const PENCIL = '（最下面的鉛筆字，現在看得清楚了：「我的願望已經實現了。不過，我想再多幫一個人。—— H.」）';
 
 // Three stamps buy a wish; another substitute grants it and leaves a note in their own hand.
-export const WISH = { title: '用三個章，許一個願望', invite: '守則上寫著：集到三個章，就能許一個願望，帶著它回家。你已經有三個章了，要許一個願望嗎？', sign: '蓋章許願', made: wish => `你許了願：${wish}。` };
+export const WISH = { title: '用三個章，許一個願望', invite: '守則上寫著：集到三個章，就能許一個願望，帶著它回家。你已經有三個章了，要許一個願望嗎？', sign: '蓋章許願', made: wish => `你許了願：${wish}。`, sure: wish => `許了願，就會帶著它回家。確定要用三個章，許「${wish}」嗎？`, yes: '確定許願', no: '再想想' };
 export const WISHES = [
   { id: 'sleigh', name: '坐一次聖誕老人的雪橇', by: 'K.', hand: 'k', note: '你的願望，交給我了。抓緊扶手，我們繞村子一圈！' },
   { id: 'snow', name: '看一場好大的雪', by: 'E.', hand: 'e', note: '你的願望，交給我了。今天下的雪，都是給你的。' },
@@ -40,19 +40,43 @@ export const WISHES = [
 ];
 
 // Once all four jobs are done: the early shift on Christmas morning, still unsigned.
-export const STAY = { invite: '12/25 早班還沒有人簽名。四件工作你都做過了，要簽上你的縮寫，留下來幫忙嗎？', sign: '簽上早班', tag: '最右邊的掛勾上，掛著你的名牌。' };
+export const STAY = { invite: '12/25 早班還沒有人簽名。四件工作你都做過了，要簽上你的縮寫，留下來幫忙嗎？', sign: '簽上早班', tag: '最右邊的掛勾上，掛著你的名牌；帽架的第六個掛鉤，掛著你的帽子。', sure: '簽了 12/25 早班，明天早上就換你出發。確定要留下來嗎？', yes: '確定簽名', no: '再想想' };
+// The world signpost in the yard: the only way home (ending A), and only for a visitor who knows the secret and is not
+// signed up; a volunteer finds a card hung on it; anyone else reads only what the signpost says.
+export const SIGNPOST = { title: '世界路標', home: '踏上回家的路', sure: '要離開聖誕村、踏上回家的路了嗎？村子的小秘密，會一直放在你心裡。', yes: '確定回家', no: '再逛逛', volunteer: '路標上掛著一張小卡：「替身要先在登記簿劃掉縮寫，才能踏上回家的路。」', close: '好 ✓' };
+// All four jobs done, back in the middle of the room: Santa asks, once, what comes next. Nothing ends until it is chosen
+// at the register or the shift log.
+export const ASK = {
+  question: '聖誕老人放下茶杯：「你的工作已經完成了。想再看看這間小屋，還是準備繼續旅程呢？」',
+  options: [['explore', '繼續探索', '「慢慢逛，不急。小屋的門一直開著。」'], ['wish', '帶著願望離開', '「那就到小房間的登記簿，用你的章許一個願望吧。」'], ['stay', '自願留下', '「交接表上 12/25 的早班還空著。簽上你的名字，明天早上就換你出發。」']],
+  wished: '「你已經許過願了。想留下來的話，交接表上的早班還空著。」',
+};
 
-// The endings. A: you knew, and went home; B: a wish granted; C: staying on; D: knowing why Holly stayed, and doing as
-// she did (with B or C; the most when you wished and stayed both). Each is told once, in a little paper theatre of its
-// own (cabin-ending.js), under its title in paper letters (`en`, from scripts/build-title-glyphs.mjs).
+// The endings. A: you knew, and went home; B: a wish granted; C: staying on. Each is told once each time it is chosen, in
+// a little paper theatre of its own (cabin-ending.js), under its title in paper letters (`en`, from
+// scripts/build-title-glyphs.mjs).
 export const ENDINGS = {
   A: { title: '結局 A　普通訪客', en: 'Going Home', lines: ['聖誕老人送你到門口，塞給你一張明信片：', '「謝謝你來小屋作客。村子的小秘密，就放在你心裡吧。」', '「哪天想回來幫忙，登記簿最下面那一格，永遠留給你。」'], sign: '—— S.' },
   B: { title: '結局 B　願望旅人', en: 'Wish Granted', lines: ['你用三個章，換了一個願望。', '替身們把它送到了。你帶著實現的願望，和一段北極的回憶回家。'] },
-  C: { title: '結局 C　自願留下', en: 'Staying On', lines: ['你在 12/25 早班簽上了自己的縮寫。', '名牌板最右邊的空掛勾，現在掛著你的名牌。明天早上，換你出發。'] },
-  D: { title: '結局 D　真正的聖誕奇蹟', en: 'Christmas Miracle', lines: ['登記簿裡夾著一封信，信封上寫著你的縮寫。'] },
+  C: { title: '結局 C　自願留下', en: 'Staying On', lines: ['你在 12/25 早班簽上了自己的縮寫。', '名牌板最右邊的空掛勾掛上了你的名牌，帽架的第六個掛鉤，也掛上了你的帽子。明天早上，換你出發。'] },
 };
-// The theatre's buttons, and the line D ends on.
-export const THEATRE = { skip: '跳過', again: '再看一次', close: '回到村子', next: '繼續', last: '原來，聖誕老人從來不只是一個人。' };
+// The truer telling of B or C, for whoever understood what Holly knew: after it, the village at night, every name lit and
+// the light passed on to every window, with Holly's letter (the old ending D, no longer told on its own).
+export const TRUTH = { kicker: '＋真相', star: '真相', lines: ['登記簿裡夾著一封信，信封上寫著你的縮寫。'] };
+// The postcard after an ending, to keep (saved as a picture): its words by ending, and the deeper one for a true telling.
+export const POSTCARD = {
+  title: '紀念明信片', save: '存成圖片', home: '回到 Home', stay: '留在村子 ✓', file: kind => `holy-merry-postcard-${kind.toLowerCase()}.png`,
+  from: '北極　聖誕村', date: '2026.12.25',
+  lines: {
+    A: ['謝謝你來小屋作客。', '村子的小秘密，就放在你心裡吧。'],
+    B: ['你的願望，替身們送到了。', '帶著它，和一段北極的回憶回家。'],
+    C: ['12/25 早班，換你出發。', '你的名牌和帽子，掛在第六個掛鉤上。'],
+  },
+  truth: ['Dear Christmas Traveler,', 'Santa was never just one person.', '原來，聖誕老人從來不只是一個人。'],
+  sign: { A: '—— S.', B: '—— S.', C: '—— S.', truth: '—— H.' },
+};
+// The theatre's buttons, and the line a true telling ends on.
+export const THEATRE = { skip: '跳過', again: '再看一次', close: '回到村子', last: '原來，聖誕老人從來不只是一個人。' };
 export const HOLLY = {
   greeting: mark => `親愛的 ${mark}.：`,
   body: '你也看到那一頁了吧。我的願望，在 2003 年就實現了。那年平安夜，替身們把媽媽送回了家。\n從那天起我就想：換我來，把這份溫暖，再傳給下一個人。',

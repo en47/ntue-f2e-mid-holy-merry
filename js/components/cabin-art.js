@@ -651,18 +651,22 @@ export function sortingRack({ paper }, { width, height }) {
   }
 }
 // Six pegs: a hat on each of the first five, one for each substitute in the name tags' order, Holly's the smallest (the
-// one she wore the year she first came); the sixth is empty.
-export const HAT_SIZES = { N: 1, K: .9, H: .46, E: .82, O: .78 };
-export function hatPegs({ paper }, { width, height }) {
+// one she wore the year she first came); the sixth is empty. `mine`: the visitor has signed the early shift, and their hat
+// hangs on the sixth (with a gold star on its band, like their name tag).
+export const HAT_SIZES = { N: 1, K: .9, H: .46, E: .82, O: .78, mine: .86 };
+export function hatPegs({ paper }, { width, height }, state = {}) {
   shape('rect', { x: 0, y: height * .12, width, height: height * .1, rx: 6, fill: WOOD_LIT }, paper);
   for (let i = 0; i < 6; i++) {
     const cx = width * (.09 + i * .164), top = height * .2;
     shape('circle', { cx, cy: top, r: 7, fill: WOOD }, paper);
-    const char = SUBSTITUTES[i]?.[0]; if (!char) continue;
+    const char = SUBSTITUTES[i]?.[0] ?? (state.mine ? 'mine' : null); if (!char) continue;
     const size = HAT_SIZES[char], h = height * .7 * size, w = width * .15 * size;
     shape('path', { d: `M${cx - w / 2} ${top + h}C${cx - w * .4} ${top + h * .3} ${cx + w * .2} ${top} ${cx + w * .55} ${top + h * .35}L${cx + w / 2} ${top + h}Z`, fill: RED }, paper);
     shape('rect', { x: cx - w * .58, y: top + h - h * .16, width: w * 1.16, height: h * .2, rx: h * .1, fill: SNOW }, paper);
     shape('circle', { cx: cx + w * .56, cy: top + h * .38, r: Math.max(5, w * .12), fill: SNOW }, paper);
+    if (char !== 'mine') continue;
+    const y = top + h - h * .06, r = h * .13;
+    shape('path', { d: Array.from({ length: 10 }, (_, k) => { const a = -Math.PI / 2 + k * Math.PI / 5, d = k % 2 ? r * .45 : r; return `${k ? 'L' : 'M'}${(cx + Math.cos(a) * d).toFixed(1)} ${(y + Math.sin(a) * d).toFixed(1)}`; }).join('') + 'Z', fill: GOLD }, paper);
   }
 }
 

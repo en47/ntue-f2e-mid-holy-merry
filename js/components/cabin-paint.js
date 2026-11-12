@@ -29,7 +29,7 @@ export function outfitBoard(item) {
 // loaded, the reindeer's
 // trough eaten from (its gold showing, then taken), the snow at the snowman's feet dug, the barn's drawer pulled out (with
 // the matchbox, then without), the coat gone from its peg while Santa is out, and the back wall open behind the bookcase.
-const VARIANTS = { sign: [1, 2, 3, 4].map(stars => ({ stars })), mailbox: [{ open: true }], sleigh: [{ loaded: true }], trough: [{ eaten: true }, { eaten: true, taken: true }], 'snow-pile': [{ dug: true }], 'hoist-drawer': [{ open: true, matches: true }, { open: true, matches: false }], 'front-in': [{ coat: false }], back: [{ secret: true }], 'secret-tags': [{ mine: true }] };
+const VARIANTS = { sign: [1, 2, 3, 4].map(stars => ({ stars })), mailbox: [{ open: true }], sleigh: [{ loaded: true }], trough: [{ eaten: true }, { eaten: true, taken: true }], 'snow-pile': [{ dug: true }], 'hoist-drawer': [{ open: true, matches: true }, { open: true, matches: false }], 'front-in': [{ coat: false }], back: [{ secret: true }], 'secret-tags': [{ mine: true }], 'secret-hats': [{ mine: true }] };
 const SHEETS = [...[...BOARDS, ...WORLD].map(board => [board.id, board]), ...Object.entries(PIECES), ...BOOK_SHEETS.map(sheet => [sheet.id, sheet]), ...WARDROBE.map(item => [`outfit-${item.id}`, outfitBoard(item)])];
 // Each sheet's look when the page opened: a game changes board.state later, and the picture only matches the first look.
 const FIRST = new Map(SHEETS.map(([name, board]) => [name, JSON.stringify(board.state ?? null)]));

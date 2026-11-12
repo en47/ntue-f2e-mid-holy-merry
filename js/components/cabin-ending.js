@@ -2,22 +2,25 @@
 // layer at a time (sky, hills, the village, the snow in front) and plays its scene, while the words are written in beside
 // it a character at a time under the ending's title in paper letters. Skipping (the button or Esc) puts every piece where
 // it ends; under reduced motion the scene simply stands finished. The pieces are in cabin-ending-art.js and their moves in
-// santa.css; which ending, and when, is decided by cabin-story.js (through cabin-play.js).
+// santa.css; which ending, and when, is decided by cabin-story.js (through cabin-play.js). A true telling of B or C
+// (`truth`) goes on into a second act once the first has played: the village at night, every name lit and the light passed
+// on to every window, with Holly's letter, then the last line.
 import { mountTitleArt } from './title-art.js';
-import { frame, goingHome, miracle, stayingOn, wishGranted } from './cabin-ending-art.js';
-import { ENDINGS, HOLLY, THEATRE, WISHES } from '../data/cabin-finale.js';
+import { PASS, VILLAGE, frame, goingHome, miracle, stayingOn, wishGranted } from './cabin-ending-art.js';
+import { ENDINGS, HOLLY, THEATRE, TRUTH, WISHES } from '../data/cabin-finale.js';
 import { MORNING } from '../data/cabin-secret.js';
 
-const SCENES = { A: goingHome, B: wishGranted, C: stayingOn, D: miracle };
+const SCENES = { A: goingHome, B: wishGranted, C: stayingOn };
+// The second act's length and when its last window is lit (cabin-ending-art.js `miracle`).
+const ACT = { length: 17, last: PASS.from + VILLAGE.length * PASS.step + PASS.travel };
 const PACE = .055, PAUSE = .6;
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 
-// `next`: another ending follows this one (D after B or C), so the way out says so.
-export function endingTheatre({ host, ending, mark = '', both = false, wish = null, sound, next = false, onClose = () => {} }) {
+export function endingTheatre({ host, ending, truth = false, mark = '', both = false, wish = null, sound, onClose = () => {} }) {
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches, before = document.activeElement, timers = new Set();
   // The dialog itself takes the focus as it opens (Tab reaches 跳過 next), so nothing is ringed while the scene plays.
   const theatre = element('dialog', 'ending-theatre', host); theatre.dataset.ending = ending; theatre.tabIndex = -1;
-  let started = 0, length = 0, playing = true;
+  let started = 0, length = 0, playing = true, raise = null;
   const after = (seconds, fn) => { const id = setTimeout(() => { timers.delete(id); fn(); }, seconds * 1000); timers.add(id); };
   // A line written in a character at a time from `at` seconds (in someone's `hand`); screen readers get it whole.
   // Returns when it is done.
@@ -37,22 +40,32 @@ export function endingTheatre({ host, ending, mark = '', both = false, wish = nu
     mountTitleArt(heading, `ending-${ending.toLowerCase()}`);
     const art = heading.querySelector('.title-art'); art.style.maxWidth = `calc(5.6rem * ${art.style.aspectRatio})`;
     heading.querySelectorAll('.title-letter').forEach((letter, i) => { letter.style.animationDelay = ''; letter.style.setProperty('--drop', `${(1.2 + i * .07).toFixed(2)}s`); letter.style.setProperty('--wobble', `${-(i * 1.37) % 3.4}s`); });
-    element('p', 'theatre-kicker', words, title);
+    element('p', 'theatre-kicker', words, truth ? `${title}${TRUTH.kicker}` : title);
     let at = play.text;
     for (const line of lines) at = write(words, 'theatre-line', line, at);
     if (sign) at = write(words, 'theatre-line theatre-sign', sign, at);
-    // B: the note left by whoever granted the wish, once it is pinned up. C: the early shift, signed. D: Holly's letter,
-    // then the last line, slowly, once the whole village is lit.
+    // B: the note left by whoever granted the wish, once it is pinned up. C: the early shift, signed. Told true: Holly's
+    // letter in the second act, then the last line, slowly, once the whole village is lit.
     if (ending === 'B') { const given = WISHES.find(each => each.id === wish) || WISHES[2]; at = write(words, 'theatre-line theatre-note', `「${given.note}」——\u00a0${given.by}`, Math.max(at, play.note), { hand: given.hand }); }
     if (ending === 'C') at = write(words, 'theatre-line theatre-log', `${MORNING.date}　${MORNING.shift}　${mark}.`, Math.max(at, play.log), { hand: 'you' });
-    if (ending === 'D') {
-      for (const line of [HOLLY.greeting(mark), HOLLY.body, both ? HOLLY.both : HOLLY.one]) at = write(words, 'theatre-line theatre-letter', line, at, { hand: 'h' });
+    let over = play.length;
+    if (truth) {
+      const start = play.length - .5;
+      raise = () => {
+        raise = null;
+        const act = document.createElement('div'); act.className = 'theatre-act'; scene.insertBefore(act, scene.querySelector('.theatre-frame'));
+        miracle(act, { mark });
+      };
+      after(start, () => raise?.());
+      at = Math.max(at, start + 3);
+      for (const line of [...TRUTH.lines, HOLLY.greeting(mark), HOLLY.body, both ? HOLLY.both : HOLLY.one]) at = write(words, 'theatre-line theatre-letter', line, at, { hand: 'h' });
       at = write(words, 'theatre-line theatre-letter theatre-sign', HOLLY.sign, at, { hand: 'h' });
-      at = write(words, 'theatre-line theatre-last', THEATRE.last, Math.max(at, play.last), { pace: .14 });
+      at = write(words, 'theatre-line theatre-last', THEATRE.last, Math.max(at, start + ACT.last), { pace: .14 });
+      over = start + ACT.length;
     }
-    length = Math.max(play.length, at + .4); theatre.style.setProperty('--end', `${length.toFixed(2)}s`);
+    length = Math.max(over, at + .4); theatre.style.setProperty('--end', `${length.toFixed(2)}s`);
     const actions = element('div', 'theatre-actions', words);
-    const again = element('button', 'theatre-again', actions, THEATRE.again), close = element('button', 'theatre-close', actions, next ? THEATRE.next : THEATRE.close);
+    const again = element('button', 'theatre-again', actions, THEATRE.again), close = element('button', 'theatre-close', actions, THEATRE.close);
     again.type = 'button'; close.type = 'button';
     skip.addEventListener('click', finish);
     again.addEventListener('click', () => { sound.play('pick'); timers.forEach(clearTimeout); timers.clear(); build(); });
@@ -71,7 +84,7 @@ export function endingTheatre({ host, ending, mark = '', both = false, wish = nu
     if (active === theatre || !theatre.contains(active) || active.classList.contains('theatre-skip')) theatre.querySelector('.theatre-close').focus({ preventScroll: true });
   }
   // Everything to where it ends: the finished pieces stop there, the snow and the waving go on.
-  function finish() { theatre.classList.add('is-skipped'); started = performance.now() - length * 1000; timers.forEach(clearTimeout); timers.clear(); done(); }
+  function finish() { theatre.classList.add('is-skipped'); started = performance.now() - length * 1000; timers.forEach(clearTimeout); timers.clear(); raise?.(); done(); }
   function end(chain = true) {
     if (!theatre.isConnected) return;
     playing = false; timers.forEach(clearTimeout); timers.clear();
