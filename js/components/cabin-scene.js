@@ -562,15 +562,15 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     };
     const base = board.nudge ?? 0, box = new THREE.Group(), floorY = fh * .14;
     box.position.set(((x0 + x1) / 2 - .5) * board.w, (1 - y1) * board.h, base);
-    // The furniture is a standing sheet with its top painted on: whatever of the box is still inside would show through
-    // above it, so all but the front is only there while the drawer is out.
+    // The furniture is a standing sheet with its top painted on, so nothing may go behind it (it would show above the
+    // painted top): the box is only ever as deep as it has come out. Its floor and sides reach from its front back to the
+    // furniture's face, the floor showing the front part of its picture; its back, inside the furniture, is never seen.
     const face = plane(front, fw, fh), inside = new THREE.Group(); face.position.set(0, fh / 2, .004);
-    const bottom = plane(floor, lw, lh); bottom.rotation.x = -Math.PI / 2; bottom.position.set(0, floorY, .004 - lh / 2);
-    for (const x of [-1, 1]) { const wall = plane(side, sw, sh); wall.rotation.y = Math.PI / 2; wall.position.set(x * lw / 2, floorY + sh / 2, .004 - sw / 2); inside.add(wall); }
-    const back = plane(side, lw, sh); back.position.set(0, floorY + sh / 2, .004 - depth);
-    inside.add(back, bottom); box.add(inside, face); holder.add(box);
-    const open = look.open ? 1 : 0; inside.visible = Boolean(open);
-    drawers.set(id, { box, face, bottom, inside, base, slide, open, out: open, shown: { front: look.front ?? {}, inside: look.inside ?? {} } });
+    const bottom = plane(floor, lw, lh); bottom.rotation.x = -Math.PI / 2; bottom.position.y = floorY;
+    const walls = [-1, 1].map(x => { const wall = plane(side, sw, sh); wall.rotation.y = Math.PI / 2; wall.position.set(x * lw / 2, floorY + sh / 2, 0); inside.add(wall); return wall; });
+    inside.add(bottom); box.add(inside, face); holder.add(box);
+    const open = look.open ? 1 : 0;
+    drawers.set(id, { box, face, bottom, walls, inside, base, slide, depth, open, out: open, shown: { front: look.front ?? {}, inside: look.inside ?? {} } });
     restyleDrawer(id); redraw();
   }
   // A drawer's front or floor changed: its piece in its new look.
@@ -716,7 +716,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       mark.position.set((i ? 1 : -1) * BOOKMARKS.x, BOOKMARKS.rest + musicbox.marks * BOOKMARKS.rise, BOOKMARKS.z);
       mark.rotation.z = still ? 0 : Math.sin(t * 1.3 + i * 2) * .05 * musicbox.marks;
     });
-    for (const [index, material] of twinkles.entries()) material.opacity = still ? 1 : .72 + Math.sin(t * 2.6 + index) * .28;
+    for (const [index, material] of twinkles.entries()) material.opacity = still ? 1 : .8 + Math.sin(t * 2.6 + index) * .2;
     for (const [index, holder] of candles.entries()) {
       holder.scale.set(1 + (still ? 0 : Math.sin(t * 8.3 + index * 2) * .05), 1 + (still ? 0 : Math.sin(t * 11.1 + index) * .07 + Math.sin(t * 5.7 + index * 3) * .05), 1);
       holder.rotation.z = still ? 0 : Math.sin(t * 4.1 + index) * .06;
@@ -788,7 +788,14 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (hoist.tag) { const u = (t - hoist.swing) / 1.4; hoist.tag.rotation.z = !still && u < 1 ? Math.sin(u * Math.PI * 5) * .35 * (1 - u) : 0; }
     if (hoist.drawer) { hoist.out += (hoist.slide - hoist.out) * (still ? 1 : .12); hoist.drawer.position.z = .03 + hoist.out * .07; hoist.drawer.scale.setScalar(1 + hoist.out * .04); }
     // The desk's and the music box's drawers slide out of their slots, or back in.
-    for (const drawer of drawers.values()) { drawer.out += (drawer.open - drawer.out) * (still ? 1 : .14); if (Math.abs(drawer.open - drawer.out) < .002) drawer.out = drawer.open; drawer.box.position.z = drawer.base + drawer.out * drawer.slide; drawer.inside.visible = drawer.out > .01; }
+    for (const drawer of drawers.values()) {
+      drawer.out += (drawer.open - drawer.out) * (still ? 1 : .14); if (Math.abs(drawer.open - drawer.out) < .002) drawer.out = drawer.open;
+      const reach = drawer.out * drawer.slide, share = reach / drawer.depth;
+      drawer.box.position.z = drawer.base + reach; drawer.inside.visible = reach > .002;
+      if (!drawer.inside.visible) continue;
+      drawer.bottom.scale.y = share; drawer.bottom.position.z = .004 - reach / 2; drawer.bottom.material.map.repeat.y = share;
+      for (const wall of drawer.walls) { wall.scale.x = share; wall.position.z = .004 - reach / 2; }
+    }
     for (const puff of smoke) {
       const life = still ? puff.userData.phase : (t * .18 + puff.userData.phase) % 1;
       puff.position.set(FIRE.x + life * 1.25, 3.38 + life * .6, FIRE.z); puff.scale.set(.3 + life * .4, .22 + life * .28, 1);

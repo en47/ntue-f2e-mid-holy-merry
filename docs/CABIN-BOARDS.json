@@ -428,11 +428,11 @@
       "bytes": 46076
     },
     "hi/decor-front-in-lights.webp": {
-      "fingerprint": "c1e5da52afae637b951f169b28b3d62aaf94166cab0839e9d95bca4afd8d6f89",
-      "sha256": "29e9b14131f208221a4f3de8b0efff96fd91d30be38158630179eb3671de4c19",
+      "fingerprint": "605df8492552f8f9fd831e8c3a56bf8dd7cc06e99853cb92b5e7ba0cf0ad29a9",
+      "sha256": "8c1589cc8fc2f47a1b793c3884c3e0c33cf79dbaa103f2f5d1ac256e2e37bbc7",
       "width": 560,
       "height": 568,
-      "bytes": 5642
+      "bytes": 4480
     },
     "hi/decor-front-in-view.webp": {
       "fingerprint": "62d6c2e3bf9ba4b686bd8ba4fd95b8c0afde94d3c9ab0f17f8989d61d55454ac",
@@ -456,11 +456,11 @@
       "bytes": 59758
     },
     "hi/decor-left-lights.webp": {
-      "fingerprint": "01525979332a235103c3a521e731cbf968c28f8b1cacd1fb39ec1c355ba71a2a",
-      "sha256": "0edb22bdb823a746c794e9e18112ddc26b906fbd07c88c106813bedbd64c1cdd",
+      "fingerprint": "80af4294eb723624632f58988f117d090092bde578908dc3af27205580f650af",
+      "sha256": "7d6e0dde9519d3bace018f3b3a21f903b81c141e8a2b571045c3d190902d9d9e",
       "width": 656,
       "height": 656,
-      "bytes": 6502
+      "bytes": 5108
     },
     "hi/decor-left-view.webp": {
       "fingerprint": "f939fd5e755b65db42daab6b48641c67c967f6c2ab19f69e854be1d7870bb0a8",
@@ -491,11 +491,11 @@
       "bytes": 48424
     },
     "hi/decor-right-lights.webp": {
-      "fingerprint": "a7742ca736c99d6fe3e47507d7867431cefb9cf6366ac24cfcb2b5676207c697",
-      "sha256": "9046cf4c9b41188a8ac59b24f73b8e3c102f34702c3ebd4d50f7f1d9793cde78",
+      "fingerprint": "30740a9abb4a73791f472eff8487b6e2d3302dcf6086d9eceeba728810f3ff11",
+      "sha256": "3cc732226123c5a704da1b6448a7fd353645a7183d806ff1e8bef816173d2db5",
       "width": 576,
       "height": 600,
-      "bytes": 5732
+      "bytes": 4640
     },
     "hi/decor-right-view.webp": {
       "fingerprint": "d9a4e7b966b9a916061f1af7231fa7510ac324f829c7b20a53d07433505327b2",
@@ -1499,18 +1499,18 @@
       "bytes": 34838
     },
     "hi/tree-lights.webp": {
-      "fingerprint": "c3369f973ad569d9aa6092577a466e30f575a3c2e03fe9f937d58b20ed999fcc",
-      "sha256": "72f2b27b3d6dfed9fdcf5ddf7d7c107e2ecf99e33c596a8921f9501d4e232a87",
-      "width": 370,
-      "height": 680,
-      "bytes": 7690
+      "fingerprint": "fe49daaf74dfe9ffbc80ef21a73d44d187f52371f6ba966f36fbebf11250fb34",
+      "sha256": "e139a846ffa823febfe6bd7027768654f59b52b08b38b00be6f2aa9f55f890f0",
+      "width": 814,
+      "height": 1496,
+      "bytes": 19488
     },
     "hi/tree.webp": {
-      "fingerprint": "98c466750bab0b214454b988f9951585076b6457ee3f7ccc09c51970d90eca7c",
-      "sha256": "6bf2697ca06b2deda74ba211f7d4149619bbe1af2f7596e40289be75038ecc30",
-      "width": 370,
-      "height": 680,
-      "bytes": 36730
+      "fingerprint": "f81ed692d7622b74461a4935ab163b4075e09a1c75d8d9f36895c8616454b8be",
+      "sha256": "705a5a13691b8bde1709babcb35692e8f39fb601b0b50939cedc65c10911b9e1",
+      "width": 814,
+      "height": 1496,
+      "bytes": 104352
     },
     "hi/trough--eaten-true--taken-true.webp": {
       "fingerprint": "779c349ff706322d57ac9f5187400b2957907c3f1da22d1aaee2d00c9236f35a",
@@ -2024,11 +2024,11 @@
       "bytes": 31936
     },
     "large/decor-front-in-lights.webp": {
-      "fingerprint": "bc4d2244531f4da913ee6184a56dc34e30292a0921666d0b8dbf0813efc0d451",
-      "sha256": "d13b5429636699f9d334a721f4936f7e29a53d0338aa03219cd8808fd17af1e9",
+      "fingerprint": "ebce3e303a67d7b94e53e9426e34d2b3cbf58b884a8f0f46371548510f234c61",
+      "sha256": "b75173382006abbfa75a48c6a7c61c91a440962d9f347a5ba72343cd05852dbb",
       "width": 420,
       "height": 426,
-      "bytes": 3894
+      "bytes": 2904
     },
     "large/decor-front-in-view.webp": {
       "fingerprint": "17d39f5bf3a499c89bb917bec13020ec6b9a382bb98c2f0e97ab9e477ced359a",
@@ -2052,11 +2052,11 @@
       "bytes": 41812
     },
     "large/decor-left-lights.webp": {
-      "fingerprint": "35dbf4365b8f20a63d5129ec1f03a20697a8912080cf1bc79f6340c22bfbf5b8",
-      "sha256": "5b94dbaaa68213214c65d2480f9255fe749e1432b013525db008ce126c39fb1e",
+      "fingerprint": "44c677617d5ca85432e21391662d42c19b08317bf6471692c5f0169254256f79",
+      "sha256": "0bd6f80f34ae1f7cf014a2d33ea0b83d34c26255e580fc7fcbfa17937861cd10",
       "width": 492,
       "height": 492,
-      "bytes": 4928
+      "bytes": 3836
     },
     "large/decor-left-view.webp": {
       "fingerprint": "5ac0fccafbf274b4ca0df928c3eeb51b7b29f79cf231b3c68bdf46ea84dc9e14",
@@ -2087,11 +2087,11 @@
       "bytes": 34148
     },
     "large/decor-right-lights.webp": {
-      "fingerprint": "af12c8ee2d5c584d10596c06a3ef582507b4001127341bad2e99d89a1aa27a10",
-      "sha256": "da5f9e4849ea238dbe4c0199670612303c1b0d99e2bfad131dd6e7fe4937e29b",
+      "fingerprint": "51a3440f6b7138f06cf6217714ffeb2476b8ae444f18bc9c8d22e4442375448c",
+      "sha256": "2d71f9e68b7a50e41a2c18b908500af5e8a6e5a1034e813bcef207c414a85335",
       "width": 432,
       "height": 450,
-      "bytes": 4212
+      "bytes": 3392
     },
     "large/decor-right-view.webp": {
       "fingerprint": "7d72755edb35bd1f56764658d51a826ecb9891182a0db04e725dcade647b7ef1",
@@ -3095,18 +3095,18 @@
       "bytes": 22966
     },
     "large/tree-lights.webp": {
-      "fingerprint": "e77ca0d3a8b367bf893922f5484ceb6544dabcb48d86ad029510879c6e145574",
-      "sha256": "62035de5b9d78e24826f0aa1296c93086df8c8af17de945139a72c40810e7ca8",
-      "width": 278,
-      "height": 510,
-      "bytes": 5872
+      "fingerprint": "47cce03b799a96a7e5c29d5ebf1ca04e97432c30e74d70d1cca7a16ed6b845f3",
+      "sha256": "7d43750948ea412f0d12e9a7261077b88fb7ed0d5ea9139f57d9a9b0a4b04c94",
+      "width": 611,
+      "height": 1122,
+      "bytes": 14240
     },
     "large/tree.webp": {
-      "fingerprint": "d7a6d61a43d45e6a220aa7417ea1dcc09be1cbfb7d0ab412ad4896b6ad3fab1f",
-      "sha256": "c72693325f466de136214c056a84a0133c949e934e77cf7beeba184d39f07ae1",
-      "width": 278,
-      "height": 510,
-      "bytes": 24658
+      "fingerprint": "885fd1a81767b06f645bb69b246f3692a8733479a424c320e046817f72569ef0",
+      "sha256": "0d1e4e44f380fbccbf05ce4ef5f5b9bd67a3b8e4d6257d853a168ef534fca29b",
+      "width": 611,
+      "height": 1122,
+      "bytes": 72746
     },
     "large/trough--eaten-true--taken-true.webp": {
       "fingerprint": "4a75491f8ef0c17d7356da74cc72a613989bb19c2c33746e035ad52c8dea4175",
@@ -3620,11 +3620,11 @@
       "bytes": 13422
     },
     "small/decor-front-in-lights.webp": {
-      "fingerprint": "9c7f82dd1e5a72047fbac998937ba300894b64f63a9c91ecde8578743e317b00",
-      "sha256": "ba4c533b5bed9d1ad6f55bccb2dc357023a7ec411ab4c2b904e9fc3747b08bab",
+      "fingerprint": "2f9560b9bd8d18e01c13456c30de55c4d17d2bae8f9afa72fa6856ac7470c63d",
+      "sha256": "39706771db657987e1dd1118b0c6179b7971030881aa32a9304d46df488e934a",
       "width": 280,
       "height": 284,
-      "bytes": 2062
+      "bytes": 1728
     },
     "small/decor-front-in-view.webp": {
       "fingerprint": "e328627969dbfd313a5f77e258772cb96a2366b446b302cfb3dc822082d4f82a",
@@ -3648,11 +3648,11 @@
       "bytes": 17260
     },
     "small/decor-left-lights.webp": {
-      "fingerprint": "4b0b3e258379a0bd96d8010526fb0741ea68c4fc3947f5a3aabed492b853d62c",
-      "sha256": "0176f9153c5dd4f24215bdcac39e911ace3ad1c35c750c12e834bf901cb9e1c8",
+      "fingerprint": "fcc187ad5c7428ea18846f9e984c83279ccdc1a1db9f038939a4352fa3d575f6",
+      "sha256": "10a9613238e0d73163a905f5d7c9461868b8ff18d7963707d413c8cbf3f20936",
       "width": 328,
       "height": 328,
-      "bytes": 2504
+      "bytes": 2128
     },
     "small/decor-left-view.webp": {
       "fingerprint": "49b5b69fd0c225fab9a71a99b18acd9b77393278f889aa36ba838c96283bf37e",
@@ -3683,11 +3683,11 @@
       "bytes": 13640
     },
     "small/decor-right-lights.webp": {
-      "fingerprint": "ee13324c05357f0beb964c94b68b688c9c95333a2e571c552e0c2ee63bd35460",
-      "sha256": "1c283a8c7f79268a12fbce416bc862637cb9f8220b0a841954350ba643a41760",
+      "fingerprint": "cfcac060c9d84ede5aa0d0c7d8dab58b0d5198f6bf423bd3e1e7efc8766a6edd",
+      "sha256": "5b64f45df008fd843fb409e418e5931a477d5b9a2cf961b704cdc1de928eb205",
       "width": 288,
       "height": 300,
-      "bytes": 2214
+      "bytes": 2048
     },
     "small/decor-right-view.webp": {
       "fingerprint": "e3f751ab40a82dd0188d433f73c203773203af81c45e709d3cf66c11e46dab66",
@@ -4691,18 +4691,18 @@
       "bytes": 5968
     },
     "small/tree-lights.webp": {
-      "fingerprint": "81fc8ad0dcadb62cdde21b63f78e009262be2c4301c190f4e40b8fd8c279b0f5",
-      "sha256": "e35b703cabde4b46ad35409ef6ab2e22c51ef9d80ab944ec1cc528f081de9ef4",
-      "width": 185,
-      "height": 340,
-      "bytes": 3232
+      "fingerprint": "1f68de4631f9abac904240cbc12ec8eb84f4fe8a6fc04f1fceb7487fd4329150",
+      "sha256": "5e9b848e0b77ed253cdf9256a99a41176fb5731a2b33791b75dcfeb82733933a",
+      "width": 407,
+      "height": 748,
+      "bytes": 7976
     },
     "small/tree.webp": {
-      "fingerprint": "291b70f017bb03f4057dc3a584cdc88b3bb17288fdb455ac29bfb45c4a19802f",
-      "sha256": "8307a609f8a5237fa955132e10ca3fba2b61d84bdedb2ecef1ad7604253698e3",
-      "width": 185,
-      "height": 340,
-      "bytes": 9638
+      "fingerprint": "bee7009a9be557252ff32657dbbc9c33d1bc4265246d7c13d91eca36653d14d7",
+      "sha256": "db5add04be33124bc58b85d4361a156c064b344ae17c84a47454e7a7e2248469",
+      "width": 407,
+      "height": 748,
+      "bytes": 26204
     },
     "small/trough--eaten-true--taken-true.webp": {
       "fingerprint": "a1203f89de3369f41f16b5525e7e6ba04b8d72aeee8091310c61e0754f664d21",

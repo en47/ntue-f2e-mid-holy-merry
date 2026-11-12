@@ -446,14 +446,14 @@ await test('Santa 回饋修正：真的抽屜（書桌、音樂盒）、卡片�
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [art, paint, scene, desk, music, play, secret, notebook, progress, santa] = await Promise.all(['js/components/cabin-art.js', 'js/components/cabin-paint.js', 'js/components/cabin-scene.js', 'js/components/cabin-desk.js', 'js/components/cabin-musicbox.js', 'js/components/cabin-play.js', 'js/components/cabin-secret.js', 'js/components/cabin-notebook.js', 'js/services/cabin-progress.js', 'js/santa.js'].map(read));
   assert.ok(art.includes('export const DRAWERS = {') && art.includes("fill: '#2b1d16'") && art.includes("fill: '#2a1412'") && paint.includes("'desk-drawer-front': [{ key: true }], 'desk-drawer-inside': [{ taken: true }], 'musicbox-drawer-front': [{ undone: true }], 'musicbox-drawer-inside': [{ empty: true }]"), 'Each drawer is a box of paper pieces (cut ahead, with their looks) in a dark slot drawn on its furniture');
-  assert.ok(scene.includes('async function buildDrawer(id)') && scene.includes('drawer.inside.visible = drawer.out > .01;') && scene.includes('drawerRect(id) {'), 'The drawers slide in the scene; while shut only the front is there');
+  assert.ok(scene.includes('async function buildDrawer(id)') && scene.includes('drawer.bottom.scale.y = share;') && !scene.includes('const back = plane(side') && scene.includes('drawerRect(id) {'), 'The drawers slide in the scene; while shut only the front is there');
   assert.ok(!desk.includes("paperLayer(drawer,") && !music.includes("paperLayer(drawer,") && desk.includes("cabin.drawer('desk', { open })") && music.includes("cabin.drawer('musicbox', { open })") && play.includes("cabin.drawer('desk', { front: gone('key') ? { key: true } : {}"), 'The buttons are only where the fronts are; the games and the save drive the drawers in the scene');
   const things = secret.slice(secret.indexOf('const THINGS = {'), secret.indexOf('};', secret.indexOf('const THINGS = {')));
   assert.ok(things.indexOf("rack: ['secret-rack'") < things.indexOf("record: ['secret-desk'"), 'The old record book comes after the rack, so it is over the rack and under any card');
   assert.ok(art.includes("const [ox, oy, ox2, oy2] = box('outbox'), ocx = (ox + ox2) / 2, foot = oy2 - 30, lean = `rotate(-3 ${ocx} ${foot})`;"), 'The reply stands in its letter rack, its foot hidden by the front board');
   assert.ok(progress.includes("export const FOUND = 'holy-merry:cabin:found';") && santa.includes("FOUND = 'holy-merry:cabin:found'") && notebook.includes("yes.addEventListener('click', () => { resetProgress(); location.reload(); });") && notebook.includes('RESTART.ask'), 'Starting over is at the bottom of the clue book, asked once more, and forgets only the village');
 });
-await test('Santa 房間牆面佈置：每件裝飾是自己的紙板（比牆細），會動的是獨立圖層，只在走進屋時才下載，流量有上限', async () => {
+await test('Santa 房間牆面佈置：每件裝飾與聖誕樹是自己的紙板（比牆細），會動的是獨立圖層，只在走進屋時才下載，流量有上限', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [art, decor, scene] = await Promise.all(['js/components/cabin-art.js', 'js/components/cabin-decor.js', 'js/components/cabin-scene.js'].map(read));
   const { DECOR } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
@@ -462,10 +462,13 @@ await test('Santa 房間牆面佈置：每件裝飾是自己的紙板（比牆�
   assert.ok(!decor.includes('innerHTML') && !/Gradient|dasharray/.test(decor), 'Paper only: no gradients or dashes');
   assert.ok(['snowfall: true', 'twinkle: true', 'candle: true', 'sway: true', 'advent: ADVENT_WINDOWS'].every(flag => art.includes(flag)) && scene.includes('function snowPane(holder, board)') && scene.includes('function adventLights(holder, board)') && scene.includes("holder.rotation.z = still ? 0 : Math.sin(t * 4.1 + index) * .06;"), 'Snow past the windows, twinkling bulbs, flickering candles, swaying wreath, calendar and snowflakes, the advent windows lit for the day; still under reduced motion');
   assert.ok(scene.includes('if (indoorView(name)) furnish();') && scene.includes('board.decor ? decor :'), 'Decorations are fetched the first time the visitor heads indoors');
+  assert.ok(art.includes('export function treeLights({ plain }, { width, height }) {') && decor.includes('({ plain: paper }, { width: w, height: h }) => {') && scene.includes('material.opacity = still ? 1 : .8 + Math.sin(t * 2.6 + index) * .2;'), 'Bulbs are glass, drawn without the paper rim (no blurred halo), and twinkle gently');
+  assert.ok(/\{ id: 'tree', [^}]*detail: 2\.2, decor: true \}/.test(art) && /\{ id: 'tree-lights', [^}]*detail: 2\.2, decor: true \}/.test(art), 'The tree is cut finer, and fetched with the decorations');
   // What they cost to download, per picture set (a large screen, a phone).
-  const size = async set => { let bytes = 0; for (const name of await fs.readdir(path.join(project, 'images/cabin', set))) if (name.startsWith('decor-')) bytes += (await fs.stat(path.join(project, 'images/cabin', set, name))).size; return bytes / 1024; };
+  const { BOARDS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href), lazy = BOARDS.filter(board => board.decor).map(board => board.id);
+  const size = async set => { let bytes = 0; for (const name of await fs.readdir(path.join(project, 'images/cabin', set))) if (lazy.some(id => name === `${id}.webp` || name.startsWith(`${id}--`))) bytes += (await fs.stat(path.join(project, 'images/cabin', set, name))).size; return bytes / 1024; };
   const [large, small] = [await size('large'), await size('small')];
-  assert.ok(large <= 320 && small <= 140, `Decorations stay light: ${large.toFixed(0)} KB on a large screen, ${small.toFixed(0)} KB on a phone`);
+  assert.ok(large <= 400 && small <= 175, `Decorations and the tree stay light: ${large.toFixed(0)} KB on a large screen, ${small.toFixed(0)} KB on a phone`);
 });
 await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');

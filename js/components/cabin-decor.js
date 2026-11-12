@@ -72,8 +72,9 @@ export const windowFrame = ({ glass: [gx0, gy0, gx1, gy1] }) => ({ paper }, { wi
   for (const side of [-1, 1]) shape('path', { d: `M${bx} ${by}l${side * bar * .7} ${bar * 1.6}l${side * bar * .2} -${bar * .3}l${side * bar * .2} ${bar * .2}Z`, fill: DEEP_RED }, paper);
   shape('circle', { cx: bx, cy: by, r: bar * .32, fill: DEEP_RED }, paper);
 };
-// The garland's bulbs, a layer of their own (they twinkle): one every so often along the top of the frame.
-export const windowLights = ({ glass: [gx0, gy0, gx1] }) => ({ paper }, { width: w, height: h }) => {
+// The garland's bulbs, a layer of their own (they twinkle): one every so often along the top of the frame. Glass, not
+// paper: drawn without the paper's cut rim, which on bulbs this small reads as a blurred halo.
+export const windowLights = ({ glass: [gx0, gy0, gx1] }) => ({ plain: paper }, { width: w, height: h }) => {
   const x0 = w * gx0, x1 = w * gx1, bar = (x1 - x0) * .07, top = h * gy0 - bar * 1.2, colours = ['#ef6f5e', '#f4c668', '#7fce9a', '#7cb8ec'];
   for (let i = 1; i < 12; i++) {
     const x = x0 - bar * 2 + (x1 - x0 + bar * 4) * i / 12, y = top + Math.sin(Math.PI * i / 12) * bar * .9 + bar * .55;
