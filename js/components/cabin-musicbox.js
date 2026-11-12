@@ -1,12 +1,13 @@
 // The music box up close. Wind its key by dragging round it clockwise (three turns at most; it will not go back the other
 // way, it only clicks and springs), or press the arrow keys or Enter for a quarter turn. Let go and the little scene on
 // top turns while the tune plays, both slowing as the spring runs down; wind it again whenever you like. While it plays,
-// four blank gold bookmarks rise under the scene, cut like the ribbons hanging in the bookcase's four empty places. The box
+// four blank gold bookmarks rise out of the box beside the scene (cabin-scene.js), cut like the ribbons hanging in the
+// bookcase's four empty places. The box
 // keeps playing if you step away (the scene and cabin-sound.js keep it going). Under the box a little drawer is held shut
 // by a brass catch with a pinhole beside it: the brass pin from the little room's postmark tray (cabin-bag.js) undoes it,
 // for good (`placed`, cabin-progress.js).
 import { paperLayer, shape } from './paper-art.js';
-import { SUBSTITUTES, ribbon } from './cabin-art.js';
+import { SUBSTITUTES } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { showOrnament } from './cabin-ornaments.js';
 import { FLIGHT_ORDER, playsOpen } from '../services/cabin-story.js';
@@ -29,11 +30,6 @@ const tine = length => parent => {
   shape('path', { d: `M8 0H32V${length - 6}Q20 ${length + 4} 8 ${length - 6}Z`, fill: '#e0b04f' }, parent);
   shape('path', { d: `M12 0H17V${length - 8}H12Z`, fill: '#f4d98c', opacity: .8 }, parent);
 };
-// The four gold bookmarks that rise under the little turning scene: blank, side by side from a little brass bar.
-function bookmarks(parent) {
-  shape('rect', { x: 10, y: 8, width: 80, height: 8, rx: 4, fill: '#8f6a2c' }, parent);
-  for (const x of [22, 41, 60, 79]) ribbon(parent, x, 12, 11, 76);
-}
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 
 export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUse = () => {}, knows = () => false, clue = () => {}, gift = () => false, progress, save = () => {} }) {
@@ -57,15 +53,11 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUs
     use: () => { progress.placed.push('musicbox-catch'); save(); later(400, () => { drawer.classList.add('is-undone'); cabin.drawer('musicbox', { front: { undone: true } }); sound.play('snap'); }); later(1100, () => slide(true)); later(1850, combCard); return '撥針伸進小孔，輕輕一撥——卡榫鬆開了。'; },
   });
   if (knows() && !undone()) later(1600, () => say('音樂盒底下的小抽屜，還被那根黃銅卡榫卡著。'));
-  const gold = element('span', 'musicbox-letter', layer); gold.setAttribute('aria-hidden', 'true');
-  paperLayer(gold, '0 0 100 100', '', bookmarks, { paper: { scale: .35, grain: .4, shadow: .25 }, eager: true });
   function layout() {
     const rects = cabin.musicRects(); if (!rects) return;
     const { key } = rects, size = Math.max(96, key.width * 2.4), x = key.left + key.width / 2, y = key.top + key.height / 2;
     Object.assign(knob.style, { left: `${x - size / 2}px`, top: `${y - size / 2}px`, width: `${size}px`, height: `${size}px` });
     { const front = cabin.drawerRect('musicbox'), w = front?.width ?? Math.max(88, rects.box.width * .7), h = front?.height ?? w / 4; Object.assign(drawer.style, { left: `${front?.left ?? rects.box.left + rects.box.width / 2 - w / 2}px`, top: `${front?.top ?? rects.box.top + rects.box.height * .9 - h}px`, width: `${w}px`, height: `${h}px` }); }
-    // The bookmarks stand up over the box, kept clear of the caption along the top.
-    const { box } = rects, medal = Math.max(44, box.width * .4); Object.assign(gold.style, { left: `${box.left + box.width / 2 - medal / 2}px`, top: `${Math.max(76, box.top - medal * .78)}px`, width: `${medal}px`, height: `${medal}px` });
   }
   const played = () => (knows() ? '盒蓋內側刻著 N 和 K：尼爾斯和克莉絲。' : '') + (sound.musicOn ? '小紙雕轉起來了。（網站音樂開著時，音樂盒的歌聲會被蓋過；關掉右下角的音樂就聽得到。）' : '叮叮咚咚……小紙雕跟著音樂慢慢轉。');
   // Each 30° of winding clicks the ratchet once.
@@ -80,8 +72,8 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUs
     cabin.holdKey(false);
     if (cabin.wound > 0) { sound.tune(() => cabin.wound); say(played()); onUse(); clue('music-lid'); }
   }
-  // While it plays, the four gold bookmarks rise under the turning scene; the first time, they are told and written in the
-  // clue book.
+  // While it plays, the four gold bookmarks rise out of the box beside the turning scene (the scene moves them); the first
+  // time, they are told and written in the clue book.
   // The drawer's comb, up close: five tines to pluck; five plucked in the right order and the drawer springs open on a
   // welcome ornament Nils hid for the next new substitute. Played wrong, the comb buzzes and starts again.
   let card = null;
@@ -126,8 +118,8 @@ export function musicboxGame({ layer, stage, cabin, say, later, sound, bag, onUs
     showOrnament(card, 'N', done);
   }
   function playing() {
-    const up = cabin.wound > 0; gold.classList.toggle('is-up', up);
-    if (up && clue('music-bookmarks')) later(2600, () => say('小紙雕轉著轉著，底下升起四枚金色的書籤，上面一個字也沒有。'));
+    const up = cabin.wound > 0;
+    if (up && clue('music-bookmarks')) later(2600, () => say('小紙雕轉著轉著，盒子兩側升起四枚金色的書籤，上面一個字也沒有。'));
     later(500, playing);
   }
   playing();

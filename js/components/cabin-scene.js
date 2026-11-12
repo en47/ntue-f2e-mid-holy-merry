@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, DRAWERS, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS, PX, adventLit, drawerPieces } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOKMARKS, BOOK_SHEETS, CHAIR, DESK, DOOR, DRAWERS, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS, PX, adventLit, drawerPieces } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -202,7 +202,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const hearth = { heat: 0, flare: 0, squeeze: 0, lit: false };
   // The music box: `energy` is how far it is wound (0–1, three turns of the key), spent as it plays; `key` and `spin` are
   // the key's and the little scene's angles. It does not run down while a hand is on the key.
-  const musicbox = { energy: 0, key: 0, spin: 0, held: false };
+  const musicbox = { energy: 0, key: 0, spin: 0, held: false, marks: 0 };
   // The story: whether Santa is out (his chair empty, his coat gone from its peg, a note on the seat), whether a little
   // scene is playing (his going out) and holds the controls, and how far the bookcase has swung open (0–1).
   const story = { away: false, scripted: false, open: 0, opening: null, kick: -10, door: null };
@@ -710,6 +710,12 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // The music box's key and its turning scene (two crossed cut-outs, so it never turns edge-on to nothing).
     const key = sheets.get('musicbox-key')?.holder; if (key) key.rotation.z = musicbox.key;
     (clones.get('musicbox-scene') ?? []).forEach((scene, i) => { scene.rotation.y = musicbox.spin + i * Math.PI / 2; });
+    // While it plays, the four gold bookmarks rise out of the box, a pair each side of its scene, and sway; after, they sink.
+    musicbox.marks += ((musicbox.energy > 0 ? 1 : 0) - musicbox.marks) * (still ? 1 : .05);
+    (clones.get('musicbox-bookmarks') ?? []).forEach((mark, i) => {
+      mark.position.set((i ? 1 : -1) * BOOKMARKS.x, BOOKMARKS.rest + musicbox.marks * BOOKMARKS.rise, BOOKMARKS.z);
+      mark.rotation.z = still ? 0 : Math.sin(t * 1.3 + i * 2) * .05 * musicbox.marks;
+    });
     for (const [index, material] of twinkles.entries()) material.opacity = still ? 1 : .72 + Math.sin(t * 2.6 + index) * .28;
     for (const [index, holder] of candles.entries()) {
       holder.scale.set(1 + (still ? 0 : Math.sin(t * 8.3 + index * 2) * .05), 1 + (still ? 0 : Math.sin(t * 11.1 + index) * .07 + Math.sin(t * 5.7 + index * 3) * .05), 1);

@@ -72,7 +72,7 @@ check((await saved()).clues.includes('blotter'), '吸墨器記進線索本');
 await press('.inspect-close'); await wait(400); await press('.drawer-card .cabin-letter-close'); await wait(400);
 // The music box: four blank bookmarks rise; its drawer is caught, and the magnifier does not undo it.
 await spot('musicbox'); for (let i = 0; i < 8; i++) { await page.focus('.musicbox-knob'); await page.keyboard.press('Enter'); await wait(120); }
-await wait(3800); check((await caption()).includes('四枚金色的書籤') && await visible('.musicbox-letter.is-up'), `音樂盒升起四枚空白書籤：${await caption()}`); await shot('bookmarks');
+await wait(3800); check((await caption()).includes('四枚金色的書籤') && (await saved()).clues?.includes('music-bookmarks'), `音樂盒升起四枚空白書籤（記進線索本）：${await caption()}`); await shot('bookmarks');
 await tap('.musicbox-drawer'); check((await caption()).includes('卡榫'), '盒底抽屜被黃銅卡榫卡住');
 await openPocket(); await drag('.bag-item[data-item="magnifier"]', '.musicbox-drawer');
 check((await caption()).includes('孔太小') && (await saved()).bag.held.includes('magnifier'), '放大鏡伸不進卡榫的小孔，彈回');

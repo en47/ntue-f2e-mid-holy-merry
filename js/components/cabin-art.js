@@ -355,7 +355,7 @@ export function letter(parent, char, cx, cy, width, height, style) {
 const shade = (parent, x, y, width, height, opacity, fill = '#000') => shape('rect', { x, y, width, height, fill, opacity }, parent);
 
 // A gold silk bookmark ribbon hanging from (x, y), `w` wide and `h` long, its end cut in a swallowtail. The bookcase's four
-// empty places each have one, and the music box raises four just like them (cabin-musicbox.js).
+// empty places each have one, and the music box raises four just like them (musicBookmarks).
 export function ribbon(parent, x, y, w, h) {
   const notch = w * .7;
   shape('path', { d: `M${x - w / 2} ${y}H${x + w / 2}V${y + h}L${x} ${y + h - notch}L${x - w / 2} ${y + h}Z`, fill: '#c9a24f' }, parent);
@@ -529,6 +529,17 @@ export function musicBoxScene({ paper }, { width, height }) {
   shape('circle', { cx: width * .42, cy: height * .06, r: 8, fill: GOLD }, paper);
   shape('path', { d: `M${width * .58} ${height * .86}C${width * .6} ${height * .7} ${width * .76} ${height * .66} ${width * .9} ${height * .7}L${width * .94} ${height * .58}H${width * .98}L${width * .96} ${height * .78}C${width * .9} ${height * .9} ${width * .7} ${height * .92} ${width * .58} ${height * .86}Z`, fill: RED }, paper);
   shape('path', { d: `M${width * .06} ${height * .62}l${width * .06} -${height * .1} ${width * .1} 0 ${width * .06} -${height * .14} ${width * .04} ${height * .04} -${width * .04} ${height * .12} ${width * .06} ${height * .2} -${width * .05} 0 -${width * .04} -${height * .1} -${width * .1} 0 -${width * .02} ${height * .1}Z`, fill: '#a8774d' }, paper);
+}
+// The music box's four gold bookmarks, cut like the bookcase's four ribbons: two on each side of its turning scene, hung
+// from the crossbar of a little brass post inside the box. While it plays they rise up out of it and sway (cabin-scene.js),
+// still blank; `x` is how far each pair stands from the middle, clear of the scene as it turns.
+export const BOOKMARKS = { w: .052, h: .12, x: .092, z: -.03, rest: .015, rise: .09 };
+export function musicBookmarks({ paper }, { width, height }) {
+  const g = shape('g', { transform: `scale(${width / 100})` }, paper), h = 100 * height / width;
+  shape('rect', { x: 46, y: 6, width: 8, height: h - 6, rx: 3, fill: '#8f6a2c' }, g);
+  shape('rect', { x: 8, y: 4, width: 84, height: 8, rx: 4, fill: '#c9a24f' }, g);
+  shape('circle', { cx: 50, cy: 5, r: 6, fill: GOLD }, g);
+  for (const x of [28, 72]) ribbon(g, x, 11, 26, h * .6);
 }
 export function musicBoxKey({ paper }, { width, height }) {
   const cx = width / 2, cy = height / 2;
@@ -1382,6 +1393,7 @@ export const BOARDS = [
   { id: 'musicbox-body', w: MUSICBOX.body[0], h: MUSICBOX.body[1], px: 1800, at: [0, 0, 0], rig: 'musicbox', draw: musicBoxBody, room: true },
   { id: 'musicbox-key', w: .07, h: .05, px: 1800, at: [.095, .07, .008], rig: 'musicbox', center: true, draw: musicBoxKey, room: true },
   { id: 'musicbox-scene', w: .13, h: .11, px: 1800, at: [0, 0, 0], rig: 'turntable', clones: 2, draw: musicBoxScene, room: true },
+  { id: 'musicbox-bookmarks', w: BOOKMARKS.w, h: BOOKMARKS.h, px: 1800, at: [0, BOOKMARKS.rest, BOOKMARKS.z], rig: 'musicbox', clones: 2, draw: musicBookmarks, room: true },
   { id: 'snowglobe', w: GLOBE.w, h: GLOBE.h, px: 1800, at: [GLOBE.x, GLOBE.y, GLOBE.z], draw: snowGlobe, room: true },
   { id: 'chair-back', w: .82, h: 1.12, at: [0, 0, -.3], draw: chairBack, chair: true },
   { id: 'chair-left', w: .9, h: 1.0, at: [-.38, 0, -.04], turn: -Math.PI / 2, mirror: true, draw: chairSide, chair: true },

@@ -14,7 +14,7 @@ export const NOTEBOOK = {
   'letter-hearth': { place: '壁爐', text: '用火柴把火點旺以後，壁爐前的石板上，淺淺的刻痕亮了起來：一個字母 R。書櫃上有幾本書的書脊，在火光裡閃著金光。' },
   'desk-lock': { place: '書桌抽屜', text: '抽屜鎖著，鑰匙孔兩邊各刻著一小枝冬青葉。' },
   blotter: { place: '書桌抽屜裡的吸墨器', text: '翻過來，吸墨紙上印著一行反過來的字：「.eman ruo nihtiw kooL」' },
-  'music-bookmarks': { place: '音樂盒', text: '音樂響起、小紙雕轉起來時，底下升起四枚金色的書籤，一個字也沒有。' },
+  'music-bookmarks': { place: '音樂盒', text: '音樂響起、小紙雕轉起來時，盒子兩側升起四枚金色的書籤，一個字也沒有。' },
   'music-catch': { place: '音樂盒底下', text: '有個小抽屜被一根黃銅卡榫卡住了，卡榫旁邊有一個很小的孔。' },
   'globe-village': { place: '雪花球（放大鏡）', text: '球裡是從前的聖誕村：舊小屋的左後方，多了一個有窗的小房間，窗裡亮著燈。' },
   'globe-base': { place: '雪花球（放大鏡）', text: '底座刻著「H. · 2003」。' },
