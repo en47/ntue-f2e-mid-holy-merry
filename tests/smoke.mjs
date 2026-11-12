@@ -453,6 +453,20 @@ await test('Santa 回饋修正：真的抽屜（書桌、音樂盒）、卡片�
   assert.ok(art.includes("const [ox, oy, ox2, oy2] = box('outbox'), ocx = (ox + ox2) / 2, foot = oy2 - 30, lean = `rotate(-3 ${ocx} ${foot})`;"), 'The reply stands in its letter rack, its foot hidden by the front board');
   assert.ok(progress.includes("export const FOUND = 'holy-merry:cabin:found';") && santa.includes("FOUND = 'holy-merry:cabin:found'") && notebook.includes("yes.addEventListener('click', () => { resetProgress(); location.reload(); });") && notebook.includes('RESTART.ask'), 'Starting over is at the bottom of the clue book, asked once more, and forgets only the village');
 });
+await test('Santa 房間牆面佈置：每件裝飾是自己的紙板（比牆細），會動的是獨立圖層，只在走進屋時才下載，流量有上限', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [art, decor, scene] = await Promise.all(['js/components/cabin-art.js', 'js/components/cabin-decor.js', 'js/components/cabin-scene.js'].map(read));
+  const { DECOR } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  assert.ok(DECOR.length >= 15 && DECOR.every(board => board.decor && board.room && board.detail >= 1.6 && board.id.startsWith('decor-')), 'Each decoration is a room sheet of its own, cut finer than the wall');
+  assert.ok(!/morningWindow|pictureFrame\(|adventHouse\(paper, 710/.test(art) && art.includes('...DECOR,'), 'The walls no longer carry the windows, pictures, candles and jar drawn coarse on them');
+  assert.ok(!decor.includes('innerHTML') && !/Gradient|dasharray/.test(decor), 'Paper only: no gradients or dashes');
+  assert.ok(['snowfall: true', 'twinkle: true', 'candle: true', 'sway: true', 'advent: ADVENT_WINDOWS'].every(flag => art.includes(flag)) && scene.includes('function snowPane(holder, board)') && scene.includes('function adventLights(holder, board)') && scene.includes("holder.rotation.z = still ? 0 : Math.sin(t * 4.1 + index) * .06;"), 'Snow past the windows, twinkling bulbs, flickering candles, swaying wreath, calendar and snowflakes, the advent windows lit for the day; still under reduced motion');
+  assert.ok(scene.includes('if (indoorView(name)) furnish();') && scene.includes('board.decor ? decor :'), 'Decorations are fetched the first time the visitor heads indoors');
+  // What they cost to download, per picture set (a large screen, a phone).
+  const size = async set => { let bytes = 0; for (const name of await fs.readdir(path.join(project, 'images/cabin', set))) if (name.startsWith('decor-')) bytes += (await fs.stat(path.join(project, 'images/cabin', set, name))).size; return bytes / 1024; };
+  const [large, small] = [await size('large'), await size('small')];
+  assert.ok(large <= 320 && small <= 140, `Decorations stay light: ${large.toFixed(0)} KB on a large screen, ${small.toFixed(0)} KB on a phone`);
+});
 await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const { RULES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { WISH, NEXT } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href), { WISH_COST } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);

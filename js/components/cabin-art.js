@@ -2,6 +2,7 @@
 // the front door. Every board is drawn here once, then stood up in 3D by cabin-scene.js. Units: 1 = Santa's seated height.
 // Light comes from the upper left. It is Christmas morning: Santa is home from the night's deliveries.
 import { holly, pine, shape } from './paper-art.js';
+import { ADVENT_WINDOWS, adventHouse as adventHouseSheet, calendar, candleFlame, candles, cookieJar, doorWreath, framedReindeer, framedSleigh, snowflakeBunting, windowFrame, windowLights, windowView } from './cabin-decor.js';
 import { church, roofHouse, snowyFir, star } from './paper-props.js';
 import { headingGlyphs } from '../data/heading-glyphs.js';
 import { cabinGlyphs } from '../data/cabin-glyphs.js';
@@ -95,23 +96,6 @@ function stones(parent, x, y, width, height) {
   }
 }
 
-// A green-framed window onto the snowy morning; `id` keeps the clip unique inside one board.
-function morningWindow(parent, svg, x, y, width, height, id) {
-  const view = shape('g', { 'clip-path': clip(svg, id, `M${x} ${y}H${x + width}V${y + height}H${x}Z`) }, parent);
-  shape('rect', { x, y, width, height, fill: '#cfe3ee' }, view);
-  shape('rect', { x, y: y + height * .42, width, height: height * .2, fill: '#f6e2d4' }, view);
-  shape('circle', { cx: x + width * .7, cy: y + height * .5, r: height * .13, fill: '#fbe7b0' }, view);
-  shape('path', { d: `M${x} ${y + height * .62}C${x + width * .3} ${y + height * .5} ${x + width * .6} ${y + height * .6} ${x + width} ${y + height * .52}V${y + height}H${x}Z`, fill: '#e6eef2' }, view);
-  pine(view, x + width * .24, y + height * .78, height * .3, DEEP_GREEN);
-  pine(view, x + width * .82, y + height * .72, height * .24, GREEN);
-  shape('path', { d: `M${x} ${y + height * .84}C${x + width * .4} ${y + height * .76} ${x + width * .7} ${y + height * .84} ${x + width} ${y + height * .78}V${y + height}H${x}Z`, fill: SNOW }, view);
-  for (let i = 0; i < 12; i++) shape('circle', { cx: x + noise(i + x) * width, cy: y + noise(i + y) * height * .7, r: 3 + noise(i) * 3, fill: '#fff', opacity: .9 }, view);
-  const bar = 20;
-  shape('path', { d: `M${x - bar} ${y - bar}H${x + width + bar}V${y + height + bar}H${x - bar}ZM${x} ${y}V${y + height}H${x + width}V${y}Z`, fill: GREEN, 'fill-rule': 'evenodd' }, parent);
-  shape('path', { d: `M${x + width / 2} ${y}V${y + height}M${x} ${y + height * .5}H${x + width}`, stroke: GREEN, 'stroke-width': bar * .7 }, parent);
-  shape('rect', { x: x - bar * 2, y: y + height + bar * .6, width: width + bar * 4, height: bar * 1.4, rx: 6, fill: WOOD_LIT }, parent);
-  garland(parent, x - bar, x + width + bar, y - bar - 6, 10);
-}
 
 function archedDoor(parent, x, top, width, bottom) {
   const r = width / 2;
@@ -119,7 +103,6 @@ function archedDoor(parent, x, top, width, bottom) {
   shape('path', { d: `M${x} ${bottom}V${top + r}A${r} ${r} 0 0 1 ${x + width} ${top + r}V${bottom}Z`, fill: GREEN }, parent);
   for (let i = 1; i < 4; i++) shape('path', { d: `M${x + width * i / 4} ${top + (i === 2 ? 0 : r * .3)}V${bottom}`, stroke: DEEP_GREEN, 'stroke-width': 6 }, parent);
   shape('path', { d: `M${x + width * .12} ${bottom - 60}H${x + width * .88}`, stroke: DEEP_GREEN, 'stroke-width': 10 }, parent);
-  wreath(parent, x + r, top + r + 70, 62);
   shape('circle', { cx: x + width - 34, cy: top + (bottom - top) * .58, r: 11, fill: GOLD }, parent);
 }
 
@@ -143,7 +126,6 @@ export function backWall({ plain, paper, svg }, { width, height }, state = {}) {
   shape('path', { d: `M${ox - 66} ${oy + 18}C${ox - 20} ${oy} ${ox + 20} ${oy + 16} ${ox + 66} ${oy + 6}V${oy + 70}H${ox - 66}Z`, fill: SNOW }, paper);
   shape('path', { d: `M${ox} ${oy - 66}V${oy + 66}M${ox - 66} ${oy}H${ox + 66}`, stroke: GREEN, 'stroke-width': 10 }, paper);
   star(paper, ox, 150, 34, GOLD);
-  pictureFrame(paper, 70, 610, 200, 150);
   archedDoor(paper, 690, 880, 228, height);
 }
 
@@ -154,22 +136,12 @@ export function sideWall(side) {
     for (const x of [0, width / 2 - 16, width - 36]) beam(plain, x, 0, x ? 32 : 36, rail);
     beam(plain, 0, 0, width, 30);
     if (side === 'left') {
-      // Texture left is the front of the room. The window holds the advent house on its sill.
-      morningWindow(paper, svg, 560, 210, 300, 300, 'left-window');
-      adventHouse(paper, 710, 551, adventLit());
-      for (const [x, y, w, h, fill] of [[120, 300, 140, 110, RED], [150, 250, 80, 50, GOLD]]) shape('rect', { x, y, width: w, height: h, rx: 10, fill }, paper);
+      // Texture left is the front of the room. Its window (with the advent house on the sill), the calendar and the paper
+      // snowflakes hang on it as sheets of their own (DECOR).
     } else {
-      // Texture left is the back. A window by the fireplace, a shelf of candles toward the front.
-      morningWindow(paper, svg, 150, 230, 260, 260, 'right-window');
-      const y = 470;
-      shape('rect', { x: 560, y, width: 360, height: 24, rx: 6, fill: WOOD_LIT }, paper);
-      for (const [cx, h] of [[610, 90], [660, 64]]) {
-        shape('rect', { x: cx - 16, y: y - h, width: 32, height: h, rx: 4, fill: CREAM }, paper);
-        shape('path', { d: `M${cx} ${y - h - 34}C${cx + 14} ${y - h - 18} ${cx + 10} ${y - h - 4} ${cx} ${y - h - 2}C${cx - 10} ${y - h - 4} ${cx - 14} ${y - h - 18} ${cx} ${y - h - 34}Z`, fill: '#f2a541' }, paper);
-      }
-      shape('path', { d: `M760 ${y}V${y - 96}C760 ${y - 120} 860 ${y - 120} 860 ${y - 96}V${y}Z`, fill: '#cfe1e7' }, paper);
-      shape('rect', { x: 774, y: y - 132, width: 72, height: 22, rx: 8, fill: RED }, paper);
-      for (const [cx, cy] of [[790, y - 40], [830, y - 62], [820, y - 24]]) shape('circle', { cx, cy, r: 13, fill: '#a8774d' }, paper);
+      // Texture left is the back. A window by the fireplace and, toward the front, the shelf the music box stands on (its
+      // window, candles and cookie jar are sheets of their own, DECOR).
+      shape('rect', { x: 560, y: 470, width: 360, height: 24, rx: 6, fill: WOOD_LIT }, paper);
     }
   };
 }
@@ -211,12 +183,9 @@ export function frontInside({ plain, paper, svg }, { width, height }, state = {}
   shape('circle', { cx, cy: oy, r: 58, fill: '#cfe3ee' }, paper);
   shape('path', { d: `M${cx - 58} ${oy + 16}C${cx - 20} ${oy} ${cx + 20} ${oy + 14} ${cx + 58} ${oy + 6}V${oy + 60}H${cx - 58}Z`, fill: SNOW }, paper);
   shape('path', { d: `M${cx} ${oy - 58}V${oy + 58}M${cx - 58} ${oy}H${cx + 58}`, stroke: GREEN, 'stroke-width': 9 }, paper);
-  morningWindow(paper, svg, 175, eave + 110, 250, 250, 'front-window');
   const w = DOOR.width * PX, x = cx - w / 2, y = height - DOOR.height * PX;
   shape('path', { d: `M${x - 30} ${height}V${y - 30}H${x + w + 30}V${height}ZM${x} ${height}V${y}H${x + w}V${height}Z`, fill: WOOD_LIT, 'fill-rule': 'evenodd' }, paper);
   for (let i = 0; i < 5; i++) holly(paper, x - 20 + i * (w + 40) / 4, y - 34, .62);
-  pictureFrame(paper, 470, eave + 150, 150, 120);
-  holly(paper, 545, eave + 146, .6);
   coatPegs(paper, 1070, eave + 170, 390, height - 14, state.coat !== false);
 }
 function litWindow(parent, x, y, width, height) {
@@ -1215,15 +1184,6 @@ function wreath(parent, x, y, radius) {
   shape('path', { d: `M${x - 6} ${y + radius * .78}l-${radius * .22} ${radius * .55}h${radius * .16}l${radius * .1} -${radius * .3} ${radius * .1} ${radius * .3}h${radius * .16}l-${radius * .22} -${radius * .55}Z`, fill: '#87302f' }, parent);
 }
 
-function pictureFrame(parent, x, y, width, height) {
-  shape('rect', { x, y, width, height, rx: 8, fill: WOOD }, parent);
-  shape('rect', { x: x + 14, y: y + 14, width: width - 28, height: height - 28, fill: '#dfeef3' }, parent);
-  shape('path', { d: `M${x + 14} ${y + height - 40}C${x + width * .4} ${y + height - 60} ${x + width * .7} ${y + height - 46} ${x + width - 14} ${y + height - 56}V${y + height - 14}H${x + 14}Z`, fill: SNOW }, parent);
-  // A reindeer silhouette, looking left.
-  const rx = x + width * .55, ry = y + height - 52;
-  shape('path', { d: `M${rx - 34} ${ry}V${ry - 22}C${rx - 30} ${ry - 34} ${rx + 10} ${ry - 36} ${rx + 26} ${ry - 30}L${rx + 30} ${ry}H${rx + 22}V${ry - 18}H${rx - 22}V${ry}Z M${rx - 30} ${ry - 28}L${rx - 46} ${ry - 50}L${rx - 58} ${ry - 46}L${rx - 52} ${ry - 38}Z`, fill: '#8a6a55' }, parent);
-  shape('path', { d: `M${rx - 46} ${ry - 50}l-6 -18m6 18l8 -16m-8 16l-14 -8`, stroke: '#8a6a55', 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none' }, parent);
-}
 
 export function fireplace({ paper: sheet }, size) {
   const width = 600, height = 650, paper = shape('g', { transform: `scale(${size.width / width} ${size.height / height})` }, sheet);
@@ -1344,15 +1304,45 @@ export function chairFront({ paper }, { width, height }) {
 
 // The advent house on the window sill: one lit window per December day so far (all lit outside December).
 export function adventLit(date = new Date()) { return date.getMonth() === 11 ? Math.min(date.getDate(), 24) : date.getMonth() === 10 ? 0 : 24; }
-function adventHouse(parent, x, base, lit) {
-  roofHouse(parent, x, base, 150, 110, { wall: '#ecdcc0', roof: '#a8564c', chimney: true });
-  for (let i = 0; i < 24; i++) {
-    const column = i % 6, row = Math.floor(i / 6);
-    shape('rect', { x: x - 62 + column * 21, y: base - 104 + row * 16, width: 13, height: 10, rx: 2, fill: i < lit ? '#f4cf74' : '#9a8670' }, parent);
-  }
-}
 
 const wall = (id, w, h, at, extra) => ({ id, w, h, at, kind: 'wall', ...extra });
+// A sheet hung on a room wall: `box` is where it is drawn on that wall's own picture ([left, top, right, bottom], in the
+// wall's art units), `out` how far it stands off the wall. Centred on its box, or hung from its top (`hang`: it can sway),
+// or standing on its bottom edge (`stand`: on a shelf).
+const WALLS = { back: [HOUSE.width, HOUSE.ridge], 'front-in': [HOUSE.width, HOUSE.ridge], left: [HOUSE.depth, HOUSE.wall], right: [HOUSE.depth, HOUSE.wall] };
+function onWall(side, [x0, y0, x1, y1], { out = .012, hang = false, stand = false, ...extra } = {}) {
+  const [width, height] = WALLS[side], u = (x0 + x1) / 2 / PX - width / 2, v = height - (hang ? y0 : stand ? y1 : (y0 + y1) / 2) / PX;
+  const at = { back: [u, v, BACK + out], 'front-in': [-u, v, HOUSE.depth / 2 - out], left: [-HOUSE.width / 2 + out, v, -u], right: [HOUSE.width / 2 - out, v, u] }[side];
+  const turn = { back: 0, 'front-in': Math.PI, left: Math.PI / 2, right: -Math.PI / 2 }[side];
+  return { w: (x1 - x0) / PX, h: (y1 - y0) / PX, at, turn, room: true, decor: true, ...(hang ? { hang: true } : stand ? {} : { center: true }), ...extra };
+}
+// A window on a wall: its view (with the snow falling past it, cabin-scene.js), its frame and garland over that, and the
+// garland's bulbs, which twinkle. `glass` is the pane's place on the wall, `box` the whole frame's.
+function wallWindow(side, glass, box) {
+  const [x0, y0, x1, y1] = box, frame = { glass: [(glass[0] - x0) / (x1 - x0), (glass[1] - y0) / (y1 - y0), (glass[2] - x0) / (x1 - x0), (glass[3] - y0) / (y1 - y0)] };
+  return [
+    { id: `decor-${side}-view`, ...onWall(side, glass, { out: .008 }), detail: 1.8, snowfall: true, draw: windowView },
+    { id: `decor-${side}-frame`, ...onWall(side, box, { out: .016 }), detail: 2, draw: windowFrame(frame) },
+    { id: `decor-${side}-lights`, ...onWall(side, box, { out: .019 }), detail: 1.6, twinkle: true, draw: windowLights(frame) },
+  ];
+}
+// The room's wall decorations (cabin-decor.js), each cut finer than its wall so it stays crisp up close. The advent house's
+// windows lit for the day are laid over it in the scene (`advent`); the candle flames flicker (`candle`).
+export const DECOR = [
+  ...wallWindow('left', [560, 210, 860, 510], [505, 150, 915, 560]),
+  ...wallWindow('right', [150, 230, 410, 490], [100, 160, 460, 535]),
+  ...wallWindow('front-in', [175, 660, 425, 910], [125, 595, 475, 950]),
+  { id: 'decor-advent', ...onWall('left', [630, 372, 790, 527], { out: .028, stand: true }), detail: 3, advent: ADVENT_WINDOWS, draw: adventHouseSheet },
+  { id: 'decor-calendar', ...onWall('left', [120, 290, 260, 500], { hang: true, sway: true }), detail: 3, draw: calendar },
+  { id: 'decor-bunting', ...onWall('left', [60, 130, 500, 250], { hang: true, sway: true }), detail: 2, draw: snowflakeBunting },
+  { id: 'decor-picture', ...onWall('back', [70, 570, 290, 780], { out: .014 }), detail: 2.6, draw: framedReindeer },
+  { id: 'decor-wreath', ...onWall('back', [713, 920, 895, 1166], { out: .016, hang: true, sway: true }), detail: 2.6, draw: doorWreath },
+  { id: 'decor-photo', ...onWall('front-in', [465, 670, 625, 820], { out: .014 }), detail: 2.6, draw: framedSleigh },
+  { id: 'decor-candles', ...onWall('right', [575, 360, 700, 470], { out: .05, stand: true }), detail: 3, draw: candles },
+  { id: 'decor-flame-a', ...onWall('right', [598, 352, 626, 394], { out: .052, stand: true }), detail: 3, candle: true, draw: candleFlame },
+  { id: 'decor-flame-b', ...onWall('right', [646, 373, 674, 415], { out: .052, stand: true }), detail: 3, candle: true, draw: candleFlame },
+  { id: 'decor-jar', ...onWall('right', [755, 340, 865, 470], { out: .05, stand: true }), detail: 3, draw: cookieJar },
+];
 // Every board: art size in world units and where it stands. `kind` marks room surfaces (cut at a lower density, no paper edge).
 export const BOARDS = [
   wall('back', HOUSE.width, HOUSE.ridge, [0, 0, BACK], { draw: backWall, room: true }),
@@ -1440,6 +1430,8 @@ export const BOARDS = [
   { id: 'village', w: 13, h: 2.4, px: 60, at: [-8, GROUND, -24], draw: village, kind: 'scenery' },
   { id: 'drift-left', w: .9, h: .34, at: [-2.05, GROUND, HOUSE.depth / 2 + .05], draw: drift },
   { id: 'drift-right', w: .9, h: .34, at: [2.05, GROUND, HOUSE.depth / 2 + .05], mirror: true, draw: drift },
+  // The room's wall decorations (above).
+  ...DECOR,
 ];
 export const SMOKE = { w: .55, h: .4, draw: smokePuff };
 

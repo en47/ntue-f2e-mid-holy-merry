@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, DRAWERS, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS, drawerPieces } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOK_SHEETS, CHAIR, DESK, DOOR, DRAWERS, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS, PX, adventLit, drawerPieces } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -180,13 +180,17 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // phone held upright sees a narrow slice, so even the reindeer, just off to the right, can come a moment later.
   const opening = goalFor('outside'), half = Math.atan(Math.tan(THREE.MathUtils.degToRad(opening.fov) / 2) * (stage.clientWidth || 1) / (stage.clientHeight || 1)) + .15;
   const sweep = [opening.heading - half, opening.heading + half], seen = board => flying || boardInSight(board, sweep);
-  const indoor = board => board.room || board.chair, first = [], after = [];
-  for (const board of [...BOARDS, ...WORLD]) (indoor(board) || WORLD.includes(board) && !seen(board) ? after : first).push(board);
+  // The room's wall decorations (cabin-art.js DECOR) are only fetched the first time the visitor heads indoors (`furnish`):
+  // someone who only walks round the yard never downloads them; the walk in gives them time to arrive.
+  const indoor = board => board.room || board.chair, first = [], after = [], decor = [];
+  for (const board of [...BOARDS, ...WORLD]) (board.decor ? decor : indoor(board) || WORLD.includes(board) && !seen(board) ? after : first).push(board);
+  let furnished = null;
+  function furnish() { furnished ??= Promise.all(decor.map(board => addBoard(board).catch(error => console.error('Decoration failed', board.id, error)))).then(() => redraw()); return furnished; }
   const reindeerFirst = flying || inSight(sweep, REINDEER.x, REINDEER.z, 1.4);
   let painted = 0, reindeerShare = reindeerFirst ? 0 : 1;
   const report = () => onProgress(Math.min(1, painted / (first.length + 1) * .6 + reindeerShare * .4));
   // Sheets by id, so a game can redraw one (the snowman's hat, the hay in the loft) and a tap can wiggle one.
-  const flames = [], twinkles = [], swings = [], smoke = [], billboards = [], sheets = new Map(), lifting = new Map();
+  const flames = [], twinkles = [], swings = [], smoke = [], billboards = [], sheets = new Map(), lifting = new Map(), candles = [], snowfalls = [], glows = [];
   // Sheets that move as one: the tree's lights are a sheet of their own (they twinkle) hung on the same tree.
   const COMPANIONS = { tree: ['tree-lights'] };
   const together = (id, apply) => { for (const other of [id, ...(COMPANIONS[id] ?? [])]) { const sheet = sheets.get(other); if (sheet) apply(sheet); } };
@@ -226,6 +230,33 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // Real shelves for the things that stand on painted ones: the mantel (the snow globe) and the candle shelf (the music box).
   solid(new THREE.BoxGeometry(1.08, .03, .2), 0xa86b47, new THREE.Vector3(FIRE.x, GLOBE.y - .015, GLOBE.z), indoors);
   solid(new THREE.BoxGeometry(.2, .025, .76), 0xa86b47, new THREE.Vector3(MUSICBOX.x + .01, MUSICBOX.y - .0125, MUSICBOX.z), indoors);
+  // Snow falling past a window: a pane of flakes over its view, scrolled down in the loop (each window from its own start).
+  // The flakes are dots drawn once on a small canvas, nothing downloaded.
+  let snowCanvas = null;
+  function snowPane(holder, board) {
+    if (!snowCanvas) {
+      snowCanvas = document.createElement('canvas'); snowCanvas.width = snowCanvas.height = 256;
+      const pen = snowCanvas.getContext('2d'), random = i => { const value = Math.sin(i * 78.233) * 43758.5453; return value - Math.floor(value); };
+      for (let i = 0; i < 36; i++) { pen.globalAlpha = .75 + random(i + 5) * .25; pen.fillStyle = '#ffffff'; pen.beginPath(); pen.arc(random(i) * 256, random(i + 40) * 256, 1.6 + random(i + 80) * 2.6, 0, Math.PI * 2); pen.fill(); }
+    }
+    const map = keep(textures, new THREE.CanvasTexture(snowCanvas)); map.colorSpace = THREE.SRGBColorSpace; map.wrapS = map.wrapT = THREE.RepeatWrapping; map.repeat.set(board.w / .5, board.h / .5);
+    const pane = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(board.w, board.h)), keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, toneMapped: false })));
+    pane.position.z = .003; holder.add(pane); return map;
+  }
+  // The advent house's windows lit for today (cabin-art.js adventLit: one more each day of December), drawn on a canvas laid
+  // over its dark windows; they glow softly in the loop.
+  function adventLights(holder, board) {
+    const scale = 3, width = Math.round(board.w * PX * scale), height = Math.round(board.h * PX * scale), canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+    const pen = canvas.getContext('2d'), lit = adventLit();
+    board.advent({ width, height }).slice(0, lit).forEach(([x, y, w, h]) => {
+      pen.shadowColor = 'rgba(255, 214, 120, .9)'; pen.shadowBlur = h * .8; pen.fillStyle = '#f4cf74'; pen.beginPath();
+      if (pen.roundRect) pen.roundRect(x, y, w, h, 2 * scale); else pen.rect(x, y, w, h); pen.fill();
+    });
+    const map = keep(textures, new THREE.CanvasTexture(canvas)); map.colorSpace = THREE.SRGBColorSpace;
+    const material = keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, toneMapped: false }));
+    const pane = new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(board.w, board.h)), material); pane.position.set(0, board.h / 2, .002); holder.add(pane);
+    return material;
+  }
   function standBoard(board, map) {
     const material = keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false, fog: board.fog !== false, side: board.mirror || board.chair && board.turn || board.billboard || board.clones ? THREE.DoubleSide : THREE.FrontSide }));
     const geometry = keep(geometries, new THREE.PlaneGeometry(board.w, board.h));
@@ -272,6 +303,11 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (edges && !board.rig && !board.hang && !board.chair && !board.room && board.at?.[1] === GROUND) shadow(board.at[0], board.at[2], board.w * 1.1, board.w * .5, board.h);
     if (board.flame) flames.push(holder);
     if (board.twinkle) twinkles.push(material);
+    // A candle's flame flickers about its foot; snow falls past a window, between its view and its frame; the advent house
+    // has the windows lit for the day laid over it.
+    if (board.candle) candles.push(holder);
+    if (board.snowfall) snowfalls.push(snowPane(holder, board));
+    if (board.advent) glows.push(adventLights(holder, board));
   }
   // A painted pattern that wraps round a 3D shape (the sea, the carousel) instead of standing as a board.
   const skinTargets = new Map();
@@ -675,6 +711,12 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const key = sheets.get('musicbox-key')?.holder; if (key) key.rotation.z = musicbox.key;
     (clones.get('musicbox-scene') ?? []).forEach((scene, i) => { scene.rotation.y = musicbox.spin + i * Math.PI / 2; });
     for (const [index, material] of twinkles.entries()) material.opacity = still ? 1 : .72 + Math.sin(t * 2.6 + index) * .28;
+    for (const [index, holder] of candles.entries()) {
+      holder.scale.set(1 + (still ? 0 : Math.sin(t * 8.3 + index * 2) * .05), 1 + (still ? 0 : Math.sin(t * 11.1 + index) * .07 + Math.sin(t * 5.7 + index * 3) * .05), 1);
+      holder.rotation.z = still ? 0 : Math.sin(t * 4.1 + index) * .06;
+    }
+    for (const [index, texture] of snowfalls.entries()) if (!still) { texture.offset.y = (t * .045 + index * .37) % 1; texture.offset.x = Math.sin(t * .3 + index) * .03; }
+    for (const [index, material] of glows.entries()) material.opacity = still ? 1 : .88 + Math.sin(t * 1.7 + index) * .1;
     for (const [holder, swing] of swings) holder.rotation.z = still ? 0 : Math.sin(t * 1.1 + holder.id) * swing;
     lanternGlow.material.opacity = .85 + (still ? 0 : Math.sin(t * 3.1) * .1);
     doorGlow.material.opacity = (hovered === 'house' ? .55 : .2) + (still ? 0 : Math.sin(t * 1.8) * .06);
@@ -875,6 +917,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   function back() { setView(VIEWS[view].room ? 'inside' : 'outside'); }
   function setView(name) {
     if (!VIEWS[name] || story.scripted) return;
+    if (indoorView(name)) furnish();
     const asked = ++choice;
     if (indoorView(name) && !indoorView(view) && !roomIn) { roomReady.then(() => { if (asked === choice) setView(name); }); return; }
     if (trip?.direction === 'fly') finishTrip();

@@ -79,7 +79,8 @@ function inspect({ mobile }) {
     if (covers.length) issues.push({ kind: 'covered', what: describe(node), by: describe(covers[0].closest('button, a, .cabin-bag, .notebook-button, .cabin-back, .cabin-caption, .cabin-chat, .music-toggle, ' + FRONT) ?? covers[0]), part: `${covers.length}/5` });
   }
   // The words on an open card, and the caption.
-  const words = [...document.querySelectorAll(`:is(${FRONT}) :is(p, li, h2, h3, h4, label, strong), .cabin-caption`)].filter(node => inGame(node) && shown(node) && node.textContent.trim() && !node.closest('.sr-only'));
+  // Words that let taps through (the caption) can never be found under a point, so they are not checked this way.
+  const words = [...document.querySelectorAll(`:is(${FRONT}) :is(p, li, h2, h3, h4, label, strong), .cabin-caption`)].filter(node => inGame(node) && shown(node) && node.textContent.trim() && !node.closest('.sr-only') && getComputedStyle(node).pointerEvents !== 'none');
   for (const node of words) {
     const view = seen(node); if (!view) continue;
     const covers = points(view).map(point => coverAt(node, point)).filter(by => by && wrong(node, by));
