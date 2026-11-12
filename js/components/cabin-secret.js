@@ -6,12 +6,12 @@ import { ITEM_ART } from './cabin-items.js';
 import { SUBSTITUTES, workMark } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { paperLayer, shape } from './paper-art.js';
-import { CLUES, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
+import { CLUES, ENDING_KINDS, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
 import { COLOUR_NAMES, DUTY, INK, JOBS, LOG, MARKS, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
 import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { polaroid } from './cabin-photo.js';
 import { showOrnament } from './cabin-ornaments.js';
-import { CORD, PENCIL, RECORD, SEEN, STAY, WISH, WISHES } from '../data/cabin-finale.js';
+import { CORD, PENCIL, RECORD, SEEN, STAY, TRUTH, WISH, WISHES } from '../data/cabin-finale.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const noise = index => { const value = Math.sin(index * 12.9898) * 43758.5453; return value - Math.floor(value); };
@@ -103,6 +103,15 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   });
   let card = null;
   const closeCard = () => { card?.remove(); card = null; };
+  // A choice that ends the story is asked once more: what it means, then yes or not yet (back as it was).
+  function confirm(button, { sure, yes, no }, onYes, onNo = () => {}) {
+    button.hidden = true; sound.play('pick');
+    const note = element('p', 'secret-note signpost-sure', null, sure), row = element('div', 'signpost-actions'), ok = element('button', 'register-sign', row, yes), back = element('button', 'register-sign is-quiet', row, no);
+    ok.type = back.type = 'button'; button.after(note, row);
+    on(ok, 'click', onYes);
+    on(back, 'click', () => { note.remove(); row.remove(); button.hidden = false; sound.play('remove'); onNo(); button.focus({ preventScroll: true }); });
+    ok.focus({ preventScroll: true });
+  }
   // Out of the little room and the bookcase pushed shut behind you (only once you are clear of its swing).
   const leave = element('button', 'books-enter', layer, '離開，關上書櫃 ↺'); leave.type = 'button';
   on(leave, 'click', () => { cabin.setView('inside'); setTimeout(onShut, 1300); });
@@ -148,7 +157,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       if (canStay(volunteer, finale)) {
         element('p', 'secret-note', page, STAY.invite);
         const sign = element('button', 'register-sign', page, STAY.sign); sign.type = 'button';
-        on(sign, 'click', () => { sound.play('thud'); onStay(); open('log', from); });
+        on(sign, 'click', () => confirm(sign, STAY, () => { sound.play('thud'); onStay(); open('log', from); }));
       }
     } else if (id === 'rules') {
       // The duty rules on the first page; the pages after, stuck with snowmelt until Santa has opened them for you.
@@ -169,7 +178,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       const picture = element('div', 'hats-polaroid', page); picture.setAttribute('role', 'img'); picture.setAttribute('aria-label', '舊拍立得：雪人戴著耳罩、格紋圍巾、圓框眼鏡，手裡提著燈');
       paperLayer(picture, '-4 -4 128 158', '', polaroid, { paper: { scale: .3, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true });
       element('p', 'secret-note', page, NOTES.polaroid); clue('snowman-photo');
-      element('p', 'secret-note', page, NOTES.hats); hat(page);
+      element('p', 'secret-note', page, finale.stayed ? NOTES.hatsMine : NOTES.hats); hat(page);
     } else if (['stamps', 'rack'].includes(id) && !(id === 'rack' && signedUp(volunteer))) element('p', 'secret-note', page, NOTES[id]);
     // On the postmark tray, a brass pin (it undoes the music box's catch, cabin-musicbox.js): to the pocket.
     if (id === 'stamps' && !bag.ever('pin')) {
@@ -359,13 +368,22 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
           const choice = element('button', 'compose-choice', choices, wish.name); choice.type = 'button'; choice.setAttribute('aria-pressed', 'false');
           on(choice, 'click', () => { chosen = wish.id; sound.play('pick'); for (const other of choices.children) other.setAttribute('aria-pressed', String(other === choice)); make.disabled = false; });
         }
-        on(make, 'click', () => { if (!chosen) return; sound.play('thud'); closeCard(); onWish(chosen); });
+        // Chosen, then confirmed; while it is being confirmed, the wish stays as chosen.
+        on(make, 'click', () => {
+          if (!chosen) return; for (const choice of choices.children) choice.disabled = true;
+          confirm(make, { ...WISH, sure: WISH.sure(WISHES.find(wish => wish.id === chosen).name) }, () => { sound.play('thud'); closeCard(); onWish(chosen); }, () => { for (const choice of choices.children) choice.disabled = false; });
+        });
       } else if (finale.wish) element('p', 'secret-note', card, WISH.made(WISHES.find(wish => wish.id === finale.wish).name));
       const seen = element('p', 'register-endings', card); element('span', '', seen, `${SEEN}：`);
-      // A stamp for each ending seen: press it to watch that ending again.
-      for (const ending of ['A', 'B', 'C', 'D']) {
-        const got = finale.endings.includes(ending), mark = element(got ? 'button' : 'span', got ? 'is-seen' : '', seen); mark.setAttribute('aria-label', got ? `再看一次結局 ${ending}` : `結局 ${ending}，還沒看過`);
+      // A stamp for each ending seen, and a gold star once one was told true: press it to watch that again.
+      for (const ending of [...ENDING_KINDS, 'truth']) {
+        const got = ending === 'truth' ? finale.truth : finale.endings.includes(ending), name = ending === 'truth' ? TRUTH.star : `結局 ${ending}`;
+        const mark = element(got ? 'button' : 'span', `${got ? 'is-seen' : ''}${ending === 'truth' ? ' ending-truth' : ''}`, seen); mark.setAttribute('aria-label', got ? `再看一次${name}` : `${name}，還沒看過`);
         if (got) { mark.type = 'button'; on(mark, 'click', () => { sound.play('pick'); onReplay(ending); }); }
+        if (ending === 'truth') {
+          inked(element('span', 'truth-star', mark), '0 0 30 30', ink => shape('path', { d: 'M15 2L18.6 10.6 27.8 11.2 20.6 17 23 26 15 21 7 26 9.4 17 2.2 11.2 11.4 10.6Z', ...(got ? { fill: '#d9a93c' } : { fill: 'none', stroke: '#d6c6a4', 'stroke-width': 1.6, 'stroke-linejoin': 'round' }) }, ink));
+          element('span', 'ending-letter', mark, TRUTH.star); continue;
+        }
         inked(mark, '0 0 30 30', ink => shape('circle', got ? { cx: 15, cy: 15, r: 13, fill: '#b5443c' } : { cx: 15, cy: 15, r: 12, fill: 'none', stroke: '#d6c6a4', 'stroke-width': 1.8 }, ink)); element('span', 'ending-letter', mark, ending);
       }
       // Leaving takes a second press, and keeps the stamps.

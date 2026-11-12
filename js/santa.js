@@ -40,6 +40,7 @@ function onView(view) {
   if (SPOTS.includes(view) || ROOMS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : 1000);
   if (view === 'inside') play?.inRoom();
   if (view === 'outside') { play?.outside(); chat.setAway(Boolean(cabin && !cabin.santaHome)); }
+  if (view === 'outside' && touchOutside) { const id = touchOutside; touchOutside = ''; setTimeout(() => cabin?.touch(id), motion.matches ? 0 : 1200); }
   if (view === 'inside') status.textContent = '推開門走進屋裡：聖誕老人坐在火爐邊。拖曳可以環顧整個房間，點門口就能出去。';
   if (view === 'hearth') status.textContent = '走到壁爐前：可以從柴籃添柴，也可以壓一壓風箱。';
   if (view === 'desk') status.textContent = '走到書桌前：可以抽一封信來讀，也可以蓋郵戳、封火漆。';
@@ -52,6 +53,9 @@ function onView(view) {
 back.addEventListener('click', () => cabin?.back());
 explore.forEach(button => button.addEventListener('click', () => { cabin?.setView(button.dataset.spot); back.focus(); }));
 looks.forEach(button => button.addEventListener('click', () => { cabin?.look(button.dataset.look); stage.querySelector('.cabin-gesture').focus(); }));
+// The world signpost (the way home) from the list too: in the yard it is read at once; from anywhere else, once back out.
+let touchOutside = '';
+document.querySelectorAll('.cabin-explore [data-touch]').forEach(button => button.addEventListener('click', () => { if (!cabin) return; if (cabin.view === 'outside') cabin.touch(button.dataset.touch); else { touchOutside = button.dataset.touch; cabin.setView('outside'); } }));
 // Escape steps back once (from the hearth to the room, from the room out of the door); the scene may have taken it already.
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !event.defaultPrevented && cabin && cabin.view !== 'outside') { cabin.back(); stage.querySelector('.cabin-gesture').focus(); } });
 markExplore();
@@ -75,7 +79,7 @@ async function mountCabin(fly = true) {
   try {
     const [{ mountCabin: build }, { mountPlay }] = await Promise.all([import('./components/cabin-scene.js'), import('./components/cabin-play.js')]);
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (note) play?.note(note, id); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
+    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (note) play?.note(note, id); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
     if (!result || run !== generation) { result?.destroy(); return; }
     cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; }, onSanta: state => { if (state === 'away' || state === 'home') chat.setAway(state === 'away'); } });
     cabin.setFound([...found]);

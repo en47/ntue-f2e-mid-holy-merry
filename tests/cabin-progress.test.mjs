@@ -95,11 +95,12 @@ test('volunteering is kept: a valid initial and the known jobs, once each', () =
   storage.setItem('holy-merry:cabin:v1', JSON.stringify({ volunteer: { mark: 'N', tasks: 'hay' } }));
   assert.deepEqual(readProgress(storage).volunteer, { mark: '', tasks: [] }, 'a name tag\'s initial, or tasks that are not a list, are dropped');
 });
-test('the end is kept: offered, untied, the wish, staying, the endings seen; nothing else', () => {
-  assert.deepEqual(readProgress(memory()).finale, { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] });
+test('the end is kept: offered, untied, the wish, staying, the endings seen, told true, asked; nothing else', () => {
+  assert.deepEqual(readProgress(memory()).finale, { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [], truth: false, asked: false });
   const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { invited: true, twist: true, wish: 'snow', stayed: true, endings: ['B', 'D', 'B', 'Z'] } }) });
-  assert.deepEqual(readProgress(store).finale, { invited: true, twist: true, unlocked: true, slip: 'none', wish: 'snow', stayed: true, endings: ['B', 'D'] });
-  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { twist: 'yes', wish: 'pony', endings: 'A' } }) })).finale, { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] });
+  assert.deepEqual(readProgress(store).finale, { invited: true, twist: true, unlocked: true, slip: 'none', wish: 'snow', stayed: true, endings: ['B'], truth: true, asked: false }, 'an older record\'s ending D: B or C was told true');
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { endings: ['C', 'A'], truth: true, asked: true } }) })).finale, { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: ['A', 'C'], truth: true, asked: true });
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ finale: { twist: 'yes', wish: 'pony', endings: 'A', truth: 'yes', asked: 1 } }) })).finale, { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [], truth: false, asked: false });
 });
 test('the clue book is kept: known clues once each, hints asked for by goal, nothing else', () => {
   const storage = memory({ 'holy-merry:cabin:v1': JSON.stringify({ clues: ['tags', 'barn-note', 'nonsense', 'tags', 3], hints: { room: 2, jobs: 9, bookcase: -1, nonsense: 1, secret: 'x' } }) });

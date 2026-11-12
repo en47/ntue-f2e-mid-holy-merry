@@ -1,6 +1,6 @@
 // What a visitor has done in Santa's yard, kept in this browser only and never sent anywhere. One versioned record, so a
 // Christmas passport or the cabin's story can later read the same place. Every function takes the storage, so tests pass a stand-in.
-import { CLUES, GIFTS, LOG_ANSWER, SLIP, TASKS, canSign, homeShelf, knowsSantas, readLog, readShelf } from './cabin-story.js';
+import { CLUES, ENDING_KINDS, GIFTS, LOG_ANSWER, SLIP, TASKS, canSign, homeShelf, knowsSantas, readLog, readShelf } from './cabin-story.js';
 import { emptyBag, ever, readBag } from './cabin-bag.js';
 import { WISHES } from '../data/cabin-finale.js';
 import { GOALS, NOTEBOOK } from '../data/cabin-clues.js';
@@ -23,7 +23,7 @@ export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'car
 // except that a barn hoisted then has its winch's crank fitted (the crank is the snowman's handle, so that is found too).
 // What has been set right in the room for good that the pocket does not show (`placed`): the music box's catch undone by the
 // brass pin (a tool, kept). A record whose music box drawer was opened before it had a catch counts it undone.
-const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog(), told: false }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [] }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0, bag: emptyBag(), placed: [] });
+const blank = () => ({ outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog(), told: false }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [], truth: false, asked: false }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0, bag: emptyBag(), placed: [] });
 export const PLACED = ['musicbox-catch'];
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
@@ -61,7 +61,9 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   // Letters answered before the rack had to be sorted first: it counts as sorted.
   if (progress.volunteer.tasks.includes('letters')) progress.desk.sorted = true;
   const end = saved.finale ?? {}, endings = end.endings;
-  progress.finale = { invited: end.invited === true, twist: end.twist === true, unlocked: end.unlocked === true || end.twist === true, slip: SLIP.includes(end.slip) ? end.slip : 'none', wish: WISHES.some(wish => wish.id === end.wish) ? end.wish : null, stayed: end.stayed === true, endings: Array.isArray(endings) ? ['A', 'B', 'C', 'D'].filter(ending => endings.includes(ending)) : [] };
+  // The endings seen (A, B, C), whether the truer telling of B or C has been (an older record's ending D), and whether
+  // Santa has asked, all four jobs done, what comes next.
+  progress.finale = { invited: end.invited === true, twist: end.twist === true, unlocked: end.unlocked === true || end.twist === true, slip: SLIP.includes(end.slip) ? end.slip : 'none', wish: WISHES.some(wish => wish.id === end.wish) ? end.wish : null, stayed: end.stayed === true, endings: Array.isArray(endings) ? ENDING_KINDS.filter(ending => endings.includes(ending)) : [], truth: end.truth === true || (Array.isArray(endings) && endings.includes('D')), asked: end.asked === true };
   if (Number.isInteger(saved.wheelRounds) && saved.wheelRounds > 0) progress.wheelRounds = Math.min(saved.wheelRounds, 999);
   // An earlier record kept the same finds as pieces of a photograph, by where they were found.
   const OLD = { music: 'N', rack: 'O', snowman: 'E', wheel: 'K', hat: 'H' }, found = Array.isArray(saved.ornaments) ? saved.ornaments : Array.isArray(saved.pieces) ? saved.pieces.map(id => OLD[id]) : [];

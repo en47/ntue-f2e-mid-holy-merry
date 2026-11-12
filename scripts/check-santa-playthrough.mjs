@@ -1,5 +1,5 @@
 // Santa 頁從空白存檔整套玩一遍：院子（郵筒包裹、餵食槽鑰匙、雪堆把手、絞盤與抽屜）、屋裡（火柴點火、鑰匙開抽屜拿放大鏡、吸墨器、音樂盒書籤、放大鏡看雪花球）、書櫃、弄濕的交接表、聖誕老人回來說明、加入、四件替身工作（餵食表、裝雪橇、分信回一封、雪地的齒輪）、空白紙條放在熱石板上、紅繩舊紀錄簿、
-// 五位替身的見面禮與聖誕樹，最後走到結局 B→D、C→D、A。每一步都按頁面上的按鈕或拖曳，不改存檔。只讀寫這個瀏覽器的
+// 五位替身的見面禮與聖誕樹，最後走到結局 B＋真相、C＋真相（都要再確認），走出小屋不觸發，到世界路標確認回家才是 A；每個結局後有紀念明信片。每一步都按頁面上的按鈕或拖曳，不改存檔。只讀寫這個瀏覽器的
 // localStorage，不連任何雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
 // 執行：BASE=http://127.0.0.1:5511 node scripts/check-santa-playthrough.mjs（WIDTH=390 HEIGHT=844 是手機；SHOTS=資料夾 會存截圖）
@@ -115,7 +115,9 @@ for (const [tab, item] of [['頭部', '耳罩'], ['頸部', '格紋圍巾'], ['�
 await wait(2600); await shot('snowman-gift'); await closeCard('.piece-card');
 // Back in: the music box's drawer (N), the cord's lock and the old page, the smallest hat (H).
 await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(6000);
-await spot('inside', 7000); await spot('musicbox');
+// All four jobs done, back in the middle of the room: Santa asks, once, what comes next.
+await spot('inside', 7000); log.push(`asked: ${await page.evaluate(() => document.querySelector('.ask-card')?.textContent.slice(0, 30) ?? 'no')}`); await must('繼續探索'); await wait(500); await note('explore');
+await spot('musicbox');
 await use('pin', '.musicbox-drawer'); await wait(1900);
 for (const m of ['E', 'O', 'N', 'K', 'H']) { await page.evaluate(m => [...document.querySelectorAll('.comb-tine')].find(b => b.textContent === `${m}.`).click(), m); await wait(260); }
 await wait(2000); await shot('comb-open'); await closeCard('.comb-card');
@@ -127,20 +129,24 @@ log.push(`twist ${(await save()).finale.twist} | ornaments ${(await save()).orna
 // Out of the little room: back in the middle, the tree.
 await must('離開，關上書櫃'); await wait(4500); await toRoom(); await wait(2500);
 log.push(`tree card: ${await page.evaluate(() => Boolean(document.querySelector('.tree-card')))}`); await shot('tree'); await page.evaluate(() => document.querySelector('.tree-card .cabin-letter-close')?.click()); await wait(500);
-// The endings: a wish (B, then D), staying on (C, then D), going home (A).
+// The endings, each confirmed and told once, then its postcard: a wish (B, told true), staying on (C, told true), and,
+// signed off, going home at the world signpost (A); walking out of the house tells nothing.
+const told = async () => { const kind = await theatre(), truth = await page.evaluate(() => Boolean(document.querySelector('.ending-theatre .theatre-act'))); await leaveTheatre(); const card = await page.evaluate(() => Boolean(document.querySelector('.postcard-card'))); await page.waitForFunction(() => document.querySelector('.postcard-image')?.src.startsWith('data:image/png'), null, { timeout: 15000 }); await shot(`postcard-${kind}`); await must('留在村子'); await wait(1500); return `${kind}${truth ? '＋真相' : ''}${card ? '（明信片）' : ''}${await page.evaluate(() => document.querySelector('.ending-theatre') ? '，又接了一段' : '')}`; };
 await enterSecret();
-await thing('register'); await page.evaluate(() => [...document.querySelectorAll('.register-wishes .compose-choice')].find(b => b.textContent.includes('禮物')).click()); await must('蓋章許願'); await wait(900);
+await thing('register'); await page.evaluate(() => [...document.querySelectorAll('.register-wishes .compose-choice')].find(b => b.textContent.includes('禮物')).click()); await must('蓋章許願'); await wait(400); await must('確定許願'); await wait(900);
 await page.click('.wish-gift'); await wait(2600); await must('好 ✓'); await wait(800);
-log.push(`ending: ${await theatre()}`); await leaveTheatre(); log.push(`then: ${await theatre()}`); await leaveTheatre();
-await thing('log'); await must('簽上早班'); await wait(900); log.push(`ending: ${await theatre()}`); await leaveTheatre(); log.push(`then: ${await theatre()}`); await leaveTheatre(); await putBack();
+log.push(`ending: ${await told()}`);
+await thing('log'); await must('簽上早班'); await wait(400); await must('確定簽名'); await wait(900); log.push(`ending: ${await told()}`); await putBack();
 await thing('register'); await must('離開替身工作'); await wait(300); await must('確定離開'); await wait(800); await putBack();
 await must('離開，關上書櫃'); await wait(4500); await toRoom(); await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(8000);
-log.push(`ending: ${await theatre()}`); await leaveTheatre();
+log.push(`walked out: ${await page.evaluate(() => document.querySelector('.ending-theatre') ? 'an ending (wrong)' : 'nothing told')}`);
+await page.evaluate(() => document.querySelector('.cabin-explore [data-touch="world-sign"]').click()); await wait(800); await must('踏上回家的路'); await wait(300); await must('確定回家'); await wait(900);
+log.push(`ending: ${await told()}`);
 const end = await save();
 log.push(`finale ${JSON.stringify(end.finale)} | ornaments ${end.ornaments} tree ${end.tree} | clues ${end.clues.length}`);
 await page.evaluate(() => document.querySelector('.notebook-button').click()); await wait(600); await shot('notebook-end');
 log.push(`goal: ${await page.evaluate(() => document.querySelector('.notebook-goal:last-of-type')?.textContent)}`);
-// Everything reached: four endings, five gifts on the tree, no page errors.
-const whole = ['A', 'B', 'C', 'D'].every(kind => end.finale.endings.includes(kind)) && end.ornaments.length === 5 && end.tree && ['lichen', 'key', 'handle', 'matches', 'magnifier', 'pin', 'slip', 'gear'].every(id => [...end.bag.held, ...end.bag.used].includes(id)) && ['blotter', 'music-bookmarks', 'globe-village'].every(id => end.clues.includes(id)) && !errors.length;
-console.log(whole ? 'PASS  從空白存檔玩到院子四樣東西、屋裡的放大鏡與線索、撥針、四個結局、五個見面禮、聖誕樹，沒有頁面錯誤' : `FAIL  ${JSON.stringify({ endings: end.finale.endings, ornaments: end.ornaments, tree: end.tree, bag: end.bag, errors })}`);
+// Everything reached: the three endings and the truth, five gifts on the tree, no page errors.
+const whole = ['A', 'B', 'C'].every(kind => end.finale.endings.includes(kind)) && end.finale.truth && end.finale.asked && end.ornaments.length === 5 && end.tree && ['lichen', 'key', 'handle', 'matches', 'magnifier', 'pin', 'slip', 'gear'].every(id => [...end.bag.held, ...end.bag.used].includes(id)) && ['blotter', 'music-bookmarks', 'globe-village'].every(id => end.clues.includes(id)) && !errors.length;
+console.log(whole ? 'PASS  從空白存檔玩到院子四樣東西、屋裡的放大鏡與線索、撥針、三個結局與真相版、五個見面禮、聖誕樹，沒有頁面錯誤' : `FAIL  ${JSON.stringify({ endings: end.finale.endings, ornaments: end.ornaments, tree: end.tree, bag: end.bag, errors })}`);
 await browser.close(); process.exitCode = whole ? 0 : 1;

@@ -51,7 +51,7 @@ const KINDS = [
   ['.compose-choice, .lemon-card', 'slip'],
   ['.register-jobs .is-done .job-box', 'tag'],
   ['.job-box', 'kraft'],
-  ['.register-letter, .sack-count', 'pale'],
+  ['.register-letter, .sack-count, .register-sign.is-quiet', 'pale'],
   ['.cabin-letter:not(.secret-card)', 'letter'],
   ['.cabin-chat', 'plain'],
   ['.cabin-caption, .cabin-tip, .cabin-away, .books-found', 'pinned'],

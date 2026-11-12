@@ -1259,6 +1259,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const old = hoist.drawer.material.map; hoist.drawer.material.map = map; textures.delete(old); old.dispose(); redraw();
     },
     snowmanAct(kind) { if (motion.matches || !snowman) return; snowmanMove = { kind, start: clock }; wake(); },
+    // A thing in the village touched without a pointer (from the explore list): its wiggle, and its line.
+    touch(id) { const prop = PROPS.find(each => each.id === id); if (prop) touch(prop); },
     // Turn to face one side of the village: 'left' (the fair), 'right' (the coast) or 'back' (the house and the mountain).
     look(direction) {
       const turn = { left: 1.2, right: -1.2 }[direction] ?? lerp(VIEWS.outside.tallHeading, 0, blend());
