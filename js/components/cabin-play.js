@@ -74,10 +74,12 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const timers = new Set(), later = (ms, run) => { const id = setTimeout(() => { timers.delete(id); run(); }, ms); timers.add(id); };
   // What lasts between visits (the snowman's outfit, the reindeer's meals today, the barn's hoist), and the yard's small sounds.
   let storage = null; try { storage = localStorage; } catch { /* this visit only */ }
-  const progress = readProgress(storage, known), save = () => writeProgress(progress, storage), sound = createSound();
+  // Every save also lets the clue book see whether the goal has moved on (it says so, `notebook.check`).
+  let notebook = null;
+  const progress = readProgress(storage, known), save = () => { writeProgress(progress, storage); notebook?.check(); }, sound = createSound();
   let cleanup = () => {};
   // The clue book in the corner: games write what they show into it (`clue`).
-  const notebook = mountNotebook(stage, { progress, save, sound }), clue = id => notebook.add(id);
+  notebook = mountNotebook(stage, { progress, save, sound }); const clue = id => notebook.add(id);
   // The pocket in the other corner: what has been picked up, to be used where it fits (cabin-bag.js).
   const bag = mountBag(stage, { progress, save, sound, say: text => say(text) });
   // A substitute's welcome ornament, found: kept and written down (false if it was found before).
@@ -363,7 +365,9 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
           else say(NOTES.chair);
           story.told = true; save(); notebook.refresh();
           later(4200, () => say(NOTES.told));
-          if (progress.finale.unlocked && !progress.finale.twist) later(8800, () => say(NOTES.record));
+          // And he asks you to join, in so many words.
+          later(9000, () => say(NOTES.invite));
+          if (progress.finale.unlocked && !progress.finale.twist) later(15000, () => say(NOTES.record));
         });
         return;
       }
@@ -398,6 +402,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       if (progress.volunteer.tasks.includes('hay')) cabin.repaint('sleigh', { loaded: true });
       // The desk's drawer with its key turned and its magnifier taken; the music box's drawer, its catch undone and Nils's star found.
       cabin.drawer('desk', { front: gone('key') ? { key: true } : {}, inside: had('magnifier') ? { taken: true } : {} });
+      cabin.drawer('barn', { inside: had('matches') ? { taken: true } : {} });
       cabin.drawer('musicbox', { front: progress.placed.includes('musicbox-catch') ? { undone: true } : {}, inside: progress.ornaments.includes('N') ? { empty: true } : {} });
       cabin.placeBooks(progress.story.shelf); if (progress.story.opened) cabin.openBookcase(!progress.story.shut, false);
       cabin.wheelBroken(pending(progress.volunteer, 'wheel'), false);

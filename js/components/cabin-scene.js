@@ -426,7 +426,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     catch (error) { if (!WORLD.includes(board)) throw error; console.error('Village board failed', board.id, error); }
     painted++; report();
   });
-  const hoistParts = Promise.all(['hoist-bracket', 'hoist-wheel', 'hoist-bale', 'hoist-winch', 'hoist-crank', 'hoist-tag', 'hoist-drawer'].map(name => cutBoard(name, PIECES[name], set)));
+  const hoistParts = Promise.all(['hoist-bracket', 'hoist-wheel', 'hoist-bale', 'hoist-winch', 'hoist-crank', 'hoist-tag'].map(name => cutBoard(name, PIECES[name], set)));
 
   // Warm glows: the fire, the lantern, the reading lamp, the porch and the lighthouse lamp. Sprites always face the camera.
   const warm = keep(textures, radialTexture([[0, 'rgba(255,190,110,.8)'], [.45, 'rgba(255,150,70,.28)'], [1, 'rgba(255,140,60,0)']]));
@@ -551,13 +551,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const piece = (id, part, state) => { const name = `${id}-drawer-${part}`; return cutBoard(name, PIECES[name], set, state ?? PIECES[name].state); };
   async function buildDrawer(id) {
     const { sheet: under, slot: [x0, , x1, y1], depth, slide } = DRAWERS[id], host = sheets.get(under);
-    if (!host || disposed) return;
+    if (!host || disposed || drawers.has(id)) return;
     const { board, holder } = host, { front: [fw, fh], floor: [lw, lh], side: [sw, sh] } = drawerPieces(id), look = drawerLooks.get(id) ?? {};
     const [front, floor, side] = (await Promise.all([piece(id, 'front', look.front), piece(id, 'inside', look.inside), piece(id, 'side')])).map(texture);
     if (disposed) return;
     const plane = (map, w, h) => {
       const material = keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false, side: THREE.DoubleSide }));
-      warmed.push([material, material.color.clone()]);
+      if (board.room) warmed.push([material, material.color.clone()]);
       return new THREE.Mesh(keep(geometries, new THREE.PlaneGeometry(w, h)), material);
     };
     const base = board.nudge ?? 0, box = new THREE.Group(), floorY = fh * .14;
@@ -586,14 +586,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // The hay hoist on the barn: paper pieces on the barn's own sheet, so they stand and turn with it. One number, how far
   // the bale has been wound up (0 to 1), places everything: the bale rises as far as the winch's spool winds rope in, the
   // spool (with the crank, once it is fitted) and the pulley turn by that length of rope, and the rope to the bale runs
-  // from the wheel's rim down to it. The repair tag swings when the winch is tried without its crank; the drawer behind the
-  // bale slides out a little when it is pulled open.
-  const barn = sheets.get('stable'), hoist = { pull: 0, swing: -10, slide: 0, out: 0 };
+  // from the wheel's rim down to it. The repair tag swings when the winch is tried without its crank. The drawer behind the
+  // bale is a real one (DRAWERS.barn, `drawer`).
+  const barn = sheets.get('stable'), hoist = { pull: 0, swing: -10 };
   if (barn) {
     const sheet = (map, w, h, lift = 0, shift = 0) => { const geometry = keep(geometries, new THREE.PlaneGeometry(w, h)); geometry.translate(shift * w, lift * h, 0); const mesh = new THREE.Mesh(geometry, keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false }))); barn.holder.add(mesh); return mesh; };
-    const [bracket, wheel, bale, winch, crank, tag, drawer] = (await hoistParts).map(texture);
+    const [bracket, wheel, bale, winch, crank, tag] = (await hoistParts).map(texture);
     const hang = HOIST.x - HOIST.radius, pull = HOIST.x + HOIST.radius, [cw, ch] = WINCH.crank, [gw, gh] = WINCH.tag;
-    hoist.drawer = sheet(drawer, ...HOIST.drawer, .5); hoist.drawer.position.set(hang, 0, .03);
     hoist.bale = sheet(bale, ...HOIST.bale, .5); hoist.bale.position.set(hang, 0, .16);
     sheet(winch, ...WINCH.plate).position.set(WINCH.x, WINCH.y, .18);
     // The tag hangs from the top of its string, the crank turns about its square hole.
@@ -603,6 +602,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     sheet(bracket, .62, .34).position.set(HOIST.x, HOIST.wheel + .11, .13);
     const rope = keep(geometries, new THREE.PlaneGeometry(.022, 1).translate(0, -.5, 0)), cord = flat(0xb98a52);
     hoist.ropes = [hang, pull].map(x => { const mesh = new THREE.Mesh(rope, cord); mesh.position.set(x, HOIST.wheel, .19); barn.holder.add(mesh); return mesh; });
+    // The little drawer at the hoist's foot, a real one (as the desk's): built now the barn stands.
+    buildDrawer('barn').catch(error => console.error('Drawer failed', 'barn', error));
     hoist.ropes[1].scale.y = HOIST.wheel - WINCH.y;
   }
   function placeHoist() {
@@ -786,7 +787,6 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     }
     // The barn's repair tag swings for a moment; its drawer, pulled open, stands a little out of the wall.
     if (hoist.tag) { const u = (t - hoist.swing) / 1.4; hoist.tag.rotation.z = !still && u < 1 ? Math.sin(u * Math.PI * 5) * .35 * (1 - u) : 0; }
-    if (hoist.drawer) { hoist.out += (hoist.slide - hoist.out) * (still ? 1 : .12); hoist.drawer.position.z = .03 + hoist.out * .07; hoist.drawer.scale.setScalar(1 + hoist.out * .04); }
     // The desk's and the music box's drawers slide out of their slots, or back in.
     for (const drawer of drawers.values()) {
       drawer.out += (drawer.open - drawer.out) * (still ? 1 : .14); if (Math.abs(drawer.open - drawer.out) < .002) drawer.out = drawer.open;
@@ -1351,15 +1351,15 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
     },
     // The hay hoist: how far the bale is wound up (0–1) and where the crank stands (radians; by default as far as the
-    // rope wound in has turned it); whether the crank is fitted; a swing of the repair tag; the drawer behind the bale
-    // (shut, or pulled out with or without the matchbox); and where its parts are on screen.
+    // rope wound in has turned it); whether the crank is fitted; a swing of the repair tag; and where its parts are on
+    // screen (the drawer behind the bale is `drawer('barn')`).
     hoist(pull, turn) { hoist.pull = THREE.MathUtils.clamp(pull, 0, 1); hoist.turn = turn; placeHoist(); wake(); if (motion.matches || frame === undefined) draw(); },
     fitCrank(fitted) { if (!hoist.crank) return; hoist.crank.visible = fitted; redraw(); },
     swingTag() { hoist.swing = clock; wake(); },
     hoistRects() {
       if (!barn || !hoist.bale) return null;
       barn.holder.updateMatrixWorld(true);
-      const hang = HOIST.x - HOIST.radius, [dw, dh] = HOIST.drawer, [gw, gh] = WINCH.tag, reach = WINCH.arm + WINCH.crank[0] / 2;
+      const [gw, gh] = WINCH.tag, reach = WINCH.arm + WINCH.crank[0] / 2;
       const local = (center, size) => {
         const rect = stage.getBoundingClientRect(), xs = [], ys = [];
         for (const dx of [-.5, .5]) for (const dy of [-.5, .5]) {
@@ -1369,14 +1369,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
         return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
       };
       // `crank` is the circle its knob runs round, to turn a drag about the hub into turns of the winch.
-      return { winch: local([WINCH.x, WINCH.y, .2], WINCH.plate), crank: local([WINCH.x, WINCH.y, .21], [reach * 2, reach * 2]), tag: local([WINCH.tagAt[0] + gw * .44, WINCH.tagAt[1] - gh / 2, .19], [gw, gh]), drawer: local([hang, dh / 2, .03], [dw, dh]), wheel: local([HOIST.x, HOIST.wheel, .21], [HOIST.radius * 2, HOIST.radius * 2]) };
-    },
-    async openDrawer(state) {
-      if (!hoist.drawer) return;
-      hoist.slide = state.open ? 1 : 0;
-      const map = texture(await cutBoard('hoist-drawer', PIECES['hoist-drawer'], set, state.open ? { open: true, matches: Boolean(state.matches) } : {}));
-      if (disposed) return;
-      const old = hoist.drawer.material.map; hoist.drawer.material.map = map; textures.delete(old); old.dispose(); redraw();
+      return { winch: local([WINCH.x, WINCH.y, .2], WINCH.plate), crank: local([WINCH.x, WINCH.y, .21], [reach * 2, reach * 2]), tag: local([WINCH.tagAt[0] + gw * .44, WINCH.tagAt[1] - gh / 2, .19], [gw, gh]), wheel: local([HOIST.x, HOIST.wheel, .21], [HOIST.radius * 2, HOIST.radius * 2]) };
     },
     snowmanAct(kind) { if (motion.matches || !snowman) return; snowmanMove = { kind, start: clock }; wake(); },
     // A thing in the village touched without a pointer (from the explore list): its wiggle, and its line.

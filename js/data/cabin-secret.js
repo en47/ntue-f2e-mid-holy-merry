@@ -62,6 +62,7 @@ export const NOTES = {
   chair: '聖誕老人從搖椅上看著你，笑了：「看來，你已經發現我們的小秘密了。」',
   told: '「小房間那本小冊，後面黏住的幾頁，我幫你翻開了。上面寫著我們是怎麼開始的。」',
   coming: '門外好像傳來麋鹿的鈴鐺聲……聖誕老人回來了嗎？回房間看看吧。',
+  invite: '「登記簿最下面那一格，一直空著。想留下來幫忙的話，就簽上你的縮寫吧。」',
   record: '他看了書櫃後面一眼：「……那本舊紀錄，你也翻開過了啊。那時候你還不知道我們的小秘密吧？現在再讀一次，說不定會讀出不一樣的東西。」',
 };
 // The register's newest page, once the secret is known: how many stamps each substitute has this season (four fill a row;

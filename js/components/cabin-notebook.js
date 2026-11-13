@@ -38,6 +38,13 @@ export function mountNotebook(stage, { progress, save, sound }) {
   paperLayer(dot, '0 0 20 20', '', paper => shape('circle', { cx: 10, cy: 10, r: 7, fill: '#b5443c' }, paper), { paper: { scale: .15, grain: .3, shadow: .3 }, eager: true });
   let card = null, fresh = new Set();
   const show = () => { button.hidden = !(progress.clues.length || progress.story.left); };
+  // When the goal moves on, the book only hops and shows its red dot: nothing is said (what to do now is written inside).
+  let goalNow = goal(progress);
+  function check() {
+    const now = goal(progress); if (now === goalNow) return;
+    goalNow = now; show(); dot.hidden = false;
+    button.classList.remove('is-new'); void button.offsetWidth; button.classList.add('is-new');
+  }
   // Something new in the book: written down, and the book hops. Returns whether it was new.
   function add(id) {
     if (!NOTEBOOK[id] || progress.clues.includes(id)) return false;
@@ -80,6 +87,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
     divider(body);
     const help = element('section', 'notebook-hints', body); help.setAttribute('aria-live', 'polite');
     element('h4', 'notebook-goal', help, `現在：${title}`);
+    element('p', 'notebook-task', help, GOALS[now].task);
     hints.slice(0, shown).forEach((hint, i) => element('p', 'notebook-hint-line', help, `${i + 1}. ${hint}`));
     if (shown < hints.length) {
       const ask = element('button', 'notebook-hint', help, shown ? '再給一點提示' : '卡住了？給我一點提示'); ask.type = 'button';
@@ -116,5 +124,5 @@ export function mountNotebook(stage, { progress, save, sound }) {
   button.setAttribute('aria-expanded', 'false');
   button.addEventListener('click', () => (card ? close() : open()));
   show();
-  return { add, refresh: show, close, destroy() { card?.remove(); button.remove(); } };
+  return { add, check, refresh: show, close, destroy() { card?.remove(); button.remove(); } };
 }

@@ -649,6 +649,8 @@ html.theatre-open { overflow: hidden; }
 .notebook-hint { color: var(--ink); }
 .notebook-close { align-self: flex-end; color: #fffaf0; }
 /* 線索本最下面的「從頭再玩一次」：低調的文字鈕，按了先問一次。 */
+/* 線索本裡寫著現在要做什麼。 */
+.notebook-task { margin: .2rem 0 .5rem; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; }
 .notebook-restart { align-self: center; padding: .3rem .7rem; color: #6b5a4c; background: none; border: 0; font-size: var(--fs-small); text-decoration: underline; cursor: pointer; }
 .notebook-restart[hidden] { display: none; }
 .notebook-restart:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
@@ -914,9 +916,6 @@ html.theatre-open { overflow: hidden; }
    放大的是看不見的範圍，畫面不變。卡片裡的按鈕、跳過、結局章也至少 44px。 */
 @media (pointer: coarse) {
   :is(.play-target, .hearth-log, .desk-drawer, .musicbox-drawer)::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
-  /* 抽屜裡並排的火柴盒和紙條：各往外側放大，不吃掉對方。 */
-  .drawer-matches::after { left: min(0px, calc(100% - 44px)); right: 0; }
-  .drawer-note::after { left: 0; right: min(0px, calc(100% - 44px)); }
   .gearbox-peg::before { inset: -45%; }
   .gearbox-piece::before { inset: -14%; }
   .compose-choice, .inspect-close, .inspect-flip, .notebook-close, .notebook-restart, .theatre-skip, .theatre-actions button { min-height: 44px; }

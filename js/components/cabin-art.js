@@ -49,6 +49,8 @@ export const MUSICBOX = { x: 1.49, y: .96, z: -.02, body: [.26, .14] };
 export const DRAWERS = {
   desk: { sheet: 'desk', size: [DESK.w, DESK.h], slot: DESK.items.drawer, depth: .2, slide: .15, wood: '#7d4f33' },
   musicbox: { sheet: 'musicbox-body', size: MUSICBOX.body, slot: [.1, .7, .9, .93], depth: .062, slide: .042, wood: '#6e2a26' },
+  // In the barn's wall at the foot of the hay hoist, well inside the wall and behind the bale while it rests on the snow.
+  barn: { sheet: 'stable', size: [3.4, 2.7], slot: [.1735, .9037, .2618, .9778], depth: .3, slide: .2, wood: '#5e3e29' },
 };
 // A drawer's pieces, in scene units: the front, the floor and a side (the back is a side's width across).
 export function drawerPieces(id) {
@@ -780,6 +782,27 @@ export function musicDrawerInside({ paper }, { width, height }, state = {}) {
   shape('path', { d: Array.from({ length: 10 }, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? r * .45 : r; return `${i ? 'L' : 'M'}${(cx + Math.cos(a) * d).toFixed(1)} ${(cy + Math.sin(a) * d).toFixed(1)}`; }).join('') + 'Z', fill: '#c63a33' }, g);
   shape('path', { d: `M${cx} ${cy - r}q-6 -2 -10 -${h * .1}`, fill: 'none', stroke: '#e0b04f', 'stroke-width': 1 }, g);
 }
+// The barn drawer's front, in 200 units across: weathered planks and an iron ring to pull it by.
+export function barnDrawerFront({ paper }, { width, height }) {
+  const g = shape('g', { transform: `scale(${width / 200})` }, paper), h = 200 * height / width;
+  shape('rect', { x: 0, y: 0, width: 200, height: h, rx: 4, fill: '#a8774d' }, g);
+  for (const y of [h * .34, h * .67]) shape('path', { d: `M4 ${y}H196`, stroke: '#8a5f3d', 'stroke-width': 2.4 }, g);
+  for (const [x, y] of [[14, h * .2], [186, h * .2], [14, h * .82], [186, h * .82]]) shape('circle', { cx: x, cy: y, r: 3, fill: '#4a3a30' }, g);
+  shape('circle', { cx: 100, cy: h * .42, r: 6, fill: '#3b302a' }, g);
+  shape('circle', { cx: 100, cy: h * .62, r: 15, fill: 'none', stroke: '#3b302a', 'stroke-width': 5 }, g);
+}
+// Its floor from above: rough boards, a red and cream box of matches (until it is taken: `taken`), a folded note.
+export function barnDrawerInside({ paper }, { width, height }, state = {}) {
+  const g = shape('g', { transform: `scale(${width / 100})` }, paper), h = 100 * height / width;
+  shape('rect', { x: 0, y: 0, width: 100, height: h, fill: '#5e3e29' }, g);
+  shape('rect', { x: 0, y: 0, width: 100, height: h * .3, fill: '#4a2f20' }, g);
+  for (const x of [33, 66]) shape('path', { d: `M${x} 0V${h}`, stroke: '#4a2f20', 'stroke-width': .8 }, g);
+  shape('rect', { x: 56, y: h * .6, width: 28, height: h * .22, rx: 2, fill: '#fffdf6', transform: `rotate(-8 70 ${h * .7})` }, g);
+  shape('path', { d: `M60 ${h * .66}h18M60 ${h * .72}h12`, stroke: '#3f5a7a', 'stroke-width': 1.2, transform: `rotate(-8 70 ${h * .7})` }, g);
+  if (state.taken) return;
+  shape('rect', { x: 14, y: h * .6, width: 30, height: h * .2, rx: 2, fill: '#b5443c', transform: `rotate(6 29 ${h * .7})` }, g);
+  shape('rect', { x: 19, y: h * .64, width: 20, height: h * .11, rx: 1.5, fill: '#fbf3df', transform: `rotate(6 29 ${h * .7})` }, g);
+}
 // A drawer's side or back: plain wood of its colour, a lighter top edge.
 export const drawerSide = colour => ({ paper }, { width, height }) => {
   shape('rect', { x: 0, y: 0, width, height, fill: colour }, paper);
@@ -887,11 +910,15 @@ export function stable({ paper }, { width, height }) {
     shape('rect', { x: loft.x + x, y: loft.y + y, width: 64, height: 42, rx: 12, fill: '#d9b36a' }, paper);
     shape('path', { d: `M${loft.x + x + 6} ${loft.y + y + 14}h52M${loft.x + x + 6} ${loft.y + y + 28}h52`, stroke: '#b98f48', 'stroke-width': 4 }, paper);
   }
+  // The little drawer's opening in the wall at the hoist's foot (the drawer itself is a box that slides out of it).
+  const [sx0, sy0, sx1, sy1] = DRAWERS.barn.slot;
+  shape('rect', { x: width * sx0 - 8, y: height * sy0 - 8, width: width * (sx1 - sx0) + 16, height: height * (sy1 - sy0) + 12, rx: 4, fill: TIMBER }, paper);
+  shape('rect', { x: width * sx0, y: height * sy0, width: width * (sx1 - sx0), height: height * (sy1 - sy0), fill: '#1e140f' }, paper);
 }
 // The hay hoist on the barn's face, left of the door (stable-board units: x from the board's middle, y up from the snow).
 // A single pulley under the eave: one rope runs down to a bale, the other to a winch on the wall, so the bale rises
 // exactly as far as the winch's spool winds in. At rest the bale sits on the snow, hiding a little drawer set in the wall.
-export const HOIST = { x: -.9, wheel: 1.55, radius: .14, lift: .9, bale: [.5, .42], drawer: [.44, .36] };
+export const HOIST = { x: -.9, wheel: 1.55, radius: .14, lift: .9, bale: [.5, .42] };
 // The winch, under the pulley's other side: its spool's middle, the spool's radius (the rope winds on it, so the crank
 // turns lift / spool radians from bottom to top), its plate, and the crank (hub to knob `arm`) that fits on its square
 // hub. The crank is missing when the visitor first comes; a repair tag hangs below the plate (`tag`: size, then where).
@@ -956,29 +983,6 @@ export function hoistTag({ paper }, { width, height }) {
 }
 // The drawer behind the bale, set in the barn wall. Shut, its front and a knob; pulled out (`state.open`), its inside
 // shows: a folded note, and the matchbox beside it until it has been taken (`state.matches`).
-export function hoistDrawer({ paper }, { width, height }, state = {}) {
-  shape('rect', { x: 0, y: 0, width, height, rx: 10, fill: TIMBER }, paper);
-  shape('rect', { x: 12, y: 12, width: width - 24, height: height - 18, rx: 6, fill: '#2f1d18' }, paper);
-  const knob = (y, r) => { shape('circle', { cx: width / 2, cy: y, r, fill: '#3b302a' }, paper); shape('circle', { cx: width / 2 - r * .3, cy: y - r * .3, r: r * .35, fill: '#7a6a5e' }, paper); };
-  if (!state.open) {
-    shape('rect', { x: 18, y: height * .3, width: width - 36, height: height * .62, rx: 5, fill: '#c39466' }, paper);
-    shape('path', { d: `M26 ${height * .48}H${width - 26}`, stroke: '#a8774d', 'stroke-width': 4, opacity: .6 }, paper);
-    knob(height * .64, 9); return;
-  }
-  const front = height * .58;
-  shape('path', { d: `M20 ${front}L34 ${height * .2}H${width - 34}L${width - 20} ${front}Z`, fill: '#a8774d' }, paper);
-  shape('path', { d: `M30 ${front - 4}L40 ${height * .26}H${width - 40}L${width - 30} ${front - 4}Z`, fill: '#d9b48a' }, paper);
-  shape('rect', { x: width * .5, y: height * .28, width: width * .3, height: height * .2, rx: 2, fill: '#fffdf6', transform: `rotate(7 ${width * .65} ${height * .38})` }, paper);
-  shape('path', { d: `M${width * .53} ${height * .34}h${width * .2}M${width * .53} ${height * .4}h${width * .14}`, stroke: '#7d9bc9', 'stroke-width': 3, 'stroke-linecap': 'round', transform: `rotate(7 ${width * .65} ${height * .38})` }, paper);
-  if (state.matches) {
-    shape('rect', { x: width * .16, y: height * .3, width: width * .28, height: height * .18, rx: 3, fill: '#b5443c', transform: `rotate(-6 ${width * .3} ${height * .39})` }, paper);
-    shape('rect', { x: width * .21, y: height * .34, width: width * .17, height: height * .1, rx: 2, fill: '#fbf3df', transform: `rotate(-6 ${width * .3} ${height * .39})` }, paper);
-    star(paper, width * .295, height * .39, 6, GOLD);
-  }
-  shape('rect', { x: 4, y: front, width: width - 8, height: height - front - 2, rx: 6, fill: '#c39466' }, paper);
-  shape('path', { d: `M12 ${front + 10}H${width - 12}`, stroke: '#a8774d', 'stroke-width': 4, opacity: .6 }, paper);
-  knob(front + (height - front) * .55, 10);
-}
 export function snowman({ paper }, { width, height }) {
   // Only the snowman himself: what he wears is laid over him in four places by the wardrobe game (cabin-wardrobe.js).
   const cx = width / 2, ground = height - 8, ball = (cy, r) => { shape('circle', { cx, cy, r, fill: SNOW }, paper); shape('path', { d: `M${cx + r * .3} ${cy - r * .95}A${r} ${r} 0 0 1 ${cx + r * .3} ${cy + r * .95}A${r * 1.3} ${r * 1.3} 0 0 0 ${cx + r * .3} ${cy - r * .95}Z`, fill: '#d9e5ec' }, paper); };
