@@ -28,5 +28,4 @@ export const PREFETCH_ASSETS = [
   'assets/models/wish-tree-web.glb',
   'assets/models/wish-elf-web.glb',
   'assets/animations/elf-actions.json',
-  'assets/fonts/wish-handwritten.woff',
 ];
