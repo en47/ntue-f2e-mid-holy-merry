@@ -364,6 +364,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     leave,
     // The world signpost tapped in the yard: what it says, and for a visitor who knows the secret, the way home.
     signpost,
+    // Arrived in the yard with Santa's letter still unread: the mailbox's flag springs up with a snap to call the visitor over.
+    arrived() { if (mail.seen) return; cabin.mailCall(); later(950, () => sound.play('snap')); },
     // A line about something tapped in the village or the room; it fades on its own and never covers a game.
     // `id`: what was tapped; the wish board's thank-you note goes in the clue book.
     note(text, id) { if (id === 'wish-board') clue('wish-board'); if (layer.dataset.game) return; timers.forEach(clearTimeout); timers.clear(); say(text); later(4200, () => { if (!layer.dataset.game) say(''); }); },

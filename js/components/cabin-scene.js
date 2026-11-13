@@ -589,13 +589,14 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // spool (with the crank, once it is fitted) and the pulley turn by that length of rope, and the rope to the bale runs
   // from the wheel's rim down to it. The repair tag swings when the winch is tried without its crank. The drawer behind the
   // bale is a real one (DRAWERS.barn, `drawer`).
-  // The mailbox's flag, raised while Santa's letter waits: on the mailbox's sheet, turning about its pole's foot, and every
-  // few seconds giving a little wave to catch the eye. Lowered (hidden: the box's own picture shows it down) once opened.
-  const mail = sheets.get('mailbox'), flag = { mesh: null, up: true };
+  // The mailbox's flag, raised while Santa's letter waits: on the mailbox's sheet, turning about its pole's foot. It lies
+  // down until the visitor has arrived (`mailCall`), then springs up; after that the box gives a little hop every few
+  // seconds, its flag waving, until it is opened. Lowered (hidden: the box's own picture shows it down) once opened.
+  const mail = sheets.get('mailbox'), flag = { mesh: null, up: true, rise: null };
   if (mail) {
     const geometry = keep(geometries, new THREE.PlaneGeometry(MAIL_FLAG.w, MAIL_FLAG.h)); geometry.translate(MAIL_FLAG.w * (.5 - MAIL_FLAG.pivot), MAIL_FLAG.h / 2, 0);
     flag.mesh = new THREE.Mesh(geometry, keep(materials, new THREE.MeshBasicMaterial({ map: texture(await flagPart), transparent: true, alphaTest: .4, toneMapped: false })));
-    flag.mesh.position.set(...MAIL_FLAG.at); flag.mesh.visible = flag.up; mail.holder.add(flag.mesh);
+    flag.mesh.position.set(...MAIL_FLAG.at); flag.mesh.scale.setScalar(1.3); flag.mesh.visible = flag.up; mail.holder.add(flag.mesh);
   }
   const barn = sheets.get('stable'), hoist = { pull: 0, swing: -10 };
   if (barn) {
@@ -794,8 +795,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const delta = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), reindeerTurn[0] + extraYaw).multiply(new THREE.Quaternion().setFromAxisAngle(across, reindeerTurn[1] + extraPitch));
       reindeerHead.quaternion.premultiply(parent.clone().invert().multiply(delta).multiply(parent));
     }
-    // The mailbox's flag waves for a moment every five seconds while it is up.
-    if (flag.mesh) { const beat = t % 5; flag.mesh.rotation.z = still || beat > 1.2 ? 0 : Math.sin(beat * 9) * .16 * Math.sin(beat / 1.2 * Math.PI); }
+    // The mailbox calling: its flag springs up (overshooting a little), then every four seconds the box hops and rattles.
+    if (flag.mesh) {
+      const since = flag.rise === null ? -1 : t - flag.rise, beat = since > 1.6 ? (since - 1.6) % 4 / .7 : 1, hop = !still && flag.up && beat < 1 ? beat : 1;
+      flag.mesh.rotation.z = still ? 0 : since < 0 ? -Math.PI / 2 : since < .8 ? -Math.PI / 2 * Math.exp(-7.5 * since) * Math.cos(since * 12.5) : hop < 1 ? Math.sin(hop * Math.PI * 4) * .35 * (1 - hop) : 0;
+      mail.holder.position.y = mail.home.y + (hop < 1 ? Math.abs(Math.sin(hop * Math.PI * 2)) * .09 * (1 - hop * .4) : 0);
+      mail.holder.rotation.z = hop < 1 ? Math.sin(hop * Math.PI * 6) * .07 * (1 - hop) : 0;
+    }
     // The barn's repair tag swings for a moment; its drawer, pulled open, stands a little out of the wall.
     if (hoist.tag) { const u = (t - hoist.swing) / 1.4; hoist.tag.rotation.z = !still && u < 1 ? Math.sin(u * Math.PI * 5) * .35 * (1 - u) : 0; }
     // The desk's and the music box's drawers slide out of their slots, or back in.
@@ -1384,6 +1390,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     },
     // The mailbox's flag: up while Santa's letter waits unread, down (hidden) once the box has been opened.
     mailFlag(up) { flag.up = up; if (flag.mesh) flag.mesh.visible = up; redraw(); },
+    // The visitor has arrived in the yard: a moment later (the loader may still be fading) the flag springs up from lying
+    // down. Reduced motion: it is simply up.
+    mailCall() { if (flag.rise === null) { flag.rise = clock + .7; wake(); } },
     snowmanAct(kind) { if (motion.matches || !snowman) return; snowmanMove = { kind, start: clock }; wake(); },
     // A thing in the village touched without a pointer (from the explore list): its wiggle, and its line.
     touch(id) { const prop = PROPS.find(each => each.id === id); if (prop) touch(prop); },
