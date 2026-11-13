@@ -582,18 +582,18 @@
       "bytes": 36920
     },
     "hi/desk-drawer-front--key-true.webp": {
-      "fingerprint": "d9fa78eb4875f4c48305d3fcf17e97afdba387d821638de8d29e12449e3d210f",
-      "sha256": "f9dd91b7008c7b17b447804ce9b8dd68e7ba487c6424abb3173949d0a5e07f89",
+      "fingerprint": "c3bdda159134d79c907208f0a51cbc4e41e83c201f2a55af0f1c0868b1cdacce",
+      "sha256": "ce4a9ccb030423bd3db105d0a910221a513a52ae7b9fe361f0fbcb13bca7ba60",
       "width": 323,
       "height": 50,
-      "bytes": 3966
+      "bytes": 4002
     },
     "hi/desk-drawer-front.webp": {
-      "fingerprint": "6d63666f60df5676fbdf0fa02cd615461979c2016b675cabc263982777cd0fdc",
-      "sha256": "dcf32aa43b4d8ce58837e23b8cd8147c78b402b1c3bd7a96031bab5a14151f9a",
+      "fingerprint": "b96f244f4c8942cae4653a3ffe12ef51b1e44a131560c144e50a4c1e5bb15296",
+      "sha256": "53b4a5be382718b3f284c4896a71a054ade03f3cb6928fddc8b3e131303c8eca",
       "width": 323,
       "height": 50,
-      "bytes": 3892
+      "bytes": 4168
     },
     "hi/desk-drawer-inside--taken-true.webp": {
       "fingerprint": "70dd99d0d3fbad7861d934e38011e2fc502dce8eb8b38981900862bdae96b592",
@@ -869,11 +869,11 @@
       "bytes": 5068
     },
     "hi/hoist-winch.webp": {
-      "fingerprint": "67b9569140ebefb73a0c5add02c8a5ae188cd1f7f20c9979d7f52a2113a24e4c",
-      "sha256": "839b97276501ba294767dea165dd8b776828dd316e1ceb7b465807991c99bf4e",
+      "fingerprint": "8a05e9a2fca0b5d76719cd64aa08efe887eecb530bd20239fde586f5959dddf6",
+      "sha256": "71072818342412dec4e9504c6e41947a153c101ae23b0baac8faf6ba9b103886",
       "width": 192,
       "height": 192,
-      "bytes": 9218
+      "bytes": 9374
     },
     "hi/hoofprints.webp": {
       "fingerprint": "1db551b64ad257661eda81ad7df3ff3be95aca416192241ae8be17fa2568c1d0",
@@ -966,12 +966,26 @@
       "height": 475,
       "bytes": 15112
     },
-    "hi/mailbox.webp": {
-      "fingerprint": "a3ca26bcdf457e99948540c6675477936770fca1eed869083c318530dc459c6c",
-      "sha256": "5f2e78309f97603e907237172914380c0b73643b69c5872407f10b044efa2b58",
+    "hi/mailbox--read-true.webp": {
+      "fingerprint": "904e158b7b34a169aed6e60652111625e6a563a6704f3e66895d1ddda59c942b",
+      "sha256": "44cc8e2538beec2e3ae4e2a7acc8578144ed0cb571fb0b0c6654e7140b72b137",
       "width": 250,
       "height": 475,
-      "bytes": 10662
+      "bytes": 10844
+    },
+    "hi/mailbox-flag.webp": {
+      "fingerprint": "4efafe5e0cd7197049548fd7af3abf499d9f146558d01d2e97ec58b40ce5c6a2",
+      "sha256": "4af807143c3dd71ceab2f61236d5823692f0f530eec165150608817971f9a65a",
+      "width": 77,
+      "height": 202,
+      "bytes": 1286
+    },
+    "hi/mailbox.webp": {
+      "fingerprint": "108baa4abfac0b459bbce0cf056e18a6f236804055a8873607e8210d08c88d30",
+      "sha256": "b1983a12ed038788c0042d689483610c5a7fcf54f2cbaa28528813b0eefbcf0d",
+      "width": 250,
+      "height": 475,
+      "bytes": 10742
     },
     "hi/musicbox-body.webp": {
       "fingerprint": "c8ddb145cf0ddcd960f8914d8f7bf09a84bf27077eff7b62c155c2aeb26041b1",
@@ -2220,18 +2234,18 @@
       "bytes": 25826
     },
     "large/desk-drawer-front--key-true.webp": {
-      "fingerprint": "a21525278d26cf3f7082f3bcb9525a1134673bd2f58fc2e7985ee18046dc39db",
-      "sha256": "b7cd129f416592c5965d11d9fa41ab4c153f71219a0db5adeeb1663a3cb478ac",
+      "fingerprint": "1fcb91e9a5c8584d5e454922bb828343b4a6f9745600a915546e97694e802f96",
+      "sha256": "6cfeab832300b81bf20b67c5af45d1a196a8298b3ef4b067b5988cec94196728",
       "width": 242,
       "height": 38,
-      "bytes": 2640
+      "bytes": 2668
     },
     "large/desk-drawer-front.webp": {
-      "fingerprint": "023dd9d51a8f45bbfba8b1d1621df4c04384a5be9ab632ead984ebd86453666d",
-      "sha256": "9b1796a3bac49e16b7169cd11c8e1d8369240f8320f4910d98fe34b068798032",
+      "fingerprint": "18ab98cb18fc77a12770ed9387e075d1cdf019d0219f26de1faa54d0573808c0",
+      "sha256": "fa813e3a711ff729e492a783503a083ac5c553a49d6fd281a999193bda2d07c7",
       "width": 242,
       "height": 38,
-      "bytes": 2644
+      "bytes": 2734
     },
     "large/desk-drawer-inside--taken-true.webp": {
       "fingerprint": "95adc0783a7b066eba485b0025957210ffbcda7712819bb68821df4acaf9ad67",
@@ -2507,11 +2521,11 @@
       "bytes": 3626
     },
     "large/hoist-winch.webp": {
-      "fingerprint": "4e896df69051ec303479a2c2fa140092114303ee36baa6f66900b649de099478",
-      "sha256": "5a36f071740def6e498a91e9f1498d9505ee28bb63c248fa8bd3d870c1bbd394",
+      "fingerprint": "868ea6451e085b51042ab4b15ef4d0d0e5c79db57bbc41f691d1c5be0f2da68a",
+      "sha256": "c165386b1130ad9947eae63ae9853e85ee07647fa703b5493f6f1df5467337a9",
       "width": 144,
       "height": 144,
-      "bytes": 6002
+      "bytes": 6098
     },
     "large/hoofprints.webp": {
       "fingerprint": "718ec56ff16acd150ff6a4392d7d84c61472ecdcdde80813f36e6be361844e74",
@@ -2604,12 +2618,26 @@
       "height": 356,
       "bytes": 9830
     },
-    "large/mailbox.webp": {
-      "fingerprint": "13be5852c803eecee9e3c3a95ee2f981754a56b48b35cb71572f86cf63bad4c1",
-      "sha256": "031789b2401636093ec185679a7da82589e7d34bf8f084a3b4378c35fb52411e",
+    "large/mailbox--read-true.webp": {
+      "fingerprint": "c117ca5fb2e0d59c3339d520125f2b008f5a6a86e3f12e2787dc20e70f5e6dd6",
+      "sha256": "971ea7c34ce23490562a3f4ca7cbd4d2b48e86d08c8678fae63d71edf5c9873e",
       "width": 188,
       "height": 356,
-      "bytes": 7018
+      "bytes": 7060
+    },
+    "large/mailbox-flag.webp": {
+      "fingerprint": "e509533b158520584e4293bde24ac3c38cf3a7487b90e86552aae99454941be1",
+      "sha256": "c3861c40bc6c7bcffa4b5d32b14e860c023e913c3009c75f5579cb39e39f8c80",
+      "width": 58,
+      "height": 152,
+      "bytes": 954
+    },
+    "large/mailbox.webp": {
+      "fingerprint": "d55c901100b21e686825da9624c51cc2de9f931be2eabf993e8c8a7d59d11953",
+      "sha256": "6998d6e1d8c1fffcfc015fb0dca28061ca2e7fe830bdd6f3aa0a89cf2f7301d8",
+      "width": 188,
+      "height": 356,
+      "bytes": 6978
     },
     "large/musicbox-body.webp": {
       "fingerprint": "ece28e084b059cd0dca8c41f672a7190d97d0ac1fff76340175301b281c64b84",
@@ -3858,18 +3886,18 @@
       "bytes": 10352
     },
     "small/desk-drawer-front--key-true.webp": {
-      "fingerprint": "d6043aa048fd8c1cb3996d2a4b1a46da4b4d920654786ecc55f469265420faf1",
-      "sha256": "6191f921a5f467696a67d6e4031a6980c208dffa10a5794c098bd61ad5ba0a23",
+      "fingerprint": "51695d802cc03a005104847d50be01a8e87bba5d8c910f58a79bc52a8c39624a",
+      "sha256": "1cf9c0f0866f841de69bb899d7e100cf91e2f35c2ecb5a9674aecc51ff4fc00d",
       "width": 162,
       "height": 25,
-      "bytes": 806
+      "bytes": 812
     },
     "small/desk-drawer-front.webp": {
-      "fingerprint": "287422f5c0fc40e302d6feaf6ad0a58cccfb2d16adb63257b3a6cf508b70daa6",
-      "sha256": "6b13e99f4b436145dfbc79c754e01153b84ffa1407984e70f0b908876247fdf5",
+      "fingerprint": "e1aa55f59fb86310bca291cb8c5aba3821b390bc98029c4d0ceafb805ff39bc9",
+      "sha256": "071ef78ad7f9c1313eea907e84c4309891a40dfe0f9b771a5ea96cf2a87a7644",
       "width": 162,
       "height": 25,
-      "bytes": 768
+      "bytes": 818
     },
     "small/desk-drawer-inside--taken-true.webp": {
       "fingerprint": "07df58f454e4dda685663a3302e003dbc1b222803c3ad8467f778a14d9901f2f",
@@ -4145,11 +4173,11 @@
       "bytes": 1618
     },
     "small/hoist-winch.webp": {
-      "fingerprint": "6759ff6f3b5a1d90093f5fa3d32b2c6bfb7f9038ac01e735fde8e5d06268e9ee",
-      "sha256": "11573520248dd2df4c41f4c5232665f37b998389ff7437bb942d8a4a71eb9cef",
+      "fingerprint": "939b756b8a75223d2361ed812cdb9b75445978e38e20f8db1c8ce5c7e2bbb9cf",
+      "sha256": "1a8ff47eb720d24ce68e9829e4d5848ea2e08596a9c113765d79c1be23df9bad",
       "width": 96,
       "height": 96,
-      "bytes": 2226
+      "bytes": 2330
     },
     "small/hoofprints.webp": {
       "fingerprint": "2c0ef08a38a9cca24ea168a654b8ba98d5b3049d60b250041024b6c62d8bbb32",
@@ -4242,12 +4270,26 @@
       "height": 238,
       "bytes": 3388
     },
-    "small/mailbox.webp": {
-      "fingerprint": "9410cead26525ea632a5229c2ef1061d6b7e02a5e887c81fe7d3a47cca210b42",
-      "sha256": "f0ceaa2e44d9fba0a6d818b39ca8c224e02cb717e45a487853a610493fd1e7d0",
+    "small/mailbox--read-true.webp": {
+      "fingerprint": "e2486e1b09258db5de291c36f0698c93c820f33ad9916d5ae9293e7823267e90",
+      "sha256": "bb45ec79f2bc17ce6bee50191f6bdd74047665705c2bfe80c7d2e634ca0e15c0",
       "width": 125,
       "height": 238,
-      "bytes": 2214
+      "bytes": 2298
+    },
+    "small/mailbox-flag.webp": {
+      "fingerprint": "c1d4eb7b07da9ce65b2fde2fd03832061f948b69662b84a458e7df626782c9cf",
+      "sha256": "e9687505aae937e2af01505ae9da771aa5879b5e752e1b07d0bcba0073787e1f",
+      "width": 39,
+      "height": 101,
+      "bytes": 434
+    },
+    "small/mailbox.webp": {
+      "fingerprint": "dda430c75b629b1ce2378caad20f4dab46afea14b8c1008e11b65c1dc8870e3a",
+      "sha256": "6b88bf646ef6dfc753442957ca18645016189012a69b68dbe3bf376e270604b9",
+      "width": 125,
+      "height": 238,
+      "bytes": 2220
     },
     "small/musicbox-body.webp": {
       "fingerprint": "8e7431b11db7ee61b59398a7427d383fc8419ad0dc028e2f1ae17c3e6d50fa66",

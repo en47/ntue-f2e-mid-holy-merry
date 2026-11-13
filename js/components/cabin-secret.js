@@ -211,6 +211,9 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   // read; otherwise it says only how many cells are wrong.
   function shiftLog(page) {
     const log = story.log, solved = () => logSolved(log);
+    // Santa's slip, taped on above it.
+    const pin = element('p', 'shift-pin', page), plea = element('span', '', pin, solved() ? LOG.pin.thanks : cabin.santaHome ? LOG.pin.home : LOG.pin.away);
+    element('span', 'shift-pin-sign', pin, LOG.pin.sign);
     const note = element('p', 'secret-note shift-note', page, solved() ? LOG.solved : `${LOG.wet}${LOG.how}`);
     const grid = element('div', solved() ? 'shift-grid is-solved' : 'shift-grid', page); grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', LOG.title);
     element('span', 'shift-head', grid); for (const half of LOG.halves) element('span', 'shift-head', grid, half);
@@ -254,7 +257,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       if (!logSolved(log)) { note.textContent = LOG.wrong(logWrong(log)); sound.play('nope'); grid.classList.remove('is-wrong'); void grid.offsetWidth; grid.classList.add('is-wrong'); return; }
       // Put right: the ink comes back a row at a time, and the log counts as read.
       grid.classList.add('is-solved'); picks.remove(); cells.forEach(cell => { cell.disabled = true; cell.removeAttribute('aria-pressed'); });
-      note.textContent = LOG.solved; sound.play('cheer'); learn('log');
+      note.textContent = LOG.solved; plea.textContent = LOG.pin.thanks; sound.play('cheer'); learn('log');
     }
   }
   // The sorting rack, where the letters job starts: eight letters for six pigeonholes (N, K, H, E, O and the new

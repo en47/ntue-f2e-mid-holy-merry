@@ -23,16 +23,21 @@ export const ITEM_ART = {
     shape('rect', { x: 39, y: 58, width: 22, height: 15, rx: 2, fill: '#fbf3df', transform: 'rotate(-6 50 65)' }, g);
     shape('path', { d: 'M50 70C45 66 43 63 45 61 47 59 49 60 50 62 51 60 53 59 55 61 57 63 55 66 50 70Z', fill: '#b5443c', transform: 'rotate(-6 50 65)' }, g);
   },
+  // Its bow is carved with the same holly as the desk drawer's front, either side of its keyhole (cabin-art.js).
   key(g) {
-    shape('path', { d: 'M20 36C10 28 13 15 24 17', fill: 'none', stroke: '#b5443c', 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
-    shape('path', { d: ring(31, 50, 17, 7), fill: '#d9a441', 'fill-rule': 'evenodd' }, g);
+    shape('path', { d: 'M23 40C10 31 12 16 24 17', fill: 'none', stroke: '#b5443c', 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+    shape('path', { d: 'M14 50a17 17 0 1 0 34 0a17 17 0 1 0 -34 0ZM20 41a3 3 0 1 1 6 0a3 3 0 1 1 -6 0Z', fill: '#d9a441', 'fill-rule': 'evenodd' }, g);
     shape('rect', { x: 45, y: 46, width: 42, height: 8, rx: 3, fill: '#d9a441' }, g);
     shape('path', { d: 'M71 53V65H77V59H81V67H87V53Z', fill: '#c48f32' }, g);
-    shape('path', { d: 'M21 43Q25 37 32 37', fill: 'none', stroke: '#f4d58a', 'stroke-width': 2.2, 'stroke-linecap': 'round' }, g);
+    holly(g, 31, 55, .27, '#a87526');
+    shape('path', { d: 'M38 36Q45 40 46.5 47', fill: 'none', stroke: '#f4d58a', 'stroke-width': 2.2, 'stroke-linecap': 'round' }, g);
   },
+  // One end a square tenon of bare wood, the shape of the hole in the barn's winch.
   handle(g) {
-    shape('rect', { x: 10, y: 26, width: 18, height: 18, rx: 3, fill: '#6b4a33' }, g);
-    shape('rect', { x: 15, y: 31, width: 8, height: 8, fill: '#3b2a24' }, g);
+    shape('rect', { x: 17, y: 27, width: 11, height: 17, rx: 2, fill: '#6b4a33' }, g);
+    shape('rect', { x: 5, y: 29.5, width: 13, height: 12, rx: 1, fill: '#d6ab78' }, g);
+    shape('path', { d: 'M5 29.5H18M5 41.5H18', fill: 'none', stroke: '#9a6a44', 'stroke-width': 1.3 }, g);
+    shape('path', { d: 'M8 34H15M9 37.5H14', fill: 'none', stroke: '#b8865a', 'stroke-width': 1 }, g);
     shape('rect', { x: 24, y: 30, width: 52, height: 11, rx: 4, fill: '#a8774d' }, g);
     shape('path', { d: 'M30 35H66', stroke: '#8f5a3c', 'stroke-width': 1.6, opacity: .6 }, g);
     shape('rect', { x: 63, y: 35, width: 17, height: 48, rx: 8, fill: '#c08a5a' }, g);
@@ -45,7 +50,10 @@ export const ITEM_ART = {
     shape('rect', { x: 16, y: 38, width: 68, height: 42, rx: 3, fill: '#b5443c' }, g);
     shape('rect', { x: 16, y: 38, width: 68, height: 7, rx: 2, fill: '#6b4a33' }, g);
     shape('rect', { x: 29, y: 51, width: 42, height: 22, rx: 2, fill: '#fbf3df' }, g);
-    shape('path', { d: 'M50 54L52.6 59.4 58.5 60 54 64 55.3 69.8 50 66.8 44.7 69.8 46 64 41.5 60 47.4 59.4Z', fill: '#e0b04f' }, g);
+    // On its label, a little hearth fire on a log.
+    shape('path', { d: 'M50 53C54 58 58 61 57 65.5 56 69 53 70.5 50 70.5 47 70.5 44 69 43 65.5 42.5 62 45 59.5 46.5 57.5 47 61 48.5 62 50 53Z', fill: '#e0b04f' }, g);
+    shape('path', { d: 'M50 60C52.5 63 54 65 53.3 67.5 52.6 69.3 51.3 70 50 70 48.7 70 47.4 69.3 46.7 67.5 46.2 65.5 48 64.5 50 60Z', fill: '#c8553a' }, g);
+    shape('rect', { x: 41, y: 69, width: 18, height: 3.4, rx: 1.7, fill: '#8f5a3c' }, g);
   },
   magnifier(g) {
     shape('rect', { x: 55, y: 50, width: 13, height: 40, rx: 6, fill: '#8f5a3c', transform: 'rotate(-45 61 70)' }, g);

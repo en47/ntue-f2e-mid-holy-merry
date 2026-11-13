@@ -22,10 +22,12 @@ export const LOG = {
   wrong: count => `墨水乾了一點……有 ${count} 格的筆跡好像對不上。`,
   solved: '最後一格補上，墨水乾了，字一行一行回來：每一晚，都是兩個人接力飛完的。',
   erase: '擦掉',
+  // Santa's slip, stuck at the top: asking for a hand (and, while he is out, saying when he will be back); then thanks.
+  pin: { away: '弄濕了……誰來幫我補好？補好我就回來。', home: '弄濕了……誰來幫我補好？', thanks: '謝謝你幫我補好！', sign: '—— S.' },
 };
 // The note left on Santa's chair, hidden while he sat on it: one line in English in his hand (the clue book adds it in
-// Chinese). With what the room shows, it points the bookcase's way.
-export const CHAIR = { title: '搖椅上的紙條', lines: ["There's always room for more."], sign: '—— S.' };
+// Chinese). With what the room shows, it points the bookcase's way. On its back, where he has gone (and nothing more).
+export const CHAIR = { title: '搖椅上的紙條', lines: ["There's always room for more."], sign: '—— S.', back: ['麋鹿那邊要忙一陣子。'] };
 // Out of the window, before he goes: the reindeer's bells; and what he says going out (back in the middle of the room).
 export const BELLS = '窗外傳來一陣叮叮噹噹的麋鹿鈴鐺聲。';
 export const GOING = '聖誕老人站起來，往窗外看了看：「哎呀，麋鹿好像又把飼料弄翻了！我出去看看。」';

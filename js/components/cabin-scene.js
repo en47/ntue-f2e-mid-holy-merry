@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, BOOKCASE, BOOKMARKS, BOOK_SHEETS, CHAIR, DESK, DOOR, DRAWERS, GLOBE, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS, PX, adventLit, drawerPieces } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOKMARKS, BOOK_SHEETS, CHAIR, DESK, DOOR, DRAWERS, GLOBE, MAIL_FLAG, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS, PX, adventLit, drawerPieces } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -426,6 +426,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     catch (error) { if (!WORLD.includes(board)) throw error; console.error('Village board failed', board.id, error); }
     painted++; report();
   });
+  const flagPart = cutBoard('mailbox-flag', PIECES['mailbox-flag'], set);
   const hoistParts = Promise.all(['hoist-bracket', 'hoist-wheel', 'hoist-bale', 'hoist-winch', 'hoist-crank', 'hoist-tag'].map(name => cutBoard(name, PIECES[name], set)));
 
   // Warm glows: the fire, the lantern, the reading lamp, the porch and the lighthouse lamp. Sprites always face the camera.
@@ -588,6 +589,14 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // spool (with the crank, once it is fitted) and the pulley turn by that length of rope, and the rope to the bale runs
   // from the wheel's rim down to it. The repair tag swings when the winch is tried without its crank. The drawer behind the
   // bale is a real one (DRAWERS.barn, `drawer`).
+  // The mailbox's flag, raised while Santa's letter waits: on the mailbox's sheet, turning about its pole's foot, and every
+  // few seconds giving a little wave to catch the eye. Lowered (hidden: the box's own picture shows it down) once opened.
+  const mail = sheets.get('mailbox'), flag = { mesh: null, up: true };
+  if (mail) {
+    const geometry = keep(geometries, new THREE.PlaneGeometry(MAIL_FLAG.w, MAIL_FLAG.h)); geometry.translate(MAIL_FLAG.w * (.5 - MAIL_FLAG.pivot), MAIL_FLAG.h / 2, 0);
+    flag.mesh = new THREE.Mesh(geometry, keep(materials, new THREE.MeshBasicMaterial({ map: texture(await flagPart), transparent: true, alphaTest: .4, toneMapped: false })));
+    flag.mesh.position.set(...MAIL_FLAG.at); flag.mesh.visible = flag.up; mail.holder.add(flag.mesh);
+  }
   const barn = sheets.get('stable'), hoist = { pull: 0, swing: -10 };
   if (barn) {
     const sheet = (map, w, h, lift = 0, shift = 0) => { const geometry = keep(geometries, new THREE.PlaneGeometry(w, h)); geometry.translate(shift * w, lift * h, 0); const mesh = new THREE.Mesh(geometry, keep(materials, new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: .4, toneMapped: false }))); barn.holder.add(mesh); return mesh; };
@@ -785,6 +794,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const delta = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), reindeerTurn[0] + extraYaw).multiply(new THREE.Quaternion().setFromAxisAngle(across, reindeerTurn[1] + extraPitch));
       reindeerHead.quaternion.premultiply(parent.clone().invert().multiply(delta).multiply(parent));
     }
+    // The mailbox's flag waves for a moment every five seconds while it is up.
+    if (flag.mesh) { const beat = t % 5; flag.mesh.rotation.z = still || beat > 1.2 ? 0 : Math.sin(beat * 9) * .16 * Math.sin(beat / 1.2 * Math.PI); }
     // The barn's repair tag swings for a moment; its drawer, pulled open, stands a little out of the wall.
     if (hoist.tag) { const u = (t - hoist.swing) / 1.4; hoist.tag.rotation.z = !still && u < 1 ? Math.sin(u * Math.PI * 5) * .35 * (1 - u) : 0; }
     // The desk's and the music box's drawers slide out of their slots, or back in.
@@ -1168,7 +1179,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   }
   const api = {
     // Resolves true once Santa sits in his chair, false if his model could not load.
-    santa: santaReady, destroy, setView, get view() { return view; }, repaint,
+    santa: santaReady, destroy, setView, get view() { return view; }, repaint, restyle,
     rect: id => { const spot = [...SPOTS, ...ROOM_SPOTS].find(item => item.id === id); return spot ? rectOfBox(...spot.box) : null; },
     back,
     // The hearth: feed the fire a log (false when it already burns as high as it goes), squeeze the bellows (0–1) and let
@@ -1371,6 +1382,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       // `crank` is the circle its knob runs round, to turn a drag about the hub into turns of the winch.
       return { winch: local([WINCH.x, WINCH.y, .2], WINCH.plate), crank: local([WINCH.x, WINCH.y, .21], [reach * 2, reach * 2]), tag: local([WINCH.tagAt[0] + gw * .44, WINCH.tagAt[1] - gh / 2, .19], [gw, gh]), wheel: local([HOIST.x, HOIST.wheel, .21], [HOIST.radius * 2, HOIST.radius * 2]) };
     },
+    // The mailbox's flag: up while Santa's letter waits unread, down (hidden) once the box has been opened.
+    mailFlag(up) { flag.up = up; if (flag.mesh) flag.mesh.visible = up; redraw(); },
     snowmanAct(kind) { if (motion.matches || !snowman) return; snowmanMove = { kind, start: clock }; wake(); },
     // A thing in the village touched without a pointer (from the explore list): its wiggle, and its line.
     touch(id) { const prop = PROPS.find(each => each.id === id); if (prop) touch(prop); },
