@@ -56,6 +56,34 @@
       "height": 320,
       "bytes": 11220
     },
+    "hi/barn-drawer-front.webp": {
+      "fingerprint": "7e21117a4c14b9fecdda0237682a4bd0df2b1053d63d4a825e38911110406f11",
+      "sha256": "a625f9085b34a73f7331af6bc0370ae66616409c8962e1b41f21f00bd9510c18",
+      "width": 300,
+      "height": 200,
+      "bytes": 10454
+    },
+    "hi/barn-drawer-inside--taken-true.webp": {
+      "fingerprint": "167f067fba6c6288b5de3025e72c325d69d8ba0d337b8cf68a71f1138c1597ef",
+      "sha256": "7c3017586d40894d4fffbadd85ff8fbb61d176ece3efa0fd8d56410987f3dc19",
+      "width": 226,
+      "height": 240,
+      "bytes": 13194
+    },
+    "hi/barn-drawer-inside.webp": {
+      "fingerprint": "058386b82bb8a34c0086b5981cfb23bbb1bb781ce41f34ebd8b8e75ebddb8f9a",
+      "sha256": "7c4c578d3f23e0901bf2e42d3e16d92dbd6223aab0ca106b129bde64f838bd45",
+      "width": 226,
+      "height": 240,
+      "bytes": 13464
+    },
+    "hi/barn-drawer-side.webp": {
+      "fingerprint": "410650cc52a1a3f41e0b0f73b4ad64d15bc337b953af0ddce96190429152d97b",
+      "sha256": "593b92eb817f42226d9451b28432ca42799b60cd7eb456323c4071d388134b49",
+      "width": 96,
+      "height": 55,
+      "bytes": 1396
+    },
     "hi/barrels.webp": {
       "fingerprint": "ff9762a5d32fe47d01268d71992ff5e9322da135410b32c82ef48dbf54b29e57",
       "sha256": "57af166060bf90787dec7579a6609b15e421c28cd5df4f5dce8650e06607fff3",
@@ -826,27 +854,6 @@
       "height": 160,
       "bytes": 2546
     },
-    "hi/hoist-drawer--open-true--matches-false.webp": {
-      "fingerprint": "899b381c90169f2b1f79e8d1f92ae06a3144a9b07af6bb171feb38f6c3c02bd2",
-      "sha256": "8eaeaf9f08b22abf4d640bcd557b4c5ee8b5436aeb0d84e7fe73d1e8778309cd",
-      "width": 282,
-      "height": 230,
-      "bytes": 12506
-    },
-    "hi/hoist-drawer--open-true--matches-true.webp": {
-      "fingerprint": "ab7bbdf41cb2121ee8b2ccbda82c1ea3f957d35bf5f61c5f052241479f733072",
-      "sha256": "3a5ad5ee8bf9445d8be63865f43bf9434e0de2f8f134dc3be7806f126fdfae8d",
-      "width": 282,
-      "height": 230,
-      "bytes": 13616
-    },
-    "hi/hoist-drawer.webp": {
-      "fingerprint": "298497823f5f8c24cebb45803f83de0aebf97c2b49e459580718202ed21de45f",
-      "sha256": "5c357dc85573d546fec0cbf75b6afbeb81492960603d5defebfc7c89b25a98e1",
-      "width": 282,
-      "height": 230,
-      "bytes": 13346
-    },
     "hi/hoist-tag.webp": {
       "fingerprint": "7c7bf755bb19f7bea52c312133e5387833c82c81822b02d3ab9d74499a06d92e",
       "sha256": "ad95f9499eafe5eb1ebb61a1d62f6389396a4b830408704ad3eca430604815b5",
@@ -1499,11 +1506,11 @@
       "bytes": 15464
     },
     "hi/stable.webp": {
-      "fingerprint": "1e4bab76bd68b1eda8cf5b20588037c01e4d329679260cc75243de0201ad2aec",
-      "sha256": "c3a897c49f6451950a601bec336bfe5a12d2828febf9cf5dee942521974bf3b9",
+      "fingerprint": "fc21bb93d922484d781211abdab4a5b3eb0f8c78915fe4b1348c4abb650d3205",
+      "sha256": "b0180428b1e8a4cdaba92edc1ab9221bb1f05eae0e91bb7313e92973a0fd2d28",
       "width": 1700,
       "height": 1350,
-      "bytes": 276686
+      "bytes": 278216
     },
     "hi/stall-cocoa.webp": {
       "fingerprint": "94148f9651455ad75894839aea4b17a317aad4a933cd0ce7ed8f7fcbd999b3bf",
@@ -1686,6 +1693,34 @@
       "width": 180,
       "height": 240,
       "bytes": 7976
+    },
+    "large/barn-drawer-front.webp": {
+      "fingerprint": "ff90813e88153f35201eab2997d6ce1206c69253dbba09aa3c52d7520f7333be",
+      "sha256": "b735e9a668bbea67ccfaebc3a8133a0cea0e8225d58abb9149ab0f8bd553cae8",
+      "width": 225,
+      "height": 150,
+      "bytes": 6582
+    },
+    "large/barn-drawer-inside--taken-true.webp": {
+      "fingerprint": "c1ee28bdacd2c57212f8e372aab739d9441f7d015036642c1b4000ef6ef2c278",
+      "sha256": "d2eed08136502ceba531098bde5da6b49263fa905fc187d539245b0be1fe7c12",
+      "width": 170,
+      "height": 180,
+      "bytes": 8022
+    },
+    "large/barn-drawer-inside.webp": {
+      "fingerprint": "ba21e2de1c3a5bea14bb092749d1653db138558268702edd44630f4f7270f9f7",
+      "sha256": "7d97b8aaa7512dd49cbc9a1aeb5e6dc4d75d2b688f02c7425a6d72e87106feba",
+      "width": 170,
+      "height": 180,
+      "bytes": 8372
+    },
+    "large/barn-drawer-side.webp": {
+      "fingerprint": "43ca7158a27b2b62c97b27a90516825f1359063a9d73fe37dfe5825908cb2987",
+      "sha256": "948925b2aefcd1add33347b291411d57ec068e90b4bfaf9e400198f92ab981bf",
+      "width": 72,
+      "height": 41,
+      "bytes": 906
     },
     "large/barrels.webp": {
       "fingerprint": "bde30fee4bb6b9deb239bec575cd07b15481129443462b096683e1e1e8df5a9d",
@@ -2457,27 +2492,6 @@
       "height": 120,
       "bytes": 1832
     },
-    "large/hoist-drawer--open-true--matches-false.webp": {
-      "fingerprint": "b8f3f4fddadb02479e437423d45c8506581b17d8022e2993da4b318fc3be8c88",
-      "sha256": "19aecd2765a5ea6a68df355d92d0516db7082bd2e66593b0a7d50e2959da4472",
-      "width": 212,
-      "height": 173,
-      "bytes": 7790
-    },
-    "large/hoist-drawer--open-true--matches-true.webp": {
-      "fingerprint": "7ab7a8e040153af457831a8e29ed57c532836e841446bea284d4b086430e163d",
-      "sha256": "478343e53cc028694c611d9e37ff4b2ae9994aea1be28ab2f624a85a06329a04",
-      "width": 212,
-      "height": 173,
-      "bytes": 8528
-    },
-    "large/hoist-drawer.webp": {
-      "fingerprint": "d05d149390c5a220234e6b5c7dcbeb73f2bc96ae0799e77c4a874a799c9d1132",
-      "sha256": "11afc8f246a9739ac71e04a9b6b4a11a415d609ba22f7fb926054208d3d74448",
-      "width": 212,
-      "height": 173,
-      "bytes": 7686
-    },
     "large/hoist-tag.webp": {
       "fingerprint": "41028822ecf12c7688dd762df59d37452be4e0f731f3bc053d248b13e6da73a7",
       "sha256": "5b89ca73b0eb699e2b45e5cd1ecce184599a135aef91ad1cce8f13a6241d6e9d",
@@ -3130,11 +3144,11 @@
       "bytes": 11458
     },
     "large/stable.webp": {
-      "fingerprint": "4a885c203a4c78edf50a29aa8cd89a3c6d57d6188de3d1b4fa9edd237bc04603",
-      "sha256": "bbac1a4663fcd6890f77c63e1a4c345a8aeaee06c8dba37a2ecf9b1dae683039",
+      "fingerprint": "0213a747fe68b6512b2964ab76ed195b4059d3c1e1f8e1ca474fff7af200fc42",
+      "sha256": "0ddb4bbf92e4fc48899d789873c578346805c643ed36519c7bcc5169422b9265",
       "width": 1275,
       "height": 1013,
-      "bytes": 170732
+      "bytes": 171380
     },
     "large/stall-cocoa.webp": {
       "fingerprint": "6f0d517ecbdca8dc92037ba59be9523ad062b6120b2e0d9e4fc4f0477162f4e5",
@@ -3317,6 +3331,34 @@
       "width": 120,
       "height": 160,
       "bytes": 3376
+    },
+    "small/barn-drawer-front.webp": {
+      "fingerprint": "05811ea14a5a849762c14bdf3c074bb32966ee6d3eb2f630a786773a87dd1c58",
+      "sha256": "25514f9757b020f1590ac8c2b8675e5441734c0e13bd6e4ae298c0031da600c9",
+      "width": 150,
+      "height": 100,
+      "bytes": 1522
+    },
+    "small/barn-drawer-inside--taken-true.webp": {
+      "fingerprint": "4304e86bb016d3df009d970c54dd03daa7209ad54783a934d7524ca59069dd7f",
+      "sha256": "4c9a755e52acee73373a17c37e2829dfe1dd0d9eb7f36970756f58e3b8ee8e8b",
+      "width": 113,
+      "height": 120,
+      "bytes": 2296
+    },
+    "small/barn-drawer-inside.webp": {
+      "fingerprint": "a3dc016efc17a5b6bf62e01a9b640e836cec1038cd837e3afa1c4c0c1fd6bbad",
+      "sha256": "eaef3a497788de8ab1dc3bfd752404ce2fb19a5a22952ff482bd593e672c3f18",
+      "width": 113,
+      "height": 120,
+      "bytes": 2478
+    },
+    "small/barn-drawer-side.webp": {
+      "fingerprint": "2389bb35fafdc03977f1de05984b5c1d5241517acbfcb41a521fd3c977a559ba",
+      "sha256": "930b0398b95845d8e5b82790f10bc3be15a8d9d0b39e8177737e9b469f2ec184",
+      "width": 48,
+      "height": 28,
+      "bytes": 370
     },
     "small/barrels.webp": {
       "fingerprint": "464df9c19823d675c02b46c79cc7f7d721e0e2ee00370be731d03611ccd1404e",
@@ -4088,27 +4130,6 @@
       "height": 80,
       "bytes": 794
     },
-    "small/hoist-drawer--open-true--matches-false.webp": {
-      "fingerprint": "8e207d691a852aac0bbca8b6b518d1f98d77c96f1df808758d8ce533439b6da1",
-      "sha256": "a6844759074a776d3f753b64abfb59d56352bfe1a7f754ea8071ce132d79ed19",
-      "width": 141,
-      "height": 115,
-      "bytes": 2360
-    },
-    "small/hoist-drawer--open-true--matches-true.webp": {
-      "fingerprint": "6850ec0f1665cd17d129a3d6e6b637bfd47f02d6dc8777c751106a4493c627b8",
-      "sha256": "b8d20586898f62659ad250cdd83314dc3cee59a22ec479af7b19214151e52a55",
-      "width": 141,
-      "height": 115,
-      "bytes": 2738
-    },
-    "small/hoist-drawer.webp": {
-      "fingerprint": "5d8801d258c019eabba68e68215df51da820eabdd7e45d539fe458a8ef33acde",
-      "sha256": "0b37bcb0a10c883dbf54d2b66e7bff78a225cde8c7b12475ca68d153f1ea520f",
-      "width": 141,
-      "height": 115,
-      "bytes": 2172
-    },
     "small/hoist-tag.webp": {
       "fingerprint": "d137166219f8a6a24765a633b98827a503c19c0feb148c63f071c768dd3b177a",
       "sha256": "5058779455640c81246887cdeb611a614822e853c1a2c22fcdbbb674b8d3cd5e",
@@ -4761,11 +4782,11 @@
       "bytes": 5670
     },
     "small/stable.webp": {
-      "fingerprint": "9517d3704c99a0cf6d6f7d0171484dc9b51f3bb071569ff292a56abd6d760cff",
-      "sha256": "380f5692634f0e5885f63c83626070243965ddf9ea20564cd769fe623db49ab3",
+      "fingerprint": "70c9e4b874dc511d3491611e8aa2485c713950cb420adf517552bfcb1eb2c297",
+      "sha256": "bad546a566de68baf31849a504b4eed043470f1717b94bf4bf918259c2533ae7",
       "width": 850,
       "height": 675,
-      "bytes": 46282
+      "bytes": 46654
     },
     "small/stall-cocoa.webp": {
       "fingerprint": "1e3be9cd85eb2fb40305dc943f915a5e824c1e6ce690b3e89e8e3cc4a3a0ac74",

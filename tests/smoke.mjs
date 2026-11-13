@@ -208,7 +208,7 @@ await test('Santa 紙板預先畫成 WebP：圖片對應目前畫法、手機用
   const { CUTS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-cuts.js')).href), names = [...new Set(cuts.map(cut => cut.name))];
   assert.deepEqual(CUTS.sets, SETS); assert.deepEqual(Object.keys(CUTS.sheets).sort(), names.sort());
   for (const name of names) assert.equal(CUTS.sheets[name], createHash('sha256').update(Object.keys(SETS).map(set => manifest.files[`${set}/${name}.webp`].sha256).join()).digest('hex').slice(0, 10), `${name} 的網址版本過期`);
-  for (const name of ['sign--stars-4', 'mailbox--open-true', 'hoist-drawer--open-true--matches-true', 'hoist-drawer--open-true--matches-false', 'trough--eaten-true', 'trough--eaten-true--taken-true', 'snow-pile--dug-true', 'smoke', 'hoist-bale', 'hoist-crank', 'outfit-red-scarf']) assert.ok(names.includes(name), `${name} 也事先畫好`);
+  for (const name of ['sign--stars-4', 'mailbox--open-true', 'barn-drawer-inside--taken-true', 'trough--eaten-true', 'trough--eaten-true--taken-true', 'snow-pile--dug-true', 'smoke', 'hoist-bale', 'hoist-crank', 'outfit-red-scarf']) assert.ok(names.includes(name), `${name} 也事先畫好`);
   assert.ok(names.filter(name => name.startsWith('outfit-')).length === 21, 'Every accessory has its picture');
   const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), paint = await fs.readFile(path.join(project, 'js/components/cabin-paint.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8');
   assert.ok(!scene.includes('paperFilter') && !scene.includes('XMLSerializer') && scene.includes('cutBoard(') && paint.includes('return paintBoard(board, CUTS.sets[set], state)'), 'The scene only loads pictures; a missing or broken one is cut in the browser instead');
@@ -439,7 +439,7 @@ await test('Santa 第七階段：觸控點擊範圍至少 44px、手指放開的
   assert.ok(coarse.includes(":is(.play-target, .hearth-log, .desk-drawer, .musicbox-drawer)::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }") && coarse.includes('.theatre-skip') && coarse.includes('.register-endings > :is(span, button):not(:first-child) { width: 2.75rem; }'), 'Small things in the scene reach 44px by an invisible area; the card buttons, 跳過 and the ending stamps are 44px');
   assert.ok(css.includes('.notebook-button { top: .6rem; right: .6rem; width: 44px; height: 52px; }') && !css.includes('.secret-thing[data-id="record"] { z-index') && css.includes('.drawer-card { z-index: 6; }'), 'The clue book is big enough on a phone; the old record and the drawer card are not covered');
   assert.ok(bag.includes("pad: event.pointerType === 'mouse' ? 8 : 16") && bag.includes('return best ?? near;'), 'A finger may land a little off a place, but never takes the one beside the place it is right over');
-  assert.ok(story.includes("finale.unlocked ? 'reread' : 'cord'") && clues.includes("reread: { title: '再讀一次舊紀錄簿'") && clues.includes('分信：台北 E.'), 'Opened the old record early: the hint says to read it again; the last job hint gives the sorting too');
+  assert.ok(story.includes("finale.unlocked ? 'reread' : 'cord'") && clues.includes("title: '再讀一次舊紀錄簿'") && clues.includes('分信：台北 E.'), 'Opened the old record early: the hint says to read it again; the last job hint gives the sorting too');
   assert.ok(audit.includes("const file = process.env.AUDIT;") && audit.includes('if (!file) return async () => {};') && playthrough.includes('const RELOAD = Boolean(process.env.RELOAD)') && playthrough.includes("await checkpoint('the room',"), 'The browser checks can look for covered and small controls (AUDIT), and the playthrough can reload at every chapter (RELOAD)');
 });
 await test('Santa 回饋修正：真的抽屜（書桌、音樂盒）、卡片蓋過小房間的熱區、信架、從頭再玩一次', async () => {
@@ -471,6 +471,15 @@ await test('Santa 房間牆面佈置：每件裝飾與聖誕樹是自己的紙�
   const size = async set => { let bytes = 0; for (const name of await fs.readdir(path.join(project, 'images/cabin', set))) if (lazy.some(id => name === `${id}.webp` || name.startsWith(`${id}--`))) bytes += (await fs.stat(path.join(project, 'images/cabin', set, name))).size; return bytes / 1024; };
   const [large, small] = [await size('large'), await size('small')];
   assert.ok(large <= 540 && small <= 215, `Decorations and the tree stay light: ${large.toFixed(0)} KB on a large screen, ${small.toFixed(0)} KB on a phone`);
+});
+await test('Santa 引導：每個目標都有一句白話的「現在要做什麼」（只寫在線索本裡），目標一換線索本只冒紅點、不跳文字，聖誕老人開口邀請加入', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [notebook, play, secretData] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-play.js', 'js/data/cabin-secret.js'].map(read));
+  const { GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.ok(Object.values(GOALS).every(each => each.task && each.task.length < 60), 'Every goal says what to do now, in one short line');
+  assert.ok(GOALS.log.task.includes('聖誕老人就會回來') && GOALS.secret.task.includes('回到房間中間') && GOALS.join.task.includes('登記簿') && GOALS.join.task.includes('世界路標'), 'When Santa comes back, and how to join (or go home), are said plainly');
+  assert.ok(notebook.includes("element('p', 'notebook-task', help, GOALS[now].task);") && notebook.includes('goalNow = now; show(); dot.hidden = false;') && !/notebook-slip|setInterval|還在找嗎|新目標/.test(notebook) && play.includes('notebook?.check();'), 'What to do now is written in the clue book; when it moves on the book only hops, nothing pops up');
+  assert.ok(secretData.includes('invite:') && play.includes('later(9000, () => say(NOTES.invite));'), 'Having told the secret, Santa asks you to join');
 });
 await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
@@ -511,7 +520,7 @@ await test('Santa 線索本：看到的線索自動記下、分段提示依故�
   assert.ok(book.includes('export function mountNotebook') && book.includes("paperLayer(button, '0 0 48 56', 'notebook-icon', cover, PAPER)") && !book.includes('innerHTML'), 'The clue book is a paper notebook; words only through textContent');
   assert.ok(book.includes('const now = goal(progress)') && book.includes('progress.hints[now] = shown + 1; save();'), 'Hints follow the story (cabin-story.js goal) and get plainer one at a time, kept between visits');
   assert.ok(book.includes("if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); }"), 'Esc closes the book without leaving the room');
-  assert.ok(play.includes('const notebook = mountNotebook(stage, { progress, save, sound }), clue = id => notebook.add(id);') && play.includes("if (id === 'wish-board') clue('wish-board');"), 'Games write into the book through one function');
+  assert.ok(play.includes('notebook = mountNotebook(stage, { progress, save, sound }); const clue = id => notebook.add(id);') && play.includes("if (id === 'wish-board') clue('wish-board');"), 'Games write into the book through one function');
   // Every clue the games write is one the book knows, and every clue in the book is written somewhere.
   const written = [...games.join('\n').matchAll(/clue\((?:'([\w-]+)'|current\.entry\.id === 'route' \? 'route-note' : 'letter-backs'|id)\)/g)];
   assert.ok(written.length >= 6, 'The games record their clues where they are seen');
@@ -553,7 +562,7 @@ await test('Santa 第一章：院子裡先看到缺了什麼，再找到補上�
   assert.ok(play.includes("bag.give('lichen', from)") && play.includes('別忘了餵麋鹿。上次輪到你時，牠可是等了好久！'), 'The mailbox parcel: the care note and the lichen');
   assert.ok(feed.includes("bag.target(trough, { accepts: id => id === 'lichen'") && feed.indexOf("if (!fed())") < feed.indexOf("bag.give('key'") && feed.includes('cabin.reindeerStep(true)'), 'Lichen in the trough; he steps aside; the key only once he has eaten, and only when the hay is brushed');
   assert.ok(snowman.includes("bag.give('handle', from)") && snowman.includes("cabin.repaint('snow-pile', { dug: true })"), 'The handle in the snowman\'s drift');
-  assert.ok(pulley.includes('function stuck()') && pulley.includes("clue('repair-tag')") && pulley.includes("bag.give('matches', matches)") && pulley.indexOf('const fitted = () =>') < pulley.indexOf('crank.hidden = !ready'), 'The winch will not turn without its crank; the matches in the drawer behind the bale');
+  assert.ok(pulley.includes('function stuck()') && pulley.includes("clue('repair-tag')") && pulley.includes("if (!bag.give('matches', {") && pulley.includes("cabin.drawer('barn', { open })") && pulley.indexOf('const fitted = () =>') < pulley.indexOf('crank.hidden = !ready'), 'The winch will not turn without its crank; the matches in the drawer behind the bale, a real drawer that slides out of the barn wall');
   for (const id of ['care-note', 'repair-tag', 'barn-note', 'care-log']) assert.ok(NOTEBOOK[id], `${id} goes in the clue book`);
   assert.equal(GOALS.yard.hints.length, 3, 'Three hints, plainer each time');
   // Coming back, the yard is as it was left; on a phone the pocket sits above the wardrobe and the basket.
@@ -571,7 +580,7 @@ await test('Santa 第三章：一進工作室沒有「替身」字樣；聖誕�
   const early = [...labels, NOTES.tags, NOTES.hats, NOTES.hatInside, NOTES.hatLook, NOTES.stamps, NOTES.pin, NOTES.rack, NOTES.polaroid, NOTES.known, NOTES.coming, DUTY.title, ...DUTY.lines, DUTY.margin, DUTY.stuck, REGISTER.title, REGISTER.season, REGISTER.blank, LOG.title, LOG.wet, LOG.how, CORD.title, CORD.locked, RECORD.title, ...RECORD.entry, ...RECORD.since, RECORD.pencil, ...RECORD.card, RECORD.surface];
   assert.ok(labels.length >= 7, 'Every thing in the room has a name'); assert.ok(!early.join('').includes('替身'), 'Nothing in the room says "substitute" until Santa has told you');
   assert.ok(RULES.title.includes('替身') && secret.includes("if (!story.told) element('p', 'secret-note', page, DUTY.stuck);"), 'The rules for substitutes are on the booklet\'s stuck pages, opened by Santa');
-  assert.ok(play.includes('story.told = true; save();') && play.includes('if (progress.finale.unlocked && !progress.finale.twist) later(8800, () => say(NOTES.record));') && NOTES.record.includes('再讀一次'), 'Santa tells you once; having opened the old record early, you are told to read it again');
+  assert.ok(play.includes('story.told = true; save();') && play.includes('if (progress.finale.unlocked && !progress.finale.twist) later(15000, () => say(NOTES.record));') && NOTES.record.includes('再讀一次'), 'Santa tells you once; having opened the old record early, you are told to read it again');
   assert.ok(secret.includes("classList.toggle('is-glinting', finale.unlocked && !finale.twist && story.told)") && CORD.known.includes('你已經知道了'), 'Its corner catches the light to be read again; the lemon slip knows you know the year already');
 });
 await test('Santa 第四章：四件替身工作各有真的操作（餵食表、雪橇反序、分信回一封、雪地的齒輪），紙條放進口袋烘在石板上', async () => {

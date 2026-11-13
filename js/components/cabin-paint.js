@@ -2,7 +2,7 @@
 // the snowman's accessories. scripts/build-cabin-boards.mjs cuts them all ahead of time at two sizes (images/cabin/), so
 // the page only downloads finished pictures instead of running the paper filter on every board while it opens. A sheet
 // with no picture, or whose picture fails to load, is cut here in the browser exactly as before.
-import { BOARDS, BOOK_SHEETS, DRAWERS, HOIST, PX, SMOKE, SPOTS, WINCH, deskDrawerFront, deskDrawerInside, drawerPieces, drawerSide, hayBale, hoistBracket, hoistCrank, hoistDrawer, hoistTag, hoistWheel, hoistWinch, musicDrawerFront, musicDrawerInside } from './cabin-art.js';
+import { BOARDS, BOOK_SHEETS, DRAWERS, HOIST, PX, SMOKE, SPOTS, WINCH, barnDrawerFront, barnDrawerInside, deskDrawerFront, deskDrawerInside, drawerPieces, drawerSide, hayBale, hoistBracket, hoistCrank, hoistTag, hoistWheel, hoistWinch, musicDrawerFront, musicDrawerInside } from './cabin-art.js';
 import { RIGS, VIEWPOINT, WORLD } from './cabin-world.js';
 import { PLACES, WARDROBE } from './cabin-wardrobe.js';
 import { paperFilter, shape } from './paper-art.js';
@@ -18,9 +18,8 @@ export const PIECES = {
   'hoist-winch': { w: WINCH.plate[0], h: WINCH.plate[1], px: 640, draw: hoistWinch },
   'hoist-crank': { w: WINCH.crank[0], h: WINCH.crank[1], px: 640, draw: hoistCrank },
   'hoist-tag': { w: WINCH.tag[0], h: WINCH.tag[1], px: 640, draw: hoistTag },
-  'hoist-drawer': { w: HOIST.drawer[0], h: HOIST.drawer[1], px: 640, draw: hoistDrawer, state: {} },
   // The two drawers that slide out (cabin-art.js DRAWERS): front, floor and side of each.
-  ...Object.fromEntries(Object.entries({ desk: [deskDrawerFront, deskDrawerInside], musicbox: [musicDrawerFront, musicDrawerInside] }).flatMap(([id, [front, inside]]) => {
+  ...Object.fromEntries(Object.entries({ desk: [deskDrawerFront, deskDrawerInside], musicbox: [musicDrawerFront, musicDrawerInside], barn: [barnDrawerFront, barnDrawerInside] }).flatMap(([id, [front, inside]]) => {
     const { front: [fw, fh], floor: [lw, lh], side: [sw, sh] } = drawerPieces(id);
     return [[`${id}-drawer-front`, { w: fw, h: fh, px: 1000, draw: front, state: {} }], [`${id}-drawer-inside`, { w: lw, h: lh, px: 800, draw: inside, state: {} }], [`${id}-drawer-side`, { w: sw, h: sh, px: 320, draw: drawerSide(DRAWERS[id].wood) }]];
   })),
@@ -32,9 +31,8 @@ export function outfitBoard(item) {
 }
 // The other looks a sheet can take, cut ahead too: the sign with one to four stars lit, the mailbox open, the sleigh
 // loaded, the reindeer's
-// trough eaten from (its gold showing, then taken), the snow at the snowman's feet dug, the barn's drawer pulled out (with
-// the matchbox, then without), the coat gone from its peg while Santa is out, and the back wall open behind the bookcase.
-const VARIANTS = { sign: [1, 2, 3, 4].map(stars => ({ stars })), mailbox: [{ open: true }], sleigh: [{ loaded: true }], trough: [{ eaten: true }, { eaten: true, taken: true }], 'snow-pile': [{ dug: true }], 'hoist-drawer': [{ open: true, matches: true }, { open: true, matches: false }], 'decor-coat': [{ coat: false }], back: [{ secret: true }], 'secret-tags': [{ mine: true }], 'secret-hats': [{ mine: true }], 'desk-drawer-front': [{ key: true }], 'desk-drawer-inside': [{ taken: true }], 'musicbox-drawer-front': [{ undone: true }], 'musicbox-drawer-inside': [{ empty: true }] };
+// trough eaten from (its gold showing, then taken), the snow at the snowman's feet dug, the coat gone from its peg while Santa is out, and the back wall open behind the bookcase.
+const VARIANTS = { sign: [1, 2, 3, 4].map(stars => ({ stars })), mailbox: [{ open: true }], sleigh: [{ loaded: true }], trough: [{ eaten: true }, { eaten: true, taken: true }], 'snow-pile': [{ dug: true }], 'decor-coat': [{ coat: false }], back: [{ secret: true }], 'secret-tags': [{ mine: true }], 'secret-hats': [{ mine: true }], 'desk-drawer-front': [{ key: true }], 'desk-drawer-inside': [{ taken: true }], 'musicbox-drawer-front': [{ undone: true }], 'musicbox-drawer-inside': [{ empty: true }], 'barn-drawer-inside': [{ taken: true }] };
 const SHEETS = [...[...BOARDS, ...WORLD].map(board => [board.id, board]), ...Object.entries(PIECES), ...BOOK_SHEETS.map(sheet => [sheet.id, sheet]), ...WARDROBE.map(item => [`outfit-${item.id}`, outfitBoard(item)])];
 // Each sheet's look when the page opened: a game changes board.state later, and the picture only matches the first look.
 const FIRST = new Map(SHEETS.map(([name, board]) => [name, JSON.stringify(board.state ?? null)]));
