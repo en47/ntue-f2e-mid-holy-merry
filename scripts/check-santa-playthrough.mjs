@@ -52,7 +52,7 @@ log.push(`notebook at start hidden: ${await page.evaluate(() => document.querySe
 const use = async (id, place) => { if (await page.evaluate(() => document.querySelector('.cabin-bag').dataset.open === 'false')) await page.click('.bag-pocket'); await page.click(`.bag-item[data-item="${id}"]`); await wait(200); await page.click(place); };
 const crank = async () => { for (let i = 0; i < 8 && !(await page.isVisible('.hoist-hook')); i++) { await page.focus('.hoist-crank'); await page.keyboard.press('Enter'); await wait(150); } };
 await spot('mailbox'); await page.click('.play-target'); await wait(800); await page.click('.play-parcel'); await wait(600); await page.click('.parcel-pouch'); await wait(1200); await closeCard('.parcel-card'); await note('parcel');
-await spot('reindeer'); await use('lichen', '.feed-trough'); await wait(4000); await page.click('.feed-trough'); await wait(3500); await note('trough');
+await spot('reindeer'); await use('lichen', '.feed-trough'); await wait(4000); await page.click('.feed-trough'); await wait(1200); await page.click('.feed-log'); await wait(600); await closeCard('.care-log-card'); await note('trough');
 await spot('snowman'); await page.click('.snow-pile'); await wait(1200);
 await spot('stable'); await use('handle', '.hoist-winch'); await wait(900); await crank(); await page.click('.hoist-hook'); await wait(600);
 await page.click('.hoist-drawer'); await wait(900); await page.click('.drawer-matches'); await wait(1200); await page.click('.drawer-note'); await wait(800); await shot('barn-note'); await closeCard('.cabin-note'); await note('hoist');

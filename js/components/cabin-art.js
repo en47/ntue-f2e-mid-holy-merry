@@ -994,17 +994,33 @@ export function snowman({ paper }, { width, height }) {
 }
 // The reindeer's feeding trough, just behind him on his right: a plank box on crossed legs, heaped with hay. Fed
 // (`state.eaten`), the hay is pushed about, and at the end he stood over a little gold shows in it until it is taken
-// (`state.taken`).
+// (`state.taken`). The care log hangs on a twig in the hay all along (cabin-feed.js reads it).
 export const TROUGH = { x: REINDEER.x - .42, z: REINDEER.z - .42, w: .95, h: .46, turn: -.3 };
+// Where the care log hangs on the trough, as parts of the sheet [left, top, right, bottom] (cabin-feed.js taps it there).
+export const CARE_LOG = [.25, .03, .47, .37];
+// The care log: a slip on a red string from a twig stuck in the hay, a pencilled heading and today's line, and an older
+// line in O.'s gold with an O. after it, then two more in pencil.
+function careLog(paper, [left, top, right, bottom]) {
+  const w = right - left, h = bottom - top, at = (x, y) => `${left + w * x} ${top + h * y}`, gold = SUBSTITUTES.find(([mark]) => mark === 'O')[1];
+  shape('path', { d: `M${at(.52, 1.25)}L${at(.56, .02)}`, stroke: '#8a6a45', 'stroke-width': 8, 'stroke-linecap': 'round' }, paper);
+  shape('path', { d: `M${at(.04, .2)}L${at(.97, .25)} ${at(.94, .98)} ${at(0, .92)}Z`, fill: '#fbf3df' }, paper);
+  shape('path', { d: `M${at(.1, .24)}L${at(.56, .05)} ${at(.9, .28)}`, stroke: '#ad3c3b', 'stroke-width': 3.5, fill: 'none', 'stroke-linejoin': 'round' }, paper);
+  for (const [x, y] of [[.1, .24], [.9, .28]]) shape('circle', { cx: left + w * x, cy: top + h * y, r: 4, fill: '#ad3c3b' }, paper);
+  const line = (x0, x1, y, colour, thick) => shape('path', { d: `M${at(x0, y)}Q${at((x0 + x1) / 2, y - .05)} ${at(x1, y + .01)}`, stroke: colour, 'stroke-width': thick, fill: 'none', 'stroke-linecap': 'round' }, paper);
+  line(.3, .7, .38, '#6c7178', 4.5); line(.12, .62, .54, gold, 5); line(.12, .86, .7, '#6c7178', 3.5); line(.12, .6, .84, '#6c7178', 3.5);
+  shape('path', { d: `M${at(.78, .49)}c-6 -8 -16 0 -10 8s14 2 10 -8M${at(.88, .57)}h0`, stroke: gold, 'stroke-width': 4.5, fill: 'none', 'stroke-linecap': 'round' }, paper);
+}
 export function trough({ paper }, { width, height }, state = {}) {
   const rim = height * .36, bottom = height * .74, straw = (x, y, length, lean) => shape('path', { d: `M${x} ${y}l${lean} ${-length}`, stroke: '#c49a52', 'stroke-width': 4, 'stroke-linecap': 'round' }, paper);
   for (const x of [.15, .85]) shape('path', { d: `M${width * (x - .07)} ${height - 4}L${width * (x + .05)} ${bottom - 6}M${width * (x + .07)} ${height - 4}L${width * (x - .05)} ${bottom - 6}`, stroke: TIMBER, 'stroke-width': 13, 'stroke-linecap': 'round' }, paper);
   if (!state.eaten) {
     shape('path', { d: `M${width * .05} ${rim + 10}C${width * .1} ${height * .02} ${width * .3} ${height * .06} ${width * .42} ${height * .1}C${width * .55} ${-4} ${width * .8} ${height * .04} ${width * .95} ${rim + 10}Z`, fill: '#d9b36a' }, paper);
+    careLog(paper, CARE_LOG.map((at, i) => at * (i % 2 ? height : width)));
     for (let i = 0; i < 14; i++) straw(width * (.1 + noise(i + 40) * .8), rim + 4, 24 + noise(i + 41) * 40, (noise(i + 42) - .5) * 40);
   } else {
     shape('path', { d: `M${width * .05} ${rim + 10}C${width * .08} ${height * .12} ${width * .25} ${height * .1} ${width * .4} ${height * .2}C${width * .5} ${height * .26} ${width * .58} ${rim - 2} ${width * .66} ${rim + 10}Z`, fill: '#d9b36a' }, paper);
     shape('path', { d: `M${width * .86} ${rim + 10}C${width * .88} ${rim - 22} ${width * .93} ${rim - 18} ${width * .95} ${rim + 10}Z`, fill: '#d9b36a' }, paper);
+    careLog(paper, CARE_LOG.map((at, i) => at * (i % 2 ? height : width)));
     for (let i = 0; i < 8; i++) straw(width * (.1 + noise(i + 50) * .5), rim + 4, 14 + noise(i + 51) * 26, (noise(i + 52) - .5) * 40);
     for (const [x, y, r] of [[.7, rim - 3, 5], [.76, rim - 1, 4], [.63, rim - 5, 3.5]]) shape('circle', { cx: width * x, cy: y, r, fill: '#b9cfa8' }, paper);
     if (!state.taken) {
