@@ -89,6 +89,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const local = rect => { const box = stage.getBoundingClientRect(); return { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height }; };
   // The yard's corners finished so far (a star each on the name sign): restored from santa.js, and added to as they are.
   const corners = new Set(), found = id => { corners.add(id); onFound(id); };
+  // The mailbox: open or shut, and whether it has been opened at all (its flag stays down from then on).
+  const mail = { open: false, seen: false };
   function prop(kind, parent, label) {
     const button = element('button', `play-item play-${kind}`, parent); button.type = 'button'; button.setAttribute('aria-label', label);
     paperLayer(button, '0 0 100 100', '', ART[kind], PAPER); return button;
@@ -139,22 +141,27 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
 
   const games = {
     // The mailbox: Santa's letter for the visitor, and a little parcel for Santa himself, tied with string: a note from
-    // whoever looked after the reindeer last, and a pouch of his favourite lichen (to the pocket, cabin-bag.js). Both stay
-    // in the open mailbox, to be read again.
+    // whoever looked after the reindeer last, and a pouch of his favourite lichen (to the pocket, cabin-bag.js). Tapping the
+    // box opens it (its raised flag drops for good) and tapping it again shuts it; the two stay inside, to be read again.
     mailbox() {
-      // The two lie in the open mailbox, kept on it while the camera settles or the stage changes size.
-      const shown = [], watch = new ResizeObserver(() => lay());
+      // The two lie in the open mailbox, kept on it (and the box's own button over it) while the camera settles or the stage changes size.
+      const shown = [], watch = new ResizeObserver(() => lay()), lid = element('button', 'play-target', layer);
+      lid.type = 'button';
       function lay() {
-        const spot = cabin.sheetRect('mailbox', [.12, .12, .88, .6]) ?? cabin.rect('mailbox'), size = Math.min(spot.height * .9, spot.width * .48, 110);
+        const rect = cabin.rect('mailbox'), spot = cabin.sheetRect('mailbox', [.12, .12, .88, .6]) ?? rect, size = Math.min(spot.height * .9, spot.width * .48, 110);
+        if (rect) Object.assign(lid.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
         for (const [thing, x] of shown) Object.assign(thing.style, { left: `${spot.left + spot.width * x - size / 2}px`, top: `${spot.top + spot.height / 2 - size / 2}px`, width: `${size}px`, height: `${size}px` });
       }
-      const things = () => {
-        cabin.repaint('mailbox', { open: true });
-        for (const [kind, label, x, read] of [['envelope', '聖誕老人的信', .27, letter], ['parcel', '寄給聖誕老人的小包裹', .73, parcel]]) {
+      function shut(open) {
+        if (open) mail.seen = true;
+        mail.open = open; cabin.restyle('mailbox', open ? { open: true } : mail.seen ? { read: true } : {}); cabin.mailFlag(!mail.seen);
+        lid.setAttribute('aria-label', open ? '關上郵筒' : '打開郵筒'); lid.setAttribute('aria-expanded', String(open));
+        if (open && !shown.length) for (const [kind, label, x, read] of [['envelope', '聖誕老人的信', .27, letter], ['parcel', '寄給聖誕老人的小包裹', .73, parcel]]) {
           const thing = prop(kind, layer, label); thing.classList.add('mail-thing'); thing.addEventListener('click', read); shown.push([thing, x]);
         }
-        lay(); later(600, lay); later(1300, lay); watch.observe(stage);
-      };
+        for (const [thing] of shown) thing.hidden = !open;
+        lay(); later(600, lay); later(1300, lay);
+      }
       function letter() {
         sound.play('open');
         const card = element('article', 'cabin-letter', layer); card.setAttribute('aria-label', '聖誕老人的信');
@@ -178,13 +185,16 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
         done.addEventListener('click', () => { card.remove(); sound.play('remove'); say(bag.ever('lichen') ? '便條放回包裹裡了。' : '包裹裡還留著那包「給麋鹿的點心」。'); });
         (card.querySelector('.parcel-pouch') ?? done).focus({ preventScroll: true });
       }
-      if (corners.has('mailbox') || bag.ever('lichen') || progress.clues.includes('care-note')) { say('郵筒開著：聖誕老人的信，和一個寄給他的小包裹。'); things(); return () => watch.disconnect(); }
-      say('郵筒的旗子豎起來了，裡面有東西！點一下郵筒打開它。');
-      const rect = cabin.rect('mailbox'), open = element('button', 'play-target', layer);
-      open.type = 'button'; open.setAttribute('aria-label', '打開郵筒');
-      Object.assign(open.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
-      open.addEventListener('click', () => { open.remove(); sound.play('open'); say('郵筒裡有一封信，和一個用麻繩綁著的小包裹。'); things(); });
-      open.focus();
+      lid.addEventListener('click', () => {
+        const open = !mail.open; sound.play(open ? 'open' : 'creak'); shut(open);
+        if (open) say(bag.ever('lichen') || progress.clues.includes('care-note') ? '郵筒裡還放著聖誕老人的信，和寄給他的小包裹。' : '郵筒裡有一封信，和一個用麻繩綁著的小包裹。');
+        else say('');
+      });
+      watch.observe(stage);
+      // Coming back to a box already opened opens it straight away (that is what the visit was for); a new one waits to be opened.
+      if (mail.seen || corners.has('mailbox') || bag.ever('lichen') || progress.clues.includes('care-note')) { shut(true); say('郵筒裡還放著聖誕老人的信，和寄給他的小包裹。'); }
+      else { shut(false); say('郵筒的旗子豎起來了，裡面有東西！點一下郵筒打開它。'); }
+      lid.focus({ preventScroll: true });
       return () => watch.disconnect();
     },
     // By the reindeer: his feeding (and the job of feeding him by the barn's table), and the sleigh to load.
@@ -315,15 +325,26 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     done.addEventListener('click', () => { card.remove(); sound.play('remove'); });
     done.focus({ preventScroll: true });
   }
-  // The note on the empty chair: the bookcase's riddle, in Santa's hand. It goes in the clue book as it is read.
+  // The note on the empty chair: the bookcase's riddle, in Santa's hand. It goes in the clue book as it is read. Turned
+  // over, its back says where he has gone.
   function chairNote() {
     if (layer.dataset.game) return;
     clue('chair-note'); sound.play('open');
     const card = element('article', 'cabin-letter chair-card', layer); card.setAttribute('aria-label', CHAIR.title);
     element('h3', 'chair-title', card).textContent = CHAIR.title;
-    for (const line of CHAIR.lines) element('p', 'chair-line', card).textContent = line;
-    element('p', 'chair-sign', card).textContent = CHAIR.sign;
-    const done = element('button', 'cabin-letter-close', card); done.type = 'button'; done.textContent = '收好紙條 ✓';
+    const face = element('div', 'chair-face', card), back = element('div', 'chair-face', card);
+    for (const line of CHAIR.lines) element('p', 'chair-line', face).textContent = line;
+    for (const line of CHAIR.back) element('p', 'chair-line', back).textContent = line;
+    for (const side of [face, back]) element('p', 'chair-sign', side).textContent = CHAIR.sign;
+    back.hidden = true;
+    const actions = element('div', 'chair-actions', card), turn = element('button', 'chair-flip', actions); turn.type = 'button'; turn.textContent = '翻面'; turn.setAttribute('aria-pressed', 'false');
+    turn.addEventListener('click', () => {
+      const over = back.hidden; sound.play('pick'); turn.setAttribute('aria-pressed', String(over));
+      const swap = () => { face.hidden = over; back.hidden = !over; };
+      if (still()) return swap();
+      card.classList.remove('is-turning'); void card.offsetWidth; card.classList.add('is-turning'); later(200, swap);
+    });
+    const done = element('button', 'cabin-letter-close', actions); done.type = 'button'; done.textContent = '收好紙條 ✓';
     done.addEventListener('click', () => { card.remove(); sound.play('remove'); say(''); });
     done.focus({ preventScroll: true });
   }
@@ -343,6 +364,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     leave,
     // The world signpost tapped in the yard: what it says, and for a visitor who knows the secret, the way home.
     signpost,
+    // Arrived in the yard with Santa's letter still unread: the mailbox's flag springs up with a snap to call the visitor over.
+    arrived() { if (mail.seen) return; cabin.mailCall(); later(950, () => sound.play('snap')); },
     // A line about something tapped in the village or the room; it fades on its own and never covers a game.
     // `id`: what was tapped; the wish board's thank-you note goes in the clue book.
     note(text, id) { if (id === 'wish-board') clue('wish-board'); if (layer.dataset.game) return; timers.forEach(clearTimeout); timers.clear(); say(text); later(4200, () => { if (!layer.dataset.game) say(''); }); },
@@ -396,7 +419,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       const had = id => ever(progress.bag, id), gone = id => had(id) && !holds(progress.bag, id);
       for (const place of Object.keys(PLACES)) cabin.dress(place, progress.outfit[place]);
       cabin.hoist(progress.hoist.locked ? 1 : 0); cabin.fitCrank(gone('handle')); if (gone('matches')) cabin.light(true);
-      if (ids.includes('mailbox') || had('lichen') || progress.clues.includes('care-note')) cabin.repaint('mailbox', { open: true });
+      if (ids.includes('mailbox') || had('lichen') || progress.clues.includes('care-note')) { cabin.repaint('mailbox', { read: true }); cabin.mailFlag(false); mail.seen = true; }
       if (gone('lichen')) { cabin.repaint('trough', had('key') ? { eaten: true, taken: true } : { eaten: true }); cabin.reindeerStep(true, true); }
       if (had('handle')) cabin.repaint('snow-pile', { dug: true });
       if (progress.volunteer.tasks.includes('hay')) cabin.repaint('sleigh', { loaded: true });

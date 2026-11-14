@@ -732,10 +732,8 @@ export function deskDrawerFront({ paper }, { width, height }, state = {}) {
   shape('rect', { x: 0, y: 0, width: 200, height: h, rx: 4, fill: '#9a6343' }, g);
   shape('rect', { x: 6, y: 5, width: 188, height: h - 10, rx: 3, fill: '#a86b47' }, g);
   shape('path', { d: `M7 6H193`, stroke: '#c08a5a', 'stroke-width': 1.4, opacity: .7 }, g);
-  for (const side of [-1, 1]) {
-    shape('path', { d: `M${100 + side * 12} ${h / 2}c${side * 6}-6 ${side * 14}-6 ${side * 20}-1c${-side * 6} 1 ${-side * 9} 5 ${-side * 20} 1Z`, fill: '#7d4f33' }, g);
-    shape('circle', { cx: 100 + side * 33, cy: h / 2, r: 1.8, fill: '#8f3b36' }, g);
-  }
+  // The same holly sprig as on the little key's bow (cabin-items.js).
+  for (const side of [-1, 1]) holly(g, 100 + side * 30, h / 2 + 2, .22, '#7d4f33', '#8f3b36');
   shape('rect', { x: 93, y: h / 2 - 8, width: 14, height: 16, rx: 3, fill: GOLD }, g);
   shape('path', { d: `M100 ${h / 2 - 4}a2 2 0 1 1 0 4l1 4h-2l1-4`, fill: '#3b2a24' }, g);
   if (!state.key) return;
@@ -958,7 +956,9 @@ export function hoistWinch({ paper }, { width, height }) {
   shape('circle', { cx: c, cy: c, r: width * .27, fill: '#c39466' }, paper);
   for (const r of [.235, .2, .165]) shape('circle', { cx: c, cy: c, r: width * r, fill: 'none', stroke: '#b98a52', 'stroke-width': width * .028 }, paper);
   shape('circle', { cx: c, cy: c, r: width * .11, fill: '#8f5a3c' }, paper);
-  shape('rect', { x: c - width * .045, y: c - width * .045, width: width * .09, height: width * .09, fill: '#241a16' }, paper);
+  // The socket: a square hole with a pale rim, so its shape shows from across the yard.
+  shape('rect', { x: c - width * .075, y: c - width * .075, width: width * .15, height: width * .15, rx: width * .012, fill: '#e3c08a' }, paper);
+  shape('rect', { x: c - width * .05, y: c - width * .05, width: width * .1, height: width * .1, fill: '#241a16' }, paper);
 }
 // The winch's crank, the wooden handle found in the snow, seen from the front as it turns: the block with its square
 // tenon over the hub (at the top of the sheet), the arm, and the grip seen end on (at the bottom).
@@ -1133,8 +1133,10 @@ export function drift({ paper }, { width, height }) {
   shape('path', { d: `M0 ${height}C${width * .1} ${height * .3} ${width * .6} ${height * .1} ${width} ${height * .7}V${height}Z`, fill: SNOW }, paper);
   shape('path', { d: `M${width * .55} ${height * .2}C${width * .8} ${height * .3} ${width * .95} ${height * .6} ${width} ${height * .7}V${height}H${width * .7}C${width * .75} ${height * .6} ${width * .7} ${height * .35} ${width * .55} ${height * .2}Z`, fill: '#dbe5ec' }, paper);
 }
+// The mailbox. While a letter from Santa waits inside, its flag stands up: a piece of its own (`mailboxFlag`, waved in the
+// scene) so the box is drawn here without it. `open`: the door down and the flag lowered; `read`: shut again, the flag
+// still lowered.
 export function mailbox({ paper }, { width, height }, state = {}) {
-  // The flag stands up while a letter from Santa waits inside; opening the box lowers it.
   const cx = width / 2;
   shape('rect', { x: cx - 14, y: 230, width: 28, height: height - 230, fill: WOOD }, paper);
   shape('path', { d: `M${cx - 110} 240V140C${cx - 110} 80 ${cx + 110} 80 ${cx + 110} 140V240Z`, fill: RED }, paper);
@@ -1144,7 +1146,16 @@ export function mailbox({ paper }, { width, height }, state = {}) {
   } else shape('path', { d: `M${cx - 110} 140C${cx - 110} 80 ${cx + 110} 80 ${cx + 110} 140`, stroke: '#87302f', 'stroke-width': 10, fill: 'none' }, paper);
   shape('path', { d: `M${cx - 120} 110C${cx - 80} 60 ${cx + 80} 60 ${cx + 120} 110C${cx + 60} 96 ${cx - 60} 96 ${cx - 120} 110Z`, fill: SNOW }, paper);
   if (state.open) { shape('rect', { x: cx + 96, y: 150, width: 14, height: 80, fill: GOLD }, paper); shape('rect', { x: cx + 96, y: 210, width: 50, height: 20, fill: GOLD }, paper); }
-  else { shape('rect', { x: cx + 96, y: 80, width: 14, height: 150, fill: GOLD }, paper); shape('rect', { x: cx + 96, y: 80, width: 50, height: 26, fill: GOLD }, paper); star(paper, cx, 190, 28, GOLD); }
+  else if (state.read) { shape('rect', { x: cx + 96, y: 150, width: 14, height: 80, fill: GOLD }, paper); shape('rect', { x: cx + 96, y: 210, width: 50, height: 20, fill: GOLD }, paper); star(paper, cx, 190, 28, GOLD); }
+  else star(paper, cx, 190, 28, GOLD);
+}
+// The mailbox's flag, raised, 60 × 158 art units: its pole and the gold flag at the top (the pole's foot is the pivot).
+export const MAIL_FLAG = { w: .12, h: .316, pivot: 13 / 60, at: [.206, .49, .006] };
+export function mailboxFlag({ paper }, { width, height }) {
+  const g = shape('g', { transform: `scale(${width / 60})` }, paper), h = 60 * height / width;
+  shape('rect', { x: 6, y: 6, width: 14, height: h - 6, fill: GOLD }, g);
+  shape('rect', { x: 6, y: 6, width: 50, height: 26, rx: 2, fill: GOLD }, g);
+  shape('path', { d: 'M8 10H54', stroke: '#f4d58a', 'stroke-width': 3, opacity: .7 }, g);
 }
 // The sleigh beside the reindeer; loaded (`state.loaded`, the volunteer job done), four sacks of presents stand on its
 // rack one on another, the first stop's on top.

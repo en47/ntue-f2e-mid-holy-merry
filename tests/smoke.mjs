@@ -208,7 +208,7 @@ await test('Santa 紙板預先畫成 WebP：圖片對應目前畫法、手機用
   const { CUTS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-cuts.js')).href), names = [...new Set(cuts.map(cut => cut.name))];
   assert.deepEqual(CUTS.sets, SETS); assert.deepEqual(Object.keys(CUTS.sheets).sort(), names.sort());
   for (const name of names) assert.equal(CUTS.sheets[name], createHash('sha256').update(Object.keys(SETS).map(set => manifest.files[`${set}/${name}.webp`].sha256).join()).digest('hex').slice(0, 10), `${name} 的網址版本過期`);
-  for (const name of ['sign--stars-4', 'mailbox--open-true', 'barn-drawer-inside--taken-true', 'trough--eaten-true', 'trough--eaten-true--taken-true', 'snow-pile--dug-true', 'smoke', 'hoist-bale', 'hoist-crank', 'outfit-red-scarf']) assert.ok(names.includes(name), `${name} 也事先畫好`);
+  for (const name of ['sign--stars-4', 'mailbox--open-true', 'mailbox--read-true', 'mailbox-flag', 'barn-drawer-inside--taken-true', 'trough--eaten-true', 'trough--eaten-true--taken-true', 'snow-pile--dug-true', 'smoke', 'hoist-bale', 'hoist-crank', 'outfit-red-scarf']) assert.ok(names.includes(name), `${name} 也事先畫好`);
   assert.ok(names.filter(name => name.startsWith('outfit-')).length === 21, 'Every accessory has its picture');
   const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), paint = await fs.readFile(path.join(project, 'js/components/cabin-paint.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8');
   assert.ok(!scene.includes('paperFilter') && !scene.includes('XMLSerializer') && scene.includes('cutBoard(') && paint.includes('return paintBoard(board, CUTS.sets[set], state)'), 'The scene only loads pictures; a missing or broken one is cut in the browser instead');

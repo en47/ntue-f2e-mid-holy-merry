@@ -60,10 +60,12 @@ document.querySelectorAll('.cabin-explore [data-touch]').forEach(button => butto
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !event.defaultPrevented && cabin && cabin.view !== 'outside') { cabin.back(); stage.querySelector('.cabin-gesture').focus(); } });
 markExplore();
 
-// A one-time hint, gone after the first touch of the scene.
+// A one-time hint, gone after the first touch of the scene: on a first visit it points at the mailbox's raised flag
+// (where the yard begins), afterwards at how to look around.
 function showTip() {
   let seen = false; try { seen = sessionStorage.getItem(TIP) === '1'; sessionStorage.setItem(TIP, '1'); } catch { /* show it anyway */ }
   if (seen) return;
+  if (!found.has('mailbox')) tip.textContent = '郵筒的旗子豎起來了，點它看看';
   tip.hidden = false;
   const hide = () => tip.classList.add('is-gone');
   stage.addEventListener('pointerdown', hide, { once: true }); setTimeout(hide, 8000);
@@ -86,7 +88,7 @@ async function mountCabin(fly = true) {
     if (found.size) cabin.repaint('sign', { stars: found.size });
     play.restore([...found]);
     stage.dataset.state = 'ready'; stage.dataset.santa = 'home'; progress(1);
-    const arrive = () => cabin?.arrive().then(showTip);
+    const arrive = () => cabin?.arrive().then(() => { showTip(); play?.arrived(); });
     if (document.documentElement.classList.contains('is-loading')) addEventListener('site-loader:done', arrive, { once: true }); else arrive();
     const welcome = status.textContent = '聖誕老人在屋裡烤火。點小屋就能推門進去，也可以左右轉轉，看看整座村子。';
     result.santa.then(home => {

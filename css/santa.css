@@ -486,7 +486,7 @@
 @media (prefers-reduced-motion: reduce) { .volunteer-stamp, .gearbox-peg.is-ready, .gearbox-peg.is-missing, .gearbox-piece.is-jammed, .gearbox-gear.is-missing, .gearbox-crank.is-resisting, .gearbox-arm.is-resisting, .gearbox.is-running .gearbox-lamp { animation: none; } .gearbox-piece { transition: none; } }
 /* 觸控螢幕：每個按鈕至少 44px 見方，手指點得準。 */
 @media (pointer: coarse) {
-  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chat-fold, .chat-send, .desk-actions button, .books-tools button, .books-enter, .register-letter, .register-sign, .register-leave, .gearbox-actions button { min-width: 44px; min-height: 44px; }
+  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chair-flip, .chat-fold, .chat-send, .desk-actions button, .books-tools button, .books-enter, .register-letter, .register-sign, .register-leave, .gearbox-actions button { min-width: 44px; min-height: 44px; }
 }
 /* 橫拿的手機：小屋和螢幕一樣高（點進角落或屋裡時捲到剛好整個露出），衣櫃、食物籃、對話框改成右側窄欄，提示放到左上。 */
 @media (orientation: landscape) and (max-height: 500px) {
@@ -661,6 +661,10 @@ html.theatre-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .notebook-button.is-new, .notebook-card { animation: none; } }
 /* 弄濕的交接表：四晚 × 前半夜／後半夜的格子。暈開的墨水留著寫字人的顏色，洗掉的只剩水痕；點格子再點名牌補字，補對了墨水一行行乾回來。 */
 .shift-note { margin-bottom: .4rem; }
+/* 交接表最上面貼著聖誕老人的便條：請人幫忙補好（他不在家時也寫著何時回來），補好後換成謝謝。 */
+.shift-pin { display: block; width: fit-content; max-width: 100%; margin: 0 auto .7rem; padding: .6rem 1.1rem; color: #8f3b36; background: var(--cream); border-radius: 10px; box-shadow: 0 4px 0 -1px #dccaa9; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.6; rotate: -1.5deg; }
+.shift-pin-sign { display: block; text-align: right; }
+.cabin[data-paper] .shift-pin { padding: 1rem 1.5rem .8rem; background: transparent no-repeat 0 0 / 100% 100%; border-radius: 0; box-shadow: none; }
 .shift-grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: .35rem .5rem; align-items: center; margin: 0 0 .8rem; }
 .shift-head { color: var(--muted); font-size: var(--fs-small); text-align: center; }
 .shift-date { color: var(--ink); font-family: var(--font-hand); font-size: var(--fs-small); }
@@ -718,6 +722,11 @@ html.theatre-open { overflow: hidden; }
 .chair-title { margin: 0 0 .4rem; color: #8f3b36; font-size: var(--fs-small); letter-spacing: .1em; }
 .chair-line { margin: 0; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.9; }
 .chair-sign { margin: .3rem 0 .9rem; color: #8f3b36; font-family: var(--font-hand); text-align: right; }
+/* 搖椅紙條可以翻面：背面寫著聖誕老人去哪了。翻的時候紙片橫向收窄再展開。 */
+.chair-actions { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; }
+.chair-flip { padding: .45rem 1rem; border: 0; background: transparent no-repeat 0 0 / 100% 100%; color: var(--ink); font-weight: 700; font-size: var(--fs-small); cursor: pointer; }
+@media (prefers-reduced-motion: no-preference) { .chair-card.is-turning { animation: chair-turn .4s ease-in-out; } }
+@keyframes chair-turn { 50% { scale: .04 1; } }
 /* 書桌抽屜、放大鏡下的雪花球、郵戳章盤上的撥針：打開成一張紙卡，東西是可以點的紙片。 */
 .drawer-card, .lens-card { width: min(22rem, calc(100% - 2rem)); }
 /* 抽屜卡片蓋在桌上的火漆印與郵戳上面。 */
