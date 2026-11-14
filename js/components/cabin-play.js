@@ -350,7 +350,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     done.focus({ preventScroll: true });
   }
   // Santa tapped, or his portrait in the corner: out, his note; with the secret waiting to be told, the telling; otherwise
-  // his line and the questions, answered for where the story is now (data/cabin-talk.js): a goal's two lines, then a smile.
+  // his line and the questions, answered for where the story is now (data/cabin-talk.js): a goal's two lines and the clue
+  // book, then that question is put away until the goal moves on; the others are asked once a talk.
   const asked = new Map();
   function chat() {
     if (!talk) return;
@@ -358,10 +359,12 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     const story = progress.story;
     if (story.opened && knowsSantas(story.seen) && !story.told) { tellSecret(); return; }
     const told = story.told, said = signedUp(progress.volunteer) ? TALK.hello.partner : told ? TALK.hello.told : TALK.hello.guest;
-    const now = () => { const id = goal(progress), count = asked.get(id) ?? 0; asked.set(id, count + 1); return TALK.now[id]?.[count] ?? TALK.again; };
-    const questions = [{ text: TALK.asks.now, answer: now }, { text: TALK.asks.place, answer: () => told ? TALK.place.told : TALK.place.guest }];
-    if (story.left) questions.push({ text: TALK.asks.where, answer: () => TALK.where });
-    talk.open({ said, questions });
+    const lines = () => [...TALK.now[goal(progress)] ?? [], TALK.book], once = new Set();
+    const now = { text: TALK.asks.now, more: () => (asked.get(goal(progress)) ?? 0) < lines().length, answer: () => { const id = goal(progress), count = asked.get(id) ?? 0; asked.set(id, count + 1); return lines()[count]; } };
+    const one = (id, text, answer) => ({ text, more: () => !once.has(id), answer: () => { once.add(id); return answer(); } });
+    const questions = [now, one('place', TALK.asks.place, () => told ? TALK.place.told : TALK.place.guest)];
+    if (story.left) questions.push(one('where', TALK.asks.where, () => TALK.where));
+    talk.open({ said, questions, closing: TALK.again });
   }
   // Santa tells you the secret, once: home from the reindeer (or from his chair, already in), in the chat card a line at a
   // time, each moved on by your reply, then the empty row in the register. Only the choice makes it told (and moves the

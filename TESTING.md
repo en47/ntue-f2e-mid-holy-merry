@@ -1278,3 +1278,4 @@ node --experimental-vm-modules tests/smoke.mjs
 - 修正：頭像按鈕裡的 `span` 不是區塊，寬度沒套上而看不見（改成 `display: block`）。
 - 手寫字型子集重建（新增「拾痛遍『』矩」）。順手修 `CLAUDE.md`：`npm test` 跑 package.json 列出的所有 node:test 檔；產出檔看檔頭，並更正 `elf-actions.json`、`storybook-masks` 的位置。
 - 驗收：`npm test` 通過；`check-santa-room.mjs`、`check-santa-secret.mjs`（改成一句一句點回應、回答前不算說明完）桌機＋手機通過；截圖桌機與手機：頭像、打開、問答、聖誕老人出門後的紙條頭像、回來那一幕。`check-santa-playthrough.mjs` 也改成點回應，合併前完整回歸再跑。
+- **試玩回饋修正（一直按同一題只得到同一句）**：「我現在該做什麼？」每個目標兩句，第三次請你翻線索本的「給我一點提示」，之後這一題收起來，目標換了才再出現；「這是什麼地方？」「你剛剛去哪了？」每次打開紙卡各問一次。全部問完他只說一次「慢慢來，不急。」，不再重複洗版。驗收：`npm test` 通過；瀏覽器實測問到沒有問題為止。

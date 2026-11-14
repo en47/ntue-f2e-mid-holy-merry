@@ -1,12 +1,14 @@
 // Talking to Santa in the room, with no AI: tap him (or his portrait in the corner) and a paper card opens with his
 // line and a few questions to ask (components/cabin-chat.js shows it; components/cabin-play.js picks the line). For each
-// goal (data/cabin-clues.js GOALS) two lines in his own words that point the way and never give the answer; asked a third
-// time, he only smiles. Before he has told you the secret, nothing here says "substitute". All made up.
+// goal (data/cabin-clues.js GOALS) two lines in his own words that point the way and never give the answer, then a
+// third sending you to the clue book's hints; after that the question is put away until the goal moves on, and each other
+// question is asked once a talk. Before he has told you the secret, nothing here says "substitute". All made up.
 export const TALK = {
   hello: { guest: '外面很冷吧？在火爐邊暖暖身子。', told: '又見面了。想好了嗎？不急。', partner: '辛苦了，夥伴。' },
   asks: { now: '我現在該做什麼？', place: '這是什麼地方？', where: '你剛剛去哪了？' },
   place: { guest: '這是我的小屋。一年到頭，我大多待在這裡。', told: '這間小屋，是所有替身的家。' },
   where: '麋鹿又把飼料弄翻了，我出去收拾了一下。',
+  book: '要是卡住了，翻翻線索本，按「給我一點提示」，那裡都記著呢。',
   again: '慢慢來，不急。',
   now: {
     yard: ['院子裡好幾樣東西，都少了點什麼。郵筒的旗子不是豎著嗎？', '給麋鹿的點心、雪人腳邊的雪堆、穀倉的絞盤……慢慢找。'],

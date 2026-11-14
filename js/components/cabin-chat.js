@@ -85,12 +85,17 @@ export function mountCabinChat(stage, { onOpen = () => {}, onNote = () => {} } =
     choices(last.choices.map(({ text, reply, then }) => [text, () => { line(text, true); line(reply); asks.replaceChildren(); scene = null; then(); close.focus({ preventScroll: true }); }]));
   }
   return {
-    // His line and the questions: [{ text, answer() }]; asked, your question and his answer go into the card.
-    open({ said, questions }) {
+    // His line and the questions: [{ text, answer(), more() }]; asked, your question and his answer go into the card. A
+    // question with nothing more to say is put away; when none is left he says `closing`, once.
+    open({ said, questions, closing }) {
       if (scene) return show();
       log.replaceChildren(); line(said);
-      choices(questions.map(({ text, answer }) => [text, () => { line(text, true); line(answer()); }]));
-      show();
+      const ask = () => {
+        const left = questions.filter(question => question.more());
+        if (!left.length) { line(closing); asks.replaceChildren(); close.focus({ preventScroll: true }); return; }
+        choices(left.map(({ text, answer }) => [text, () => { line(text, true); line(answer()); ask(); }]));
+      };
+      ask(); show();
     },
     // A turn in the story: `lines` [[his line, your reply]], then `last` { line, choices: [{ text, reply, then }] }.
     scene(lines, last) { scene = { lines, last, at: 0 }; log.replaceChildren(); step(); show(); },
