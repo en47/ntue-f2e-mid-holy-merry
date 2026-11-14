@@ -50,7 +50,7 @@ const KINDS = [
   ['.envelope-wax', 'wax'],
   ['.compose-choice[aria-pressed="true"], .register-letter[aria-pressed="true"]', 'chosen'],
   ['.compose-choice, .lemon-card', 'slip'],
-  ['.register-jobs .is-done .job-box', 'tag'],
+  ['.register-jobs .is-done .job-box, .notebook-jobs .is-done .job-box', 'tag'],
   ['.job-box', 'kraft'],
   ['.register-letter, .sack-count, .register-sign.is-quiet', 'pale'],
   ['.cabin-letter:not(.secret-card)', 'letter'],

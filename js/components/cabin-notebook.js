@@ -1,12 +1,14 @@
 // The visitor's clue book, a little kraft notebook in the corner of the scene: whatever is noticed around the village that
 // may matter later is written in it the moment it is seen (`add`), and it keeps a hint for whatever the story is waiting
-// on now (`goal`, cabin-story.js), a little plainer each time one is asked for. It shows itself once there is something
-// in it, and hops when something new goes in. Cut from the same paper as everything else (cabin-paper.js draws its page).
+// on now (`goal`, cabin-story.js), a little plainer each time one is asked for. Once signed up as a substitute, the day's
+// jobs come first, ticked as they are done, as the register lists them. It shows itself once there is something in it,
+// and hops when something new goes in. Cut from the same paper as everything else (cabin-paper.js draws its page).
 import { paperLayer, shape } from './paper-art.js';
 import { star } from './paper-props.js';
 import { ornament } from './cabin-ornaments.js';
-import { GIFTS, goal, knowsSantas } from '../services/cabin-story.js';
+import { GIFTS, TASKS, goal, knowsSantas, points, signedUp } from '../services/cabin-story.js';
 import { GIFT_HINTS, GIFT_ORDER, GOALS, NOTEBOOK, RESTART } from '../data/cabin-clues.js';
+import { JOBS } from '../data/cabin-secret.js';
 import { resetProgress } from '../services/cabin-progress.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
@@ -56,6 +58,18 @@ export function mountNotebook(stage, { progress, save, sound }) {
   function render() {
     const body = card.querySelector('.notebook-body'); body.replaceChildren();
     element('h3', 'notebook-title', body, '線索本');
+    // The substitute's jobs (the register's list): a box for each, ticked once it is done and stamped.
+    if (signedUp(progress.volunteer)) {
+      const work = element('section', 'notebook-work', body), { tasks } = progress.volunteer;
+      element('h4', 'notebook-goal', work, `替身工作：完成 ${points(progress.volunteer)}／${TASKS.length}`);
+      const jobs = element('ul', 'notebook-jobs', work);
+      for (const task of TASKS) {
+        const done = tasks.includes(task), item = element('li', done ? 'is-done' : '', jobs);
+        element('span', 'job-box', item, done ? '✓' : '').setAttribute('aria-hidden', 'true'); element('span', 'sr-only', item, done ? '已完成：' : '還沒做：');
+        element('strong', '', item, JOBS[task][0]); element('span', '', item, JOBS[task][1]);
+      }
+      divider(body);
+    }
     const found = Object.keys(NOTEBOOK).filter(id => progress.clues.includes(id));
     if (!found.length) element('p', 'notebook-empty', body, '還沒記下任何線索。到處看看吧！');
     const list = element('ul', 'notebook-clues', body);
