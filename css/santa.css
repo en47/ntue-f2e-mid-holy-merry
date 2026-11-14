@@ -86,6 +86,8 @@
 .hoist-crank:focus-visible, .hoist-hook:focus-visible, .hoist-release:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 /* The trough's little gold, the mailbox's letter and parcel, and the parcel opened on a card. */
 .feed-mouth-spot { position: absolute; pointer-events: auto; }
+.feed-log { position: absolute; padding: 0; background: none; border: 0; border-radius: 6px; cursor: pointer; pointer-events: auto; }
+.feed-log:focus-visible { outline: 3px solid var(--yellow); }
 .feed-glint { position: absolute; pointer-events: none; animation: feed-glint 2.2s ease-in-out infinite; }
 .feed-glint .art-layer { position: absolute; left: 50%; top: 0; width: 46%; height: auto; aspect-ratio: 1; translate: -50% 0; }
 @keyframes feed-glint { 0%, 100% { opacity: .2; scale: .55; } 50% { opacity: 1; scale: 1; } }
@@ -105,6 +107,10 @@
 .note-first { color: #3f5a7a; font-size: var(--fs-body); }
 .note-second { display: flex; align-items: center; gap: .4rem; margin: .2rem 0 1rem 2.4rem; color: #3f6653; font-size: var(--fs-title); letter-spacing: .12em; rotate: -6deg; }
 .note-mark { width: 5.5rem; height: auto; }
+.care-log-card .note-line { margin-bottom: .5rem; font-size: var(--fs-body); color: #6c7178; }
+.care-log-card .log-title { color: var(--muted); font-size: var(--fs-small); letter-spacing: .12em; }
+.care-log-card .log-gold { color: #b98a3c; font-weight: 700; }
+.care-log-card .cabin-letter-close { margin-top: 1rem; }
 /* 和聖誕老人說話（預設對話，不用 AI）：屋裡右上角、線索本底下一個紙雕頭像，點它（或點聖誕老人）在旁邊打開一張紙卡，
    他的話在左、附頭像，你的話在右，下面是可以點的問句紙籤。只在進屋、門關上之後出現。他不在家時頭像換成搖椅上的紙條。
    手機上紙卡改成頭像下方整排寬的面板。輸入框留給之後的 AI 回信，現在藏著。底部讓開右下角的音樂按鈕。 */

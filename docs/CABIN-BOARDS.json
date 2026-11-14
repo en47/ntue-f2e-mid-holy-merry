@@ -1569,25 +1569,25 @@
       "bytes": 104352
     },
     "hi/trough--eaten-true--taken-true.webp": {
-      "fingerprint": "779c349ff706322d57ac9f5187400b2957907c3f1da22d1aaee2d00c9236f35a",
-      "sha256": "3d3861e38988bd37544f40141d80599ca278dfe609fac4ab0f146a24e6b82ae0",
+      "fingerprint": "406a8eef739f5103f25968ceda06a9d0d0d45e3be6b570d304e2cfd4bd400cf2",
+      "sha256": "9dcf58db8e48ae25231a1d8ccc3747ef0e16d505aef7d4be5ff5fe5db17609e9",
       "width": 855,
       "height": 414,
-      "bytes": 36828
+      "bytes": 40202
     },
     "hi/trough--eaten-true.webp": {
-      "fingerprint": "d5bfebc0609752c66b552cf2fa5e7e1f89c80214a9bfdd12e7d205679e8ac069",
-      "sha256": "4160b272ffade4ee130da723e1a9b52cdb094d0224298065bec0f59e4e6318b3",
+      "fingerprint": "e5e1a626b0f8b22389bbb4b0dc7b31d851e6159506ea596db30393660fa16ed2",
+      "sha256": "f274e6518b0c08634bd912c9149259f5ca3d83eaeab4a7ab89440bfac396c4b1",
       "width": 855,
       "height": 414,
-      "bytes": 38008
+      "bytes": 41508
     },
     "hi/trough.webp": {
-      "fingerprint": "8b2cd6b2794d670d6501034b7523971c39a0ca13b4189035605b25d679c37b6b",
-      "sha256": "50284eafed18206ecbe8bafcfee5183d39b73ef702b1a16538f9d9d79471726a",
+      "fingerprint": "b37d117cd52961af356ec1c6e5a5f43f638b37cb3dafa33e603bf7a36948be4d",
+      "sha256": "0218487b530ea80469f15c409e1c0bb1a0174a7da90477ed28e009143d7ef0b9",
       "width": 855,
       "height": 414,
-      "bytes": 39698
+      "bytes": 44036
     },
     "hi/village.webp": {
       "fingerprint": "186cb96f96cd35d69f8127d44c9166fa75af7b97dc489a81bccf3d14313dceab",
@@ -3221,25 +3221,25 @@
       "bytes": 72746
     },
     "large/trough--eaten-true--taken-true.webp": {
-      "fingerprint": "4a75491f8ef0c17d7356da74cc72a613989bb19c2c33746e035ad52c8dea4175",
-      "sha256": "cdcb8f3c37820b58cb69436e7422e5f4d80706411753008c1977e6b70b683e4e",
+      "fingerprint": "87e3aed89c87201506df9be2f05a5af1937bee615836cbcbdcfc7570c499e129",
+      "sha256": "b77ad931614f8fc8c34c3f4bd1a95fe4b31c3b5db917e9aaa294bc89f4ada256",
       "width": 641,
       "height": 311,
-      "bytes": 24440
+      "bytes": 27288
     },
     "large/trough--eaten-true.webp": {
-      "fingerprint": "6a454764e65a34939d348468000047332cb51be3fc66e2bafac96088785a0f36",
-      "sha256": "0dd1f512699e1da9904bdf867cefb78ed866139dcf8f75426049598679db722a",
+      "fingerprint": "8a9d6ff5a9e676d095beb094f9b046f33a38aad4300f43dfb11a5436bf1ee749",
+      "sha256": "e360b7ad961e78998a666d1bce9f391f6ba6488fd774637066a92d9f46eb48d0",
       "width": 641,
       "height": 311,
-      "bytes": 25488
+      "bytes": 28180
     },
     "large/trough.webp": {
-      "fingerprint": "38fa62f62807e44d8c3ac54734e8b7c0dcb2c6c36642465e196d4db832b7ecdc",
-      "sha256": "82e71ffcbd7810cfb6592a8009c31519fc760b2f13083528ddc622b95f797390",
+      "fingerprint": "6e96686bfd2b33b43742d69829028b036a8e4be082a0678bc6ea9a11d9fa4fc2",
+      "sha256": "71d428e8d43d52c1ba7f01e3971076be1106220544da947e507b726f265f16c5",
       "width": 641,
       "height": 311,
-      "bytes": 26162
+      "bytes": 29166
     },
     "large/village.webp": {
       "fingerprint": "0bb1fc0c8db31adefde36c02787506b0daae122600a3157deb1c78e126d48dfc",
@@ -4873,25 +4873,25 @@
       "bytes": 26204
     },
     "small/trough--eaten-true--taken-true.webp": {
-      "fingerprint": "a1203f89de3369f41f16b5525e7e6ba04b8d72aeee8091310c61e0754f664d21",
-      "sha256": "f36eb6e02283802c73e4c195ad91cca2d1fdd03a1fe47fbe59684710049c610d",
+      "fingerprint": "d5afbf31a91f5ca6c4719597fad025c0fd302547fefa73469e8fa63f27a11ae1",
+      "sha256": "f7fe0fcea08c07c811c7adfe32603a74b410db7f35ca0878801083c3a69917b1",
       "width": 428,
       "height": 207,
-      "bytes": 8074
+      "bytes": 9356
     },
     "small/trough--eaten-true.webp": {
-      "fingerprint": "97f3310d69c5b13193ea38add0543a8aa71fee4a7221ca31723099241f1741f9",
-      "sha256": "16b32982fdd257391cba3be5840916c46bb2af162f829f65a11161e20648135c",
+      "fingerprint": "472a33a178e965da69a069d91f67dbc4f50f48613824ba7f4e39f9b391cd8d73",
+      "sha256": "24fbecef90719477cfdb6fc04b15821791fc2411d19383c5397f4ff46e0351c8",
       "width": 428,
       "height": 207,
-      "bytes": 8456
+      "bytes": 10144
     },
     "small/trough.webp": {
-      "fingerprint": "d72afb46b4c3c719586a1a84b3c3169a55628f91e7f39622aa99d96ec90a7739",
-      "sha256": "ffe9350b487a83659359e1ef2f2891e93ae4ce901b4156ee805a85181386e6e7",
+      "fingerprint": "b93d75e64e8bac8886e1e13b5ffff068d78b91442c710a92ca5fd6028eb8ccd2",
+      "sha256": "3d2d1bbce882f8afca9b9f871ff34b9ea814a51d5131604e94aa390d02f1eb9a",
       "width": 428,
       "height": 207,
-      "bytes": 8600
+      "bytes": 10240
     },
     "small/village.webp": {
       "fingerprint": "e975d18181ba7a8c3ec3b2a26a9db1cda77a21fd1bc00472dafe54f207fb6c0f",
