@@ -13,7 +13,8 @@ const INK = { paper: { scale: .25, grain: .6, shadow: 0, rim: '#ffffff00' }, eag
 export const inked = (host, viewBox, draw) => paperLayer(host, viewBox, 'ink-layer', draw, INK);
 
 // fill, the shadow under it, and an optional trim: a strip of 'tape' holding a caption up, a sprig of 'holly' in the corner
-// of Santa's letter. Buttons stay plain paper: no stitched lines, no snow, nothing to tire the eye.
+// of Santa's letter. Buttons stay plain paper (only the replies to Santa are gift tags): no stitched lines, no snow,
+// nothing to tire the eye.
 const PAPERS = {
   note: ['#fbf3df', '#dccaa9'],
   pinned: ['#fbf3df', '#dccaa9', 'tape'],
@@ -53,16 +54,20 @@ const KINDS = [
   ['.job-box', 'kraft'],
   ['.register-letter, .sack-count, .register-sign.is-quiet', 'pale'],
   ['.cabin-letter:not(.secret-card)', 'letter'],
-  ['.chat-card', 'plain'],
+  ['.chat-card', 'chatcard'],
+  ['.chat-head', 'chathead'],
+  ['.from-santa .chat-bubble', 'saysSanta'],
+  ['.from-me .chat-bubble', 'saysYou'],
+  ['.chat-ask', 'gifttag'],
   ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin, .shift-file', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
   ['.feed-basket, .play-basket', 'wood'],
   ['.wardrobe-item[aria-pressed="true"], .bag-item[aria-pressed="true"]', 'picked'],
   ['.inspect-card', 'frame'],
   ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-close, .chat-send, .books-tools button, .books-enter, .gearbox-actions button, .desk-actions button, .register-sign, .theatre-close, .notebook-close, .inspect-close', 'tag'],
-  ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .theatre-again, .theatre-skip, .notebook-hint, .shift-pick, .bag-item, .bag-look, .inspect-flip, .chair-flip, .chat-ask, .from-me .chat-bubble', 'pale'],
+  ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .theatre-again, .theatre-skip, .notebook-hint, .shift-pick, .bag-item, .bag-look, .inspect-flip, .chair-flip', 'pale'],
   ['.notebook-card', 'notebook'],
-  ['.cabin-noscript, .theatre-words, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble, .bag-empty, .parcel-note, .shift-read', 'note'],
+  ['.cabin-noscript, .theatre-words, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .bag-empty, .parcel-note, .shift-read', 'note'],
 ];
 const ALL = KINDS.map(([selector]) => selector).join(', ');
 const kindOf = node => KINDS.find(([selector]) => node.matches(selector))?.[1];
@@ -97,6 +102,54 @@ function holly(parent, x, y) {
   shape('path', { d: `M${x - 20} ${y + 4}C${x - 14} ${y - 8} ${x - 2} ${y - 8} ${x + 2} ${y}C${x - 4} ${y - 1} ${x - 6} ${y + 6} ${x - 11} ${y + 3}C${x - 13} ${y + 9} ${x - 19} ${y + 9} ${x - 20} ${y + 4}Z`, fill: '#3f6653' }, parent);
   shape('path', { d: `M${x + 20} ${y + 4}C${x + 14} ${y - 8} ${x + 2} ${y - 8} ${x - 2} ${y}C${x + 4} ${y - 1} ${x + 6} ${y + 6} ${x + 11} ${y + 3}C${x + 13} ${y + 9} ${x + 19} ${y + 9} ${x + 20} ${y + 4}Z`, fill: '#4f7d68' }, parent);
   for (const [dx, dy] of [[0, 2], [-4, 6], [4, 6]]) shape('circle', { cx: x + dx, cy: y + dy, r: 3.4, fill: '#c63a33' }, parent);
+}
+// A red ribbon bow at (x, y), about 40 wide at `size` 1: two loops, the knot and two notched tails.
+export function bow(parent, x, y, size = 1) {
+  const group = shape('g', { transform: `translate(${x} ${y}) scale(${size})` }, parent);
+  shape('path', { d: 'M-2 2L-11 20-6 18-4 23 2 3ZM2 2L11 20 6 18 4 23-2 3Z', fill: '#9a3a33' }, group);
+  shape('path', { d: 'M-2 0C-9-13-22-11-21-1-20 8-9 7-2 2ZM2 0C9-13 22-11 21-1 20 8 9 7 2 2Z', fill: '#c0473f' }, group);
+  shape('path', { d: 'M-4-1C-9-6-15-6-16-1M4-1C9-6 15-6 16-1', fill: 'none', stroke: '#9a3a33', 'stroke-width': 1.4, 'stroke-linecap': 'round' }, group);
+  shape('circle', { cx: 0, cy: 1, r: 4.4, fill: '#a8423b' }, group);
+}
+// A glass bauble hung by a thread `drop` long from (x, y): its gold cap, the ball and a gleam.
+function bauble(parent, x, y, drop, r, fill) {
+  shape('path', { d: `M${x} ${y}V${y + drop}`, stroke: '#8a6a45', 'stroke-width': 1.2, fill: 'none' }, parent);
+  shape('rect', { x: x - r * .42, y: y + drop, width: r * .84, height: r * .55, rx: 1, fill: '#b98a3c' }, parent);
+  const cy = y + drop + r * .45 + r;
+  shape('circle', { cx: x, cy, r, fill }, parent);
+  shape('path', { d: `M${x - r * .6} ${cy - r * .05}A${r * .6} ${r * .6} 0 0 1 ${x - r * .1} ${cy - r * .6}`, fill: 'none', stroke: '#fffaf0', 'stroke-width': 1.3, 'stroke-linecap': 'round', opacity: .8 }, parent);
+}
+// A pine garland swagged across the top of a sheet: tied at both ends and in the middle (with a bow), dipping between,
+// berries along it and baubles hanging from it.
+function garland(paper, width, seed) {
+  const top = 9, at = x => top + 10 * Math.abs(Math.sin(x / width * Math.PI * 2));
+  let d = '';
+  for (let x = 5; x <= width - 5; x += 6) d += `${d ? 'L' : 'M'}${x.toFixed(1)} ${at(x).toFixed(1)}`;
+  shape('path', { d, fill: 'none', stroke: '#2f5240', 'stroke-width': 9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, paper);
+  for (let x = 7, i = 0; x < width - 6; x += 4.5, i++) {
+    const y = at(x), lean = (noise(seed + i) - .5) * 4;
+    shape('path', { d: `M${x.toFixed(1)} ${y.toFixed(1)}l${(lean - 3).toFixed(1)} -7M${x.toFixed(1)} ${y.toFixed(1)}l${(lean + 3).toFixed(1)} 7`, stroke: i % 3 ? '#3f6653' : '#5f8a70', 'stroke-width': 2.4, 'stroke-linecap': 'round', fill: 'none' }, paper);
+  }
+  for (let x = 16, i = 0; x < width - 12; x += 21, i++) shape('circle', { cx: x + noise(seed + i * 3) * 6, cy: at(x) + (noise(seed + i * 5) - .5) * 6, r: 2.3, fill: '#c63a33' }, paper);
+  for (const [f, drop, r, fill] of [[.13, 5, 4.6, '#9dbfd0'], [.25, 2, 6, '#c63a33'], [.37, 6, 4.6, '#e0b04f'], [.63, 6, 4.6, '#9dbfd0'], [.75, 2, 6, '#e0b04f'], [.87, 5, 4.6, '#c63a33']]) bauble(paper, width * f, at(width * f) + 4, drop, r, fill);
+  bow(paper, width / 2, top, .72);
+}
+// A paper snowflake, six arms with a pair of twigs on each.
+function snowflake(paper, x, y, r) {
+  let d = '';
+  for (let i = 0; i < 6; i++) {
+    const a = i * Math.PI / 3 + .26, ux = Math.cos(a), uy = Math.sin(a), bx = x + ux * r * .55, by = y + uy * r * .55;
+    d += `M${x} ${y}L${(x + ux * r).toFixed(1)} ${(y + uy * r).toFixed(1)}`;
+    for (const turn of [-.75, .75]) d += `M${bx.toFixed(1)} ${by.toFixed(1)}l${(Math.cos(a + turn) * r * .32).toFixed(1)} ${(Math.sin(a + turn) * r * .32).toFixed(1)}`;
+  }
+  shape('path', { d, stroke: '#cfdfe8', 'stroke-width': 1.8, 'stroke-linecap': 'round', fill: 'none' }, paper);
+}
+// A speech bubble cut together with its tail, which points down from its left foot (Santa's) or its right (yours).
+function speech(paper, width, height, seed, left, fill, shadow) {
+  const bottom = height - SHADOW - 2, body = left ? rounded(12, 2, width - 2, bottom, seed) : rounded(2, 2, width - 12, bottom, seed);
+  const x = left ? 0 : width, s = left ? 1 : -1, tail = `M${x + s * 24} ${bottom - 16}L${x + s * 2} ${bottom + 1}Q${x + s * 15} ${bottom} ${x + s * 28} ${bottom - 5}Z`;
+  for (const d of [body, tail]) shape('path', { d, fill: shadow, transform: `translate(0 ${SHADOW})` }, paper);
+  for (const d of [body, tail]) shape('path', { d, fill }, paper);
 }
 // Things drawn whole from the same paper, at their own size: each draws into the paper group, given the size and a seed.
 const ink = (d, colour, parent, width = 1.4, opacity = 1) => shape('path', { d, fill: 'none', stroke: colour, 'stroke-width': width, 'stroke-linecap': 'round', opacity }, parent);
@@ -230,6 +283,38 @@ const OBJECTS = {
     cut(paper, outline(width, height, seed), '#f1e2bd', '#c9b07c');
     for (let i = 0; i < 14; i++) shape('circle', { cx: noise(seed + i) * width, cy: noise(seed + i * 5) * height, r: 2 + noise(seed + i * 9) * 6, fill: '#e2c98f', opacity: .45 }, paper);
     ink(`M4 20Q22 34 12 56Q4 76 22 92Q34 104 18 122`, '#b5443c', paper, 3);
+  },
+  // Talking with Santa: the card is his stationery (a red line and a green one inside its edge) with a pine garland swagged
+  // across the top and a few paper snowflakes low behind the words; its head has a string of little lights along its foot.
+  chatcard(paper, width, height, seed) {
+    OBJECTS.stationery(paper, width, height, seed);
+    for (const [x, y, r] of [[30, height - 42, 10], [56, height - 24, 6.5], [width * .5, height - 22, 5]]) snowflake(paper, x, y, r);
+    garland(paper, width, seed);
+  },
+  chathead(paper, width, height, seed) {
+    const wire = height - 17, at = x => wire + 4 * Math.sin(x / width * Math.PI * 3) ** 2;
+    let d = '';
+    for (let x = 2; x <= width - 2; x += 6) d += `${d ? 'L' : 'M'}${x.toFixed(1)} ${at(x).toFixed(1)}`;
+    ink(d, '#6b5a4c', paper, 1.3);
+    for (let x = 14, i = 0; x < width - 8; x += 26, i++) {
+      const bulb = shape('g', { transform: `translate(${x.toFixed(1)} ${at(x).toFixed(1)}) rotate(${((noise(seed + i) - .5) * 36).toFixed(1)})` }, paper);
+      shape('rect', { x: -2.2, y: 0, width: 4.4, height: 3.4, fill: '#7d8790' }, bulb);
+      shape('path', { d: 'M0 3C-4.6 5-5 11 0 14.5 5 11 4.6 5 0 3Z', fill: ['#c63a33', '#e0b04f', '#4f7d68', '#7b95a6'][i % 4] }, bulb);
+      shape('path', { d: 'M-1.7 6.6Q-2 9.2-.7 11', stroke: '#fffaf0', 'stroke-width': 1, fill: 'none', opacity: .75 }, bulb);
+    }
+  },
+  saysSanta(paper, width, height, seed) {
+    speech(paper, width, height, seed, true, '#fbf3df', '#dccaa9');
+    if (width > 100) holly(shape('g', { transform: `translate(${width - 17} 7) scale(.5)` }, paper), 0, 0);
+  },
+  saysYou: (paper, width, height, seed) => speech(paper, width, height, seed, false, '#e4eedc', '#bccdb2'),
+  // A reply to give him: a gift tag, its end cut to a point with an eyelet, and the two loose ends of a red string tied
+  // through it.
+  gifttag(paper, width, height, seed) {
+    const bottom = height - SHADOW - 2, mid = bottom / 2 + 1, end = 14 + Math.min(12, bottom / 2), j = i => (noise(seed + i) - .5) * 1.4;
+    cut(paper, `M${end} ${2 + j(1)}H${width - 2 + j(2)}V${bottom + j(3)}H${end}L14 ${mid}Z`, '#f3e3c3', '#c9ae80');
+    shape('circle', { cx: end + 5, cy: mid, r: 4.6, fill: '#e2cc9f' }, paper); shape('circle', { cx: end + 5, cy: mid, r: 2.1, fill: '#7a5236' }, paper);
+    ink(`M${end + 5} ${mid}C${end - 4} ${mid - 9} 9 ${mid - 9} 2 ${mid - 4}M${end + 5} ${mid}C${end - 6} ${mid + 5} 10 ${mid + 9} 3 ${mid + 8}`, '#b5443c', paper, 1.8);
   },
   // A chosen slip or letter: warmer paper with a red line round it.
   chosen(paper, width, height, seed) {

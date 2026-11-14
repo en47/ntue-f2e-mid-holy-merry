@@ -1,10 +1,12 @@
 // Talking with Santa in the room, without AI: his paper portrait waits in the corner under the clue book (only once you
-// are inside with the door shut, css/santa.css). Tapped, or Santa himself tapped, it opens a paper card with his line on
-// the left and yours on the right, like a chat, and a few questions to ask underneath; what he says is chosen by
+// are inside with the door shut, css/santa.css), in a holly wreath. Tapped, or Santa himself tapped, it opens a paper card
+// (his stationery with a garland across the top, cabin-paper.js) with his lines on the left and yours on the right, like a
+// chat, and a few replies to give underneath, as gift tags; what he says is chosen by
 // cabin-play.js from data/cabin-talk.js, never here. At a turn in the story the card tells a scene instead: one line at a
 // time, each moved on by your reply, ending in a choice. While he is out the corner shows the note he left on his chair.
 // The writing line stays in the card, hidden and switched off, for a reply written by an AI later.
-import { paperLayer, shape } from './paper-art.js';
+import { bow } from './cabin-paper.js';
+import { leaf, paperLayer, shape } from './paper-art.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .18 }, eager: true };
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
@@ -21,6 +23,17 @@ function portrait(parent) {
   shape('rect', { x: 26, y: 34, width: 48, height: 10, rx: 5, fill: '#fbf8f1' }, parent);
   shape('circle', { cx: 80, cy: 40, r: 6, fill: '#fbf8f1' }, parent);
 }
+// The portrait in a wreath of holly and pine, berries in three places and a red bow at its foot.
+function wreathed(parent) {
+  shape('circle', { cx: 50, cy: 50, r: 40, fill: 'none', stroke: '#2f5240', 'stroke-width': 13 }, parent);
+  for (let i = 0; i < 20; i++) {
+    const a = i / 20 * Math.PI * 2, r = 40 + (i % 2 ? 4 : -4);
+    leaf(parent, `translate(${(50 + Math.cos(a) * r).toFixed(1)} ${(50 + Math.sin(a) * r).toFixed(1)}) rotate(${(a * 180 / Math.PI + (i % 2 ? 35 : -35)).toFixed(0)}) scale(.3)`, ['#3f6653', '#4f7d68', '#5f8a70'][i % 3]);
+  }
+  for (const a of [-2.4, -.75, .55]) for (const [dx, dy] of [[0, 0], [4.5, 2], [1, 4.8]]) shape('circle', { cx: 50 + Math.cos(a) * 41 + dx - 2, cy: 50 + Math.sin(a) * 41 + dy - 2, r: 3.1, fill: '#c63a33' }, parent);
+  portrait(shape('g', { transform: 'translate(19 18) scale(.62)' }, parent));
+  bow(parent, 50, 86, .55);
+}
 // The note left on his chair, folded once: three lines of his hand and an S.
 function chairSlip(parent) {
   shape('path', { d: 'M18 26L80 18 86 76 24 84Z', fill: '#fbf3df' }, parent);
@@ -33,11 +46,11 @@ function chairSlip(parent) {
 export function mountCabinChat(stage, { onOpen = () => {}, onNote = () => {} } = {}) {
   const panel = element('aside', 'cabin-chat is-folded', stage); panel.setAttribute('aria-label', '和聖誕老人說話');
   const fold = element('button', 'chat-fold', panel); fold.type = 'button'; fold.setAttribute('aria-expanded', 'false'); fold.setAttribute('aria-label', '和聖誕老人說話');
-  paperLayer(element('span', 'chat-avatar', fold), '0 0 100 100', '', portrait, PAPER);
+  paperLayer(element('span', 'chat-avatar', fold), '0 0 100 100', '', wreathed, PAPER);
   const slip = element('span', 'chat-avatar chat-slip', fold); paperLayer(slip, '0 0 100 100', '', chairSlip, PAPER); slip.hidden = true;
   const card = element('div', 'chat-card', panel);
   const head = element('header', 'chat-head', card);
-  paperLayer(element('span', 'chat-avatar', head), '0 0 100 100', '', portrait, PAPER);
+  paperLayer(element('span', 'chat-avatar', head), '0 0 100 100', '', wreathed, PAPER);
   element('p', 'chat-title', head, '聖誕老人');
   const close = element('button', 'chat-close', head, '收起'); close.type = 'button';
   const log = element('ol', 'chat-log', card); log.setAttribute('role', 'log');
@@ -49,10 +62,9 @@ export function mountCabinChat(stage, { onOpen = () => {}, onNote = () => {} } =
   form.addEventListener('submit', event => event.preventDefault());
   let away = false, scene = null;
 
-  // A line in the card, his (with his portrait) or yours; only the last few stay.
+  // A line in the card, his or yours (the bubble's paper and tail tell them apart); only the last few stay.
   function line(text, mine = false) {
     const item = element('li', `chat-line ${mine ? 'from-me' : 'from-santa'}`, log);
-    if (!mine) paperLayer(element('span', 'chat-avatar', item), '0 0 100 100', '', portrait, PAPER);
     element('p', 'chat-bubble', item, text);
     while (log.children.length > 6) log.firstElementChild.remove();
     item.scrollIntoView({ block: 'nearest' });

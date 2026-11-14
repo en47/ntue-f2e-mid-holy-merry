@@ -131,7 +131,7 @@
 .chat-log { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; gap: .8rem; margin: 0; padding: 0; overflow: auto; list-style: none; }
 .chat-line { display: flex; align-items: flex-end; gap: .5rem; }
 .chat-line.from-me { flex-direction: row-reverse; }
-.chat-bubble { max-width: 78%; margin: 0; padding: .7rem 1rem; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; background: #fbf3df; border-radius: 14px 14px 14px 4px; }
+.chat-bubble { max-width: 86%; margin: 0; padding: .7rem 1rem; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; background: #fbf3df; border-radius: 14px 14px 14px 4px; }
 .chat-line.from-me .chat-bubble { border-radius: 14px 14px 4px 14px; }
 .chat-asks { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .45rem; }
 .chat-asks:empty { display: none; }
@@ -140,8 +140,19 @@
 .chat-form { display: flex; gap: .5rem; }
 .chat-form[hidden] { display: none; }
 .chat-form input { flex: 1; min-width: 0; padding: .55rem .8rem; color: var(--ink); background: #fffdf6; border: 2px solid #c9b48f; border-radius: 10px; font-size: var(--fs-small); }
-.cabin[data-paper] .chat-card { padding: 1.5rem 1.4rem 1.4rem; }
-.cabin[data-paper] .from-santa .chat-bubble { padding: .85rem 1.1rem; }
+.chat-head .chat-avatar { width: 3rem; }
+.cabin[data-paper] .chat-card { padding: 3.2rem 1.4rem 1.4rem; }
+.cabin[data-paper] .chat-head { padding-bottom: 1.4rem; background: transparent no-repeat 0 0 / 100% 100%; border-bottom: 0; }
+.cabin[data-paper] .from-santa .chat-bubble { padding: .85rem 1.7rem .85rem calc(1.1rem + 10px); }
+.cabin[data-paper] .from-me .chat-bubble { padding: .7rem calc(1rem + 10px) .75rem 1rem; }
+.cabin[data-paper] .chat-ask { padding: .5rem .95rem .6rem 2.6rem; }
+.chat-ask:nth-child(odd) { rotate: -1.5deg; }
+.chat-ask:nth-child(even) { rotate: 1.2deg; }
+@media (prefers-reduced-motion: no-preference) {
+  .chat-line, .chat-ask { animation: chat-in .32s ease-out both; }
+  .chat-ask { animation-delay: .12s; }
+}
+@keyframes chat-in { from { opacity: 0; translate: 0 6px; } }
 @media (max-width: 700px) {
   .cabin-chat { right: .6rem; bottom: 4.6rem; left: .6rem; }
   .chat-card { top: calc(48px + .5rem); right: 0; left: 0; width: auto; max-height: calc(100% - 48px - .5rem); }
