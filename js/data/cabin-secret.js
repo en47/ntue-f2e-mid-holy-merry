@@ -58,14 +58,8 @@ export const NOTES = {
   polaroid: '帽架上夾著一張舊拍立得：一個打扮好的雪人。翻到背面，有人寫著：「照這樣打扮，它會想起來。」',
   hatLook: '把最小的那頂帽子翻過來看看', hatGift: '帽子裡藏著一個綠色的紙鈴鐺吊飾，綁著一張小卡片。',
   known: '最後一格補上，墨水一行一行乾回來……每一晚，都是兩個人接力飛完的。原來，聖誕老人不只一位。',
-  // Santa back from the reindeer once the log is put right (or, if he is already in, from his chair): he knows that you
-  // know, and opens the booklet's stuck pages for you. Having opened the old record already, you hear a word about it too.
-  back: '門開了，聖誕老人拍掉身上的雪走進來：「看來，你已經發現我們的小秘密了。」',
-  chair: '聖誕老人從搖椅上看著你，笑了：「看來，你已經發現我們的小秘密了。」',
-  told: '「小房間那本小冊，後面黏住的幾頁，我幫你翻開了。上面寫著我們是怎麼開始的。」',
+  // Heard in the little room once the log is put right: Santa on his way home (what he says then: data/cabin-talk.js).
   coming: '門外好像傳來麋鹿的鈴鐺聲……聖誕老人回來了嗎？回房間看看吧。',
-  invite: '「登記簿最下面那一格，一直空著。想留下來幫忙的話，就簽上你的縮寫吧。」',
-  record: '他看了書櫃後面一眼：「……那本舊紀錄，你也翻開過了啊。那時候你還不知道我們的小秘密吧？現在再讀一次，說不定會讀出不一樣的東西。」',
 };
 // The register's newest page, once the secret is known: how many stamps each substitute has this season (four fill a row;
 // Holly's is full, and she is still on the shift log), then a blank row the visitor may sign.

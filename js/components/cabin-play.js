@@ -18,8 +18,9 @@ import { wheelGame } from './cabin-wheel.js';
 import { wishScene } from './cabin-finale.js';
 import { endingTheatre } from './cabin-ending.js';
 import { postcard } from './cabin-postcard.js';
-import { GIFTS, TASKS, canGoHome, canStay, canWish, knowsSantas, pending, points, record, santaGoes, signedUp, trueMiracle } from '../services/cabin-story.js';
-import { BELLS, CHAIR, DONE, GOING, JOBS, NOTES } from '../data/cabin-secret.js';
+import { GIFTS, TASKS, canGoHome, canStay, canWish, goal, knowsSantas, pending, points, record, santaGoes, signedUp, trueMiracle } from '../services/cabin-story.js';
+import { BELLS, CHAIR, DONE, GOING, JOBS } from '../data/cabin-secret.js';
+import { RETURN, TALK } from '../data/cabin-talk.js';
 import { ASK, GLOBE, NEXT, SANTA_ON_HOLLY, SIGNPOST, TWIST } from '../data/cabin-finale.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
@@ -68,7 +69,7 @@ function postage(parent) {
   for (const [x, y] of [[30, 114], [90, 114]]) for (let a = 0; a < 3; a++) { const c = Math.cos(a * Math.PI / 3) * 4.5, n = Math.sin(a * Math.PI / 3) * 4.5; shape('path', { d: `M${x - c} ${y - n}L${x + c} ${y + n}`, stroke: '#9fc3d8', 'stroke-width': 1.5, 'stroke-linecap': 'round' }, parent); }
 }
 
-export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {}, onSanta = () => {} } = {}) {
+export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {}, onSanta = () => {}, talk } = {}) {
   const layer = element('div', 'cabin-play', stage), caption = element('p', 'cabin-caption', layer);
   caption.setAttribute('aria-hidden', 'true'); caption.hidden = true;
   const timers = new Set(), later = (ms, run) => { const id = setTimeout(() => { timers.delete(id); run(); }, ms); timers.add(id); };
@@ -348,6 +349,39 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     done.addEventListener('click', () => { card.remove(); sound.play('remove'); say(''); });
     done.focus({ preventScroll: true });
   }
+  // Santa tapped, or his portrait in the corner: out, his note; with the secret waiting to be told, the telling; otherwise
+  // his line and the questions, answered for where the story is now (data/cabin-talk.js): a goal's two lines, then a smile.
+  const asked = new Map();
+  function chat() {
+    if (!talk) return;
+    if (!cabin.santaHome) { chairNote(); return; }
+    const story = progress.story;
+    if (story.opened && knowsSantas(story.seen) && !story.told) { tellSecret(); return; }
+    const told = story.told, said = signedUp(progress.volunteer) ? TALK.hello.partner : told ? TALK.hello.told : TALK.hello.guest;
+    const now = () => { const id = goal(progress), count = asked.get(id) ?? 0; asked.set(id, count + 1); return TALK.now[id]?.[count] ?? TALK.again; };
+    const questions = [{ text: TALK.asks.now, answer: now }, { text: TALK.asks.place, answer: () => told ? TALK.place.told : TALK.place.guest }];
+    if (story.left) questions.push({ text: TALK.asks.where, answer: () => TALK.where });
+    talk.open({ said, questions });
+  }
+  // Santa tells you the secret, once: home from the reindeer (or from his chair, already in), in the chat card a line at a
+  // time, each moved on by your reply, then the empty row in the register. Only the choice makes it told (and moves the
+  // clue book on); either way he has asked you, so the signpost knows the way home.
+  let telling = false;
+  async function tellSecret() {
+    if (!talk || telling || talk.telling) { talk?.show(); return; }
+    telling = true;
+    let opener = RETURN.chair;
+    if (!cabin.santaHome) {
+      say('門外傳來踩雪的腳步聲……');
+      if (!(await cabin.santaReturn())) { telling = false; return; }
+      onSanta('home'); opener = RETURN.door;
+    }
+    telling = false; say('');
+    const story = progress.story, lines = [[opener, RETURN.first], ...RETURN.steps];
+    if (progress.finale.unlocked && !progress.finale.twist) lines.push(RETURN.record);
+    const then = () => { invite(); story.told = true; save(); notebook.refresh(); };
+    talk.scene(lines, { line: RETURN.ask, choices: [RETURN.join, RETURN.wait].map(([text, reply]) => ({ text, reply, then })) });
+  }
   // What has been used in the room on this visit; whether the secret behind the bookcase is known. The moment enough has
   // been used for Santa to go out, the reindeer's bells ring outside the window (he goes once back in the middle).
   const used = new Set(), knows = () => knowsSantas(progress.story.seen);
@@ -364,6 +398,9 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     leave,
     // The world signpost tapped in the yard: what it says, and for a visitor who knows the secret, the way home.
     signpost,
+    // Santa tapped in the room, or his portrait in the corner; and his note, from the corner while he is out.
+    chat,
+    chairNote,
     // Arrived in the yard with Santa's letter still unread: the mailbox's flag springs up with a snap to call the visitor over.
     arrived() { if (mail.seen) return; cabin.mailCall(); later(950, () => sound.play('snap')); },
     // A line about something tapped in the village or the room; it fades on its own and never covers a game.
@@ -380,20 +417,9 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       if (heardHolly && cabin.santaHome) { heardHolly = false; later(900, () => say(SANTA_ON_HOLLY)); return; }
       // All four jobs done, he asks once what comes next.
       if (signedUp(progress.volunteer) && points(progress.volunteer) === TASKS.length && !progress.finale.asked && cabin.santaHome) { later(900, ask); return; }
-      // Once the secret is known, Santa tells you about it: home from the reindeer (or from his chair, already in), he opens
-      // the booklet's stuck pages for you; the old record opened before, he has a word about that too. Told once (kept).
-      if (story.opened && knowsSantas(story.seen) && !story.told) {
-        later(700, async () => {
-          if (!cabin.santaHome) { say('門外傳來踩雪的腳步聲……'); if (!(await cabin.santaReturn())) return; say(NOTES.back); onSanta('home'); }
-          else say(NOTES.chair);
-          story.told = true; save(); notebook.refresh();
-          later(4200, () => say(NOTES.told));
-          // And he asks you to join, in so many words.
-          later(9000, () => say(NOTES.invite));
-          if (progress.finale.unlocked && !progress.finale.twist) later(15000, () => say(NOTES.record));
-        });
-        return;
-      }
+      // Once the secret is known, Santa tells you about it (`tellSecret`): it opens his talk in the corner, which no tap elsewhere
+      // can cut short, and goes on where it was if the card was folded away.
+      if (story.opened && knowsSantas(story.seen) && !story.told) { if (talk?.telling) talk.show(); else later(700, tellSecret); return; }
       if (!santaGoes({ used: used.size, left: story.left, home: cabin.santaHome, opened: story.opened })) return;
       later(900, async () => {
         say(GOING);

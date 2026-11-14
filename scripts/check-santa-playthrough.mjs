@@ -82,7 +82,9 @@ await thing('log'); for (const mark of ['E', 'O', 'K', 'H', 'N', 'K', 'H']) { aw
 await wait(1500); await shot('log-solved'); await putBack(); await wait(2600); await note('known');
 await thing('hats'); await putBack();
 // Back in the middle of the room, Santa comes home and tells you the secret; then the register can be signed.
-await must('離開，關上書櫃'); await wait(4500); await toRoom(); await wait(14000); log.push(`told: ${(await save()).story.told}`);
+// His lines come one at a time in the chat card, each moved on by a reply; the last asks whether you will help.
+const hear = async choice => { for (let i = 0; i < 40; i++) { if (await button(choice, '.chat-ask')) return true; await wait((await button('', '.chat-ask')) ? 300 : 500); } return false; };
+await must('離開，關上書櫃'); await wait(4500); await toRoom(); await hear('我想幫忙'); await wait(600); log.push(`told: ${(await save()).story.told}`);
 await enterSecret();
 // Volunteer: J.
 await thing('register'); await page.evaluate(() => [...document.querySelectorAll('.register-letter')].find(b => b.textContent === 'J').click()); await wait(200); await must('蓋章加入'); await wait(800); await putBack();
