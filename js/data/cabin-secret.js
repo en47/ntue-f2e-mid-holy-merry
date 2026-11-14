@@ -17,8 +17,10 @@ export const MARKS = { N: ['spanner', '扳手'], K: ['sleigh', '雪橇'], H: ['s
 export const DUTY = { title: '值班須知', lines: ['一、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在交接表上簽名。', '二、同一個人不能連著值兩段（跨過午夜也一樣），要讓下一位接手。', '三、新夥伴的前五年是見習期：一季只負責一段，其他時間跟著前輩學。'], margin: '（登記簿上的加入年份，就是見習期從哪一年算起。）', stuck: '後面幾頁被雪水黏在一起，翻不開。' };
 export const LOG = {
   title: '夜班交接表', halves: ['前半夜', '後半夜'],
-  wet: '班表被雪水弄濕了。暈開的地方還看得出是什麼顏色的墨水；有幾格整個洗掉了。',
   how: '點一格，再點下面的名牌，把縮寫補回去。',
+  // The notes found around the village that the washed-out cells need, clipped on beside it (clue ids, data/cabin-clues.js).
+  files: [['care-log', '照顧紀錄'], ['barn-note', '穀倉紙條'], ['route-note', '路線筆記'], ['duty', '值班須知'], ['register-years', '登記簿']],
+  missing: '還沒找到的紀錄',
   wrong: count => `墨水乾了一點……有 ${count} 格的筆跡好像對不上。`,
   solved: '最後一格補上，墨水乾了，字一行一行回來：每一晚，都是兩個人接力飛完的。',
   erase: '擦掉',
@@ -66,7 +68,9 @@ export const NOTES = {
 // The register's newest page: the season at the top, then each one's initial, the year they joined and their stamps this
 // season (four fill a row; Holly's is full, and she joined long before anyone else), then a blank row.
 export const REGISTER = {
-  title: '登記簿　最新的一頁', season: '2026 年聖誕季', full: 4, joined: '加入',
+  title: '登記簿　最新的一頁', season: '2026 年聖誕季', year: 2026, full: 4, joined: '加入',
+  // Stamped by the year of anyone still in the first five years (the duty rules' learners).
+  learner: '見習',
   rows: [['N', 3, 2015], ['K', 2, 2016], ['H', 4, 2003], ['E', 1, 2022], ['O', 2, 2023]],
   blank: '（空白）',
   invite: '最下面還空著一格。想一起幫忙，把願望送到大家手上嗎？選一個字母當你的縮寫，蓋上章就加入了。不加入也沒關係。',

@@ -54,7 +54,7 @@ const KINDS = [
   ['.register-letter, .sack-count, .register-sign.is-quiet', 'pale'],
   ['.cabin-letter:not(.secret-card)', 'letter'],
   ['.chat-card', 'plain'],
-  ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin', 'pinned'],
+  ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin, .shift-file', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
   ['.feed-basket, .play-basket', 'wood'],
   ['.wardrobe-item[aria-pressed="true"], .bag-item[aria-pressed="true"]', 'picked'],
@@ -62,7 +62,7 @@ const KINDS = [
   ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-close, .chat-send, .books-tools button, .books-enter, .gearbox-actions button, .desk-actions button, .register-sign, .theatre-close, .notebook-close, .inspect-close', 'tag'],
   ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .theatre-again, .theatre-skip, .notebook-hint, .shift-pick, .bag-item, .bag-look, .inspect-flip, .chair-flip, .chat-ask, .from-me .chat-bubble', 'pale'],
   ['.notebook-card', 'notebook'],
-  ['.cabin-noscript, .theatre-words, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble, .bag-empty, .parcel-note', 'note'],
+  ['.cabin-noscript, .theatre-words, .reindeer-bubble, .feed-meter, .wardrobe, .cabin-explore, .play-pile, .hoist-hint, .from-santa .chat-bubble, .bag-empty, .parcel-note, .shift-read', 'note'],
 ];
 const ALL = KINDS.map(([selector]) => selector).join(', ');
 const kindOf = node => KINDS.find(([selector]) => node.matches(selector))?.[1];

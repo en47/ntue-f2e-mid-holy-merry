@@ -493,7 +493,7 @@
 @media (prefers-reduced-motion: reduce) { .volunteer-stamp, .gearbox-peg.is-ready, .gearbox-peg.is-missing, .gearbox-piece.is-jammed, .gearbox-gear.is-missing, .gearbox-crank.is-resisting, .gearbox-arm.is-resisting, .gearbox.is-running .gearbox-lamp { animation: none; } .gearbox-piece { transition: none; } }
 /* 觸控螢幕：每個按鈕至少 44px 見方，手指點得準。 */
 @media (pointer: coarse) {
-  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chair-flip, .chat-fold, .chat-close, .chat-ask, .chat-send, .desk-actions button, .books-tools button, .books-enter, .register-letter, .register-sign, .register-leave, .gearbox-actions button { min-width: 44px; min-height: 44px; }
+  .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chair-flip, .chat-fold, .chat-close, .chat-ask, .chat-send, .shift-file, .desk-actions button, .books-tools button, .books-enter, .register-letter, .register-sign, .register-leave, .gearbox-actions button { min-width: 44px; min-height: 44px; }
 }
 /* 橫拿的手機：小屋和螢幕一樣高（點進角落或屋裡時捲到剛好整個露出），衣櫃、食物籃、對話框改成右側窄欄，提示放到左上。 */
 @media (orientation: landscape) and (max-height: 500px) {
@@ -700,6 +700,21 @@ html.theatre-open { overflow: hidden; }
 .shift-pick:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 .shift-erase { color: var(--muted); font-family: var(--font-body); font-size: var(--fs-small); }
 @media (prefers-reduced-motion: reduce) { .shift-grid.is-wrong, .shift-grid.is-solved .shift-mark { animation: none; } }
+/* 看得出筆跡的格子（暈開的墨水、工作記號）一填對，墨水就乾了：暈開的墨水退淡、字定下來，之後不能再改。 */
+.shift-cell.is-dry .ink-layer:not(.shift-ring) { opacity: .3; }
+.shift-cell.is-dry .shift-ink { display: none; }
+.shift-grid:not(.is-solved) .shift-cell:not(.is-dry):not(:disabled) .shift-mark { opacity: .7; }
+@media (prefers-reduced-motion: no-preference) { .shift-cell.is-dry .shift-mark { animation: shift-dry .7s ease-out both; } }
+/* 夾在交接表下面的紀錄：找到的貼著紙條、點開來讀；還沒找到的是一張空白的紙。 */
+.shift-files { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 .5rem; }
+.shift-file { min-width: 4.8rem; min-height: 2.6rem; padding: .7rem .8rem .45rem; color: var(--ink); background: #fbf3df; border: 0; font-family: var(--font-hand); font-size: var(--fs-small); cursor: pointer; transition: translate .2s ease; }
+.shift-file:hover:not(:disabled), .shift-file[aria-pressed="true"] { translate: 0 -3px; }
+.shift-file.is-missing { opacity: .5; cursor: default; }
+.shift-file:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.shift-read { margin: 0 0 .8rem; padding: .7rem 1rem; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; background: #fbf3df; }
+.cabin[data-paper] :is(.shift-file, .shift-read) { background: transparent no-repeat 0 0 / 100% 100%; }
+/* 登記簿上加入不到五年的人，年份旁蓋一個紅色的「見習」章。 */
+.register-learner { position: relative; display: inline-grid; place-items: center; width: 3.1rem; aspect-ratio: 60 / 32; margin-left: .45rem; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-small); vertical-align: middle; rotate: -8deg; opacity: .9; }
 /* 紅繩的小鎖：黃銅鎖身、四個轉輪（點一下加一，方向鍵也行），對了鎖扣彈開。 */
 .cord-lock { position: relative; width: 8.5rem; aspect-ratio: 120 / 130; margin: .3rem auto .5rem; }
 .lock-shackle { transform-origin: 71.7% 44.6%; transition: translate .5s cubic-bezier(.3,1.6,.5,1), rotate .5s ease-out; }

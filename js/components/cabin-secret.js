@@ -8,6 +8,7 @@ import { inked } from './cabin-paper.js';
 import { paperLayer, shape } from './paper-art.js';
 import { CLUES, ENDING_KINDS, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
 import { COLOUR_NAMES, DUTY, INK, JOBS, LOG, MARKS, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
+import { NOTEBOOK } from '../data/cabin-clues.js';
 import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { polaroid } from './cabin-photo.js';
 import { showOrnament } from './cabin-ornaments.js';
@@ -207,14 +208,16 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     on(turn, 'click', () => { turn.remove(); gift('H'); sound.play('open'); element('p', 'secret-note', page, NOTES.hatGift); look(); });
   }
   // The shift log, wet: a grid of the four nights, first and second half. A cell is chosen, then a name tag below writes
-  // that initial in. Filled in, it is checked by the rules (cabin-story.js): put right, the ink comes back and it counts as
-  // read; otherwise it says only how many cells are wrong.
+  // that initial in. A cell that still shows its writer (a blot in their colour, their work mark) dries the moment the right
+  // initial goes in, and stays. Filled in, the whole is checked by the rules (cabin-story.js): put right, the ink comes back
+  // and it counts as read; otherwise it says only how many cells are wrong. The notes the washed-out cells need are clipped
+  // on underneath, the ones found so far to open and read; one not found yet is an empty clip.
   function shiftLog(page) {
     const log = story.log, solved = () => logSolved(log);
     // Santa's slip, taped on above it.
     const pin = element('p', 'shift-pin', page), plea = element('span', '', pin, solved() ? LOG.pin.thanks : cabin.santaHome ? LOG.pin.home : LOG.pin.away);
     element('span', 'shift-pin-sign', pin, LOG.pin.sign);
-    const note = element('p', 'secret-note shift-note', page, solved() ? LOG.solved : `${LOG.wet}${LOG.how}`);
+    const note = element('p', 'secret-note shift-note', page, solved() ? LOG.solved : LOG.how);
     const grid = element('div', solved() ? 'shift-grid is-solved' : 'shift-grid', page); grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', LOG.title);
     element('span', 'shift-head', grid); for (const half of LOG.halves) element('span', 'shift-head', grid, half);
     let chosen = -1;
@@ -223,17 +226,18 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       element('span', 'shift-date', grid, date);
       for (const half of [0, 1]) {
         // The blot keeps the colour of whoever really wrote there.
-        const index = night * 2 + half, state = INK[index], writer = NIGHTS[night][half + 1];
+        const index = night * 2 + half, state = INK[index], writer = NIGHTS[night][half + 1], legible = state === 'blot' || state === 'mark';
         const cell = element('button', 'shift-cell', grid); cell.type = 'button'; cell.dataset.ink = state; cells.push(cell);
         // Washed out but for a work mark: the stain, and the little mark its writer draws by their initial, its colour gone.
-        inked(cell, '0 0 80 44', ink => state === 'blot' ? blot(ink, COLOURS[writer], index * 7 + 3) : state === 'washed' ? stain(ink, index * 5 + 1) : state === 'mark' ? (stain(ink, index * 5 + 1), workMark(ink, MARKS[writer][0], 62, 30, 14, '#8a8f96')) : null);
+        inked(cell, '0 0 80 44', ink => state === 'blot' ? blot(ink, COLOURS[writer], index * 7 + 3) : state === 'washed' ? stain(ink, index * 5 + 1) : state === 'mark' ? (stain(ink, index * 5 + 1), workMark(ink, MARKS[writer][0], 60, 24, 24, '#6c7178')) : null);
         inked(cell, '0 0 80 44', ink => shape('ellipse', { cx: 40, cy: 22, rx: 34, ry: 17, fill: 'none', stroke: '#b5443c', 'stroke-width': 2, transform: 'rotate(-4 40 22)' }, ink)).classList.add('shift-ring');
         const mark = element('span', 'shift-mark', cell);
         const hint = state === 'blot' ? `暈開的${COLOUR_NAMES[writer]}色墨水` : state === 'washed' ? '整個洗掉了' : state === 'mark' ? `顏色洗掉了，只剩一個小小的${MARKS[writer][1]}記號` : '還看得清楚';
         if (state === 'blot') element('span', 'shift-ink', cell, `${COLOUR_NAMES[writer]}色`);
-        const show = () => { const value = log[index]; mark.textContent = value ? `${value}.` : ''; mark.style.color = value ? COLOURS[value] : ''; cell.setAttribute('aria-label', `${date} ${LOG.halves[half]}：${hint}${value ? `，寫著 ${value}.` : '，空著'}`); };
-        show(); cell.show = show;
-        if (index === LOG_GIVEN || solved()) { cell.disabled = true; continue; }
+        const dry = () => legible && log[index] === writer;
+        const show = () => { const value = log[index]; mark.textContent = value ? `${value}.` : ''; mark.style.color = value ? COLOURS[value] : ''; cell.classList.toggle('is-dry', dry()); cell.setAttribute('aria-label', `${date} ${LOG.halves[half]}：${hint}${value ? `，寫著 ${value}.${dry() ? '（墨水乾了）' : ''}` : '，空著'}`); };
+        show(); cell.show = show; cell.dry = dry;
+        if (index === LOG_GIVEN || solved() || dry()) { cell.disabled = true; continue; }
         cell.setAttribute('aria-pressed', 'false');
         on(cell, 'click', () => { chosen = index; sound.play('pick'); cells.forEach((each, i) => each.hasAttribute('aria-pressed') && each.setAttribute('aria-pressed', String(i === index))); });
       }
@@ -243,8 +247,10 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     const picks = element('div', 'shift-picks', page);
     const write = (mark, cell = chosen) => {
       const empty = log.findIndex((value, i) => !value && i !== LOG_GIVEN), at = cell >= 0 ? cell : empty;
-      if (at < 0) return;
+      if (at < 0 || cells[at].disabled) return;
       log[at] = mark; save(); cells[at].show(); sound.play(mark ? 'snap' : 'remove');
+      // The right initial where the writer still shows: the ink dries there and stays.
+      if (cells[at].dry()) { cells[at].disabled = true; cells[at].removeAttribute('aria-pressed'); later(250, () => sound.play('jingle')); }
       // Next, the next empty cell.
       const next = log.findIndex((value, i) => !value && i !== LOG_GIVEN);
       chosen = next; cells.forEach((each, i) => each.hasAttribute('aria-pressed') && each.setAttribute('aria-pressed', String(i === next)));
@@ -252,11 +258,22 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     };
     for (const mark of WHO) { const pick = element('button', 'shift-pick', picks, `${mark}.`); pick.type = 'button'; pick.style.color = COLOURS[mark]; pick.setAttribute('aria-label', `寫上 ${mark}.（${NAMES[mark]}）`); draggable(pick, '.shift-cell', cell => { pick.style.translate = ''; write(mark, cells.indexOf(cell)); }); on(pick, 'click', () => write(mark)); }
     const erase = element('button', 'shift-pick shift-erase', picks, LOG.erase); erase.type = 'button';
+    const files = element('div', 'shift-files', page), reading = element('p', 'shift-read', page); reading.hidden = true;
+    for (const [id, name] of LOG.files) {
+      const found = progress.clues.includes(id), file = element('button', found ? 'shift-file' : 'shift-file is-missing', files, found ? name : ''); file.type = 'button';
+      if (!found) { file.disabled = true; file.setAttribute('aria-label', LOG.missing); continue; }
+      file.setAttribute('aria-pressed', 'false');
+      on(file, 'click', () => {
+        const open = file.getAttribute('aria-pressed') !== 'true'; sound.play('pick');
+        for (const each of files.querySelectorAll('[aria-pressed]')) each.setAttribute('aria-pressed', String(each === file && open));
+        reading.hidden = !open; reading.textContent = open ? NOTEBOOK[id].text : '';
+      });
+    }
     on(erase, 'click', () => { if (chosen >= 0 && log[chosen]) { log[chosen] = ''; save(); cells[chosen].show(); sound.play('remove'); } });
     function check() {
       if (!logSolved(log)) { note.textContent = LOG.wrong(logWrong(log)); sound.play('nope'); grid.classList.remove('is-wrong'); void grid.offsetWidth; grid.classList.add('is-wrong'); return; }
       // Put right: the ink comes back a row at a time, and the log counts as read.
-      grid.classList.add('is-solved'); picks.remove(); cells.forEach(cell => { cell.disabled = true; cell.removeAttribute('aria-pressed'); });
+      grid.classList.add('is-solved'); picks.remove(); files.remove(); reading.remove(); cells.forEach(cell => { cell.disabled = true; cell.removeAttribute('aria-pressed'); });
       note.textContent = LOG.solved; plea.textContent = LOG.pin.thanks; sound.play('cheer'); learn('log');
     }
   }
@@ -343,7 +360,12 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     const row = (mark, count, year, you = false) => {
       const item = element('li', you ? 'is-you' : '', list); item.dataset.hand = you ? 'you' : mark.toLowerCase();
       element('span', 'register-mark', item, `${mark}.${you ? REGISTER.you : ''}`);
-      element('span', 'register-year', item, `${REGISTER.joined} ${year}`);
+      const joined = element('span', 'register-year', item, `${REGISTER.joined} ${year}`);
+      if (!you && REGISTER.year - year < 5) {
+        const seal = element('span', 'register-learner', joined); seal.setAttribute('aria-label', REGISTER.learner);
+        inked(seal, '0 0 60 32', ink => shape('rect', { x: 3, y: 3, width: 54, height: 26, rx: 5, fill: 'none', stroke: '#b5443c', 'stroke-width': 2.4 }, ink));
+        element('span', 'ink-words', seal, REGISTER.learner);
+      }
       const stamps = element('span', 'register-stamps', item); stamps.setAttribute('aria-label', `${count}／${REGISTER.full} 個章`);
       // Each stamp in red ink, the places still to fill as faint rings.
       inked(stamps, `0 0 ${REGISTER.full * 25} 24`, ink => { for (let i = 0; i < REGISTER.full; i++) { const cx = 12 + i * 25; if (i < count) { shape('circle', { cx, cy: 12, r: 9.5, fill: 'none', stroke: '#b5443c', 'stroke-width': 2.2 }, ink); shape('circle', { cx, cy: 12, r: 5, fill: '#b5443c' }, ink); } else shape('circle', { cx, cy: 12, r: 9.5, fill: 'none', stroke: '#d6c6a4', 'stroke-width': 1.6 }, ink); } });
