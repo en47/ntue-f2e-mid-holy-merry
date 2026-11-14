@@ -18,8 +18,7 @@ export const DUTY = { title: '值班須知', lines: ['一、每一晚分前半�
 export const LOG = {
   title: '夜班交接表', halves: ['前半夜', '後半夜'],
   how: '點一格，再點下面的名牌，把縮寫補回去。',
-  // The notes found around the village that the washed-out cells need, clipped on beside it (clue ids, data/cabin-clues.js).
-  files: [['care-log', '照顧紀錄'], ['barn-note', '穀倉紙條'], ['route-note', '路線筆記'], ['duty', '值班須知'], ['register-years', '登記簿']],
+  // A note it needs, clipped on beside it (LOG_FILES), not found yet.
   missing: '還沒找到的紀錄',
   wrong: count => `墨水乾了一點……有 ${count} 格的筆跡好像對不上。`,
   solved: '最後一格補上，墨水乾了，字一行一行回來：每一晚，都是兩個人接力飛完的。',
@@ -88,3 +87,13 @@ export const JOBS = {
   wheel: ['修摩天輪', '遊樂場的摩天輪停了，去看看哪裡壞了。'],
 };
 export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿上多了一個章（願望點數 ${count}／${of}）。`;
+// The notes the shift log's washed-out cells need, clipped on beside it once found (clue ids, data/cabin-clues.js): each as
+// it looks, line by line, in the hand that wrote it, so the ink says whose it is (an initial: that substitute's colour,
+// named too; none: plain ink).
+export const LOG_FILES = [
+  ['care-log', '照顧紀錄', [['麋鹿的照顧紀錄，往前翻的一行：', ''], ['12/21 後半夜，地衣餵過了。—— O.', 'O']]],
+  ['barn-note', '穀倉紙條', [['12/24 夜班：禮物已分類。壁爐記得添柴。下一位辛苦了！', 'K'], ['收到 ✓', 'H']]],
+  ['route-note', '路線筆記', [['平安夜路線的背面：', ''], ['收到，後半段換我飛。—— H.', 'H']]],
+  ['duty', '值班須知', DUTY.lines.map(line => [line, ''])],
+  ['register-years', '登記簿', [[REGISTER.season, ''], ...REGISTER.rows.map(([mark, , year]) => [`${mark}.　${REGISTER.joined} ${year}${REGISTER.year - year < 5 ? `（${REGISTER.learner}）` : ''}`, mark])]],
+];

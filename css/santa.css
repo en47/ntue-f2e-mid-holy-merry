@@ -712,6 +712,9 @@ html.theatre-open { overflow: hidden; }
 .shift-file.is-missing { opacity: .5; cursor: default; }
 .shift-file:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 .shift-read { margin: 0 0 .8rem; padding: .7rem 1rem; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; background: #fbf3df; }
+.shift-read-line { display: block; font-weight: 700; }
+.shift-read-line.is-plain { color: var(--muted); font-weight: 400; }
+.shift-read-line .shift-ink { position: static; margin-left: .5rem; font-weight: 400; }
 .cabin[data-paper] :is(.shift-file, .shift-read) { background: transparent no-repeat 0 0 / 100% 100%; }
 /* 登記簿上加入不到五年的人，年份旁蓋一個紅色的「見習」章。 */
 .register-learner { position: relative; display: inline-grid; place-items: center; width: 3.1rem; aspect-ratio: 60 / 32; margin-left: .45rem; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-small); vertical-align: middle; rotate: -8deg; opacity: .9; }

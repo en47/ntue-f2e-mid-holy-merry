@@ -7,8 +7,7 @@ import { SUBSTITUTES, workMark } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { paperLayer, shape } from './paper-art.js';
 import { CLUES, ENDING_KINDS, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
-import { COLOUR_NAMES, DUTY, INK, JOBS, LOG, MARKS, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
-import { NOTEBOOK } from '../data/cabin-clues.js';
+import { COLOUR_NAMES, DUTY, INK, JOBS, LOG, LOG_FILES, MARKS, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
 import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { polaroid } from './cabin-photo.js';
 import { showOrnament } from './cabin-ornaments.js';
@@ -211,7 +210,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   // that initial in. A cell that still shows its writer (a blot in their colour, their work mark) dries the moment the right
   // initial goes in, and stays. Filled in, the whole is checked by the rules (cabin-story.js): put right, the ink comes back
   // and it counts as read; otherwise it says only how many cells are wrong. The notes the washed-out cells need are clipped
-  // on underneath, the ones found so far to open and read; one not found yet is an empty clip.
+  // on underneath, the ones found so far to open and read as they look, each line in its writer's ink (and its colour
+  // named, as the blots are); one not found yet is a blank slip.
   function shiftLog(page) {
     const log = story.log, solved = () => logSolved(log);
     // Santa's slip, taped on above it.
@@ -259,14 +259,18 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     for (const mark of WHO) { const pick = element('button', 'shift-pick', picks, `${mark}.`); pick.type = 'button'; pick.style.color = COLOURS[mark]; pick.setAttribute('aria-label', `寫上 ${mark}.（${NAMES[mark]}）`); draggable(pick, '.shift-cell', cell => { pick.style.translate = ''; write(mark, cells.indexOf(cell)); }); on(pick, 'click', () => write(mark)); }
     const erase = element('button', 'shift-pick shift-erase', picks, LOG.erase); erase.type = 'button';
     const files = element('div', 'shift-files', page), reading = element('p', 'shift-read', page); reading.hidden = true;
-    for (const [id, name] of LOG.files) {
+    for (const [id, name, lines] of LOG_FILES) {
       const found = progress.clues.includes(id), file = element('button', found ? 'shift-file' : 'shift-file is-missing', files, found ? name : ''); file.type = 'button';
       if (!found) { file.disabled = true; file.setAttribute('aria-label', LOG.missing); continue; }
       file.setAttribute('aria-pressed', 'false');
       on(file, 'click', () => {
         const open = file.getAttribute('aria-pressed') !== 'true'; sound.play('pick');
         for (const each of files.querySelectorAll('[aria-pressed]')) each.setAttribute('aria-pressed', String(each === file && open));
-        reading.hidden = !open; reading.textContent = open ? NOTEBOOK[id].text : '';
+        reading.hidden = !open; reading.replaceChildren();
+        if (open) for (const [text, who] of lines) {
+          const line = element('span', who ? 'shift-read-line' : 'shift-read-line is-plain', reading, text);
+          if (who) { line.style.color = COLOURS[who]; element('span', 'shift-ink', line, `${COLOUR_NAMES[who]}色`); }
+        }
       });
     }
     on(erase, 'click', () => { if (chosen >= 0 && log[chosen]) { log[chosen] = ''; save(); cells[chosen].show(); sound.play('remove'); } });
