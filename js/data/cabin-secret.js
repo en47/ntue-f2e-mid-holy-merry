@@ -5,7 +5,8 @@ export const NAMES = { N: '尼爾斯', K: '克莉絲', H: '荷莉', E: '艾洛',
 // each night in turn, is a blot still in its writer's colour, washed out altogether, washed out but for the little work
 // mark its writer draws by their initial, or still clear. Three ways to put it right (docs/SANTA-PUZZLE-DESIGN.md §5):
 // looked at (a colour, a mark, the clear cell), matched with notes found elsewhere (the care log, the barn note, the route
-// note), and the one left by the duty rules and the join years in the register (12/22, second half). The colours are the
+// note), and the one left by the duty rules, the join years in the register and H.'s word on the route note that she
+// slept that night (12/22, second half). The colours are the
 // name tags' (cabin-art.js SUBSTITUTES), and their names are said too, for anyone who cannot tell them apart.
 export const INK = ['blot', 'washed', 'clear', 'washed', 'blot', 'mark', 'washed', 'washed'];
 export const COLOUR_NAMES = { N: '深紅', K: '藍', H: '綠', E: '紫', O: '金' };
@@ -14,7 +15,7 @@ export const COLOUR_NAMES = { N: '深紅', K: '藍', H: '綠', E: '紫', O: '金
 export const MARKS = { N: ['spanner', '扳手'], K: ['sleigh', '雪橇'], H: ['star', '星星'], E: ['snowflake', '雪花'], O: ['envelope', '信封'] };
 // The booklet on the desk: its first page, the duty rules, can be read from the start; the pages after are stuck together
 // with snowmelt until Santa opens them for you (the rules for substitutes, below). Neither page says who they are for.
-export const DUTY = { title: '值班須知', lines: ['一、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在交接表上簽名。', '二、同一個人不能連著值兩段（跨過午夜也一樣），要讓下一位接手。', '三、新夥伴的前五年是見習期：一季只負責一段，其他時間跟著前輩學。'], margin: '（登記簿上的加入年份，就是見習期從哪一年算起。）', stuck: '後面幾頁被雪水黏在一起，翻不開。' };
+export const DUTY = { title: '值班須知', lines: ['一、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在交接表上簽名。', '二、同一個人不能連著值兩段，要讓下一位接手：前半夜接後半夜不行，後半夜接下一晚的前半夜也不行。', '三、新夥伴的前五年是見習期：一季只負責一段，其他時間跟著前輩學。'], margin: '（登記簿上的加入年份，就是見習期從哪一年算起。）', stuck: '後面幾頁被雪水黏在一起，翻不開。' };
 export const LOG = {
   title: '夜班交接表', halves: ['前半夜', '後半夜'],
   how: '點一格，再點下面的名牌，把縮寫補回去。',
@@ -93,7 +94,7 @@ export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿
 export const LOG_FILES = [
   ['care-log', '照顧紀錄', [['麋鹿的照顧紀錄，往前翻的一行：', ''], ['12/21 後半夜，地衣餵過了。—— O.', 'O']]],
   ['barn-note', '穀倉紙條', [['12/24 夜班：禮物已分類。壁爐記得添柴。下一位辛苦了！', 'K'], ['收到 ✓', 'H']]],
-  ['route-note', '路線筆記', [['平安夜路線的背面：', ''], ['收到，後半段換我飛。—— H.', 'H']]],
+  ['route-note', '路線筆記', [['平安夜路線的背面：', ''], ['收到，扣環修好了。12/23 前半夜換我飛，12/22 晚上我先睡飽。—— H.', 'H']]],
   ['duty', '值班須知', DUTY.lines.map(line => [line, ''])],
   ['register-years', '登記簿', [[REGISTER.season, ''], ...REGISTER.rows.map(([mark, , year]) => [`${mark}.　${REGISTER.joined} ${year}${REGISTER.year - year < 5 ? `（${REGISTER.learner}）` : ''}`, mark])]],
 ];
