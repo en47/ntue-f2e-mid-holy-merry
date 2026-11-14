@@ -709,7 +709,8 @@ html.theatre-open { overflow: hidden; }
 .shift-files { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 .5rem; }
 .shift-file { min-width: 4.8rem; min-height: 2.6rem; padding: .7rem .8rem .45rem; color: var(--ink); background: #fbf3df; border: 0; font-family: var(--font-hand); font-size: var(--fs-small); cursor: pointer; transition: translate .2s ease; }
 .shift-file:hover:not(:disabled), .shift-file[aria-pressed="true"] { translate: 0 -3px; }
-.shift-file.is-missing { opacity: .5; cursor: default; }
+.shift-file.is-missing { color: var(--muted); cursor: default; }
+.shift-file-where { display: block; font-size: var(--fs-small); opacity: .8; }
 .shift-file:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 .shift-read { margin: 0 0 .8rem; padding: .7rem 1rem; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; background: #fbf3df; }
 .shift-read-line { display: block; font-weight: 700; }

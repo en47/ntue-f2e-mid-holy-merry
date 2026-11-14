@@ -6,6 +6,7 @@ import { ITEM_ART } from './cabin-items.js';
 import { SUBSTITUTES, workMark } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { paperLayer, shape } from './paper-art.js';
+import { NOTEBOOK } from '../data/cabin-clues.js';
 import { CLUES, ENDING_KINDS, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
 import { COLOUR_NAMES, DUTY, INK, JOBS, LOG, LOG_FILES, MARKS, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
 import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
@@ -260,8 +261,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     const erase = element('button', 'shift-pick shift-erase', picks, LOG.erase); erase.type = 'button';
     const files = element('div', 'shift-files', page), reading = element('p', 'shift-read', page); reading.hidden = true;
     for (const [id, name, lines] of LOG_FILES) {
-      const found = progress.clues.includes(id), file = element('button', found ? 'shift-file' : 'shift-file is-missing', files, found ? name : ''); file.type = 'button';
-      if (!found) { file.disabled = true; file.setAttribute('aria-label', LOG.missing); continue; }
+      const found = progress.clues.includes(id), file = element('button', found ? 'shift-file' : 'shift-file is-missing', files, name); file.type = 'button';
+      if (!found) { file.disabled = true; element('span', 'shift-file-where', file, LOG.missing(NOTEBOOK[id].place)); continue; }
       file.setAttribute('aria-pressed', 'false');
       on(file, 'click', () => {
         const open = file.getAttribute('aria-pressed') !== 'true'; sound.play('pick');

@@ -9,6 +9,8 @@ import { MEALS, eat, full, mealsToday } from '../services/cabin-progress.js';
 import { FEED_ORDER, feedsNext } from '../services/cabin-story.js';
 import { FEED } from '../data/cabin-jobs.js';
 
+// The care log on his fence: read once the key is found (and again whenever the trough is tapped after).
+const CARE_LOG = '柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」往前翻，還有一行金色的字：「12/21 後半夜，地衣餵過了。—— O.」';
 const FOODS = [['oats', '北極燕麥餅'], ['carrot', '胡蘿蔔'], ['lichen', '地衣'], ['gingerbread', '薑餅']];
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
 const centre = rect => ({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
@@ -55,16 +57,18 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
   // Brushing the hay aside where the gold shows: the little key, once.
   on(trough, 'click', () => {
     if (!fed()) { say('餵食槽裡堆著乾草。麋鹿聞了聞，好像在等什麼更好吃的。'); return; }
-    if (bag.ever('key')) { say('餵食槽裡的乾草被翻得亂七八糟。'); return; }
+    if (bag.ever('key')) { say(`餵食槽裡的乾草被翻得亂七八糟。${CARE_LOG}`); clue('care-log'); return; }
     sound.play('remove'); cabin.repaint('trough', { eaten: true, taken: true }); glint.hidden = true;
     bag.give('key', local(glint.getBoundingClientRect()));
-    later(2600, () => { clue('care-log'); say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」往前翻，還有一行金色的字：「12/21 後半夜，地衣餵過了。—— O.」'); });
+    clue('care-log'); later(2600, () => say(CARE_LOG));
   });
   // He may step aside as the corner opens (for the sleigh, cabin-sleigh.js): his mouth is followed until he stands still.
   layout(); later(600, layout); later(1300, layout); later(3200, layout);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
   const done = () => { events.abort(); clearTimeout(hush); watch.disconnect(); forget.forEach(each => each()); cabin.reindeerLook(null); cabin.reindeerAct(null); };
 
+  // The key found before the log was read (a tap elsewhere used to cut it short): the log is read on coming back.
+  if (bag.ever('key') && clue('care-log')) later(2600, () => say(CARE_LOG));
   let job = wants(), served = [];
   if (full(progress) && !job) {
     say(bag.holds('lichen') ? '麋鹿今天已經吃飽了……不過聞到你口袋裡的味道，牠回頭看了看餵食槽。' : '麋鹿今天已經吃飽了，明天再來餵牠吧。');
@@ -160,7 +164,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (kind === 'lichen') {
       cabin.reindeerAct('happy'); sound.play('happy'); later(1800, () => { cabin.reindeerAct('chew'); sound.play('chew'); });
       burst(mouth, 'heart', 3); speak('是地衣！我最愛吃這個！'); onTask();
-      later(1200, () => { say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」往前翻，還有一行金色的字：「12/21 後半夜，地衣餵過了。—— O.」'); clue('care-log'); });
+      clue('care-log'); later(1200, () => say(CARE_LOG));
     } else {
       cabin.reindeerAct('chew'); sound.play('chew'); burst(mouth, 'heart', 1); speak(['喀滋喀滋！', '好甜的胡蘿蔔！', '再一根好不好？'][eaten % 3]);
     }
