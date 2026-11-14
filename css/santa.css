@@ -365,12 +365,13 @@
 .register-rows .is-you .register-mark { color: var(--red); }
 .register-stamps { position: relative; width: 6rem; aspect-ratio: 100 / 24; }
 .register-heading { margin: .2rem 0 .4rem; font-family: var(--font-hand); font-size: var(--fs-body); }
-.register-jobs { display: grid; gap: .45rem; margin: 0 0 .9rem; padding: 0; list-style: none; font-size: var(--fs-small); }
-.register-jobs li { display: grid; gap: .1rem; padding-left: 2rem; position: relative; }
+.register-jobs, .notebook-jobs { display: grid; gap: .45rem; margin: 0 0 .9rem; padding: 0; list-style: none; font-size: var(--fs-small); }
+.notebook-jobs { margin: .3rem 0 0; line-height: 1.7; }
+:is(.register-jobs, .notebook-jobs) li { display: grid; gap: .1rem; padding-left: 2rem; position: relative; }
 .job-box { position: absolute; left: 0; top: .05rem; width: 1.5rem; aspect-ratio: 1; display: grid; place-items: center; color: var(--cream); border: 2px solid #d9c9a8; border-radius: 4px; font-size: var(--fs-small); line-height: 1; }
-.register-jobs .is-done .job-box { background: #b5544c; border-color: #b5544c; }
+:is(.register-jobs, .notebook-jobs) .is-done .job-box { background: #b5544c; border-color: #b5544c; }
 .cabin[data-paper] .job-box { padding-bottom: 3px; background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border: 0; border-radius: 0; }
-.register-jobs .is-done strong { text-decoration: line-through #b5544c 2px; }
+:is(.register-jobs, .notebook-jobs) .is-done strong { text-decoration: line-through #b5544c 2px; }
 .register-letters { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr)); gap: .3rem; margin: 0 0 .8rem; }
 .register-letter { aspect-ratio: 1; padding: 0; color: #5b3a2c; background: #f4ead4; border: 2px solid #e3d2b0; border-radius: 8px; font-family: var(--font-hand); font-size: var(--fs-body); }
 .register-letter[aria-pressed="true"] { color: var(--cream); background: var(--red); border-color: var(--red-dark); }
