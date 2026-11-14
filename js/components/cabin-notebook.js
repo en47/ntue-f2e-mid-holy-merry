@@ -38,7 +38,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
   paperLayer(button, '0 0 48 56', 'notebook-icon', cover, PAPER);
   const dot = element('span', 'notebook-new', button); dot.hidden = true;
   paperLayer(dot, '0 0 20 20', '', paper => shape('circle', { cx: 10, cy: 10, r: 7, fill: '#b5443c' }, paper), { paper: { scale: .15, grain: .3, shadow: .3 }, eager: true });
-  let card = null, fresh = new Set();
+  let card = null, fresh = new Set(), ticked = new Set();
   const show = () => { button.hidden = !(progress.clues.length || progress.story.left); };
   // When the goal moves on, the book only hops and shows its red dot: nothing is said (what to do now is written inside).
   let goalNow = goal(progress);
@@ -55,6 +55,12 @@ export function mountNotebook(stage, { progress, save, sound }) {
     sound.play('pick'); if (card) render();
     return true;
   }
+  // A job done: its box is ticked in the book (stamped in as the book next opens), and the book hops.
+  function tick(task) {
+    ticked.add(task); dot.hidden = false;
+    button.classList.remove('is-new'); void button.offsetWidth; button.classList.add('is-new');
+    if (card) render();
+  }
   function render() {
     const body = card.querySelector('.notebook-body'); body.replaceChildren();
     element('h3', 'notebook-title', body, '線索本');
@@ -64,7 +70,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
       element('h4', 'notebook-goal', work, `替身工作：完成 ${points(progress.volunteer)}／${TASKS.length}`);
       const jobs = element('ul', 'notebook-jobs', work);
       for (const task of TASKS) {
-        const done = tasks.includes(task), item = element('li', done ? 'is-done' : '', jobs);
+        const done = tasks.includes(task), item = element('li', done ? `is-done${ticked.has(task) ? ' is-fresh' : ''}` : '', jobs);
         element('span', 'job-box', item, done ? '✓' : '').setAttribute('aria-hidden', 'true'); element('span', 'sr-only', item, done ? '已完成：' : '還沒做：');
         element('strong', '', item, JOBS[task][0]); element('span', '', item, JOBS[task][1]);
       }
@@ -132,11 +138,11 @@ export function mountNotebook(stage, { progress, save, sound }) {
   }
   function close() {
     if (!card) return;
-    card.remove(); card = null; fresh = new Set(); sound.play('remove');
+    card.remove(); card = null; fresh = new Set(); ticked = new Set(); sound.play('remove');
     button.setAttribute('aria-expanded', 'false'); button.focus({ preventScroll: true });
   }
   button.setAttribute('aria-expanded', 'false');
   button.addEventListener('click', () => (card ? close() : open()));
   show();
-  return { add, check, refresh: show, close, destroy() { card?.remove(); button.remove(); } };
+  return { add, tick, check, refresh: show, close, destroy() { card?.remove(); button.remove(); } };
 }

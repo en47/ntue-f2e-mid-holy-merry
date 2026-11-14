@@ -116,9 +116,9 @@ check((await saved()).finale.endings.join() === 'B' && (await saved()).finale.tr
 // All four jobs and the second twist understood: Santa asks once; the early shift confirmed; C told true.
 const four = { ...base, volunteer: { mark: 'J', tasks: ['wheel', 'hay', 'lichen', 'letters'] }, desk: { sorted: true }, finale: { invited: true, unlocked: true, twist: true } };
 await load(four); await spot('inside'); await wait(1500);
-check(await exists('.ask-card') && (await text('.ask-card')).includes('你的工作已經完成了'), '四件工作都做完：回到房間中間，聖誕老人問一次'); await shot('ask');
-await must('自願留下'); check((await caption()).includes('早班') && (await saved()).finale.asked && !(await saved()).finale.endings?.length, '選「自願留下」：只說去交接表簽名，不直接結束');
-await load(await saved()); await spot('inside'); await wait(1800); check(!(await exists('.ask-card')), '重新整理後再回房間：不再問');
+check(await exists('.cabin-chat:not(.is-folded)') && (await text('.chat-log')).includes('你的工作已經完成了') && (await text('.chat-asks')).includes('自願留下'), '四件工作都做完：回到房間中間，聖誕老人在對話框問一次，回答是禮物吊牌'); await shot('ask');
+await must('自願留下'); check((await text('.chat-log')).includes('早班') && (await saved()).finale.asked && !(await saved()).finale.endings?.length, '選「自願留下」：只說去交接表簽名，不直接結束');
+await load(await saved()); await spot('inside'); await wait(1800); check(!(await exists('.cabin-chat:not(.is-folded)')), '重新整理後再回房間：不再問');
 await enter(); await thing('log');
 await must('簽上早班'); check((await text('.secret-card')).includes('確定要留下來嗎'), '簽上早班：先問一次');
 await must('再想想'); check(!(await saved()).finale.stayed, '再想想：還沒簽');

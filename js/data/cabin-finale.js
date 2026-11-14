@@ -85,7 +85,7 @@ export const HOLLY = {
   sign: '—— H.',
 };
 export const SEEN = '看過的結局';
-// After a stamp, where the story goes next (by how many stamps there are), and what Santa says once the old page is known.
-export const NEXT = { 2: '兩個章了。再一個章，就能在登記簿許一個願望。', 3: '三個章了！回登記簿看看，可以許一個願望。', 4: '四件工作都做完了。小房間的班表上，12/25 早班還空著。' };
+// What Santa has to say once the old page is known: his portrait in the corner calls you over, and it is the first thing
+// he says when you come (nothing pops up after a stamp to say where to go: the clue book hops, and he says it when asked).
 export const SANTA_ON_HOLLY = '聖誕老人看著你，笑了笑：「你讀了荷莉的紀錄了吧。她呀，是我們這裡最可靠的人。」';
 export const GLOBE = '雪慢慢落定了。底座刻著「H. · 2003」——荷莉的願望實現的那一年。';

@@ -136,7 +136,7 @@ await wait(2600); await shot('snowman-gift'); await closeCard('.piece-card');
 // Back in: the music box's drawer (N), the cord's lock and the old page, the smallest hat (H).
 await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(6000);
 // All four jobs done, back in the middle of the room: Santa asks, once, what comes next.
-await spot('inside', 7000); log.push(`asked: ${await page.evaluate(() => document.querySelector('.ask-card')?.textContent.slice(0, 30) ?? 'no')}`); await must('繼續探索'); await wait(500); await note('explore');
+await spot('inside', 7000); log.push(`asked: ${await page.evaluate(() => document.querySelector('.cabin-chat:not(.is-folded) .chat-log')?.textContent.slice(0, 30) ?? 'no')}`); await must('繼續探索'); await wait(500); await note('explore');
 await spot('musicbox');
 await use('pin', '.musicbox-drawer'); await wait(1900);
 for (const m of ['E', 'O', 'N', 'K', 'H']) { await page.evaluate(m => [...document.querySelectorAll('.comb-tine')].find(b => b.textContent === `${m}.`).click(), m); await wait(260); }

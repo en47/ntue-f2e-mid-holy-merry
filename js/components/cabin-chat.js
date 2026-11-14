@@ -3,7 +3,8 @@
 // (his stationery with a garland across the top, cabin-paper.js) with his lines on the left and yours on the right, like a
 // chat, and a few replies to give underneath, as gift tags; what he says is chosen by
 // cabin-play.js from data/cabin-talk.js, never here. At a turn in the story the card tells a scene instead: one line at a
-// time, each moved on by your reply, ending in a choice. While he is out the corner shows the note he left on his chair.
+// time, each moved on by your reply, ending in a choice. While he is out the corner shows the note he left on his chair;
+// when he has something to say, his portrait hops now and then with a little speech bubble beside it (`call`).
 // The writing line stays in the card, hidden and switched off, for a reply written by an AI later.
 import { bow } from './cabin-paper.js';
 import { leaf, paperLayer, shape } from './paper-art.js';
@@ -34,6 +35,11 @@ function wreathed(parent) {
   portrait(shape('g', { transform: 'translate(19 18) scale(.62)' }, parent));
   bow(parent, 50, 86, .55);
 }
+// A little speech bubble with three dots, its tail towards the portrait: he has something to say.
+function dots(parent) {
+  shape('path', { d: 'M8 2H28Q34 2 34 8V16Q34 22 28 22H27L37 29 21 22H8Q2 22 2 16V8Q2 2 8 2Z', fill: '#fffaf0' }, parent);
+  for (const x of [11, 18, 25]) shape('circle', { cx: x, cy: 12, r: 2.6, fill: '#b5443c' }, parent);
+}
 // The note left on his chair, folded once: three lines of his hand and an S.
 function chairSlip(parent) {
   shape('path', { d: 'M18 26L80 18 86 76 24 84Z', fill: '#fbf3df' }, parent);
@@ -48,6 +54,7 @@ export function mountCabinChat(stage, { onOpen = () => {}, onNote = () => {} } =
   const fold = element('button', 'chat-fold', panel); fold.type = 'button'; fold.setAttribute('aria-expanded', 'false'); fold.setAttribute('aria-label', '和聖誕老人說話');
   paperLayer(element('span', 'chat-avatar', fold), '0 0 100 100', '', wreathed, PAPER);
   const slip = element('span', 'chat-avatar chat-slip', fold); paperLayer(slip, '0 0 100 100', '', chairSlip, PAPER); slip.hidden = true;
+  paperLayer(element('span', 'chat-call', fold), '0 0 40 32', '', dots, PAPER);
   const card = element('div', 'chat-card', panel);
   const head = element('header', 'chat-head', card);
   paperLayer(element('span', 'chat-avatar', head), '0 0 100 100', '', wreathed, PAPER);
@@ -60,7 +67,8 @@ export function mountCabinChat(stage, { onOpen = () => {}, onNote = () => {} } =
   const input = element('input', '', form); input.id = 'cabin-chat-input'; input.disabled = true;
   const send = element('button', 'chat-send', form, '寄出'); send.type = 'submit'; send.disabled = true;
   form.addEventListener('submit', event => event.preventDefault());
-  let away = false, scene = null;
+  let away = false, scene = null, calling = false;
+  const describe = () => fold.setAttribute('aria-label', away ? '看聖誕老人留下的紙條' : calling ? '聖誕老人有話想跟你說' : '和聖誕老人說話');
 
   // A line in the card, his or yours (the bubble's paper and tail tell them apart); only the last few stay.
   function line(text, mine = false) {
@@ -112,12 +120,13 @@ export function mountCabinChat(stage, { onOpen = () => {}, onNote = () => {} } =
     // A turn in the story: `lines` [[his line, your reply]], then `last` { line, choices: [{ text, reply, then }] }.
     scene(lines, last) { scene = { lines, last, at: 0 }; log.replaceChildren(); step(); show(); },
     get telling() { return Boolean(scene); },
+    // He has something to say: the portrait calls until he has said it.
+    call(on) { calling = on; panel.classList.toggle('is-calling', on); describe(); },
     show,
     destroy() { panel.remove(); },
     // While Santa is out the corner shows his note instead, and an open card folds away.
     setAway(out) {
-      away = out; slip.hidden = !out; fold.querySelector('.chat-avatar:not(.chat-slip)').hidden = out;
-      fold.setAttribute('aria-label', out ? '看聖誕老人留下的紙條' : '和聖誕老人說話');
+      away = out; slip.hidden = !out; fold.querySelector('.chat-avatar:not(.chat-slip)').hidden = out; describe();
       if (out && !scene) hide();
     },
   };

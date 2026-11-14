@@ -3,7 +3,7 @@
 // open at a time; leaving one clears its props, timers and listeners. The bigger games live in their own files.
 import { paperLayer, shape } from './paper-art.js';
 import { createSound } from './cabin-sound.js';
-import { perforated } from './cabin-paper.js';
+import { inked, perforated } from './cabin-paper.js';
 import { snowmanGame } from './cabin-snowman.js';
 import { feedGame } from './cabin-feed.js';
 import { pulleyGame } from './cabin-pulley.js';
@@ -21,7 +21,7 @@ import { postcard } from './cabin-postcard.js';
 import { GIFTS, TASKS, canGoHome, canStay, canWish, goal, knowsSantas, pending, points, record, santaGoes, signedUp, trueMiracle } from '../services/cabin-story.js';
 import { BELLS, CHAIR, DONE, GOING, JOBS } from '../data/cabin-secret.js';
 import { RETURN, TALK } from '../data/cabin-talk.js';
-import { ASK, GLOBE, NEXT, SANTA_ON_HOLLY, SIGNPOST, TWIST } from '../data/cabin-finale.js';
+import { ASK, GLOBE, SANTA_ON_HOLLY, SIGNPOST, TWIST } from '../data/cabin-finale.js';
 import { PLACES, known } from './cabin-wardrobe.js';
 import { readProgress, writeProgress } from '../services/cabin-progress.js';
 import { mountNotebook } from './cabin-notebook.js';
@@ -67,6 +67,13 @@ function postage(parent) {
   shape('circle', { cx: 88, cy: 34, r: 10.5, fill: 'none', stroke: '#b5443c', 'stroke-width': 1, opacity: .45 }, parent);
   for (const y of [27, 33, 39]) shape('path', { d: `M66 ${y}q4 -3 8 0t8 0t8 0t8 0t8 0`, fill: 'none', stroke: '#b5443c', 'stroke-width': 1.3, opacity: .38 }, parent);
   for (const [x, y] of [[30, 114], [90, 114]]) for (let a = 0; a < 3; a++) { const c = Math.cos(a * Math.PI / 3) * 4.5, n = Math.sin(a * Math.PI / 3) * 4.5; shape('path', { d: `M${x - c} ${y - n}L${x + c} ${y + n}`, stroke: '#9fc3d8', 'stroke-width': 1.5, 'stroke-linecap': 'round' }, parent); }
+}
+// Today's postmark, inked over the stamp a moment after it lands, 120 × 80: two rings round a star, and the wavy lines.
+function postmark(ink) {
+  for (const [r, width] of [[30, 3.2], [22, 1.6]]) shape('circle', { cx: 80, cy: 40, r, fill: 'none', stroke: '#b5443c', 'stroke-width': width }, ink);
+  const points = Array.from({ length: 10 }, (_, i) => { const r = i % 2 ? 4 : 9.5, a = -Math.PI / 2 + i * Math.PI / 5; return `${(80 + Math.cos(a) * r).toFixed(1)} ${(40 + Math.sin(a) * r).toFixed(1)}`; });
+  shape('path', { d: `M${points.join('L')}Z`, fill: '#b5443c' }, ink);
+  for (const y of [28, 40, 52]) shape('path', { d: `M2 ${y}q6 -5 12 0t12 0t12 0t10 0`, fill: 'none', stroke: '#b5443c', 'stroke-width': 2.2, 'stroke-linecap': 'round' }, ink);
 }
 
 export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {}, onSanta = () => {}, talk } = {}) {
@@ -232,16 +239,18 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   function quit() { progress.volunteer.mark = ''; save(); cabin.wheelBroken(false); }
   function task(id) {
     if (!record(progress.volunteer, id)) return;
-    save(); later(1500, () => {
-      sound.play('thud'); say(DONE(JOBS[id][0], points(progress.volunteer), TASKS.length));
-      // Where the story goes next, a moment later.
-      const next = NEXT[points(progress.volunteer)]; if (next) later(3600, () => say(next));
-      // A postage stamp lands on the corner of the scene: the job done, a gold star for each point.
+    save(); notebook.tick(id); later(1500, () => {
+      const count = points(progress.volunteer);
+      sound.play('thud'); say(DONE(JOBS[id][0], count, TASKS.length));
+      // A postage stamp lands on the corner of the scene, today's postmark is pressed onto it, and this job's gold star pops
+      // in beside the ones already earned. Where to go next is left to the clue book (it has hopped) and to Santa.
       const stamp = element('div', 'volunteer-stamp', layer); stamp.setAttribute('aria-hidden', 'true'); paperLayer(stamp, '0 0 120 144', '', postage, STAMP);
+      inked(element('span', 'stamp-postmark', stamp), '0 0 120 80', postmark);
       const words = element('div', 'stamp-words', stamp);
       element('span', 'stamp-kicker', words).textContent = '替身工作'; element('span', 'stamp-done', words).textContent = '完成！';
       const stars = element('span', 'stamp-stars', words);
-      for (let i = 0; i < TASKS.length; i++) element('span', i < points(progress.volunteer) ? 'is-on' : '', stars).textContent = '★';
+      for (let i = 0; i < TASKS.length; i++) element('span', i < count - 1 ? 'is-on' : i === count - 1 ? 'is-on is-new' : '', stars).textContent = '★';
+      later(520, () => sound.play('snap')); later(950, () => sound.play('pick'));
       later(3700, () => stamp.remove());
     });
   }
@@ -299,19 +308,13 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     // It opens under the finger that tapped the signpost: the click a touch sends after it must not press what is now there.
     node.inert = true; setTimeout(() => { node.inert = false; if (node.isConnected) (node.querySelector('.register-sign') ?? done).focus({ preventScroll: true }); }, 400);
   }
-  // All four jobs done, back in the middle of the room: Santa asks once what comes next (kept, never asked again). Each
-  // answer only says where to go; nothing ends until it is chosen at the register or on the shift log.
+  // All four jobs done, back in the middle of the room: Santa asks once what comes next, in his talk in the corner (kept,
+  // never asked again), the answers as gift tags. Each only says where to go; nothing ends until it is chosen at the
+  // register or on the shift log.
   function ask() {
-    if (layer.dataset.game) return;
+    if (layer.dataset.game || !talk || talk.telling) return;
     finale.asked = true; save(); sound.play('open');
-    const node = element('article', 'cabin-letter ask-card', layer); node.setAttribute('aria-label', '聖誕老人的問題');
-    element('p', 'piece-words', node).textContent = ASK.question;
-    const row = element('div', 'signpost-actions', node);
-    for (const [id, label, reply] of ASK.options) {
-      const choice = element('button', 'register-sign', row); choice.type = 'button'; choice.textContent = label;
-      choice.addEventListener('click', () => { node.remove(); sound.play('pick'); say(id === 'wish' && finale.wish ? ASK.wished : reply); });
-    }
-    row.firstElementChild.focus({ preventScroll: true });
+    talk.scene([], { line: ASK.question, choices: ASK.options.map(([id, text, reply]) => ({ text, reply: id === 'wish' && finale.wish ? ASK.wished : reply, then: () => sound.play('pick') })) });
   }
   // All five ornaments found: back in the room, they are on the tree, and at its top a red one with your initial.
   function trimmed() {
@@ -352,13 +355,16 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   // Santa tapped, or his portrait in the corner: out, his note; with the secret waiting to be told, the telling; otherwise
   // his line and the questions, answered for where the story is now (data/cabin-talk.js): a goal's two lines and the clue
   // book, then that question is put away until the goal moves on; the others are asked once a talk.
+  // Something he has been waiting to say (`calling`: his portrait in the corner hops until it is tapped) comes first.
   const asked = new Map();
+  let calling = null;
   function chat() {
     if (!talk) return;
     if (!cabin.santaHome) { chairNote(); return; }
     const story = progress.story;
     if (story.opened && knowsSantas(story.seen) && !story.told) { tellSecret(); return; }
-    const told = story.told, said = signedUp(progress.volunteer) ? TALK.hello.partner : told ? TALK.hello.told : TALK.hello.guest;
+    const told = story.told, said = calling ?? (signedUp(progress.volunteer) ? TALK.hello.partner : told ? TALK.hello.told : TALK.hello.guest);
+    calling = null; talk.call(false);
     const lines = () => [...TALK.now[goal(progress)] ?? [], TALK.book], once = new Set();
     const now = { text: TALK.asks.now, more: () => (asked.get(goal(progress)) ?? 0) < lines().length, answer: () => { const id = goal(progress), count = asked.get(id) ?? 0; asked.set(id, count + 1); return lines()[count]; } };
     const one = (id, text, answer) => ({ text, more: () => !once.has(id), answer: () => { once.add(id); return answer(); } });
@@ -416,8 +422,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       if (GIFTS.every(mark => progress.ornaments.includes(mark)) && !progress.tree) { later(900, trimmed); return; }
       // Back with Santa still out: his note is still on the chair (and in the clue book).
       if (story.left && !story.opened && !cabin.santaHome) clue('chair-note');
-      // Back from the old page, Santa (if he is in) has a word about Holly; once.
-      if (heardHolly && cabin.santaHome) { heardHolly = false; later(900, () => say(SANTA_ON_HOLLY)); return; }
+      // Back from the old page, Santa (if he is in) has a word about Holly: his portrait calls you over; once.
+      if (heardHolly && cabin.santaHome) { heardHolly = false; calling = SANTA_ON_HOLLY; talk?.call(true); return; }
       // All four jobs done, he asks once what comes next.
       if (signedUp(progress.volunteer) && points(progress.volunteer) === TASKS.length && !progress.finale.asked && cabin.santaHome) { later(900, ask); return; }
       // Once the secret is known, Santa tells you about it (`tellSecret`): it opens his talk in the corner, which no tap elsewhere
