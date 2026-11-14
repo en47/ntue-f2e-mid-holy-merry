@@ -16,7 +16,7 @@ export const DESK_LETTERS = [
   {
     id: 'route', from: '工作筆記', to: '平安夜路線', paper: 'pad',
     body: '台北 → 東京 → 雷克雅維克 → 多倫多。\n冰島風大，記得多帶一條圍巾。雪橇第三個座位的扣環有點鬆。',
-    back: { note: '收到，後半段換我飛。扣環修好了。', sign: 'H.', date: '12/23', hand: 'h' },
+    back: { note: '收到，扣環修好了。12/23 前半夜換我飛，12/22 晚上我先睡飽。', sign: 'H.', date: '12/22', hand: 'h' },
   },
   {
     id: 'lumi', from: '露米（10 歲）', to: '北極　聖誕老人 收', paper: 'kid', doodle: 'book',
