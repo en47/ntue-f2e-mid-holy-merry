@@ -228,7 +228,7 @@ await test('Santa 手機版：觸控按鈕至少 44px、橫拿手機改右側窄
   for (const selector of ['.cabin-back', '.wardrobe-tabs button', '.wardrobe-reset', '.hoist-hook', '.hoist-release', '.cabin-letter-close', '.chat-fold', '.chat-close', '.chat-ask', '.chat-send']) assert.ok(coarse.includes(selector), `${selector} 在觸控螢幕上至少 44px`);
   assert.ok(coarse.includes('min-width: 44px; min-height: 44px'));
   const sideways = block('(orientation: landscape) and (max-height: 500px)');
-  assert.ok(sideways.includes('.cabin { height: 100svh; }') && sideways.includes('.feed-basket { flex-direction: column; }') && sideways.includes('.wardrobe {') && sideways.includes('.cabin-chat {'), 'A phone held sideways gets the whole screen and the trays down the right side');
+  assert.ok(sideways.includes('.cabin { height: 100svh; }') && sideways.includes('.feed-tray { left: auto; right: 5.4rem; top: auto; bottom: .6rem; translate: none; flex-direction: row; align-items: flex-end; }') && sideways.includes('.wardrobe {') && sideways.includes('.cabin-chat {'), 'A phone held sideways gets the whole screen, the wardrobe down the right side and the food tray along the bottom, clear of the music button');
   assert.ok(entry.includes("matchMedia('(orientation: landscape) and (max-height: 500px)')") && entry.includes('fitSideways()'), 'Opening a corner sideways scrolls the cabin fully into view');
   assert.ok(/\.wardrobe \{[^}]*bottom: 5\.4rem/.test(css) && css.includes('.wardrobe-reset { margin-right: 3.8rem; }'), 'The wardrobe stays clear of the music button');
   assert.ok(scene.includes("chair.visible = indoorView(view) || trip?.direction === 'in' || trip?.direction === 'out'") && scene.includes("const indoorView = name => name === 'inside' || VIEWS[name]?.room === true") && scene.includes('reindeerHolder.visible = frustum.intersectsSphere(reindeerBounds)'), 'Santa is drawn only around the room and the reindeer only while in view');
@@ -481,14 +481,14 @@ await test('Santa 引導：每個目標都有一句白話的「現在要做什�
   assert.ok(notebook.includes("element('p', 'notebook-task', help, GOALS[now].task);") && notebook.includes('goalNow = now; show(); dot.hidden = false;') && !/notebook-slip|setInterval|還在找嗎|新目標/.test(notebook) && play.includes('notebook?.check();'), 'What to do now is written in the clue book; when it moves on the book only hops, nothing pops up');
   assert.ok(secretData.includes('invite:') && play.includes('talk.scene(lines, { line: RETURN.ask, choices: [RETURN.join, RETURN.wait]') && play.includes('const then = () => { invite(); story.told = true; save(); notebook.refresh(); };'), 'Having told the secret, Santa asks you to join; only your answer makes it told');
 });
-await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
+await test('Santa 故事前後一致：守則與許願的章數相同、蓋章後不自動跳出下一步、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
-  const { RULES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { WISH, NEXT } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href), { WISH_COST } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { RULES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), finale = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href), { WISH } = finale, { WISH_COST } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
   const count = ['零', '一', '二', '三', '四'][WISH_COST];
   assert.ok(RULES.lines.some(line => line.includes(`集到${count}個章`)) && WISH.invite.includes(`集到${count}個章`), 'The rulebook and the wish say the same number of stamps as the rule');
-  assert.deepEqual(Object.keys(NEXT), ['2', '3', '4']);
   const [play, secret, desk, story] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-secret.js', 'js/components/cabin-desk.js', 'docs/SANTA-STORY.md'].map(read));
-  assert.ok(play.includes('const next = NEXT[points(progress.volunteer)]; if (next) later(3600, () => say(next));'), 'After each stamp, a line says where the story goes next');
+  assert.ok(!('NEXT' in finale) && !play.includes('NEXT[') && play.includes('save(); notebook.tick(id); later(1500, () => {') && play.includes("inked(element('span', 'stamp-postmark', stamp), '0 0 120 80', postmark);"), 'After a stamp nothing pops up to say where to go: the stamp is postmarked, the clue book ticks the job and hops, and Santa says it when asked');
+  assert.ok(play.includes('talk.scene([], { line: ASK.question,') && !play.includes('ask-card') && play.includes('calling = SANTA_ON_HOLLY; talk?.call(true);'), 'Santa asks what comes next in his talk, and calls you over (his portrait hops) to say his word about Holly');
   assert.ok(secret.includes('inked(stamps,') && secret.includes('inked(fulfilled,') && desk.includes('inked(postmark,') && desk.includes('inked(arrived,'), 'Stamps and postmarks are ink drawn in SVG');
   assert.ok(['第一次', '第二次', '結局 A', '真相'].every(word => story.includes(word)) || ['兩次反轉', 'A　普通訪客', 'D　真正的聖誕奇蹟'].every(word => story.includes(word)), 'The story line is written down in one place');
 });

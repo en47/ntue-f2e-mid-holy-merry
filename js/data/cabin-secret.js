@@ -87,7 +87,7 @@ export const JOBS = {
   letters: ['處理信件', '小房間的分揀架：先把信分給對的人；交給你的信，挑一封拿到書桌回信、寄出去。'],
   wheel: ['修摩天輪', '遊樂場的摩天輪停了，去看看哪裡壞了。'],
 };
-export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿上多了一個章（願望點數 ${count}／${of}）。`;
+export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿上多了一個章（${count}／${of}）。`;
 // The notes the shift log's washed-out cells need, clipped on beside it once found (clue ids, data/cabin-clues.js): each as
 // it looks, line by line, in the hand that wrote it, so the ink says whose it is (an initial: that substitute's colour,
 // named too; none: plain ink).

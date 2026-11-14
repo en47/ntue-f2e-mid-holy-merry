@@ -8,7 +8,7 @@
 import { CARE_LOG } from './cabin-art.js';
 import { paperLayer } from './paper-art.js';
 import { MEALS, eat, full, mealsToday } from '../services/cabin-progress.js';
-import { FEED_ORDER, feedsNext } from '../services/cabin-story.js';
+import { FEED_ORDER, FEED_TABLE, feedsNext } from '../services/cabin-story.js';
 import { FEED } from '../data/cabin-jobs.js';
 
 // The care log's lines, oldest first: O.'s in gold (O.'s colour, cabin-art.js), the rest in pencil; today's only once he
@@ -21,7 +21,8 @@ const near = (point, rect, pad) => rect && point.x >= rect.left - pad && point.x
 
 // A volunteer owing him his care (`wants`) finds in the basket what the barn's feeding table lists (and the gingerbread):
 // he takes them only in the order of their times (cabin-story.js); a wrong one and the round starts again. Fed for the
-// job, it does not count among the day's meals, so it can be done even once he is full.
+// job, it does not count among the day's meals, so it can be done even once he is full. Each food has its name tag hung
+// under it; once the table on the barn door has been read, a copy is pinned over the basket and ticked as he eats.
 export function feedGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound, burst, art, paper, wants = () => false, onTask = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
@@ -89,6 +90,18 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
 
   say(job ? FEED.start : bag.holds('lichen') ? '麋鹿聞到你口袋裡的地衣，抽了抽鼻子。牠身後有個餵食槽。' : '從籃子拿食物，拖到麋鹿嘴邊餵牠吃吧！');
   const tray = element('div', 'feed-tray', layer), meter = element('p', 'feed-meter', tray), basket = element('div', 'feed-basket', tray);
+  // On the job, the feeding table as it is pinned on the barn door (once read there): a box by each line, ticked as he eats
+  // it in its turn, all cleared when he shakes his head.
+  const table = job && progress.clues.includes('feed-table') ? element('div', 'feed-slip', null) : null;
+  if (table) {
+    tray.prepend(table); table.setAttribute('aria-hidden', 'true');
+    element('p', 'feed-slip-title', table).textContent = FEED.title;
+    FEED_TABLE.forEach(([time, kind], i) => {
+      const row = element('p', 'feed-slip-row', table); row.dataset.food = kind;
+      element('span', 'feed-slip-box', row); element('span', 'feed-slip-time', row).textContent = time; element('span', '', row).textContent = FEED.lines[i][1].replace(/（.*）/, '');
+    });
+  }
+  const shake = () => { table.classList.remove('is-shaking'); void table.offsetWidth; table.classList.add('is-shaking'); };
   const meals = Array.from({ length: MEALS }, () => element('span', 'feed-meal', meter));
   const ring = element('span', 'feed-mouth', layer); ring.setAttribute('aria-hidden', 'true');
   function count() {
@@ -106,6 +119,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     const button = element('button', `play-item play-${kind}`, basket); button.type = 'button';
     button.setAttribute('aria-label', `餵麋鹿吃${label}`); button.dataset.kind = kind;
     paperLayer(button, '0 0 100 100', '', art[kind], paper);
+    const tag = element('span', 'feed-name', button); tag.textContent = FEED.tags[kind]; tag.setAttribute('aria-hidden', 'true');
     let drag = null, dragged = false;
     on(button, 'pointerdown', event => {
       if (event.button > 0) return;
@@ -150,14 +164,19 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
   function serve(kind, button, ghost, mouth) {
     if (!feedsNext(served, kind)) {
       served = []; cabin.reindeerAct('shake'); sound.play('refuse'); speak('嗯……現在還不是吃這個的時候。');
+      if (table) { table.querySelectorAll('.is-ticked').forEach(row => row.classList.remove('is-ticked')); shake(); }
       fly(ghost, centre(local(button.getBoundingClientRect())), false); say(FEED.wrong); return;
     }
-    served.push(kind); if (mouth) fly(ghost, centre(mouth), true);
+    served.push(kind); if (mouth) fly(ghost, centre(mouth), true); table?.querySelector(`[data-food="${kind}"]`).classList.add('is-ticked');
     button.classList.add('is-gone'); later(700, () => button.classList.remove('is-gone'));
     cabin.reindeerAct(kind === 'lichen' ? 'happy' : 'chew'); sound.play(kind === 'lichen' ? 'happy' : 'chew'); burst(mouth, 'heart', served.length);
     speak(kind === 'lichen' ? '是地衣！我最愛吃這個！' : FEED.good(served.length - 1) || '喀滋喀滋！');
     say(`${FEED.foods[kind]}，照餵食表餵了 ${served.length}／${FEED_ORDER.length} 樣。`);
-    if (served.length === FEED_ORDER.length) { job = false; meter.hidden = false; later(1600, () => { say(FEED.done); onTask(); }); }
+    // All three: the job is done, and the oats and lichen go back to the barn (the basket is the everyday one again).
+    if (served.length === FEED_ORDER.length) {
+      job = false; meter.hidden = false; table?.classList.add('is-done');
+      later(1600, () => { say(FEED.done); onTask(); basket.querySelectorAll('[data-kind="oats"], [data-kind="lichen"]').forEach(each => { each.classList.add('is-gone'); later(300, () => each.remove()); }); });
+    }
   }
   function offer(kind, button, ghost) {
     const mouth = cabin.mouthRect();

@@ -71,6 +71,25 @@
 .feed-basket .play-item.is-lifted, .feed-basket .play-item.is-gone { opacity: .3; }
 .feed-basket .play-item.is-gone { scale: .6; }
 .feed-basket .play-item { transition: opacity .3s ease, scale .3s ease; }
+/* 籃子裡每樣食物下面掛一張手寫名牌；做照顧麋鹿的工作時，籃子上方釘一張餵食表，照時間餵對就打勾，餵錯全部清掉、紙條抖一下。 */
+.feed-basket { padding-bottom: 2.4rem; }
+.feed-name { position: absolute; left: 50%; top: calc(100% - 4px); padding: 13px .5rem 5px; translate: -50% 0; color: var(--ink); background: #f3e3c3; border-radius: 3px; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.2; white-space: nowrap; pointer-events: none; transform-origin: 50% 0; }
+.feed-slip { display: grid; gap: .15rem; padding: 1rem 1.1rem .75rem; color: var(--ink); background: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.45; white-space: nowrap; rotate: -1.5deg; pointer-events: none; }
+.feed-slip-title { margin: 0 0 .15rem; color: #8f3b36; font-weight: 700; }
+.feed-slip-row { display: flex; align-items: center; gap: .5rem; margin: 0; }
+.feed-slip-time { color: #8f5a3c; font-variant-numeric: tabular-nums; }
+.feed-slip-box { position: relative; flex: none; width: 1.15rem; aspect-ratio: 1; border: 2px solid #c9ae80; border-radius: 3px; }
+.feed-slip .is-ticked .feed-slip-box::after { content: '✓'; position: absolute; left: .12rem; bottom: .05rem; color: #b5443c; font-size: var(--fs-body); font-weight: 700; line-height: 1; }
+.feed-slip.is-done .feed-slip-row:not(.is-ticked) { opacity: .5; }
+.cabin[data-paper] :is(.feed-name, .feed-slip, .feed-slip-box) { background: transparent no-repeat 0 0 / 100% 100%; border: 0; border-radius: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .feed-basket .play-item:is(:hover, :focus-visible) .feed-name { animation: tag-sway .8s ease-in-out; }
+  .feed-slip .is-ticked .feed-slip-box::after { animation: tick-in .35s cubic-bezier(.3, 1.6, .5, 1) both; }
+  .feed-slip.is-shaking { animation: slip-shake .45s ease-in-out; }
+}
+@keyframes tag-sway { 25% { rotate: 8deg; } 55% { rotate: -6deg; } 80% { rotate: 2deg; } }
+@keyframes tick-in { from { opacity: 0; scale: 1.9; rotate: -18deg; } }
+@keyframes slip-shake { 20% { translate: -6px 0; } 40% { translate: 5px 0; } 60% { translate: -3px 0; } 80% { translate: 2px 0; } }
 .feed-mouth { position: absolute; border-radius: 50%; background: radial-gradient(#ffe8a499, transparent 70%); opacity: 0; scale: .7; pointer-events: none; transition: opacity .2s ease, scale .2s ease; }
 .feed-mouth.is-open { opacity: 1; scale: 1.15; }
 .feed-ghost { position: absolute; top: 0; left: 0; z-index: 6; pointer-events: none; filter: drop-shadow(0 8px 6px #3b2a2433); }
@@ -118,6 +137,16 @@
 .cabin-stage[data-view="inside"]:not(.is-walking) .cabin-chat { display: block; }
 .chat-fold { position: absolute; top: 0; right: 0; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; pointer-events: auto; }
 .chat-fold:hover { translate: 0 -2px; rotate: -4deg; }
+/* 聖誕老人有話想說：頭像旁冒出一個紙對話泡泡，頭像每隔一會兒跳一下，點開聊天框就停。 */
+.chat-call { position: absolute; right: calc(100% - 4px); top: -10px; width: 36px; aspect-ratio: 40 / 32; display: none; pointer-events: none; }
+.chat-call .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+.cabin-chat.is-calling .chat-call { display: block; }
+@media (prefers-reduced-motion: no-preference) {
+  .cabin-chat.is-calling .chat-call { animation: chat-call-pop .45s cubic-bezier(.3, 1.6, .5, 1) both; }
+  .cabin-chat.is-calling.is-folded .chat-fold { animation: chat-calling 2.6s ease-in-out .6s infinite; }
+}
+@keyframes chat-call-pop { from { opacity: 0; scale: .3; translate: 10px 6px; } }
+@keyframes chat-calling { 0%, 64%, 100% { translate: 0 0; rotate: 0deg; } 70% { translate: 0 -7px; rotate: -7deg; } 76% { translate: 0 0; rotate: 5deg; } 82% { translate: 0 -3px; rotate: -2deg; } 88% { translate: 0 0; rotate: 0deg; } }
 .chat-fold .chat-avatar { display: block; width: 100%; }
 .chat-fold .chat-avatar[hidden] { display: none; }
 .chat-card { position: absolute; top: 0; right: calc(48px + .6rem); width: min(22rem, 34vw); max-height: 100%; display: flex; flex-direction: column; gap: .7rem; padding: 1.2rem 1.2rem 1.1rem; color: var(--ink); background: #fffdf6; border-radius: 10px; box-shadow: 0 10px 0 -3px #e4d6bf; pointer-events: auto; }
@@ -198,6 +227,7 @@
 .cabin[data-paper] .cabin-explore:focus-within { padding: 1rem; }
 .cabin[data-paper] .cabin-explore button { padding: .45rem .9rem; }
 .cabin[data-paper] :is(.feed-basket, .play-basket) { padding: .7rem 1.1rem; }
+.cabin[data-paper] .feed-basket { padding-bottom: 2.6rem; }
 .santa-page .page-foreground { margin-top: 0; background: #fff9eb; }
 @media (max-width: 700px) {
   .cabin { height: max(560px, calc(100svh - 86px)); }
@@ -389,6 +419,17 @@
 .stamp-stars .is-on { color: #e0b04f; text-shadow: 0 0 5px #ffd36e; }
 @keyframes stamp-land { from { opacity: 0; scale: 1.8; rotate: -12deg; } 60% { opacity: 1; scale: .94; } to { scale: 1; rotate: 7deg; } }
 @keyframes stamp-leave { to { opacity: 0; translate: 0 -14px; } }
+/* 郵票落下後，今天的郵戳蓋上去，這件工作的金星跳出來。 */
+.stamp-postmark { position: absolute; right: -10%; top: 3%; width: 76%; aspect-ratio: 120 / 80; rotate: -12deg; opacity: .85; }
+.stamp-postmark .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  .stamp-postmark { animation: postmark-press .3s .5s cubic-bezier(.2, 1.4, .5, 1) both; }
+  .stamp-stars .is-new { animation: star-pop .5s .9s cubic-bezier(.3, 1.8, .5, 1) both; }
+  .notebook-jobs .is-fresh .job-box { animation: job-stamp .5s .3s cubic-bezier(.3, 1.6, .5, 1) both; }
+}
+@keyframes postmark-press { from { opacity: 0; scale: 1.7; } 70% { opacity: .95; scale: .96; } to { opacity: .85; scale: 1; } }
+@keyframes star-pop { from { opacity: 0; scale: 0; rotate: -90deg; } 70% { opacity: 1; scale: 1.5; } to { scale: 1; rotate: 0deg; } }
+@keyframes job-stamp { from { opacity: 0; scale: 1.9; rotate: -14deg; } }
 @media (max-width: 700px) { .volunteer-stamp { width: 6.2rem; right: .6rem; } }
 /* 故事的結尾：登記簿的紅繩舊頁（泛黃的紙、紅色 WISH FULFILLED 墨章、荷莉的鉛筆字）、許願、看過的結局；
    願望被實現的小場景與替身的字條；結局卡（紙雕證書，D 附荷莉的信）。 */
@@ -513,14 +554,14 @@
 @media (pointer: coarse) {
   .cabin-back, .wardrobe-tabs button, .wardrobe-reset, .hoist-hook, .hoist-release, .cabin-letter-close, .chair-flip, .chat-fold, .chat-close, .chat-ask, .chat-send, .shift-file, .desk-actions button, .books-tools button, .books-enter, .register-letter, .register-sign, .register-leave, .gearbox-actions button { min-width: 44px; min-height: 44px; }
 }
-/* 橫拿的手機：小屋和螢幕一樣高（點進角落或屋裡時捲到剛好整個露出），衣櫃、食物籃、對話框改成右側窄欄，提示放到左上。 */
+/* 橫拿的手機：小屋和螢幕一樣高（點進角落或屋裡時捲到剛好整個露出），衣櫃、對話框改成右側窄欄，提示放到左上；
+   食物籃（連同掛著的名牌與餵食表）沿著底部排成一列，讓開右下角的音樂按鈕，麋鹿的頭留在上面。 */
 @media (orientation: landscape) and (max-height: 500px) {
   .cabin { height: 100svh; }
   .cabin-caption { left: 1rem; top: 4rem; max-width: calc(60% - 2rem); translate: none; text-align: left; }
   .wardrobe { top: .6rem; right: .6rem; width: min(17rem, 36%); padding: .6rem; }
   .wardrobe-items { grid-template-columns: repeat(3, 1fr); }
-  .feed-tray { left: auto; right: 1rem; top: 50%; bottom: auto; translate: 0 -50%; }
-  .feed-basket { flex-direction: column; }
+  .feed-tray { left: auto; right: 5.4rem; top: auto; bottom: .6rem; translate: none; flex-direction: row; align-items: flex-end; }
   .cabin-chat { bottom: .6rem; }
   .chat-card { width: min(20rem, 40vw); }
   .cabin-letter { max-height: calc(100% - 1.5rem); overflow: auto; }
