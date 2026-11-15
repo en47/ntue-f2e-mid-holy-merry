@@ -526,7 +526,14 @@ await test('Santa 線索本：看到的線索自動記下、分段提示依故�
   assert.ok(written.length >= 6, 'The games record their clues where they are seen');
   const named = new Set([...[...games, play].join('\n').matchAll(/clue\('([\w-]+)'\)/g)].map(([, id]) => id).concat(games.join('\n').includes("'route-note' : 'letter-backs'") ? ['route-note', 'letter-backs'] : [], games.join('\n').includes('if (id === \'tags\' || id === \'rules\') { clue(id);') ? ['tags', 'rules'] : [], play.includes('clue(`gift-${mark}`)') ? [...games.join('\n').matchAll(/gift\('([A-Z])'\)/g)].map(([, mark]) => `gift-${mark}`) : []));
   for (const id of Object.keys(NOTEBOOK)) assert.ok(named.has(id), `${id} is written into the book somewhere`);
-  assert.ok(paper.includes("['.notebook-card', 'notebook']") && paper.includes('notebook(paper, width, height, seed)'), 'Its open page is cut like every other sheet');
+  assert.ok(paper.includes("['.board-half:first-child', 'boardLeft']") && paper.includes("boardLeft: bookBoard('right')") && paper.includes("pageLeft: bookPage('right')") && paper.includes("coverLeft: bookCover('left')"), 'Its boards, pages, cover and tabs are cut like every other sheet');
+  // Opened, it is a book turned a leaf at a time as the Intro's storybook is, with a tab for now, each place and the gifts.
+  const { CLUE_PLACES, GOAL_CLUES, GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  const placed = [...CLUE_PLACES.flatMap(([, , ids]) => ids), ...Object.keys(NOTEBOOK).filter(id => id.startsWith('gift-'))];
+  assert.deepEqual([...placed].sort(), Object.keys(NOTEBOOK).sort(), 'Every clue has one place in the book (the gifts have theirs)');
+  assert.ok(Object.values(NOTEBOOK).every(clue => clue.name && clue.place && clue.text) && new Set(Object.values(NOTEBOOK).map(clue => clue.name)).size === Object.keys(NOTEBOOK).length, 'Each clue has a name of its own for its sticker');
+  assert.deepEqual(Object.keys(GOAL_CLUES).sort(), Object.keys(GOALS).sort()); assert.ok(Object.values(GOAL_CLUES).flat().every(id => NOTEBOOK[id]), 'Each goal names the clues it turns on, all of them real');
+  assert.ok(book.includes("const axis = narrow() ? 'rotateX' : 'rotateY'") && book.includes("on(shell, 'touchmove'") && book.includes('if (calm() || !node.animate)') && book.includes("{ now: '現在', yard: '院子', house: '小屋', room: '小房間', gifts: '見面禮' }"), 'An upright spine on a wide screen and one across the middle at 700px and narrower, a finger sliding to turn, at once with less motion; tabs for now, each place and the gifts');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
