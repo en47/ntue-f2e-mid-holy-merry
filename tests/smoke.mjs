@@ -574,8 +574,12 @@ await test('Santa 線索貼紙有那樣東西的紙雕小圖，剛找到的會�
   const { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
   assert.deepEqual(Object.keys(NOTEBOOK).filter(id => typeof CLUE_ART[CLUE_ICON[id]] !== 'function'), [], 'Every clue has a picture drawn for it');
   assert.deepEqual(Object.keys(CLUE_ICON).sort(), Object.keys(NOTEBOOK).sort(), 'No picture for a clue the book does not have');
-  assert.ok(book.includes('picture.style.backgroundImage = clueIcon(CLUE_ICON[id]);') && art.includes('if (!images.has(name))') && !art.includes('innerHTML'), 'The sticker shows its picture, each cut into an image once');
+  assert.ok(book.includes('picture.style.backgroundImage = clueIcon(CLUE_ICON[id]);') && art.includes('if (!images.has(key))') && !art.includes('innerHTML'), 'The sticker shows its picture, each cut into an image once');
   assert.ok(css.includes('.notebook-card[data-state="open"] .clue-item.is-fresh > .clue-sticker { animation: sticker-slap') && book.includes("card.dataset.state = 'turning';"), 'A clue just found is stuck on once its page lies open, not under a turning leaf');
+  // By the goal on the "now" page, a picture of what the story is waiting on; a new goal's pops in once as the book opens.
+  const { GOAL_ART } = await import(pathToFileURL(path.join(project, 'js/components/cabin-clue-art.js')).href), { GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.deepEqual(Object.keys(GOAL_ART).sort(), Object.keys(GOALS).sort(), 'Every goal has its picture');
+  assert.ok(book.includes('picture.style.backgroundImage = goalPicture(now);') && book.includes('goalFresh = goal(progress) !== goalRead; goalRead = goal(progress);') && css.includes('.notebook-card[data-state="open"] .goal-picture.is-fresh { animation: goal-pop'), 'The goal has its picture, and a new one pops in once');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
