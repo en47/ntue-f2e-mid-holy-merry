@@ -88,3 +88,14 @@ export const GOALS = {
   endings: { task: '換個選擇，看看其他結局（登記簿下方記著你看過的）。', title: '還有別的結局', hints: ['登記簿下方蓋著你看過的結局；還沒蓋章的，換個選擇試試。', 'A：知道秘密、沒有加入（或在登記簿劃掉縮寫），到院子的世界路標選「踏上回家的路」；B：用三個章許願；C：四件工作都做完，簽 12/25 早班。', '金色的「真相」星：補好交接表、也讀懂舊紀錄簿以後，再走到 B 或 C。'] },
   done: { task: '三個結局和真相都看過了！想重玩，線索本最下面可以從頭開始。', title: '三個結局和真相都看過了', hints: ['謝謝你陪聖誕村過了這個聖誕節。登記簿上看過的結局和真相星，點一下就能再看一次；想從頭再玩一次，線索本最下面有「從頭再玩一次」。'] },
 };
+
+// What the visitor is left wondering once a chapter is done (docs/SANTA-PUZZLE-DESIGN.md 1.1), written under the goal on
+// the clue book's "now" page as their own note. The substitute's work leaves one question after the old record is read
+// again and another for someone who has not read it.
+export const WONDER = {
+  yard: '「上次輪到你」是誰？紙條上為什麼有兩種筆跡？',
+  house: '書櫃後面為什麼藏著一間小房間？名牌板上為什麼有五個名字，還空著一個掛勾？',
+  room: '其他人都是 2015 年以後加入，H. 為什麼 2003 年就在？紅繩舊紀錄簿為什麼鎖著？',
+  jobs: ['荷莉的願望早就實現，卻一直留下來——那我呢？', '三個章就能許願：要現在許，還是做完四件工作？'],
+  choice: '我想成為什麼樣的人？',
+};

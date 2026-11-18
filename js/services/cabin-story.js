@@ -110,3 +110,11 @@ export function goal({ story, volunteer, finale, bag }) {
   if (!finale.wish && !finale.stayed) return points(volunteer) >= WISH_COST ? 'wish' : 'jobs';
   return allEndings(finale) ? 'done' : 'endings';
 }
+// The clue book's five chapters, a stamp on its cover for each the story is past: the yard's things found, the bookcase
+// opened, the secret told, the substitute's work done far enough (the old record read again, or stamps enough for a
+// wish), and a choice made at the end. Someone who leaves without joining has the last without the fourth.
+export const CHAPTERS = ['yard', 'house', 'room', 'jobs', 'choice'];
+export const chaptersDone = ({ story, volunteer, finale, bag }) => CHAPTERS.filter(id => ({
+  yard: yardDone(bag) || story.opened, house: story.opened, room: story.told,
+  jobs: signedUp(volunteer) && (finale.twist || points(volunteer) >= WISH_COST), choice: finale.endings.length > 0,
+})[id]);

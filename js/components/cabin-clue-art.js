@@ -258,16 +258,32 @@ export const GOAL_ART = {
   },
 };
 
+// The cover's chapter stamps: a perforated stamp, its frame red or green by turns, the chapter's picture in it as a
+// layer of its own (shown as a shadow while the chapter is the next one); and a postmark inked over a stamp once it is
+// on, ink lying in the paper (no rim, no shadow).
+const CHAPTER_ART = { yard: GOAL_ART.yard, house: GOAL_ART.room, room: CLUE_ART.nameboard, jobs: CLUE_ART.parcel, choice: GOAL_ART.endings };
+const INKED = { scale: .25, grain: .6, shadow: 0, rim: '#ffffff00' };
+
 const images = new Map();
 let count = 0;
 // A picture as a background image, cut the first time it is wanted and kept.
-function picture(key, draw, size) {
+function picture(key, draw, size, paper = { scale: .25, grain: .4, shadow: .3 }) {
   if (!images.has(key)) {
     const svg = shape('svg', { viewBox: '0 0 40 40', width: size, height: size });
-    draw(shape('g', { filter: paperFilter(svg, `clue-art-${++count}`, { scale: .25, grain: .4, shadow: .3 }) }, svg));
+    draw(shape('g', { filter: paperFilter(svg, `clue-art-${++count}`, paper) }, svg));
     images.set(key, `url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}")`);
   }
   return images.get(key);
 }
 export const clueIcon = name => picture(name, CLUE_ART[name], 80);
 export const goalPicture = goal => picture(`goal-${goal}`, GOAL_ART[goal], 160);
+export const stampFrame = (chapter, i) => picture(`stamp-${chapter}`, g => {
+  shape('path', { d: perforated(3, 3, 37, 37, 4, 1.3), fill: SHEET, ...EDGE }, g);
+  shape('rect', { x: 6.5, y: 6.5, width: 27, height: 27, fill: 'none', stroke: i % 2 ? '#3f6653' : RED, 'stroke-width': 1.4 }, g);
+}, 96);
+export const stampArt = chapter => picture(`stamp-art-${chapter}`, g => CHAPTER_ART[chapter](shape('g', { transform: 'translate(9 9) scale(.55)' }, g)), 96);
+export const postmark = () => picture('postmark', g => {
+  const ink = shape('g', { opacity: .8 }, g);
+  for (const r of [11, 8.5]) shape('circle', { cx: 15, cy: 20, r, fill: 'none', stroke: INK, 'stroke-width': r > 10 ? 1.6 : 1 }, ink);
+  line('M27 13Q30.5 11 34 13T40 13M27 20Q30.5 18 34 20T40 20M27 27Q30.5 25 34 27T40 27', INK, ink, 1.4);
+}, 96, INKED);

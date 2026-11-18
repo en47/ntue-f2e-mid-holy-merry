@@ -581,6 +581,21 @@ await test('Santa 線索貼紙有那樣東西的紙雕小圖，剛找到的會�
   assert.deepEqual(Object.keys(GOAL_ART).sort(), Object.keys(GOALS).sort(), 'Every goal has its picture');
   assert.ok(book.includes('picture.style.backgroundImage = goalPicture(now);') && book.includes('goalFresh = goal(progress) !== goalRead; goalRead = goal(progress);') && css.includes('.notebook-card[data-state="open"] .goal-picture.is-fresh { animation: goal-pop'), 'The goal has its picture, and a new one pops in once');
 });
+await test('Santa 線索本封面的章節郵票：過一章蓋一枚，下一章是剪影，章末的疑問寫在目標下面', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [book, css] = await Promise.all(['js/components/cabin-notebook.js', 'css/santa.css'].map(read));
+  const { CHAPTERS, chaptersDone } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { readProgress } = await import(pathToFileURL(path.join(project, 'js/services/cabin-progress.js')).href);
+  const { WONDER } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.deepEqual(CHAPTERS, ['yard', 'house', 'room', 'jobs', 'choice']); assert.ok(CHAPTERS.every(id => WONDER[id]), 'Each chapter leaves a question');
+  const start = readProgress(null); assert.deepEqual(chaptersDone(start), []); assert.deepEqual(start.stamped, []);
+  start.story.opened = true; start.story.told = true; assert.deepEqual(chaptersDone(start), ['yard', 'house', 'room'], 'The bookcase opened and the secret told: three chapters');
+  start.finale.endings.push('A'); assert.deepEqual(chaptersDone(start), ['yard', 'house', 'room', 'choice'], 'Leaving without joining makes the last choice without the substitute\'s work');
+  assert.deepEqual(readProgress({ getItem: () => JSON.stringify({ stamped: ['yard', 'nope', 'room'] }) }).stamped, ['yard', 'room'], 'The stamps on the cover are kept with the save');
+  assert.ok(book.includes("pressed = finished.filter(id => !progress.stamped.includes(id))") && book.includes('progress.stamped = [...finished]; save();') && book.includes("slot.dataset.state = finished.includes(chapter) ? 'done' : chapter === next ? 'next' : 'later';"), 'A stamp is pressed on once, the next chapter shows as a shadow');
+  assert.ok(css.includes('.notebook-card[data-state="shut"] .cover-stamp.is-new :is(.stamp-frame, .stamp-art) { animation: cover-stamp-land') && css.includes('.cover-stamp[data-state="next"] .stamp-art { filter: brightness(0) opacity(.2); }'), 'Pressed on while the book is still shut; the next a faint shadow');
+  assert.ok(book.includes("WONDER.jobs[progress.finale.twist ? 0 : 1]") && book.includes("element('p', 'notebook-wonder', help, wonder)"), 'What the last chapter left you wondering is written under the goal');
+});
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [bagUi, inspectUi, play, paper, css] = await Promise.all(['js/components/cabin-bag.js', 'js/components/cabin-inspect.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'css/santa.css'].map(read));

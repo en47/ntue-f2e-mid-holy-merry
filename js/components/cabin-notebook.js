@@ -3,8 +3,9 @@
 // on now (`goal`, cabin-story.js), a little plainer each time one is asked for. It shows itself once there is something
 // in it, and hops when something new goes in, a job is ticked or the goal moves on.
 // Opened, it is a real little book, turned as the Intro's storybook is. Shut, it lies in the middle with its elastic band
-// round it; the band slips off over the edge, and the cover (as big as the board under it) swings open on the spine while
-// the book slides over to lay the spread in the middle. The inside of the cover is the first left page. On a wide screen
+// round it and a stamp on its cover for each chapter the story is past (one finished since it was last opened is pressed
+// on first); the band slips off over the edge, and the cover (as big as the board under it) swings open on the spine
+// while the book slides over to lay the spread in the middle. The inside of the cover is the first left page. On a wide screen
 // the two pages lie side by side about an upright spine; at 700px and narrower they lie top and bottom with the spine
 // across the middle, and a finger sliding up or down turns the page once that page's words have been scrolled to their
 // end. Paper index tabs are stuck to the leaves where each part begins (now, the yard, the house, the little room, the
@@ -17,9 +18,9 @@
 import { paperLayer, shape } from './paper-art.js';
 import { lamp, roofHouse, snowyFir, star } from './paper-props.js';
 import { ornament } from './cabin-ornaments.js';
-import { CLUE_ICON, clueIcon, goalPicture } from './cabin-clue-art.js';
-import { GIFTS, TASKS, goal, knowsSantas, points, signedUp } from '../services/cabin-story.js';
-import { CLUE_PLACES, GIFT_HINTS, GIFT_ORDER, GOALS, GOAL_CLUES, NOTEBOOK, RESTART } from '../data/cabin-clues.js';
+import { CLUE_ICON, clueIcon, goalPicture, postmark, stampArt, stampFrame } from './cabin-clue-art.js';
+import { CHAPTERS, GIFTS, TASKS, chaptersDone, goal, knowsSantas, points, signedUp } from '../services/cabin-story.js';
+import { CLUE_PLACES, GIFT_HINTS, GIFT_ORDER, GOALS, GOAL_CLUES, NOTEBOOK, RESTART, WONDER } from '../data/cabin-clues.js';
 import { JOBS } from '../data/cabin-secret.js';
 import { resetProgress } from '../services/cabin-progress.js';
 
@@ -191,7 +192,8 @@ export function mountNotebook(stage, { progress, save, sound }) {
     return box;
   }
   // What the book holds, part by part, as blocks written one under another (each draws itself onto a page and returns
-  // what it wrote last). Now: the goal and, once signed up, the jobs (what to do), then the clues it turns on and a hint
+  // what it wrote last). Now: the goal (with what the last chapter finished left you wondering, as your own note) and,
+  // once signed up, the jobs (what to do), then the clues it turns on and a hint
   // (what helps). Then each place's clues, and the gifts. A heading goes in one block with what comes first under it, so
   // a page never ends on a heading.
   function parts() {
@@ -203,6 +205,8 @@ export function mountNotebook(stage, { progress, save, sound }) {
         const row = element('div', 'goal-row', head), picture = element('span', goalFresh ? 'goal-picture is-fresh' : 'goal-picture', row);
         picture.style.backgroundImage = goalPicture(now); picture.setAttribute('aria-hidden', 'true');
         const help = element('div', 'goal-words', row); element('h4', 'notebook-goal', help, title); element('p', 'notebook-task', help, GOALS[now].task);
+        const last = chaptersDone(progress).at(-1), wonder = last === 'jobs' ? WONDER.jobs[progress.finale.twist ? 0 : 1] : WONDER[last];
+        if (wonder) element('p', 'notebook-wonder', help, wonder);
         return head;
       },
       ...(signedUp(progress.volunteer) ? jobs() : []),
@@ -360,7 +364,15 @@ export function mountNotebook(stage, { progress, save, sound }) {
     // first left page on it (the paper the tabs on it are stuck under).
     const lid = quiet(element('div', 'book-cover', shell)), face = element('div', 'leaf-face leaf-front cover-face', lid);
     element('p', 'cover-title', face, 'Clue Book').lang = 'en';
-    paperLayer(element('span', 'cover-star', face), '0 0 40 40', '', g => star(g, 20, 20, 15), PAPER);
+    // A stamp under the label for each chapter: on and postmarked for each the story is past, the next one's picture faint
+    // as a shadow, the rest empty frames. One finished since the book was last opened is pressed on as it opens.
+    const finished = chaptersDone(progress), next = CHAPTERS.find(id => !finished.includes(id)), pressed = finished.filter(id => !progress.stamped.includes(id));
+    const stamps = element('div', 'cover-stamps', face);
+    CHAPTERS.forEach((chapter, i) => {
+      const slot = element('span', pressed.includes(chapter) ? 'cover-stamp is-new' : 'cover-stamp', stamps);
+      slot.dataset.state = finished.includes(chapter) ? 'done' : chapter === next ? 'next' : 'later'; slot.style.setProperty('--tilt', `${[-4, 3, -2, 4, -3][i]}deg`);
+      for (const [name, image] of [['stamp-frame', stampFrame(chapter, i)], ['stamp-art', stampArt(chapter)], ['stamp-mark', postmark()]]) element('span', name, slot).style.backgroundImage = image;
+    });
     carrier(lid, 'front');
     const lining = element('div', 'leaf-face leaf-back cover-lining', lid); carrier(lining, 'back');
     const sheet = element('div', 'cover-page', lining);
@@ -427,6 +439,10 @@ export function mountNotebook(stage, { progress, save, sound }) {
     const mine = book;
     requestAnimationFrame(() => requestAnimationFrame(async () => {
       if (book !== mine) return;
+      if (pressed.length) {
+        if (!calm()) { sound.play('snap'); await wait(950); if (book !== mine) return; }
+        stamps.querySelectorAll('.is-new').forEach(slot => slot.classList.remove('is-new')); progress.stamped = [...finished]; save();
+      }
       await slip(band, true); if (book !== mine) return;
       carry(lid, ['now']); card.dataset.state = 'opening';
       await Promise.all([hinge(lid, 0, flipped(), 900), slide(shell, shift(-25), shift(0), 640)]);
