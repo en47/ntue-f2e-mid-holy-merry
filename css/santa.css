@@ -562,8 +562,6 @@
   .wardrobe { top: .6rem; right: .6rem; width: min(17rem, 36%); padding: .6rem; }
   .wardrobe-items { grid-template-columns: repeat(3, 1fr); }
   .feed-tray { left: auto; right: 5.4rem; top: auto; bottom: .6rem; translate: none; flex-direction: row; align-items: flex-end; }
-  .book-tabs { top: 2.6rem; gap: .25rem; }
-  .book-tab { padding-block: .3rem; }
   .cabin-chat { bottom: .6rem; }
   .chat-card { width: min(20rem, 40vw); }
   .cabin-letter { max-height: calc(100% - 1.5rem); overflow: auto; }
@@ -697,36 +695,61 @@ html.theatre-open { overflow: hidden; }
 /* 線索本：右上角的牛皮紙小筆記本；有新線索時跳一下、亮一個紅點。打開是一頁紙：記下的線索，和一格分段提示。 */
 .notebook-button { position: absolute; z-index: 5; top: .8rem; right: .9rem; width: 46px; height: 54px; padding: 0; border: 0; background: none; cursor: pointer; }
 .notebook-button[hidden] { display: none; }
+/* 書拿出來打開時，角落就空了；闔上收回去才又出現。 */
+.notebook-button[aria-expanded="true"] { visibility: hidden; }
 .notebook-button:hover { translate: 0 -2px; rotate: -3deg; }
 .notebook-button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
 .notebook-button.is-new { animation: notebook-hop .9s ease-out; }
 @keyframes notebook-hop { 30% { scale: 1.18; rotate: -8deg; } 60% { rotate: 6deg; } }
 .notebook-new { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; }
 .notebook-new[hidden] { display: none; }
-/* 線索本打開是一本書（翻頁照 Intro 故事書）：寬螢幕左右兩頁、書脊直立；700px 以下上下兩頁、書脊橫在中間，手指上下滑翻頁。
-   書邊突出紙索引標籤（現在、院子、小屋、小房間、見面禮），點了就翻到那一區。封面掀開、紙頁翻過去都只動那一張紙；減少動態時直接換頁。 */
-.notebook-card { position: absolute; z-index: 7; left: 50%; top: 50%; width: min(54rem, calc(100% - 11rem)); height: min(36rem, calc(100% - 2.4rem)); display: flex; flex-direction: column; gap: .7rem; translate: calc(-50% - 2.4rem) -50%; color: var(--ink); pointer-events: auto; }
-.book { position: relative; flex: 1; min-height: 0; margin: 14px 14px 20px; perspective: 2200px; }
-.book-board { position: absolute; inset: -14px -14px -20px; display: grid; grid-template-columns: 1fr 1fr; }
+/* 線索本打開是一本真的小書（翻頁照 Intro 故事書）。闔著時在正中間、套著紅色鬆緊帶；帶子從書口滑開，封面沿書脊翻開，書同時滑到書脊在正中間。
+   封面跟底下的書板一樣大，內側就是第一個左頁。寬螢幕左右兩頁、書脊直立；700px 以下上下兩頁、書脊橫在中間，手指上下滑翻頁。
+   索引標籤黏在每一區開頭那張紙底下、從書口突出：翻過的在左（上）邊、還沒翻的在右（下）邊，翻頁時跟著那張紙一起翻過去。
+   書板上露出底下紙頁的邊，哪邊的紙多哪邊就厚。封面、紙頁翻動都只動那一張紙；減少動態時直接換頁。 */
+.notebook-card { --edge-top: 14px; --edge-side: 14px; --edge-bottom: 20px; --tab-under: 10px; --tab-long: 5.6rem; --tab-wide: 2.3rem; --tab-top: .9rem; --tab-step: 2.65rem; position: absolute; z-index: 7; left: 50%; top: 50%; width: min(52rem, calc(100% - 13rem)); height: min(38rem, calc(100% - 2.4rem)); display: flex; flex-direction: column; gap: .7rem; translate: -50% -50%; color: var(--ink); pointer-events: auto; }
+.book { position: relative; flex: 1; min-height: 0; margin: var(--edge-top) var(--edge-side) var(--edge-bottom); perspective: 2200px; }
+.book-board { position: absolute; inset: calc(var(--edge-top) * -1) calc(var(--edge-side) * -1) calc(var(--edge-bottom) * -1); display: grid; grid-template-columns: 1fr 1fr; }
 .board-half { background: #c9a46a; border-radius: 14px; }
-.book-pages { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; }
-.book-page, .leaf-face { position: relative; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 1.3rem 1.9rem 1.2rem 1.5rem; background: #fffaf0; font-size: var(--fs-small); line-height: 1.6; }
-.book-page[data-slot="b"], .leaf-front { padding: 1.3rem 1.5rem 1.2rem 1.9rem; }
-.book-leaf, .book-cover { position: absolute; z-index: 3; top: 0; bottom: 0; left: 50%; width: 50%; transform-origin: left center; transform-style: preserve-3d; visibility: hidden; pointer-events: none; }
-.book-cover { z-index: 4; }
+.book-tabs { position: absolute; z-index: 1; inset: 0; pointer-events: none; }
+.book-pages { position: absolute; z-index: 2; inset: 0; display: grid; grid-template-columns: 1fr 1fr; }
+.book-page, .leaf-face, .cover-page { position: relative; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 1.3rem 1.9rem 1.2rem 1.5rem; background: #fffaf0; font-size: var(--fs-small); line-height: 1.6; }
+.book-page[data-slot="b"], .book-leaf .leaf-front { padding: 1.3rem 1.5rem 1.2rem 1.9rem; }
+:is(.book-page, .leaf-face, .cover-page) > :first-child { margin-top: 0; }
+/* 量高度用的隱形頁：跟真的紙頁一樣寬，內容一條條寫下去，量完就清空。 */
+.book-probe { position: absolute; top: 0; left: 0; height: auto; overflow: visible; visibility: hidden; pointer-events: none; }
+/* 翻動的那張紙與封面：正面蓋在右（下）頁上，翻過書脊換背面；黏在上面的標籤在紙底下一起翻。 */
+.book-leaf, .book-cover { position: absolute; transform-origin: left center; transform-style: preserve-3d; visibility: hidden; pointer-events: none; }
+.book-leaf { z-index: 3; top: 0; bottom: 0; left: 50%; width: 50%; border-radius: 4px; }
+.book-cover { z-index: 4; top: calc(var(--edge-top) * -1); bottom: calc(var(--edge-bottom) * -1); left: 50%; right: calc(var(--edge-side) * -1); border-radius: 14px; }
 .book-leaf.is-turning, .book-cover.is-turning { visibility: visible; }
 .leaf-face { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; }
 .leaf-back { transform: rotateY(180deg); }
-:is(.book-leaf, .book-cover)[data-side="back"] .leaf-front, :is(.book-leaf, .book-cover):not([data-side="back"]) .leaf-back { opacity: 0; }
-.book-cover .cover-face { padding: 0; }
-.cover-title { position: absolute; left: 25%; right: 25%; top: 26%; height: 17%; display: grid; place-items: center; margin: 0; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-title); letter-spacing: .2em; }
+.leaf-tabs { position: absolute; inset: 0; transform: translateZ(-1px); backface-visibility: hidden; }
+.book-leaf > .leaf-tabs[data-face="back"] { transform: rotateY(180deg) translateZ(-1px); }
+.book-cover > .leaf-tabs { top: var(--edge-top); bottom: var(--edge-bottom); left: 0; right: var(--edge-side); }
+:is(.book-leaf, .book-cover)[data-side="back"] > :is(.leaf-front, .leaf-tabs[data-face="front"]), :is(.book-leaf, .book-cover):not([data-side="back"]) > :is(.leaf-back, .leaf-tabs[data-face="back"]) { opacity: 0; }
+/* 封面內側是一塊書板，上面就是第一個左頁的紙。 */
+.book-cover .cover-face, .cover-lining { padding: 0; }
+.cover-lining { overflow: visible; }
+.cover-lining > :is(.leaf-tabs, .cover-page) { position: absolute; top: var(--edge-top); bottom: var(--edge-bottom); left: var(--edge-side); right: 0; transform: none; }
+.cover-page { overflow: hidden; }
+.cover-title { position: absolute; left: 25%; right: 25%; top: 26%; height: 17%; display: grid; place-items: center; margin: 0; padding-right: 1.4rem; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-title); line-height: 1; white-space: nowrap; }
 .cover-star { position: absolute; left: 50%; top: 57%; width: 3rem; aspect-ratio: 1; translate: -50% 0; }
 .cover-star .art-layer, .book-doodle .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
-.book-doodle { position: relative; width: 4rem; aspect-ratio: 1; margin: 30% auto 0; opacity: .45; }
-.book-tabs { position: absolute; left: calc(100% + 6px); top: .8rem; display: grid; gap: .4rem; }
-.book-tab { min-width: 5.4rem; padding: .5rem .9rem .5rem 1.6rem; color: #fffaf0; background: #b5443c; border: 0; border-radius: 0 10px 10px 0; font-size: var(--fs-small); font-weight: 700; text-align: left; white-space: nowrap; translate: -10px 0; transition: translate .2s ease; cursor: pointer; }
+/* 闔著的書套著一條紅色鬆緊帶：打開前從書口滑開，闔上後套回去。 */
+.book-band { position: absolute; z-index: 5; top: calc(-1px - var(--edge-top)); bottom: calc(3px - var(--edge-bottom)); left: calc(100% - 1.7rem); width: 16px; pointer-events: none; }
+/* 什麼都沒寫的頁面：淡淡一張這一區的紙雕小圖。 */
+.book-doodle { position: relative; width: 6rem; aspect-ratio: 1; margin: 22% auto 0; opacity: .5; }
+/* 索引標籤：每區一張、位置固定；內端黏在紙底下，外端從書口突出。 */
+.book-tab { position: absolute; display: grid; place-items: center; margin: 0; padding: 0 0 4px; color: #fffaf0; background: #b5443c; border: 0; border-radius: 10px; font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; line-height: 1; white-space: nowrap; cursor: pointer; pointer-events: auto; transition: translate .2s ease; }
+.book-tab.is-carried { visibility: hidden; }
 .book-tab:is([data-section="house"], [data-section="gifts"]) { color: var(--ink); }
-.book-tab[aria-pressed="true"], .book-tab:hover { translate: 0 0; }
+.book-tab:is([data-side="right"], [data-side="left"]) { top: calc(var(--tab-top) + var(--slot) * var(--tab-step)); width: var(--tab-long); height: var(--tab-wide); }
+.book-tab[data-side="right"] { left: calc(100% - var(--tab-under)); padding-left: calc(var(--tab-under) + var(--edge-side)); }
+.book-tab[data-side="left"] { right: calc(100% - var(--tab-under)); padding-right: calc(var(--tab-under) + var(--edge-side)); }
+.book-tab[data-side="right"]:is([aria-pressed="true"], :hover) { translate: 4px 0; }
+.book-tab[data-side="left"]:is([aria-pressed="true"], :hover) { translate: -4px 0; }
 .book-tab:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
 .book-foot { display: flex; align-items: center; justify-content: center; gap: .7rem; }
 .book-turn { padding: .45rem .9rem; color: var(--ink); background: #f6efe0; border: 0; font-size: var(--fs-small); font-weight: 700; cursor: pointer; }
@@ -743,7 +766,7 @@ html.theatre-open { overflow: hidden; }
 .clue-sticker::after { content: '＋'; color: #b5443c; }
 .clue-sticker[aria-expanded="true"]::after { content: '－'; }
 .clue-sticker:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
-.clue-words { display: grid; }
+.clue-words { display: grid; line-height: 1.45; }
 .notebook-place { color: #8f5a3c; font-weight: 700; }
 .clue-where { color: #6b5a4c; font-size: var(--fs-small); font-weight: 400; }
 .notebook-clues .is-fresh .notebook-place::after { content: ' ★ 新'; color: #c08a3e; }
@@ -761,26 +784,39 @@ html.theatre-open { overflow: hidden; }
 .notebook-sure { margin: 0; color: #8f3b36; text-align: center; }
 .notebook-hint:hover, .notebook-close:hover, .book-turn:not(:disabled):hover { translate: 0 -2px; }
 .notebook-hint:focus-visible, .notebook-close:focus-visible, .book-turn:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
-/* 封面掀開、闔上時，書的左（上）半邊還沒打開。 */
-.notebook-card:is([data-state="opening"], [data-state="closing"]) :is(.book-page[data-slot="a"], .book-tabs, .board-half:first-child) { visibility: hidden; }
-.cabin[data-paper] :is(.board-half, .book-page, .leaf-face, .book-tab, .book-turn, .book-count, .clue-sticker) { background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border-radius: 0; }
+/* 闔著、封面翻開或闔上時，左（上）半邊就是封面本身。 */
+.notebook-card:is([data-state="shut"], [data-state="opening"], [data-state="closing"]) :is(.book-page[data-slot="a"], .board-half:first-child) { visibility: hidden; }
+.cabin[data-paper] :is(.board-half, .book-page, .leaf-face, .cover-page, .book-tab, .book-turn, .book-count, .clue-sticker, .book-band) { background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border-radius: 0; }
 .cabin[data-paper] .clue-sticker { padding: .65rem 1rem .75rem; }
+@media (pointer: coarse) { .notebook-card { --tab-wide: 2.75rem; --tab-step: 3.05rem; } }
 @media (max-width: 700px) {
   .notebook-button { top: .6rem; right: .6rem; width: 44px; height: 52px; }
-  .notebook-card { width: calc(100% - 1.2rem); height: calc(100% - 1.2rem); translate: -50% -50%; gap: .5rem; }
-  .book { margin: 2.9rem 10px 14px; }
-  .book-board { inset: -10px; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
-  .book-pages { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
-  .book-page, .leaf-face { padding: 1rem 1.15rem 1.5rem; }
-  .book-page[data-slot="b"], .leaf-front { padding: 1.5rem 1.15rem 1rem; }
-  .book-cover .cover-face { padding: 0; }
-  .book-leaf, .book-cover { left: 0; top: 50%; bottom: auto; width: 100%; height: 50%; transform-origin: center top; }
+  .notebook-card { --edge-top: 16px; --edge-side: 12px; --edge-bottom: 16px; --tab-long: 3.4rem; --tab-gap: .3rem; width: calc(100% - 1.2rem); height: calc(100% - 1.2rem); gap: .5rem; }
+  .book { margin: calc(var(--tab-long) - var(--tab-under) + 2px) var(--edge-side); }
+  .book-board, .book-pages { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  .book-page, .leaf-face, .cover-page { padding: 1rem 1.15rem 1.5rem; }
+  .book-page[data-slot="b"], .book-leaf .leaf-front { padding: 1.5rem 1.15rem 1rem; }
+  .book-leaf, .book-cover { transform-origin: center top; }
+  .book-leaf { left: 0; top: 50%; bottom: auto; width: 100%; height: 50%; }
+  .book-cover { left: calc(var(--edge-side) * -1); right: calc(var(--edge-side) * -1); top: 50%; bottom: calc(var(--edge-bottom) * -1); }
   .leaf-back { transform: rotateX(180deg); }
-  .book-tabs { left: 0; right: 0; top: auto; bottom: calc(100% + 4px); display: flex; gap: .3rem; }
-  .book-tab { flex: 1; min-width: 0; padding: .45rem .2rem .7rem; border-radius: 10px 10px 0 0; text-align: center; translate: 0 8px; }
-  .book-tab[aria-pressed="true"], .book-tab:hover { translate: 0 0; }
+  .book-leaf > .leaf-tabs[data-face="back"] { transform: rotateX(180deg) translateZ(-1px); }
+  .book-cover > .leaf-tabs { top: 0; bottom: var(--edge-bottom); left: var(--edge-side); right: var(--edge-side); }
+  .cover-lining > :is(.leaf-tabs, .cover-page) { top: var(--edge-top); bottom: 0; left: var(--edge-side); right: var(--edge-side); }
+  .cover-title { padding-right: 1.8rem; }
+  .book-band { top: calc(100% - 1.7rem); bottom: auto; left: calc(-1px - var(--edge-side)); right: calc(-1px - var(--edge-side)); width: auto; height: 16px; }
+  .book-tab:is([data-side="top"], [data-side="bottom"]) { left: calc(var(--slot) * (100% + var(--tab-gap)) / 5); width: calc((100% - 4 * var(--tab-gap)) / 5); height: var(--tab-long); }
+  .book-tab[data-side="bottom"] { top: calc(100% - var(--tab-under)); padding-top: calc(var(--tab-under) + var(--edge-bottom)); }
+  .book-tab[data-side="top"] { bottom: calc(100% - var(--tab-under)); padding-bottom: calc(var(--tab-under) + var(--edge-top)); }
+  .book-tab[data-side="bottom"]:is([aria-pressed="true"], :hover) { translate: 0 4px; }
+  .book-tab[data-side="top"]:is([aria-pressed="true"], :hover) { translate: 0 -4px; }
   .book-count { min-width: 5.5rem; }
   .book-turn { padding: .45rem .7rem; }
+}
+/* 橫拿的手機：書很矮，所以整張卡片幾乎和畫面一樣高，「從頭再玩一次」放到按鈕列左邊，讓書多一點高度。 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .notebook-card { --tab-top: .5rem; --tab-step: 2.95rem; height: calc(100% - 1rem); gap: .5rem; }
+  .notebook-restart { position: absolute; left: 0; bottom: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .notebook-button.is-new { animation: none; } .book-tab, .notebook-hint, .notebook-close, .book-turn { transition: none; } }
 /* 弄濕的交接表：四晚 × 前半夜／後半夜的格子。暈開的墨水留著寫字人的顏色，洗掉的只剩水痕；點格子再點名牌補字，補對了墨水一行行乾回來。 */

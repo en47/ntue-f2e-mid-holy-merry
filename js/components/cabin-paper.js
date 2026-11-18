@@ -30,6 +30,8 @@ const PAPERS = {
   slate: ['#7b95a6', '#58707f'],
   gold: ['#e0b04f', '#b98a3c'],
 };
+// How many leaves' edges a board of the clue book can show.
+const LEAVES = [0, 1, 2, 3];
 // Which paper each box is cut from; the first match wins, so a pressed tab is a red tag and the others stay pale.
 const KINDS = [
   ['.secret-card[data-thing="tags"] .secret-tags li', 'label'],
@@ -71,15 +73,21 @@ const KINDS = [
   ['.inspect-card', 'frame'],
   ['.wardrobe-tabs button[aria-pressed="true"], .cabin-back, .cabin-letter-close, .wardrobe-reset, .hoist-hook, .hoist-release, .chat-close, .chat-send, .books-tools button, .books-enter, .gearbox-actions button, .desk-actions button, .register-sign, .theatre-close, .notebook-close, .inspect-close', 'tag'],
   ['.wardrobe-tabs button, .wardrobe-item, .cabin-explore button, .theatre-again, .theatre-skip, .notebook-hint, .shift-pick, .bag-item, .bag-look, .inspect-flip, .chair-flip', 'pale'],
-  ['.notebook-card[data-layout="stacked"] .board-half:first-child', 'boardTop'],
-  ['.notebook-card[data-layout="stacked"] .board-half:last-child', 'boardBottom'],
-  ['.board-half:first-child', 'boardLeft'],
-  ['.board-half:last-child', 'boardRight'],
+  // The clue book's boards, with the edges of the leaves lying on each (`data-kind` of them, up to three); the inside of
+  // its cover is a board like the left (upper) one.
+  ...LEAVES.flatMap(n => [
+    [`.notebook-card[data-layout="stacked"] :is(.board-half:first-child, .cover-lining)[data-kind="${n}"]`, `boardTop${n}`],
+    [`.notebook-card[data-layout="stacked"] .board-half:last-child[data-kind="${n}"]`, `boardBottom${n}`],
+    [`:is(.board-half:first-child, .cover-lining)[data-kind="${n}"]`, `boardLeft${n}`],
+    [`.board-half:last-child[data-kind="${n}"]`, `boardRight${n}`],
+  ]),
   ['.notebook-card[data-layout="stacked"] .cover-face', 'coverTop'],
   ['.cover-face', 'coverLeft'],
-  ['.notebook-card[data-layout="stacked"] :is(.book-page[data-slot="a"], .leaf-back)', 'pageTop'],
+  ['.notebook-card[data-layout="stacked"] .book-band', 'bandAcross'],
+  ['.book-band', 'band'],
+  ['.notebook-card[data-layout="stacked"] :is(.book-page[data-slot="a"], .leaf-back, .cover-page)', 'pageTop'],
   ['.notebook-card[data-layout="stacked"] :is(.book-page[data-slot="b"], .book-leaf .leaf-front)', 'pageBottom'],
-  ['.notebook-card :is(.book-page[data-slot="a"], .leaf-back)', 'pageLeft'],
+  ['.notebook-card :is(.book-page[data-slot="a"], .leaf-back, .cover-page)', 'pageLeft'],
   ['.notebook-card :is(.book-page[data-slot="b"], .book-leaf .leaf-front)', 'pageRight'],
   ['.book-tab[data-section="now"]', 'tag'],
   ['.book-tab[data-section="yard"]', 'pine'],
@@ -177,11 +185,20 @@ function speech(paper, width, height, seed, left, fill, shadow) {
 const ink = (d, colour, parent, width = 1.4, opacity = 1) => shape('path', { d, fill: 'none', stroke: colour, 'stroke-width': width, 'stroke-linecap': 'round', opacity }, parent);
 const cut = (parent, d, fill, shadow) => { shape('path', { d, fill: shadow, transform: `translate(0 ${SHADOW})` }, parent); shape('path', { d, fill }, parent); };
 const flap = (fill, shadow) => (paper, width, height, seed) => { const j = i => (noise(seed + i) - .5) * 2; cut(paper, `M${2 + j(1)} ${2 + j(2)}H${width - 2 + j(3)}L${width / 2 + j(4)} ${height - SHADOW}Z`, fill, shadow); };
-// One of the clue book's two kraft boards, darker where it meets the other at the spine (its `spine` side).
-const bookBoard = spine => (paper, width, height, seed) => {
+// One of the clue book's two kraft boards, darker where it meets the other at the spine (its `spine` side), with the
+// edges of `leaves` leaves lying on it showing past the top page towards the fore-edge (and a little below it). The page
+// lies inset from the board as css/santa.css sets it: 14px, 14px at the fore-edge and 20px below on a wide screen, 16px
+// above and below and 12px at the sides when the pages are stacked; flush at the spine.
+const bookBoard = (spine, leaves = 0) => (paper, width, height, seed) => {
   cut(paper, outline(width, height, seed), '#c9a46a', '#a8865a');
   const bottom = height - SHADOW;
   shape('rect', { ...{ left: { x: 2, y: 3, width: 12, height: bottom - 6 }, right: { x: width - 14, y: 3, width: 12, height: bottom - 6 }, top: { x: 3, y: 2, width: width - 6, height: 12 }, bottom: { x: 3, y: bottom - 14, width: width - 6, height: 12 } }[spine], rx: 4, fill: '#a8774d' }, paper);
+  const page = { left: [0, 14, width - 14, height - 20], right: [14, 14, width, height - 20], top: [12, 0, width - 12, height - 16], bottom: [12, 16, width - 12, height] }[spine];
+  const out = { left: [1, 0], right: [-1, 0], top: [0, 1], bottom: [0, -1] }[spine], drop = spine === 'left' || spine === 'right' ? .6 : 0;
+  for (let k = leaves; k >= 1; k--) {
+    const dx = out[0] * k * 2.2, dy = out[1] * k * 2.2 + k * drop;
+    shape('path', { d: rounded(page[0] + dx, page[1] + dy, page[2] + dx, page[3] + dy, seed + k, 4), fill: k % 2 ? '#f6eedd' : '#efe4cc', stroke: '#d6c3a0', 'stroke-width': .8 }, paper);
+  }
 };
 // A page of the clue book: cream paper, ruled faintly, shaded a little towards the spine on its `spine` side.
 const bookPage = spine => (paper, width, height, seed) => {
@@ -193,14 +210,15 @@ const bookPage = spine => (paper, width, height, seed) => {
   }
 };
 // The clue book's cover: kraft board darker along its hinge (on its left, or along its top when the pages are stacked),
-// a cream label for its name (written over it in the page), and the red elastic band round it.
+// a cream label for its name (written over it in the page) with a sprig of holly at its corner. Its elastic band is a
+// strip of its own (`band`), since it slips off before the cover opens.
 const bookCover = hinge => (paper, width, height, seed) => {
   cut(paper, outline(width, height, seed), '#c9a46a', '#a8865a');
   const bottom = height - SHADOW, left = hinge === 'left';
   shape('rect', left ? { x: 3, y: 3, width: 16, height: bottom - 6, rx: 4, fill: '#a8774d' } : { x: 3, y: 3, width: width - 6, height: 16, rx: 4, fill: '#a8774d' }, paper);
   shape('path', { d: rounded(width * .25, bottom * .26, width * .75, bottom * .46, seed + 4, 6), fill: '#fffaf0' }, paper);
   ink(`M${(width * .3).toFixed(1)} ${(bottom * .43).toFixed(1)}H${(width * .7).toFixed(1)}`, '#b5443c', paper, 2);
-  shape('rect', left ? { x: width - 30, y: 0, width: 9, height: bottom, fill: '#b5443c' } : { x: 0, y: bottom - 30, width, height: 9, fill: '#b5443c' }, paper);
+  holly(paper, width * .75 - 4, bottom * .26 + 2);
 };
 const OBJECTS = {
   // The name board and the gearbox's case: planks with their grain and seams, a nail in each corner.
@@ -312,9 +330,23 @@ const OBJECTS = {
     cut(paper, `${d}Z`, '#a8423b', '#6e2c28');
     shape('circle', { cx, cy, r: r * .64, fill: 'none', stroke: '#c9665c', 'stroke-width': 1.6 }, paper);
   },
-  boardLeft: bookBoard('right'), boardRight: bookBoard('left'), boardTop: bookBoard('bottom'), boardBottom: bookBoard('top'),
+  ...Object.fromEntries(LEAVES.flatMap(n => [[`boardLeft${n}`, bookBoard('right', n)], [`boardRight${n}`, bookBoard('left', n)], [`boardTop${n}`, bookBoard('bottom', n)], [`boardBottom${n}`, bookBoard('top', n)]])),
   pageLeft: bookPage('right'), pageRight: bookPage('left'), pageTop: bookPage('bottom'), pageBottom: bookPage('top'),
   coverLeft: bookCover('left'), coverTop: bookCover('top'),
+  // The elastic band round the shut clue book: red, a thread of a darker red down it, darker where it bends round the
+  // edges of the cover; down near the fore-edge, or across it when the pages are stacked.
+  band(paper, width, height) {
+    const x = width / 2 - 4.5, bottom = height - SHADOW;
+    cut(paper, `M${x} 1H${x + 9}V${bottom}H${x}Z`, '#b5443c', '#7f312c');
+    for (const y of [1, bottom - 5]) shape('rect', { x, y, width: 9, height: 5, fill: '#8f3530' }, paper);
+    ink(`M${width / 2} 7V${bottom - 7}`, '#9a3a33', paper, 1);
+  },
+  bandAcross(paper, width, height) {
+    const y = (height - SHADOW) / 2 - 4.5;
+    cut(paper, `M1 ${y}H${width - 1}V${y + 9}H1Z`, '#b5443c', '#7f312c');
+    for (const x of [1, width - 6]) shape('rect', { x, y, width: 5, height: 9, fill: '#8f3530' }, paper);
+    ink(`M7 ${y + 4.5}H${width - 7}`, '#9a3a33', paper, 1);
+  },
   // Looking closely: a kraft mount round a cream card, with a darker paper corner holding each corner of the card.
   frame(paper, width, height, seed) {
     cut(paper, outline(width, height, seed), '#c9a46a', '#a8865a');
