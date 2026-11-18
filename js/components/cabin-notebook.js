@@ -10,11 +10,14 @@
 // end. Paper index tabs are stuck to the leaves where each part begins (now, the yard, the house, the little room, the
 // gifts) and stick out of the fore-edge, so each lies on the side its leaf does and rides over with it as it turns; the
 // edges of the leaves show on the boards, more on the side that holds more. What each part holds is laid over its pages
-// measured, so the two pages of a spread come out about as full as each other. A clue is a sticker naming where it was
-// seen; tapped, what it said opens under it. Cut from the same paper as everything else (cabin-paper.js).
+// measured, so the two pages of a spread come out about as full as each other. A clue is a sticker with a little paper
+// picture of the thing it was found on (cabin-clue-art.js), its name and where it was seen; tapped, what it said opens
+// under it, and one just found is stuck on with a slap once its page lies open. Cut from the same paper as everything
+// else (cabin-paper.js).
 import { paperLayer, shape } from './paper-art.js';
 import { lamp, roofHouse, snowyFir, star } from './paper-props.js';
 import { ornament } from './cabin-ornaments.js';
+import { CLUE_ICON, clueIcon } from './cabin-clue-art.js';
 import { GIFTS, TASKS, goal, knowsSantas, points, signedUp } from '../services/cabin-story.js';
 import { CLUE_PLACES, GIFT_HINTS, GIFT_ORDER, GOALS, GOAL_CLUES, NOTEBOOK, RESTART } from '../data/cabin-clues.js';
 import { JOBS } from '../data/cabin-secret.js';
@@ -65,20 +68,21 @@ const FLAT = '0 1px 2px #6e55331a', LIFTED = '8px 10px 8px #6e553340';
 
 // Where to cut a part's blocks to lay them over an even number of pages `room` tall (`ends`: where each block ends when
 // they are written one under another): as few pages as hold them, each as near as can be to as full as the others, a
-// page running over costing dearly, and a list cut in two (`joins`: the blocks that go on from the one before) costing
-// enough that it only is when it has to be. Each page is [its first block, the one after its last]; one may be empty.
+// page running over costing dearly. A list may go on from a left (upper) page to the one beside it, read at a glance;
+// going on over a turn of the leaf (`joins`: the blocks that go on from the one before) costs enough that it only does
+// when it has to. Each page is [its first block, the one after its last]; one may be empty.
 export function share(ends, room, joins = []) {
   const n = ends.length, total = ends[n - 1] ?? 0, tall = (i, j) => (j > i ? ends[j - 1] - (i ? ends[i - 1] : 0) : 0);
   // Two more pages at a time until nothing runs over (or there is a page for every block).
   for (let count = 2 * Math.max(1, Math.ceil(total / (2 * room))); ; count += 2) {
-    const even = total / count, cost = (height, i) => (height - even) ** 2 + (height > room ? 50 * (height - room) ** 2 : 0) + (joins[i] && height ? (room / 3) ** 2 : 0);
+    const even = total / count, cost = (height, i, page) => (height - even) ** 2 + (height > room ? 50 * (height - room) ** 2 : 0) + (joins[i] && height && !(page % 2) ? (room / 3) ** 2 : 0);
     // best[j]: the least it costs to lay the first j blocks on the pages so far, and where each of those pages starts.
     // On a tie the later cut wins, so the earlier page is the fuller one.
     let best = Array.from({ length: n + 1 }, (_, j) => [j ? Infinity : 0, []]);
     for (let page = 0; page < count; page++) {
       const next = Array.from({ length: n + 1 }, () => [Infinity, []]);
       for (let j = 0; j <= n; j++) for (let i = j; i >= 0; i--) {
-        const [was, starts] = best[i], value = was + cost(tall(i, j), i);
+        const [was, starts] = best[i], value = was + cost(tall(i, j), i, page);
         if (value < next[j][0]) next[j] = [value, [...starts, i]];
       }
       best = next;
@@ -117,12 +121,14 @@ export function mountNotebook(stage, { progress, save, sound }) {
     if (card) render();
   }
 
-  // A clue as a sticker, at the end of the page's list (a new list if the page does not end in one): its name, and where
-  // it was seen; tapped, what it said opens under it (one just found is open already).
+  // A clue as a sticker, at the end of the page's list (a new list if the page does not end in one): the picture of the
+  // thing it was found on, its name, and where it was seen; tapped, what it said opens under it (one just found is open
+  // already).
   function sticker(page, id) {
     const list = page.lastElementChild?.matches('.notebook-clues') ? page.lastElementChild : element('ul', 'notebook-clues', page);
     const item = element('li', fresh.has(id) ? 'clue-item is-fresh' : 'clue-item', list);
     const tag = element('button', 'clue-sticker', item); tag.type = 'button';
+    const picture = element('span', 'clue-icon', tag); picture.style.backgroundImage = clueIcon(CLUE_ICON[id]); picture.setAttribute('aria-hidden', 'true');
     const words = element('span', 'clue-words', tag); element('span', 'notebook-place', words, NOTEBOOK[id].name); element('span', 'clue-where', words, NOTEBOOK[id].place);
     const text = element('p', 'clue-text', item, NOTEBOOK[id].text); text.hidden = !fresh.has(id);
     tag.setAttribute('aria-expanded', String(!text.hidden));
@@ -315,7 +321,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
   // is the new one already.
   async function turnTo(target) {
     const b = book; if (!b || b.busy || target === b.spread || target < 0 || target >= b.pages.length / 2) return;
-    b.busy = b.turning = true; nav(); sound.play('pick');
+    b.busy = b.turning = true; nav(); sound.play('pick'); card.dataset.state = 'turning';
     const from = b.spread, forward = target > from, spreads = b.pages.length / 2, [left, right] = b.slots, [front, rear] = b.leaf.querySelectorAll(':scope > .leaf-face'), focused = document.activeElement;
     fill(front, b.pages[2 * (forward ? from : target) + 1]); fill(rear, b.pages[2 * (forward ? target : from)]);
     if (forward) fill(right, b.pages[2 * target + 1]); else fill(left, b.pages[2 * target]);
@@ -325,7 +331,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
     await hinge(b.leaf, forward ? 0 : flipped(), forward ? flipped() : 0);
     if (book !== b) return;
     if (forward) fill(left, b.pages[2 * target]); else fill(right, b.pages[2 * target + 1]);
-    landed(b.leaf); b.spread = target; b.busy = b.turning = false;
+    landed(b.leaf); b.spread = target; b.busy = b.turning = false; card.dataset.state = 'open';
     if (b.dirty) { b.dirty = false; render(); } else { fill(b.sheet, b.pages[2 * target]); lie(); nav(); }
     if (focused?.isConnected && focused.matches('.book-tab')) focused.focus({ preventScroll: true });
   }
