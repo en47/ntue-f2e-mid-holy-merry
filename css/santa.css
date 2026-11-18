@@ -758,6 +758,13 @@ html.theatre-open { overflow: hidden; }
 .book-heading, .notebook-title { margin: 0 0 .6rem; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-body); letter-spacing: .12em; }
 .book-label { margin: .8rem 0 .35rem; color: #6b5a4c; font-size: var(--fs-small); }
 .notebook-goal { margin: 0; color: #3f6653; font-size: var(--fs-small); }
+/* 「現在」頁目標旁的紙雕小圖；目標換了以後第一次打開線索本，新的小圖彈出來一次。 */
+.goal-row { display: flex; align-items: flex-start; gap: .8rem; }
+.goal-picture { flex: none; width: 4.4rem; aspect-ratio: 1; margin-top: .1rem; background: no-repeat center / contain; }
+.goal-words { flex: 1; min-width: 0; }
+@media (prefers-reduced-motion: no-preference) { .notebook-card[data-state="open"] .goal-picture.is-fresh { animation: goal-pop .7s cubic-bezier(.3, 1.6, .5, 1) both; } }
+@keyframes goal-pop { from { opacity: 0; scale: .4; rotate: -12deg; } 60% { opacity: 1; scale: 1.08; } to { scale: 1; rotate: 0deg; } }
+@media (max-width: 700px) { .goal-picture { width: 3.6rem; } }
 /* 線索本裡寫著現在要做什麼。 */
 .notebook-task { margin: .2rem 0 .5rem; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; }
 .notebook-empty { margin: 0; color: var(--muted); font-size: var(--fs-small); }

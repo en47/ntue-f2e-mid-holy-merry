@@ -17,7 +17,7 @@
 import { paperLayer, shape } from './paper-art.js';
 import { lamp, roofHouse, snowyFir, star } from './paper-props.js';
 import { ornament } from './cabin-ornaments.js';
-import { CLUE_ICON, clueIcon } from './cabin-clue-art.js';
+import { CLUE_ICON, clueIcon, goalPicture } from './cabin-clue-art.js';
 import { GIFTS, TASKS, goal, knowsSantas, points, signedUp } from '../services/cabin-story.js';
 import { CLUE_PLACES, GIFT_HINTS, GIFT_ORDER, GOALS, GOAL_CLUES, NOTEBOOK, RESTART } from '../data/cabin-clues.js';
 import { JOBS } from '../data/cabin-secret.js';
@@ -101,6 +101,8 @@ export function mountNotebook(stage, { progress, save, sound }) {
   const show = () => { button.hidden = !(progress.clues.length || progress.story.left); };
   // When the goal moves on, the book only hops and shows its red dot: nothing is said (what to do now is written inside).
   let goalNow = goal(progress);
+  // The goal as it stood when the book was last opened: a new one's picture pops in as the book opens, once.
+  let goalRead = goalNow, goalFresh = false;
   function check() {
     const now = goal(progress); if (now === goalNow) return;
     goalNow = now; show(); dot.hidden = false;
@@ -196,7 +198,13 @@ export function mountNotebook(stage, { progress, save, sound }) {
     const now = goal(progress), { title } = GOALS[now], list = [];
     const clues = (ids, head) => ids.map((id, i) => page => { if (!i) head(page); return sticker(page, id); });
     list.push(['now', [
-      page => { const help = element('header', 'notebook-now', page); element('h3', 'book-heading', help, SECTIONS.now[1]); element('h4', 'notebook-goal', help, title); element('p', 'notebook-task', help, GOALS[now].task); return help; },
+      page => {
+        const head = element('header', 'notebook-now', page); element('h3', 'book-heading', head, SECTIONS.now[1]);
+        const row = element('div', 'goal-row', head), picture = element('span', goalFresh ? 'goal-picture is-fresh' : 'goal-picture', row);
+        picture.style.backgroundImage = goalPicture(now); picture.setAttribute('aria-hidden', 'true');
+        const help = element('div', 'goal-words', row); element('h4', 'notebook-goal', help, title); element('p', 'notebook-task', help, GOALS[now].task);
+        return head;
+      },
       ...(signedUp(progress.volunteer) ? jobs() : []),
       ...clues(found(GOAL_CLUES[now] ?? []), page => element('p', 'book-label', page, '用得上的線索')),
       page => hints(page, now),
@@ -409,6 +417,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
     });
     sized.observe(shell); events.signal.addEventListener('abort', () => sized.disconnect());
     book = { shell, halves, tabs, slots, probe, leaf, lid, lining, sheet, band, back, ahead, count, events, pages: [], spread: 0, busy: true, turning: true, dirty: false, shut: true };
+    goalFresh = goal(progress) !== goalRead; goalRead = goal(progress);
     book.turning = false; render(); book.turning = true;
     dot.hidden = true; sound.play('open'); button.setAttribute('aria-expanded', 'true');
     // Shut in the middle with its band on; the band slips off, then the cover swings open over the spine (the tab on its
@@ -424,6 +433,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
       if (book !== mine) return;
       landed(lid); card.dataset.state = 'open'; mine.shut = false; mine.busy = mine.turning = false;
       if (mine.dirty) { mine.dirty = false; render(); } else { lie(); nav(); }
+      goalFresh = false;
     }));
     done.focus({ preventScroll: true });
   }
