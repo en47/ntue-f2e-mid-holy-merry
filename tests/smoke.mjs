@@ -547,10 +547,13 @@ await test('Santa 線索本像一本真的書：封面和書板一樣大、標�
   assert.deepEqual(share([], 300), [[0, 0], [0, 0]]);
   const house = share(ends([104, ...Array(11).fill(72)]), 413), tall = ([i, j], list) => (j > i ? list[j - 1] - (i ? list[i - 1] : 0) : 0), houseEnds = ends([104, ...Array(11).fill(72)]);
   assert.equal(house.length % 2, 0); assert.ok(house.length > 2 && house.every(page => tall(page, houseEnds) <= 413), 'What will not go on one spread goes on two rather than running over');
-  // The jobs stay one list where they fit, and are cut over the page only where they do not.
+  // The jobs list goes on from the left page to the right one when that evens the spread (both lie open together), but
+  // over a turn of the leaf only when it has to.
   const now = ends([100, 95, 70, 70, 70, 90, 69, 90]), joins = [false, false, true, true, true, false, false, false];
-  assert.deepEqual(share(now, 445, joins), [[0, 5], [5, 8]]);
-  assert.ok(share(now, 231, joins).every(page => tall(page, now) <= 231), 'On a phone the list is cut so no page runs over');
+  assert.deepEqual(share(now, 445, joins), [[0, 4], [4, 8]]);
+  const phone = share(now, 231, joins);
+  assert.ok(phone.every(page => tall(page, now) <= 231), 'On a phone no page runs over');
+  assert.ok(share(ends([110, 100, 72, 72, 72, 98, 69, 69, 69, 69, 75]), 445, [false, false, true, true, true, false, false, false, false, false, false]).slice(0, 2).every(page => tall(page, ends([110, 100, 72, 72, 72, 98, 69, 69, 69, 69, 75])) > 150), 'Over two spreads, the first is not the goal alone beside the jobs');
   assert.ok(book.includes('share(ends, room, blocks.map(draw => Boolean(draw.join)))') && book.includes('return node.offsetTop + node.offsetHeight - top;'), 'The blocks are measured on a hidden page as wide as a real one');
   // Shut, the cover covers the board under it exactly; open, its inside is the left (upper) board with the first page on it.
   assert.ok(css.includes('.book-cover { z-index: 4; top: calc(var(--edge-top) * -1); bottom: calc(var(--edge-bottom) * -1); left: 50%; right: calc(var(--edge-side) * -1);') && css.includes('.book-board { position: absolute; inset: calc(var(--edge-top) * -1) calc(var(--edge-side) * -1) calc(var(--edge-bottom) * -1);'), 'The cover is the size of the board it shuts over');
@@ -563,6 +566,16 @@ await test('Santa 線索本像一本真的書：封面和書板一樣大、標�
   assert.ok(css.includes('.leaf-tabs { position: absolute; inset: 0; transform: translateZ(-1px); backface-visibility: hidden; }') && css.includes('.book-tab[data-side="left"] { right: calc(100% - var(--tab-under));'), 'A tab is tucked under its paper and sticks out of the fore-edge');
   // Outside, the book is in English; the corner icon is gone while the book is out of it.
   assert.ok(book.includes("element('p', 'cover-title', face, 'Clue Book').lang = 'en';") && css.includes('.notebook-button[aria-expanded="true"] { visibility: hidden; }'), 'Its cover reads Clue Book, and the corner is empty while it is open');
+});
+await test('Santa 線索貼紙有那樣東西的紙雕小圖，剛找到的會貼上去', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [book, art, css] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-clue-art.js', 'css/santa.css'].map(read));
+  const { CLUE_ART, CLUE_ICON } = await import(pathToFileURL(path.join(project, 'js/components/cabin-clue-art.js')).href);
+  const { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.deepEqual(Object.keys(NOTEBOOK).filter(id => typeof CLUE_ART[CLUE_ICON[id]] !== 'function'), [], 'Every clue has a picture drawn for it');
+  assert.deepEqual(Object.keys(CLUE_ICON).sort(), Object.keys(NOTEBOOK).sort(), 'No picture for a clue the book does not have');
+  assert.ok(book.includes('picture.style.backgroundImage = clueIcon(CLUE_ICON[id]);') && art.includes('if (!images.has(name))') && !art.includes('innerHTML'), 'The sticker shows its picture, each cut into an image once');
+  assert.ok(css.includes('.notebook-card[data-state="open"] .clue-item.is-fresh > .clue-sticker { animation: sticker-slap') && book.includes("card.dataset.state = 'turning';"), 'A clue just found is stuck on once its page lies open, not under a turning leaf');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
