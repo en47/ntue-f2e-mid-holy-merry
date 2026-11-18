@@ -1338,11 +1338,11 @@
       "bytes": 5034
     },
     "hi/secret-desk.webp": {
-      "fingerprint": "6a8b84d7970a1f21e40b95b8c5e448adf10562b62e7e881f93fd661d95c590fe",
-      "sha256": "77e9c46789d08ce03c7977500a6dc537ed6dba9d4238a8efa1819eb8afe77fff",
+      "fingerprint": "000981ef52e658ab75970391b80375c297d143590ceaeabb863a129e37cb2858",
+      "sha256": "099843059bdfe0f8d95010731870dd205eb4295e3d5656e188a36db42fa4ee41",
       "width": 840,
       "height": 744,
-      "bytes": 30232
+      "bytes": 27262
     },
     "hi/secret-hats--mine-true.webp": {
       "fingerprint": "2357b5ed774a51225acaf9d27b1b6be24d6f942427f036ef3543aec980076894",
@@ -1365,12 +1365,26 @@
       "height": 442,
       "bytes": 15232
     },
+    "hi/secret-page.webp": {
+      "fingerprint": "058744948fa41d570a2d9f99037276ff159e1daa2f192293f134a1c3e446b350",
+      "sha256": "6a5df68e3d0e25ac26d54658b85a874a77fb119a2f413b45c138c67a6da3a8be",
+      "width": 134,
+      "height": 149,
+      "bytes": 1176
+    },
     "hi/secret-rack.webp": {
       "fingerprint": "93d633c816bcc2481de4c8d60294d8322682e809242079cf399cc4bace6afea4",
       "sha256": "372baf6faca6e6c32b9925fba861909b6202c2c37f66e509e3be38de9bf65a40",
       "width": 550,
       "height": 484,
       "bytes": 43948
+    },
+    "hi/secret-record.webp": {
+      "fingerprint": "90b51c99e0539c8d63094eca11f5d5c23f97a5f984927bdf17a200e7f468a5b4",
+      "sha256": "ef0c659e0e60f66d0db47d8e881d4bc9928eeb502b61356eb802c8c7178b05ff",
+      "width": 84,
+      "height": 149,
+      "bytes": 3538
     },
     "hi/secret-tags--mine-true.webp": {
       "fingerprint": "06487c554a7b55591b8a0fa3538bb4d457d67348218310e500d7fd01980d18eb",
@@ -2990,11 +3004,11 @@
       "bytes": 3758
     },
     "large/secret-desk.webp": {
-      "fingerprint": "3896b3a80e7b1bd066756bc25229d1df6044828c755cc8bc63ff84f3c783fab8",
-      "sha256": "46aa91d8564b3f56cdb1c9f89d4f17735a598320c3e2c491baf66fc83f5cefed",
+      "fingerprint": "60a10f69db013fa0546a3b113d155fa3b4a62903649cfbdeae5187f24575bf10",
+      "sha256": "6e2945378b9cedf50f98817d6a2937978c0aac266214abc7a914d7f5c42169e3",
       "width": 630,
       "height": 558,
-      "bytes": 20078
+      "bytes": 17356
     },
     "large/secret-hats--mine-true.webp": {
       "fingerprint": "884e0126d0535ce1724c1a4a4d3c189c6d58a3538a549693535756f76c534c61",
@@ -3017,12 +3031,26 @@
       "height": 332,
       "bytes": 9906
     },
+    "large/secret-page.webp": {
+      "fingerprint": "eed83f8aded7cfd55a4a71d9727f161e7c0e66650ae1aa0d9ce4e38439f6e346",
+      "sha256": "4fe008a649b38997fea0232a078e8b5afb271b8d77ef5e1beba2cbe63d269805",
+      "width": 101,
+      "height": 112,
+      "bytes": 898
+    },
     "large/secret-rack.webp": {
       "fingerprint": "665f86e3fe92297a1080d8d57853fce4346d66d56dd7718942614fd86fcd1611",
       "sha256": "2c8d09703bf7d69d50a089ebb49e6d08c51862733e151ab78e8ced7c074bac16",
       "width": 413,
       "height": 363,
       "bytes": 27196
+    },
+    "large/secret-record.webp": {
+      "fingerprint": "9d05d07bef3db8780c710ebf1c0ea49cbe64788ea08e8096307bedf96f95f420",
+      "sha256": "562e99b4a2c3ca7adbbebf9ee6fb75eaf7b18a4d170bb9adfa7a46e63b7e996e",
+      "width": 63,
+      "height": 112,
+      "bytes": 2454
     },
     "large/secret-tags--mine-true.webp": {
       "fingerprint": "8c1c752bd13f9b0cb89d691e300deb21e5262e97b87ceb4ca832ec7f5d52c5cc",
@@ -4642,11 +4670,11 @@
       "bytes": 1484
     },
     "small/secret-desk.webp": {
-      "fingerprint": "7149caf665c8c0493aab321e258c71618e0cf2b901cc5befd4ef2604c529083c",
-      "sha256": "1ab503e2e5136007ebd6e10a54fac726bdcca75fcbdd53b42f02a8e8c916763d",
+      "fingerprint": "4a18cf8b5ca0bdab098da6b6a33f5356fcb4b60834df5345b5a9c55ad67055bc",
+      "sha256": "7d1cffda815542ab6e33ee4facaac4eed74883746c50c6c49241ea8ea5c4c2f3",
       "width": 420,
       "height": 372,
-      "bytes": 6514
+      "bytes": 5746
     },
     "small/secret-hats--mine-true.webp": {
       "fingerprint": "a099248effd62fcca396ec2d818732fffcfac176ecf870a43b328bcbf36f9062",
@@ -4669,12 +4697,26 @@
       "height": 221,
       "bytes": 3166
     },
+    "small/secret-page.webp": {
+      "fingerprint": "8277522279f45163d1f4fe0a791b076c7c082faf50fbed3afa34b63711eaef79",
+      "sha256": "8c9f35f577ed638321b0ab8723a24f2db2d9a47dce4a9ba60c556094d9ac780d",
+      "width": 67,
+      "height": 75,
+      "bytes": 554
+    },
     "small/secret-rack.webp": {
       "fingerprint": "f2bd2519c840a8841e22358c841ee852fa19c723386d9efc4a58c9af4f301e98",
       "sha256": "4e7ea321c463e7ce2d5e76bfea75225399efd111cb637b753b739a0f73f33fcf",
       "width": 275,
       "height": 242,
       "bytes": 8624
+    },
+    "small/secret-record.webp": {
+      "fingerprint": "cfc0564737cdaa881c2f4452d8095f976317ed1914ceb0005ea604b02e82f651",
+      "sha256": "63f7d88b98dc0795f1ba10b594a86761504a2f3d2c2b3b1b5dae6f3aa94dbad7",
+      "width": 42,
+      "height": 75,
+      "bytes": 968
     },
     "small/secret-tags--mine-true.webp": {
       "fingerprint": "8c89c55e688789b18f208157aee0b7a79991bd1239db3bbdb55ef850950c6881",

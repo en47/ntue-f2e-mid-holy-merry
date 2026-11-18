@@ -627,12 +627,20 @@ export function secretDesk({ paper }, { width, height }) {
     shape('rect', { x: cx - 20, y: top - 22, width: 40, height: 20, rx: 4, fill: colour }, paper);
   });
   shape('rect', { x: width * .3, y: top - 26, width: width * .16, height: 24, rx: 4, fill: '#3f6653', transform: `rotate(-6 ${width * .38} ${top})` }, paper);
-  // At the far end, the old record book standing up: dark red cloth, tied round with red cord, a little brass lock.
-  const bx = width * .855, bw = width * .085, bh = height * .2;
-  shape('rect', { x: bx, y: top - bh, width: bw, height: bh, rx: 4, fill: '#6b2a2a' }, paper);
-  shape('rect', { x: bx + bw * .08, y: top - bh + 4, width: bw * .12, height: bh - 8, fill: '#8f3b36' }, paper);
-  shape('path', { d: `M${bx - 3} ${top - bh * .45}H${bx + bw + 3}`, stroke: '#c63a33', 'stroke-width': 5 }, paper);
-  shape('rect', { x: bx + bw * .3, y: top - bh * .45 - 10, width: bw * .4, height: 20, rx: 4, fill: '#c99a3c' }, paper);
+  // The register's top page and the old record book at the far end are sheets of their own (below), to move by themselves.
+}
+// The register's top page, laid exactly over the right-hand page drawn on the table (`secretDesk`): it lifts on its spine
+// in a draught when the register calls a stuck visitor (cabin-scene.js `beckon`), showing the same page under it.
+export function registerPage({ paper }, { width, height }) {
+  shape('path', { d: `M0 ${height * .25}Q${width * .5} 0 ${width} ${height * .3}L${width * .875} ${height}H0Z`, fill: '#fffdf6' }, paper);
+}
+// The old record book standing up at the table's far end: dark red cloth, tied round with red cord, a little brass lock.
+export function recordBook({ paper }, { width, height }) {
+  const bx = width * .075, bw = width * .85, cord = height * .55;
+  shape('rect', { x: bx, y: 0, width: bw, height, rx: 4, fill: '#6b2a2a' }, paper);
+  shape('rect', { x: bx + bw * .08, y: 4, width: bw * .12, height: height - 8, fill: '#8f3b36' }, paper);
+  shape('path', { d: `M${bx - 3} ${cord}H${bx + bw + 3}`, stroke: '#c63a33', 'stroke-width': 5 }, paper);
+  shape('rect', { x: bx + bw * .3, y: cord - 10, width: bw * .4, height: 20, rx: 4, fill: '#c99a3c' }, paper);
 }
 export function sortingRack({ paper }, { width, height }) {
   shape('rect', { x: 0, y: 0, width, height, rx: 8, fill: WOOD }, paper);
@@ -1470,6 +1478,9 @@ export const BOARDS = [
   // its wall: its paper edge, 1.2 cm behind it, would otherwise lie in the wall's plane and flicker.
   { id: 'secret-tags', w: .66, h: .42, px: 1200, at: [SECRET.left + SECRET.wall + .03, .6, -HOUSE.depth / 2 - .55], turn: Math.PI / 2, draw: nameTags, room: true, secret: true },
   { id: 'secret-desk', w: .7, h: .62, px: 1200, at: [SECRET.left + SECRET.width / 2, 0, -HOUSE.depth / 2 - SECRET.depth + .05], draw: secretDesk, room: true, secret: true },
+  // On the table, 6 mm in front of it, where the table's own drawing had them (its sheet is 840 × 744 at 1200 px a metre).
+  { id: 'secret-page', w: .112, h: .124, px: 1200, at: [SECRET.left + SECRET.width / 2 - .084, .3844, -HOUSE.depth / 2 - SECRET.depth + .056], draw: registerPage, room: true, secret: true },
+  { id: 'secret-record', w: .07, h: .124, px: 1200, at: [SECRET.left + SECRET.width / 2 + .27825, .3596, -HOUSE.depth / 2 - SECRET.depth + .056], draw: recordBook, room: true, secret: true },
   { id: 'secret-log', w: .26, h: .34, px: 1300, at: [SECRET.left + SECRET.width - SECRET.wall - .03, .62, -HOUSE.depth / 2 - .42], turn: -Math.PI / 2, draw: shiftLog, room: true, secret: true },
   { id: 'secret-hats', w: .5, h: .3, px: 1100, at: [SECRET.left + SECRET.width - SECRET.wall - .03, .9, -HOUSE.depth / 2 - .9], turn: -Math.PI / 2, draw: hatPegs, room: true, secret: true },
   { id: 'secret-rack', w: .5, h: .44, px: 1100, at: [SECRET.left + SECRET.width - SECRET.wall - .03, .08, -HOUSE.depth / 2 - .85], turn: -Math.PI / 2, draw: sortingRack, room: true, secret: true },

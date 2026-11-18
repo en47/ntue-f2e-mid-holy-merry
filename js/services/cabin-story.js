@@ -2,7 +2,7 @@
 // places for its nine letter books: the nine along HOLY MERRY's shelf (0–8) and the four empty ones left of the SANTA
 // picture book (9–12). A book moves to an empty place, or swaps with the book already there; the shelf opens when the four
 // places spell MORE (the two R books are alike, either will do).
-import { ever } from './cabin-bag.js';
+import { ever, holds } from './cabin-bag.js';
 
 export const LETTERS = ['H', 'O', 'L', 'Y', 'M', 'E', 'R', 'R', 'Y'];
 export const BOOK_IDS = ['book-h1', 'book-o1', 'book-l1', 'book-y1', 'book-m1', 'book-e1', 'book-r1', 'book-r2', 'book-y2'];
@@ -109,6 +109,26 @@ export function goal({ story, volunteer, finale, bag }) {
   if (!finale.twist) return points(volunteer) < 2 ? 'jobs' : finale.unlocked ? 'reread' : 'cord';
   if (!finale.wish && !finale.stayed) return points(volunteer) >= WISH_COST ? 'wish' : 'jobs';
   return allEndings(finale) ? 'done' : 'endings';
+}
+// When the visitor seems stuck (cabin-play.js: a minute with nothing new and no card open), the one thing that shows the
+// way gives a little move of its own, never a word: in the place they are in (`place`: 'yard', 'room', or 'little', the
+// room behind the bookcase), or else the way there (the front door, the bookcase standing open). `used`: what has been
+// used in the room on this visit; `calling`: the mailbox still calls by itself, its flag up; `home`: Santa is in his chair
+// (the books are not to be touched while he is: the room's things send him out again first); `turn`: how many moves there
+// have been, to take the gold books in turn. The letters job starts at the rack: the register beside it lists the jobs.
+const GOLD = BOOK_IDS.filter((id, i) => 'MORE'.includes(LETTERS[i])), ROOM_THINGS = ['hearth', 'desk', 'musicbox', 'globe'];
+const BECKONS = { log: ['little', 'secret-log'], secret: ['room', 'chair'], join: ['little', 'register'], wish: ['little', 'register'], endings: ['little', 'register'], cord: ['little', 'record'], reread: ['little', 'record'] };
+export function beckon(state, place, { used = new Set(), calling = false, home = false, turn = 0 } = {}) {
+  const { story, volunteer, bag, desk } = state, now = goal(state);
+  const at = ([where, id]) => where === place ? id : place === 'little' ? null : place === 'room' && where === 'little' ? 'bookcase' : 'door';
+  if (now === 'yard') return at(['yard', { lichen: calling ? null : 'mailbox', key: holds(bag, 'lichen') ? 'reindeer' : 'trough', handle: 'snow-pile', matches: 'hoist-tag' }[YARD.find(id => !ever(bag, id))]]);
+  if (now === 'room' || now === 'bookcase' && home) { const next = ROOM_THINGS.find(id => !used.has(id)); return at(['room', !next || used.size >= (story.left ? 1 : 2) ? 'chair' : next]); }
+  if (now === 'bookcase') { const loose = GOLD.filter(id => !GAPS.includes(story.shelf.indexOf(id))); return at(['room', loose[turn % loose.length]]); }
+  if (now === 'jobs') {
+    const jobs = TASKS.filter(task => !volunteer.tasks.includes(task)).map(task => ({ lichen: ['yard', 'reindeer'], hay: ['yard', 'sleigh'], letters: desk?.sorted ? ['room', 'desk'] : ['little', 'register'], wheel: ['yard', 'wheel'] })[task]);
+    return at(jobs.find(([where]) => where === place) ?? jobs[0]);
+  }
+  return BECKONS[now] ? at(BECKONS[now]) : null;
 }
 // The clue book's five chapters, a stamp on its cover for each the story is past: the yard's things found, the bookcase
 // opened, the secret told, the substitute's work done far enough (the old record read again, or stamps enough for a

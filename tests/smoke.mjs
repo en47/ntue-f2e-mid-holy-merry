@@ -293,7 +293,8 @@ await test('Santa 隱藏故事 P5：書櫃後的小房間、第一次反轉、�
   const { BOARDS, ROOM_SPOTS, SUBSTITUTES } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
   const { NAMES, RULES, NOTES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { NIGHTS } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
   const { DESK_LETTERS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href);
-  assert.ok(ROOM_SPOTS.some(spot => spot.id === 'secret' && spot.view.turn > 0) && BOARDS.filter(board => board.secret).length === 5, 'The little room is a place to look round, with five things on its walls');
+  const secretBoards = BOARDS.filter(board => board.secret).map(board => board.id).sort();
+  assert.ok(ROOM_SPOTS.some(spot => spot.id === 'secret' && spot.view.turn > 0) && secretBoards.join() === ['secret-desk', 'secret-hats', 'secret-log', 'secret-page', 'secret-rack', 'secret-record', 'secret-tags'].join(), 'The little room is a place to look round, with five things on its walls and floor (and on its table the register\'s top page and the old record book, sheets of their own)');
   assert.ok(SUBSTITUTES.every(([char]) => NAMES[char]) && DESK_LETTERS.every(letter => NAMES[letter.back.sign[0]]), 'Every initial on the desk has a name tag behind the bookcase');
   assert.deepEqual(NIGHTS.find(([date]) => date === '12/24'), ['12/24', 'K', 'H'], 'The night of 12/24 matches the note in the barn: blue K. starts, green H. finishes');
   assert.ok(NOTES.known.includes('原來，聖誕老人不只一位') && !Object.values(NOTES).join('').includes('從來不只是一個人') && !RULES.lines.join('').includes('實現了'), 'The first discovery is told; the deeper one is kept for later');
@@ -595,6 +596,40 @@ await test('Santa 線索本封面的章節郵票：過一章蓋一枚，下一�
   assert.ok(book.includes("pressed = finished.filter(id => !progress.stamped.includes(id))") && book.includes('progress.stamped = [...finished]; save();') && book.includes("slot.dataset.state = finished.includes(chapter) ? 'done' : chapter === next ? 'next' : 'later';"), 'A stamp is pressed on once, the next chapter shows as a shadow');
   assert.ok(css.includes('.notebook-card[data-state="shut"] .cover-stamp.is-new :is(.stamp-frame, .stamp-art) { animation: cover-stamp-land') && css.includes('.cover-stamp[data-state="next"] .stamp-art { filter: brightness(0) opacity(.2); }'), 'Pressed on while the book is still shut; the next a faint shadow');
   assert.ok(book.includes("WONDER.jobs[progress.finale.twist ? 0 : 1]") && book.includes("element('p', 'notebook-wonder', help, wonder)"), 'What the last chapter left you wondering is written under the goal');
+});
+await test('Santa 卡住時的場景暗示：一分鐘沒有進展、沒開卡片，才由目標那一樣東西自己動一下；不說話、只用位移與轉動、看得到才動、減少動態時不動', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [play, scene, art] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-scene.js', 'js/components/cabin-art.js'].map(read));
+  const { beckon, homeShelf } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { readProgress } = await import(pathToFileURL(path.join(project, 'js/services/cabin-progress.js')).href);
+  assert.ok(play.includes('const QUIET = 60000, EVERY = 20000, AFTER = 8000;') && play.includes('save = () => { quiet = Date.now();'), 'A minute with nothing new saved (every save starts it over), then one move every twenty seconds');
+  assert.ok(play.includes("if (stage.querySelector('article, dialog[open], .cabin-chat:not(.is-folded)')) busy = now;") && play.includes('if (still() || document.hidden || now - quiet < QUIET || now - beckoned < EVERY || now - busy < AFTER) return;'), 'Nothing moves while a card, the clue book, Santa\'s talk or an ending is open (nor for a few seconds after), the page is hidden, or motion is reduced');
+  const calls = play.slice(play.indexOf('const calls = setInterval'), play.indexOf('function start(id)'));
+  assert.ok(calls.includes('beckon(progress, cabin.where, { used, calling: !mail.seen, home: cabin.santaHome, turn: turns })') && !/say\(|textContent|announce\(|sound\./.test(calls), 'The thing moves; nothing is said or sounded');
+  assert.ok(play.includes('destroy() { clearInterval(calls);'), 'The timer goes with the page');
+  // Whatever the story can name, the scene can move: a known move each, a second or two, ending where it rests.
+  const kinds = Object.keys(Function(`return ${scene.match(/const BECKON = (\{[^}]+\});/)[1]}`)());
+  const states = [];
+  for (const place of ['yard', 'room', 'little']) for (const turn of [0, 1, 2, 3, 4]) {
+    const base = readProgress(null), add = (changes, used = new Set()) => states.push([Object.assign(readProgress(null), changes), place, { used, turn }]);
+    add({}); add({ bag: { held: ['lichen'], used: [] } }); add({ bag: { held: [], used: ['lichen'] } }); add({ bag: { held: ['key'], used: ['lichen'] } }); add({ bag: { held: ['key', 'handle'], used: ['lichen'] } });
+    const yard = { held: ['key', 'matches'], used: ['lichen', 'handle'] }, known = { ...base.story, opened: true, left: true, seen: ['tags', 'log', 'rules'], told: true };
+    add({ bag: yard }); add({ bag: yard }, new Set(['hearth', 'desk'])); add({ bag: yard, story: { ...base.story, left: true, shelf: homeShelf() } });
+    add({ bag: yard, story: { ...base.story, opened: true, left: true, seen: ['tags'] } }); add({ story: { ...known, told: false } }); add({ story: known });
+    for (const tasks of [[], ['lichen'], ['lichen', 'hay']]) add({ story: known, volunteer: { mark: 'J', tasks } });
+    add({ story: known, volunteer: { mark: 'J', tasks: ['lichen', 'hay'] }, finale: { ...base.finale, twist: true } }); add({ story: known, volunteer: { mark: 'J', tasks: [] }, desk: { ...base.desk, sorted: true } });
+  }
+  const named = new Set(states.map(args => beckon(...args)).filter(Boolean).map(id => id.startsWith('book-') ? 'book' : id));
+  assert.deepEqual([...named].filter(kind => !kinds.includes(kind)), [], 'Every thing the story names has a move in the scene');
+  assert.ok(['mailbox', 'reindeer', 'trough', 'snow-pile', 'hoist-tag', 'door', 'hearth', 'book', 'bookcase', 'secret-log', 'chair', 'register', 'record', 'sleigh', 'wheel'].every(kind => named.has(kind)), 'The yard, the room, the bookcase, the little room and the jobs each have theirs');
+  assert.ok(scene.includes('if (motion.matches || calling || trip || story.scripted || !BECKON[kind] || !thing || !showing(thing)) return false;'), 'Only one thing at a time, only in sight, never under reduced motion or while walking');
+  assert.ok(scene.includes('if (calling && t - calling.at >= calling.length) { calling = null; delete stage.dataset.beckon; }') && scene.includes('const shiver = (u, turns, size) => Math.sin(u * Math.PI * turns) * size * (1 - u);'), 'Each move dies away and ends just where the thing rests');
+  const moves = scene.slice(scene.indexOf('// Things calling the visitor over.'), scene.indexOf('// The mailbox calling:'));
+  assert.ok(!/intensity|\.color\.|glow|sheen/.test(moves) && !/leap[^;\n]*(intensity|opacity)/.test(scene), 'Moves, not light: nothing glows or brightens to call');
+  // The register's top page and the old record book are sheets of their own, so they can move without the table.
+  assert.ok(art.includes("{ id: 'secret-page', w: .112, h: .124, px: 1200,") && art.includes("draw: registerPage, room: true, secret: true }") && art.includes("draw: recordBook, room: true, secret: true }"), 'The register page and the record book are their own sheets on the table');
+  const desk = art.slice(art.indexOf('export function secretDesk'), art.indexOf('export function registerPage'));
+  assert.ok(!desk.includes('#6b2a2a') && art.slice(art.indexOf('export function recordBook')).includes("fill: '#6b2a2a'"), 'The record book is drawn once, on its own sheet');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
