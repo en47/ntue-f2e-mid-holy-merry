@@ -2,14 +2,18 @@
 // may matter later is written in it the moment it is seen (`add`), and it keeps a hint for whatever the story is waiting
 // on now (`goal`, cabin-story.js), a little plainer each time one is asked for. It shows itself once there is something
 // in it, and hops when something new goes in, a job is ticked or the goal moves on.
-// Opened, it is a book turned a leaf at a time, as the Intro's storybook is: on a wide screen two pages lie side by side
-// and the leaf turns about an upright spine; at 700px and narrower the spread is laid out top and bottom with the spine
-// across the middle, and a finger sliding up or down turns the page, once that page's words have been scrolled to their
-// end. Paper index tabs stick out of its edge: now (the goal, the clues it turns on, the jobs once signed up, the hints),
-// then the clues found in the yard, the house and the little room, then the gifts. A clue is a sticker naming where it
-// was seen; tapped, what it said opens under it. Cut from the same paper as everything else (cabin-paper.js).
+// Opened, it is a real little book, turned as the Intro's storybook is. Shut, it lies in the middle with its elastic band
+// round it; the band slips off over the edge, and the cover (as big as the board under it) swings open on the spine while
+// the book slides over to lay the spread in the middle. The inside of the cover is the first left page. On a wide screen
+// the two pages lie side by side about an upright spine; at 700px and narrower they lie top and bottom with the spine
+// across the middle, and a finger sliding up or down turns the page once that page's words have been scrolled to their
+// end. Paper index tabs are stuck to the leaves where each part begins (now, the yard, the house, the little room, the
+// gifts) and stick out of the fore-edge, so each lies on the side its leaf does and rides over with it as it turns; the
+// edges of the leaves show on the boards, more on the side that holds more. What each part holds is laid over its pages
+// measured, so the two pages of a spread come out about as full as each other. A clue is a sticker naming where it was
+// seen; tapped, what it said opens under it. Cut from the same paper as everything else (cabin-paper.js).
 import { paperLayer, shape } from './paper-art.js';
-import { star } from './paper-props.js';
+import { lamp, roofHouse, snowyFir, star } from './paper-props.js';
 import { ornament } from './cabin-ornaments.js';
 import { GIFTS, TASKS, goal, knowsSantas, points, signedUp } from '../services/cabin-story.js';
 import { CLUE_PLACES, GIFT_HINTS, GIFT_ORDER, GOALS, GOAL_CLUES, NOTEBOOK, RESTART } from '../data/cabin-clues.js';
@@ -37,13 +41,52 @@ function cover(paper) {
   star(paper, 24, 37, 5.2);
   shape('rect', { x: 33, y: 3, width: 3.4, height: 48, fill: '#b5443c' }, paper);
 }
-// The tabs, in the book's order; the clue stickers a page holds, tall beside an upright spine or short above or below it.
-const SECTIONS = { now: '現在', yard: '院子', house: '小屋', room: '小房間', gifts: '見面禮' };
-const PER_PAGE = { spread: 6, stacked: 4 };
+// The tabs in the book's order, each with its word: outside, the book is written in English; inside, in Chinese.
+const SECTIONS = { now: ['Now', '現在'], yard: ['Yard', '院子'], house: ['Cabin', '小屋'], room: ['Room', '小房間'], gifts: ['Gifts', '見面禮'] };
+// A page with nothing written on it keeps a faint paper picture of its part of the book: [viewBox, draw].
+const EMBLEMS = {
+  now: ['0 0 100 100', g => star(g, 50, 54, 32)],
+  yard: ['0 0 100 100', g => { snowyFir(g, 40, 94, 74); snowyFir(g, 66, 94, 54, 1); }],
+  house: ['0 0 100 100', g => roofHouse(g, 50, 90, 52, 36)],
+  room: ['0 0 100 100', g => lamp(shape('g', { transform: 'translate(25 8) scale(.5)' }, g), 50, 178)],
+  gifts: ['-6 -4 112 140', g => ornament(GIFTS[0], g)],
+};
 const narrow = () => Boolean(globalThis.matchMedia?.('(max-width: 700px)').matches);
 const calm = () => Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
-// A leaf lies over the right (or lower) page and turns about the spine to lie over the other one.
+const wait = ms => new Promise(resolve => { setTimeout(resolve, ms); });
+// A leaf lies over the right (or lower) page and turns about the spine to lie over the other one; the tabs of the leaves
+// still to turn stick out of the right (lower) edge, those turned out of the left (upper) one.
 const flipped = () => (narrow() ? 180 : -180);
+const sides = () => (narrow() ? ['bottom', 'top'] : ['right', 'left']);
+// Shut, the book lies in the middle: it is the right (lower) half of the spread, so the spread sits a quarter over.
+const shift = amount => (narrow() ? `translateY(${amount}%)` : `translateX(${amount}%)`);
+// A sheet turning stands off the page under it, its shadow longest when it is lifted highest (as the Intro's).
+const FLAT = '0 1px 2px #6e55331a', LIFTED = '8px 10px 8px #6e553340';
+
+// Where to cut a part's blocks to lay them over an even number of pages `room` tall (`ends`: where each block ends when
+// they are written one under another): as few pages as hold them, each as near as can be to as full as the others, a
+// page running over costing dearly, and a list cut in two (`joins`: the blocks that go on from the one before) costing
+// enough that it only is when it has to be. Each page is [its first block, the one after its last]; one may be empty.
+export function share(ends, room, joins = []) {
+  const n = ends.length, total = ends[n - 1] ?? 0, tall = (i, j) => (j > i ? ends[j - 1] - (i ? ends[i - 1] : 0) : 0);
+  // Two more pages at a time until nothing runs over (or there is a page for every block).
+  for (let count = 2 * Math.max(1, Math.ceil(total / (2 * room))); ; count += 2) {
+    const even = total / count, cost = (height, i) => (height - even) ** 2 + (height > room ? 50 * (height - room) ** 2 : 0) + (joins[i] && height ? (room / 3) ** 2 : 0);
+    // best[j]: the least it costs to lay the first j blocks on the pages so far, and where each of those pages starts.
+    // On a tie the later cut wins, so the earlier page is the fuller one.
+    let best = Array.from({ length: n + 1 }, (_, j) => [j ? Infinity : 0, []]);
+    for (let page = 0; page < count; page++) {
+      const next = Array.from({ length: n + 1 }, () => [Infinity, []]);
+      for (let j = 0; j <= n; j++) for (let i = j; i >= 0; i--) {
+        const [was, starts] = best[i], value = was + cost(tall(i, j), i);
+        if (value < next[j][0]) next[j] = [value, [...starts, i]];
+      }
+      best = next;
+    }
+    const starts = best[n][1], pages = starts.map((start, page) => [start, starts[page + 1] ?? n]);
+    if (count >= n || pages.every(([i, j]) => tall(i, j) <= room)) return pages;
+  }
+}
 
 export function mountNotebook(stage, { progress, save, sound }) {
   const button = element('button', 'notebook-button', stage); button.type = 'button'; button.setAttribute('aria-label', '線索本');
@@ -74,33 +117,42 @@ export function mountNotebook(stage, { progress, save, sound }) {
     if (card) render();
   }
 
-  // A clue as a sticker: its name, and where it was seen; tapped, what it said opens under it (one just found is open
-  // already).
-  function sticker(list, id) {
+  // A clue as a sticker, at the end of the page's list (a new list if the page does not end in one): its name, and where
+  // it was seen; tapped, what it said opens under it (one just found is open already).
+  function sticker(page, id) {
+    const list = page.lastElementChild?.matches('.notebook-clues') ? page.lastElementChild : element('ul', 'notebook-clues', page);
     const item = element('li', fresh.has(id) ? 'clue-item is-fresh' : 'clue-item', list);
     const tag = element('button', 'clue-sticker', item); tag.type = 'button';
     const words = element('span', 'clue-words', tag); element('span', 'notebook-place', words, NOTEBOOK[id].name); element('span', 'clue-where', words, NOTEBOOK[id].place);
     const text = element('p', 'clue-text', item, NOTEBOOK[id].text); text.hidden = !fresh.has(id);
     tag.setAttribute('aria-expanded', String(!text.hidden));
     tag.addEventListener('click', () => { text.hidden = !text.hidden; tag.setAttribute('aria-expanded', String(!text.hidden)); sound.play(text.hidden ? 'remove' : 'pick'); });
+    return item;
   }
-  const stickers = (parent, ids) => { const list = element('ul', 'notebook-clues', parent); for (const id of ids) sticker(list, id); };
   // The clues found among `ids`, in the order they were found.
   const found = ids => progress.clues.filter(id => ids.includes(id));
-  // The substitute's jobs (the register's list): a box for each, ticked once it is done and stamped.
-  function jobs(page) {
-    const work = element('section', 'notebook-work', page), { tasks } = progress.volunteer;
-    element('h4', 'notebook-goal', work, `替身工作：完成 ${points(progress.volunteer)}／${TASKS.length}`);
-    const list = element('ul', 'notebook-jobs', work);
-    for (const task of TASKS) {
+  // The substitute's jobs (the register's list): a box for each, ticked once it is done and stamped. Each job is a block
+  // of its own, going on from the one before (on the next page too, when the list has to be cut).
+  function jobs() {
+    const { tasks } = progress.volunteer;
+    return TASKS.map((task, i) => Object.assign(page => {
+      let list = page.lastElementChild?.matches('.notebook-work') && page.lastElementChild.querySelector('.notebook-jobs');
+      if (!list) {
+        const work = element('section', 'notebook-work', page);
+        if (!i) element('h4', 'notebook-goal', work, `替身工作：完成 ${points(progress.volunteer)}／${TASKS.length}`);
+        list = element('ul', 'notebook-jobs', work);
+      }
       const done = tasks.includes(task), item = element('li', done ? `is-done${ticked.has(task) ? ' is-fresh' : ''}` : '', list);
       element('span', 'job-box', item, done ? '✓' : '').setAttribute('aria-hidden', 'true'); element('span', 'sr-only', item, done ? '已完成：' : '還沒做：');
       element('strong', '', item, JOBS[task][0]); element('span', '', item, JOBS[task][1]);
-    }
+      return item;
+    }, { join: i > 0 }));
   }
-  // A hint for what the story is waiting on: one more line each time it is asked for.
+  // A hint for what the story is waiting on: one more line each time it is asked for. A pencil line parts it from what
+  // comes before it on the page.
   function hints(page, now) {
     const lines = GOALS[now].hints, shown = progress.hints[now] ?? 0;
+    if (page.children.length) divider(page);
     const help = element('section', 'notebook-hints', page); help.setAttribute('aria-live', 'polite');
     element('h4', 'book-label', help, '卡住了嗎？');
     lines.slice(0, shown).forEach((hint, i) => element('p', 'notebook-hint-line', help, `${i + 1}. ${hint}`));
@@ -108,11 +160,13 @@ export function mountNotebook(stage, { progress, save, sound }) {
       const ask = element('button', 'notebook-hint', help, shown ? '再給一點提示' : '卡住了？給我一點提示'); ask.type = 'button';
       ask.addEventListener('click', () => { progress.hints[now] = shown + 1; save(); sound.play('pick'); render(); card?.querySelector('.book-page .notebook-hint, .notebook-close')?.focus({ preventScroll: true }); });
     }
+    return help;
   }
   // The welcome gifts, once the secret is known: a place for each substitute's ornament, cut out in colour once found,
   // faint until then; and a hint about the next one not yet found, each time one is asked for.
   function gifts(page) {
     const box = element('section', 'notebook-gifts', page), have = progress.ornaments;
+    element('h3', 'book-heading', box, SECTIONS.gifts[1]);
     element('h4', 'notebook-goal', box, `見面禮：找到 ${have.length}／${GIFTS.length}`);
     element('p', 'notebook-hint-line', box, have.length === GIFTS.length ? '五個都找齊了，掛在小屋的聖誕樹上。' : '五位替身各藏了一個吊飾，留給新來的替身。');
     const row = element('div', 'gift-row', box);
@@ -126,100 +180,177 @@ export function mountNotebook(stage, { progress, save, sound }) {
       const ask = element('button', 'notebook-hint', box, asked ? '還有哪裡？' : '去哪裡找？'); ask.type = 'button';
       ask.addEventListener('click', () => { progress.hints.gifts = asked + 1; save(); sound.play('pick'); render(); });
     }
+    return box;
   }
-  // The book's pages, two to a spread. Now: the goal and the clues it turns on, then the jobs (once signed up) and the
-  // hints. Then each place's clues, a place starting on a left page so its tab opens on it, and the gifts. A page left
-  // over is a quiet one with a star on it.
-  function pages() {
-    const list = [], per = PER_PAGE[narrow() ? 'stacked' : 'spread'];
-    const spare = () => { if (list.length % 2) list.push({ section: list[list.length - 1].section, draw: page => paperLayer(element('div', 'book-doodle', page), '0 0 100 100', '', g => star(g, 50, 50, 26), PAPER) }); };
-    const now = goal(progress), { title } = GOALS[now];
-    list.push({ section: 'now', draw: page => {
-      const help = element('section', 'notebook-now', page);
-      element('h3', 'notebook-title', help, '線索本'); element('h4', 'notebook-goal', help, `現在：${title}`);
-      element('p', 'notebook-task', help, GOALS[now].task);
-      const near = found(GOAL_CLUES[now] ?? []);
-      if (near.length) { element('p', 'book-label', help, '用得上的線索'); stickers(help, near); }
-    } });
-    list.push({ section: 'now', draw: page => { if (signedUp(progress.volunteer)) { jobs(page); divider(page); } hints(page, now); } });
-    for (const [id, name, ids] of CLUE_PLACES) {
-      const here = found(ids); if (!here.length) continue;
-      spare();
-      for (let i = 0; i < here.length; i += per) list.push({ section: id, draw: page => { element('h3', 'book-heading', page, name); stickers(page, here.slice(i, i + per)); } });
-    }
+  // What the book holds, part by part, as blocks written one under another (each draws itself onto a page and returns
+  // what it wrote last). Now: the goal and, once signed up, the jobs (what to do), then the clues it turns on and a hint
+  // (what helps). Then each place's clues, and the gifts. A heading goes in one block with what comes first under it, so
+  // a page never ends on a heading.
+  function parts() {
+    const now = goal(progress), { title } = GOALS[now], list = [];
+    const clues = (ids, head) => ids.map((id, i) => page => { if (!i) head(page); return sticker(page, id); });
+    list.push(['now', [
+      page => { const help = element('header', 'notebook-now', page); element('h3', 'book-heading', help, SECTIONS.now[1]); element('h4', 'notebook-goal', help, title); element('p', 'notebook-task', help, GOALS[now].task); return help; },
+      ...(signedUp(progress.volunteer) ? jobs() : []),
+      ...clues(found(GOAL_CLUES[now] ?? []), page => element('p', 'book-label', page, '用得上的線索')),
+      page => hints(page, now),
+    ]]);
+    for (const [id, name, ids] of CLUE_PLACES) { const here = found(ids); if (here.length) list.push([id, clues(here, page => element('h3', 'book-heading', page, name))]); }
     if (knowsSantas(progress.story.seen) || progress.ornaments.length) {
-      spare();
-      const notes = found(GIFTS.map(mark => `gift-${mark}`));
-      list.push({ section: 'gifts', draw: gifts }, { section: 'gifts', draw: page => { element('h3', 'book-heading', page, '吊飾上的小卡片'); if (notes.length) stickers(page, notes); else element('p', 'notebook-empty', page, '還沒找到任何吊飾。'); } });
+      const notes = found(GIFTS.map(mark => `gift-${mark}`)), cards = page => element('h3', 'book-heading', page, '吊飾上的小卡片');
+      list.push(['gifts', [gifts, ...(notes.length ? clues(notes, cards) : [page => { cards(page); return element('p', 'notebook-empty', page, '還沒找到任何吊飾。'); }])]]);
     }
-    spare();
+    return list;
+  }
+  // The book's pages: each part's blocks written one under another on a hidden page as wide as a real one, where each
+  // ends read off, and the part laid over as few pages as hold it, as evenly as it goes (`share`). A part starts on a
+  // left (upper) page, so its tab opens on it.
+  function lay() {
+    const { probe, slots: [page] } = book, style = getComputedStyle(page);
+    const room = Math.max(96, page.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)), list = [];
+    probe.style.width = `${page.clientWidth}px`;
+    for (const [section, blocks] of parts()) {
+      probe.replaceChildren();
+      const top = parseFloat(getComputedStyle(probe).paddingTop), ends = blocks.map(draw => { const node = draw(probe); return node.offsetTop + node.offsetHeight - top; });
+      for (const [start, end] of share(ends, room, blocks.map(draw => Boolean(draw.join)))) list.push({ section, blocks: blocks.slice(start, end) });
+    }
+    probe.replaceChildren();
+    book.size = `${page.clientWidth}x${Math.round(room)}`;
     return list;
   }
 
-  // The open book (`book`): its two pages, the leaf that turns, the cover, the tabs and the way along.
-  const fill = (page, { section, draw }) => { page.replaceChildren(); page.scrollTop = 0; page.dataset.section = section; draw(page); };
-  // Everything in it drawn again for the story as it stands, open at the same spread (put off until a leaf has landed).
+  // A page drawn: its blocks, or with none, the faint picture of its part.
+  function fill(page, { section, blocks }) {
+    page.replaceChildren(); page.scrollTop = 0; page.dataset.section = section;
+    for (const draw of blocks) draw(page);
+    if (!blocks.length) { const [box, draw] = EMBLEMS[section]; paperLayer(element('div', 'book-doodle', page), box, '', draw, PAPER); }
+  }
+  // The first and last spread of a part.
+  const firstOf = section => Math.floor(book.pages.findIndex(page => page.section === section) / 2);
+  const lastOf = section => Math.floor(book.pages.findLastIndex(page => page.section === section) / 2);
+  // The edges of the leaves lying on each board (as many as three show), and on the inside of the cover as it swings.
+  function stacks(left, right) {
+    const [a, z] = book.halves; a.dataset.kind = String(Math.min(3, left)); z.dataset.kind = String(Math.min(3, right));
+    book.lining.dataset.kind = a.dataset.kind;
+  }
+  // The tabs and the leaves as they lie at this spread: a leaf turned lies on the left (upper) side with its tab, the
+  // others on the right (lower); shut, all of them lie under the cover.
+  function lie() {
+    const b = book, [ahead, turned] = sides();
+    for (const tab of b.tabs.children) { tab.dataset.side = !b.shut && firstOf(tab.dataset.section) <= b.spread ? turned : ahead; tab.classList.remove('is-carried'); }
+    stacks(b.shut ? 0 : b.spread, b.pages.length / 2 - 1 - (b.shut ? 0 : b.spread));
+  }
+  // The tabs stuck to the leaves that turn ride over on them: taken off the edge they stuck out of, and drawn on the
+  // turning sheet, on its front (the side it lies on now) and its back (the side it lands on).
+  function carry(sheet, sections) {
+    const [ahead, turned] = sides(), front = sheet.querySelector('.leaf-tabs[data-face="front"]'), back = sheet.querySelector('.leaf-tabs[data-face="back"]');
+    front.replaceChildren(); back.replaceChildren();
+    for (const tab of book.tabs.children) {
+      if (!sections.includes(tab.dataset.section)) continue;
+      tab.classList.add('is-carried');
+      for (const [carrier, side] of [[front, ahead], [back, turned]]) {
+        const copy = element('span', 'book-tab', carrier, SECTIONS[tab.dataset.section][0]);
+        copy.dataset.section = tab.dataset.section; copy.dataset.side = side; copy.style.setProperty('--slot', tab.style.getPropertyValue('--slot'));
+      }
+    }
+  }
+  const landed = sheet => { for (const carrier of sheet.querySelectorAll('.leaf-tabs')) carrier.replaceChildren(); sheet.classList.remove('is-turning'); };
+  // Everything in it laid out and drawn again for the story as it stands, at the same place in the same part (put off
+  // until a sheet has landed).
   function render() {
     const b = book; if (!b) return;
     if (b.turning) { b.dirty = true; return; }
     card.dataset.layout = narrow() ? 'stacked' : 'spread';
-    b.pages = pages(); b.spread = Math.min(b.spread, b.pages.length / 2 - 1);
+    const was = b.pages[2 * b.spread]?.section, into = was ? b.spread - firstOf(was) : 0;
+    b.pages = lay();
+    b.spread = was && firstOf(was) >= 0 ? Math.min(firstOf(was) + into, lastOf(was)) : 0;
     b.slots.forEach((page, i) => fill(page, b.pages[2 * b.spread + i]));
-    fill(b.lid.lastElementChild, b.pages[2 * b.spread]);
+    fill(b.sheet, b.pages[2 * b.spread]);
+    // A tab for each part there is, each in its own place along the edge (where it stays as the book fills).
+    const focused = document.activeElement?.closest?.('.book-tab')?.dataset.section;
     b.tabs.replaceChildren();
-    for (const [id, name] of Object.entries(SECTIONS)) {
-      const first = b.pages.findIndex(page => page.section === id); if (first < 0) continue;
-      const tab = element('button', 'book-tab', b.tabs, name); tab.type = 'button'; tab.dataset.section = id;
-      tab.addEventListener('click', () => turnTo(Math.floor(first / 2)));
-    }
-    nav();
+    Object.keys(SECTIONS).forEach((id, slot) => {
+      if (firstOf(id) < 0) return;
+      const tab = element('button', 'book-tab', b.tabs); tab.type = 'button'; tab.dataset.section = id; tab.style.setProperty('--slot', String(slot));
+      element('span', '', tab, SECTIONS[id][0]).lang = 'en'; element('span', 'sr-only', tab, SECTIONS[id][1]);
+      tab.addEventListener('click', () => turnTo(firstOf(id)));
+    });
+    lie(); nav();
+    if (focused) b.tabs.querySelector(`[data-section="${focused}"]`)?.focus({ preventScroll: true });
   }
   function nav() {
     const b = book; if (!b) return;
     const spreads = b.pages.length / 2, section = b.pages[2 * b.spread].section;
     b.back.disabled = b.busy || b.spread === 0; b.ahead.disabled = b.busy || b.spread === spreads - 1;
-    b.count.textContent = `${SECTIONS[section]}　${b.spread + 1}／${spreads}`;
+    b.count.textContent = `${SECTIONS[section][1]}　${b.spread + 1}／${spreads}`;
     for (const tab of b.tabs.children) tab.setAttribute('aria-pressed', String(tab.dataset.section === section));
   }
-  // A leaf (or the cover) turning about the spine. iOS Safari does not reliably hide a sheet's back, so the faces swap
-  // while it stands on edge; with less motion it is simply laid down on the other side.
+  // A leaf (or the cover) turning about the spine, lifting off the page and laying itself down again. iOS Safari does not
+  // reliably hide a sheet's back, so the faces swap while it stands on edge; with less motion it is simply laid down on
+  // the other side.
   async function hinge(node, from, to, duration = 760) {
     const axis = narrow() ? 'rotateX' : 'rotateY', side = angle => (Math.abs(angle) > 90 ? 'back' : 'front');
     const set = angle => { node.style.transform = `translateZ(2px) ${axis}(${angle}deg)`; };
     set(from); node.dataset.side = side(from); node.classList.add('is-turning');
     if (calm() || !node.animate) { set(to); node.dataset.side = side(to); return; }
-    const middle = (from + to) / 2, frame = angle => ({ transform: `translateZ(2px) ${axis}(${angle}deg)` });
+    const middle = (from + to) / 2, frame = (angle, lifted) => ({ transform: `translateZ(2px) ${axis}(${angle}deg)`, boxShadow: lifted ? LIFTED : FLAT });
     for (const [a, z, easing] of [[from, middle, 'cubic-bezier(.5,.05,.85,.55)'], [middle, to, 'cubic-bezier(.15,.45,.4,1)']]) {
-      const run = node.animate([frame(a), frame(z)], { duration: duration / 2, easing, fill: 'forwards' });
+      const run = node.animate([frame(a, a === middle), frame(z, z === middle)], { duration: duration / 2, easing, fill: 'forwards' });
       await run.finished.catch(() => {}); set(z); node.dataset.side = side(to); run.cancel();
     }
   }
-  // Turning to another spread: the leaf lifts one page and lays the next down on the other side, and the page under it
+  // The book sliding to or from the middle, and its band slipping off over the edge or back on.
+  function slide(node, from, to, duration) {
+    node.style.transform = to;
+    if (calm() || !node.animate) return Promise.resolve();
+    return node.animate([{ transform: from }, { transform: to }], { duration, easing: 'cubic-bezier(.3,.7,.3,1)' }).finished.catch(() => {});
+  }
+  function slip(band, off) {
+    band.style.visibility = '';
+    if (calm() || !band.animate) { band.style.visibility = off ? 'hidden' : ''; return Promise.resolve(); }
+    const frames = [{ transform: 'none', opacity: 1 }, { transform: narrow() ? 'translateY(2.4rem)' : 'translateX(2.4rem)', opacity: 0 }];
+    return band.animate(off ? frames : frames.reverse(), { duration: 240, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' }).finished.catch(() => {}).then(() => { band.getAnimations().forEach(run => run.cancel()); band.style.visibility = off ? 'hidden' : ''; });
+  }
+  // Turning to another spread: every leaf in between turns over at once, with the tabs stuck to them; the page under them
   // is the new one already.
   async function turnTo(target) {
     const b = book; if (!b || b.busy || target === b.spread || target < 0 || target >= b.pages.length / 2) return;
     b.busy = b.turning = true; nav(); sound.play('pick');
-    const forward = target > b.spread, [left, right] = b.slots, [front, rear] = b.leaf.children;
-    fill(front, b.pages[2 * (forward ? b.spread : target) + 1]); fill(rear, b.pages[2 * (forward ? target : b.spread)]);
+    const from = b.spread, forward = target > from, spreads = b.pages.length / 2, [left, right] = b.slots, [front, rear] = b.leaf.querySelectorAll(':scope > .leaf-face'), focused = document.activeElement;
+    fill(front, b.pages[2 * (forward ? from : target) + 1]); fill(rear, b.pages[2 * (forward ? target : from)]);
     if (forward) fill(right, b.pages[2 * target + 1]); else fill(left, b.pages[2 * target]);
+    carry(b.leaf, Object.keys(SECTIONS).filter(id => firstOf(id) > Math.min(from, target) && firstOf(id) <= Math.max(from, target)));
+    // The side the leaves leave is thinner at once; the other is thicker once they land.
+    stacks(Math.min(from, target), spreads - 1 - Math.max(from, target));
     await hinge(b.leaf, forward ? 0 : flipped(), forward ? flipped() : 0);
     if (book !== b) return;
     if (forward) fill(left, b.pages[2 * target]); else fill(right, b.pages[2 * target + 1]);
-    b.leaf.classList.remove('is-turning'); b.spread = target; b.busy = b.turning = false;
-    if (b.dirty) { b.dirty = false; render(); } else { fill(b.lid.lastElementChild, b.pages[2 * target]); nav(); }
+    landed(b.leaf); b.spread = target; b.busy = b.turning = false;
+    if (b.dirty) { b.dirty = false; render(); } else { fill(b.sheet, b.pages[2 * target]); lie(); nav(); }
+    if (focused?.isConnected && focused.matches('.book-tab')) focused.focus({ preventScroll: true });
   }
   function open() {
     card = element('article', 'notebook-card', stage); card.setAttribute('aria-label', '線索本');
     const events = new AbortController(), on = (node, type, handler, options = {}) => node.addEventListener(type, handler, { ...options, signal: events.signal });
-    const shell = element('div', 'book', card), tabs = element('div', 'book-tabs', shell), board = element('div', 'book-board', shell);
-    element('div', 'board-half', board); element('div', 'board-half', board);
-    tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', '分頁');
+    const shell = element('div', 'book', card), board = element('div', 'book-board', shell), halves = [element('div', 'board-half', board), element('div', 'board-half', board)];
+    const tabs = element('div', 'book-tabs', shell); tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', '分頁');
     const sheets = element('div', 'book-pages', shell), slots = ['a', 'b'].map(slot => { const page = element('section', 'book-page', sheets); page.dataset.slot = slot; return page; });
-    // The leaf that turns and the cover: a front over the right (or lower) page, a back that lands over the other.
-    const sheet = className => { const node = element('div', className, shell); node.setAttribute('aria-hidden', 'true'); node.inert = true; element('div', 'leaf-face leaf-front', node); element('div', 'leaf-face leaf-back', node); return node; };
-    const leaf = sheet('book-leaf'), lid = sheet('book-cover'), face = lid.firstElementChild;
-    face.classList.add('cover-face'); element('p', 'cover-title', face, '線索本');
+    const probe = element('div', 'book-page book-probe', sheets); probe.setAttribute('aria-hidden', 'true'); probe.inert = true;
+    // The leaf that turns: a front over the right (or lower) page, a back that lands over the other, and the tabs riding
+    // on each, just under the paper.
+    const carrier = (parent, face) => { const node = element('div', 'leaf-tabs', parent); node.dataset.face = face; return node; };
+    const quiet = node => { node.setAttribute('aria-hidden', 'true'); node.inert = true; return node; };
+    const leaf = quiet(element('div', 'book-leaf', shell));
+    element('div', 'leaf-face leaf-front', leaf); element('div', 'leaf-face leaf-back', leaf); carrier(leaf, 'front'); carrier(leaf, 'back');
+    // The cover, as big as the board it shuts over: kraft with a label outside; inside, a board like the other with the
+    // first left page on it (the paper the tabs on it are stuck under).
+    const lid = quiet(element('div', 'book-cover', shell)), face = element('div', 'leaf-face leaf-front cover-face', lid);
+    element('p', 'cover-title', face, 'Clue Book').lang = 'en';
     paperLayer(element('span', 'cover-star', face), '0 0 40 40', '', g => star(g, 20, 20, 15), PAPER);
+    carrier(lid, 'front');
+    const lining = element('div', 'leaf-face leaf-back cover-lining', lid); carrier(lining, 'back');
+    const sheet = element('div', 'cover-page', lining);
+    const band = quiet(element('div', 'book-band', shell));
     const foot = element('div', 'book-foot', card);
     const back = element('button', 'book-turn', foot, '‹ 上一頁'), count = element('p', 'book-count', foot), ahead = element('button', 'book-turn', foot, '下一頁 ›');
     const done = element('button', 'notebook-close', foot, '收好 ✓');
@@ -262,33 +393,50 @@ export function mountNotebook(stage, { progress, save, sound }) {
     }, { passive: false });
     on(shell, 'touchend', () => { if (swipe?.turn !== undefined && swipe.turn !== false && swipe.moved >= 48) turnTo(swipe.turn); swipe = null; });
     on(shell, 'touchcancel', () => { swipe = null; });
-    // Across 700px (a phone turned, a window narrowed) the spread is laid out again, at the start of what it was showing.
+    // Across 700px (a phone turned, a window narrowed) or at another size, the parts are laid out again, at the same place.
     const media = globalThis.matchMedia?.('(max-width: 700px)');
-    if (media) on(media, 'change', () => {
-      const b = book; if (!b || b.turning) return;
-      const section = b.pages[2 * b.spread].section; b.spread = 0; render();
-      b.spread = Math.max(0, Math.floor(b.pages.findIndex(page => page.section === section) / 2)); render();
+    if (media) on(media, 'change', () => render());
+    const sized = new ResizeObserver(() => {
+      const b = book, page = b?.slots[0]; if (!b || b.busy || !page) return;
+      const style = getComputedStyle(page), room = Math.round(Math.max(96, page.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)));
+      if (`${page.clientWidth}x${room}` !== b.size) render();
     });
-    book = { slots, tabs, leaf, lid, back, ahead, count, events, pages: [], spread: 0, busy: true, turning: false, dirty: false };
-    render(); dot.hidden = true; sound.play('open'); button.setAttribute('aria-expanded', 'true');
-    // Its papers drawn, the cover swings open over the spine.
-    card.dataset.state = 'opening'; lid.style.transform = 'translateZ(2px)'; lid.dataset.side = 'front'; lid.classList.add('is-turning');
+    sized.observe(shell); events.signal.addEventListener('abort', () => sized.disconnect());
+    book = { shell, halves, tabs, slots, probe, leaf, lid, lining, sheet, band, back, ahead, count, events, pages: [], spread: 0, busy: true, turning: true, dirty: false, shut: true };
+    book.turning = false; render(); book.turning = true;
+    dot.hidden = true; sound.play('open'); button.setAttribute('aria-expanded', 'true');
+    // Shut in the middle with its band on; the band slips off, then the cover swings open over the spine (the tab on its
+    // inside page riding with it) while the book slides over to lay its spread in the middle.
+    card.dataset.state = 'shut'; shell.style.transform = shift(-25); lid.style.transform = 'translateZ(2px)'; lid.dataset.side = 'front'; lid.classList.add('is-turning');
+    if (!calm()) card.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' });
     const mine = book;
     requestAnimationFrame(() => requestAnimationFrame(async () => {
       if (book !== mine) return;
-      await hinge(lid, 0, flipped(), 900); if (book !== mine) return;
-      lid.classList.remove('is-turning'); card.dataset.state = 'open'; mine.busy = false; nav();
+      await slip(band, true); if (book !== mine) return;
+      carry(lid, ['now']); card.dataset.state = 'opening';
+      await Promise.all([hinge(lid, 0, flipped(), 900), slide(shell, shift(-25), shift(0), 640)]);
+      if (book !== mine) return;
+      landed(lid); card.dataset.state = 'open'; mine.shut = false; mine.busy = mine.turning = false;
+      if (mine.dirty) { mine.dirty = false; render(); } else { lie(); nav(); }
     }));
     done.focus({ preventScroll: true });
   }
-  // Put away: the cover swings shut over the pages and the book goes back to its corner (at once while it is still
-  // opening or turning, or with less motion).
+  // Put away: everything turned closes over at once with the cover (their tabs with it), the book slides back to the
+  // middle, its band goes back on, and it goes back to its corner (at once while it is still opening or turning, or with
+  // less motion).
   async function close() {
     const b = book; if (!b || b.closing) return;
     if (b.busy || calm()) { shut(); return; }
-    b.closing = b.busy = true; nav(); card.dataset.state = 'closing';
-    fill(b.lid.lastElementChild, b.pages[2 * b.spread]);
-    await hinge(b.lid, flipped(), 0, 640);
+    b.closing = b.busy = b.turning = true; nav();
+    fill(b.sheet, b.pages[2 * b.spread]);
+    carry(b.lid, Object.keys(SECTIONS).filter(id => firstOf(id) >= 0 && firstOf(id) <= b.spread));
+    b.lid.style.transform = `translateZ(2px) ${narrow() ? 'rotateX' : 'rotateY'}(${flipped()}deg)`; b.lid.dataset.side = 'back'; b.lid.classList.add('is-turning');
+    card.dataset.state = 'closing';
+    await Promise.all([hinge(b.lid, flipped(), 0, 700), wait(280).then(() => (book === b ? slide(b.shell, shift(0), shift(-25), 520) : null))]);
+    if (book !== b) return;
+    landed(b.lid); b.lid.classList.add('is-turning'); b.shut = true; lie(); card.dataset.state = 'shut';
+    await slip(b.band, false); if (book !== b) return;
+    await card.animate?.([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => {});
     if (book === b) shut();
   }
   function shut() {
