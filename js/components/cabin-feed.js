@@ -3,12 +3,17 @@
 // he is full until tomorrow (this computer's calendar, cabin-progress.js). He does not sleep: the model has no eyelids, and
 // a drooping head with open eyes looked wrong. Lichen, his favourite, is not in the basket: the pouch from the mailbox goes
 // in the trough behind him (from the pocket, cabin-bag.js). He eats it there, steps aside, and where he stood a little gold
-// shows in the hay; brushed aside, it is a little key. Fed and found are the pocket's to keep (lichen used, key had).
+// shows in the hay; brushed aside, it is a little key. Fed and found are the pocket's to keep (lichen used, key had). The
+// care log hangs on a twig in the hay (drawn on the trough, cabin-art.js): tapped, it is read in the hand.
+import { CARE_LOG } from './cabin-art.js';
 import { paperLayer } from './paper-art.js';
 import { MEALS, eat, full, mealsToday } from '../services/cabin-progress.js';
-import { FEED_ORDER, feedsNext } from '../services/cabin-story.js';
+import { FEED_ORDER, FEED_TABLE, feedsNext } from '../services/cabin-story.js';
 import { FEED } from '../data/cabin-jobs.js';
 
+// The care log's lines, oldest first: O.'s in gold (O.'s colour, cabin-art.js), the rest in pencil; today's only once he
+// has had his lichen.
+const LOG = { title: '麋鹿照顧紀錄', gold: '12/21 後半夜，地衣餵過了。—— O.', ginger: '別給牠薑餅。上次那位總是記錯牠喜歡什麼。', today: '今天的聖誕老人記得帶地衣來了！', back: '掛回去 ✓' };
 const FOODS = [['oats', '北極燕麥餅'], ['carrot', '胡蘿蔔'], ['lichen', '地衣'], ['gingerbread', '薑餅']];
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
 const centre = rect => ({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
@@ -16,7 +21,8 @@ const near = (point, rect, pad) => rect && point.x >= rect.left - pad && point.x
 
 // A volunteer owing him his care (`wants`) finds in the basket what the barn's feeding table lists (and the gingerbread):
 // he takes them only in the order of their times (cabin-story.js); a wrong one and the round starts again. Fed for the
-// job, it does not count among the day's meals, so it can be done even once he is full.
+// job, it does not count among the day's meals, so it can be done even once he is full. Each food has its name tag hung
+// under it; once the table on the barn door has been read, a copy is pinned over the basket and ticked as he eats.
 export function feedGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound, burst, art, paper, wants = () => false, onTask = () => {}, clue = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const at = event => { const box = stage.getBoundingClientRect(); return { x: event.clientX - box.left, y: event.clientY - box.top }; };
@@ -36,8 +42,9 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
   trough.type = 'button'; trough.setAttribute('aria-label', '麋鹿身後的餵食槽'); mouthSpot.setAttribute('aria-hidden', 'true');
   const glint = element('span', 'feed-glint', layer); glint.setAttribute('aria-hidden', 'true'); paperLayer(glint, '0 0 100 100', '', art.star, paper);
   const place = (node, rect) => rect && Object.assign(node.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
+  const slip = element('button', 'feed-log', layer); slip.type = 'button'; slip.setAttribute('aria-label', '乾草上掛著的照顧紀錄');
   function layout() {
-    place(trough, cabin.sheetRect('trough', [0, 0, 1, .8])); place(mouthSpot, cabin.mouthRect()); place(glint, cabin.sheetRect('trough', [.7, 0, .9, .4]));
+    place(trough, cabin.sheetRect('trough', [0, 0, 1, .8])); place(slip, cabin.sheetRect('trough', CARE_LOG)); place(mouthSpot, cabin.mouthRect()); place(glint, cabin.sheetRect('trough', [.7, 0, .9, .4]));
     glint.hidden = !fed() || bag.ever('key');
   }
   const forget = [
@@ -58,7 +65,16 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (bag.ever('key')) { say('餵食槽裡的乾草被翻得亂七八糟。'); return; }
     sound.play('remove'); cabin.repaint('trough', { eaten: true, taken: true }); glint.hidden = true;
     bag.give('key', local(glint.getBoundingClientRect()));
-    later(2600, () => { clue('care-log'); say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」往前翻，還有一行金色的字：「12/21 後半夜，地衣餵過了。—— O.」'); });
+  });
+  // The care log in the hand, read where it hangs.
+  on(slip, 'click', () => {
+    sound.play('open'); say('');
+    const card = element('article', 'cabin-letter cabin-note care-log-card', layer); card.setAttribute('aria-label', LOG.title);
+    const lines = [['log-title', LOG.title], ['log-gold', LOG.gold], ['log-pencil', LOG.ginger], ...fed() ? [['log-pencil', LOG.today]] : []];
+    for (const [kind, text] of lines) element('p', `note-line ${kind}`, card).textContent = text;
+    const back = element('button', 'cabin-letter-close', card); back.type = 'button'; back.textContent = LOG.back; clue('care-log');
+    on(back, 'click', () => { card.remove(); sound.play('remove'); slip.focus({ preventScroll: true }); });
+    back.focus({ preventScroll: true });
   });
   // He may step aside as the corner opens (for the sleigh, cabin-sleigh.js): his mouth is followed until he stands still.
   layout(); later(600, layout); later(1300, layout); later(3200, layout);
@@ -74,6 +90,18 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
 
   say(job ? FEED.start : bag.holds('lichen') ? '麋鹿聞到你口袋裡的地衣，抽了抽鼻子。牠身後有個餵食槽。' : '從籃子拿食物，拖到麋鹿嘴邊餵牠吃吧！');
   const tray = element('div', 'feed-tray', layer), meter = element('p', 'feed-meter', tray), basket = element('div', 'feed-basket', tray);
+  // On the job, the feeding table as it is pinned on the barn door (once read there): a box by each line, ticked as he eats
+  // it in its turn, all cleared when he shakes his head.
+  const table = job && progress.clues.includes('feed-table') ? element('div', 'feed-slip', null) : null;
+  if (table) {
+    tray.prepend(table); table.setAttribute('aria-hidden', 'true');
+    element('p', 'feed-slip-title', table).textContent = FEED.title;
+    FEED_TABLE.forEach(([time, kind], i) => {
+      const row = element('p', 'feed-slip-row', table); row.dataset.food = kind;
+      element('span', 'feed-slip-box', row); element('span', 'feed-slip-time', row).textContent = time; element('span', '', row).textContent = FEED.lines[i][1].replace(/（.*）/, '');
+    });
+  }
+  const shake = () => { table.classList.remove('is-shaking'); void table.offsetWidth; table.classList.add('is-shaking'); };
   const meals = Array.from({ length: MEALS }, () => element('span', 'feed-meal', meter));
   const ring = element('span', 'feed-mouth', layer); ring.setAttribute('aria-hidden', 'true');
   function count() {
@@ -91,6 +119,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     const button = element('button', `play-item play-${kind}`, basket); button.type = 'button';
     button.setAttribute('aria-label', `餵麋鹿吃${label}`); button.dataset.kind = kind;
     paperLayer(button, '0 0 100 100', '', art[kind], paper);
+    const tag = element('span', 'feed-name', button); tag.textContent = FEED.tags[kind]; tag.setAttribute('aria-hidden', 'true');
     let drag = null, dragged = false;
     on(button, 'pointerdown', event => {
       if (event.button > 0) return;
@@ -135,14 +164,19 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
   function serve(kind, button, ghost, mouth) {
     if (!feedsNext(served, kind)) {
       served = []; cabin.reindeerAct('shake'); sound.play('refuse'); speak('嗯……現在還不是吃這個的時候。');
+      if (table) { table.querySelectorAll('.is-ticked').forEach(row => row.classList.remove('is-ticked')); shake(); }
       fly(ghost, centre(local(button.getBoundingClientRect())), false); say(FEED.wrong); return;
     }
-    served.push(kind); if (mouth) fly(ghost, centre(mouth), true);
+    served.push(kind); if (mouth) fly(ghost, centre(mouth), true); table?.querySelector(`[data-food="${kind}"]`).classList.add('is-ticked');
     button.classList.add('is-gone'); later(700, () => button.classList.remove('is-gone'));
     cabin.reindeerAct(kind === 'lichen' ? 'happy' : 'chew'); sound.play(kind === 'lichen' ? 'happy' : 'chew'); burst(mouth, 'heart', served.length);
     speak(kind === 'lichen' ? '是地衣！我最愛吃這個！' : FEED.good(served.length - 1) || '喀滋喀滋！');
     say(`${FEED.foods[kind]}，照餵食表餵了 ${served.length}／${FEED_ORDER.length} 樣。`);
-    if (served.length === FEED_ORDER.length) { job = false; meter.hidden = false; later(1600, () => { say(FEED.done); onTask(); }); }
+    // All three: the job is done, and the oats and lichen go back to the barn (the basket is the everyday one again).
+    if (served.length === FEED_ORDER.length) {
+      job = false; meter.hidden = false; table?.classList.add('is-done');
+      later(1600, () => { say(FEED.done); onTask(); basket.querySelectorAll('[data-kind="oats"], [data-kind="lichen"]').forEach(each => { each.classList.add('is-gone'); later(300, () => each.remove()); }); });
+    }
   }
   function offer(kind, button, ghost) {
     const mouth = cabin.mouthRect();
@@ -150,7 +184,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (kind === 'gingerbread') {
       // Not for him: he turns away and the biscuit floats back to the basket.
       cabin.reindeerAct('refuse'); sound.play('refuse'); speak('不要不要，這是聖誕老人的點心！');
-      fly(ghost, centre(local(button.getBoundingClientRect())), false); say('麋鹿把頭轉開了：牠不吃薑餅。柵欄上的照顧紀錄有一行：「上次那位總是記錯牠喜歡什麼。」');
+      fly(ghost, centre(local(button.getBoundingClientRect())), false); say('麋鹿把頭轉開了：牠不吃薑餅。乾草上的照顧紀錄也寫著：「上次那位總是記錯牠喜歡什麼。」');
       return;
     }
     if (mouth) fly(ghost, centre(mouth), true);
@@ -160,7 +194,7 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (kind === 'lichen') {
       cabin.reindeerAct('happy'); sound.play('happy'); later(1800, () => { cabin.reindeerAct('chew'); sound.play('chew'); });
       burst(mouth, 'heart', 3); speak('是地衣！我最愛吃這個！'); onTask();
-      later(1200, () => { say('柵欄上的照顧紀錄寫著：「今天的聖誕老人記得帶地衣來了！」往前翻，還有一行金色的字：「12/21 後半夜，地衣餵過了。—— O.」'); clue('care-log'); });
+      clue('care-log'); later(1200, () => say(`乾草上的照顧紀錄寫著：「${LOG.today}」往前翻，還有一行金色的字：「${LOG.gold}」`));
     } else {
       cabin.reindeerAct('chew'); sound.play('chew'); burst(mouth, 'heart', 1); speak(['喀滋喀滋！', '好甜的胡蘿蔔！', '再一根好不好？'][eaten % 3]);
     }

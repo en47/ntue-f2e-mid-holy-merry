@@ -228,7 +228,7 @@ await test('Santa 手機版：觸控按鈕至少 44px、橫拿手機改右側窄
   for (const selector of ['.cabin-back', '.wardrobe-tabs button', '.wardrobe-reset', '.hoist-hook', '.hoist-release', '.cabin-letter-close', '.chat-fold', '.chat-close', '.chat-ask', '.chat-send']) assert.ok(coarse.includes(selector), `${selector} 在觸控螢幕上至少 44px`);
   assert.ok(coarse.includes('min-width: 44px; min-height: 44px'));
   const sideways = block('(orientation: landscape) and (max-height: 500px)');
-  assert.ok(sideways.includes('.cabin { height: 100svh; }') && sideways.includes('.feed-basket { flex-direction: column; }') && sideways.includes('.wardrobe {') && sideways.includes('.cabin-chat {'), 'A phone held sideways gets the whole screen and the trays down the right side');
+  assert.ok(sideways.includes('.cabin { height: 100svh; }') && sideways.includes('.feed-tray { left: auto; right: 5.4rem; top: auto; bottom: .6rem; translate: none; flex-direction: row; align-items: flex-end; }') && sideways.includes('.wardrobe {') && sideways.includes('.cabin-chat {'), 'A phone held sideways gets the whole screen, the wardrobe down the right side and the food tray along the bottom, clear of the music button');
   assert.ok(entry.includes("matchMedia('(orientation: landscape) and (max-height: 500px)')") && entry.includes('fitSideways()'), 'Opening a corner sideways scrolls the cabin fully into view');
   assert.ok(/\.wardrobe \{[^}]*bottom: 5\.4rem/.test(css) && css.includes('.wardrobe-reset { margin-right: 3.8rem; }'), 'The wardrobe stays clear of the music button');
   assert.ok(scene.includes("chair.visible = indoorView(view) || trip?.direction === 'in' || trip?.direction === 'out'") && scene.includes("const indoorView = name => name === 'inside' || VIEWS[name]?.room === true") && scene.includes('reindeerHolder.visible = frustum.intersectsSphere(reindeerBounds)'), 'Santa is drawn only around the room and the reindeer only while in view');
@@ -481,14 +481,14 @@ await test('Santa 引導：每個目標都有一句白話的「現在要做什�
   assert.ok(notebook.includes("element('p', 'notebook-task', help, GOALS[now].task);") && notebook.includes('goalNow = now; show(); dot.hidden = false;') && !/notebook-slip|setInterval|還在找嗎|新目標/.test(notebook) && play.includes('notebook?.check();'), 'What to do now is written in the clue book; when it moves on the book only hops, nothing pops up');
   assert.ok(secretData.includes('invite:') && play.includes('talk.scene(lines, { line: RETURN.ask, choices: [RETURN.join, RETURN.wait]') && play.includes('const then = () => { invite(); story.told = true; save(); notebook.refresh(); };'), 'Having told the secret, Santa asks you to join; only your answer makes it told');
 });
-await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
+await test('Santa 故事前後一致：守則與許願的章數相同、蓋章後不自動跳出下一步、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
-  const { RULES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { WISH, NEXT } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href), { WISH_COST } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { RULES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), finale = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href), { WISH } = finale, { WISH_COST } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
   const count = ['零', '一', '二', '三', '四'][WISH_COST];
   assert.ok(RULES.lines.some(line => line.includes(`集到${count}個章`)) && WISH.invite.includes(`集到${count}個章`), 'The rulebook and the wish say the same number of stamps as the rule');
-  assert.deepEqual(Object.keys(NEXT), ['2', '3', '4']);
   const [play, secret, desk, story] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-secret.js', 'js/components/cabin-desk.js', 'docs/SANTA-STORY.md'].map(read));
-  assert.ok(play.includes('const next = NEXT[points(progress.volunteer)]; if (next) later(3600, () => say(next));'), 'After each stamp, a line says where the story goes next');
+  assert.ok(!('NEXT' in finale) && !play.includes('NEXT[') && play.includes('save(); notebook.tick(id); later(1500, () => {') && play.includes("inked(element('span', 'stamp-postmark', stamp), '0 0 120 80', postmark);"), 'After a stamp nothing pops up to say where to go: the stamp is postmarked, the clue book ticks the job and hops, and Santa says it when asked');
+  assert.ok(play.includes('talk.scene([], { line: ASK.question,') && !play.includes('ask-card') && play.includes('calling = SANTA_ON_HOLLY; talk?.call(true);'), 'Santa asks what comes next in his talk, and calls you over (his portrait hops) to say his word about Holly');
   assert.ok(secret.includes('inked(stamps,') && secret.includes('inked(fulfilled,') && desk.includes('inked(postmark,') && desk.includes('inked(arrived,'), 'Stamps and postmarks are ink drawn in SVG');
   assert.ok(['第一次', '第二次', '結局 A', '真相'].every(word => story.includes(word)) || ['兩次反轉', 'A　普通訪客', 'D　真正的聖誕奇蹟'].every(word => story.includes(word)), 'The story line is written down in one place');
 });
@@ -526,7 +526,75 @@ await test('Santa 線索本：看到的線索自動記下、分段提示依故�
   assert.ok(written.length >= 6, 'The games record their clues where they are seen');
   const named = new Set([...[...games, play].join('\n').matchAll(/clue\('([\w-]+)'\)/g)].map(([, id]) => id).concat(games.join('\n').includes("'route-note' : 'letter-backs'") ? ['route-note', 'letter-backs'] : [], games.join('\n').includes('if (id === \'tags\' || id === \'rules\') { clue(id);') ? ['tags', 'rules'] : [], play.includes('clue(`gift-${mark}`)') ? [...games.join('\n').matchAll(/gift\('([A-Z])'\)/g)].map(([, mark]) => `gift-${mark}`) : []));
   for (const id of Object.keys(NOTEBOOK)) assert.ok(named.has(id), `${id} is written into the book somewhere`);
-  assert.ok(paper.includes("['.notebook-card', 'notebook']") && paper.includes('notebook(paper, width, height, seed)'), 'Its open page is cut like every other sheet');
+  assert.ok(paper.includes("[`:is(.board-half:first-child, .cover-lining)[data-kind=\"${n}\"]`, `boardLeft${n}`]") && paper.includes("[`boardLeft${n}`, bookBoard('right', n)]") && paper.includes("pageLeft: bookPage('right')") && paper.includes("coverLeft: bookCover('left')") && paper.includes("['.book-band', 'band']"), 'Its boards, pages, cover, band and tabs are cut like every other sheet');
+  // Opened, it is a book turned a leaf at a time as the Intro's storybook is, with a tab for now, each place and the gifts.
+  const { CLUE_PLACES, GOAL_CLUES, GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  const placed = [...CLUE_PLACES.flatMap(([, , ids]) => ids), ...Object.keys(NOTEBOOK).filter(id => id.startsWith('gift-'))];
+  assert.deepEqual([...placed].sort(), Object.keys(NOTEBOOK).sort(), 'Every clue has one place in the book (the gifts have theirs)');
+  assert.ok(Object.values(NOTEBOOK).every(clue => clue.name && clue.place && clue.text) && new Set(Object.values(NOTEBOOK).map(clue => clue.name)).size === Object.keys(NOTEBOOK).length, 'Each clue has a name of its own for its sticker');
+  assert.deepEqual(Object.keys(GOAL_CLUES).sort(), Object.keys(GOALS).sort()); assert.ok(Object.values(GOAL_CLUES).flat().every(id => NOTEBOOK[id]), 'Each goal names the clues it turns on, all of them real');
+  assert.ok(book.includes("const axis = narrow() ? 'rotateX' : 'rotateY'") && book.includes("on(shell, 'touchmove'") && book.includes('if (calm() || !node.animate)') && book.includes("{ now: ['Now', '現在'], yard: ['Yard', '院子'], house: ['Cabin', '小屋'], room: ['Room', '小房間'], gifts: ['Gifts', '見面禮'] }"), 'An upright spine on a wide screen and one across the middle at 700px and narrower, a finger sliding to turn, at once with less motion; tabs for now, each place and the gifts');
+});
+await test('Santa 線索本像一本真的書：封面和書板一樣大、標籤跟著紙頁翻、兩頁內容量過再平均分', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [book, paper, css] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-paper.js', 'css/santa.css'].map(read));
+  const { share } = await import(pathToFileURL(path.join(project, 'js/components/cabin-notebook.js')).href);
+  const ends = heights => heights.reduce((list, height) => [...list, (list.at(-1) ?? 0) + height], []);
+  // A part is laid over an even number of pages, as few as hold it and as even as it goes; a block alone leaves the other
+  // page empty, never a page over.
+  assert.deepEqual(share(ends([100, 64, 64, 64]), 500), [[0, 2], [2, 4]]);
+  assert.deepEqual(share(ends([110]), 500), [[0, 1], [1, 1]]);
+  assert.deepEqual(share([], 300), [[0, 0], [0, 0]]);
+  const house = share(ends([104, ...Array(11).fill(72)]), 413), tall = ([i, j], list) => (j > i ? list[j - 1] - (i ? list[i - 1] : 0) : 0), houseEnds = ends([104, ...Array(11).fill(72)]);
+  assert.equal(house.length % 2, 0); assert.ok(house.length > 2 && house.every(page => tall(page, houseEnds) <= 413), 'What will not go on one spread goes on two rather than running over');
+  // The jobs list goes on from the left page to the right one when that evens the spread (both lie open together), but
+  // over a turn of the leaf only when it has to.
+  const now = ends([100, 95, 70, 70, 70, 90, 69, 90]), joins = [false, false, true, true, true, false, false, false];
+  assert.deepEqual(share(now, 445, joins), [[0, 4], [4, 8]]);
+  const phone = share(now, 231, joins);
+  assert.ok(phone.every(page => tall(page, now) <= 231), 'On a phone no page runs over');
+  assert.ok(share(ends([110, 100, 72, 72, 72, 98, 69, 69, 69, 69, 75]), 445, [false, false, true, true, true, false, false, false, false, false, false]).slice(0, 2).every(page => tall(page, ends([110, 100, 72, 72, 72, 98, 69, 69, 69, 69, 75])) > 150), 'Over two spreads, the first is not the goal alone beside the jobs');
+  assert.ok(book.includes('share(ends, room, blocks.map(draw => Boolean(draw.join)))') && book.includes('return node.offsetTop + node.offsetHeight - top;'), 'The blocks are measured on a hidden page as wide as a real one');
+  // Shut, the cover covers the board under it exactly; open, its inside is the left (upper) board with the first page on it.
+  assert.ok(css.includes('.book-cover { z-index: 4; top: calc(var(--edge-top) * -1); bottom: calc(var(--edge-bottom) * -1); left: 50%; right: calc(var(--edge-side) * -1);') && css.includes('.book-board { position: absolute; inset: calc(var(--edge-top) * -1) calc(var(--edge-side) * -1) calc(var(--edge-bottom) * -1);'), 'The cover is the size of the board it shuts over');
+  assert.ok(css.includes('.cover-lining > :is(.leaf-tabs, .cover-page) { position: absolute; top: var(--edge-top); bottom: var(--edge-bottom); left: var(--edge-side); right: 0;') && book.includes("const lining = element('div', 'leaf-face leaf-back cover-lining', lid)") && book.includes('fill(b.sheet, b.pages[2 * b.spread]);'), 'The inside of the cover is a board with the first left page on it, so nothing pops in when it lands');
+  assert.ok(css.includes('.notebook-card:is([data-state="shut"], [data-state="opening"], [data-state="closing"]) :is(.book-page[data-slot="a"], .board-half:first-child) { visibility: hidden; }') && book.includes('shell.style.transform = shift(-25)') && book.includes('slide(shell, shift(-25), shift(0), 640)'), 'Shut, the book lies in the middle and slides over as it opens');
+  // The band slips off before the cover opens and back on once it is shut; the cover no longer has one painted on.
+  assert.ok(book.includes('await slip(band, true)') && book.includes('await slip(b.band, false)') && !/bookCover[\s\S]{0,800}width - 30/.test(paper), 'The elastic band slips off and on, and does not swing with the cover');
+  // The tabs are stuck to the leaves where each part begins: on the side their leaf lies, riding over with it.
+  assert.ok(book.includes("tab.dataset.side = !b.shut && firstOf(tab.dataset.section) <= b.spread ? turned : ahead;") && book.includes("carry(b.leaf, Object.keys(SECTIONS).filter(id => firstOf(id) > Math.min(from, target) && firstOf(id) <= Math.max(from, target)));") && book.includes("carry(lid, ['now'])"), 'The tabs lie where their leaves do and turn over with them');
+  assert.ok(css.includes('.leaf-tabs { position: absolute; inset: 0; transform: translateZ(-1px); backface-visibility: hidden; }') && css.includes('.book-tab[data-side="left"] { right: calc(100% - var(--tab-under));'), 'A tab is tucked under its paper and sticks out of the fore-edge');
+  // Outside, the book is in English; the corner icon is gone while the book is out of it.
+  assert.ok(book.includes("element('p', 'cover-title', face, 'Clue Book').lang = 'en';") && css.includes('.notebook-button[aria-expanded="true"] { visibility: hidden; }'), 'Its cover reads Clue Book, and the corner is empty while it is open');
+});
+await test('Santa 線索貼紙有那樣東西的紙雕小圖，剛找到的會貼上去', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [book, art, css] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-clue-art.js', 'css/santa.css'].map(read));
+  const { CLUE_ART, CLUE_ICON } = await import(pathToFileURL(path.join(project, 'js/components/cabin-clue-art.js')).href);
+  const { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.deepEqual(Object.keys(NOTEBOOK).filter(id => typeof CLUE_ART[CLUE_ICON[id]] !== 'function'), [], 'Every clue has a picture drawn for it');
+  assert.deepEqual(Object.keys(CLUE_ICON).sort(), Object.keys(NOTEBOOK).sort(), 'No picture for a clue the book does not have');
+  assert.ok(book.includes('picture.style.backgroundImage = clueIcon(CLUE_ICON[id]);') && art.includes('if (!images.has(key))') && !art.includes('innerHTML'), 'The sticker shows its picture, each cut into an image once');
+  assert.ok(css.includes('.notebook-card[data-state="open"] .clue-item.is-fresh > .clue-sticker { animation: sticker-slap') && book.includes("card.dataset.state = 'turning';"), 'A clue just found is stuck on once its page lies open, not under a turning leaf');
+  // By the goal on the "now" page, a picture of what the story is waiting on; a new goal's pops in once as the book opens.
+  const { GOAL_ART } = await import(pathToFileURL(path.join(project, 'js/components/cabin-clue-art.js')).href), { GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.deepEqual(Object.keys(GOAL_ART).sort(), Object.keys(GOALS).sort(), 'Every goal has its picture');
+  assert.ok(book.includes('picture.style.backgroundImage = goalPicture(now);') && book.includes('goalFresh = goal(progress) !== goalRead; goalRead = goal(progress);') && css.includes('.notebook-card[data-state="open"] .goal-picture.is-fresh { animation: goal-pop'), 'The goal has its picture, and a new one pops in once');
+});
+await test('Santa 線索本封面的章節郵票：過一章蓋一枚，下一章是剪影，章末的疑問寫在目標下面', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [book, css] = await Promise.all(['js/components/cabin-notebook.js', 'css/santa.css'].map(read));
+  const { CHAPTERS, chaptersDone } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { readProgress } = await import(pathToFileURL(path.join(project, 'js/services/cabin-progress.js')).href);
+  const { WONDER } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.deepEqual(CHAPTERS, ['yard', 'house', 'room', 'jobs', 'choice']); assert.ok(CHAPTERS.every(id => WONDER[id]), 'Each chapter leaves a question');
+  const start = readProgress(null); assert.deepEqual(chaptersDone(start), []); assert.deepEqual(start.stamped, []);
+  start.story.opened = true; start.story.told = true; assert.deepEqual(chaptersDone(start), ['yard', 'house', 'room'], 'The bookcase opened and the secret told: three chapters');
+  start.finale.endings.push('A'); assert.deepEqual(chaptersDone(start), ['yard', 'house', 'room', 'choice'], 'Leaving without joining makes the last choice without the substitute\'s work');
+  assert.deepEqual(readProgress({ getItem: () => JSON.stringify({ stamped: ['yard', 'nope', 'room'] }) }).stamped, ['yard', 'room'], 'The stamps on the cover are kept with the save');
+  assert.ok(book.includes("pressed = finished.filter(id => !progress.stamped.includes(id))") && book.includes('progress.stamped = [...finished]; save();') && book.includes("slot.dataset.state = finished.includes(chapter) ? 'done' : chapter === next ? 'next' : 'later';"), 'A stamp is pressed on once, the next chapter shows as a shadow');
+  assert.ok(css.includes('.notebook-card[data-state="shut"] .cover-stamp.is-new :is(.stamp-frame, .stamp-art) { animation: cover-stamp-land') && css.includes('.cover-stamp[data-state="next"] .stamp-art { filter: brightness(0) opacity(.2); }'), 'Pressed on while the book is still shut; the next a faint shadow');
+  assert.ok(book.includes("WONDER.jobs[progress.finale.twist ? 0 : 1]") && book.includes("element('p', 'notebook-wonder', help, wonder)"), 'What the last chapter left you wondering is written under the goal');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
@@ -573,14 +641,14 @@ await test('Santa 第一章：院子裡先看到缺了什麼，再找到補上�
 await test('Santa 第三章：一進工作室沒有「替身」字樣；聖誕老人回來翻開守則；舊紀錄簿開啟與理解分開', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [secret, play] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-play.js'].map(read));
-  const { NOTES, DUTY, REGISTER, LOG, RULES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { RECORD, CORD } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href);
+  const { NOTES, DUTY, REGISTER, LOG, LOG_FILES, RULES } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { RECORD, CORD } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href);
   // Everything the room shows before Santa has told you: the things' names, the notes, the duty rules, the register's page,
   // the log, the old record (read early) and its lock.
   const labels = [...secret.matchAll(/\[(?:'secret-[a-z]+'|'secret-desk'), [^\]]*\]?,? ?(?:undefined, )?'([^']+)'\]/g)].map(([, name]) => name);
   const { TALK, RETURN } = await import(pathToFileURL(path.join(project, 'js/data/cabin-talk.js')).href);
   const { GOALS: goals } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
   assert.ok(Object.keys(goals).filter(id => id !== 'secret').every(id => TALK.now[id]?.length === 2) && !TALK.now.secret, 'Santa has two lines for every goal; the secret itself he tells as a scene');
-  const early = [...labels, TALK.hello.guest, TALK.place.guest, TALK.where, TALK.book, TALK.again, ...['yard', 'room', 'bookcase', 'log'].flatMap(id => TALK.now[id]), NOTES.tags, NOTES.hats, NOTES.hatInside, NOTES.hatLook, NOTES.stamps, NOTES.pin, NOTES.rack, NOTES.polaroid, NOTES.known, NOTES.coming, DUTY.title, ...DUTY.lines, DUTY.margin, DUTY.stuck, REGISTER.title, REGISTER.season, REGISTER.blank, LOG.title, LOG.wet, LOG.how, CORD.title, CORD.locked, RECORD.title, ...RECORD.entry, ...RECORD.since, RECORD.pencil, ...RECORD.card, RECORD.surface];
+  const early = [...labels, TALK.hello.guest, TALK.place.guest, TALK.where, TALK.book, TALK.again, ...['yard', 'room', 'bookcase', 'log'].flatMap(id => TALK.now[id]), NOTES.tags, NOTES.hats, NOTES.hatInside, NOTES.hatLook, NOTES.stamps, NOTES.pin, NOTES.rack, NOTES.polaroid, NOTES.known, NOTES.coming, DUTY.title, ...DUTY.lines, DUTY.margin, DUTY.stuck, REGISTER.title, REGISTER.season, REGISTER.blank, LOG.title, LOG.how, ...LOG_FILES.flatMap(([, name, lines]) => [name, ...lines.map(([text]) => text)]), LOG.missing(''), REGISTER.learner, CORD.title, CORD.locked, RECORD.title, ...RECORD.entry, ...RECORD.since, RECORD.pencil, ...RECORD.card, RECORD.surface];
   assert.ok(labels.length >= 7, 'Every thing in the room has a name'); assert.ok(!early.join('').includes('替身'), 'Nothing in the room says "substitute" until Santa has told you');
   assert.ok(RULES.title.includes('替身') && secret.includes("if (!story.told) element('p', 'secret-note', page, DUTY.stuck);"), 'The rules for substitutes are on the booklet\'s stuck pages, opened by Santa');
   assert.ok(play.includes('story.told = true; save();') && play.includes('if (progress.finale.unlocked && !progress.finale.twist) lines.push(RETURN.record);') && RETURN.record[0].includes('再讀一次'), 'Santa tells you once; having opened the old record early, you are told to read it again');

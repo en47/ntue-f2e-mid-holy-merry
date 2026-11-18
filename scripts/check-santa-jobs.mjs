@@ -84,10 +84,16 @@ check(await page.evaluate(() => { const box = document.querySelector('.feed-tabl
 check((await text('.feed-card')).includes('06:00') && (await saved()).clues.includes('feed-table'), '餵食表：時間沒照順序寫，記進線索本'); await press('.feed-card .cabin-letter-close'); await wait(400);
 await toYard(); await spot('reindeer');
 check((await caption()).includes('餵食表'), `麋鹿：今天輪到你照顧 ${await caption()}`);
+const tags = await page.evaluate(() => [...document.querySelectorAll('.feed-basket .feed-name')].map(tag => tag.textContent).join('/'));
+check(await visible('.feed-slip') && (await text('.feed-slip')).includes('07:30') && tags === '燕麥餅/胡蘿蔔/地衣/薑餅', `讀過餵食表：籃子上方釘著餵食表，每樣食物掛著名牌（${tags}）`);
+const ticks = () => page.evaluate(() => document.querySelectorAll('.feed-slip .is-ticked').length);
+await tap('.feed-basket [data-kind="oats"]'); await wait(1200); const one = await ticks();
 await tap('.feed-basket [data-kind="lichen"]'); await wait(1200);
-check((await caption()).includes('還不到吃這個的時候'), '先餵最愛的地衣：麋鹿搖頭，從頭再來');
+check(one === 1 && (await caption()).includes('還不到吃這個的時候') && await ticks() === 0, '先餵燕麥餅打一個勾；接著就餵地衣：麋鹿搖頭，勾全部清掉，從頭再來');
 for (const kind of ['oats', 'carrot', 'lichen']) { await tap(`.feed-basket [data-kind="${kind}"]`); await wait(1500); }
+check(await ticks() === 3, '照時間順序餵：餵食表三格都打勾');
 await wait(2400); check((await saved()).volunteer.tasks.includes('lichen'), '照時間順序餵完：照顧麋鹿（第三件工作）'); await shot('fed');
+check(await page.evaluate(() => [...document.querySelectorAll('.feed-basket [data-kind]')].map(item => item.dataset.kind).join()) === 'carrot,gingerbread', '餵完：燕麥餅和地衣收回去，籃子回到平常的胡蘿蔔與薑餅');
 // The letters: sorted at the rack, one reply written and sent.
 await toYard(); await enter(); await thing('rack');
 for (const [id, mark] of [['m1', 'E'], ['m2', 'O'], ['m3', 'N'], ['m4', 'K'], ['m5', 'H'], ['m6', 'N'], ['tomas', 'you'], ['aya', 'you']]) { await page.click(`.rack-letter[data-id="${id}"]`); await wait(100); await page.evaluate(m => document.querySelector(`.rack-slot[data-mark="${m}"]`).click(), mark); await wait(220); }

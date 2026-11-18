@@ -57,7 +57,7 @@ await tap('.parcel-pouch'); await wait(1400);
 check((await saved()).bag.held.includes('lichen'), '點了「給麋鹿的點心」才收進口袋');
 await page.evaluate(() => document.querySelector('.parcel-card .cabin-letter-close').click()); await wait(400);
 // The reindeer: at his mouth he only looks round at the trough; in the trough he eats, steps aside, and gold shows.
-await spot('reindeer'); await openPocket();
+await spot('reindeer'); check(await visible('.feed-log'), '乾草上掛著照顧紀錄的紙條，一開始就點得到'); await openPocket();
 await drag('.bag-item[data-item="lichen"]', '.feed-mouth-spot');
 check((await saved()).bag.held.includes('lichen') && (await caption()).includes('餵食槽'), `拖到嘴邊：地衣彈回口袋，${await caption()}`);
 await drag('.bag-item[data-item="lichen"]', '.feed-trough'); await wait(3400);
@@ -66,7 +66,11 @@ check(fed.bag.used.includes('lichen') && !fed.bag.held.includes('key'), '放進�
 check((await caption()).includes('金色') && await visible('.feed-glint'), `吃完挪開，乾草裡有一點金色：${await caption()}`); await shot('trough');
 await tap('.feed-trough'); await wait(1200);
 check((await saved()).bag.held.includes('key'), '撥開乾草，撿到小鑰匙');
-await wait(2600); check((await saved()).clues.includes('care-log'), '照顧紀錄（12/21 後半夜 O.）記進線索本');
+check(!(await saved()).clues.includes('care-log'), '撿到鑰匙不會自己讀照顧紀錄');
+await tap('.feed-log'); await wait(600);
+const log = await page.evaluate(() => [...document.querySelectorAll('.care-log-card .note-line')].map(line => line.textContent));
+check(log.some(line => line.includes('12/21 後半夜') && line.includes('O.')) && log.some(line => line.includes('地衣來了')) && (await saved()).clues.includes('care-log'), `點乾草上的紙條讀照顧紀錄，記進線索本：${log.join('／')}`); await shot('care-log');
+await tap('.care-log-card .cabin-letter-close'); await wait(300);
 // The snowman's drift.
 await spot('snowman');
 check(await visible('.snow-pile'), '雪人腳邊的雪堆看得到、點得到'); await shot('snowman');

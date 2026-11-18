@@ -5,7 +5,8 @@ export const NAMES = { N: '尼爾斯', K: '克莉絲', H: '荷莉', E: '艾洛',
 // each night in turn, is a blot still in its writer's colour, washed out altogether, washed out but for the little work
 // mark its writer draws by their initial, or still clear. Three ways to put it right (docs/SANTA-PUZZLE-DESIGN.md §5):
 // looked at (a colour, a mark, the clear cell), matched with notes found elsewhere (the care log, the barn note, the route
-// note), and the one left by the duty rules and the join years in the register (12/22, second half). The colours are the
+// note), and the one left by the duty rules, the join years in the register and H.'s word on the route note that she
+// slept that night (12/22, second half). The colours are the
 // name tags' (cabin-art.js SUBSTITUTES), and their names are said too, for anyone who cannot tell them apart.
 export const INK = ['blot', 'washed', 'clear', 'washed', 'blot', 'mark', 'washed', 'washed'];
 export const COLOUR_NAMES = { N: '深紅', K: '藍', H: '綠', E: '紫', O: '金' };
@@ -14,11 +15,12 @@ export const COLOUR_NAMES = { N: '深紅', K: '藍', H: '綠', E: '紫', O: '金
 export const MARKS = { N: ['spanner', '扳手'], K: ['sleigh', '雪橇'], H: ['star', '星星'], E: ['snowflake', '雪花'], O: ['envelope', '信封'] };
 // The booklet on the desk: its first page, the duty rules, can be read from the start; the pages after are stuck together
 // with snowmelt until Santa opens them for you (the rules for substitutes, below). Neither page says who they are for.
-export const DUTY = { title: '值班須知', lines: ['一、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在交接表上簽名。', '二、同一個人不能連著值兩段（跨過午夜也一樣），要讓下一位接手。', '三、新夥伴的前五年是見習期：一季只負責一段，其他時間跟著前輩學。'], margin: '（登記簿上的加入年份，就是見習期從哪一年算起。）', stuck: '後面幾頁被雪水黏在一起，翻不開。' };
+export const DUTY = { title: '值班須知', lines: ['一、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在交接表上簽名。', '二、同一個人不能連著值兩段，要讓下一位接手：前半夜接後半夜不行，後半夜接下一晚的前半夜也不行。', '三、新夥伴的前五年是見習期：一季只負責一段，其他時間跟著前輩學。'], margin: '（登記簿上的加入年份，就是見習期從哪一年算起。）', stuck: '後面幾頁被雪水黏在一起，翻不開。' };
 export const LOG = {
   title: '夜班交接表', halves: ['前半夜', '後半夜'],
-  wet: '班表被雪水弄濕了。暈開的地方還看得出是什麼顏色的墨水；有幾格整個洗掉了。',
   how: '點一格，再點下面的名牌，把縮寫補回去。',
+  // A note it needs, clipped on beside it (LOG_FILES), not found yet.
+  missing: place => `還沒讀到・${place}`,
   wrong: count => `墨水乾了一點……有 ${count} 格的筆跡好像對不上。`,
   solved: '最後一格補上，墨水乾了，字一行一行回來：每一晚，都是兩個人接力飛完的。',
   erase: '擦掉',
@@ -66,7 +68,9 @@ export const NOTES = {
 // The register's newest page: the season at the top, then each one's initial, the year they joined and their stamps this
 // season (four fill a row; Holly's is full, and she joined long before anyone else), then a blank row.
 export const REGISTER = {
-  title: '登記簿　最新的一頁', season: '2026 年聖誕季', full: 4, joined: '加入',
+  title: '登記簿　最新的一頁', season: '2026 年聖誕季', year: 2026, full: 4, joined: '加入',
+  // Stamped by the year of anyone still in the first five years (the duty rules' learners).
+  learner: '見習',
   rows: [['N', 3, 2015], ['K', 2, 2016], ['H', 4, 2003], ['E', 1, 2022], ['O', 2, 2023]],
   blank: '（空白）',
   invite: '最下面還空著一格。想一起幫忙，把願望送到大家手上嗎？選一個字母當你的縮寫，蓋上章就加入了。不加入也沒關係。',
@@ -83,4 +87,14 @@ export const JOBS = {
   letters: ['處理信件', '小房間的分揀架：先把信分給對的人；交給你的信，挑一封拿到書桌回信、寄出去。'],
   wheel: ['修摩天輪', '遊樂場的摩天輪停了，去看看哪裡壞了。'],
 };
-export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿上多了一個章（願望點數 ${count}／${of}）。`;
+export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿上多了一個章（${count}／${of}）。`;
+// The notes the shift log's washed-out cells need, clipped on beside it once found (clue ids, data/cabin-clues.js): each as
+// it looks, line by line, in the hand that wrote it, so the ink says whose it is (an initial: that substitute's colour,
+// named too; none: plain ink).
+export const LOG_FILES = [
+  ['care-log', '照顧紀錄', [['麋鹿的照顧紀錄，往前翻的一行：', ''], ['12/21 後半夜，地衣餵過了。—— O.', 'O']]],
+  ['barn-note', '穀倉紙條', [['12/24 夜班：禮物已分類。壁爐記得添柴。下一位辛苦了！', 'K'], ['收到 ✓', 'H']]],
+  ['route-note', '路線筆記', [['平安夜路線的背面：', ''], ['收到，扣環修好了。12/23 前半夜換我飛，12/22 晚上我先睡飽。—— H.', 'H']]],
+  ['duty', '值班須知', DUTY.lines.map(line => [line, ''])],
+  ['register-years', '登記簿', [[REGISTER.season, ''], ...REGISTER.rows.map(([mark, , year]) => [`${mark}.　${REGISTER.joined} ${year}${REGISTER.year - year < 5 ? `（${REGISTER.learner}）` : ''}`, mark])]],
+];

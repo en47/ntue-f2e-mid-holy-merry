@@ -52,7 +52,7 @@ log.push(`notebook at start hidden: ${await page.evaluate(() => document.querySe
 const use = async (id, place) => { if (await page.evaluate(() => document.querySelector('.cabin-bag').dataset.open === 'false')) await page.click('.bag-pocket'); await page.click(`.bag-item[data-item="${id}"]`); await wait(200); await page.click(place); };
 const crank = async () => { for (let i = 0; i < 8 && !(await page.isVisible('.hoist-hook')); i++) { await page.focus('.hoist-crank'); await page.keyboard.press('Enter'); await wait(150); } };
 await spot('mailbox'); await page.click('.play-target'); await wait(800); await page.click('.play-parcel'); await wait(600); await page.click('.parcel-pouch'); await wait(1200); await closeCard('.parcel-card'); await note('parcel');
-await spot('reindeer'); await use('lichen', '.feed-trough'); await wait(4000); await page.click('.feed-trough'); await wait(3500); await note('trough');
+await spot('reindeer'); await use('lichen', '.feed-trough'); await wait(4000); await page.click('.feed-trough'); await wait(1200); await page.click('.feed-log'); await wait(600); await closeCard('.care-log-card'); await note('trough');
 await spot('snowman'); await page.click('.snow-pile'); await wait(1200);
 await spot('stable'); await use('handle', '.hoist-winch'); await wait(900); await crank(); await page.click('.hoist-hook'); await wait(600);
 await page.click('.hoist-drawer'); await wait(900); await page.click('.drawer-matches'); await wait(1200); await page.click('.drawer-note'); await wait(800); await shot('barn-note'); await closeCard('.cabin-note'); await note('hoist');
@@ -136,7 +136,7 @@ await wait(2600); await shot('snowman-gift'); await closeCard('.piece-card');
 // Back in: the music box's drawer (N), the cord's lock and the old page, the smallest hat (H).
 await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(6000);
 // All four jobs done, back in the middle of the room: Santa asks, once, what comes next.
-await spot('inside', 7000); log.push(`asked: ${await page.evaluate(() => document.querySelector('.ask-card')?.textContent.slice(0, 30) ?? 'no')}`); await must('繼續探索'); await wait(500); await note('explore');
+await spot('inside', 7000); log.push(`asked: ${await page.evaluate(() => document.querySelector('.cabin-chat:not(.is-folded) .chat-log')?.textContent.slice(0, 30) ?? 'no')}`); await must('繼續探索'); await wait(500); await note('explore');
 await spot('musicbox');
 await use('pin', '.musicbox-drawer'); await wait(1900);
 for (const m of ['E', 'O', 'N', 'K', 'H']) { await page.evaluate(m => [...document.querySelectorAll('.comb-tine')].find(b => b.textContent === `${m}.`).click(), m); await wait(260); }

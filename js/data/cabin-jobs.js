@@ -3,10 +3,12 @@
 export const FEED = {
   title: '12/25 麋鹿餵食表',
   // The table as it is pinned up: by the clock, but not written in that order.
-  lines: [['07:30', '胡蘿蔔兩根'], ['06:00', '北極燕麥餅一塊（先墊墊肚子）'], ['09:00', '地衣一小撮（牠最愛的，留到最後）']],
+  lines: [['07:30', '胡蘿蔔一根'], ['06:00', '北極燕麥餅一塊（先墊墊肚子）'], ['09:00', '地衣一小撮（牠最愛的，留到最後）']],
   never: '✗ 薑餅：那是聖誕老人的點心！',
   note: '（貼在穀倉門上，今天早上的。）',
   foods: { oats: '北極燕麥餅', carrot: '胡蘿蔔', lichen: '地衣', gingerbread: '薑餅' },
+  // The little name tags hung under each food in the basket.
+  tags: { oats: '燕麥餅', carrot: '胡蘿蔔', lichen: '地衣', gingerbread: '薑餅' },
   start: '今天輪到你照顧麋鹿。照穀倉門上的餵食表，一樣一樣餵。',
   wrong: '麋鹿歪著頭，沒有吃……好像還不到吃這個的時候。照餵食表的時間，從頭再來一次。',
   good: count => ['喀滋喀滋！', '好甜！', ''][count] ?? '',
