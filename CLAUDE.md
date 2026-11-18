@@ -15,7 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 python3 -m http.server 5500 --bind 127.0.0.1    # 或 VS Code Live Server 開 index.html
 
 npm ci                      # 僅測試需要（Node.js 22+）
-npm test                    # tests/smoke.mjs ＋ node:test（wish-cloud / elf / wish-interaction / intro）
+npm test                    # tests/smoke.mjs ＋ package.json 列出的所有 node:test 檔
 npm run test:firebase       # Firestore 規則與整合測試，需 Java 21 與 firebase-tools emulator
 
 # 單獨執行
@@ -52,7 +52,7 @@ node --test --test-name-pattern 'waypoints' tests/elf.test.mjs  # node:test 檔�
 - Intro 故事書在 700px 以下把跨頁轉 90 度：上頁紙雕、下頁文字同尺寸，書脊橫在中間（`rotateX`），手指上下滑動翻頁、文字捲到底才翻，最後一頁的滑動交還網頁捲動；超過 700px 維持左右翻書（`rotateY`），兩種版型共用同一批章節節點。手機封面是獨立的橫式圖 `coverWide`。
 - Santa 頁是紙雕聖誕村：`js/components/cabin-art.js` 畫小屋每片紙板並定義位置（單位：聖誕老人坐高 = 1），`cabin-world.js` 畫四周的許願角、遊樂場、海岸、滑雪場，`cabin-scene.js` 把紙板畫成貼圖立進 Three.js。屋外站在原地左右各 90° 環視，點小屋沿固定路徑推開門走進去，屋內 360° 環顧；門關上後屋外整組隱藏。夾住坐姿模型 `santa-seated-web.glb`（`scripts/build-cabin-models.mjs` 產生），屋外放首頁的麋鹿。Wish 院子的小屋就是同一棟（平安夜），本頁是聖誕節早晨。頭部轉動上限刻意很小，超過會壓到鬍子與帽沿，見 `docs/SANTA-CABIN.md`。
 - `js/components/paper-art.js`、`paper-props.js` — SVG 紙雕工法與道具。每片紙只轉成圖片一次，會動的部位拆成獨立圖層以 CSS 移動，不要動畫 SVG 內部（濾鏡重算成本很高）。
-- `js/data/` — 純資料表。多數由 `scripts/` 的 `.mjs` / `.py` 產生（`envelope-shapes.js` 由 `build-wish-art.mjs`、`cabin-cuts.js` 由 `build-cabin-boards.mjs`、`title-glyphs.js`、`elf-actions.json`、`elf-ground.js`、`wish-tree-anchors.js`、`storybook-masks`）；**不要手改產出檔**，改腳本後重新產生。
+- `js/data/` — 純資料表。檔頭寫明由哪支 `scripts/` 腳本產生的就是產出檔（例如 `cabin-cuts.js` 由 `build-cabin-boards.mjs`、`envelope-shapes.js` 由 `build-wish-art.mjs`、各 `*-glyphs.js` 由 `build-title-glyphs.mjs`）；`assets/animations/elf-actions.json`（`build-elf-actions.mjs`）與 `images/storybook/masks/`（`build-storybook-masks.py`）也是產出檔。**不要手改產出檔**，改腳本後重新產生。
 - `js/services/` — 儲存與 Firebase。
 - `js/games/` — 配對遊戲適配層；`js/games/matching.js` 是保留的舊單關原型，已不載入。
 - 全站只用三種字型（`--font-body`、`--font-display`、`--font-hand`）與三級字級（`--fs-title`、`--fs-body`、`--fs-small`），新樣式不可寫死字級；`css/game2-*.css` 是遊戲原作樣式，不在此限。

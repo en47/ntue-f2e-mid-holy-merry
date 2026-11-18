@@ -176,7 +176,7 @@ await test('Santa 小屋：壓縮坐姿模型、封閉紙雕小屋與聖誕村�
   assert.deepEqual(adrift, [], 'Every village board starts somewhere: one without a place waits at the origin, inside the cabin');
   assert.ok(scene.includes("sheets.get('balloon-green')"), 'The single green balloon is moved too, not left behind');
   const chat = await fs.readFile(path.join(project, 'js/components/cabin-chat.js'), 'utf8'), backdrop = await fs.readFile(path.join(project, 'js/components/cabin-backdrop.js'), 'utf8');
-  assert.ok(entry.includes('mountCabinChat(stage)') && chat.includes('input.disabled = true') && chat.includes("'from-santa'".slice(1, -1)) && !chat.includes('innerHTML') && santaCss.includes('.cabin-stage[data-view="inside"]:not(.is-walking) .cabin-chat'), 'A letter-paper chat waits in the room, its writing line off until the AI reply exists');
+  assert.ok(entry.includes('mountCabinChat(stage, { onOpen: () => play?.chat()') && entry.includes("else if (id === 'santa') play?.chat();") && chat.includes('input.disabled = true') && chat.includes('form.hidden = true') && chat.includes("'from-santa'".slice(1, -1)) && !chat.includes('innerHTML') && santaCss.includes('.cabin-stage[data-view="inside"]:not(.is-walking) .cabin-chat') && santaCss.includes('.cabin-chat.is-folded .chat-card { display: none; }'), 'Santa\'s portrait waits in the room\'s corner; tapped (or Santa tapped) it opens his preset talk, the writing line kept hidden and off for an AI reply later');
   assert.ok(!backdrop.includes('cabin-sun') && !scene.includes('--cabin-turn') && scene.includes('sprite.position.set(-27.5'), 'The sun rises behind the far mountains in the 3D scene instead of sliding on the page behind it');
   const village = await fs.readFile(path.join(project, 'js/components/cabin-world.js'), 'utf8');
   for (const id of ['wish-post', 'wheel', 'horse', 'lighthouse', 'world-sign', 'ski-mountain', 'game-sign']) assert.ok(village.includes(`id: '${id}'`), `The village has its ${id}`);
@@ -225,7 +225,7 @@ await test('Santa 手機版：觸控按鈕至少 44px、橫拿手機改右側窄
   const css = await fs.readFile(path.join(project, 'css/santa.css'), 'utf8'), scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8'), entry = await fs.readFile(path.join(project, 'js/santa.js'), 'utf8');
   const block = query => { const start = css.indexOf(`@media ${query} {`); assert.ok(start >= 0, `少了 @media ${query}`); return css.slice(start, css.indexOf('\n}', start)); };
   const coarse = block('(pointer: coarse)');
-  for (const selector of ['.cabin-back', '.wardrobe-tabs button', '.wardrobe-reset', '.hoist-hook', '.hoist-release', '.cabin-letter-close', '.chat-fold', '.chat-send']) assert.ok(coarse.includes(selector), `${selector} 在觸控螢幕上至少 44px`);
+  for (const selector of ['.cabin-back', '.wardrobe-tabs button', '.wardrobe-reset', '.hoist-hook', '.hoist-release', '.cabin-letter-close', '.chat-fold', '.chat-close', '.chat-ask', '.chat-send']) assert.ok(coarse.includes(selector), `${selector} 在觸控螢幕上至少 44px`);
   assert.ok(coarse.includes('min-width: 44px; min-height: 44px'));
   const sideways = block('(orientation: landscape) and (max-height: 500px)');
   assert.ok(sideways.includes('.cabin { height: 100svh; }') && sideways.includes('.feed-basket { flex-direction: column; }') && sideways.includes('.wardrobe {') && sideways.includes('.cabin-chat {'), 'A phone held sideways gets the whole screen and the trays down the right side');
@@ -299,7 +299,7 @@ await test('Santa 隱藏故事 P5：書櫃後的小房間、第一次反轉、�
   assert.ok(NOTES.known.includes('原來，聖誕老人不只一位') && !Object.values(NOTES).join('').includes('從來不只是一個人') && !RULES.lines.join('').includes('實現了'), 'The first discovery is told; the deeper one is kept for later');
   const secret = await fs.readFile(path.join(project, 'js/components/cabin-secret.js'), 'utf8'), play = await fs.readFile(path.join(project, 'js/components/cabin-play.js'), 'utf8'), scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8');
   assert.ok(secret.includes('knowsSantas(story.seen)') && secret.includes('cancelAnimationFrame(frame)') && !secret.includes('innerHTML'), 'The secret is known by the rules once the shift log is put right; the buttons follow the view and let go');
-  assert.ok(play.includes('if (story.opened && knowsSantas(story.seen) && !story.told)') && play.includes('await cabin.santaReturn()') && play.includes('say(NOTES.chair)') && scene.includes('restyled.delete(board.id)'), 'Santa comes home once the secret is known (or speaks from his chair, already in); a look set before a board arrives is applied when it does');
+  assert.ok(play.includes('if (story.opened && knowsSantas(story.seen) && !story.told)') && play.includes('await cabin.santaReturn()') && play.includes('let opener = RETURN.chair;') && play.includes('opener = RETURN.door;') && scene.includes('restyled.delete(board.id)'), 'Santa comes home once the secret is known (or speaks from his chair, already in); a look set before a board arrives is applied when it does');
   const wardrobe = await fs.readFile(path.join(project, 'js/components/cabin-wardrobe.js'), 'utf8'), feed = await fs.readFile(path.join(project, 'js/components/cabin-feed.js'), 'utf8'), world = await fs.readFile(path.join(project, 'js/components/cabin-world.js'), 'utf8');
   assert.ok(wardrobe.includes('今天怎麼又多了一位聖誕老人') && feed.includes('今天的聖誕老人記得帶地衣來了') && feed.includes('上次那位總是記錯牠喜歡什麼') && world.includes('謝謝昨晚幫忙修好摩天輪的人'), 'Small clues outside, in words only');
 });
@@ -340,7 +340,7 @@ await test('Santa 書櫃可以再玩一次：開著時近看可進小房間或�
   assert.ok(books.includes("push.hidden = !replay || done || !solved(shelf)") && books.includes('toggle(true); later(2800, restart)'), 'It can simply be pushed open only while the books still spell MORE');
   assert.ok(books.includes('story.opened = true; story.shut = false; save(); onOpen()'), 'Spelling MORE again opens it again, with the same flash and creak');
   assert.ok(play.includes("restart: () => start('shelf')") && play.includes('enter: start') && !play.includes('swing: () => swing()'), 'The shelf game restarts in place; the bookcase is no longer worked from afar');
-  assert.ok(page.includes("onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (note) play?.note(note, id); }") && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
+  assert.ok(page.includes("onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (note) play?.note(note, id); }") && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
 });
 await test('Santa 拖曳不會卡住：放開被攔下時（例如瀏覽器擴充功能）仍會結束拖曳，書一次只拿一本、Esc 只放回書', async () => {
   const dir = path.join(project, 'js/components'), files = (await fs.readdir(dir)).filter(name => name.startsWith('cabin-') && name.endsWith('.js'));
@@ -479,7 +479,7 @@ await test('Santa 引導：每個目標都有一句白話的「現在要做什�
   assert.ok(Object.values(GOALS).every(each => each.task && each.task.length < 60), 'Every goal says what to do now, in one short line');
   assert.ok(GOALS.log.task.includes('聖誕老人就會回來') && GOALS.secret.task.includes('回到房間中間') && GOALS.join.task.includes('登記簿') && GOALS.join.task.includes('世界路標'), 'When Santa comes back, and how to join (or go home), are said plainly');
   assert.ok(notebook.includes("element('p', 'notebook-task', help, GOALS[now].task);") && notebook.includes('goalNow = now; show(); dot.hidden = false;') && !/notebook-slip|setInterval|還在找嗎|新目標/.test(notebook) && play.includes('notebook?.check();'), 'What to do now is written in the clue book; when it moves on the book only hops, nothing pops up');
-  assert.ok(secretData.includes('invite:') && play.includes('later(9000, () => say(NOTES.invite));'), 'Having told the secret, Santa asks you to join');
+  assert.ok(secretData.includes('invite:') && play.includes('talk.scene(lines, { line: RETURN.ask, choices: [RETURN.join, RETURN.wait]') && play.includes('const then = () => { invite(); story.told = true; save(); notebook.refresh(); };'), 'Having told the secret, Santa asks you to join; only your answer makes it told');
 });
 await test('Santa 故事前後一致：守則與許願的章數相同、每段之後有一句推進提示、蓋上去的是墨水、故事線文件', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
@@ -577,10 +577,13 @@ await test('Santa 第三章：一進工作室沒有「替身」字樣；聖誕�
   // Everything the room shows before Santa has told you: the things' names, the notes, the duty rules, the register's page,
   // the log, the old record (read early) and its lock.
   const labels = [...secret.matchAll(/\[(?:'secret-[a-z]+'|'secret-desk'), [^\]]*\]?,? ?(?:undefined, )?'([^']+)'\]/g)].map(([, name]) => name);
-  const early = [...labels, NOTES.tags, NOTES.hats, NOTES.hatInside, NOTES.hatLook, NOTES.stamps, NOTES.pin, NOTES.rack, NOTES.polaroid, NOTES.known, NOTES.coming, DUTY.title, ...DUTY.lines, DUTY.margin, DUTY.stuck, REGISTER.title, REGISTER.season, REGISTER.blank, LOG.title, LOG.wet, LOG.how, CORD.title, CORD.locked, RECORD.title, ...RECORD.entry, ...RECORD.since, RECORD.pencil, ...RECORD.card, RECORD.surface];
+  const { TALK, RETURN } = await import(pathToFileURL(path.join(project, 'js/data/cabin-talk.js')).href);
+  const { GOALS: goals } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  assert.ok(Object.keys(goals).filter(id => id !== 'secret').every(id => TALK.now[id]?.length === 2) && !TALK.now.secret, 'Santa has two lines for every goal; the secret itself he tells as a scene');
+  const early = [...labels, TALK.hello.guest, TALK.place.guest, TALK.where, TALK.book, TALK.again, ...['yard', 'room', 'bookcase', 'log'].flatMap(id => TALK.now[id]), NOTES.tags, NOTES.hats, NOTES.hatInside, NOTES.hatLook, NOTES.stamps, NOTES.pin, NOTES.rack, NOTES.polaroid, NOTES.known, NOTES.coming, DUTY.title, ...DUTY.lines, DUTY.margin, DUTY.stuck, REGISTER.title, REGISTER.season, REGISTER.blank, LOG.title, LOG.wet, LOG.how, CORD.title, CORD.locked, RECORD.title, ...RECORD.entry, ...RECORD.since, RECORD.pencil, ...RECORD.card, RECORD.surface];
   assert.ok(labels.length >= 7, 'Every thing in the room has a name'); assert.ok(!early.join('').includes('替身'), 'Nothing in the room says "substitute" until Santa has told you');
   assert.ok(RULES.title.includes('替身') && secret.includes("if (!story.told) element('p', 'secret-note', page, DUTY.stuck);"), 'The rules for substitutes are on the booklet\'s stuck pages, opened by Santa');
-  assert.ok(play.includes('story.told = true; save();') && play.includes('if (progress.finale.unlocked && !progress.finale.twist) later(15000, () => say(NOTES.record));') && NOTES.record.includes('再讀一次'), 'Santa tells you once; having opened the old record early, you are told to read it again');
+  assert.ok(play.includes('story.told = true; save();') && play.includes('if (progress.finale.unlocked && !progress.finale.twist) lines.push(RETURN.record);') && RETURN.record[0].includes('再讀一次'), 'Santa tells you once; having opened the old record early, you are told to read it again');
   assert.ok(secret.includes("classList.toggle('is-glinting', finale.unlocked && !finale.twist && story.told)") && CORD.known.includes('你已經知道了'), 'Its corner catches the light to be read again; the lemon slip knows you know the year already');
 });
 await test('Santa 第四章：四件替身工作各有真的操作（餵食表、雪橇反序、分信回一封、雪地的齒輪），紙條放進口袋烘在石板上', async () => {

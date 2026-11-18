@@ -18,8 +18,8 @@ function fitSideways() {
 }
 mountCabinBackdrop(document.querySelector('.cabin-backdrop'));
 mountCabinPaper(document.querySelector('.cabin'));
-// The letter-paper chat with Santa waits in the room (its writing line stays off until the AI reply is ready).
-const chat = mountCabinChat(stage);
+// Talking with Santa in the room: his portrait in the corner, and the card his preset lines open in (cabin-chat.js).
+const chat = mountCabinChat(stage, { onOpen: () => play?.chat(), onNote: () => play?.chairNote() });
 
 // Corners already found stay found on this browser (a convenience: an empty store just starts over).
 // Ids no longer in the yard (the elf that used to sit in a fir) are dropped.
@@ -31,7 +31,7 @@ const markExplore = () => explore.forEach(button => button.classList.toggle('is-
 function onFound(id) {
   if (found.has(id)) return;
   found.add(id); try { localStorage.setItem(FOUND, JSON.stringify([...found])); } catch { /* still lit for this visit */ }
-  cabin?.setFound([...found]); cabin?.repaint('sign', { stars: found.size }); markExplore();
+  cabin?.repaint('sign', { stars: found.size }); markExplore();
   status.textContent = found.size === SPOTS.length ? '招牌上的星星全亮了！院子裡的秘密你全找到了。' : `發現了一個角落（${found.size}/${SPOTS.length}），招牌上又亮了一顆星。`;
 }
 function onView(view) {
@@ -81,10 +81,9 @@ async function mountCabin(fly = true) {
   try {
     const [{ mountCabin: build }, { mountPlay }] = await Promise.all([import('./components/cabin-scene.js'), import('./components/cabin-play.js')]);
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (note) play?.note(note, id); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
+    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (note) play?.note(note, id); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
     if (!result || run !== generation) { result?.destroy(); return; }
-    cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; }, onSanta: state => { if (state === 'away' || state === 'home') chat.setAway(state === 'away'); } });
-    cabin.setFound([...found]);
+    cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; }, onSanta: state => { if (state === 'away' || state === 'home') chat.setAway(state === 'away'); }, talk: chat });
     if (found.size) cabin.repaint('sign', { stars: found.size });
     play.restore([...found]);
     stage.dataset.state = 'ready'; stage.dataset.santa = 'home'; progress(1);

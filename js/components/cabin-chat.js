@@ -1,7 +1,9 @@
-// The corner of the room kept for talking with Santa: a sheet of letter paper on the right (along the bottom on a phone),
-// his lines on the left beside a little paper portrait, yours on the right, like a chat. Talking to him is still to come (an
-// AI reply is planned), so for now he greets you and the writing line waits, switched off. It shows only once you are inside
-// with the door shut (css/santa.css), and folds away to a tab for a clear look round the room.
+// Talking with Santa in the room, without AI: his paper portrait waits in the corner under the clue book (only once you
+// are inside with the door shut, css/santa.css). Tapped, or Santa himself tapped, it opens a paper card with his line on
+// the left and yours on the right, like a chat, and a few questions to ask underneath; what he says is chosen by
+// cabin-play.js from data/cabin-talk.js, never here. At a turn in the story the card tells a scene instead: one line at a
+// time, each moved on by your reply, ending in a choice. While he is out the corner shows the note he left on his chair.
+// The writing line stays in the card, hidden and switched off, for a reply written by an AI later.
 import { paperLayer, shape } from './paper-art.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .18 }, eager: true };
@@ -19,36 +21,92 @@ function portrait(parent) {
   shape('rect', { x: 26, y: 34, width: 48, height: 10, rx: 5, fill: '#fbf8f1' }, parent);
   shape('circle', { cx: 80, cy: 40, r: 6, fill: '#fbf8f1' }, parent);
 }
+// The note left on his chair, folded once: three lines of his hand and an S.
+function chairSlip(parent) {
+  shape('path', { d: 'M18 26L80 18 86 76 24 84Z', fill: '#fbf3df' }, parent);
+  shape('path', { d: 'M51 22L55 80', stroke: '#e2d4b8', 'stroke-width': 2 }, parent);
+  for (const [y, end] of [[38, 74], [50, 70], [62, 60]]) shape('path', { d: `M28 ${y + 2}Q${(28 + end) / 2} ${y - 3} ${end} ${y - 2}`, stroke: '#ad3c3b', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round' }, parent);
+  shape('path', { d: 'M70 70C64 66 62 74 68 74S72 82 64 80', stroke: '#ad3c3b', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round' }, parent);
+}
 
-export function mountCabinChat(stage) {
-  const panel = element('aside', 'cabin-chat', stage); panel.setAttribute('aria-label', '和聖誕老人聊天（準備中）');
-  const head = element('header', 'chat-head', panel);
+// `onOpen`: the portrait tapped while Santa is in (cabin-play.js then calls `open`); `onNote`: tapped while he is out.
+export function mountCabinChat(stage, { onOpen = () => {}, onNote = () => {} } = {}) {
+  const panel = element('aside', 'cabin-chat is-folded', stage); panel.setAttribute('aria-label', '和聖誕老人說話');
+  const fold = element('button', 'chat-fold', panel); fold.type = 'button'; fold.setAttribute('aria-expanded', 'false'); fold.setAttribute('aria-label', '和聖誕老人說話');
+  paperLayer(element('span', 'chat-avatar', fold), '0 0 100 100', '', portrait, PAPER);
+  const slip = element('span', 'chat-avatar chat-slip', fold); paperLayer(slip, '0 0 100 100', '', chairSlip, PAPER); slip.hidden = true;
+  const card = element('div', 'chat-card', panel);
+  const head = element('header', 'chat-head', card);
   paperLayer(element('span', 'chat-avatar', head), '0 0 100 100', '', portrait, PAPER);
   element('p', 'chat-title', head, '聖誕老人');
-  const fold = element('button', 'chat-fold', head, '收起'); fold.type = 'button'; fold.setAttribute('aria-expanded', 'true');
-  const log = element('ol', 'chat-log', panel); log.setAttribute('role', 'log');
-  for (const text of ['外面很冷吧？快坐到火爐邊暖暖身子。', '再過不久，你就能在這張信紙上寫字跟我聊天了。']) {
-    const line = element('li', 'chat-line from-santa', log);
-    paperLayer(element('span', 'chat-avatar', line), '0 0 100 100', '', portrait, PAPER);
-    element('p', 'chat-bubble', line, text);
-  }
-  // Where your own lines will go; an outline only, nothing is put in your mouth.
-  const yours = element('li', 'chat-line from-me is-example', log); yours.setAttribute('aria-hidden', 'true');
-  element('p', 'chat-bubble', yours, '你寫的話會出現在這一邊');
-  const form = element('form', 'chat-form', panel);
+  const close = element('button', 'chat-close', head, '收起'); close.type = 'button';
+  const log = element('ol', 'chat-log', card); log.setAttribute('role', 'log');
+  const asks = element('div', 'chat-asks', card);
+  const form = element('form', 'chat-form', card); form.hidden = true;
   const label = element('label', 'sr-only', form, '寫給聖誕老人的話'); label.htmlFor = 'cabin-chat-input';
-  const input = element('input', '', form); input.id = 'cabin-chat-input'; input.disabled = true; input.placeholder = '聊天功能準備中';
+  const input = element('input', '', form); input.id = 'cabin-chat-input'; input.disabled = true;
   const send = element('button', 'chat-send', form, '寄出'); send.type = 'submit'; send.disabled = true;
   form.addEventListener('submit', event => event.preventDefault());
+  let away = false, scene = null;
+
+  // A line in the card, his (with his portrait) or yours; only the last few stay.
+  function line(text, mine = false) {
+    const item = element('li', `chat-line ${mine ? 'from-me' : 'from-santa'}`, log);
+    if (!mine) paperLayer(element('span', 'chat-avatar', item), '0 0 100 100', '', portrait, PAPER);
+    element('p', 'chat-bubble', item, text);
+    while (log.children.length > 6) log.firstElementChild.remove();
+    item.scrollIntoView({ block: 'nearest' });
+  }
+  // The paper tags under the lines: [words, what tapping them does].
+  function choices(list) {
+    asks.replaceChildren();
+    for (const [words, then] of list) { const ask = element('button', 'chat-ask', asks, words); ask.type = 'button'; ask.addEventListener('click', then); }
+    asks.querySelector('button')?.focus({ preventScroll: true });
+  }
+  function show() { panel.classList.remove('is-folded'); fold.setAttribute('aria-expanded', 'true'); }
+  function hide() { panel.classList.add('is-folded'); fold.setAttribute('aria-expanded', 'false'); }
+  // A scene goes on from where it was; otherwise the card opens afresh.
   fold.addEventListener('click', () => {
-    const folded = panel.classList.toggle('is-folded');
-    fold.textContent = folded ? '和聖誕老人聊聊 ✉' : '收起'; fold.setAttribute('aria-expanded', String(!folded));
+    if (!panel.classList.contains('is-folded')) return hide();
+    if (scene) return show();
+    if (away) onNote(); else onOpen();
   });
-  // While Santa is out the letter waits for him: a line on his behalf, and his name marked out.
-  const absent = element('li', 'chat-line from-santa is-away', log); absent.hidden = true;
-  element('p', 'chat-bubble', absent, '（聖誕老人去看麋鹿了，搖椅上留了一張紙條。）');
+  close.addEventListener('click', () => { hide(); fold.focus({ preventScroll: true }); });
+
+  // The scene's next line: his line and your reply to move on, or at the end his question and the choice.
+  function step() {
+    const { lines, last } = scene;
+    if (scene.at < lines.length) {
+      const [said, reply] = lines[scene.at];
+      line(said); choices([[reply, () => { line(reply, true); scene.at += 1; step(); }]]);
+      return;
+    }
+    line(last.line);
+    choices(last.choices.map(({ text, reply, then }) => [text, () => { line(text, true); line(reply); asks.replaceChildren(); scene = null; then(); close.focus({ preventScroll: true }); }]));
+  }
   return {
+    // His line and the questions: [{ text, answer(), more() }]; asked, your question and his answer go into the card. A
+    // question with nothing more to say is put away; when none is left he says `closing`, once.
+    open({ said, questions, closing }) {
+      if (scene) return show();
+      log.replaceChildren(); line(said);
+      const ask = () => {
+        const left = questions.filter(question => question.more());
+        if (!left.length) { line(closing); asks.replaceChildren(); close.focus({ preventScroll: true }); return; }
+        choices(left.map(({ text, answer }) => [text, () => { line(text, true); line(answer()); ask(); }]));
+      };
+      ask(); show();
+    },
+    // A turn in the story: `lines` [[his line, your reply]], then `last` { line, choices: [{ text, reply, then }] }.
+    scene(lines, last) { scene = { lines, last, at: 0 }; log.replaceChildren(); step(); show(); },
+    get telling() { return Boolean(scene); },
+    show,
     destroy() { panel.remove(); },
-    setAway(away) { absent.hidden = !away; panel.classList.toggle('is-away', away); },
+    // While Santa is out the corner shows his note instead, and an open card folds away.
+    setAway(out) {
+      away = out; slip.hidden = !out; fold.querySelector('.chat-avatar:not(.chat-slip)').hidden = out;
+      fold.setAttribute('aria-label', out ? '看聖誕老人留下的紙條' : '和聖誕老人說話');
+      if (out && !scene) hide();
+    },
   };
 }

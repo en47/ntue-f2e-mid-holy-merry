@@ -46,6 +46,15 @@ const toRoom = async () => { for (let i = 0; i < 3 && (await page.evaluate(() =>
 const enter = async () => { await spot('shelf'); for (let i = 0; i < 2 && (await page.evaluate(() => document.querySelector('#cabin-stage').dataset.view)) !== 'secret'; i++) { await press('.books-tools button:not([hidden])'); await wait(4800); } };
 const openPocket = async () => { if (await page.evaluate(() => document.querySelector('.cabin-bag').dataset.open === 'false')) await tap('.bag-pocket'); };
 const leave = async () => { await press('.books-enter'); await wait(4500); await toRoom(); };
+// Santa home with the secret: in the chat card a line at a time, each moved on by tapping a reply, up to the question
+// (answered by the caller: told only once answered). What the replies were, in order.
+const replies = () => page.evaluate(() => [...document.querySelectorAll('.chat-ask')].filter(b => b.getClientRects().length).map(b => b.textContent));
+async function hear() {
+  for (let i = 0; i < 30 && !(await replies()).length; i++) await wait(500);
+  const heard = [];
+  for (let i = 0; i < 8; i++) { const words = await replies(); heard.push(words.join('/')); if (words.includes('我想幫忙')) break; await tap('.chat-ask'); await wait(300); }
+  return heard;
+}
 // The room's own words while open: every card's text and the caption.
 const everything = () => page.evaluate(() => [...document.querySelectorAll('.secret-card, .cabin-caption')].map(node => node.textContent).join(''));
 async function turnDials(code) { for (const [i, digit] of [...code].entries()) for (let k = 0; k < Number(digit); k++) { await press(`.lock-dial:nth-child(${i + 1})`); await wait(60); } await wait(2400); }
@@ -75,8 +84,12 @@ check((await caption()).includes('夜班是什麼'), `只讀得懂表面：${awa
 await thing('log'); await fillLog(); await shot('log-solved');
 check((await saved()).story.seen.includes('log') && (await text('.secret-card')).includes('兩個人接力'), '交接表補對：每一晚都是兩個人接力'); await putBack(); await wait(2500);
 check((await caption()).includes('不只一位'), `第一次反轉：${await caption()}`);
-await leave(); await wait(16000);
-const told = await saved(); check(told.story.told, '聖誕老人回來，說明了秘密'); await shot('santa-back');
+await leave();
+const heard = await hear(); await shot('santa-tells');
+check(heard[0] === '你們是……？' && heard.at(-1) === '我想幫忙/我再想想' && heard.length >= 4, `聖誕老人回來，一句一句說，點了回應才往下：${heard.join(' → ')}`);
+check(!(await saved()).story.told, '還沒回答，不算說明完');
+await tap('.chat-ask'); await wait(600);
+const told = await saved(); check(told.story.told && told.finale.invited && (await text('.chat-log')).includes('登記簿'), '回答「我想幫忙」：說明了秘密，他指向登記簿'); await shot('santa-back');
 await enter();
 check(await page.evaluate(() => document.querySelector('.secret-thing[data-id="record"]').classList.contains('is-glinting')), '舊紀錄簿的書角在發光');
 await thing('rules'); check((await text('.secret-card')).includes('替身守則'), '小冊黏住的後半本翻開了：替身守則');
@@ -101,7 +114,7 @@ check((await saved()).finale.twist, '先補交接表、再開舊紀錄：讀完�
 await load(opened); await enter();
 await thing('log'); await fillLog(); await putBack(); await wait(2500);
 await thing('register'); check(!(await visible('.register-letter')), 'Santa 還沒說明以前，登記簿還不能簽'); await putBack();
-await leave(); await wait(16000);
+await leave(); await hear(); await tap('.chat-ask'); await wait(600);
 await enter(); await thing('register');
 check(await visible('.register-letter'), '聖誕老人說明以後，登記簿最下面一格可以簽');
 await page.evaluate(() => [...document.querySelectorAll('.register-letter')].find(b => b.textContent === 'J').click()); await wait(200); await press('.register-sign'); await wait(800);

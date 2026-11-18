@@ -474,9 +474,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const caseTarget = new THREE.Mesh(unit, unseen); caseTarget.position.set(BOOKCASE.width / 2, BOOKCASE.height / 2, BOOKCASE.depth / 2);
   caseTarget.scale.set(BOOKCASE.width, BOOKCASE.height, BOOKCASE.depth); caseTarget.userData = { bookcase: true }; rigs.get('bookcase').add(caseTarget);
   const roomTargets = [caseTarget, ...ROOM_SPOTS.map(spot => target(spot.box, { spot: spot.id })), ...ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }))];
-  const glint = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: keep(textures, radialTexture([[0, 'rgba(255,255,240,1)'], [.25, 'rgba(255,230,150,.8)'], [1, 'rgba(255,220,120,0)']], 64)), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })));
-  glint.visible = false; world.add(glint);
-  let snowmanMove = null, found = new Set(), glintSpot = null, glintAt = 0, nextGlint = 4, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null, reindeerAside = 0, reindeerShift = 0;
+  let snowmanMove = null, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null, reindeerAside = 0, reindeerShift = 0;
   const wiggles = new Map(), runs = RUNS.map(points => new THREE.SplineCurve(points.map(([x, y]) => new THREE.Vector2(x, y)))), track = new THREE.SplineCurve(TRACK.map(([x, y]) => new THREE.Vector2(x, y)));
   // The coaster's timetable, worked out once. The chain pulls the train slowly to the top of the lift hill; from there it
   // coasts, its speed set by how far it has dropped below the crest (v² = v₀² + 2g·drop) less a little friction for the
@@ -737,14 +735,6 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     for (const [holder, swing] of swings) holder.rotation.z = still ? 0 : Math.sin(t * 1.1 + holder.id) * swing;
     lanternGlow.material.opacity = .85 + (still ? 0 : Math.sin(t * 3.1) * .1);
     doorGlow.material.opacity = (hovered === 'house' ? .55 : .2) + (still ? 0 : Math.sin(t * 1.8) * .06);
-    // A glint over a corner not yet found, every few seconds, only while looking at the whole yard.
-    if (!still && view === 'outside' && !trip && t > nextGlint) {
-      const hidden = SPOTS.filter(spot => !found.has(spot.id));
-      glintSpot = hidden.length ? hidden[Math.floor(Math.random() * hidden.length)] : null; glintAt = t; nextGlint = t + 5.5;
-    }
-    const sparkle = glintSpot && view === 'outside' && !still ? (t - glintAt) / 1.4 : 1;
-    glint.visible = sparkle < 1;
-    if (glint.visible) { const [[x, y, z], [, h]] = glintSpot.box; glint.position.set(x, y + h * .45, z + .1); glint.scale.setScalar(Math.sin(sparkle * Math.PI) * .9); }
     // The snowman's little performances: a hop, a spin when he is all dressed, a gentleman's bow, a reindeer's prance.
     if (snowman && snowmanMove) {
       const { kind, start: begun } = snowmanMove, length = { hop: 1.2, spin: 1.4, bow: 1.6, prance: 1.5 }[kind], u = Math.min(1, (t - begun) / length), holder = snowman.holder;
@@ -1342,7 +1332,6 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       return { mouth: rectOfBox([FIRE.x, .27, BACK_WALL + .2], [.46, .3, .05]), basket: rectOfBox([.47, .17, BACK_WALL + .42], [.34, .22, .05]), bellows: rectOfBox(handles.toArray(), [.22, .16, .05]) };
     },
     rectOfBox,
-    setFound(ids) { found = new Set(ids); },
     // Fly down from over the village to the front of the house; resolves once landed (at once when there is no flight).
     arrive() { if (!perched) return Promise.resolve(); perched = false; return new Promise(done => walk('fly', done)); },
     wave(id) { if (!motion.matches) { wiggles.set(id, clock); wake(); } },
