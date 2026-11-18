@@ -813,10 +813,10 @@ html.theatre-open { overflow: hidden; }
   .book-count { min-width: 5.5rem; }
   .book-turn { padding: .45rem .7rem; }
 }
-/* 橫拿的手機：書很矮，所以整張卡片幾乎和畫面一樣高，「從頭再玩一次」放到按鈕列左邊，讓書多一點高度。 */
+/* 橫拿的手機：書很矮，所以整張卡片幾乎和畫面一樣高，「從頭再玩一次」放到按鈕列右邊的空位（左下角是口袋），讓書多一點高度。 */
 @media (orientation: landscape) and (max-height: 500px) {
   .notebook-card { --tab-top: .5rem; --tab-step: 2.95rem; height: calc(100% - 1rem); gap: .5rem; }
-  .notebook-restart { position: absolute; left: 0; bottom: 0; }
+  .notebook-restart { position: absolute; right: 0; bottom: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .notebook-button.is-new { animation: none; } .book-tab, .notebook-hint, .notebook-close, .book-turn { transition: none; } }
 /* 弄濕的交接表：四晚 × 前半夜／後半夜的格子。暈開的墨水留著寫字人的顏色，洗掉的只剩水痕；點格子再點名牌補字，補對了墨水一行行乾回來。 */
