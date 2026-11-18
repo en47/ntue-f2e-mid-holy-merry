@@ -406,12 +406,15 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   ribbon(-.9, .02, 0xe4ded2, GROUND + .006);
   const foam = ribbon(-.05, .45, 0xf4f8f8, GROUND + .02, .85);
 
+  let spray = null;
   const smokeReady = cutBoard('smoke', PIECES.smoke, set).then(image => {
     const map = texture(image);
     for (let i = 0; i < 3; i++) {
       const puff = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false, toneMapped: false })));
       puff.userData.phase = i / 3; smoke.push(puff); world.add(puff);
     }
+    // The snow a drift throws up when it calls (`beckon`): the same paper puff, out of sight until then.
+    spray = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false, toneMapped: false }))); spray.visible = false; world.add(spray);
     painted++; report();
   });
   // A village board that fails is left out; a house board that fails before the page opens fails the whole cabin.
@@ -475,6 +478,23 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   caseTarget.scale.set(BOOKCASE.width, BOOKCASE.height, BOOKCASE.depth); caseTarget.userData = { bookcase: true }; rigs.get('bookcase').add(caseTarget);
   const roomTargets = [caseTarget, ...ROOM_SPOTS.map(spot => target(spot.box, { spot: spot.id })), ...ROOM_PROPS.filter(prop => prop.box).map(prop => target(prop.box, { prop }))];
   let snowmanMove = null, reindeerAim = [0, 0], reindeerTurn = [0, 0], reindeerAction = null, reindeerAside = 0, reindeerShift = 0;
+  // Something calling the visitor over when they seem stuck (cabin-play.js decides what, by cabin-story.js `beckon`): one
+  // small move of its own, a second or two long (`BECKON`), ending just where it rests. `moving(kind)` is how far through it
+  // is, 0 → 1 (null: something else, or nothing). A gold book is a 'book'.
+  const BECKON = { mailbox: .7, trough: 1.4, reindeer: 1.8, 'snow-pile': 1.5, 'hoist-tag': 1.4, door: 1.2, hearth: 1.5, desk: 1, musicbox: 1.2, globe: 1.6, book: 1.1, bookcase: 1.5, chair: 1.6, 'secret-log': 1.8, register: 2, record: 1.6, sleigh: 1.6, wheel: 1.8 };
+  let calling = null;
+  const moving = kind => calling?.kind === kind ? Math.min(1, (clock - calling.at) / calling.length) : null;
+  const shiver = (u, turns, size) => Math.sin(u * Math.PI * turns) * size * (1 - u);
+  // Turns a sheet by `angle` about one of its own axes through `point` on it ([x, y] from the middle of its foot), which
+  // stays where it was: a board on its nail, a page on its spine. `rock` tips one on a corner of its foot and back, never
+  // sinking it into what it stands on.
+  const UPRIGHT = new THREE.Vector3(0, 1, 0), FACING = new THREE.Vector3(0, 0, 1);
+  const turnBy = new THREE.Quaternion(), yawBy = new THREE.Quaternion(), pin = new THREE.Vector3(), pinGone = new THREE.Vector3();
+  function pivot({ holder, home, board }, axis, angle, [x, y]) {
+    yawBy.setFromAxisAngle(UPRIGHT, board.turn ?? 0); turnBy.setFromAxisAngle(axis, angle); holder.quaternion.copy(yawBy).multiply(turnBy);
+    pin.set(x, y, 0); pinGone.copy(pin).applyQuaternion(turnBy); holder.position.copy(home).add(pin.sub(pinGone).applyQuaternion(yawBy));
+  }
+  const rock = (sheet, angle) => pivot(sheet, FACING, angle, [(angle > 0 ? -.5 : .5) * sheet.board.w, 0]);
   const wiggles = new Map(), runs = RUNS.map(points => new THREE.SplineCurve(points.map(([x, y]) => new THREE.Vector2(x, y)))), track = new THREE.SplineCurve(TRACK.map(([x, y]) => new THREE.Vector2(x, y)));
   // The coaster's timetable, worked out once. The chain pulls the train slowly to the top of the lift hill; from there it
   // coasts, its speed set by how far it has dropped below the crest (v² = v₀² + 2g·drop) less a little friction for the
@@ -691,17 +711,26 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // The seat and the note on it show only while he is out: sitting, his thighs slope down below the seat's front edge.
     for (const id of ['chair-note', 'chair-seat']) { const holder = sheets.get(id)?.holder; if (holder) holder.visible = story.away; }
     if (story.door && !trip) { const u = THREE.MathUtils.clamp((t - story.door.start) / story.door.length, 0, 1); rigs.get('door').rotation.y = lerp(story.door.from, story.door.to, ease(u)); }
+    // Calling: the shut door rattles in its frame, as in a gust.
+    const knock = moving('door'); if (knock !== null && !story.door && !trip) rigs.get('door').rotation.y = shiver(knock, 6, .035);
     // The bookcase swings on its hinge into the room.
     if (story.opening) { const u = THREE.MathUtils.clamp((t - story.opening.start) / 2.6, 0, 1); story.open = story.opening.from + (story.opening.to - story.opening.from) * ease(u); }
     // Hinged at its left edge, it swings out into the room toward the left wall, about 55°.
-    rigs.get('bookcase').rotation.y = -.95 * story.open; secret.visible = story.open > 0 && indoorView(view);
+    // Calling, standing open, it swings a little further on its hinge and back (shut, it gives the shake below).
+    const creak = moving('bookcase');
+    rigs.get('bookcase').rotation.y = -.95 * story.open + (creak === null || story.opening ? 0 : shiver(creak, 3, .05) * story.open); secret.visible = story.open > 0 && indoorView(view);
+    // A gold book calling hops twice where it stands (one held in the hand is left alone).
+    const bounce = moving('book'), hopping = bounce === null ? null : letterBooks.get(calling.id);
+    if (hopping && !hopping.userData.held && hopping.userData.goal) hopping.position.y = hopping.userData.goal.y + Math.abs(Math.sin(bounce * Math.PI * 2)) * .02 * (1 - bounce * .5);
     if (story.shake && t - story.shake < .5) rigs.get('bookcase').position.x = BOOKCASE.left + Math.sin((t - story.shake) * 60) * .004 * (1 - (t - story.shake) * 2); else rigs.get('bookcase').position.x = BOOKCASE.left;
     if (spine && spineRest) spine.quaternion.copy(spineRest).multiply(tilt.setFromAxisAngle(side, still ? 0 : Math.sin(t * 1.5) * .014));
     const flicker = still ? 0 : Math.sin(t * 9.1) * .5 + Math.sin(t * 13.7) * .3 + Math.sin(t * 5.3) * .2;
     // The fire burns as high as it is fed and flares when the bellows blow. Its light warms the room a little: the paper is
     // not lit by lamps, so its colour is warmed by hand. The books that spelled MORE glow for a moment.
     const warmth = hearth.heat / 3, blaze = hearth.lit ? 1 + hearth.heat * .22 + hearth.flare * .45 : .32 + hearth.flare * .12;
-    for (const holder of flames) { holder.scale.y = (1 + flicker * .07) * blaze; holder.scale.x = (1 + (still ? 0 : Math.sin(t * 7.3) * .025)) * (1 + hearth.heat * .08 + hearth.flare * .12); }
+    // Calling, the fire licks up once and sinks back: a low one to twice its height, a burning one a little.
+    const lick = moving('hearth'), leap = lick === null ? 0 : Math.sin(lick * Math.PI) * (hearth.lit ? .35 : 1.1) * (1 - lick * .3);
+    for (const holder of flames) { holder.scale.y = (1 + flicker * .07) * blaze * (1 + leap); holder.scale.x = (1 + (still ? 0 : Math.sin(t * 7.3) * .025)) * (1 + hearth.heat * .08 + hearth.flare * .12); }
     fireGlow.material.opacity = hearth.lit ? Math.min(1, .85 + flicker * .12 + hearth.flare * .15) : .3 + flicker * .08; fireGlow.scale.setScalar(hearth.lit ? 1 + warmth * .4 + hearth.flare * .3 : .55);
     fire.intensity = hearth.lit ? 2.2 + flicker * .4 + warmth * 2.4 + hearth.flare * 2 : .9 + flicker * .2; fire.distance = 3 + warmth * 1.4;
     const tint = warmth * .08 + hearth.flare * .04;
@@ -717,7 +746,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (left && right) { left.rotation.z = open; right.rotation.z = -open; }
     if (leather) leather.scale.x = .25 + .75 * open / .39;
     // The music box's key and its turning scene (two crossed cut-outs, so it never turns edge-on to nothing).
-    const key = sheets.get('musicbox-key')?.holder; if (key) key.rotation.z = musicbox.key;
+    const key = sheets.get('musicbox-key')?.holder, twitch = moving('musicbox'); if (key) key.rotation.z = musicbox.key + (twitch === null ? 0 : shiver(twitch, 4, .3));
     (clones.get('musicbox-scene') ?? []).forEach((scene, i) => { scene.rotation.y = musicbox.spin + i * Math.PI / 2; });
     // While it plays, the four gold bookmarks rise out of the box, a pair each side of its scene, and sway; after, they sink.
     musicbox.marks += ((musicbox.energy > 0 ? 1 : 0) - musicbox.marks) * (still ? 1 : .05);
@@ -756,6 +785,20 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       sheet.lift += (goal - sheet.lift) * (still ? 1 : .25); together(id, other => other.holder.scale.copy(other.base).multiplyScalar(sheet.lift));
       if (goal === 1 && Math.abs(sheet.lift - 1) < .002) { together(id, other => other.holder.scale.copy(other.base)); lifting.delete(id); }
     }
+    // Things calling the visitor over. The trough's hay heaves (as if something stirred in it; also when the reindeer noses
+    // it); the drift shudders and throws up a little snow; the snow globe and the sleigh rock on their feet; the shift log
+    // swings on its nail; the register's top page lifts in a draught and falls back; the old record book rocks on its foot.
+    const nosed = calling?.kind === 'reindeer' ? THREE.MathUtils.clamp(((t - calling.at) / calling.length - .35) / .5, 0, 1) : null, rustle = moving('trough') ?? nosed;
+    const hay = sheets.get('trough'); if (rustle !== null && hay) hay.holder.scale.set(hay.base.x * (1 + shiver(rustle, 4, .025)), hay.base.y * (1 + Math.abs(shiver(rustle, 4, .07))), hay.base.z);
+    const flurry = moving('snow-pile'), pile = sheets.get('snow-pile');
+    if (flurry !== null && pile) {
+      pile.holder.scale.set(pile.base.x * (1 + shiver(flurry, 3, .04)), pile.base.y * (1 - shiver(flurry, 3, .06)), pile.base.z);
+      if (spray) { spray.visible = flurry < 1; spray.position.set(pile.home.x, pile.home.y + pile.board.h * .8 + flurry * .35, pile.home.z + .05); spray.scale.set(.18 + flurry * .3, .13 + flurry * .22, 1); spray.material.opacity = Math.sin(flurry * Math.PI) * .9; }
+    }
+    for (const [kind, id, size] of [['globe', 'snowglobe', .09], ['sleigh', 'sleigh', .045]]) { const u = moving(kind), sheet = sheets.get(id); if (u !== null && sheet) rock(sheet, shiver(u, 4, size)); }
+    const sway = moving('secret-log'), log = sheets.get('secret-log'); if (sway !== null && log) pivot(log, FACING, shiver(sway, 4, .06), [0, log.board.h]);
+    const draught = moving('register'), page = sheets.get('secret-page'); if (draught !== null && page) pivot(page, UPRIGHT, -Math.sin(draught * Math.PI) * .8 + shiver(draught, 7, .05), [-page.board.w / 2, 0]);
+    const tip = moving('record'), record = sheets.get('secret-record'); if (tip !== null && record) rock(record, shiver(tip, 3, .12));
     // The reindeer's head follows the food in your hand. Eating, he chews (small quick bobs with the head a little down);
     // lichen, his favourite, makes him hop and nod; gingerbread he turns away from. Only the head bone turns and the whole
     // body lifts: nothing in the model is stretched.
@@ -769,6 +812,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
         if (kind === 'shake') extraYaw = Math.sin(u * Math.PI * 5) * .3;
         if (kind === 'chew') extraPitch = Math.sin(u * Math.PI) * .1 + Math.sin(u * Math.PI * 12) * .045 * (1 - u);
         if (kind === 'happy') { extraPitch = Math.sin(u * Math.PI * 4) * .2; hop = Math.abs(Math.sin(u * Math.PI * 2)) * .12 * (1 - u * .4); }
+        // Calling: he turns to his trough and noses it, twice.
+        if (kind === 'nuzzle') { const reach = Math.sin(u * Math.PI); extraYaw = -.55 * reach; extraPitch = .24 * reach + Math.sin(u * Math.PI * 6) * .05 * reach; }
         if (kind === 'refuse') extraYaw = Math.sin(Math.min(1, u * 3) * Math.PI / 2) * .5 * (u < .7 ? 1 : (1 - u) / .3) + Math.sin(u * Math.PI * 8) * .05;
         if (u >= 1) reindeerAction = null;
       }
@@ -787,7 +832,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     }
     // The mailbox calling: its flag springs up (overshooting a little), then every four seconds the box hops and rattles.
     if (flag.mesh) {
-      const since = flag.rise === null ? -1 : t - flag.rise, beat = since > 1.6 ? (since - 1.6) % 4 / .7 : 1, hop = !still && flag.up && beat < 1 ? beat : 1;
+      const since = flag.rise === null ? -1 : t - flag.rise, beat = since > 1.6 ? (since - 1.6) % 4 / .7 : 1, hop = still ? 1 : flag.up && beat < 1 ? beat : moving('mailbox') ?? 1;
       flag.mesh.rotation.z = still ? 0 : since < 0 ? -Math.PI / 2 : since < .8 ? -Math.PI / 2 * Math.exp(-7.5 * since) * Math.cos(since * 12.5) : hop < 1 ? Math.sin(hop * Math.PI * 4) * .35 * (1 - hop) : 0;
       mail.holder.position.y = mail.home.y + (hop < 1 ? Math.abs(Math.sin(hop * Math.PI * 2)) * .09 * (1 - hop * .4) : 0);
       mail.holder.rotation.z = hop < 1 ? Math.sin(hop * Math.PI * 6) * .07 * (1 - hop) : 0;
@@ -795,10 +840,12 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // The barn's repair tag swings for a moment; its drawer, pulled open, stands a little out of the wall.
     if (hoist.tag) { const u = (t - hoist.swing) / 1.4; hoist.tag.rotation.z = !still && u < 1 ? Math.sin(u * Math.PI * 5) * .35 * (1 - u) : 0; }
     // The desk's and the music box's drawers slide out of their slots, or back in.
-    for (const drawer of drawers.values()) {
+    // Calling, the desk's drawer rattles in its slot.
+    const rattle = moving('desk');
+    for (const [id, drawer] of drawers) {
       drawer.out += (drawer.open - drawer.out) * (still ? 1 : .14); if (Math.abs(drawer.open - drawer.out) < .002) drawer.out = drawer.open;
       const reach = drawer.out * drawer.slide, share = reach / drawer.depth;
-      drawer.box.position.z = drawer.base + reach; drawer.inside.visible = reach > .002;
+      drawer.box.position.z = drawer.base + reach + (id === 'desk' && rattle !== null ? shiver(rattle, 8, .01) : 0); drawer.inside.visible = reach > .002;
       if (!drawer.inside.visible) continue;
       drawer.bottom.scale.y = share; drawer.bottom.position.z = .004 - reach / 2; drawer.bottom.material.map.repeat.y = share;
       for (const wall of drawer.walls) { wall.scale.x = share; wall.position.z = .004 - reach / 2; }
@@ -809,6 +856,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       puff.material.opacity = Math.sin(life * Math.PI) * .9;
     }
     if (world.visible) village(t, still);
+    if (calling && t - calling.at >= calling.length) { calling = null; delete stage.dataset.beckon; }
   }
   // The village keeps slowly going: the wheel and the carousel turn, waves rock, a boat bobs, gulls circle the lighthouse,
   // skiers come down the runs and lift cabins climb. Under reduced motion each stands still where it is. The big wheel
@@ -818,7 +866,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const turn = still ? 0 : t, wheel = sheets.get('wheel'), red = clones.get('car-red') ?? [], green = clones.get('car-green') ?? [];
     const step = fair.last === null ? 0 : Math.min(.1, Math.max(0, t - fair.last)); fair.last = t;
     fair.speed += ((fair.broken ? 0 : 1) - fair.speed) * Math.min(1, step * .8); fair.angle += step * .1 * fair.speed;
-    const spin = still ? 0 : fair.angle;
+    // Calling while it stands broken, the big wheel lurches as if to start, and stops.
+    const lurch = moving('wheel'), spin = (still ? 0 : fair.angle) + (lurch === null ? 0 : shiver(lurch, 2, .06));
     if (wheel) wheel.holder.rotation.z = spin;
     const cars = red.flatMap((car, i) => [car, green[i]]).filter(Boolean);
     cars.forEach((car, i) => { const angle = spin + i / 8 * Math.PI * 2; car.position.set(Math.cos(angle) * WHEEL.radius, Math.sin(angle) * WHEEL.radius, .08); });
@@ -885,6 +934,15 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   // The two skinned models cost far more to draw than all the paper together: Santa is drawn only on the way in, inside
   // and on the way out (from outside the walls hide him), the reindeer only while he is in view.
   const frustum = new THREE.Frustum(), viewProjection = new THREE.Matrix4(), reindeerBounds = new THREE.Sphere(new THREE.Vector3(REINDEER.x, GROUND + .7, REINDEER.z), 1.2);
+  // What moves when something calls (`beckon`), and whether it is in sight: everything it hangs from shown, and its middle
+  // inside the view (on a narrow screen a thing at the side waits until the visitor turns to it).
+  const beckoning = id => ({ door: rigs.get('door'), bookcase: rigs.get('bookcase'), chair, reindeer: reindeerHolder, 'hoist-tag': hoist.tag, hearth: flames[0], desk: drawers.get('desk')?.box, musicbox: sheets.get('musicbox-key')?.holder, globe: sheets.get('snowglobe')?.holder, register: sheets.get('secret-page')?.holder, record: sheets.get('secret-record')?.holder })[id] ?? letterBooks.get(id) ?? sheets.get(id)?.holder;
+  const bounds = new THREE.Box3(), middle = new THREE.Vector3();
+  function showing(thing) {
+    for (let node = thing; node; node = node.parent) if (!node.visible) return false;
+    camera.updateMatrixWorld(); frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    return frustum.containsPoint(bounds.setFromObject(thing).getCenter(middle));
+  }
   function draw() {
     place();
     chair.visible = indoorView(view) || trip?.direction === 'in' || trip?.direction === 'out';
@@ -1176,6 +1234,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const api = {
     // Resolves true once Santa sits in his chair, false if his model could not load.
     santa: santaReady, destroy, setView, get view() { return view; }, repaint, restyle,
+    // Where the visitor is: the yard (and the village round it), the room, or the little room behind the bookcase.
+    get where() { return view === 'secret' ? 'little' : indoorView(view) ? 'room' : 'yard'; },
     rect: id => { const spot = [...SPOTS, ...ROOM_SPOTS].find(item => item.id === id); return spot ? rectOfBox(...spot.box) : null; },
     back,
     // The hearth: feed the fire a log (false when it already burns as high as it goes), squeeze the bellows (0–1) and let
@@ -1335,6 +1395,18 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // Fly down from over the village to the front of the house; resolves once landed (at once when there is no flight).
     arrive() { if (!perched) return Promise.resolve(); perched = false; return new Promise(done => walk('fly', done)); },
     wave(id) { if (!motion.matches) { wiggles.set(id, clock); wake(); } },
+    // A thing calling the visitor over when they seem stuck (cabin-play.js): its little move, only where it can be seen.
+    // False when out of sight, something else is already moving, or nothing moves at all (reduced motion).
+    beckon(id) {
+      const kind = id.startsWith('book-') ? 'book' : id, thing = beckoning(id);
+      if (motion.matches || calling || trip || story.scripted || !BECKON[kind] || !thing || !showing(thing)) return false;
+      calling = { id, kind, at: clock, length: BECKON[kind] };
+      if (kind === 'hoist-tag') hoist.swing = clock;
+      if (kind === 'chair') story.kick = clock;
+      if (kind === 'reindeer') reindeerAction = { kind: 'nuzzle', start: clock };
+      if (kind === 'bookcase' && story.open < .5) story.shake = clock;
+      stage.dataset.beckon = id; wake(); return true;
+    },
     // Put an accessory on the snowman (null takes that place's off). Resolves once it shows.
     async dress(place, id) {
       const slot = worn.get(place), item = id && itemFor(id);

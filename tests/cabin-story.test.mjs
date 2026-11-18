@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BOOK_IDS, FLIGHT_ORDER, MAIL, flyer, mailFor, sortWrong, GAPS, GIFTS, LOCK, playsOpen, LOG_ANSWER, opens, LOG_GIVEN, goal, homeShelf, logSolved, logWrong, readLog, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
+import { BOOK_IDS, FLIGHT_ORDER, beckon, MAIL, flyer, mailFor, sortWrong, GAPS, GIFTS, LOCK, playsOpen, LOG_ANSWER, opens, LOG_GIVEN, goal, homeShelf, logSolved, logWrong, readLog, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
 import { GOALS } from '../js/data/cabin-clues.js';
 
 const place = id => homeShelf().indexOf(id);
@@ -142,4 +142,42 @@ test('two volunteer jobs as rules: the feeding table by the clock, the sleigh lo
   assert.equal(feedsNext([], 'oats'), true); assert.equal(feedsNext([], 'lichen'), false); assert.equal(feedsNext(['oats'], 'carrot'), true); assert.equal(feedsNext(['oats', 'carrot', 'lichen'], 'oats'), false);
   assert.equal(loadedRight([...ROUTE].reverse()), true, 'the last stop at the bottom, the first on top');
   assert.equal(loadedRight(ROUTE), false, 'in route order, the first stop would be at the bottom'); assert.equal(loadedRight(ROUTE.slice(1)), false); assert.equal(loadedRight(null), false);
+});
+test('stuck a while: one thing where the visitor is moves a little to show the way (the way there if it is elsewhere), never more', () => {
+  const base = { story: { left: false, opened: false, shut: false, seen: [], told: false, shelf: homeShelf() }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, wish: null, stayed: false, endings: [] }, bag: { held: [], used: [] }, desk: { sorted: false } };
+  const at = (changes, place, options) => beckon({ ...base, ...changes, story: { ...base.story, ...changes.story }, finale: { ...base.finale, ...changes.finale } }, place, options);
+  // The yard: the mailbox calls by itself while its flag is up; then each thing still to find, in the order they lead on.
+  assert.equal(at({}, 'yard', { calling: true }), null, 'the raised flag calls already'); assert.equal(at({}, 'yard'), 'mailbox');
+  assert.equal(at({ bag: { held: ['lichen'], used: [] } }, 'yard'), 'reindeer', 'hungry: he noses his trough');
+  assert.equal(at({ bag: { held: [], used: ['lichen'] } }, 'yard'), 'trough', 'fed: the key in the hay');
+  assert.equal(at({ bag: { held: ['key'], used: ['lichen'] } }, 'yard'), 'snow-pile');
+  assert.equal(at({ bag: { held: ['key', 'handle'], used: ['lichen'] } }, 'yard'), 'hoist-tag');
+  assert.equal(at({ bag: { held: ['lichen'], used: [] } }, 'room'), 'door', 'indoors too soon: the door');
+  // The room: the things not used yet on this visit, then back to Santa's chair; from the yard, the door.
+  const yard = { held: ['key', 'matches'], used: ['lichen', 'handle'] };
+  assert.equal(at({ bag: yard }, 'room'), 'hearth'); assert.equal(at({ bag: yard }, 'room', { used: new Set(['hearth']) }), 'desk');
+  assert.equal(at({ bag: yard }, 'room', { used: new Set(['hearth', 'desk']) }), 'chair', 'two used: back to the middle');
+  assert.equal(at({ bag: yard }, 'yard'), 'door');
+  // The bookcase: while Santa is back in his chair (after a reload), the room's things first, to send him out again; then
+  // the gold books not in the four places yet, one at a time; never a plain one.
+  assert.equal(at({ bag: yard, story: { left: true } }, 'room', { home: true }), 'hearth'); assert.equal(at({ bag: yard, story: { left: true } }, 'room', { home: true, used: new Set(['globe']) }), 'chair', 'one thing is enough the second time');
+  const gold = turn => at({ bag: yard, story: { left: true } }, 'room', { turn });
+  assert.deepEqual(new Set([0, 1, 2, 3, 4].map(gold)), new Set(['book-o1', 'book-m1', 'book-e1', 'book-r1', 'book-r2']));
+  const placed = moveBook(homeShelf(), homeShelf().indexOf('book-m1'), GAPS[0]);
+  assert.ok([0, 1, 2, 3].every(turn => at({ bag: yard, story: { left: true, shelf: placed } }, 'room', { turn }) !== 'book-m1'), 'M in its place stays still');
+  // Behind the bookcase: the shift log, the register, the old record book; from the room the open bookcase, from the yard the door.
+  const known = { opened: true, left: true, seen: ['tags', 'log', 'rules'], told: true };
+  assert.equal(at({ bag: yard, story: { opened: true, left: true, seen: ['tags'] } }, 'little'), 'secret-log');
+  assert.equal(at({ bag: yard, story: { opened: true, left: true, seen: ['tags'] } }, 'room'), 'bookcase');
+  assert.equal(at({ bag: yard, story: { opened: true, left: true, seen: ['tags'] } }, 'yard'), 'door');
+  assert.equal(at({ story: { ...known, told: false } }, 'room'), 'chair', 'Santa is back: his chair'); assert.equal(at({ story: { ...known, told: false } }, 'little'), null);
+  assert.equal(at({ story: known }, 'little'), 'register'); assert.equal(at({ story: known, finale: { endings: ['A'] } }, 'little'), 'register');
+  // The jobs: the first not done where the visitor is (the letters start at the rack, then the desk), or else the way to one.
+  const signed = tasks => ({ mark: 'J', tasks });
+  assert.equal(at({ story: known, volunteer: signed([]) }, 'yard'), 'reindeer'); assert.equal(at({ story: known, volunteer: signed(['lichen']) }, 'yard'), 'sleigh');
+  assert.equal(at({ story: known, volunteer: signed(['lichen', 'hay']), finale: { twist: true } }, 'yard'), 'wheel');
+  assert.equal(at({ story: known, volunteer: signed([]) }, 'little'), 'register'); assert.equal(at({ story: known, volunteer: signed([]), desk: { sorted: true } }, 'room'), 'desk');
+  assert.equal(at({ story: known, volunteer: signed(['lichen', 'hay', 'wheel']), finale: { twist: true, wish: 'snow', endings: ['B'] }, desk: { sorted: true } }, 'yard'), 'door', 'other endings, from the yard: the door');
+  assert.equal(at({ story: known, volunteer: signed(['lichen', 'hay']) }, 'little'), 'record'); assert.equal(at({ story: known, volunteer: signed(['lichen', 'hay']), finale: { unlocked: true } }, 'little'), 'record');
+  assert.equal(at({ story: known, volunteer: signed(['lichen', 'hay', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C'], truth: true } }, 'little'), null, 'all done: nothing calls');
 });

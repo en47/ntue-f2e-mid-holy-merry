@@ -18,7 +18,7 @@ import { wheelGame } from './cabin-wheel.js';
 import { wishScene } from './cabin-finale.js';
 import { endingTheatre } from './cabin-ending.js';
 import { postcard } from './cabin-postcard.js';
-import { GIFTS, TASKS, canGoHome, canStay, canWish, goal, knowsSantas, pending, points, record, santaGoes, signedUp, trueMiracle } from '../services/cabin-story.js';
+import { GIFTS, TASKS, beckon, canGoHome, canStay, canWish, goal, knowsSantas, pending, points, record, santaGoes, signedUp, trueMiracle } from '../services/cabin-story.js';
 import { BELLS, CHAIR, DONE, GOING, JOBS } from '../data/cabin-secret.js';
 import { RETURN, TALK } from '../data/cabin-talk.js';
 import { ASK, GLOBE, SANTA_ON_HOLLY, SIGNPOST, TWIST } from '../data/cabin-finale.js';
@@ -82,9 +82,10 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const timers = new Set(), later = (ms, run) => { const id = setTimeout(() => { timers.delete(id); run(); }, ms); timers.add(id); };
   // What lasts between visits (the snowman's outfit, the reindeer's meals today, the barn's hoist), and the yard's small sounds.
   let storage = null; try { storage = localStorage; } catch { /* this visit only */ }
-  // Every save also lets the clue book see whether the goal has moved on (it says so, `notebook.check`).
-  let notebook = null;
-  const progress = readProgress(storage, known), save = () => { writeProgress(progress, storage); notebook?.check(); }, sound = createSound();
+  // Every save also lets the clue book see whether the goal has moved on (it says so, `notebook.check`), and starts the
+  // quiet minute (`quiet`, below) over.
+  let notebook = null, quiet = Date.now();
+  const progress = readProgress(storage, known), save = () => { quiet = Date.now(); writeProgress(progress, storage); notebook?.check(); }, sound = createSound();
   let cleanup = () => {};
   // The clue book in the corner: games write what they show into it (`clue`).
   notebook = mountNotebook(stage, { progress, save, sound }); const clue = id => notebook.add(id);
@@ -400,6 +401,19 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     if (rang || !santaGoes({ used: used.size, left: story.left, home: cabin.santaHome, opened: story.opened })) return;
     rang = true; later(1200, () => { sound.play('jingle'); say(BELLS); });
   }
+  // Stuck for a while (nothing new saved for a minute, no card open), the one thing that shows the way where the visitor
+  // is gives a little move of its own every twenty seconds (cabin-story.js `beckon`; the move is the scene's): never a
+  // word, never under reduced motion, and only once it can be seen. A card just put away (the clue book, Santa's talk)
+  // is given a few seconds first, so nothing seems to answer it.
+  const QUIET = 60000, EVERY = 20000, AFTER = 8000;
+  let beckoned = 0, busy = 0, turns = 0;
+  const calls = setInterval(() => {
+    const now = Date.now();
+    if (stage.querySelector('article, dialog[open], .cabin-chat:not(.is-folded)')) busy = now;
+    if (still() || document.hidden || now - quiet < QUIET || now - beckoned < EVERY || now - busy < AFTER) return;
+    const id = beckon(progress, cabin.where, { used, calling: !mail.seen, home: cabin.santaHome, turn: turns });
+    if (id && cabin.beckon(id)) { beckoned = now; turns++; }
+  }, 1000);
   function start(id) { leave(); if (!games[id]) return; layer.dataset.game = id; cleanup = games[id]() || (() => {}); }
   function leave() { timers.forEach(clearTimeout); timers.clear(); theatre?.close(); theatre = null; card = null; cleanup(); cleanup = () => {}; bag.clear(); layer.replaceChildren(caption); say(''); delete layer.dataset.game; }
   return {
@@ -466,6 +480,6 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       cabin.wheelBroken(pending(progress.volunteer, 'wheel'), false);
       if (progress.finale.stayed) { cabin.repaint('secret-tags', { mine: true }); cabin.repaint('secret-hats', { mine: true }); }
     },
-    destroy() { leave(); notebook.destroy(); bag.destroy(); sound.destroy(); layer.remove(); },
+    destroy() { clearInterval(calls); leave(); notebook.destroy(); bag.destroy(); sound.destroy(); layer.remove(); },
   };
 }
