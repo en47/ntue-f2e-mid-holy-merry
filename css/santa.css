@@ -735,8 +735,23 @@ html.theatre-open { overflow: hidden; }
 .cover-lining > :is(.leaf-tabs, .cover-page) { position: absolute; top: var(--edge-top); bottom: var(--edge-bottom); left: var(--edge-side); right: 0; transform: none; }
 .cover-page { overflow: hidden; }
 .cover-title { position: absolute; left: 25%; right: 25%; top: 26%; height: 17%; display: grid; place-items: center; margin: 0; padding-right: 1.4rem; color: #b5443c; font-family: var(--font-display); font-size: var(--fs-title); line-height: 1; white-space: nowrap; }
-.cover-star { position: absolute; left: 50%; top: 57%; width: 3rem; aspect-ratio: 1; translate: -50% 0; }
-.cover-star .art-layer, .book-doodle .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 封面標籤下的五格章節郵票：院子、小屋、小房間、替身工作、最終選擇。過了的那一章貼著郵票、蓋了郵戳；下一章只看得到淡淡的剪影，後面的是空框。
+   剛過的那一章，打開線索本時郵票落下、郵戳蓋上，然後才鬆開帶子。 */
+.cover-stamps { position: absolute; left: 12%; right: 12%; top: 55%; height: 19%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3%; align-items: center; }
+.cover-stamp { position: relative; width: 100%; max-height: 100%; aspect-ratio: 1; justify-self: center; rotate: var(--tilt, 0deg); }
+.cover-stamp > span { position: absolute; inset: 0; background: no-repeat center / contain; }
+.cover-stamp .stamp-mark { inset: -14% -34% 34% 26%; opacity: .85; rotate: -14deg; }
+.cover-stamp:not([data-state="done"]) .stamp-mark, .cover-stamp[data-state="later"] .stamp-art { display: none; }
+.cover-stamp[data-state="next"] .stamp-frame { opacity: .45; }
+.cover-stamp[data-state="next"] .stamp-art { filter: brightness(0) opacity(.2); }
+.cover-stamp[data-state="later"] .stamp-frame { opacity: .28; }
+@media (prefers-reduced-motion: no-preference) {
+  .notebook-card[data-state="shut"] .cover-stamp.is-new :is(.stamp-frame, .stamp-art) { animation: cover-stamp-land .5s cubic-bezier(.3, 1.5, .5, 1) both; }
+  .notebook-card[data-state="shut"] .cover-stamp.is-new .stamp-mark { animation: cover-postmark .3s .5s cubic-bezier(.2, 1.4, .5, 1) both; }
+}
+@keyframes cover-stamp-land { from { opacity: 0; scale: 1.8; rotate: -10deg; } 60% { opacity: 1; scale: .95; } to { scale: 1; rotate: 0deg; } }
+@keyframes cover-postmark { from { opacity: 0; scale: 1.6; } 70% { opacity: .95; scale: .96; } to { opacity: .85; scale: 1; } }
+.book-doodle .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* 闔著的書套著一條紅色鬆緊帶：打開前從書口滑開，闔上後套回去。 */
 .book-band { position: absolute; z-index: 5; top: calc(-1px - var(--edge-top)); bottom: calc(3px - var(--edge-bottom)); left: calc(100% - 1.7rem); width: 16px; pointer-events: none; }
 /* 什麼都沒寫的頁面：淡淡一張這一區的紙雕小圖。 */
@@ -767,6 +782,9 @@ html.theatre-open { overflow: hidden; }
 @media (max-width: 700px) { .goal-picture { width: 3.6rem; } }
 /* 線索本裡寫著現在要做什麼。 */
 .notebook-task { margin: .2rem 0 .5rem; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; }
+/* 目標下面一行自己記下的話：上一章結束時還想不通的事。 */
+.notebook-wonder { margin: 0 0 .5rem; color: #6b5a4c; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; }
+.notebook-wonder::before { content: '？'; margin-right: .25rem; color: #b5443c; }
 .notebook-empty { margin: 0; color: var(--muted); font-size: var(--fs-small); }
 .notebook-clues { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
 .clue-sticker { display: flex; justify-content: space-between; align-items: center; gap: .6rem; width: 100%; padding: .5rem .85rem .6rem; color: var(--ink); background: #fff3d9; border: 0; font-size: var(--fs-small); text-align: left; cursor: pointer; }
