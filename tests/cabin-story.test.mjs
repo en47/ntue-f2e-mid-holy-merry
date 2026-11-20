@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BOOK_IDS, FLIGHT_ORDER, beckon, MAIL, flyer, mailFor, sortWrong, GAPS, GIFTS, LOCK, playsOpen, LOG_ANSWER, opens, LOG_GIVEN, goal, homeShelf, logSolved, logWrong, readLog, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
+import { BOOK_IDS, FLIGHT_ORDER, beckon, milestone, MAIL, flyer, mailFor, sortWrong, GAPS, GIFTS, LOCK, playsOpen, LOG_ANSWER, opens, LOG_GIVEN, goal, homeShelf, logSolved, logWrong, readLog, moveBook, readShelf, santaGoes, solved, spelled } from '../js/services/cabin-story.js';
 import { GOALS } from '../js/data/cabin-clues.js';
 
 const place = id => homeShelf().indexOf(id);
@@ -180,4 +180,14 @@ test('stuck a while: one thing where the visitor is moves a little to show the w
   assert.equal(at({ story: known, volunteer: signed(['lichen', 'hay', 'wheel']), finale: { twist: true, wish: 'snow', endings: ['B'] }, desk: { sorted: true } }, 'yard'), 'door', 'other endings, from the yard: the door');
   assert.equal(at({ story: known, volunteer: signed(['lichen', 'hay']) }, 'little'), 'record'); assert.equal(at({ story: known, volunteer: signed(['lichen', 'hay']), finale: { unlocked: true } }, 'little'), 'record');
   assert.equal(at({ story: known, volunteer: signed(['lichen', 'hay', 'wheel', 'letters']), finale: { twist: true, wish: 'snow', stayed: true, endings: ['A', 'B', 'C'], truth: true } }, 'little'), null, 'all done: nothing calls');
+});
+test('the story has got further when a goal moves on, a yard thing is found, a job is done or an ending seen; not for a clue', () => {
+  const state = () => ({ story: { left: false, opened: false, seen: [], told: false, shelf: homeShelf() }, volunteer: { mark: '', tasks: [] }, finale: { twist: false, wish: null, stayed: false, endings: [], asked: false }, bag: { held: [], used: [] } });
+  const start = state(), first = milestone(start);
+  const found = state(); found.bag.held.push('lichen'); assert.notEqual(milestone(found), first, 'the lichen found');
+  const known = { opened: true, left: true, seen: ['tags', 'log', 'rules'], told: true };
+  const signed = state(); Object.assign(signed.story, known); signed.volunteer = { mark: 'J', tasks: [] }; const before = milestone(signed);
+  signed.volunteer.tasks.push('wheel'); assert.notEqual(milestone(signed), before, 'a job done');
+  const ended = state(); Object.assign(ended.story, known); const unended = milestone(ended); ended.finale.endings.push('A'); assert.notEqual(milestone(ended), unended, 'an ending seen');
+  assert.equal(milestone(Object.assign(state(), { clues: ['care-note'] })), first, 'a clue alone is not a step on');
 });

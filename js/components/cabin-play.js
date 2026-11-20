@@ -18,7 +18,7 @@ import { wheelGame } from './cabin-wheel.js';
 import { wishScene } from './cabin-finale.js';
 import { endingTheatre } from './cabin-ending.js';
 import { postcard } from './cabin-postcard.js';
-import { GIFTS, TASKS, beckon, canGoHome, canStay, canWish, goal, knowsSantas, pending, points, record, santaGoes, signedUp, trueMiracle } from '../services/cabin-story.js';
+import { GIFTS, TASKS, beckon, canGoHome, canStay, canWish, goal, knowsSantas, milestone, pending, points, record, santaGoes, signedUp, trueMiracle } from '../services/cabin-story.js';
 import { BELLS, CHAIR, DONE, GOING, JOBS } from '../data/cabin-secret.js';
 import { RETURN, TALK } from '../data/cabin-talk.js';
 import { ASK, GLOBE, SANTA_ON_HOLLY, SIGNPOST, TWIST } from '../data/cabin-finale.js';
@@ -82,10 +82,15 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const timers = new Set(), later = (ms, run) => { const id = setTimeout(() => { timers.delete(id); run(); }, ms); timers.add(id); };
   // What lasts between visits (the snowman's outfit, the reindeer's meals today, the barn's hoist), and the yard's small sounds.
   let storage = null; try { storage = localStorage; } catch { /* this visit only */ }
-  // Every save also lets the clue book see whether the goal has moved on (it says so, `notebook.check`), and starts the
-  // quiet minute (`quiet`, below) over.
-  let notebook = null, quiet = Date.now();
-  const progress = readProgress(storage, known), save = () => { quiet = Date.now(); writeProgress(progress, storage); notebook?.check(); }, sound = createSound();
+  // Every save also lets the clue book see whether the goal has moved on (it says so, `notebook.check`), starts the quiet
+  // minute (`quiet`, below) over, and notes when the story has got further (`milestone`): the clue book then says what
+  // comes next (`owed`, below).
+  let notebook = null, quiet = Date.now(), reached = '', owed = false;
+  const progress = readProgress(storage, known), save = () => {
+    quiet = Date.now(); writeProgress(progress, storage); notebook?.check();
+    const now = milestone(progress); if (now !== reached) { reached = now; owed = true; }
+  }, sound = createSound();
+  reached = milestone(progress);
   let cleanup = () => {};
   // The clue book in the corner: games write what they show into it (`clue`).
   notebook = mountNotebook(stage, { progress, save, sound }); const clue = id => notebook.add(id);
@@ -100,6 +105,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   const corners = new Set(), found = id => { corners.add(id); onFound(id); };
   // The mailbox: open or shut, and whether it has been opened at all (its flag stays down from then on).
   const mail = { open: false, seen: false };
+  // The sleigh tapped in the yard (`loadSleigh`): its rack opens as soon as the reindeer's corner is reached.
+  let loadNext = false;
   function prop(kind, parent, label) {
     const button = element('button', `play-item play-${kind}`, parent); button.type = 'button'; button.setAttribute('aria-label', label);
     paperLayer(button, '0 0 100 100', '', ART[kind], PAPER); return button;
@@ -208,8 +215,9 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     },
     // By the reindeer: his feeding (and the job of feeding him by the barn's table), and the sleigh to load.
     reindeer: () => {
+      const openNow = loadNext; loadNext = false;
       const feeding = feedGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, burst, art: ART, paper: PAPER, wants: () => pending(progress.volunteer, 'lichen'), onTask: () => task('lichen'), clue });
-      const loading = sleighGame({ layer, stage, cabin, say, sound, later, progress, onLoaded: () => task('hay') });
+      const loading = sleighGame({ layer, stage, cabin, say, sound, later, progress, openNow, onLoaded: () => task('hay') });
       return () => { feeding(); loading(); };
     },
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, confetti, clue, gift }),
@@ -244,7 +252,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       const count = points(progress.volunteer);
       sound.play('thud'); say(DONE(JOBS[id][0], count, TASKS.length));
       // A postage stamp lands on the corner of the scene, today's postmark is pressed onto it, and this job's gold star pops
-      // in beside the ones already earned. Where to go next is left to the clue book (it has hopped) and to Santa.
+      // in beside the ones already earned. Once it has gone, the clue book's note says what comes next (`remind`).
       const stamp = element('div', 'volunteer-stamp', layer); stamp.setAttribute('aria-hidden', 'true'); paperLayer(stamp, '0 0 120 144', '', postage, STAMP);
       inked(element('span', 'stamp-postmark', stamp), '0 0 120 80', postmark);
       const words = element('div', 'stamp-words', stamp);
@@ -404,12 +412,14 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
   // Stuck for a while (nothing new saved for a minute, no card open), the one thing that shows the way where the visitor
   // is gives a little move of its own every twenty seconds (cabin-story.js `beckon`; the move is the scene's): never a
   // word, never under reduced motion, and only once it can be seen. A card just put away (the clue book, Santa's talk)
-  // is given a few seconds first, so nothing seems to answer it.
-  const QUIET = 60000, EVERY = 20000, AFTER = 8000;
+  // is given a few seconds first, so nothing seems to answer it. Something done that moves the story on: once no card is
+  // open (a moment after the last is put away), the clue book's note of what comes next slides out (`remind`).
+  const QUIET = 60000, EVERY = 20000, AFTER = 8000, SETTLE = 1500;
   let beckoned = 0, busy = 0, turns = 0;
   const calls = setInterval(() => {
     const now = Date.now();
     if (stage.querySelector('article, dialog[open], .cabin-chat:not(.is-folded)')) busy = now;
+    if (owed && !document.hidden && now - busy >= SETTLE && !layer.querySelector('.volunteer-stamp')) { owed = false; notebook.remind(); }
     if (still() || document.hidden || now - quiet < QUIET || now - beckoned < EVERY || now - busy < AFTER) return;
     const id = beckon(progress, cabin.where, { used, calling: !mail.seen, home: cabin.santaHome, turn: turns });
     if (id && cabin.beckon(id)) { beckoned = now; turns++; }
@@ -457,6 +467,10 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       // Going outside ends nothing: the way home is chosen at the world signpost (`signpost`).
     },
     get opened() { return progress.story.opened; },
+    // The sleigh tapped in the yard: a volunteer goes over to it by the reindeer, its rack open (before signing up it only
+    // has its line, `note`).
+    get canLoad() { return signedUp(progress.volunteer) || progress.volunteer.tasks.includes('hay'); },
+    loadSleigh() { loadNext = true; cabin.setView('reindeer'); },
     // Tapped while it stands broken, the big wheel opens to be mended instead of saying its line; once mended, its gearbox
     // can be opened and its gears set again (stamped only the first time).
     get wheelBroken() { return pending(progress.volunteer, 'wheel'); },

@@ -1086,6 +1086,15 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     return raycaster.intersectObject(santaModel, true).length > 0;
   }
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  // Where on the stage part of a sheet shows ([left, top, right, bottom] of it, 0–1; null when behind the camera).
+  function sheetRectOf(id, [x0, y0, x1, y1] = [0, 0, 1, 1]) {
+    const sheet = sheets.get(id); if (!sheet) return null;
+    const { holder, board } = sheet; holder.updateMatrixWorld(true);
+    const rect = stage.getBoundingClientRect(), points = [[x0, y0], [x1, y0], [x0, y1], [x1, y1]].map(([fx, fy]) => holder.localToWorld(new THREE.Vector3((fx - .5) * board.w, (1 - fy) * board.h, .01)).project(camera));
+    if (points.some(point => point.z > 1)) return null;
+    const xs = points.map(p => (p.x + 1) / 2 * rect.width), ys = points.map(p => (1 - p.y) / 2 * rect.height);
+    return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+  }
   function hitAt(x, y) {
     const rect = stage.getBoundingClientRect(), targets = view === 'inside' ? roomTargets : view === 'outside' ? yardTargets : [];
     ndc.set((x - rect.left) / rect.width * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
@@ -1093,7 +1102,12 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // Once the bookcase stands open, its doorway leads into the little room and the case itself is no longer a place.
     // The bookcase itself (its own target turns with it) is where to step up to it; its doorway, once open, leads in.
     const open = story.open > .5, usable = data => data.spot === 'secret' ? open : data.spot !== 'shelf';
-    return raycaster.intersectObjects(targets, false).map(hit => hit.object.userData).find(usable) ?? null;
+    const hits = raycaster.intersectObjects(targets, false).map(hit => hit.object.userData).filter(usable);
+    // The sleigh stands just behind the reindeer's corner: where it shows, left of him and above his trough, the tap (and
+    // the pointer) is for the sleigh, not for the corner in front of it.
+    const sleigh = view === 'outside' && hits[0]?.spot === 'reindeer' && hits.find(data => data.prop?.id === 'sleigh'), part = sleigh && sheetRectOf('sleigh', [0, .05, .6, .72]);
+    if (part && x - rect.left >= part.left && x - rect.left <= part.left + part.width && y - rect.top >= part.top && y - rect.top <= part.top + part.height) return sleigh;
+    return hits[0] ?? null;
   }
   // Screen rectangle (relative to the stage) of a spot's box or of any world-space box, for the games laid over the scene.
   function rectOfBox(center, size) {
@@ -1298,14 +1312,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
     },
     get drawersReady() { return drawers.size === Object.keys(DRAWERS).length; },
-    sheetRect(id, [x0, y0, x1, y1] = [0, 0, 1, 1]) {
-      const sheet = sheets.get(id); if (!sheet) return null;
-      const { holder, board } = sheet; holder.updateMatrixWorld(true);
-      const rect = stage.getBoundingClientRect(), points = [[x0, y0], [x1, y0], [x0, y1], [x1, y1]].map(([fx, fy]) => holder.localToWorld(new THREE.Vector3((fx - .5) * board.w, (1 - fy) * board.h, .01)).project(camera));
-      if (points.some(point => point.z > 1)) return null;
-      const xs = points.map(p => (p.x + 1) / 2 * rect.width), ys = points.map(p => (1 - p.y) / 2 * rect.height);
-      return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
-    },
+    sheetRect: sheetRectOf,
     // The letter books: where each place is on screen (and which book stands there), holding one up to the pointer, which
     // place it was let go over (or -1), and laying them all out as the shelf now stands.
     bookRects(shelf) {

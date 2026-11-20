@@ -341,7 +341,7 @@ await test('Santa 書櫃可以再玩一次：開著時近看可進小房間或�
   assert.ok(books.includes("push.hidden = !replay || done || !solved(shelf)") && books.includes('toggle(true); later(2800, restart)'), 'It can simply be pushed open only while the books still spell MORE');
   assert.ok(books.includes('story.opened = true; story.shut = false; save(); onOpen()'), 'Spelling MORE again opens it again, with the same flash and creak');
   assert.ok(play.includes("restart: () => start('shelf')") && play.includes('enter: start') && !play.includes('swing: () => swing()'), 'The shelf game restarts in place; the bookcase is no longer worked from afar');
-  assert.ok(page.includes("onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (note) play?.note(note, id); }") && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
+  assert.ok(page.includes("onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (id === 'sleigh' && play?.canLoad) play.loadSleigh(); else if (note) play?.note(note, id); }") && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
 });
 await test('Santa 拖曳不會卡住：放開被攔下時（例如瀏覽器擴充功能）仍會結束拖曳，書一次只拿一本、Esc 只放回書', async () => {
   const dir = path.join(project, 'js/components'), files = (await fs.readdir(dir)).filter(name => name.startsWith('cabin-') && name.endsWith('.js'));
@@ -602,7 +602,7 @@ await test('Santa 卡住時的場景暗示：一分鐘沒有進展、沒開卡�
   const [play, scene, art] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-scene.js', 'js/components/cabin-art.js'].map(read));
   const { beckon, homeShelf } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
   const { readProgress } = await import(pathToFileURL(path.join(project, 'js/services/cabin-progress.js')).href);
-  assert.ok(play.includes('const QUIET = 60000, EVERY = 20000, AFTER = 8000;') && play.includes('save = () => { quiet = Date.now();'), 'A minute with nothing new saved (every save starts it over), then one move every twenty seconds');
+  assert.ok(play.includes('const QUIET = 60000, EVERY = 20000, AFTER = 8000, SETTLE = 1500;') && play.includes('quiet = Date.now(); writeProgress(progress, storage); notebook?.check();'), 'A minute with nothing new saved (every save starts it over), then one move every twenty seconds');
   assert.ok(play.includes("if (stage.querySelector('article, dialog[open], .cabin-chat:not(.is-folded)')) busy = now;") && play.includes('if (still() || document.hidden || now - quiet < QUIET || now - beckoned < EVERY || now - busy < AFTER) return;'), 'Nothing moves while a card, the clue book, Santa\'s talk or an ending is open (nor for a few seconds after), the page is hidden, or motion is reduced');
   const calls = play.slice(play.indexOf('const calls = setInterval'), play.indexOf('function start(id)'));
   assert.ok(calls.includes('beckon(progress, cabin.where, { used, calling: !mail.seen, home: cabin.santaHome, turn: turns })') && !/say\(|textContent|announce\(|sound\./.test(calls), 'The thing moves; nothing is said or sounded');
@@ -630,6 +630,31 @@ await test('Santa 卡住時的場景暗示：一分鐘沒有進展、沒開卡�
   assert.ok(art.includes("{ id: 'secret-page', w: .112, h: .124, px: 1200,") && art.includes("draw: registerPage, room: true, secret: true }") && art.includes("draw: recordBook, room: true, secret: true }"), 'The register page and the record book are their own sheets on the table');
   const desk = art.slice(art.indexOf('export function secretDesk'), art.indexOf('export function registerPage'));
   assert.ok(!desk.includes('#6b2a2a') && art.slice(art.indexOf('export function recordBook')).includes("fill: '#6b2a2a'"), 'The record book is drawn once, on its own sheet');
+});
+await test('Santa 試玩回饋（11/20）：做完一件事，線索本旁滑出下一步；院子點雪橇就去裝；餵食表不擋麋鹿；裝雪橇卡片放得進舞台；交接表成為線索；分到一半的信會留著', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [play, book, page, feed, sleigh, secret, css, paper] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-notebook.js', 'js/santa.js', 'js/components/cabin-feed.js', 'js/components/cabin-sleigh.js', 'js/components/cabin-secret.js', 'css/santa.css', 'js/components/cabin-paper.js'].map(read));
+  const { NOTEBOOK, NEXT, CLUE_PLACES, GOAL_CLUES, GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  const { NIGHTS, YARD, TASKS } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const { CLUE_ICON } = await import(pathToFileURL(path.join(project, 'js/components/cabin-clue-art.js')).href);
+  const { PROPS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-world.js')).href);
+  // What comes next: once the story has got further, as soon as no card is open; from the clue book, in the visitor's hand.
+  assert.ok(play.includes('const now = milestone(progress); if (now !== reached) { reached = now; owed = true; }') && play.includes("if (owed && !document.hidden && now - busy >= SETTLE && !layer.querySelector('.volunteer-stamp')) { owed = false; notebook.remind(); }"), 'Something done that moves the story on: the note comes once no card is open');
+  assert.ok(book.includes("const jotting = element('button', 'notebook-next', stage);") && book.includes('nextTimer = setTimeout(() => { jotting.hidden = true; }, 9000);') && book.includes('clearTimeout(nextTimer); jotting.hidden = true; open();') && book.includes("[button, stage.querySelector('.cabin-caption'), stage.querySelector('.chat-fold')]"), 'A note under the clue book (and anything else up there) for nine seconds; tapped, the book opens');
+  assert.ok(YARD.every(id => NEXT.places[id]) && NEXT.jobs && NEXT.asked && GOALS.wish.task.includes('回小屋'), 'The yard\'s places and the jobs by name; the way back to the cabin said where it is needed');
+  assert.ok(paper.includes('.shift-pin, .shift-file, .notebook-next\', \'pinned\']') && css.includes('.notebook-next[hidden] { display: none; }'), 'The note is pinned paper');
+  // The sleigh tapped in the yard: over to it, its rack open.
+  assert.ok(PROPS.some(prop => prop.id === 'sleigh') && page.includes("else if (id === 'sleigh' && play?.canLoad) play.loadSleigh();") && play.includes("loadSleigh() { loadNext = true; cabin.setView('reindeer'); },") && sleigh.includes('if (openNow) later(300, open);'), 'Tapping the sleigh in the yard takes a volunteer to it with its rack open');
+  // The feeding table beside the basket on a wide screen, put away once done; the sleigh's card side by side, never taller than the stage.
+  assert.ok(css.includes('.feed-tray:has(.feed-slip) { display: grid; grid-template-columns: auto auto; grid-template-areas: "slip meter" "slip basket";') && feed.includes("table?.classList.add('is-done'); later(2600, () => table?.remove());"), 'The feeding table sits beside the basket and goes once the job is done');
+  assert.ok(css.includes('.sleigh-card { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 1rem; max-height: calc(100% - 1.2rem); overflow-y: auto; }'), 'The sleigh\'s card fits the stage');
+  // The shift log, put right, is a clue: who flew each half of each night, as the log has it.
+  const log = NOTEBOOK['shift-log'];
+  assert.ok(log && NIGHTS.every(([night, first, second]) => log.text.includes(`${night} 前半夜 ${first}.、後半夜 ${second}.`)) && CLUE_ICON['shift-log'] === 'clipboard' && CLUE_PLACES.find(([id]) => id === 'room')[2].includes('shift-log') && GOAL_CLUES.jobs.includes('shift-log'), 'The shift log as a clue, with its picture, for the letters');
+  assert.ok(secret.includes("learn('log'); clue('shift-log');"), 'Written in the clue book when the log is put right');
+  // The rack: letters already in a pigeonhole stay there while something else is looked at.
+  assert.ok(secret.includes("const keep = () => { desk.rack = desk.sorted ? {} : { ...placed }; save(); };") && secret.includes('const was = desk.sorted ? mailFor(id) : desk.rack[id];'), 'Sorting half done is kept');
+  assert.equal(TASKS.length, 4);
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');

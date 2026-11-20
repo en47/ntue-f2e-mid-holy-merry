@@ -19,8 +19,9 @@ import { paperLayer, shape } from './paper-art.js';
 import { lamp, roofHouse, snowyFir, star } from './paper-props.js';
 import { ornament } from './cabin-ornaments.js';
 import { CLUE_ICON, clueIcon, goalPicture, postmark, stampArt, stampFrame } from './cabin-clue-art.js';
-import { CHAPTERS, GIFTS, TASKS, chaptersDone, goal, knowsSantas, points, signedUp } from '../services/cabin-story.js';
-import { CLUE_PLACES, GIFT_HINTS, GIFT_ORDER, GOALS, GOAL_CLUES, NOTEBOOK, RESTART, WONDER } from '../data/cabin-clues.js';
+import { CHAPTERS, GIFTS, TASKS, YARD, chaptersDone, goal, knowsSantas, points, signedUp } from '../services/cabin-story.js';
+import { ever } from '../services/cabin-bag.js';
+import { CLUE_PLACES, GIFT_HINTS, GIFT_ORDER, GOALS, GOAL_CLUES, NEXT, NOTEBOOK, RESTART, WONDER } from '../data/cabin-clues.js';
 import { JOBS } from '../data/cabin-secret.js';
 import { resetProgress } from '../services/cabin-progress.js';
 
@@ -117,6 +118,27 @@ export function mountNotebook(stage, { progress, save, sound }) {
     sound.play('pick'); if (card) render();
     return true;
   }
+  // Something done that moves the story on (cabin-play.js, `milestone`): a note slides out from under the book saying what
+  // comes next, for a few seconds: the goal's picture and its `task` (for the yard and the jobs, what is still left, by
+  // name). It is the visitor's own jotting, the book being theirs; tapped, the book opens at "now".
+  const jotting = element('button', 'notebook-next', stage); jotting.type = 'button'; jotting.hidden = true;
+  let nextTimer = 0;
+  function remind() {
+    if (card) return;
+    const now = goal(progress), { bag, volunteer, finale } = progress;
+    const text = now === 'yard' ? `${NEXT.yard}${YARD.filter(id => !ever(bag, id)).map(id => NEXT.places[id]).join('、')}。`
+      : now === 'jobs' ? `${NEXT.jobs}${TASKS.filter(task => !volunteer.tasks.includes(task)).map(task => JOBS[task][0]).join('、')}。`
+        : now === 'wish' && points(volunteer) === TASKS.length && !finale.asked ? NEXT.asked : GOALS[now].task;
+    jotting.replaceChildren();
+    const picture = element('span', 'goal-picture', jotting); picture.style.backgroundImage = goalPicture(now); picture.setAttribute('aria-hidden', 'true');
+    element('span', 'notebook-next-text', jotting, text); jotting.setAttribute('aria-label', `接下來：${text}（打開線索本）`);
+    // Below the book, and below whatever else is up there at the moment (the caption, Santa's portrait in the room).
+    const box = stage.getBoundingClientRect(), above = [button, stage.querySelector('.cabin-caption'), stage.querySelector('.chat-fold')].filter(node => node && !node.hidden && node.getClientRects().length);
+    jotting.style.top = `${Math.max(...above.map(node => node.getBoundingClientRect().bottom - box.top)) + 10}px`;
+    jotting.hidden = false; jotting.classList.remove('is-in'); void jotting.offsetWidth; jotting.classList.add('is-in'); sound.play('pick');
+    clearTimeout(nextTimer); nextTimer = setTimeout(() => { jotting.hidden = true; }, 9000);
+  }
+  jotting.addEventListener('click', () => { clearTimeout(nextTimer); jotting.hidden = true; open(); });
   // A job done: its box is ticked in the book (stamped in as the book next opens), and the book hops.
   function tick(task) {
     ticked.add(task); dot.hidden = false;
@@ -348,6 +370,7 @@ export function mountNotebook(stage, { progress, save, sound }) {
     if (focused?.isConnected && focused.matches('.book-tab')) focused.focus({ preventScroll: true });
   }
   function open() {
+    clearTimeout(nextTimer); jotting.hidden = true;
     card = element('article', 'notebook-card', stage); card.setAttribute('aria-label', '線索本');
     const events = new AbortController(), on = (node, type, handler, options = {}) => node.addEventListener(type, handler, { ...options, signal: events.signal });
     const shell = element('div', 'book', card), board = element('div', 'book-board', shell), halves = [element('div', 'board-half', board), element('div', 'board-half', board)];
@@ -479,5 +502,5 @@ export function mountNotebook(stage, { progress, save, sound }) {
   button.setAttribute('aria-expanded', 'false');
   button.addEventListener('click', () => (card ? close() : open()));
   show();
-  return { add, tick, check, refresh: show, close, destroy() { book?.events.abort(); card?.remove(); button.remove(); } };
+  return { add, tick, check, remind, refresh: show, close, destroy() { clearTimeout(nextTimer); book?.events.abort(); card?.remove(); button.remove(); jotting.remove(); } };
 }

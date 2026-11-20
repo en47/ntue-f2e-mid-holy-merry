@@ -1,6 +1,6 @@
 // What a visitor has done in Santa's yard, kept in this browser only and never sent anywhere. One versioned record, so a
 // Christmas passport or the cabin's story can later read the same place. Every function takes the storage, so tests pass a stand-in.
-import { CHAPTERS, CLUES, ENDING_KINDS, GIFTS, LOG_ANSWER, SLIP, TASKS, canSign, homeShelf, knowsSantas, readLog, readShelf } from './cabin-story.js';
+import { CHAPTERS, CLUES, ENDING_KINDS, GIFTS, LOG_ANSWER, SLIP, SUBSTITUTES, TASKS, canSign, homeShelf, knowsSantas, readLog, readShelf } from './cabin-story.js';
 import { emptyBag, ever, readBag } from './cabin-bag.js';
 import { WISHES } from '../data/cabin-finale.js';
 import { GOALS, NOTEBOOK } from '../data/cabin-clues.js';
@@ -13,7 +13,8 @@ export const PLACES = ['head', 'neck', 'face', 'hand'];
 export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'carrot', hand: null });
 // The barn's hoist: whether its rope is hooked at the top, and whether the note behind the bale has been read. The desk:
 // which replies have been sealed with wax, postmarked and sent, what the volunteer chose to say in theirs (by letter), and
-// whether the rack's letters have been sorted (the two new ones reach the desk only then). The story: whether Santa has
+// whether the rack's letters have been sorted (the two new ones reach the desk only then; until then, which are in their
+// pigeonholes so far, so looking at the shift log in between loses nothing). The story: whether Santa has
 // ever gone out, how the bookcase's books stand, whether it has opened (and whether it has been pushed shut again since),
 // and which clues behind it have been read, and how far the wet shift log has been written back in
 // (cabin-story.js). Volunteering: the initial signed in the register ('' when not signed up) and the jobs done for it. The
@@ -25,7 +26,7 @@ export const DEFAULT_OUTFIT = Object.freeze({ head: null, neck: null, face: 'car
 // except that a barn hoisted then has its winch's crank fitted (the crank is the snowman's handle, so that is found too).
 // What has been set right in the room for good that the pocket does not show (`placed`): the music box's catch undone by the
 // brass pin (a tool, kept). A record whose music box drawer was opened before it had a catch counts it undone.
-const blank = () => ({ stamped: [], outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog(), told: false }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [], truth: false, asked: false }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0, bag: emptyBag(), placed: [] });
+const blank = () => ({ stamped: [], outfit: { ...DEFAULT_OUTFIT }, combos: [], feed: { day: '', count: 0 }, hoist: { locked: false, found: false }, desk: { sealed: [], marked: [], sent: [], answers: {}, sorted: false, rack: {} }, story: { left: false, opened: false, shut: false, shelf: homeShelf(), seen: [], log: readLog(), told: false }, volunteer: { mark: '', tasks: [] }, finale: { invited: false, twist: false, unlocked: false, slip: 'none', wish: null, stayed: false, endings: [], truth: false, asked: false }, clues: [], hints: {}, ornaments: [], tree: false, wheelRounds: 0, bag: emptyBag(), placed: [] });
 export const PLACED = ['musicbox-catch'];
 // The reindeer eats five meals, then is full until the next day on this computer's calendar.
 export const MEALS = 5;
@@ -50,7 +51,9 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   // An older record kept only whether Santa's reply was sealed.
   const desk = saved.desk ?? {}, ids = list => Array.isArray(list) ? [...new Set(list.filter(id => typeof id === 'string'))].slice(0, 20) : [];
   const answers = desk.answers && typeof desk.answers === 'object' && !Array.isArray(desk.answers) ? Object.entries(desk.answers).filter(([, value]) => Number.isInteger(value) && value >= 0 && value < 3).slice(0, 10) : [];
-  progress.desk = { sealed: desk.sealed === true ? ['reply'] : ids(desk.sealed), marked: ids(desk.marked), sent: ids(desk.sent), answers: Object.fromEntries(answers), sorted: desk.sorted === true || answers.length > 0 };
+  // The letters already in their pigeonholes while the rack is still being sorted (letter id → initial, or 'you').
+  const rack = desk.rack && typeof desk.rack === 'object' && !Array.isArray(desk.rack) ? Object.entries(desk.rack).filter(([id, mark]) => /^[a-z0-9]{1,8}$/.test(id) && [...SUBSTITUTES, 'you'].includes(mark)).slice(0, 8) : [];
+  progress.desk = { sealed: desk.sealed === true ? ['reply'] : ids(desk.sealed), marked: ids(desk.marked), sent: ids(desk.sent), answers: Object.fromEntries(answers), sorted: desk.sorted === true || answers.length > 0, rack: Object.fromEntries(rack) };
   const seen = saved.story?.seen;
   progress.story = { left: saved.story?.left === true, opened: saved.story?.opened === true, shut: saved.story?.shut === true, shelf: readShelf(saved.story?.shelf), seen: Array.isArray(seen) ? CLUES.filter(clue => seen.includes(clue)) : [] };
   // Whether Santa has told you, the secret known, about the substitutes (and opened the booklet's stuck pages); a record
@@ -77,6 +80,8 @@ export function readProgress(storage = globalThis.localStorage, known = () => tr
   if ((progress.volunteer.tasks.includes('wheel') || progress.wheelRounds > 0) && !ever(progress.bag, 'gear')) progress.bag.used.push('gear');
   progress.placed = PLACED.filter(id => (Array.isArray(saved.placed) && saved.placed.includes(id)) || (id === 'musicbox-catch' && progress.ornaments.includes('N')));
   if (Array.isArray(saved.clues)) progress.clues = Object.keys(NOTEBOOK).filter(id => saved.clues.includes(id));
+  // A shift log put right before its filled-in copy went into the clue book: it is there now too.
+  if (knowsSantas(progress.story.seen) && !progress.clues.includes('shift-log')) progress.clues = Object.keys(NOTEBOOK).filter(id => id === 'shift-log' || progress.clues.includes(id));
   const hints = saved.hints && typeof saved.hints === 'object' && !Array.isArray(saved.hints) ? saved.hints : {};
   // `gifts`: how many hints about the welcome gifts have been asked for.
   const most = id => id === 'gifts' ? 5 : GOALS[id].hints.length;

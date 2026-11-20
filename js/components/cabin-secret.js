@@ -279,7 +279,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       if (!logSolved(log)) { note.textContent = LOG.wrong(logWrong(log)); sound.play('nope'); grid.classList.remove('is-wrong'); void grid.offsetWidth; grid.classList.add('is-wrong'); return; }
       // Put right: the ink comes back a row at a time, and the log counts as read.
       grid.classList.add('is-solved'); picks.remove(); files.remove(); reading.remove(); cells.forEach(cell => { cell.disabled = true; cell.removeAttribute('aria-pressed'); });
-      note.textContent = LOG.solved; plea.textContent = LOG.pin.thanks; sound.play('cheer'); learn('log');
+      note.textContent = LOG.solved; plea.textContent = LOG.pin.thanks; sound.play('cheer'); learn('log'); clue('shift-log');
     }
   }
   // The sorting rack, where the letters job starts: eight letters for six pigeonholes (N, K, H, E, O and the new
@@ -288,6 +288,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   // in the oldest envelope is Ola's welcome ornament.
   function sorting(page) {
     const desk = progress.desk, placed = {}, cubbies = {};
+    // The letters already in their pigeonholes stay there while you look at something else (`desk.rack`, kept in the save).
+    const keep = () => { desk.rack = desk.sorted ? {} : { ...placed }; save(); };
     element('h3', 'secret-title', page, RACK.title); element('p', 'secret-note rack-sign', page, RACK.sign); clue('rack-rule');
     const note = element('p', 'secret-note', page, desk.sorted ? RACK.sorted : RACK.how);
     const rack = element('div', 'rack', page), pile = element('div', 'rack-pile', page);
@@ -307,18 +309,20 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       on(slot, 'click', () => { if (picked && !desk.sorted) put(picked, mark); });
     }
     // Into a pigeonhole, or back to the pile; all in, the rules check.
-    function put(node, mark) { placed[node.dataset.id] = mark; move(node, cubbies[mark]); sound.play('snap'); if (picked) choose(picked); if (!pile.querySelector('.rack-letter')) later(550, check); }
-    function unput(node) { delete placed[node.dataset.id]; move(node, pile); sound.play('remove'); if (picked) choose(picked); }
+    function put(node, mark) { placed[node.dataset.id] = mark; keep(); move(node, cubbies[mark]); sound.play('snap'); if (picked) choose(picked); if (!pile.querySelector('.rack-letter')) later(550, check); }
+    function unput(node) { delete placed[node.dataset.id]; keep(); move(node, pile); sound.play('remove'); if (picked) choose(picked); }
     on(pile, 'click', event => { if (picked && !pile.contains(picked) && event.target === pile) unput(picked); });
     PILE.forEach((id, i) => {
       const mail = MAIL.find(([each]) => each === id), [date, time] = mail ? mail.slice(1) : ['12/25', '08:30'], fresh = !mail;
-      const letter = element('button', 'rack-letter', desk.sorted ? cubbies[mailFor(id)] : pile); letter.type = 'button'; letter.dataset.id = id; letter.setAttribute('aria-pressed', 'false');
+      const was = desk.sorted ? mailFor(id) : desk.rack[id];
+      const letter = element('button', 'rack-letter', was ? cubbies[was] : pile); letter.type = 'button'; letter.dataset.id = id; letter.setAttribute('aria-pressed', 'false');
       letter.setAttribute('aria-label', `${RACK.places[id]}寄來的信，郵戳 ${date} ${time}${fresh ? `，寫著「${RACK.fresh}」` : ''}`);
       paperLayer(letter, '0 0 120 80', '', envelope(ENVELOPES[i % ENVELOPES.length], fresh), BRASS); inked(letter, '0 0 120 80', postmark);
       const text = element('span', 'rack-text', letter); element('span', 'rack-date', text, date); element('span', 'rack-time', text, time); element('span', 'rack-place', letter, fresh ? RACK.fresh : RACK.places[id]);
       if (fresh) letter.classList.add('is-fresh');
       if (desk.sorted) { letter.disabled = true; placed[id] = mailFor(id); }
       else {
+        if (was) placed[id] = was;
         // Dragged onto a pigeonhole it goes in; onto the pile it comes back out (or, from the pile, just settles again).
         draggable(letter, '.rack-slot, .rack-pile', target => { if (!target.classList.contains('rack-pile')) put(letter, target.dataset.mark); else if (pile.contains(letter)) letter.style.translate = ''; else unput(letter); });
         on(letter, 'click', () => choose(letter));
@@ -329,9 +333,9 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       const wrong = sortWrong(placed);
       if (wrong) {
         for (const node of [...rack.querySelectorAll('.rack-letter')]) if (placed[node.dataset.id] !== mailFor(node.dataset.id)) { delete placed[node.dataset.id]; move(node, pile); node.classList.remove('is-bounced'); void node.offsetWidth; node.classList.add('is-bounced'); }
-        note.textContent = RACK.wrong(wrong); sound.play('nope'); return;
+        note.textContent = RACK.wrong(wrong); sound.play('nope'); keep(); return;
       }
-      desk.sorted = true; save(); sound.play('cheer'); note.textContent = RACK.done; say(RACK.done);
+      desk.sorted = true; keep(); sound.play('cheer'); note.textContent = RACK.done; say(RACK.done);
       for (const node of page.querySelectorAll('.rack-letter')) node.disabled = true;
       if (!progress.ornaments.includes('O')) later(1000, () => { gift('O'); sound.play('open'); element('p', 'secret-note', page, RACK.gift); showOrnament(page, 'O'); });
     }

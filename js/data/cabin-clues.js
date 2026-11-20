@@ -31,6 +31,8 @@ export const NOTEBOOK = {
   'gift-E': { name: '艾洛的圓球', place: '雪人的圍巾', text: '照拍立得打扮好雪人，圍巾裡掉出艾洛的紫色圓球吊飾：「你也喜歡替雪人打扮嗎？我也是。」' },
   'gift-K': { name: '克莉絲的雪花', place: '摩天輪的動力箱', text: '修好摩天輪以後，動力箱的門內側夾著克莉絲的藍色雪花吊飾：「摩天輪交給你了。下次，換你帶新人來修。」' },
   'gift-H': { name: '荷莉的鈴鐺', place: '最小的那頂聖誕帽', text: '帽子裡藏著荷莉的綠色鈴鐺吊飾：「這頂帽子，是我第一次來的那年戴的。歡迎你。」' },
+  // The shift log once it is put right: who flew each half of each night (cabin-story.js NIGHTS), for sorting the letters.
+  'shift-log': { name: '夜班交接表', place: '小房間的交接表', text: '補好的夜班交接表：12/21 前半夜 E.、後半夜 O.；12/22 前半夜 N.、後半夜 K.；12/23 前半夜 H.、後半夜 N.；12/24 前半夜 K.、後半夜 H.。每一晚都是兩個人接力。' },
   tags: { name: '名牌板', place: '小房間的名牌板', text: '五個名牌，每個人的字都是自己的顏色，旁邊畫著工作記號：尼爾斯 N 深紅、扳手；克莉絲 K 藍、雪橇；荷莉 H 綠、星星；艾洛 E 紫、雪花；歐拉 O 金、信封。' },
   duty: { name: '值班須知', place: '小冊的值班須知', text: '每一晚分前半夜、後半夜兩段，兩個人接力；同一個人不能連著值兩段，後半夜接下一晚的前半夜也算連著；新夥伴的前五年是見習期，一季只負責一段。' },
   'register-years': { name: '加入年份', place: '小房間的登記簿', text: '頁首寫著「2026 年聖誕季」。加入年份：N. 2015、K. 2016、H. 2003、E. 2022、O. 2023。' },
@@ -45,7 +47,7 @@ export const GIFT_ORDER = ['N', 'E', 'O', 'K', 'H'];
 export const CLUE_PLACES = [
   ['yard', '院子', ['care-note', 'repair-tag', 'barn-note', 'care-log', 'feed-table', 'wish-board']],
   ['house', '小屋', ['letter-hearth', 'desk-lock', 'blotter', 'music-lid', 'music-bookmarks', 'music-catch', 'globe-village', 'globe-base', 'chair-note', 'letter-backs', 'route', 'route-note', 'lemon-note', 'music-drawer']],
-  ['room', '小房間', ['tags', 'duty', 'register-years', 'rules', 'rack-rule', 'snowman-photo', 'hat-2003', 'blank-slip', 'old-record']],
+  ['room', '小房間', ['tags', 'duty', 'register-years', 'shift-log', 'rules', 'rack-rule', 'snowman-photo', 'hat-2003', 'blank-slip', 'old-record']],
 ];
 export const GOAL_CLUES = {
   yard: ['care-note', 'care-log', 'repair-tag', 'barn-note'],
@@ -54,7 +56,7 @@ export const GOAL_CLUES = {
   log: ['tags', 'care-log', 'barn-note', 'route-note', 'duty', 'register-years'],
   secret: [],
   join: ['rules'],
-  jobs: ['feed-table', 'route', 'rack-rule'],
+  jobs: ['feed-table', 'route', 'rack-rule', 'shift-log'],
   cord: ['blank-slip', 'lemon-note', 'globe-base', 'hat-2003', 'register-years'],
   reread: ['old-record'],
   wish: ['rules'],
@@ -83,10 +85,17 @@ export const GOALS = {
   join: { task: '要加入替身嗎？到小房間的登記簿，在最下面那格簽上縮寫；不想加入，院子的世界路標是回家的路。', title: '登記簿的空格', hints: ['小房間桌上的登記簿，最新的一頁最下面還空著一格。', '選一個沒人用過的字母當縮寫，蓋章就能加入；不想加入，院子的世界路標就是回家的路。', '加入以後，登記簿上會寫著今天可以幫忙的四件事。'] },
   jobs: { task: '完成登記簿上的四件替身工作，先做哪一件都可以。', title: '替身工作', hints: ['登記簿上列著四件工作，第一次做完就蓋一個章；先做哪一件都可以。', '照顧麋鹿看穀倉門上的餵食表；裝雪橇看書桌上的平安夜路線；處理信件先到小房間的分揀架；摩天輪在遊樂場（屋外往左轉）。', '餵食表上的時間沒有照順序寫；雪橇每到一站只拿得到最上面那一袋；分信看郵戳的時間對照交接表，過了午夜還算前一晚；摩天輪的特大齒輪掉在動力箱旁的雪地裡。', '餵食順序：北極燕麥餅 → 胡蘿蔔 → 地衣。雪橇由下往上裝：多倫多、雷克雅維克、東京、台北。分信：台北 E.、東京 O.、冰島 N.、多倫多 K.、奧斯陸 H.、開普敦 N.，北極寄來的兩封放進你的格子。摩天輪修不好時，動力箱裡有「需要提示嗎？」。'] },
   cord: { task: '小房間書桌的另一頭，有一本紅繩綁著的舊紀錄簿，想辦法打開它。', title: '紅繩綁著的舊紀錄簿', hints: ['小房間書桌的另一頭，有一本紅繩綁著的舊紀錄簿，被四位數的小鎖扣著。', '登記簿的加入年份、雪花球的底座、最小那頂帽子的裡面，都有同一個年份；登記簿你那一列的空白紙條，放在壁爐前烘熱的石板上也會告訴你。', '密碼是 2003。'] },
-  reread: { task: '交接表補好了，再讀一次舊紀錄簿。', title: '再讀一次舊紀錄簿', hints: ['舊紀錄簿已經打開過了；交接表補好以後，它的書角翹了起來。', '再翻開舊紀錄簿讀一次，不用再轉密碼：想想你現在知道的「每晚兩個人接力」。', '荷莉的願望在 2003 年就實現了，之後她卻每年都還在交接表上。再讀一次，就會明白。'] },
-  wish: { task: '集到三個章了：可以到登記簿許願，或繼續做替身工作。', title: '三個章', hints: ['守則上說，集到三個章就能許一個願望。', '登記簿上有四個願望可以選，選一個再蓋章許願。', '也可以先不許願：四件工作都做完，班表上 12/25 早班還空著。'] },
+  reread: { task: '交接表補好了，回小房間再讀一次舊紀錄簿。', title: '再讀一次舊紀錄簿', hints: ['舊紀錄簿已經打開過了；交接表補好以後，它的書角翹了起來。', '再翻開舊紀錄簿讀一次，不用再轉密碼：想想你現在知道的「每晚兩個人接力」。', '荷莉的願望在 2003 年就實現了，之後她卻每年都還在交接表上。再讀一次，就會明白。'] },
+  wish: { task: '集到三個章了：回小屋，到小房間的登記簿許願；或繼續做替身工作。', title: '三個章', hints: ['守則上說，集到三個章就能許一個願望。', '登記簿上有四個願望可以選，選一個再蓋章許願。', '也可以先不許願：四件工作都做完，班表上 12/25 早班還空著。'] },
   endings: { task: '換個選擇，看看其他結局（登記簿下方記著你看過的）。', title: '還有別的結局', hints: ['登記簿下方蓋著你看過的結局；還沒蓋章的，換個選擇試試。', 'A：知道秘密、沒有加入（或在登記簿劃掉縮寫），到院子的世界路標選「踏上回家的路」；B：用三個章許願；C：四件工作都做完，簽 12/25 早班。', '金色的「真相」星：補好交接表、也讀懂舊紀錄簿以後，再走到 B 或 C。'] },
   done: { task: '三個結局和真相都看過了！想重玩，線索本最下面可以從頭開始。', title: '三個結局和真相都看過了', hints: ['謝謝你陪聖誕村過了這個聖誕節。登記簿上看過的結局和真相星，點一下就能再看一次；想從頭再玩一次，線索本最下面有「從頭再玩一次」。'] },
+};
+
+// Something done that moves the story on: the note that slides out from under the clue book says what comes next (the
+// goal's `task`, or for the yard and the jobs what is still left, by name). `asked`: all four jobs done, before Santa asks.
+export const NEXT = {
+  yard: '院子裡還沒找的：', places: { lichen: '郵筒裡的小包裹', key: '麋鹿身後的餵食槽', handle: '雪人腳邊的雪堆', matches: '穀倉的絞盤' },
+  jobs: '還沒做的替身工作：', asked: '四件替身工作都做完了！回小屋，聖誕老人有話想問你。',
 };
 
 // What the visitor is left wondering once a chapter is done (docs/SANTA-PUZZLE-DESIGN.md 1.1), written under the goal on

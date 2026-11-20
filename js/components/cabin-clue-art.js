@@ -141,6 +141,13 @@ export const CLUE_ART = {
     line('M17 12H28M17 17H27M17 22H28M17 27H24', PENCIL, g, 1.3);
   },
   // The register: a leather cover with a gold line, the end of a red ribbon over its top.
+  // The shift log on its clipboard, put right: two initials a night, each in its own ink (E., O.; N., K.; H., N.; K., H.).
+  clipboard(g) {
+    shape('rect', { x: 8, y: 5, width: 24, height: 31, rx: 2.5, fill: WOOD }, g); shade('M27 5H29.5Q32 5 32 7.5V33.5Q32 36 29.5 36H27Z', g);
+    shape('rect', { x: 10.5, y: 9, width: 19, height: 24.5, rx: 1, fill: SHEET, ...EDGE }, g);
+    shape('rect', { x: 15, y: 3.5, width: 10, height: 5, rx: 1.5, fill: '#9a9a9a' }, g);
+    [['#6e4a6b', GOLD_DARK], ['#8f3b36', '#3f5a7a'], ['#3f6653', '#8f3b36'], ['#3f5a7a', '#3f6653']].forEach(([first, second], i) => { line(`M13 ${14 + i * 5}H18.5`, first, g, 2); line(`M21.5 ${14 + i * 5}H27`, second, g, 2); });
+  },
   ledger(g) {
     shape('rect', { x: 8, y: 6, width: 24, height: 28, rx: 2, fill: '#6b3f2e' }, g);
     shape('rect', { x: 11, y: 9, width: 18, height: 22, rx: 1, fill: 'none', stroke: GOLD, 'stroke-width': 1.2 }, g);
@@ -180,7 +187,7 @@ export const CLUE_ICON = {
   'care-note': 'parcel', 'repair-tag': 'tag', 'barn-note': 'note', 'care-log': 'hay', 'feed-table': 'feed', 'wish-board': 'board',
   'letter-hearth': 'hearth', 'desk-lock': 'keyhole', blotter: 'blotter', 'music-lid': 'musicbox', 'music-bookmarks': 'bookmarks', 'music-catch': 'musicbox', 'music-drawer': 'musicbox',
   'globe-village': 'globe', 'globe-base': 'globe', 'chair-note': 'chair', 'letter-backs': 'letter', route: 'route', 'route-note': 'route', 'lemon-note': 'lemon',
-  tags: 'nameboard', duty: 'booklet', 'register-years': 'ledger', rules: 'booklet', 'rack-rule': 'rack', 'snowman-photo': 'photo', 'hat-2003': 'hat', 'blank-slip': 'slip', 'old-record': 'record',
+  tags: 'nameboard', duty: 'booklet', 'register-years': 'ledger', 'shift-log': 'clipboard', rules: 'booklet', 'rack-rule': 'rack', 'snowman-photo': 'photo', 'hat-2003': 'hat', 'blank-slip': 'slip', 'old-record': 'record',
   ...Object.fromEntries(SUBSTITUTES.map(([mark]) => [`gift-${mark}`, `gift-${mark}`])),
 };
 

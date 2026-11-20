@@ -174,7 +174,8 @@ export function feedGame({ layer, stage, cabin, say, later, sound, progress, sav
     say(`${FEED.foods[kind]}，照餵食表餵了 ${served.length}／${FEED_ORDER.length} 樣。`);
     // All three: the job is done, and the oats and lichen go back to the barn (the basket is the everyday one again).
     if (served.length === FEED_ORDER.length) {
-      job = false; meter.hidden = false; table?.classList.add('is-done');
+      // Done: the table, every line ticked, is put away a moment later, so the basket sits low again and clear of him.
+      job = false; meter.hidden = false; table?.classList.add('is-done'); later(2600, () => table?.remove());
       later(1600, () => { say(FEED.done); onTask(); basket.querySelectorAll('[data-kind="oats"], [data-kind="lichen"]').forEach(each => { each.classList.add('is-gone'); later(300, () => each.remove()); }); });
     }
   }
