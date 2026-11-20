@@ -341,7 +341,7 @@ await test('Santa 書櫃可以再玩一次：開著時近看可進小房間或�
   assert.ok(books.includes("push.hidden = !replay || done || !solved(shelf)") && books.includes('toggle(true); later(2800, restart)'), 'It can simply be pushed open only while the books still spell MORE');
   assert.ok(books.includes('story.opened = true; story.shut = false; save(); onOpen()'), 'Spelling MORE again opens it again, with the same flash and creak');
   assert.ok(play.includes("restart: () => start('shelf')") && play.includes('enter: start') && !play.includes('swing: () => swing()'), 'The shelf game restarts in place; the bookcase is no longer worked from afar');
-  assert.ok(page.includes("onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (id === 'sleigh' && play?.canLoad) play.loadSleigh(); else if (note) play?.note(note, id); }") && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
+  assert.ok(page.includes("onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (id === 'sleigh' && play?.canLoad) play.loadSleigh(); else if (id === 'window') cabin?.setView('advent'); else if (note) play?.note(note, id); }") && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
 });
 await test('Santa 拖曳不會卡住：放開被攔下時（例如瀏覽器擴充功能）仍會結束拖曳，書一次只拿一本、Esc 只放回書', async () => {
   const dir = path.join(project, 'js/components'), files = (await fs.readdir(dir)).filter(name => name.startsWith('cabin-') && name.endsWith('.js'));
@@ -655,6 +655,31 @@ await test('Santa 試玩回饋（11/20）：做完一件事，線索本旁滑出
   // The rack: letters already in a pigeonhole stay there while something else is looked at.
   assert.ok(secret.includes("const keep = () => { desk.rack = desk.sorted ? {} : { ...placed }; save(); };") && secret.includes('const was = desk.sorted ? mailFor(id) : desk.rack[id];'), 'Sorting half done is kept');
   assert.equal(TASKS.length, 4);
+});
+await test('Santa 降臨小屋：走到窗台前，小屋彈出成立體的倒數日曆盒；24 格大小形狀各不相同、號碼不照順序，一天一扇，未來的只抖一下，打開的記在存檔', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [box, play, page, html, paper, css] = await Promise.all(['js/components/cabin-advent.js', 'js/components/cabin-play.js', 'js/santa.js', 'santa.html', 'js/components/cabin-paper.js', 'css/santa.css'].map(read));
+  const { WINDOWS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-advent.js')).href);
+  const { ADVENT_ART, CLUE_ART, GOAL_ART } = await import(pathToFileURL(path.join(project, 'js/components/cabin-clue-art.js')).href);
+  const { adventLit, ROOM_SPOTS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  const { SLOTS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-advent.js')).href);
+  const { readProgress } = await import(pathToFileURL(path.join(project, 'js/services/cabin-progress.js')).href);
+  assert.ok(WINDOWS.every(({ art }) => ADVENT_ART[art] ?? CLUE_ART[art] ?? GOAL_ART[art]), 'Every window has a picture to show');
+  assert.equal(adventLit(new Date(2026, 11, 7)), 7, 'The house on the sill lights as many windows as can be opened');
+  assert.deepEqual(readProgress(null).advent, [], 'A new save has no window opened');
+  // A place in the room of its own: the window, the list and the little house all lead there.
+  assert.ok(ROOM_SPOTS.some(spot => spot.id === 'advent') && page.includes("else if (id === 'window') cabin?.setView('advent');") && page.includes("'secret', 'advent']") && html.includes('data-spot="advent"') && play.includes("advent: () => { say(''); return adventGame("), 'The window sill is a place to walk up to');
+  // The box: twenty-four doors of all sorts and sizes, out of order, inside the box, none overlapping, none too small to tap.
+  assert.deepEqual(SLOTS.map(slot => slot.day).sort((a, b) => a - b), Array.from({ length: 24 }, (_, i) => i + 1));
+  assert.ok(new Set(SLOTS.map(slot => slot.kind)).size >= 6 && new Set(SLOTS.map(slot => slot.w * slot.h)).size >= 10, 'Doors of many kinds and sizes');
+  assert.ok(SLOTS.some((slot, i) => i && slot.day !== SLOTS[i - 1].day + 1) && SLOTS.find(slot => slot.day === 24).kind === 'arch', 'Numbered out of order; Christmas Eve is the front door');
+  assert.ok(SLOTS.every(({ x, y, w, h, layer }) => { const edge = layer === 'frame' ? 14 : 28; return x >= edge && y >= 28 && x + w <= 600 - edge && y + h <= 846 && Math.min(w, h) >= 66; }), 'Inside the box (drawers in its foot), each big enough to tap');
+  assert.ok(SLOTS.every((a, i) => SLOTS.slice(i + 1).every(b => a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y)), 'No two doors overlap');
+  assert.ok(box.includes('if (day > open) {') && box.includes("tell(open ? ADVENT.locked : ADVENT.before(until()), '', showing); return;") && box.includes('progress.advent = [...opened].sort((a, b) => a - b); save();'), 'A day to come only rattles; one opened is saved');
+  // Paper in layers, doors on their own hinges; nothing pops, leans or swings under reduced motion.
+  assert.ok(box.includes("const LAYERS = [['sky', sky], ['house', house], ['front', front], ['frame', frame]];") && css.includes('.advent-layer.is-frame { transform: translateZ(64px); }') && box.includes("paperLayer(side, '0 0 320 560', 'advent-lid is-tall', lidTall, PAPER); paperLayer(side, '0 0 360 168', 'advent-lid is-wide', lidWide, PAPER);") && box.includes("paperLayer(page, '0 0 80 92', '', calendarPage, PAPER);") && !/advent-(flake|star-hung|garland|reindeer)/.test(css), 'Sky, house, snow and box one in front of another, cut from paper; beside it the box\'s lid, kept plain: the day\'s calendar page, its line and picture');
+  assert.ok(css.includes('.advent-slot[data-hinge="left"][data-state="open"] .advent-door { transform: rotateY(-118deg); }') && css.includes('.advent-slot[data-hinge="down"][data-state="open"] .advent-door { transform: rotateX(-100deg); }'), 'Doors turn on their hinges; presents and drawers fall open');
+  assert.ok(/@media \(prefers-reduced-motion: no-preference\) \{\n  \.advent-door \{ transition/.test(css) && box.includes("if (!still && matchMedia('(pointer: fine)').matches) {"), 'Under reduced motion nothing moves');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');

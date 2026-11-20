@@ -65,6 +65,7 @@ const KINDS = [
   ['.chat-ask', 'gifttag'],
   ['.feed-name', 'hangtag'],
   ['.feed-slip', 'pinned'],
+  ['.advent-link', 'tag'],
   ['.feed-slip-box', 'kraft'],
   ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin, .shift-file, .notebook-next', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
