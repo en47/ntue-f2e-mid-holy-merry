@@ -741,6 +741,8 @@ export const WORLD = [
 
 // Things in the village that answer a tap with a line of their own. `sheet` is the board that gives a little wiggle.
 export const PROPS = [
+  // In the yard, behind the reindeer: the sleigh. A volunteer tapping it goes over to load it (cabin-play.js `loadSleigh`).
+  { id: 'sleigh', name: '雪橇', box: [[3.15, .42, -.2], [1.4, .9, .8]], note: '雪橇停在麋鹿旁邊，貨架上還空著。' },
   { id: 'wish-post', name: '許願郵筒', box: [[-7.7, .55, 2.3], [.9, 1.4, .9]], note: '許願郵筒：寄給聖誕老人的願望信，都從這裡出發。' },
   { id: 'wish-tree', name: '願望樹', box: [[-9.4, 1.4, .4], [1.7, 3.1, 1.4]], note: '樹上掛滿封好的願望信封，只有聖誕老人能拆開。' },
   { id: 'wish-board', name: '願望留言板', box: [[-10.9, .6, 2.7], [1.4, 1.4, 1.2]], note: '留言板上釘滿小卡片，每一張都畫著一個心願。其中一張寫著：「謝謝昨晚幫忙修好摩天輪的人。」沒有署名。' },

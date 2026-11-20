@@ -74,6 +74,14 @@
 /* 籃子裡每樣食物下面掛一張手寫名牌；做照顧麋鹿的工作時，籃子上方釘一張餵食表，照時間餵對就打勾，餵錯全部清掉、紙條抖一下。 */
 .feed-basket { padding-bottom: 2.4rem; }
 .feed-name { position: absolute; left: 50%; top: calc(100% - 4px); padding: 13px .5rem 5px; translate: -50% 0; color: var(--ink); background: #f3e3c3; border-radius: 3px; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.2; white-space: nowrap; pointer-events: none; transform-origin: 50% 0; }
+/* With the barn's feeding table pinned to it (a volunteer's job), a wide screen keeps the basket low: the table beside it,
+   not on top, so neither covers the reindeer's head. A narrow one stacks them as before. */
+@media (min-width: 701px) {
+  .feed-tray:has(.feed-slip) { display: grid; grid-template-columns: auto auto; grid-template-areas: "slip meter" "slip basket"; align-items: end; column-gap: 1rem; }
+  .feed-tray:has(.feed-slip) .feed-slip { grid-area: slip; }
+  .feed-tray:has(.feed-slip) .feed-meter { grid-area: meter; justify-self: center; }
+  .feed-tray:has(.feed-slip) .feed-basket { grid-area: basket; }
+}
 .feed-slip { display: grid; gap: .15rem; padding: 1rem 1.1rem .75rem; color: var(--ink); background: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.45; white-space: nowrap; rotate: -1.5deg; pointer-events: none; }
 .feed-slip-title { margin: 0 0 .15rem; color: #8f3b36; font-weight: 700; }
 .feed-slip-row { display: flex; align-items: center; gap: .5rem; margin: 0; }
@@ -785,6 +793,15 @@ html.theatre-open { overflow: hidden; }
 /* 目標下面一行自己記下的話：上一章結束時還想不通的事。 */
 .notebook-wonder { margin: 0 0 .5rem; color: #6b5a4c; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; }
 .notebook-wonder::before { content: '？'; margin-right: .25rem; color: #b5443c; }
+/* What comes next, slid out from under the clue book after something done (cabin-notebook.js `remind`): a pinned note in
+   the visitor's own hand with the goal's little picture, below whatever is up there (its top is set when it shows); tapped,
+   the book opens. */
+.notebook-next { position: absolute; z-index: 5; right: .9rem; display: flex; align-items: center; gap: .6rem; max-width: min(19rem, calc(100% - 1.8rem)); padding: .9rem 1.1rem .7rem; color: var(--ink); background: var(--cream); border: 0; border-radius: 6px; box-shadow: 0 5px 0 -1px #dccaa9; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.6; text-align: left; rotate: 1.2deg; cursor: pointer; }
+.notebook-next[hidden] { display: none; }
+.notebook-next .goal-picture { width: 2.8rem; margin: 0; }
+.cabin[data-paper] .notebook-next { background-color: transparent; background-repeat: no-repeat; background-size: 100% 100%; border-radius: 0; box-shadow: none; }
+@media (prefers-reduced-motion: no-preference) { .notebook-next.is-in { animation: next-in .55s cubic-bezier(.3, 1.4, .5, 1) both; } }
+@keyframes next-in { from { opacity: 0; translate: 1.2rem -1.6rem; rotate: 7deg; scale: .7; } }
 .notebook-empty { margin: 0; color: var(--muted); font-size: var(--fs-small); }
 .notebook-clues { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
 .clue-sticker { display: flex; justify-content: space-between; align-items: center; gap: .6rem; width: 100%; padding: .5rem .85rem .6rem; color: var(--ink); background: #fff3d9; border: 0; font-size: var(--fs-small); text-align: left; cursor: pointer; }
@@ -1102,20 +1119,23 @@ html.theatre-open { overflow: hidden; }
 .feed-time { flex: none; color: #8f3b36; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .feed-never { margin: 0 0 .6rem; color: #8a7a6a; font-family: var(--font-hand); font-size: var(--fs-small); }
 .sleigh-rule { margin: 0 0 .6rem; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; color: var(--ink); }
-.sleigh-rack { display: flex; flex-direction: column-reverse; gap: .1rem; width: 9rem; margin: 0 auto .6rem; padding: .3rem .4rem; list-style: none; border-bottom: 6px solid #8f3b36; }
-.sleigh-slot { display: grid; place-items: center; height: 4.6rem; }
+/* The rack and the sacks on the snow side by side, so the card stays short enough for the stage (and scrolls if not). */
+.sleigh-card { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 1rem; max-height: calc(100% - 1.2rem); overflow-y: auto; }
+.sleigh-card > :not(.sleigh-rack, .sleigh-pile) { grid-column: 1 / -1; }
+.sleigh-rack { display: flex; flex-direction: column-reverse; gap: .1rem; width: 7.6rem; margin: 0 0 .6rem; padding: .3rem .4rem; list-style: none; border-bottom: 6px solid #8f3b36; }
+.sleigh-slot { display: grid; place-items: center; height: 3.8rem; }
 .sleigh-slot.is-empty { border-radius: 8px; background: #f3e6c8; opacity: .6; }
-.sleigh-pile { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem .6rem; min-height: 4.6rem; margin: 0 0 .8rem; }
-.sleigh-sack { position: relative; width: 4.6rem; aspect-ratio: 100 / 80; margin-bottom: 1.1rem; padding: 0; border: 0; background: none; cursor: pointer; }
+.sleigh-pile { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; gap: .2rem .6rem; margin: 0 0 .6rem; }
+.sleigh-sack { position: relative; width: 4rem; aspect-ratio: 100 / 80; margin-bottom: 1.1rem; padding: 0; border: 0; background: none; cursor: pointer; }
 .sleigh-sack .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 .sleigh-sack:disabled { cursor: default; }
 .sleigh-sack:not(:disabled):hover { translate: 0 -2px; }
 .sleigh-sack:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
 .sleigh-tag { position: absolute; left: 50%; top: 100%; translate: -50% 0; color: var(--ink); font-size: var(--fs-small); font-weight: 700; white-space: nowrap; pointer-events: none; }
 @media (max-width: 700px) {
-  .sleigh-slot { height: 3.9rem; }
-  .sleigh-sack { width: 3.4rem; }
-  .sleigh-card { max-height: calc(100% - 1.2rem); overflow-y: auto; }
+  .sleigh-rack { width: 6.4rem; }
+  .sleigh-slot { height: 3.3rem; }
+  .sleigh-sack { width: 3.3rem; }
 }
 /* 第五章：世界路標的卡、聖誕老人最後的詢問、確認步驟（「再想想」是淡色的紙籤）、結局後的紀念明信片。 */
 .signpost-card, .ask-card { width: min(24rem, calc(100% - 2rem)); }

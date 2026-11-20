@@ -75,12 +75,19 @@ test('the blank slip and the big gear, from before the pocket: in it (or used) a
   assert.deepEqual(bag({ wheelRounds: 2 }), { held: [], used: ['gear'] });
   assert.deepEqual(bag({ finale: { slip: 'taken' }, bag: { held: ['slip'], used: [] } }), { held: ['slip'], used: [] }, 'once only');
 });
-test('the desk remembers which replies were sealed, postmarked and sent, and what was chosen to say', () => {
-  assert.deepEqual(readProgress(memory()).desk, { sealed: [], marked: [], sent: [], answers: {}, sorted: false });
+test('the desk remembers which replies were sealed, postmarked and sent, what was chosen to say, and the letters sorted so far', () => {
+  assert.deepEqual(readProgress(memory()).desk, { sealed: [], marked: [], sent: [], answers: {}, sorted: false, rack: {} });
   const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sealed: ['reply', 'reply', 7], marked: ['reply'], sent: ['reply-tomas'], answers: { tomas: 2, aya: 5, ole: 'x' } } }) });
-  assert.deepEqual(readProgress(store).desk, { sealed: ['reply'], marked: ['reply'], sent: ['reply-tomas'], answers: { tomas: 2 }, sorted: true });
-  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { stamped: ['mia'], sealed: true } }) })).desk, { sealed: ['reply'], marked: [], sent: [], answers: {}, sorted: false }, 'an older record: the reply had been sealed');
-  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sealed: 1, answers: [1] } }) })).desk, { sealed: [], marked: [], sent: [], answers: {}, sorted: false });
+  assert.deepEqual(readProgress(store).desk, { sealed: ['reply'], marked: ['reply'], sent: ['reply-tomas'], answers: { tomas: 2 }, sorted: true, rack: {} });
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { stamped: ['mia'], sealed: true } }) })).desk, { sealed: ['reply'], marked: [], sent: [], answers: {}, sorted: false, rack: {} }, 'an older record: the reply had been sealed');
+  assert.deepEqual(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { sealed: 1, answers: [1] } }) })).desk, { sealed: [], marked: [], sent: [], answers: {}, sorted: false, rack: {} });
+  const rack = readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ desk: { rack: { m1: 'E', tomas: 'you', m2: 'S', 'no way': 'N', m3: 7 } } }) })).desk.rack;
+  assert.deepEqual(rack, { m1: 'E', tomas: 'you' }, 'letters already in a pigeonhole stay there; nothing else is kept');
+});
+test('a shift log put right before its copy went into the clue book is in it now too', () => {
+  const clues = saved => readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify(saved) })).clues;
+  assert.ok(clues({ story: { opened: true, seen: ['tags', 'log', 'rules'] }, clues: ['tags'] }).includes('shift-log'));
+  assert.ok(!clues({ story: { opened: true, seen: ['tags'] }, clues: ['tags'] }).includes('shift-log'), 'not before it is put right');
 });
 test('the story keeps only real clues and a whole shelf', () => {
   const store = memory({ 'holy-merry:cabin:v1': JSON.stringify({ story: { left: true, opened: true, seen: ['log', 'tags', 'diary', 'log'], shelf: 'x' } }) });

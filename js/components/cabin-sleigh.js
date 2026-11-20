@@ -24,7 +24,8 @@ const sack = colour => g => {
   shape('path', { d: 'M24 72Q50 78 76 72', fill: 'none', stroke: '#a8774d', 'stroke-width': 2, opacity: .6 }, g);
 };
 
-export function sleighGame({ layer, stage, cabin, say, sound, later, progress, onLoaded = () => {} }) {
+// `openNow`: the sleigh was tapped from the yard, so its rack opens straight away.
+export function sleighGame({ layer, stage, cabin, say, sound, later, progress, openNow = false, onLoaded = () => {} }) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
   const volunteer = progress.volunteer, loaded = () => volunteer.tasks.includes('hay');
   if (!signedUp(volunteer) && !loaded()) return () => {};
@@ -75,7 +76,7 @@ export function sleighGame({ layer, stage, cabin, say, sound, later, progress, o
     on(done, 'click', () => { card.remove(); card = null; stack = []; sound.play('remove'); spot.focus({ preventScroll: true }); });
     render(); (pile.querySelector('.sleigh-sack') ?? done).focus({ preventScroll: true });
   }
-  layout(); later(600, layout); later(1300, layout);
+  layout(); later(600, layout); later(1300, layout); if (openNow) later(300, open);
   const watch = new ResizeObserver(() => layout()); watch.observe(stage);
   return () => { events.abort(); watch.disconnect(); card?.remove(); };
 }

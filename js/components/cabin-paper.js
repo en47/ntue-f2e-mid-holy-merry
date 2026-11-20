@@ -66,7 +66,7 @@ const KINDS = [
   ['.feed-name', 'hangtag'],
   ['.feed-slip', 'pinned'],
   ['.feed-slip-box', 'kraft'],
-  ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin, .shift-file', 'pinned'],
+  ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin, .shift-file, .notebook-next', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
   ['.feed-basket, .play-basket', 'wood'],
   ['.wardrobe-item[aria-pressed="true"], .bag-item[aria-pressed="true"]', 'picked'],

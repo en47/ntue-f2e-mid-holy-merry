@@ -130,6 +130,9 @@ export function beckon(state, place, { used = new Set(), calling = false, home =
   }
   return BECKONS[now] ? at(BECKONS[now]) : null;
 }
+// Where the story has got to, for telling when something done has moved it on (the clue book's note of what comes next,
+// cabin-notebook.js): the goal, the yard's things found, the jobs done, the endings seen, and Santa's question asked.
+export const milestone = state => [goal(state), YARD.filter(id => ever(state.bag, id)).length, points(state.volunteer), state.finale.endings.length, Boolean(state.finale.asked)].join();
 // The clue book's five chapters, a stamp on its cover for each the story is past: the yard's things found, the bookcase
 // opened, the secret told, the substitute's work done far enough (the old record read again, or stamps enough for a
 // wish), and a choice made at the end. Someone who leaves without joining has the last without the fourth.
