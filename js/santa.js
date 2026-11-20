@@ -5,7 +5,7 @@ import { mountCabinChat } from './components/cabin-chat.js';
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
 const back = document.querySelector('#cabin-back'), tip = document.querySelector('#cabin-tip'), explore = [...document.querySelectorAll('.cabin-explore [data-spot]')], looks = [...document.querySelectorAll('.cabin-explore [data-look]')];
-const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], ROOMS = ['hearth', 'desk', 'musicbox', 'globe', 'shelf', 'secret'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
+const SPOTS = ['mailbox', 'reindeer', 'snowman', 'stable'], ROOMS = ['hearth', 'desk', 'musicbox', 'globe', 'shelf', 'secret', 'advent'], FOUND = 'holy-merry:cabin:found', TIP = 'holy-merry:cabin:tip';
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 // The flight down over the village is for a large desktop window; a phone, a tablet or a small window starts at the house.
 const roomy = matchMedia('(min-width: 1100px) and (min-height: 650px) and (hover: hover) and (pointer: fine)');
@@ -37,7 +37,8 @@ function onFound(id) {
 function onView(view) {
   if (view !== 'outside') { tip.classList.add('is-gone'); fitSideways(); }
   back.hidden = view === 'outside'; back.textContent = view === 'inside' ? '← 走出門外' : ROOMS.includes(view) ? '← 回到房間' : '← 回到小屋前'; clearTimeout(enterTimer); play?.leave();
-  if (SPOTS.includes(view) || ROOMS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : 1000);
+  // The window sill is turned toward and walked up to more slowly (cabin-scene.js `glide`): its box opens as the walk ends.
+  if (SPOTS.includes(view) || ROOMS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : view === 'advent' ? 1600 : 1000);
   if (view === 'inside') play?.inRoom();
   if (view === 'outside') { play?.outside(); chat.setAway(Boolean(cabin && !cabin.santaHome)); }
   if (view === 'outside' && touchOutside) { const id = touchOutside; touchOutside = ''; setTimeout(() => cabin?.touch(id), motion.matches ? 0 : 1200); }
@@ -48,6 +49,7 @@ function onView(view) {
   if (view === 'globe') status.textContent = '拿起爐台上的雪花球：左右搖一搖，看雪花慢慢落下。';
   if (view === 'secret') status.textContent = '走進書櫃後的小房間：牆上掛著名牌，桌上擺著一本小冊子。';
   if (view === 'shelf') status.textContent = '走到書櫃前，看看架上的書。';
+  if (view === 'advent') status.textContent = '走到窗前：窗台上的降臨小屋打開了，十二月每天可以開一扇門。';
   if (view === 'outside') status.textContent = '回到屋外。往左轉是遊樂場和許願角，往右轉是海邊和燈塔，雪山在小屋後面。';
 }
 back.addEventListener('click', () => cabin?.back());
@@ -81,7 +83,7 @@ async function mountCabin(fly = true) {
   try {
     const [{ mountCabin: build }, { mountPlay }] = await Promise.all([import('./components/cabin-scene.js'), import('./components/cabin-play.js')]);
     if (run !== generation) return;
-    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (id === 'sleigh' && play?.canLoad) play.loadSleigh(); else if (note) play?.note(note, id); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
+    const result = await build(stage, { onProgress: progress, onView, onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (id === 'sleigh' && play?.canLoad) play.loadSleigh(); else if (id === 'window') cabin?.setView('advent'); else if (note) play?.note(note, id); }, isCurrent: () => run === generation, fly: fly && roomy.matches });
     if (!result || run !== generation) { result?.destroy(); return; }
     cabin = result; play = mountPlay(stage, cabin, { onFound, announce: text => { status.textContent = text; }, onSanta: state => { if (state === 'away' || state === 'home') chat.setAway(state === 'away'); }, talk: chat });
     if (found.size) cabin.repaint('sign', { stars: found.size });

@@ -1137,6 +1137,120 @@ html.theatre-open { overflow: hidden; }
   .sleigh-slot { height: 3.3rem; }
   .sleigh-sack { width: 3.3rem; }
 }
+/* 降臨小屋（走到窗台前）：像立體書一樣彈出的倒數日曆盒（cabin-advent.js）。夜空、小屋、雪地、盒子四層前後錯開，
+   每一格跟著它所在的那一層；滑鼠移動時整個盒子微微傾斜。門沿自己的鉸鏈轉開（禮物和抽屜的前板往前倒），後面的小圖出現；
+   還沒到的只抖一下。寬螢幕說明在右邊，窄螢幕在下面。 */
+.advent-scene { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 1.6rem; padding: 4.4rem 1.2rem 1rem; pointer-events: none; }
+/* The room behind the box goes dusky, so the box stands out and the window, seen this close, stays soft behind it. */
+.advent-scene::before { content: ''; position: absolute; inset: 0; background: #1c2536; opacity: .45; }
+.advent-scene > * { position: relative; }
+.advent-box { position: relative; flex: none; height: min(100%, 46rem); aspect-ratio: 600 / 860; perspective: 1600px; pointer-events: auto; }
+.advent-tilt { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(var(--lean-y, 0deg)) rotateY(var(--lean-x, 0deg)); transform-origin: 50% 100%; }
+.advent-layer, .advent-layer .art-layer, .advent-layer img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.advent-layer.is-house { transform: translateZ(24px); }
+.advent-layer.is-front { transform: translateZ(48px); }
+.advent-layer.is-frame { transform: translateZ(64px); }
+.advent-slot { position: absolute; transform-style: preserve-3d; }
+.advent-slot.is-sky { transform: translateZ(1px); }
+.advent-slot.is-house { transform: translateZ(25px); }
+.advent-slot.is-front { transform: translateZ(49px); }
+.advent-slot.is-frame { transform: translateZ(65px); }
+.advent-pic { position: absolute; inset: 14%; background: no-repeat center / contain; }
+.advent-door { position: absolute; inset: 0; padding: 0; border: 0; background: none; cursor: pointer; transform-style: preserve-3d; }
+.advent-door .advent-face, .advent-door .advent-face img { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
+.advent-door .advent-back, .advent-door .advent-back img { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
+.advent-door .advent-back { transform: rotateY(180deg); }
+.advent-slot[data-hinge="down"] .advent-door .advent-back { transform: rotateX(180deg); }
+.advent-num { position: absolute; inset: 0; display: grid; place-items: center; color: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; text-shadow: 0 1px 0 #0005; backface-visibility: hidden; pointer-events: none; }
+.advent-slot[data-kind="window"] .advent-num { inset: 46% 0 4%; }
+.advent-slot[data-kind="arch"] .advent-num { inset: 46% 0 26%; }
+.advent-slot[data-kind="present"] .advent-num { inset: 46% 4% 14% 54%; color: #8f3530; font-size: var(--fs-small); text-shadow: none; }
+.advent-slot[data-kind="drawer"] .advent-num { inset: 14% 20% 52%; color: #6b4a33; text-shadow: none; }
+.advent-slot[data-kind="chimney"] .advent-num { inset: 0 26% 0 0; }
+.advent-slot[data-hinge="left"] .advent-door { transform-origin: left center; }
+.advent-slot[data-hinge="right"] .advent-door { transform-origin: right center; }
+.advent-slot[data-hinge="down"] .advent-door { transform-origin: center bottom; }
+.advent-slot[data-hinge="left"][data-state="open"] .advent-door { transform: rotateY(-118deg); }
+.advent-slot[data-hinge="right"][data-state="open"] .advent-door { transform: rotateY(118deg); }
+.advent-slot[data-hinge="down"][data-state="open"] .advent-door { transform: rotateX(-100deg); }
+.advent-slot[data-kind="drawer"][data-state="open"] .advent-door { transform: translateZ(14px) rotateX(-78deg); }
+.advent-slot[data-state="later"] .advent-door { cursor: default; }
+/* 今天那扇：角落貼一顆紙雕金星。 */
+.advent-star, .advent-star img { position: absolute; width: max(22px, 34%); aspect-ratio: 1; height: auto; }
+.advent-star { top: -14%; right: -14%; transform: translateZ(3px); pointer-events: none; }
+.advent-star img { inset: 0; width: 100%; }
+.advent-door:focus-visible { outline: 3px solid #fbf3df; outline-offset: 3px; }
+/* 盒子的蓋子立在旁邊，內面朝外（cabin-advent.js），只留必要的東西：牛皮紙板配一圈低彩度的暗紅邊，上方兩角各一小枝冬青，
+   標題在頂端；一張貼著膠帶的米色紙上，依序是撕頁月曆（換一天時舊的那頁往上翻走）、那天的一句話、那天的紙雕小圖、
+   有連結時的紅色紙吊牌，最下面一行小字是開了幾扇。寬螢幕立在盒子右邊，窄螢幕橫放在下面。 */
+.advent-side { position: relative; flex: none; height: min(88%, 40rem); aspect-ratio: 320 / 560; color: var(--ink); pointer-events: auto; }
+.advent-lid, .advent-lid img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.advent-lid.is-wide { display: none; }
+.advent-title { position: absolute; top: 4%; left: 0; right: 0; margin: 0; color: #8f3b36; font-family: var(--font-display); font-size: var(--fs-body); letter-spacing: .14em; text-align: center; }
+.advent-page { position: absolute; top: 18%; left: 50%; width: 38%; aspect-ratio: 80 / 92; translate: -54% 0; perspective: 30rem; }
+.advent-page > .art-layer, .advent-sheet, .advent-sheet > .art-layer { position: absolute; inset: 0; }
+.advent-sheet { transform-origin: 44% 8%; }
+.advent-month { position: absolute; top: 9%; left: 0; right: 12%; color: #fbf3df; font-size: var(--fs-small); font-weight: 700; text-align: center; }
+.advent-date { position: absolute; top: 30%; right: 12%; bottom: 12%; left: 0; display: grid; place-items: center; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-title); line-height: 1; }
+.advent-note { position: absolute; top: 45%; left: 16%; right: 16%; margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; text-align: center; }
+.advent-art { position: absolute; top: 62%; left: 50%; width: 24%; aspect-ratio: 1; translate: -50% 0; background: no-repeat center / contain; }
+.advent-foot { position: absolute; top: 80%; left: 0; right: 0; display: flex; justify-content: center; }
+.advent-link { padding: .35rem .95rem .35rem 1.2rem; color: #fbf3df; font-size: var(--fs-small); text-decoration: none; }
+.advent-link[hidden] { display: none; }
+.cabin[data-paper] .advent-link { background-repeat: no-repeat; background-size: 100% 100%; }
+.advent-count { position: absolute; bottom: 9%; left: 0; right: 0; margin: 0; color: #8a7a6a; font-size: var(--fs-small); text-align: center; }
+@media (max-width: 700px) {
+  .advent-scene { flex-direction: column; justify-content: flex-start; gap: .5rem; padding: 3.6rem .6rem .5rem; }
+  .advent-box { height: auto; width: min(100%, 22.5rem); }
+  .advent-side { width: min(100%, 22.5rem); }
+}
+/* The lid lies wide: under the box on a narrow screen, beside it on a short one (a phone held sideways). */
+@media (max-width: 700px), (max-height: 560px) {
+  .advent-side { height: auto; aspect-ratio: 360 / 168; }
+  .advent-lid.is-tall { display: none; }
+  .advent-lid.is-wide { display: block; }
+  .advent-title { top: 17%; left: 30%; right: 6%; font-size: var(--fs-small); text-align: left; letter-spacing: .06em; }
+  .advent-page { top: 21%; left: 8%; width: 18%; translate: none; }
+  .advent-note { top: 35%; left: 30%; right: 6%; font-size: var(--fs-small); line-height: 1.6; text-align: left; }
+  .advent-art { display: none; }
+  .advent-foot { top: auto; bottom: 10%; left: auto; right: 6%; }
+  .advent-link { padding: .2rem .7rem .2rem .9rem; }
+  .advent-count { bottom: 10%; left: 30%; right: auto; text-align: left; }
+  .advent-side:has(.advent-link:not([hidden])) .advent-count { display: none; }
+}
+@media (max-height: 560px) and (min-width: 701px) { .advent-side { width: min(24rem, 44%); } }
+@media (prefers-reduced-motion: no-preference) {
+  .advent-door { transition: transform .8s cubic-bezier(.3, 1.25, .5, 1); }
+  .advent-tilt { transition: transform .35s ease-out; }
+  .advent-scene::before { animation: advent-dusk .8s ease-out both; }
+  .advent-scene.is-entering :is(.advent-box, .advent-side) { visibility: hidden; }
+  .advent-box.is-popping .advent-tilt { animation: advent-pop 1.3s cubic-bezier(.22, 1, .36, 1) both; }
+  .advent-side.is-sliding { animation: advent-slide .8s cubic-bezier(.22, 1, .36, 1) .6s both; }
+  .advent-scene.is-leaving { pointer-events: none; }
+  .advent-scene.is-leaving::before { animation: advent-dip 1.9s ease-in-out forwards; }
+  .advent-scene.is-leaving .advent-tilt { animation: advent-fold .5s ease-in forwards; }
+  .advent-scene.is-leaving .advent-side { animation: advent-away .3s ease-in forwards; }
+  .advent-slot.is-shaking .advent-door { animation: advent-shake .45s ease-in-out; }
+  .advent-slot[data-state="open"] .advent-pic.is-bob { animation: advent-bob 2.4s ease-in-out infinite; }
+  .advent-slot[data-state="open"] .advent-pic.is-spin { animation: advent-spin 6s linear infinite; }
+  .advent-slot[data-state="open"] .advent-pic.is-swing { animation: advent-swing 2.6s ease-in-out infinite; transform-origin: 50% 8%; }
+  .advent-slot[data-state="open"] .advent-pic.is-twinkle { animation: advent-twinkle 2.2s ease-in-out infinite; }
+  .advent-art.is-new { animation: advent-pop-in .5s cubic-bezier(.3, 1.6, .5, 1) both; }
+  .advent-sheet { animation: advent-flip .85s cubic-bezier(.5, 0, .7, .4) forwards; }
+}
+@keyframes advent-pop { from { transform: translate(var(--from-x, 0), var(--from-y, 0)) scale(var(--from-scale, .2)) rotateX(75deg); opacity: 0; } 25% { opacity: 1; } }
+@keyframes advent-fold { to { transform: translate(var(--from-x, 0), var(--from-y, 0)) scale(var(--from-scale, .2)) rotateX(75deg); opacity: 0; } }
+@keyframes advent-dusk { from { opacity: 0; } }
+@keyframes advent-dip { 22% { opacity: .96; } 62% { opacity: .96; } 100% { opacity: 0; } }
+@keyframes advent-slide { from { translate: 3rem 0; opacity: 0; } }
+@keyframes advent-away { to { translate: 2rem 0; opacity: 0; } }
+@keyframes advent-shake { 20% { translate: -4px 0; } 40% { translate: 4px 0; } 60% { translate: -3px 0; } 80% { translate: 2px 0; } }
+@keyframes advent-bob { 50% { translate: 0 -8%; } }
+@keyframes advent-spin { to { rotate: 1turn; } }
+@keyframes advent-swing { 25% { rotate: 8deg; } 75% { rotate: -8deg; } }
+@keyframes advent-twinkle { 50% { scale: 1.12; } }
+@keyframes advent-pop-in { from { scale: .4; opacity: 0; } }
+@keyframes advent-flip { to { transform: rotateX(-112deg); opacity: 0; } }
 /* 第五章：世界路標的卡、聖誕老人最後的詢問、確認步驟（「再想想」是淡色的紙籤）、結局後的紀念明信片。 */
 .signpost-card, .ask-card { width: min(24rem, calc(100% - 2rem)); }
 .signpost-card .piece-words, .ask-card .piece-words { margin: 0 0 .8rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; color: var(--ink); }

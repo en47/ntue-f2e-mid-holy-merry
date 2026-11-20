@@ -34,8 +34,9 @@ for (const spot of SPOTS) {
 for (const spot of ROOM_SPOTS) {
   // `turn`/`tilt`: how far a place lets you look round (the little room behind the bookcase, too narrow to see whole).
   // `open`: where the bookcase is looked at from once it stands open (from the side, past it, into the doorway).
-  const { target, distance, pitch, yaw, tallDistance = distance * 1.35, fov = 34, tallFov = fov, tallDrop = 0, turn = 0, tilt = 0, open } = spot.view;
-  VIEWS[spot.id] = { target, distance, tallDistance, fov, tallFov, pitch, heading: yaw, aside: 0, tallDrop, turn, minPitch: pitch - tilt, maxPitch: pitch + tilt, room: true, open };
+  // `glide`: a place past Santa's chair, turned toward first and walked up to after (`aim`).
+  const { target, distance, pitch, yaw, tallDistance = distance * 1.35, fov = 34, tallFov = fov, tallDrop = 0, turn = 0, tilt = 0, open, glide = false } = spot.view;
+  VIEWS[spot.id] = { target, distance, tallDistance, fov, tallFov, pitch, heading: yaw, aside: 0, tallDrop, turn, minPitch: pitch - tilt, maxPitch: pitch + tilt, room: true, open, glide };
 }
 const indoorView = name => name === 'inside' || VIEWS[name]?.room === true;
 const BACK_WALL = -HOUSE.depth / 2;
@@ -436,8 +437,9 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const warm = keep(textures, radialTexture([[0, 'rgba(255,190,110,.8)'], [.45, 'rgba(255,150,70,.28)'], [1, 'rgba(255,140,60,0)']]));
   const glow = (position, size, parent = indoors) => { const sprite = new THREE.Sprite(keep(materials, new THREE.SpriteMaterial({ map: warm, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }))); sprite.position.copy(position); sprite.scale.setScalar(size); parent.add(sprite); return sprite; };
   const fireGlow = glow(new THREE.Vector3(FIRE.x, .28, FIRE.z - .05), 1), lanternGlow = glow(new THREE.Vector3(LANTERN.x, 2.68, LANTERN.z + .02), .7);
-  // The desk lamp's glow, under its shade (the desk faces the room, so the sheet's right-hand end is toward the back).
-  glow(new THREE.Vector3(DESK.x + .03, DESK.h * (1 - (DESK.items.lamp[1] + DESK.items.lamp[3]) / 2.6), DESK.z + (.5 - (DESK.items.lamp[0] + DESK.items.lamp[2]) / 2) * DESK.w), .5);
+  // The desk lamp's glow, under its shade (the desk faces the room, so the sheet's right-hand end is toward the back). Its
+  // halo fades as the eye comes close (walking up to the window sill passes by it), as a real one would not show up close.
+  const deskGlow = glow(new THREE.Vector3(DESK.x + .03, DESK.h * (1 - (DESK.items.lamp[1] + DESK.items.lamp[3]) / 2.6), DESK.z + (.5 - (DESK.items.lamp[0] + DESK.items.lamp[2]) / 2) * DESK.w), .5);
   // The little room behind the bookcase: plain warm walls and a lamp; what is in it is laid out by cabin-secret.js.
   (() => {
     const { left, width, height, depth, wall } = SECRET, back = BACK_WALL - depth, mid = left + width / 2, walls = 0xb98f63;
@@ -731,6 +733,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     // Calling, the fire licks up once and sinks back: a low one to twice its height, a burning one a little.
     const lick = moving('hearth'), leap = lick === null ? 0 : Math.sin(lick * Math.PI) * (hearth.lit ? .35 : 1.1) * (1 - lick * .3);
     for (const holder of flames) { holder.scale.y = (1 + flicker * .07) * blaze * (1 + leap); holder.scale.x = (1 + (still ? 0 : Math.sin(t * 7.3) * .025)) * (1 + hearth.heat * .08 + hearth.flare * .12); }
+    deskGlow.material.opacity = THREE.MathUtils.clamp((eye.distanceTo(deskGlow.position) - .35) / .5, 0, 1);
     fireGlow.material.opacity = hearth.lit ? Math.min(1, .85 + flicker * .12 + hearth.flare * .15) : .3 + flicker * .08; fireGlow.scale.setScalar(hearth.lit ? 1 + warmth * .4 + hearth.flare * .3 : .55);
     fire.intensity = hearth.lit ? 2.2 + flicker * .4 + warmth * 2.4 + hearth.flare * 2 : .9 + flicker * .2; fire.distance = 3 + warmth * 1.4;
     const tint = warmth * .08 + hearth.flare * .04;
@@ -968,7 +971,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
         goalHeading = held; spin = held !== next ? 0 : spin * Math.exp(-3.2 * delta);
         if (Math.abs(spin) < .02) spin = 0;
       }
-      const response = 1 - Math.exp(-7 * delta), travel = 1 - Math.exp(-3.2 * delta);
+      const response = 1 - Math.exp(-7 * delta), travel = 1 - Math.exp(-travelRate * delta);
       heading += (goalHeading - heading) * response; pitch += (goalPitch - pitch) * response;
       eye.lerp(goalEye, travel); fov += (goalFov - fov) * travel;
       settling = spin !== 0 || Math.abs(goalHeading - heading) + Math.abs(goalPitch - pitch) + eye.distanceTo(goalEye) + Math.abs(goalFov - fov) > .002;
@@ -985,11 +988,17 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (motion.matches) { if (trip) finishTrip(); heading = goalHeading; pitch = goalPitch; eye.copy(goalEye); fov = goalFov; spin = 0; pose(); tracker?.update(1); draw(); }
     else { settling = true; start(); }
   }
-  // Point the goals at a view. Outside comes back to wherever the visitor was looking before stepping away.
+  // Point the goals at a view. Outside comes back to wherever the visitor was looking before stepping away. A place that
+  // `glide`s (the window sill, Santa's chair between it and the middle of the room) is turned toward first and walked up to
+  // after, a little slower, so the chair goes out of sight to the side instead of sweeping past the eye. (Coming back
+  // from it, the room is dark for the moment, cabin-advent.js.)
+  let glideTimer = 0, travelRate = 3.2;
   function aim(name) {
-    const goal = goalFor(name); goalEye.copy(goal.eye); goalFov = goal.fov;
-    const facing = name === 'outside' ? away : name === 'inside' && roomAway ? roomAway : goal;
-    goalHeading = facing.heading; goalPitch = facing.pitch;
+    const goal = goalFor(name), facing = name === 'outside' ? away : name === 'inside' && roomAway ? roomAway : goal;
+    const toEye = () => { goalEye.copy(goal.eye); goalFov = goal.fov; wake(); };
+    clearTimeout(glideTimer); travelRate = 3.2; goalHeading = facing.heading; goalPitch = facing.pitch;
+    if (motion.matches || !VIEWS[name]?.glide) { toEye(); return; }
+    travelRate = 2.2; glideTimer = setTimeout(toEye, 420);
   }
   // One step back: from a place in the room to the middle of the room, from anywhere else out in front of the house.
   function back() { setView(VIEWS[view].room ? 'inside' : 'outside'); }
@@ -1226,7 +1235,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   if (!reindeer) loadReindeer();
 
   function destroy() {
-    stop(); clearTimeout(returnTimer); clearTimeout(story.mend); storyTimers.forEach(clearTimeout); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
+    stop(); clearTimeout(returnTimer); clearTimeout(glideTimer); clearTimeout(story.mend); storyTimers.forEach(clearTimeout); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
     release3d();
   }
   // What the games may do to the scene.

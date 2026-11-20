@@ -6,6 +6,7 @@ import { ADVENT_WINDOWS, adventHouse as adventHouseSheet, swag, calendar, candle
 import { church, roofHouse, snowyFir, star } from './paper-props.js';
 import { headingGlyphs } from '../data/heading-glyphs.js';
 import { cabinGlyphs } from '../data/cabin-glyphs.js';
+import { daysOpen, today } from '../services/cabin-advent.js';
 
 export const PX = 500;
 // Inner floor from x -1.6 to 1.6 and z -1.5 to 1.5, walls 1.9 high, ridge at 3: deep enough to stand inside and look round.
@@ -1350,8 +1351,9 @@ export function chairFront({ paper }, { width, height }) {
   }
 }
 
-// The advent house on the window sill: one lit window per December day so far (all lit outside December).
-export function adventLit(date = new Date()) { return date.getMonth() === 11 ? Math.min(date.getDate(), 24) : date.getMonth() === 10 ? 0 : 24; }
+// The advent house on the window sill: one lit window per December day so far (none in November, all from Christmas on;
+// cabin-advent.js in services has the rule and today's date).
+export const adventLit = (date = today()) => daysOpen(date);
 
 const wall = (id, w, h, at, extra) => ({ id, w, h, at, kind: 'wall', ...extra });
 // A piece drawn in its wall's own art units (as it was drawn on the wall), cut out as a sheet of its own: `box` is its place.
@@ -1541,6 +1543,10 @@ export const ROOM_SPOTS = [
   { id: 'musicbox', name: '音樂盒', box: [[MUSICBOX.x - .02, MUSICBOX.y + .12, MUSICBOX.z], [.26, .34, .4]], view: { target: [MUSICBOX.x, MUSICBOX.y + .1, MUSICBOX.z], distance: .78, pitch: .28, yaw: -Math.PI / 2, tallDistance: .82, tallFov: 54 } },
   { id: 'globe', name: '雪花球', box: [[GLOBE.x, GLOBE.y + GLOBE.h / 2, GLOBE.z], [.22, .26, .2]], view: { target: [GLOBE.x, GLOBE.y + .09, GLOBE.z], distance: .62, pitch: .1, yaw: 0, tallDistance: .8, tallFov: 56 } },
   { id: 'secret', name: '書櫃後的小房間', box: [[SECRET.left + SECRET.width / 2, SECRET.height / 2, -HOUSE.depth / 2 - .05], [SECRET.width, SECRET.height, .2]], view: { target: [SECRET.left + SECRET.width / 2, .6, -HOUSE.depth / 2 - .85], distance: .95, pitch: .22, yaw: .02, fov: 62, tallDistance: .95, tallFov: 84, turn: .6, tilt: .2 } },
+  // The advent house on the window sill: up close it pops up into an advent calendar box (cabin-advent.js). Looked at
+  // from close by, so Santa's rocking chair, between the sill and the middle of the room, stays behind the camera; turned
+  // toward before it is walked up to (`glide`), so the chair goes out of sight to the side instead of past the eye.
+  { id: 'advent', name: '降臨小屋', box: [[-1.5, 1.02, .08], [.16, .4, .44]], view: { target: [-1.5, 1.02, .08], distance: .42, pitch: .12, yaw: Math.PI / 2, tallDistance: .55, tallFov: 62, glide: true } },
   { id: 'shelf', name: '書櫃', box: [[BOOKCASE.left + BOOKCASE.width / 2, .7, BACK + .15], [BOOKCASE.width, BOOKCASE.height, .3]], view: { target: [BOOKCASE.left + BOOKCASE.width / 2, .66, BOOKCASE.z + .2], distance: 1.05, pitch: .1, yaw: .06, fov: 40, tallDistance: 1.05, tallFov: 78, open: { target: [SECRET.left + SECRET.width * .62, .7, BOOKCASE.z + .15], yaw: .55 } } },
 ];
 
@@ -1550,6 +1556,7 @@ export const ROOM_PROPS = [
   { id: 'door', name: '大門', box: [[0, DOOR.height / 2, DOOR.z], [DOOR.width, DOOR.height, .3]] },
   { id: 'back-door', name: '後門', box: [[0, .62, BACK + .05], [.5, 1.24, .12]], note: '後門通往後院的玩具工坊，明年的禮物已經開始做了。' },
   { id: 'tree', name: '聖誕樹', box: [[1.3, .68, .62], [.56, 1.36, .4]], note: '屋裡的聖誕樹掛著彩燈，一閃一閃。' },
+  // The window: tapped, it takes you up to the advent house on its sill (the room's `advent` place) instead of this line.
   { id: 'window', name: '窗台', box: [[-1.55, 1.12, .08], [.15, .75, .75]], note: '窗台上的降臨小屋，十二月每過一天就多亮一扇窗。' },
   { id: 'coat', name: '掛衣架', box: [[-.9, 1.05, HOUSE.depth / 2 - .08], [.85, 1, .2]], note: '門邊掛著一件紅外套、帽子和圍巾，靴子還沾著雪。' },
 ];

@@ -265,6 +265,92 @@ export const GOAL_ART = {
   },
 };
 
+// The advent house's windows (data/cabin-advent.js): a picture behind each, the same paper and box. Those not here are
+// a clue's or a goal's picture (`adventPicture`).
+export const ADVENT_ART = {
+  // A red sleigh on gold runners, a sack of presents on it.
+  sleigh(g) {
+    line('M5 31H31Q36 31 36 26', GOLD_DARK, g, 2.2); line('M11 31V27M27 31V27', GOLD_DARK, g, 1.6);
+    shape('path', { d: 'M6 27Q6 16 12 16H16V21H30Q33 21 33 24V27Z', fill: RED }, g); shade('M28 21H30Q33 21 33 24V27H28Z', g);
+    shape('path', { d: 'M18 21Q17 12 23 10Q29 12 28 21Z', fill: KRAFT }, g); line('M20 13.5Q23 15 26 13.5', RED, g, 1.4);
+  },
+  // Korvatunturi in Lapland, the fell like two ears, snow on its tops and a little red house at its foot.
+  fell(g) {
+    shape('path', { d: 'M3 33L12 15Q14 11 16 15L19 20 23 14Q25 10 27 14L37 33Z', fill: '#9fb3c4' }, g);
+    shape('path', { d: 'M9.5 20L12 15Q14 11 16 15L17.4 17.6Q15 16.5 13 19 11 17 9.5 20ZM21 17L23 14Q25 10 27 14L29 18Q27 16.5 25 18.5 23 16.5 21 17Z', fill: SNOW }, g);
+    shape('rect', { x: 15, y: 27, width: 8, height: 6, fill: RED }, g); shape('path', { d: 'M14 27.5L19 23.5 24 27.5Z', fill: SNOW }, g);
+    shape('rect', { x: 18, y: 29.5, width: 2.2, height: 3.5, fill: GOLD }, g);
+  },
+  // The little reindeer's head: antlers, ears, a red nose.
+  reindeer(g) {
+    line('M14 13L11 7M11 7L8 8M11 7L11 3M26 13L29 7M29 7L32 8M29 7L29 3', WOOD_DARK, g, 2);
+    shape('ellipse', { cx: 10, cy: 16, rx: 3.5, ry: 2, fill: '#b98a5a', transform: 'rotate(-25 10 16)' }, g); shape('ellipse', { cx: 30, cy: 16, rx: 3.5, ry: 2, fill: '#b98a5a', transform: 'rotate(25 30 16)' }, g);
+    shape('path', { d: 'M13 15Q20 9 27 15Q29 24 24 31Q20 34 16 31Q11 24 13 15Z', fill: '#c99a64' }, g); shade('M24 13Q27 15 27 15Q29 24 24 31Q22 32.5 21 33Q26 24 24 13Z', g);
+    shape('ellipse', { cx: 20, cy: 28, rx: 5, ry: 4, fill: '#e6c79a' }, g);
+    for (const x of [17, 23]) shape('circle', { cx: x, cy: 20, r: 1.3, fill: INK }, g);
+    shape('circle', { cx: 20, cy: 26.5, r: 2.4, fill: RED }, g);
+  },
+  // A boot polished for St Nicholas, a candy cane in it.
+  boot(g) {
+    line('M27 16V6Q27 3 30 3T33 6', SNOW, g, 3); line('M27 14.5V12.5M27 9.5V7.5M30.5 3.2L32 4.2', RED, g, 3);
+    shape('path', { d: 'M11 14H25V27Q25 30 28 30H32Q35 30 35 33V35H11Z', fill: RED }, g); shade('M22 14H25V27Q25 30 28 30H32Q35 30 35 33V35H22Z', g);
+    shape('rect', { x: 9.5, y: 10, width: 17, height: 6, rx: 3, fill: SNOW }, g);
+  },
+  // A strawberry shortcake: cream, a pink layer, three strawberries on top.
+  cake(g) {
+    shape('ellipse', { cx: 20, cy: 32, rx: 15, ry: 3.5, fill: PALE }, g);
+    shape('path', { d: 'M8 19H32V31Q20 34 8 31Z', fill: SNOW }, g); shade('M27 19H32V31Q30 31.6 27 32Z', g);
+    line('M8 25H32', '#f2b6b0', g, 2);
+    shape('ellipse', { cx: 20, cy: 19, rx: 12, ry: 3, fill: '#fffaf0' }, g);
+    for (const x of [13, 20, 27]) { shape('path', { d: `M${x - 3} 16Q${x} 10 ${x + 3} 16Q${x} 19 ${x - 3} 16Z`, fill: RED }, g); line(`M${x} 11.5V10`, LEAF, g, 1.4); }
+  },
+  // A gold gear of the big wheel, and a drop of oil.
+  gear(g) {
+    const teeth = Array.from({ length: 8 }, (_, i) => { const a = i / 8 * Math.PI * 2; return `M${(20 + Math.cos(a) * 9).toFixed(1)} ${(21 + Math.sin(a) * 9).toFixed(1)}L${(20 + Math.cos(a) * 14).toFixed(1)} ${(21 + Math.sin(a) * 14).toFixed(1)}`; }).join('');
+    line(teeth, GOLD_DARK, g, 5); shape('circle', { cx: 20, cy: 21, r: 10.5, fill: GOLD }, g); shape('circle', { cx: 20, cy: 21, r: 3.5, fill: SHEET }, g);
+    shape('path', { d: 'M33 3Q36 8 36 9.5A3 3 0 0 1 30 9.5Q30 8 33 3Z', fill: '#7b95a6' }, g);
+  },
+  // A poinsettia: green leaves, red leaves in a star, a gold heart.
+  poinsettia(g) {
+    for (const a of [20, 92, 164, 236, 308]) shape('ellipse', { cx: 20, cy: 12, rx: 3.6, ry: 8, fill: LEAF, transform: `rotate(${a} 20 21)` }, g);
+    for (const a of [-16, 56, 128, 200, 272]) shape('ellipse', { cx: 20, cy: 11, rx: 4.2, ry: 9, fill: RED, transform: `rotate(${a} 20 21)` }, g);
+    for (const [x, y] of [[18.5, 20], [21.5, 20.5], [20, 22.5]]) shape('circle', { cx: x, cy: y, r: 1.6, fill: GOLD }, g);
+  },
+  // St Lucia's crown: four candles alight on a ring of green, three red berries.
+  candles(g) {
+    for (const x of [10, 16, 24, 30]) { shape('rect', { x: x - 1.8, y: 12, width: 3.6, height: 12, rx: 1, fill: SNOW, ...EDGE }, g); shape('path', { d: `M${x} 5Q${x + 2.6} 9 ${x} 11Q${x - 2.6} 9 ${x} 5Z`, fill: GOLD }, g); }
+    shape('ellipse', { cx: 20, cy: 27, rx: 15, ry: 5.5, fill: 'none', stroke: LEAF, 'stroke-width': 4 }, g);
+    for (const [x, y] of [[8, 25], [20, 32.5], [32, 25]]) shape('circle', { cx: x, cy: y, r: 1.8, fill: RED }, g);
+  },
+  // A Christmas card standing open, a fir and a star on its front.
+  card(g) {
+    shape('path', { d: 'M6 9L20 6V34L6 31Z', fill: PALE, ...EDGE }, g);
+    shape('path', { d: 'M20 6L34 9V31L20 34Z', fill: SHEET, ...EDGE }, g);
+    shape('path', { d: 'M27 12L32 21H29L33 27H21L25 21H22Z', fill: LEAF }, g); shape('rect', { x: 26, y: 27, width: 2, height: 3, fill: WOOD_DARK }, g);
+    shape('circle', { cx: 27, cy: 11.5, r: 1.4, fill: GOLD }, g);
+  },
+  // A gingerbread house: iced roof, a door, sweets on its walls.
+  gingerhouse(g) {
+    shape('path', { d: 'M8 19L20 8 32 19V34H8Z', fill: '#b97a4a' }, g); shade('M27 14.5L32 19V34H27Z', g);
+    line('M6 20L20 7 34 20', SNOW, g, 3);
+    shape('rect', { x: 17, y: 25, width: 6, height: 9, rx: 3, fill: WOOD_DARK }, g);
+    for (const [x, y, fill] of [[12, 23, RED], [28, 23, LEAF], [12, 30, LEAF], [28, 30, RED]]) shape('circle', { cx: x, cy: y, r: 1.8, fill }, g);
+  },
+  // The longest night: a crescent moon and a few stars in a round of night sky.
+  moon(g) {
+    shape('circle', { cx: 20, cy: 20, r: 15, fill: '#2f3f5c' }, g);
+    shape('path', { d: 'M23 9A11 11 0 1 0 31 25A9 9 0 1 1 23 9Z', fill: '#f3e6b8' }, g);
+    for (const [x, y, r] of [[12, 12, 1.2], [10, 22, 1], [16, 29, 1.3]]) shape('circle', { cx: x, cy: y, r, fill: SNOW }, g);
+  },
+  // Christmas Eve: the sleigh and a reindeer across a full moon.
+  flight(g) {
+    shape('circle', { cx: 21, cy: 19, r: 14, fill: '#f3e6b8' }, g);
+    shape('path', { d: 'M7 25Q7 21 10 21H13V23H19Q21 23 21 25Z', fill: INK }, g); line('M7 27H20Q22 27 22 25.5', INK, g, 1.2);
+    shape('ellipse', { cx: 27.5, cy: 21, rx: 3.6, ry: 1.8, fill: INK }, g); line('M25.5 22L24.5 25M29.5 22L30.5 25M31 20L32.5 17.5M31 20L33.5 19M21 23.5L24 21.5', INK, g, 1.1);
+    for (const [x, y] of [[33, 8], [8, 9], [36, 28]]) shape('circle', { cx: x, cy: y, r: 1, fill: GOLD }, g);
+  },
+};
+
 // The cover's chapter stamps: a perforated stamp, its frame red or green by turns, the chapter's picture in it as a
 // layer of its own (shown as a shadow while the chapter is the next one); and a postmark inked over a stamp once it is
 // on, ink lying in the paper (no rim, no shadow).
@@ -284,6 +370,8 @@ function picture(key, draw, size, paper = { scale: .25, grain: .4, shadow: .3 })
 }
 export const clueIcon = name => picture(name, CLUE_ART[name], 80);
 export const goalPicture = goal => picture(`goal-${goal}`, GOAL_ART[goal], 160);
+// A window's picture in the advent house: one of its own, or a clue's or a goal's.
+export const adventPicture = name => picture(`advent-${name}`, ADVENT_ART[name] ?? CLUE_ART[name] ?? GOAL_ART[name], 120);
 export const stampFrame = (chapter, i) => picture(`stamp-${chapter}`, g => {
   shape('path', { d: perforated(3, 3, 37, 37, 4, 1.3), fill: SHEET, ...EDGE }, g);
   shape('rect', { x: 6.5, y: 6.5, width: 27, height: 27, fill: 'none', stroke: i % 2 ? '#3f6653' : RED, 'stroke-width': 1.4 }, g);

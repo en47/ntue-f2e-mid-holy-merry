@@ -147,3 +147,7 @@ test('hints asked for about the welcome gifts are kept too, up to one for each g
   assert.equal(readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify({ hints: { gifts: 40 } }) })).hints.gifts, 5);
 });
 
+test('the advent house: the windows opened, as days of December', () => {
+  const advent = saved => readProgress(memory({ 'holy-merry:cabin:v1': JSON.stringify(saved) })).advent;
+  assert.deepEqual(advent({ advent: [3, 1, 3, 30] }), [1, 3]); assert.deepEqual(advent({}), []);
+});

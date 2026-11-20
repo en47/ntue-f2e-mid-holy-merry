@@ -29,6 +29,7 @@ import { mountBag } from './cabin-bag.js';
 import { ITEM_ART } from './cabin-items.js';
 import { ever, holds } from '../services/cabin-bag.js';
 import { treeCard } from './cabin-ornaments.js';
+import { adventGame } from './cabin-advent.js';
 
 const PAPER = { paper: { scale: .6, grain: .45, shadow: .2 }, eager: true };
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -222,6 +223,8 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
     },
     snowman: () => snowmanGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, confetti, clue, gift }),
     stable: () => pulleyGame({ layer, stage, cabin, say, later, sound, progress, save, bag, onFound: found, fed: () => progress.volunteer.tasks.includes('lichen'), clue }),
+    // The advent house on the window sill, up close: an advent calendar box, a door a day in December (cabin-advent.js).
+    advent: () => { say(''); return adventGame({ layer, stage, cabin, sound, progress, save }); },
     // The broken big wheel, mended up close (a sheet laid over the yard: it is too far off to walk up to).
     wheel: () => wheelGame({ layer, stage, cabin, say, later, sound, bag, again: !pending(progress.volunteer, 'wheel'), round: progress.wheelRounds, progress, save, clue, gift, onMended: () => { progress.wheelRounds += 1; save(); task('wheel'); cabin.wheelBroken(false); }, onClose: leave }),
     // In the room: the hearth to tend, the desk's letters, the music box and the snow globe, and the bookcase to look over.
