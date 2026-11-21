@@ -1163,7 +1163,10 @@ html.theatre-open { overflow: hidden; }
 .advent-door .advent-back, .advent-door .advent-back img { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
 .advent-door .advent-back { transform: rotateY(180deg); }
 .advent-slot[data-hinge="down"] .advent-door .advent-back { transform: rotateX(180deg); }
-.advent-num { position: absolute; inset: 0; display: grid; place-items: center; white-space: nowrap; color: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; text-shadow: 0 1px 0 #0005; backface-visibility: hidden; pointer-events: none; }
+/* The numbers are full size on a box 400px across or more; a smaller box (a phone's, a short phone's) shrinks them with it
+   (--num-scale, set by cabin-advent.js), so each sits well inside its door. One line tall and centred in its place on the
+   door (a taller line would push it to the foot of a small door). */
+.advent-num { position: absolute; inset: 0; display: grid; place-content: center; place-items: center; white-space: nowrap; line-height: 1; color: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; text-shadow: 0 1px 0 #0005; backface-visibility: hidden; pointer-events: none; scale: var(--num-scale, 1); }
 .advent-slot[data-kind="window"] .advent-num { inset: 46% 0 4%; }
 .advent-slot[data-kind="arch"] .advent-num { inset: 46% 0 26%; }
 .advent-slot[data-kind="present"] .advent-num { inset: 46% 4% 14% 54%; color: #8f3530; font-size: var(--fs-small); text-shadow: none; }
@@ -1177,20 +1180,21 @@ html.theatre-open { overflow: hidden; }
 .advent-slot[data-hinge="down"][data-state="open"] .advent-door { transform: rotateX(-100deg); }
 .advent-slot[data-kind="drawer"][data-state="open"] .advent-door { transform: translateZ(14px) rotateX(-78deg); }
 .advent-slot[data-state="later"] .advent-door { cursor: default; }
-/* 今天那扇：角落貼一顆紙雕金星。 */
-.advent-star, .advent-star img { position: absolute; width: max(22px, 34%); aspect-ratio: 1; height: auto; }
+/* 今天那扇：角落貼一顆紙雕金星（盒子變小時跟著號碼一起縮小，不會蓋住號碼）。 */
+.advent-star, .advent-star img { position: absolute; width: max(calc(22px * var(--num-scale, 1)), 34%); aspect-ratio: 1; height: auto; }
 .advent-star { top: -14%; right: -14%; transform: translateZ(3px); pointer-events: none; }
 .advent-star img { inset: 0; width: 100%; }
 .advent-door:focus-visible { outline: 3px solid #fbf3df; outline-offset: 3px; }
 /* 盒子的蓋子立在旁邊，內面朝外（cabin-advent.js）：牛皮紙板配一圈低彩度的暗紅邊，上方兩角各一小枝冬青，英文標題在頂端。
    標題下是一扇拱形小窗（窗框和窗台是紙雕，畫在場景上面），窗裡是那一天的紙雕小場景（cabin-advent-scenes.js），點了會動；
-   窗下貼著一張米色紙：撕頁月曆（換一天時舊的那頁往上翻走）、那天的一句話、有連結時的紅色紙吊牌、開了幾扇。
+   窗下貼著一張米色紙，字排在紙上、四邊留一樣的白：撕頁月曆（換一天時舊的那頁往上翻走）和那天的一句話並排，有連結時紅色紙吊牌
+   在下面，最底下一行是開了幾扇和牛皮紙按鈕「全部關上」（一扇都沒開時不出現）。
    寬螢幕立在盒子右邊；窄螢幕（或橫拿的手機）蓋子只剩下面或旁邊的一條，小窗放在另一張卡片上，打開或再點一扇門時才升起來。 */
 .advent-side { position: relative; flex: none; height: min(88%, 40rem, calc((100vw - 4rem) / 1.21 * .88)); aspect-ratio: 320 / 560; color: var(--ink); pointer-events: auto; container-type: inline-size; }
 .advent-lid, .advent-lid img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .advent-lid.is-wide { display: none; }
 .advent-title { position: absolute; top: 3%; left: 0; right: 0; margin: 0; color: #8f3b36; font-family: var(--font-display); font-size: var(--fs-title); line-height: 1.3; text-align: center; white-space: nowrap; }
-.advent-stage { position: absolute; left: 5%; top: 11%; width: 90%; aspect-ratio: 308 / 284; }
+.advent-stage { position: absolute; left: 7%; top: 11%; width: 86%; aspect-ratio: 308 / 284; }
 /* The scene is cut to the window's arch (the same curve the frame's opening has), by a mask, not a CSS shape. */
 .advent-view, .advent-play { position: absolute; left: 4.545%; top: 4.93%; width: 90.909%; height: 84.507%; }
 .advent-view { overflow: hidden; background: #2b3d58; -webkit-mask: var(--arch) center / 100% 100% no-repeat; mask: var(--arch) center / 100% 100% no-repeat; --arch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 240' preserveAspectRatio='none'%3E%3Cpath d='M0 240V52.8A140 52.8 0 0 1 280 52.8V240Z'/%3E%3C/svg%3E"); }
@@ -1199,33 +1203,45 @@ html.theatre-open { overflow: hidden; }
 .advent-cut, .advent-frame { pointer-events: none; }
 .advent-play { padding: 0; border: 0; background: none; cursor: pointer; }
 .advent-play:focus-visible { outline: 3px solid #e0b04f; outline-offset: 3px; }
-.advent-page { position: absolute; top: 62.5%; left: 9%; width: 22%; aspect-ratio: 80 / 92; perspective: 30rem; }
+.advent-paper { position: absolute; top: 56.8%; left: 7.5%; right: 7.5%; bottom: 4.3%; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto 1fr auto; column-gap: 5cqi; padding: 5cqi 6cqi 3.5cqi; }
+.advent-page { position: relative; aspect-ratio: 80 / 92; perspective: 30rem; }
+.advent-paper .advent-page { grid-area: 1 / 1; width: 20cqi; }
 .advent-page > .art-layer, .advent-sheet, .advent-sheet > .art-layer { position: absolute; inset: 0; }
 .advent-sheet { transform-origin: 44% 8%; }
 .advent-month { position: absolute; top: 8.5%; left: 0; right: 12%; color: #fbf3df; font-size: var(--fs-small); font-weight: 700; line-height: 1; text-align: center; }
 .advent-date { position: absolute; top: 30%; right: 12%; bottom: 12%; left: 0; display: grid; place-items: center; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-title); line-height: 1; }
-.advent-note { position: absolute; top: 62%; left: 36%; right: 9%; margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.7; }
-.advent-foot { position: absolute; bottom: 11%; left: 0; right: 0; display: flex; justify-content: center; }
+.advent-note { grid-area: 1 / 2; margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.7; }
+.advent-foot { display: flex; justify-content: center; }
+.advent-paper .advent-foot { grid-area: 2 / 1 / 3 / 3; margin-top: .6rem; }
 .advent-link { padding: .35rem .95rem .35rem 1.2rem; color: #fbf3df; font-size: var(--fs-small); text-decoration: none; }
 .advent-link[hidden] { display: none; }
 .cabin[data-paper] :is(.advent-link, .advent-fold) { background-repeat: no-repeat; background-size: 100% 100%; }
-.advent-count { position: absolute; bottom: 4.5%; left: 0; right: 0; margin: 0; color: #8a7a6a; font-size: var(--fs-small); text-align: center; }
+.advent-tally { grid-area: 4 / 1 / 5 / 3; display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.advent-count { margin: 0; color: #8a7a6a; font-size: var(--fs-small); white-space: nowrap; }
+.advent-shut { position: relative; flex: none; padding: .2rem .85rem .4rem; border: 0; color: var(--ink); background: #e6d3ad; font-size: var(--fs-small); line-height: 1.4; cursor: pointer; }
+.advent-shut[hidden] { display: none; }
+.cabin[data-paper] .advent-shut { background: transparent no-repeat 0 0 / 100% 100%; }
 /* An open door is tapped again (or the picture behind it) to see its day once more; the day shown has a soft light. */
 .advent-slot[data-state="open"] .advent-pic { cursor: pointer; }
 .advent-slot.is-shown .advent-pic { filter: drop-shadow(0 0 5px #fff1c4); }
 .advent-card { display: none; }
-/* A narrow lid (a small laptop, a tablet) has the smaller of the site's sizes, so the title clears the holly and the line
-   fits above the tag. */
+/* A narrow lid (a small laptop, a tablet) has the smaller of the site's sizes, so the title clears the holly and the line,
+   the tag and the foot fit on the sheet. */
 @media (min-width: 701px) and (min-height: 561px) {
   @container (max-width: 340px) {
     .advent-title { top: 4%; font-size: var(--fs-body); line-height: 2; }
-    .advent-page { left: 7%; width: 21%; }
-    .advent-note { left: 32%; right: 6%; font-size: var(--fs-small); line-height: 1.65; }
+    .advent-paper { column-gap: 4cqi; padding: 4cqi 5cqi 3.5cqi; }
+    .advent-paper .advent-foot { margin-top: .4rem; }
+    .advent-paper .advent-page { width: 18cqi; }
+    .advent-note { font-size: var(--fs-small); line-height: 1.65; }
+    .advent-count-lead { display: none; }
   }
 }
+/* On a phone held upright the box stands over its lid, and gets smaller when the screen is short (a phone's browser bars),
+   so the lid under it is never cut off. */
 @media (max-width: 700px) {
-  .advent-scene { flex-direction: column; justify-content: flex-start; gap: .5rem; padding: 3.6rem .6rem .5rem; }
-  .advent-box { height: auto; width: min(100%, 22.5rem); }
+  .advent-scene { flex-direction: column; justify-content: flex-start; gap: .5rem; padding: 3.6rem .6rem .5rem; container-type: size; }
+  .advent-box { height: auto; width: min(100%, 22.5rem, (100cqh - .5rem - min(100cqw, 22.5rem) * 168 / 360) * 600 / 860); }
   .advent-side { width: min(100%, 22.5rem); }
 }
 /* The lid lies wide: under the box on a narrow screen, beside it on a short one (a phone held sideways). The window then
@@ -1234,23 +1250,22 @@ html.theatre-open { overflow: hidden; }
   .advent-side { height: auto; aspect-ratio: 360 / 168; }
   .advent-lid.is-tall { display: none; }
   .advent-lid.is-wide { display: block; }
-  .advent-title { top: 13%; left: 30%; right: 6%; font-size: var(--fs-body); text-align: left; }
-  .advent-page { top: 21%; left: 8%; width: 18%; }
-  .advent-note { top: 37%; left: 30%; right: 6%; font-size: var(--fs-small); line-height: 1.6; }
-  .advent-foot { top: auto; bottom: 10%; left: auto; right: 6%; }
+  .advent-paper { top: 10.7%; left: 5%; right: 5%; bottom: 8.3%; grid-template-rows: auto 1fr auto; column-gap: 4cqi; padding: 2.2cqi 4cqi; }
+  .advent-paper .advent-title { position: static; grid-area: 1 / 2; font-size: var(--fs-body); line-height: 1.5; text-align: left; }
+  .advent-paper .advent-page { grid-area: 1 / 1 / 3 / 2; width: 18cqi; }
+  .advent-note { grid-area: 2 / 2; font-size: var(--fs-small); line-height: 1.55; }
+  .advent-tally { grid-area: 3 / 1 / 4 / 3; }
   .advent-link { padding: .2rem .7rem .2rem .9rem; }
-  .advent-count { bottom: 10%; left: 30%; right: auto; text-align: left; }
-  .advent-side:has(.advent-link:not([hidden])) .advent-count { display: none; }
   .advent-card { position: absolute; z-index: 3; left: 50%; bottom: .5rem; display: block; width: min(calc(100% - 1.2rem), 22.5rem); aspect-ratio: 360 / 480; translate: -50% 0; color: var(--ink); visibility: hidden; transform: translateY(calc(100% + 1rem)); pointer-events: auto; }
   .advent-card.is-up { visibility: visible; transform: none; }
   .advent-card-board, .advent-card-board img { position: absolute; inset: 0; width: 100%; height: 100%; }
   .advent-card .advent-stage { left: 4%; top: 3%; width: 92%; }
-  .advent-page.is-small { top: 1%; left: 2%; width: 17%; rotate: -6deg; }
+  .advent-page.is-small { position: absolute; top: 1%; left: 2%; width: 17%; rotate: -6deg; }
   .advent-page.is-small .advent-date { font-size: var(--fs-body); }
   .advent-card-note { position: absolute; top: 68.5%; left: 10%; right: 10%; margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.7; text-align: center; }
   .advent-fold { position: absolute; bottom: 3.5%; left: 50%; min-height: 44px; padding: .3rem 1.2rem .3rem 1.4rem; translate: -50% 0; border: 0; color: #fbf3df; background: #9e5047; font-size: var(--fs-small); cursor: pointer; }
   .cabin[data-paper] .advent-fold { background-color: transparent; }
-  .advent-card .advent-foot { top: auto; bottom: 4.5%; left: 7%; right: auto; }
+  .advent-card .advent-foot { position: absolute; bottom: 4.5%; left: 7%; }
   .advent-card .advent-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 .9rem 0 1.1rem; }
   .advent-card:has(.advent-link:not([hidden])) .advent-fold { left: auto; right: 7%; translate: none; }
 }
@@ -1316,9 +1331,10 @@ html.theatre-open { overflow: hidden; }
 .postcard-actions .register-sign { margin: 0; }
 .postcard-home { display: inline-block; text-decoration: none; }
 /* 第七階段：觸控螢幕上，畫面裡的小東西（抽屜裡的火柴與紙條、絞盤標籤、木柴、石板、書桌抽屜）點擊範圍至少 44px 見方；
-   放大的是看不見的範圍，畫面不變。卡片裡的按鈕、跳過、結局章也至少 44px。 */
+   放大的是看不見的範圍，畫面不變。卡片裡的按鈕、跳過、結局章、降臨小屋的「全部關上」也至少 44px 高。 */
 @media (pointer: coarse) {
   :is(.play-target, .hearth-log, .desk-drawer, .musicbox-drawer)::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
+  .advent-shut::after { content: ''; position: absolute; inset: min(0px, calc((100% - 44px) / 2)); }
   .gearbox-peg::before { inset: -45%; }
   .gearbox-piece::before { inset: -14%; }
   .compose-choice, .inspect-close, .inspect-flip, .notebook-close, .notebook-restart, .theatre-skip, .theatre-actions button { min-height: 44px; }

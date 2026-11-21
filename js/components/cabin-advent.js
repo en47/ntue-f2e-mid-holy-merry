@@ -5,7 +5,8 @@
 // gable and on both floors, a little iron door in the chimney, the big front door (24), presents whose fronts fall open,
 // drawers whose fronts drop down. Today's and the days before can be opened: the door turns on its own hinge and the
 // picture inside shows, its line written beside the box. A day still to come only rattles. Before December it says when
-// it opens; from Christmas on every door opens. Doors once opened stay open (the save's `advent`).
+// it opens; from Christmas on every door opens. Doors once opened stay open (the save's `advent`), until 全部關上 under
+// the lid's line shuts them all again, so the days can be opened over.
 // The box is in layers set one in front of another (sky, house, snow, box), each cut once from paper; it leans a little
 // toward the pointer, so the layers part. Beside it stands its lid with the day's little paper scene in a window, which
 // plays when tapped, and the day's line (see `lidTall` below). A door opened before is tapped again (or the picture
@@ -172,10 +173,11 @@ const LAYERS = [['sky', sky], ['house', house], ['front', front], ['frame', fram
 // too much beside it), a sprig of holly in each top corner, the title along its top. Under the title an arched window
 // holds the day's little scene (cabin-advent-scenes.js), cut in paper layers, which stands up like a pop-up page when
 // its day is shown and plays once; a tap plays it again or on a step. Under the window a cream sheet is taped on, with a
-// tear-off calendar page for the day (it flips over when another day is shown), the day's line, the way to Intro as a
-// red tag when there is one, and how many doors are open. Tall beside the box on a wide screen (320 × 560). On a phone,
-// or held sideways, the lid is a strip under (or beside) the box (360 × 168) with the page and the line, and the window
-// rises from it on a card of its own when a door is opened or an open one tapped again, until it is put away (收好).
+// tear-off calendar page for the day (it flips over when another day is shown) beside the day's line, the way to Intro as
+// a red tag under them when there is one, and along its foot how many doors are open and a kraft button that shuts them
+// all. Tall beside the box on a wide screen (320 × 560). On a phone, or held sideways, the lid is a strip under (or beside)
+// the box (360 × 168) with the title, the page, the line and its foot, and the window rises from it on a card of its own
+// when a door is opened or an open one tapped again, until it is put away (收好).
 const RIM = '#9e5047', BOARD = '#dcc6a2', BOARD_SHADE = '#c9ae86';
 function holly(g, x, y, flip = 1) {
   for (const turn of [-30, 40]) shape('path', { d: 'M0 0C8-8 21-6 27 0 21 6 8 8 0 0Z', fill: GREEN, transform: `translate(${x} ${y}) scale(${flip} 1) rotate(${turn})` }, g);
@@ -189,8 +191,8 @@ function board(g, w, h, round = 12) {
 }
 function lidTall(g) {
   board(g, 320, 560);
-  shape('rect', { x: 24, y: 336, width: 272, height: 200, rx: 3, fill: CREAM }, g);
-  tape(g, 36, 340, -30); tape(g, 284, 340, 30);
+  shape('rect', { x: 24, y: 318, width: 272, height: 218, rx: 3, fill: CREAM }, g);
+  tape(g, 36, 322, -30); tape(g, 284, 322, 30);
   holly(g, 26, 28); holly(g, 294, 28, -1);
 }
 function lidWide(g) {
@@ -236,15 +238,22 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
   const timers = new Set(), later = (ms, task) => { const id = setTimeout(() => { timers.delete(id); task(); }, ms); timers.add(id); };
   const scene = element('div', 'advent-scene', layer), box = element('section', 'advent-box', scene); box.setAttribute('aria-label', ADVENT.name);
   const tilt = element('div', 'advent-tilt', box);
+  // The doors' numbers (and today's star) are full size on a box 400px across or more; a smaller one (a phone's, a short
+  // phone's) shrinks them with it, down to 60%.
+  const sized = new ResizeObserver(([entry]) => box.style.setProperty('--num-scale', String(Math.max(.6, Math.min(1, entry.contentRect.width / 400)))));
+  sized.observe(box);
   for (const [name, draw] of LAYERS) paperLayer(element('div', `advent-layer is-${name}`, tilt), `0 0 ${W} ${H}`, '', draw, PAPER);
   const side = element('aside', 'advent-side', scene); side.setAttribute('aria-label', ADVENT.name);
   paperLayer(side, '0 0 320 560', 'advent-lid is-tall', lidTall, PAPER); paperLayer(side, '0 0 360 168', 'advent-lid is-wide', lidWide, PAPER);
   const title = element('h3', 'advent-title', side, ADVENT.title); title.lang = 'en';
-  const page = element('div', 'advent-page', side);
+  // The words on the cream sheet, laid out on it with the same margin all round (on the strip the title joins them).
+  const paper = element('div', 'advent-paper', side), page = element('div', 'advent-page', paper);
   paperLayer(page, '0 0 80 92', '', calendarPage, PAPER); element('span', 'advent-month', page, '12 月'); const shownDay = element('span', 'advent-date', page);
-  const note = element('p', 'advent-note', side); note.setAttribute('aria-live', 'polite');
-  const foot = element('div', 'advent-foot', side), link = element('a', 'advent-link', foot); link.href = 'intro.html'; link.hidden = true;
-  const count = element('p', 'advent-count', side);
+  const note = element('p', 'advent-note', paper); note.setAttribute('aria-live', 'polite');
+  const foot = element('div', 'advent-foot', paper), link = element('a', 'advent-link', foot); link.href = 'intro.html'; link.hidden = true;
+  const tally = element('div', 'advent-tally', paper), count = element('p', 'advent-count', tally);
+  element('span', 'advent-count-lead', count, `${ADVENT.countLead} `); const tallied = count.appendChild(document.createTextNode(''));
+  const shut = element('button', 'advent-shut', tally, ADVENT.shut); shut.type = 'button'; shut.setAttribute('aria-label', ADVENT.shutLabel);
   // The window and its scenes. On a phone it sits on a card of its own that rises over the box, with the line again and
   // the way to Intro (the strip under the box is hidden while the card is up).
   const pane = element('div', 'advent-stage'), view = element('div', 'advent-view', pane);
@@ -254,10 +263,13 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
   paperLayer(card, '0 0 360 480', 'advent-card-board is-tall', cardBoard, { ...PAPER, preserveAspectRatio: 'none' }); paperLayer(card, '0 0 560 300', 'advent-card-board is-wide', cardWide, { ...PAPER, preserveAspectRatio: 'none' });
   const cardNote = element('p', 'advent-card-note', card), fold = element('button', 'advent-fold', card, ADVENT.close); fold.type = 'button';
   const cardPage = element('div', 'advent-page is-small', card); paperLayer(cardPage, '0 0 80 92', '', calendarPage, PAPER); element('span', 'advent-month', cardPage, '12 月'); const cardDay = element('span', 'advent-date', cardPage);
-  const seat = () => { if (compact.matches) { card.insertBefore(pane, cardNote); card.append(foot); } else { side.insertBefore(pane, page); side.insertBefore(foot, count); } };
+  const seat = () => {
+    if (compact.matches) { paper.prepend(title); card.insertBefore(pane, cardNote); card.append(foot); }
+    else { side.insertBefore(title, paper); side.insertBefore(pane, paper); paper.insertBefore(foot, tally); }
+  };
   seat(); on(compact, 'change', seat);
   const opened = new Set(progress.advent);
-  const counted = () => { count.textContent = ADVENT.count(opened.size); };
+  const counted = () => { tallied.data = ADVENT.count(opened.size); shut.hidden = !opened.size; };
   // The calendar page shows the day; another day, and the old page flips up over its rings and away.
   let showing = 0;
   function turnTo(day) {
@@ -303,7 +315,7 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
     link.hidden = !country; if (country) { link.textContent = ADVENT.intro(country.name); link.href = `intro.html#${country.id}`; }
     turnTo(day);
   }
-  const slots = new Map();
+  const slots = new Map(), paints = new Map();
   const showDay = day => { tell(WINDOWS[day - 1].text, WINDOWS[day - 1].intro, day); for (const [each, place] of slots) place.classList.toggle('is-shown', each === day); };
   const until = () => Math.max(1, Math.ceil((new Date(date.getFullYear(), 11, 1) - date) / 86400000));
   // The doors in the order of their days (so the keyboard goes 1, 2, 3 …), each placed where it is cut in the box.
@@ -321,7 +333,7 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
       place.dataset.state = state(); door.setAttribute('aria-label', `12 月 ${day} 日的${{ open: '窗（打開了，再看一次）', ready: '窗：可以打開', later: '窗：還沒到' }[state()]}`);
     };
     if (december && day === date.getDate()) { place.classList.add('is-today'); paperLayer(place, '0 0 40 40', 'advent-star', todayStar, PAPER); }
-    paint();
+    paint(); paints.set(day, paint);
     // A door opened before is looked at again by tapping it or the picture behind it: its day comes back in the lid (the
     // day already there plays over again).
     const look = () => {
@@ -340,11 +352,25 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
     on(door, 'click', look); on(picture, 'click', () => { if (opened.has(day)) look(); });
   }
   counted();
-  // The first scene stands up as the lid slides in beside the box.
-  const quiet = { quiet: true, delay: 1000 };
-  if (!open) { tell(ADVENT.before(until()), '', 1); stageScene(0, quiet); }
-  else if (december) { if (opened.has(date.getDate())) { showDay(date.getDate()); stageScene(date.getDate(), quiet); } else { tell(ADVENT.today(date.getDate()), '', date.getDate()); stageScene(0, quiet); } }
-  else { tell(ADVENT.after, '', 25); stageScene(0, quiet); }
+  // The lid as it stands until a door is chosen: today's scene if its door is open, else the cover, with what day it is
+  // (or when the first door opens). The first scene stands up as the lid slides in beside the box.
+  const rest = options => {
+    if (!open) { tell(ADVENT.before(until()), '', 1); stageScene(0, options); }
+    else if (december) { if (opened.has(date.getDate())) { showDay(date.getDate()); stageScene(date.getDate(), options); } else { tell(ADVENT.today(date.getDate()), '', date.getDate()); stageScene(0, options); } }
+    else { tell(ADVENT.after, '', 25); stageScene(0, options); }
+  };
+  rest({ quiet: true, delay: 1000 });
+  const home = () => (tilt.querySelector('.is-today .advent-door') ?? tilt.querySelector('[data-state="ready"] .advent-door') ?? tilt.querySelector('.advent-door')).focus({ preventScroll: true });
+  // 全部關上: the open doors swing shut one after another, from the last day back to the first (with a creak, and a click
+  // as the last one shuts), the save forgets them and the lid goes back to the cover, so every day can be opened again.
+  on(shut, 'click', () => {
+    const closing = [...opened].sort((a, b) => b - a), gap = still ? 0 : Math.min(90, 900 / closing.length);
+    opened.clear(); progress.advent = []; save(); counted();
+    card.classList.remove('is-up'); slots.forEach(place => place.classList.remove('is-shown'));
+    closing.forEach((day, i) => later(i * gap, paints.get(day)));
+    sound.play(still ? 'click' : 'creak'); if (!still) later((closing.length - 1) * gap + 650, () => sound.play('click'));
+    rest({ quiet: true, delay: 300 }); home();
+  });
   // Opening: the room grows dusky, then (every picture cut and ready, so nothing comes in piece by piece) the little house
   // on the sill rises and unfolds into the box, as a page of a pop-up book stands up, and the lid slides in beside it.
   // Closing (when leaving), the box folds back down into the little house as the room goes dark for a moment, long enough
@@ -371,9 +397,9 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
       box.style.setProperty('--lean-x', `${Math.max(-1, Math.min(1, dx * 2)) * 5}deg`); box.style.setProperty('--lean-y', `${Math.max(-1, Math.min(1, dy * 2)) * -4}deg`);
     });
   }
-  (tilt.querySelector('.is-today .advent-door') ?? tilt.querySelector('[data-state="ready"] .advent-door') ?? tilt.querySelector('.advent-door')).focus({ preventScroll: true });
+  home();
   return () => {
-    gone = true; events.abort(); timers.forEach(clearTimeout); timers.clear(); card.classList.remove('is-up');
+    gone = true; events.abort(); sized.disconnect(); timers.forEach(clearTimeout); timers.clear(); card.classList.remove('is-up');
     if (still) { scene.remove(); return; }
     place(); stage.append(scene); scene.classList.add('is-leaving'); setTimeout(() => scene.remove(), 1900);
   };
