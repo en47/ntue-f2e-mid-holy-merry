@@ -1144,7 +1144,9 @@ html.theatre-open { overflow: hidden; }
 /* The room behind the box goes dusky, so the box stands out and the window, seen this close, stays soft behind it. */
 .advent-scene::before { content: ''; position: absolute; inset: 0; background: #1c2536; opacity: .45; }
 .advent-scene > * { position: relative; }
-.advent-box { position: relative; flex: none; height: min(100%, 46rem); aspect-ratio: 600 / 860; perspective: 1600px; pointer-events: auto; }
+/* Box and lid side by side take about 1.21 × the box's height across: on a narrow, tall screen (a tablet held upright) both
+   shrink to the width, so neither is cut off. */
+.advent-box { position: relative; flex: none; height: min(100%, 46rem, calc((100vw - 4rem) / 1.21)); aspect-ratio: 600 / 860; perspective: 1600px; pointer-events: auto; }
 .advent-tilt { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(var(--lean-y, 0deg)) rotateY(var(--lean-x, 0deg)); transform-origin: 50% 100%; }
 .advent-layer, .advent-layer .art-layer, .advent-layer img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .advent-layer.is-house { transform: translateZ(24px); }
@@ -1161,7 +1163,7 @@ html.theatre-open { overflow: hidden; }
 .advent-door .advent-back, .advent-door .advent-back img { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
 .advent-door .advent-back { transform: rotateY(180deg); }
 .advent-slot[data-hinge="down"] .advent-door .advent-back { transform: rotateX(180deg); }
-.advent-num { position: absolute; inset: 0; display: grid; place-items: center; color: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; text-shadow: 0 1px 0 #0005; backface-visibility: hidden; pointer-events: none; }
+.advent-num { position: absolute; inset: 0; display: grid; place-items: center; white-space: nowrap; color: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-body); font-weight: 700; text-shadow: 0 1px 0 #0005; backface-visibility: hidden; pointer-events: none; }
 .advent-slot[data-kind="window"] .advent-num { inset: 46% 0 4%; }
 .advent-slot[data-kind="arch"] .advent-num { inset: 46% 0 26%; }
 .advent-slot[data-kind="present"] .advent-num { inset: 46% 4% 14% 54%; color: #8f3530; font-size: var(--fs-small); text-shadow: none; }
@@ -1180,45 +1182,91 @@ html.theatre-open { overflow: hidden; }
 .advent-star { top: -14%; right: -14%; transform: translateZ(3px); pointer-events: none; }
 .advent-star img { inset: 0; width: 100%; }
 .advent-door:focus-visible { outline: 3px solid #fbf3df; outline-offset: 3px; }
-/* 盒子的蓋子立在旁邊，內面朝外（cabin-advent.js），只留必要的東西：牛皮紙板配一圈低彩度的暗紅邊，上方兩角各一小枝冬青，
-   標題在頂端；一張貼著膠帶的米色紙上，依序是撕頁月曆（換一天時舊的那頁往上翻走）、那天的一句話、那天的紙雕小圖、
-   有連結時的紅色紙吊牌，最下面一行小字是開了幾扇。寬螢幕立在盒子右邊，窄螢幕橫放在下面。 */
-.advent-side { position: relative; flex: none; height: min(88%, 40rem); aspect-ratio: 320 / 560; color: var(--ink); pointer-events: auto; }
+/* 盒子的蓋子立在旁邊，內面朝外（cabin-advent.js）：牛皮紙板配一圈低彩度的暗紅邊，上方兩角各一小枝冬青，英文標題在頂端。
+   標題下是一扇拱形小窗（窗框和窗台是紙雕，畫在場景上面），窗裡是那一天的紙雕小場景（cabin-advent-scenes.js），點了會動；
+   窗下貼著一張米色紙：撕頁月曆（換一天時舊的那頁往上翻走）、那天的一句話、有連結時的紅色紙吊牌、開了幾扇。
+   寬螢幕立在盒子右邊；窄螢幕（或橫拿的手機）蓋子只剩下面或旁邊的一條，小窗放在另一張卡片上，打開或再點一扇門時才升起來。 */
+.advent-side { position: relative; flex: none; height: min(88%, 40rem, calc((100vw - 4rem) / 1.21 * .88)); aspect-ratio: 320 / 560; color: var(--ink); pointer-events: auto; container-type: inline-size; }
 .advent-lid, .advent-lid img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .advent-lid.is-wide { display: none; }
-.advent-title { position: absolute; top: 4%; left: 0; right: 0; margin: 0; color: #8f3b36; font-family: var(--font-display); font-size: var(--fs-body); letter-spacing: .14em; text-align: center; }
-.advent-page { position: absolute; top: 18%; left: 50%; width: 38%; aspect-ratio: 80 / 92; translate: -54% 0; perspective: 30rem; }
+.advent-title { position: absolute; top: 3%; left: 0; right: 0; margin: 0; color: #8f3b36; font-family: var(--font-display); font-size: var(--fs-title); line-height: 1.3; text-align: center; white-space: nowrap; }
+.advent-stage { position: absolute; left: 5%; top: 11%; width: 90%; aspect-ratio: 308 / 284; }
+/* The scene is cut to the window's arch (the same curve the frame's opening has), by a mask, not a CSS shape. */
+.advent-view, .advent-play { position: absolute; left: 4.545%; top: 4.93%; width: 90.909%; height: 84.507%; }
+.advent-view { overflow: hidden; background: #2b3d58; -webkit-mask: var(--arch) center / 100% 100% no-repeat; mask: var(--arch) center / 100% 100% no-repeat; --arch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 240' preserveAspectRatio='none'%3E%3Cpath d='M0 240V52.8A140 52.8 0 0 1 280 52.8V240Z'/%3E%3C/svg%3E"); }
+.advent-cut-scene { position: absolute; inset: 0; display: none; }
+.advent-cut-scene.is-shown { display: block; }
+.advent-cut, .advent-frame { pointer-events: none; }
+.advent-play { padding: 0; border: 0; background: none; cursor: pointer; }
+.advent-play:focus-visible { outline: 3px solid #e0b04f; outline-offset: 3px; }
+.advent-page { position: absolute; top: 62.5%; left: 9%; width: 22%; aspect-ratio: 80 / 92; perspective: 30rem; }
 .advent-page > .art-layer, .advent-sheet, .advent-sheet > .art-layer { position: absolute; inset: 0; }
 .advent-sheet { transform-origin: 44% 8%; }
-.advent-month { position: absolute; top: 9%; left: 0; right: 12%; color: #fbf3df; font-size: var(--fs-small); font-weight: 700; text-align: center; }
+.advent-month { position: absolute; top: 8.5%; left: 0; right: 12%; color: #fbf3df; font-size: var(--fs-small); font-weight: 700; line-height: 1; text-align: center; }
 .advent-date { position: absolute; top: 30%; right: 12%; bottom: 12%; left: 0; display: grid; place-items: center; color: #8f3b36; font-family: var(--font-hand); font-size: var(--fs-title); line-height: 1; }
-.advent-note { position: absolute; top: 45%; left: 16%; right: 16%; margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; text-align: center; }
-.advent-art { position: absolute; top: 62%; left: 50%; width: 24%; aspect-ratio: 1; translate: -50% 0; background: no-repeat center / contain; }
-.advent-foot { position: absolute; top: 80%; left: 0; right: 0; display: flex; justify-content: center; }
+.advent-note { position: absolute; top: 62%; left: 36%; right: 9%; margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.7; }
+.advent-foot { position: absolute; bottom: 11%; left: 0; right: 0; display: flex; justify-content: center; }
 .advent-link { padding: .35rem .95rem .35rem 1.2rem; color: #fbf3df; font-size: var(--fs-small); text-decoration: none; }
 .advent-link[hidden] { display: none; }
-.cabin[data-paper] .advent-link { background-repeat: no-repeat; background-size: 100% 100%; }
-.advent-count { position: absolute; bottom: 9%; left: 0; right: 0; margin: 0; color: #8a7a6a; font-size: var(--fs-small); text-align: center; }
+.cabin[data-paper] :is(.advent-link, .advent-fold) { background-repeat: no-repeat; background-size: 100% 100%; }
+.advent-count { position: absolute; bottom: 4.5%; left: 0; right: 0; margin: 0; color: #8a7a6a; font-size: var(--fs-small); text-align: center; }
+/* An open door is tapped again (or the picture behind it) to see its day once more; the day shown has a soft light. */
+.advent-slot[data-state="open"] .advent-pic { cursor: pointer; }
+.advent-slot.is-shown .advent-pic { filter: drop-shadow(0 0 5px #fff1c4); }
+.advent-card { display: none; }
+/* A narrow lid (a small laptop, a tablet) has the smaller of the site's sizes, so the title clears the holly and the line
+   fits above the tag. */
+@media (min-width: 701px) and (min-height: 561px) {
+  @container (max-width: 340px) {
+    .advent-title { top: 4%; font-size: var(--fs-body); line-height: 2; }
+    .advent-page { left: 7%; width: 21%; }
+    .advent-note { left: 32%; right: 6%; font-size: var(--fs-small); line-height: 1.65; }
+  }
+}
 @media (max-width: 700px) {
   .advent-scene { flex-direction: column; justify-content: flex-start; gap: .5rem; padding: 3.6rem .6rem .5rem; }
   .advent-box { height: auto; width: min(100%, 22.5rem); }
   .advent-side { width: min(100%, 22.5rem); }
 }
-/* The lid lies wide: under the box on a narrow screen, beside it on a short one (a phone held sideways). */
+/* The lid lies wide: under the box on a narrow screen, beside it on a short one (a phone held sideways). The window then
+   rises on its card over the box, and goes down again with 收好. */
 @media (max-width: 700px), (max-height: 560px) {
   .advent-side { height: auto; aspect-ratio: 360 / 168; }
   .advent-lid.is-tall { display: none; }
   .advent-lid.is-wide { display: block; }
-  .advent-title { top: 17%; left: 30%; right: 6%; font-size: var(--fs-small); text-align: left; letter-spacing: .06em; }
-  .advent-page { top: 21%; left: 8%; width: 18%; translate: none; }
-  .advent-note { top: 35%; left: 30%; right: 6%; font-size: var(--fs-small); line-height: 1.6; text-align: left; }
-  .advent-art { display: none; }
+  .advent-title { top: 13%; left: 30%; right: 6%; font-size: var(--fs-body); text-align: left; }
+  .advent-page { top: 21%; left: 8%; width: 18%; }
+  .advent-note { top: 37%; left: 30%; right: 6%; font-size: var(--fs-small); line-height: 1.6; }
   .advent-foot { top: auto; bottom: 10%; left: auto; right: 6%; }
   .advent-link { padding: .2rem .7rem .2rem .9rem; }
   .advent-count { bottom: 10%; left: 30%; right: auto; text-align: left; }
   .advent-side:has(.advent-link:not([hidden])) .advent-count { display: none; }
+  .advent-card { position: absolute; z-index: 3; left: 50%; bottom: .5rem; display: block; width: min(calc(100% - 1.2rem), 22.5rem); aspect-ratio: 360 / 480; translate: -50% 0; color: var(--ink); visibility: hidden; transform: translateY(calc(100% + 1rem)); pointer-events: auto; }
+  .advent-card.is-up { visibility: visible; transform: none; }
+  .advent-card-board, .advent-card-board img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .advent-card .advent-stage { left: 4%; top: 3%; width: 92%; }
+  .advent-page.is-small { top: 1%; left: 2%; width: 17%; rotate: -6deg; }
+  .advent-page.is-small .advent-date { font-size: var(--fs-body); }
+  .advent-card-note { position: absolute; top: 68.5%; left: 10%; right: 10%; margin: 0; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.7; text-align: center; }
+  .advent-fold { position: absolute; bottom: 3.5%; left: 50%; min-height: 44px; padding: .3rem 1.2rem .3rem 1.4rem; translate: -50% 0; border: 0; color: #fbf3df; background: #9e5047; font-size: var(--fs-small); cursor: pointer; }
+  .cabin[data-paper] .advent-fold { background-color: transparent; }
+  .advent-card .advent-foot { top: auto; bottom: 4.5%; left: 7%; right: auto; }
+  .advent-card .advent-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 .9rem 0 1.1rem; }
+  .advent-card:has(.advent-link:not([hidden])) .advent-fold { left: auto; right: 7%; translate: none; }
 }
-@media (max-height: 560px) and (min-width: 701px) { .advent-side { width: min(24rem, 44%); } }
+/* Held sideways, the card lies wide over the strip: the window on its left, the line, the tag and 收好 on its right. */
+.advent-card-board.is-wide { display: none; }
+@media (max-height: 560px) and (min-width: 701px) {
+  .advent-side { width: min(24rem, 44%); }
+  .advent-card { top: 3.4rem; bottom: .5rem; left: auto; right: .6rem; display: grid; grid-template-columns: auto 1fr; grid-template-rows: 1fr auto auto; align-items: center; gap: .5rem 1rem; width: min(64%, 40rem); aspect-ratio: auto; padding: 1rem 1.4rem 1rem 1rem; translate: none; }
+  .advent-card-board.is-tall { display: none; }
+  .advent-card-board.is-wide { display: block; }
+  .advent-card .advent-stage { position: relative; top: auto; left: auto; grid-row: 1 / 4; height: calc(100% - .2rem); width: auto; }
+  .advent-card-note { position: relative; top: auto; left: auto; right: auto; grid-column: 2; grid-row: 1; text-align: left; }
+  .advent-card .advent-foot { position: relative; inset: auto; grid-column: 2; grid-row: 2; justify-content: flex-start; }
+  .advent-fold, .advent-card:has(.advent-link:not([hidden])) .advent-fold { position: relative; inset: auto; grid-column: 2; grid-row: 3; justify-self: start; translate: none; }
+  .advent-page.is-small { width: 9%; }
+}
 @media (prefers-reduced-motion: no-preference) {
   .advent-door { transition: transform .8s cubic-bezier(.3, 1.25, .5, 1); }
   .advent-tilt { transition: transform .35s ease-out; }
@@ -1231,11 +1279,14 @@ html.theatre-open { overflow: hidden; }
   .advent-scene.is-leaving .advent-tilt { animation: advent-fold .5s ease-in forwards; }
   .advent-scene.is-leaving .advent-side { animation: advent-away .3s ease-in forwards; }
   .advent-slot.is-shaking .advent-door { animation: advent-shake .45s ease-in-out; }
+  .advent-slot[data-state="open"] .advent-pic { transition: scale .25s ease-out; }
+  .advent-slot[data-state="open"] .advent-pic:hover { scale: 1.1; }
   .advent-slot[data-state="open"] .advent-pic.is-bob { animation: advent-bob 2.4s ease-in-out infinite; }
   .advent-slot[data-state="open"] .advent-pic.is-spin { animation: advent-spin 6s linear infinite; }
   .advent-slot[data-state="open"] .advent-pic.is-swing { animation: advent-swing 2.6s ease-in-out infinite; transform-origin: 50% 8%; }
   .advent-slot[data-state="open"] .advent-pic.is-twinkle { animation: advent-twinkle 2.2s ease-in-out infinite; }
-  .advent-art.is-new { animation: advent-pop-in .5s cubic-bezier(.3, 1.6, .5, 1) both; }
+  .advent-card { transition: transform .65s cubic-bezier(.22, 1, .36, 1), visibility 0s .65s; }
+  .advent-card.is-up { transition: transform .65s cubic-bezier(.22, 1, .36, 1), visibility 0s; }
   .advent-sheet { animation: advent-flip .85s cubic-bezier(.5, 0, .7, .4) forwards; }
 }
 @keyframes advent-pop { from { transform: translate(var(--from-x, 0), var(--from-y, 0)) scale(var(--from-scale, .2)) rotateX(75deg); opacity: 0; } 25% { opacity: 1; } }
@@ -1249,7 +1300,6 @@ html.theatre-open { overflow: hidden; }
 @keyframes advent-spin { to { rotate: 1turn; } }
 @keyframes advent-swing { 25% { rotate: 8deg; } 75% { rotate: -8deg; } }
 @keyframes advent-twinkle { 50% { scale: 1.12; } }
-@keyframes advent-pop-in { from { scale: .4; opacity: 0; } }
 @keyframes advent-flip { to { transform: rotateX(-112deg); opacity: 0; } }
 /* 第五章：世界路標的卡、聖誕老人最後的詢問、確認步驟（「再想想」是淡色的紙籤）、結局後的紀念明信片。 */
 .signpost-card, .ask-card { width: min(24rem, calc(100% - 2rem)); }

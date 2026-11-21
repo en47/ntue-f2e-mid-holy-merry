@@ -36,7 +36,7 @@ test('three chapters: common architecture datum, offset backgrounds, original as
  assert.ok(find(1,'family').x+find(1,'family').w<find(1,'fireplace').x);
  assert.ok(!introStories[2].pieces.some(p=>/village|bethlehem/.test(p.id)));
 });
-test('page text and paper art: raster chapters are gone and the map keeps its six pins',async()=>{
+test('page text and paper art: raster chapters are gone and the map keeps its nine pins',async()=>{
  const html=await fs.readFile('intro.html','utf8'),css=await fs.readFile('css/intro.css','utf8');
  assert.ok(!/images\/intro\//.test(html+css),'Intro no longer loads the raster originals');
  for(const id of ['cover','close','controls'])assert.ok(html.includes(`data-book="${id}"`),id);
@@ -100,14 +100,20 @@ test('phones turn pages by swiping, stop at the last page and leave closing to t
  text[1].scrollTop=120;await book.close();assert.equal(book.snapshot().shut,true);assert.equal(book.snapshot().page,0,'Reopening starts from the first page');assert.equal(text[1].scrollTop,0,'Reopening starts from the top of the text');assert.equal(swipe(onScene,500,300),false,'A closed book ignores swipes');book.destroy();
 });
 
-test('six map positions and both random outcomes; all postcards reset, interact, close and restore focus',async()=>{
- assert.deepEqual(introCultures.map(c=>c.id),['iceland','taiwan','japan','newzealand','canada','brazil']);assert.ok(introCultures.every(c=>c.x>0&&c.x<100&&c.y>0&&c.y<100));
+test('nine map positions and the random outcomes; all postcards reset, interact, close and restore focus',async()=>{
+ assert.deepEqual(introCultures.map(c=>c.id),['iceland','uk','finland','taiwan','japan','newzealand','canada','brazil','mexico']);assert.ok(introCultures.every(c=>c.x>0&&c.x<100&&c.y>0&&c.y<100));
  assert.equal(cultureOutcome('iceland',()=>0).variant,'candy');assert.equal(cultureOutcome('iceland',()=>.99).variant,'potato');assert.equal(cultureOutcome('iceland',()=>0,12).step,12);assert.equal(cultureOutcome('iceland',()=>0,13).step,0,'the thirteen nights loop');
  const prizes=new Set();for(let i=0;i<40;i++)prizes.add(cultureOutcome('taiwan',()=>i/40).variant);assert.equal(prizes.size,9,'the draw has nine different gifts');assert.ok(prizes.has('ticket')&&prizes.has('bear'));
- for(const[id,count]of[['japan',6],['newzealand',7],['brazil',4]])assert.equal(cultureOutcome(id,()=>0,count).step,0,id);assert.ok(cultureOutcome('canada',()=>.5).text.startsWith('回信'));
+ for(const[id,count]of[['japan',6],['newzealand',7],['brazil',4],['finland',3],['uk',2],['mexico',3]])assert.equal(cultureOutcome(id,()=>0,count).step,0,id);assert.ok(cultureOutcome('canada',()=>.5).text.startsWith('回信'));
+ // The three added from the plan of 11/6: Finland's line across the snow (and the way to Santa's cabin), Britain's cracker, Mexico's piñata.
+ assert.deepEqual([0,1,2].map(step=>cultureOutcome('finland',()=>0,step).variant),['step-0','step-1','step-2']);assert.ok(cultureOutcome('finland',()=>0,2).text.includes('聖誕老人'));assert.deepEqual(introCultures.find(c=>c.id==='finland').link,{href:'santa.html',text:'去拜訪聖誕老人 →'});
+ assert.equal(cultureOutcome('uk',()=>0,0).variant,'tug');const bang=new Set();for(let i=0;i<30;i++){const o=cultureOutcome('uk',()=>i/30,1);bang.add(o.variant);assert.ok(o.text.startsWith('砰！')&&o.text.includes('冷笑話'));}assert.deepEqual([...bang].sort(),['gold','green','red']);
+ assert.deepEqual([0,1,2].map(step=>cultureOutcome('mexico',()=>0,step).variant),['hit-0','hit-1','hit-2']);assert.ok(cultureOutcome('mexico',()=>0,2).text.includes('破了'));
+ assert.ok(introCultures.filter(c=>c.link).every(c=>c.id==='finland'),'only Finland leads on to another page');
  const f=await fixture('js/components/intro-postcards.js'),played=[],view=f.api.mountIntroPostcards(f.root,{random:()=>.99,scenes:Object.fromEntries(introCultures.map(c=>[c.id,()=>({reset(){},play(o){played.push(o);}})]))}),pins=f.root.querySelector('#intro-map-points'),dialog=f.root.querySelector('#culture-dialog'),el=id=>dialog.querySelector(`[data-post="${id}"]`);
- assert.equal(pins.children.length,6);assert.equal(f.root.querySelector('#intro-country-shortcuts').children.length,6);
- for(let i=0;i<6;i++){const pin=pins.children[i];pin.emit('click');assert.equal(dialog.open,true);assert.equal(pin.getAttribute('aria-expanded'),'true');assert.equal(el('result').textContent,'');el(i%2?'action':'art').emit('click');assert.ok(el('result').textContent.length>5);assert.ok(el('art').dataset.variant);assert.equal(el('art').classList.contains('is-playing'),true);el('close').emit('click');assert.equal(dialog.open,false);assert.equal(pin.focused,true);assert.equal(pin.getAttribute('aria-expanded'),'false');}
- assert.equal(played.length,6);
+ assert.equal(pins.children.length,9);assert.equal(f.root.querySelector('#intro-country-shortcuts').children.length,9);
+ for(let i=0;i<9;i++){const pin=pins.children[i];pin.emit('click');assert.equal(dialog.open,true);assert.equal(pin.getAttribute('aria-expanded'),'true');assert.equal(el('result').textContent,'');el(i%2?'action':'art').emit('click');assert.ok(el('result').textContent.length>5);assert.ok(el('art').dataset.variant);assert.equal(el('art').classList.contains('is-playing'),true);el('close').emit('click');assert.equal(dialog.open,false);assert.equal(pin.focused,true);assert.equal(pin.getAttribute('aria-expanded'),'false');}
+ assert.equal(played.length,9);
+ pins.children[2].emit('click');assert.equal(el('link').hidden,false);assert.equal(el('link').href,'santa.html');el('close').emit('click');pins.children[0].emit('click');assert.equal(el('link').hidden,true,'a postcard with no way on hides the link');el('close').emit('click');
  view.destroy();assert.equal(pins.children.length,0);assert.equal(f.document.body.classList.contains('intro-modal-open'),false);
 });

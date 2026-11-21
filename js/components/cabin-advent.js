@@ -7,11 +7,14 @@
 // picture inside shows, its line written beside the box. A day still to come only rattles. Before December it says when
 // it opens; from Christmas on every door opens. Doors once opened stay open (the save's `advent`).
 // The box is in layers set one in front of another (sky, house, snow, box), each cut once from paper; it leans a little
-// toward the pointer, so the layers part. Beside it a card says the day (see `card` below). Under reduced motion nothing
-// pops, leans, swings, twinkles or falls.
+// toward the pointer, so the layers part. Beside it stands its lid with the day's little paper scene in a window, which
+// plays when tapped, and the day's line (see `lidTall` below). A door opened before is tapped again (or the picture
+// behind it) to see its day once more. Under reduced motion nothing pops, leans, swings, twinkles or falls.
 import { paperLayer, shape } from './paper-art.js';
 import { adventPicture } from './cabin-clue-art.js';
+import { ADVENT_SCENES, coverScene } from './cabin-advent-scenes.js';
 import { ADVENT, WINDOWS } from '../data/cabin-advent.js';
+import { introCultures } from '../data/intro-cultures.js';
 import { daysOpen, today } from '../services/cabin-advent.js';
 
 const W = 600, H = 860, PAPER = { paper: { scale: .55, grain: .45, shadow: .28 }, eager: true };
@@ -165,24 +168,29 @@ function back(g, kind, w, h) {
 const todayStar = g => shape('path', { d: 'M20 2L25 14 38 15 28 23 31 36 20 29 9 36 12 23 2 15 15 14Z', fill: GOLD, stroke: CREAM, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, g);
 const LAYERS = [['sky', sky], ['house', house], ['front', front], ['frame', frame]];
 
-// Beside the box stands its lid, its inside turned out, kept plain: kraft board as the inside of a box lid is, inside a
-// muted red rim (the box's own red would be too much beside it), a sprig of holly in each top corner, the title along
-// its top, and a cream sheet taped inside with a tear-off calendar page for the day (it flips over when another day is
-// shown), the day's line, its picture, the way to Intro as a red tag when there is one, and how many doors are open.
-// Tall beside the box on a wide screen (320 × 560), wide under it (or beside it, held sideways) otherwise (360 × 168):
-// both are cut, the layout shows one.
+// Beside the box stands its lid, its inside turned out: kraft board inside a muted red rim (the box's own red would be
+// too much beside it), a sprig of holly in each top corner, the title along its top. Under the title an arched window
+// holds the day's little scene (cabin-advent-scenes.js), cut in paper layers, which stands up like a pop-up page when
+// its day is shown and plays once; a tap plays it again or on a step. Under the window a cream sheet is taped on, with a
+// tear-off calendar page for the day (it flips over when another day is shown), the day's line, the way to Intro as a
+// red tag when there is one, and how many doors are open. Tall beside the box on a wide screen (320 × 560). On a phone,
+// or held sideways, the lid is a strip under (or beside) the box (360 × 168) with the page and the line, and the window
+// rises from it on a card of its own when a door is opened or an open one tapped again, until it is put away (收好).
 const RIM = '#9e5047', BOARD = '#dcc6a2', BOARD_SHADE = '#c9ae86';
 function holly(g, x, y, flip = 1) {
   for (const turn of [-30, 40]) shape('path', { d: 'M0 0C8-8 21-6 27 0 21 6 8 8 0 0Z', fill: GREEN, transform: `translate(${x} ${y}) scale(${flip} 1) rotate(${turn})` }, g);
   for (const [dx, dy] of [[3, 3], [9, 1.5], [6, 8]]) shape('circle', { cx: x + dx * flip, cy: y + dy, r: 3.6, fill: '#c63a33' }, g);
 }
 const tape = (g, x, y, turn) => shape('rect', { x: -15, y: -5.5, width: 30, height: 11, rx: 1, fill: '#e9cf8f', opacity: .9, transform: `translate(${x} ${y}) rotate(${turn})` }, g);
+function board(g, w, h, round = 12) {
+  shape('rect', { x: 0, y: 0, width: w, height: h, rx: round, fill: RIM }, g);
+  shape('rect', { x: 11, y: 11, width: w - 22, height: h - 22, rx: round * .6, fill: BOARD }, g);
+  shape('path', { d: `M11 18Q11 11 18 11H${w - 18}Q${w - 11} 11 ${w - 11} 18V24H11Z`, fill: BOARD_SHADE }, g);
+}
 function lidTall(g) {
-  shape('rect', { x: 0, y: 0, width: 320, height: 560, rx: 12, fill: RIM }, g);
-  shape('rect', { x: 11, y: 11, width: 298, height: 538, rx: 7, fill: BOARD }, g);
-  shape('path', { d: 'M11 18Q11 11 18 11H302Q309 11 309 18V24H11Z', fill: BOARD_SHADE }, g);
-  shape('rect', { x: 32, y: 70, width: 256, height: 452, rx: 3, fill: CREAM }, g);
-  tape(g, 42, 74, -30); tape(g, 278, 74, 30);
+  board(g, 320, 560);
+  shape('rect', { x: 24, y: 336, width: 272, height: 200, rx: 3, fill: CREAM }, g);
+  tape(g, 36, 340, -30); tape(g, 284, 340, 30);
   holly(g, 26, 28); holly(g, 294, 28, -1);
 }
 function lidWide(g) {
@@ -190,6 +198,29 @@ function lidWide(g) {
   shape('rect', { x: 8, y: 8, width: 344, height: 152, rx: 6, fill: BOARD }, g);
   shape('rect', { x: 18, y: 18, width: 324, height: 136, rx: 3, fill: CREAM }, g);
   tape(g, 26, 22, -26); tape(g, 334, 22, 26);
+}
+// The card the window rises on, on a phone: the same board, the line on a cream sheet under the window.
+function cardBoard(g) {
+  board(g, 360, 480);
+  shape('rect', { x: 22, y: 330, width: 316, height: 132, rx: 3, fill: CREAM }, g);
+  tape(g, 34, 334, -28); tape(g, 326, 334, 28);
+  holly(g, 24, 26); holly(g, 336, 26, -1);
+}
+// Held sideways, the card lies wide: the window on the left, the line on a cream sheet on the right.
+function cardWide(g) {
+  board(g, 560, 300);
+  shape('rect', { x: 344, y: 26, width: 194, height: 248, rx: 3, fill: CREAM }, g);
+  tape(g, 356, 30, -28); tape(g, 526, 30, 28);
+}
+// The window's frame: cream, arched like the house's doors (the same curve the scene is cut to), on a sill of wood
+// with snow along it. Drawn over the scene, so the scene's edges go in under it.
+const FRAME = '-14 -14 308 284';
+function windowFrame(g) {
+  shape('path', { d: 'M-12 240V52.8A152 66 0 0 1 292 52.8V240ZM0 240V52.8A140 52.8 0 0 1 280 52.8V240Z', fill: '#f3e6cc', 'fill-rule': 'evenodd' }, g);
+  shape('path', { d: 'M0 240V52.8A140 52.8 0 0 1 280 52.8V240', fill: 'none', stroke: '#d9c39a', 'stroke-width': 3 }, g);
+  shape('rect', { x: -14, y: 236, width: 308, height: 20, rx: 4, fill: WOOD }, g);
+  shape('rect', { x: -10, y: 254, width: 300, height: 8, rx: 3, fill: WOOD_DARK }, g);
+  shape('path', { d: 'M-14 240Q-14 230-4 230H284Q294 230 294 240Q280 236 270 242 262 248 256 240 240 236 220 242 210 246 196 240 170 236 150 242 140 246 126 240 100 236 80 242 70 246 60 240 36 236 20 242 6 246-14 240Z', fill: SNOW }, g);
 }
 function calendarPage(g) {
   shape('rect', { x: 8, y: 12, width: 70, height: 78, rx: 5, fill: '#e2d4b8' }, g); shape('rect', { x: 4, y: 9, width: 70, height: 78, rx: 5, fill: '#efe4cc' }, g);
@@ -201,41 +232,84 @@ function calendarPage(g) {
 export function adventGame({ layer, stage, cabin, sound, progress, save }) {
   const date = today(), open = daysOpen(date), december = date.getMonth() === 11 && date.getDate() <= WINDOWS.length;
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const scene = element('div', 'advent-scene', layer), box = element('section', 'advent-box', scene); box.setAttribute('aria-label', ADVENT.title);
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches, compact = matchMedia('(max-width: 700px), (max-height: 560px)');
+  const timers = new Set(), later = (ms, task) => { const id = setTimeout(() => { timers.delete(id); task(); }, ms); timers.add(id); };
+  const scene = element('div', 'advent-scene', layer), box = element('section', 'advent-box', scene); box.setAttribute('aria-label', ADVENT.name);
   const tilt = element('div', 'advent-tilt', box);
   for (const [name, draw] of LAYERS) paperLayer(element('div', `advent-layer is-${name}`, tilt), `0 0 ${W} ${H}`, '', draw, PAPER);
-  const side = element('aside', 'advent-side', scene); side.setAttribute('aria-label', ADVENT.title);
+  const side = element('aside', 'advent-side', scene); side.setAttribute('aria-label', ADVENT.name);
   paperLayer(side, '0 0 320 560', 'advent-lid is-tall', lidTall, PAPER); paperLayer(side, '0 0 360 168', 'advent-lid is-wide', lidWide, PAPER);
-  element('h3', 'advent-title', side, ADVENT.title);
+  const title = element('h3', 'advent-title', side, ADVENT.title); title.lang = 'en';
   const page = element('div', 'advent-page', side);
   paperLayer(page, '0 0 80 92', '', calendarPage, PAPER); element('span', 'advent-month', page, '12 月'); const shownDay = element('span', 'advent-date', page);
   const note = element('p', 'advent-note', side); note.setAttribute('aria-live', 'polite');
-  const art = element('span', 'advent-art', side); art.setAttribute('aria-hidden', 'true');
   const foot = element('div', 'advent-foot', side), link = element('a', 'advent-link', foot); link.href = 'intro.html'; link.hidden = true;
   const count = element('p', 'advent-count', side);
+  // The window and its scenes. On a phone it sits on a card of its own that rises over the box, with the line again and
+  // the way to Intro (the strip under the box is hidden while the card is up).
+  const pane = element('div', 'advent-stage'), view = element('div', 'advent-view', pane);
+  paperLayer(pane, FRAME, 'advent-frame', windowFrame, PAPER);
+  const tap = element('button', 'advent-play', pane); tap.type = 'button';
+  const card = element('section', 'advent-card', scene); card.setAttribute('aria-label', ADVENT.name);
+  paperLayer(card, '0 0 360 480', 'advent-card-board is-tall', cardBoard, { ...PAPER, preserveAspectRatio: 'none' }); paperLayer(card, '0 0 560 300', 'advent-card-board is-wide', cardWide, { ...PAPER, preserveAspectRatio: 'none' });
+  const cardNote = element('p', 'advent-card-note', card), fold = element('button', 'advent-fold', card, ADVENT.close); fold.type = 'button';
+  const cardPage = element('div', 'advent-page is-small', card); paperLayer(cardPage, '0 0 80 92', '', calendarPage, PAPER); element('span', 'advent-month', cardPage, '12 月'); const cardDay = element('span', 'advent-date', cardPage);
+  const seat = () => { if (compact.matches) { card.insertBefore(pane, cardNote); card.append(foot); } else { side.insertBefore(pane, page); side.insertBefore(foot, count); } };
+  seat(); on(compact, 'change', seat);
   const opened = new Set(progress.advent);
   const counted = () => { count.textContent = ADVENT.count(opened.size); };
   // The calendar page shows the day; another day, and the old page flips up over its rings and away.
   let showing = 0;
   function turnTo(day) {
     if (day === showing) return;
-    if (showing && !still) { const sheet = element('div', 'advent-sheet', page); paperLayer(sheet, '0 0 80 92', '', calendarPage, PAPER); element('span', 'advent-month', sheet, '12 月'); element('span', 'advent-date', sheet, String(showing)); setTimeout(() => sheet.remove(), 900); }
-    showing = day; shownDay.textContent = String(day);
+    if (showing && !still) { const sheet = element('div', 'advent-sheet', page); paperLayer(sheet, '0 0 80 92', '', calendarPage, PAPER); element('span', 'advent-month', sheet, '12 月'); element('span', 'advent-date', sheet, String(showing)); later(900, () => sheet.remove()); }
+    showing = day; shownDay.textContent = String(day); cardDay.textContent = String(day);
   }
-  // The day's picture, large on the sheet under its line (the advent house itself while no door's line is shown).
-  let pictured = '';
-  function picture(name) {
-    if (name === pictured) return;
-    pictured = name; art.style.backgroundImage = adventPicture(name); art.classList.remove('is-new'); void art.offsetWidth; art.classList.add('is-new');
+  // The day's scene in the window (the cover while no window's day is shown), cut the first time it is shown and kept.
+  // Shown, its pieces stand up one after another over the scene that was there (which stays until the new backdrop has
+  // faded in over it, so the window never stands empty), and once they stand it plays; each tap then plays on a step.
+  // On a phone's card put away, the scene that was there goes at once (`fresh`): the card rises with the new day's.
+  // The day already shown, chosen again (`again`), replays: its pieces stand up once more over its backdrop, and it plays.
+  const scenes = new Map();
+  let staged = null, rounds = 0, stacked = 0;
+  function stageScene(day, { delay = 0, quiet = false, fresh = false, again = false } = {}) {
+    if (!scenes.has(day)) { const host = element('div', 'advent-cut-scene', view); scenes.set(day, { host, ...(day ? ADVENT_SCENES[day - 1] : coverScene)(host) }); }
+    const next = scenes.get(day);
+    tap.setAttribute('aria-label', day ? WINDOWS[day - 1].play : ADVENT.cover);
+    if (staged === next && !again) return;
+    const replay = staged === next; staged = next; rounds = 0;
+    const others = () => { for (const other of scenes.values()) if (other !== staged) { other.host.getAnimations({ subtree: true }).forEach(animation => animation.cancel()); other.host.classList.remove('is-shown'); } };
+    next.reset(); next.host.style.zIndex = String(++stacked);
+    const pieces = [...next.host.children].filter(piece => piece.style.opacity !== '0').slice(replay ? 1 : 0);
+    if (still) { others(); next.host.classList.add('is-shown'); next.play(0, quiet ? null : sound); return; }
+    pieces.forEach(piece => { piece.style.visibility = 'hidden'; }); next.host.classList.add('is-shown'); if (fresh) others();
+    Promise.all([...next.host.querySelectorAll('img')].map(image => image.decode().catch(() => {}))).then(() => later(delay, () => {
+      if (staged !== next) return;
+      pieces.forEach((piece, i) => {
+        piece.style.visibility = '';
+        piece.animate(i || replay ? [{ opacity: 0, transform: 'perspective(600px) rotateX(78deg)', transformOrigin: '50% 100%' }, { opacity: 1, transform: 'none', transformOrigin: '50% 100%' }] : [{ opacity: 0 }, { opacity: 1 }], { duration: i || replay ? 650 : 400, delay: i * 110, easing: 'cubic-bezier(.2,.9,.3,1.12)', fill: 'backwards' });
+      });
+      later(420, () => { if (staged === next) others(); });
+      later(pieces.length * 110 + 650, () => { if (staged === next) next.play(0, quiet ? null : sound); });
+    }));
   }
-  function tell(text, intro = '', day = showing || 1, name = pictured || 'room') { note.textContent = text; link.hidden = !intro; if (intro) link.textContent = ADVENT.intro(intro); turnTo(day); picture(name); }
-  const show = day => tell(WINDOWS[day - 1].text, WINDOWS[day - 1].intro, day, WINDOWS[day - 1].art);
+  on(tap, 'click', () => { if (!staged) return; rounds = (rounds + 1) % staged.steps; if (!rounds && staged.steps > 1) staged.reset(); staged.play(rounds, sound); });
+  // On a phone the card rises when a door is opened or an open one is tapped again, and is put away again with 收好.
+  const raise = () => { if (!compact.matches) return; card.classList.add('is-up'); };
+  on(fold, 'click', () => { card.classList.remove('is-up'); (tilt.querySelector(`.advent-slot[data-day="${showing}"] .advent-door`) ?? tilt.querySelector('.advent-door')).focus({ preventScroll: true }); });
+  function tell(text, intro = '', day = showing || 1) {
+    note.textContent = text; cardNote.textContent = text;
+    const country = introCultures.find(culture => culture.id === intro);
+    link.hidden = !country; if (country) { link.textContent = ADVENT.intro(country.name); link.href = `intro.html#${country.id}`; }
+    turnTo(day);
+  }
+  const slots = new Map();
+  const showDay = day => { tell(WINDOWS[day - 1].text, WINDOWS[day - 1].intro, day); for (const [each, place] of slots) place.classList.toggle('is-shown', each === day); };
   const until = () => Math.max(1, Math.ceil((new Date(date.getFullYear(), 11, 1) - date) / 86400000));
   // The doors in the order of their days (so the keyboard goes 1, 2, 3 …), each placed where it is cut in the box.
   for (const slot of [...SLOTS].sort((a, b) => a.day - b.day)) {
     const { day, kind, x, y, w, h, hinge, colour } = slot, entry = WINDOWS[day - 1];
-    const place = element('div', `advent-slot is-${slot.layer}`, tilt); Object.assign(place.dataset, { day, kind, hinge });
+    const place = element('div', `advent-slot is-${slot.layer}`, tilt); Object.assign(place.dataset, { day, kind, hinge }); slots.set(day, place);
     Object.assign(place.style, { left: `${x / W * 100}%`, top: `${y / H * 100}%`, width: `${w / W * 100}%`, height: `${h / H * 100}%` });
     const picture = element('span', `advent-pic${entry.move ? ` is-${entry.move}` : ''}`, place); picture.setAttribute('aria-hidden', 'true');
     const door = element('button', 'advent-door', place); door.type = 'button';
@@ -244,23 +318,33 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
     const state = () => opened.has(day) ? 'open' : day <= open ? 'ready' : 'later';
     const paint = () => {
       if (opened.has(day)) picture.style.backgroundImage = adventPicture(entry.art);
-      place.dataset.state = state(); door.setAttribute('aria-label', `12 月 ${day} 日的${{ open: '窗（打開了）', ready: '窗：可以打開', later: '窗：還沒到' }[state()]}`);
+      place.dataset.state = state(); door.setAttribute('aria-label', `12 月 ${day} 日的${{ open: '窗（打開了，再看一次）', ready: '窗：可以打開', later: '窗：還沒到' }[state()]}`);
     };
     if (december && day === date.getDate()) { place.classList.add('is-today'); paperLayer(place, '0 0 40 40', 'advent-star', todayStar, PAPER); }
     paint();
-    on(door, 'click', () => {
+    // A door opened before is looked at again by tapping it or the picture behind it: its day comes back in the lid (the
+    // day already there plays over again).
+    const look = () => {
       if (day > open) {
         place.classList.remove('is-shaking'); void place.offsetWidth; place.classList.add('is-shaking'); sound.play('nope');
         tell(open ? ADVENT.locked : ADVENT.before(until()), '', showing); return;
       }
-      if (!opened.has(day)) { opened.add(day); progress.advent = [...opened].sort((a, b) => a - b); save(); sound.play('open'); paint(); counted(); }
-      show(day);
-    });
+      const first = !opened.has(day);
+      if (first) { opened.add(day); progress.advent = [...opened].sort((a, b) => a - b); save(); sound.play('open'); paint(); counted(); }
+      // On a phone the scene waits to stand up until its card has risen (after the door has turned, the first time).
+      const lift = compact.matches && !still;
+      const up = card.classList.contains('is-up'), again = !first && showing === day;
+      showDay(day); stageScene(day, { delay: (first ? 450 : 0) + (lift && !up ? (first ? 700 : 450) : 0), fresh: lift && !up, again });
+      if (compact.matches) { if (first && !still) later(700, raise); else raise(); }
+    };
+    on(door, 'click', look); on(picture, 'click', () => { if (opened.has(day)) look(); });
   }
   counted();
-  if (!open) tell(ADVENT.before(until()), '', 1);
-  else if (december) { if (opened.has(date.getDate())) show(date.getDate()); else tell(ADVENT.today(date.getDate()), '', date.getDate()); }
-  else tell(ADVENT.after, '', 25);
+  // The first scene stands up as the lid slides in beside the box.
+  const quiet = { quiet: true, delay: 1000 };
+  if (!open) { tell(ADVENT.before(until()), '', 1); stageScene(0, quiet); }
+  else if (december) { if (opened.has(date.getDate())) { showDay(date.getDate()); stageScene(date.getDate(), quiet); } else { tell(ADVENT.today(date.getDate()), '', date.getDate()); stageScene(0, quiet); } }
+  else { tell(ADVENT.after, '', 25); stageScene(0, quiet); }
   // Opening: the room grows dusky, then (every picture cut and ready, so nothing comes in piece by piece) the little house
   // on the sill rises and unfolds into the box, as a page of a pop-up book stands up, and the lid slides in beside it.
   // Closing (when leaving), the box folds back down into the little house as the room goes dark for a moment, long enough
@@ -275,7 +359,7 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
   let gone = false;
   if (!still) {
     scene.classList.add('is-entering');
-    Promise.all([...scene.querySelectorAll('img')].map(image => image.decode().catch(() => {}))).then(() => {
+    Promise.all([...box.querySelectorAll('img'), ...side.querySelectorAll('img')].map(image => image.decode().catch(() => {}))).then(() => {
       if (gone) return;
       place(); scene.classList.remove('is-entering'); box.classList.add('is-popping'); side.classList.add('is-sliding');
     });
@@ -289,7 +373,7 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
   }
   (tilt.querySelector('.is-today .advent-door') ?? tilt.querySelector('[data-state="ready"] .advent-door') ?? tilt.querySelector('.advent-door')).focus({ preventScroll: true });
   return () => {
-    gone = true; events.abort();
+    gone = true; events.abort(); timers.forEach(clearTimeout); timers.clear(); card.classList.remove('is-up');
     if (still) { scene.remove(); return; }
     place(); stage.append(scene); scene.classList.add('is-leaving'); setTimeout(() => scene.remove(), 1900);
   };

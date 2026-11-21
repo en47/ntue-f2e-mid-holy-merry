@@ -6,6 +6,8 @@ import { introCultures } from '../data/intro-cultures.js';
 
 const SEA = '#7fa9bd', SEA_LIGHT = '#a9c8d6', LAND = '#c3d4a6', LAND_DEEP = '#a9c08c';
 const land = mapLand.join('');
+// Great Britain, which the traced original leaves out, cut by hand to stand for the United Kingdom's postcard.
+const BRITAIN = 'M186 270C192 272 194 278 191 284C197 288 199 296 199 302C204 306 208 312 208 318C210 324 206 328 209 332C202 336 190 334 184 336C180 338 175 339 174 337C177 333 182 330 185 326C182 322 180 318 184 314C186 308 184 302 181 296C178 290 182 286 180 282C178 278 181 272 186 270Z';
 
 function compass(parent, x, y, size) {
   const group = shape('g', { transform: `translate(${x} ${y}) scale(${size})` }, parent);
@@ -30,6 +32,7 @@ function landmass(parent) {
   const clip = shape('clipPath', { id: 'map-land' }, parent);
   shape('path', { d: land, 'clip-rule': 'evenodd' }, clip);
   shape('path', { d: land, fill: LAND, 'fill-rule': 'evenodd' }, parent);
+  shape('path', { d: BRITAIN, fill: LAND }, parent);
   const inside = shape('g', { 'clip-path': 'url(#map-land)' }, parent);
   // Soft darker hills, then the snowy north across the top of the map.
   for (const [cx, cy, rx, ry] of [[480, 330, 150, 60], [300, 640, 80, 120], [1230, 400, 110, 70], [1420, 720, 70, 130], [760, 700, 70, 40], [620, 420, 90, 44]]) shape('ellipse', { cx, cy, rx, ry, fill: LAND_DEEP }, inside);
@@ -52,7 +55,7 @@ export function mountMapArt(canvas) {
   paperLayer(canvas, MAP_BOX, 'map-land', landmass, { ...options, paper: { scale: 1.3, grain: .5, shadow: .3, rim: '#f6ecda' } });
   paperLayer(canvas, MAP_BOX, 'map-dressing', dressing, { ...options, paper: { scale: 1, grain: .4, shadow: .24 } });
   const points = id => { const { x, y } = introCultures.find(item => item.id === id); return [x * 17.28, y * 9.47]; };
-  const stops = ['iceland', 'taiwan', 'japan', 'newzealand', 'brazil', 'canada'].map(points);
+  const stops = ['iceland', 'uk', 'finland', 'taiwan', 'japan', 'newzealand', 'brazil', 'mexico', 'canada'].map(points);
   const route = stops.reduce((d, [x, y], index) => {
     if (!index) return `M${x} ${y}`;
     const [px, py] = stops[index - 1];

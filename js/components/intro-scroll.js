@@ -26,5 +26,5 @@ export function mountIntroScroll(root, { sleigh } = {}) {
   const observer = new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting; run(); });
   observer.observe(stage);
   set(false);
-  return { destroy() { clearTimeout(settle); observer.disconnect(); handlers.forEach(([element, handler]) => element.removeEventListener('click', handler)); } };
+  return { open: () => set(true), destroy() { clearTimeout(settle); observer.disconnect(); handlers.forEach(([element, handler]) => element.removeEventListener('click', handler)); } };
 }
