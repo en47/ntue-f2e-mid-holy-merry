@@ -3,6 +3,8 @@
 // `ADVENT_ART`, or a clue's or a goal's), one line, its little scene in the lid (cabin-advent-scenes.js) with what a tap on
 // it does (`play`, read out to screen readers), for some a little move once it is open (`move`: 'bob', 'spin', 'swing',
 // 'twinkle'), and for those about a country on the Intro map that country (`intro`: its id in intro-cultures.js).
+// `count` is how many doors are open (`countLead` before it, left out on a narrow lid); `shut` shuts every open door
+// again, so the days can be opened over (`shutLabel` says so to screen readers).
 export const ADVENT = {
   title: 'Advent Calendar',
   name: '降臨小屋',
@@ -11,10 +13,13 @@ export const ADVENT = {
   today: day => `今天是 12 月 ${day} 日：第 ${day} 扇窗可以打開了。`,
   after: '聖誕快樂！每一扇窗都可以打開了。',
   locked: '還沒到喔，偷看會被聖誕老人發現！',
-  count: n => `打開了 ${n}／24 扇`,
+  countLead: '打開了',
+  count: n => `${n}／24 扇`,
   intro: country => `到 Intro 看看${country} →`,
   close: '收好 ✓',
   cover: '讓雪下大一點',
+  shut: '全部關上 ↺',
+  shutLabel: '把打開的窗全部關上，從頭再開一次',
 };
 export const WINDOWS = [
   { art: 'room', text: '降臨曆是從德國流行起來的：從 12/1 起每天開一扇窗，一路數到平安夜。', play: '打開小日曆的下一扇窗' },

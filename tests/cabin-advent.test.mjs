@@ -32,3 +32,7 @@ test('twenty-four windows, each with a picture, one short line and a scene to ta
   assert.ok(WINDOWS.every(({ move }) => !move || ['bob', 'spin', 'swing', 'twinkle'].includes(move)));
   assert.ok(ADVENT.before(6).includes('12/1') && ADVENT.locked.includes('還沒到'));
 });
+test('every open door can be shut again, so the days can be opened over; the count reads whole, or short on a narrow lid', () => {
+  assert.ok(ADVENT.shut.startsWith('全部關上') && ADVENT.shutLabel.includes('從頭再開'));
+  assert.equal(`${ADVENT.countLead} ${ADVENT.count(5)}`, '打開了 5／24 扇'); assert.equal(ADVENT.count(0), '0／24 扇');
+});
