@@ -28,6 +28,12 @@ const scene = () => page.evaluate(() => ({ label: document.querySelector('.adven
 const realTap = async selector => { const [x, y] = await page.evaluate(selector => { const r = document.querySelector(selector).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, selector); if (mobile) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y); };
 // On a phone the window is on its card: up after a door is opened (once the door has turned), put away with 收好.
 const putAway = async () => { if (mobile) { await press('.advent-fold'); await wait(800); } };
+// The doors (or, open, the pictures behind them) a tap at their middle does not reach: none should be, whatever 3D layer
+// lies in front of them.
+const unreachable = () => page.evaluate(() => [...document.querySelectorAll('.advent-slot')].filter(slot => {
+  const target = slot.querySelector(slot.dataset.state === 'open' ? '.advent-pic' : '.advent-door'), r = target.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+  return !(hit === target || target.contains(hit));
+}).map(slot => slot.dataset.day));
 // Numbers on doors still shut that stick out of their doors (none should, however small the box).
 const numbersOut = () => page.evaluate(() => [...document.querySelectorAll('.advent-slot:not([data-state="open"]) .advent-num')].filter(num => {
   const door = num.closest('.advent-door').getBoundingClientRect(), range = document.createRange(); range.selectNodeContents(num); const r = range.getBoundingClientRect();
@@ -71,7 +77,9 @@ context = await visit('2026-12-05T10:00:00');
 const fifth = await doors();
 check(fifth.slice(0, 5).every(state => state === 'ready') && fifth.slice(5).every(state => state === 'later'), `12/5：前 5 扇能開，其餘還沒到：${fifth.join(',')}`);
 check(await page.evaluate(() => Boolean(document.querySelector('.advent-slot[data-day="5"].is-today .advent-star'))) && (await note()).includes('12 月 5 日'), '12/5：今天那扇貼著金星，說今天可以開第 5 扇');
+check(await page.evaluate(() => !document.querySelector('.advent-box').classList.contains('is-popping') && document.querySelector('.advent-tilt').getAnimations().length === 0), '盒子彈出後拿掉彈出動畫，傾斜才會慢慢跟著滑鼠');
 check((await numbersOut()).length === 0, `門上的號碼都在門裡${(await numbersOut()).join('、')}`);
+check((await unreachable()).length === 0, `每一扇門的正中間都點得到${(await unreachable()).join('、')}`);
 await shot('closed');
 await press(door(5)); await wait(2600); await shot('opened');
 check((await doors())[4] === 'open' && await page.evaluate(() => getComputedStyle(document.querySelector('.advent-slot[data-day="5"] .advent-pic')).backgroundImage.startsWith('url(')), '12/5：第 5 扇打開，後面有小圖');
@@ -105,6 +113,7 @@ await realTap('.advent-slot[data-day="1"] .advent-pic'); await wait(1200);
 check(await page.evaluate(() => document.querySelector('.advent-date').textContent === '1') && (await note()).includes('德國') && (await scene()).label === '打開小日曆的下一扇窗', '今天 12/5，點 12/1 的小圖：看到 12/1 的結果');
 check(await sheetFits(), '最長的一句（12/1）也在米色紙的四邊留白裡，沒有碰到底下開了幾扇和「全部關上」');
 await putAway();
+check((await unreachable()).length === 0, `開過的第 1、3、5 扇點門後小圖的正中間、其他點門，都點得到${(await unreachable()).join('、')}`);
 const fits = await page.evaluate(() => { const box = document.querySelector('.advent-box').getBoundingClientRect(), side = document.querySelector('.advent-side').getBoundingClientRect(), stage = document.querySelector('#cabin-stage').getBoundingClientRect(), sizes = [...document.querySelectorAll('.advent-slot[data-state="later"] .advent-door, .advent-slot[data-state="ready"] .advent-door')].map(node => { const r = node.getBoundingClientRect(); return Math.min(r.width, r.height); }); return { inside: [box, side].every(r => r.top >= stage.top - 1 && r.bottom <= stage.bottom + 1 && r.left >= stage.left - 1 && r.right <= stage.right + 1), door: Math.round(Math.min(...sizes)) }; });
 check(fits.inside, '盒子和說明都在舞台裡'); check(fits.door >= 40, `最小的門 ${fits.door}px（至少 40px）`);
 await page.reload();
@@ -120,7 +129,10 @@ check(shutAll.doors.every(state => state === 'ready') && shutAll.count.includes(
 await realTap(door(5)); await wait(2600);
 check((await doors())[4] === 'open' && await page.evaluate(() => document.querySelector('.advent-count').textContent.includes('1／24') && !document.querySelector('.advent-shut').hidden) && JSON.stringify((await saved()).advent) === '[5]', '關上以後再開：第 5 扇又打開，開了 1／24 扇，按鈕回來');
 await putAway();
-await press('.cabin-back:not([hidden])'); await wait(4000);
+await press('.cabin-back:not([hidden])'); await wait(450);
+const leaving = await page.evaluate(() => ({ folding: Boolean(document.querySelector('.advent-scene.is-leaving')), dusk: Number(getComputedStyle(document.querySelector('.advent-scene'), '::before').opacity) }));
+check(leaving.folding && leaving.dusk < .45, `回到房間：盒子收回小屋、房間的夜色變淡（${leaving.dusk.toFixed(2)}），不會先暗下來`);
+await wait(3600);
 check(await page.evaluate(() => !document.querySelector('.advent-box') && document.querySelector('#cabin-stage').dataset.view === 'inside'), '回到房間，盒子收起來');
 await context.close();
 

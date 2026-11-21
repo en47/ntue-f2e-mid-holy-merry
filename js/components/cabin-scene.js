@@ -971,7 +971,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
         goalHeading = held; spin = held !== next ? 0 : spin * Math.exp(-3.2 * delta);
         if (Math.abs(spin) < .02) spin = 0;
       }
-      const response = 1 - Math.exp(-7 * delta), travel = 1 - Math.exp(-travelRate * delta);
+      const response = 1 - Math.exp(-turnRate * Math.min(1, (clock - turned) / .6) * delta), travel = 1 - Math.exp(-travelRate * Math.min(1, (clock - eased) / .6) * delta);
       heading += (goalHeading - heading) * response; pitch += (goalPitch - pitch) * response;
       eye.lerp(goalEye, travel); fov += (goalFov - fov) * travel;
       settling = spin !== 0 || Math.abs(goalHeading - heading) + Math.abs(goalPitch - pitch) + eye.distanceTo(goalEye) + Math.abs(goalFov - fov) > .002;
@@ -990,15 +990,22 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   }
   // Point the goals at a view. Outside comes back to wherever the visitor was looking before stepping away. A place that
   // `glide`s (the window sill, Santa's chair between it and the middle of the room) is turned toward first and walked up to
-  // after, a little slower, so the chair goes out of sight to the side instead of sweeping past the eye. (Coming back
-  // from it, the room is dark for the moment, cabin-advent.js.)
-  let glideTimer = 0, travelRate = 3.2;
-  function aim(name) {
+  // after, a little slower, so the chair goes out of sight to the side instead of sweeping past the eye. Coming back from
+  // it is the same walk undone: the eye stays while the box there folds away (cabin-advent.js), backs away to the middle
+  // of the room still facing the window (the chair comes back in from the side), and only then turns to where the visitor
+  // was looking before. A glide sets off from standing (`eased`), and that last turn too (`turned`, unhurried: `turnRate`),
+  // never with a jump; a drag takes the turn back at once.
+  let glideTimer = 0, turnTimer = 0, travelRate = 3.2, turnRate = 7, eased = -Infinity, turned = -Infinity;
+  function aim(name, from) {
     const goal = goalFor(name), facing = name === 'outside' ? away : name === 'inside' && roomAway ? roomAway : goal;
-    const toEye = () => { goalEye.copy(goal.eye); goalFov = goal.fov; wake(); };
-    clearTimeout(glideTimer); travelRate = 3.2; goalHeading = facing.heading; goalPitch = facing.pitch;
-    if (motion.matches || !VIEWS[name]?.glide) { toEye(); return; }
-    travelRate = 2.2; glideTimer = setTimeout(toEye, 420);
+    const toEye = (soft = false) => { if (soft) eased = clock; goalEye.copy(goal.eye); goalFov = goal.fov; wake(); };
+    const turn = (soft = false) => { if (soft) { turned = clock; turnRate = 3.5; } goalHeading = facing.heading; goalPitch = facing.pitch; wake(); };
+    clearTimeout(glideTimer); clearTimeout(turnTimer); travelRate = 3.2; turnRate = 7; eased = turned = -Infinity;
+    if (motion.matches) { turn(); toEye(); return; }
+    if (VIEWS[from]?.glide && !VIEWS[name]?.glide) { travelRate = 2.2; glideTimer = setTimeout(() => { toEye(true); turnTimer = setTimeout(() => turn(true), 1100); }, 900); return; }
+    turn();
+    if (!VIEWS[name]?.glide) { toEye(); return; }
+    travelRate = 2.2; glideTimer = setTimeout(() => toEye(true), 420);
   }
   // One step back: from a place in the room to the middle of the room, from anywhere else out in front of the house.
   function back() { setView(VIEWS[view].room ? 'inside' : 'outside'); }
@@ -1020,7 +1027,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if (!indoorView(from) && VIEWS[name].room) { pending = name; name = 'inside'; }
     view = name; stage.dataset.view = name;
     if (indoorView(name) !== indoorView(from)) { walk(indoorView(name) ? 'in' : 'out'); return; }
-    aim(name); onView(name); wake();
+    aim(name, from); onView(name); wake();
   }
 
   // Walking in or out: along a fixed path through the front door, timed so the door swings open just before the eye reaches
@@ -1184,7 +1191,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     if ((playing() && !VIEWS[view].turn) || story.scripted) return;
     if (pointer || trip || (event.pointerType === 'mouse' && event.button !== 0)) return;
     pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, heading: goalHeading, pitch: goalPitch, moved: false, lastX: event.clientX, lastTime: performance.now(), speed: 0 };
-    gesture.setPointerCapture?.(event.pointerId); dragging = true; spin = 0; clearTimeout(returnTimer); stage.classList.add('is-turning'); wake();
+    gesture.setPointerCapture?.(event.pointerId); dragging = true; spin = 0; turnRate = 7; turned = -Infinity; clearTimeout(turnTimer); clearTimeout(returnTimer); stage.classList.add('is-turning'); wake();
   });
   on(gesture, 'pointermove', event => {
     if (!pointer || event.pointerId !== pointer.id) return;
@@ -1235,7 +1242,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   if (!reindeer) loadReindeer();
 
   function destroy() {
-    stop(); clearTimeout(returnTimer); clearTimeout(glideTimer); clearTimeout(story.mend); storyTimers.forEach(clearTimeout); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
+    stop(); clearTimeout(returnTimer); clearTimeout(glideTimer); clearTimeout(turnTimer); clearTimeout(story.mend); storyTimers.forEach(clearTimeout); cancelAnimationFrame(hoverFrame); resize?.disconnect(); visible?.disconnect();
     release3d();
   }
   // What the games may do to the scene.

@@ -1148,17 +1148,21 @@ html.theatre-open { overflow: hidden; }
    shrink to the width, so neither is cut off. */
 .advent-box { position: relative; flex: none; height: min(100%, 46rem, calc((100vw - 4rem) / 1.21)); aspect-ratio: 600 / 860; perspective: 1600px; pointer-events: auto; }
 .advent-tilt { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(var(--lean-y, 0deg)) rotateY(var(--lean-x, 0deg)); transform-origin: 50% 100%; }
-.advent-layer, .advent-layer .art-layer, .advent-layer img { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* Only the doors and the pictures behind them take a tap: the paper layers in front (the box's frame lies over everything)
+   and the places the doors sit in let it through to them, whatever the order the 3D layers are hit in. */
+.advent-layer, .advent-layer .art-layer, .advent-layer img { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .advent-layer.is-house { transform: translateZ(24px); }
 .advent-layer.is-front { transform: translateZ(48px); }
 .advent-layer.is-frame { transform: translateZ(64px); }
-.advent-slot { position: absolute; transform-style: preserve-3d; }
-.advent-slot.is-sky { transform: translateZ(1px); }
-.advent-slot.is-house { transform: translateZ(25px); }
-.advent-slot.is-front { transform: translateZ(49px); }
-.advent-slot.is-frame { transform: translateZ(65px); }
-.advent-pic { position: absolute; inset: 14%; background: no-repeat center / contain; }
-.advent-door { position: absolute; inset: 0; padding: 0; border: 0; background: none; cursor: pointer; transform-style: preserve-3d; }
+.advent-slot { position: absolute; transform-style: preserve-3d; pointer-events: none; }
+/* Each door stands 2px in front of its layer and the picture behind it halfway between, so the picture is never drawn over
+   its shut door (sharing one plane, it could be, while other doors turn). */
+.advent-slot.is-sky { transform: translateZ(2px); }
+.advent-slot.is-house { transform: translateZ(26px); }
+.advent-slot.is-front { transform: translateZ(50px); }
+.advent-slot.is-frame { transform: translateZ(66px); }
+.advent-pic { position: absolute; inset: 14%; background: no-repeat center / contain; transform: translateZ(-1px); pointer-events: auto; }
+.advent-door { position: absolute; inset: 0; padding: 0; border: 0; background: none; cursor: pointer; transform-style: preserve-3d; pointer-events: auto; }
 .advent-door .advent-face, .advent-door .advent-face img { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
 .advent-door .advent-back, .advent-door .advent-back img { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
 .advent-door .advent-back { transform: rotateY(180deg); }
@@ -1284,30 +1288,34 @@ html.theatre-open { overflow: hidden; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .advent-door { transition: transform .8s cubic-bezier(.3, 1.25, .5, 1); }
+  /* 全部關上: the doors shut in one smooth sweep, without the little bounce one door makes opening; a picture's own move
+     holds still until its door has shut over it. */
+  .advent-box.is-shutting .advent-door { transition: transform .76s cubic-bezier(.45, 0, .2, 1); }
   .advent-tilt { transition: transform .35s ease-out; }
   .advent-scene::before { animation: advent-dusk .8s ease-out both; }
   .advent-scene.is-entering :is(.advent-box, .advent-side) { visibility: hidden; }
   .advent-box.is-popping .advent-tilt { animation: advent-pop 1.3s cubic-bezier(.22, 1, .36, 1) both; }
   .advent-side.is-sliding { animation: advent-slide .8s cubic-bezier(.22, 1, .36, 1) .6s both; }
   .advent-scene.is-leaving { pointer-events: none; }
-  .advent-scene.is-leaving::before { animation: advent-dip 1.9s ease-in-out forwards; }
-  .advent-scene.is-leaving .advent-tilt { animation: advent-fold .5s ease-in forwards; }
-  .advent-scene.is-leaving .advent-side { animation: advent-away .3s ease-in forwards; }
+  .advent-scene.is-leaving::before { animation: advent-dawn .9s ease-in-out forwards; }
+  .advent-scene.is-leaving .advent-tilt { animation: advent-fold .9s cubic-bezier(.45, 0, .55, 1) forwards; }
+  .advent-scene.is-leaving .advent-side { animation: advent-away .5s ease-in-out forwards; }
   .advent-slot.is-shaking .advent-door { animation: advent-shake .45s ease-in-out; }
   .advent-slot[data-state="open"] .advent-pic { transition: scale .25s ease-out; }
   .advent-slot[data-state="open"] .advent-pic:hover { scale: 1.1; }
-  .advent-slot[data-state="open"] .advent-pic.is-bob { animation: advent-bob 2.4s ease-in-out infinite; }
-  .advent-slot[data-state="open"] .advent-pic.is-spin { animation: advent-spin 6s linear infinite; }
-  .advent-slot[data-state="open"] .advent-pic.is-swing { animation: advent-swing 2.6s ease-in-out infinite; transform-origin: 50% 8%; }
-  .advent-slot[data-state="open"] .advent-pic.is-twinkle { animation: advent-twinkle 2.2s ease-in-out infinite; }
+  .advent-slot:is([data-state="open"], .is-closing) .advent-pic.is-bob { animation: advent-bob 2.4s ease-in-out infinite; }
+  .advent-slot:is([data-state="open"], .is-closing) .advent-pic.is-spin { animation: advent-spin 6s linear infinite; }
+  .advent-slot:is([data-state="open"], .is-closing) .advent-pic.is-swing { animation: advent-swing 2.6s ease-in-out infinite; transform-origin: 50% 8%; }
+  .advent-slot:is([data-state="open"], .is-closing) .advent-pic.is-twinkle { animation: advent-twinkle 2.2s ease-in-out infinite; }
+  .advent-slot.is-closing .advent-pic:is(.is-bob, .is-spin, .is-swing, .is-twinkle) { animation-play-state: paused; }
   .advent-card { transition: transform .65s cubic-bezier(.22, 1, .36, 1), visibility 0s .65s; }
   .advent-card.is-up { transition: transform .65s cubic-bezier(.22, 1, .36, 1), visibility 0s; }
   .advent-sheet { animation: advent-flip .85s cubic-bezier(.5, 0, .7, .4) forwards; }
 }
 @keyframes advent-pop { from { transform: translate(var(--from-x, 0), var(--from-y, 0)) scale(var(--from-scale, .2)) rotateX(75deg); opacity: 0; } 25% { opacity: 1; } }
-@keyframes advent-fold { to { transform: translate(var(--from-x, 0), var(--from-y, 0)) scale(var(--from-scale, .2)) rotateX(75deg); opacity: 0; } }
+@keyframes advent-fold { 55% { opacity: 1; } to { transform: translate(var(--from-x, 0), var(--from-y, 0)) scale(var(--from-scale, .2)) rotateX(75deg); opacity: 0; } }
 @keyframes advent-dusk { from { opacity: 0; } }
-@keyframes advent-dip { 22% { opacity: .96; } 62% { opacity: .96; } 100% { opacity: 0; } }
+@keyframes advent-dawn { to { opacity: 0; } }
 @keyframes advent-slide { from { translate: 3rem 0; opacity: 0; } }
 @keyframes advent-away { to { translate: 2rem 0; opacity: 0; } }
 @keyframes advent-shake { 20% { translate: -4px 0; } 40% { translate: 4px 0; } 60% { translate: -3px 0; } 80% { translate: 2px 0; } }

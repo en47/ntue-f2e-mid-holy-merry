@@ -315,7 +315,7 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
     link.hidden = !country; if (country) { link.textContent = ADVENT.intro(country.name); link.href = `intro.html#${country.id}`; }
     turnTo(day);
   }
-  const slots = new Map(), paints = new Map();
+  const slots = new Map(), doors = new Map();
   const showDay = day => { tell(WINDOWS[day - 1].text, WINDOWS[day - 1].intro, day); for (const [each, place] of slots) place.classList.toggle('is-shown', each === day); };
   const until = () => Math.max(1, Math.ceil((new Date(date.getFullYear(), 11, 1) - date) / 86400000));
   // The doors in the order of their days (so the keyboard goes 1, 2, 3 …), each placed where it is cut in the box.
@@ -333,7 +333,7 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
       place.dataset.state = state(); door.setAttribute('aria-label', `12 月 ${day} 日的${{ open: '窗（打開了，再看一次）', ready: '窗：可以打開', later: '窗：還沒到' }[state()]}`);
     };
     if (december && day === date.getDate()) { place.classList.add('is-today'); paperLayer(place, '0 0 40 40', 'advent-star', todayStar, PAPER); }
-    paint(); paints.set(day, paint);
+    paint(); doors.set(day, { place, paint, y });
     // A door opened before is looked at again by tapping it or the picture behind it: its day comes back in the lid (the
     // day already there plays over again).
     const look = () => {
@@ -361,20 +361,24 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
   };
   rest({ quiet: true, delay: 1000 });
   const home = () => (tilt.querySelector('.is-today .advent-door') ?? tilt.querySelector('[data-state="ready"] .advent-door') ?? tilt.querySelector('.advent-door')).focus({ preventScroll: true });
-  // 全部關上: the open doors swing shut one after another, from the last day back to the first (with a creak, and a click
-  // as the last one shuts), the save forgets them and the lid goes back to the cover, so every day can be opened again.
+  // 全部關上: the open doors swing shut in one sweep from the top of the box down to its drawers, smoothly (no bounce), each
+  // picture holding still until its door is over it (with a creak, and a click as the last one shuts); the save forgets
+  // them and the lid goes back to the cover, so every day can be opened again.
   on(shut, 'click', () => {
-    const closing = [...opened].sort((a, b) => b - a), gap = still ? 0 : Math.min(90, 900 / closing.length);
+    const closing = [...opened].map(day => ({ day, at: still ? 0 : doors.get(day).y / H * 600 })), swing = still ? 0 : 760;
+    const end = Math.max(0, ...closing.map(({ at }) => at)) + swing;
     opened.clear(); progress.advent = []; save(); counted();
-    card.classList.remove('is-up'); slots.forEach(place => place.classList.remove('is-shown'));
-    closing.forEach((day, i) => later(i * gap, paints.get(day)));
-    sound.play(still ? 'click' : 'creak'); if (!still) later((closing.length - 1) * gap + 650, () => sound.play('click'));
+    card.classList.remove('is-up'); box.classList.add('is-shutting');
+    for (const { day, at } of closing) later(at, () => { const { place, paint } = doors.get(day); place.classList.add('is-closing'); paint(); later(swing, () => place.classList.remove('is-closing', 'is-shown')); });
+    sound.play(still ? 'click' : 'creak'); if (!still) later(end - 80, () => sound.play('click'));
+    later(end, () => { box.classList.remove('is-shutting'); slots.forEach(place => place.classList.remove('is-shown')); });
     rest({ quiet: true, delay: 300 }); home();
   });
   // Opening: the room grows dusky, then (every picture cut and ready, so nothing comes in piece by piece) the little house
   // on the sill rises and unfolds into the box, as a page of a pop-up book stands up, and the lid slides in beside it.
-  // Closing (when leaving), the box folds back down into the little house as the room goes dark for a moment, long enough
-  // for the eye to walk back to the middle of the room unseen (past Santa's chair), and then clears.
+  // Closing (when leaving), the walk there undone: the lid slides away and the box folds back down into the little house on
+  // the sill while the room's dusk lifts, the eye still where it stood (cabin-scene.js waits for it), and only then does
+  // the eye back away to the middle of the room.
   const place = () => {
     const small = cabin.sheetRect('decor-advent'), shown = box.getBoundingClientRect(), base = stage.getBoundingClientRect();
     if (!small || !shown.width) return;
@@ -390,7 +394,10 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
       place(); scene.classList.remove('is-entering'); box.classList.add('is-popping'); side.classList.add('is-sliding');
     });
   }
-  // Leaning toward the pointer (a mouse; never under reduced motion), so the layers part a little.
+  // Leaning toward the pointer (a mouse; never under reduced motion), so the layers part a little. The lean eases after the
+  // pointer (.advent-tilt's transition), so the pop is taken off once it has stood up: kept at its end, it would make each
+  // move of the mouse a jump.
+  on(box, 'animationend', event => { if (event.animationName === 'advent-pop') box.classList.remove('is-popping'); });
   if (!still && matchMedia('(pointer: fine)').matches) {
     on(stage, 'pointermove', event => {
       const rect = box.getBoundingClientRect(), dx = (event.clientX - rect.left) / rect.width - .5, dy = (event.clientY - rect.top) / rect.height - .5;
@@ -401,6 +408,6 @@ export function adventGame({ layer, stage, cabin, sound, progress, save }) {
   return () => {
     gone = true; events.abort(); sized.disconnect(); timers.forEach(clearTimeout); timers.clear(); card.classList.remove('is-up');
     if (still) { scene.remove(); return; }
-    place(); stage.append(scene); scene.classList.add('is-leaving'); setTimeout(() => scene.remove(), 1900);
+    place(); stage.append(scene); scene.classList.add('is-leaving'); setTimeout(() => scene.remove(), 950);
   };
 }
