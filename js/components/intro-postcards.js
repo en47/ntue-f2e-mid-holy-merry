@@ -7,6 +7,7 @@ export function mountIntroPostcards(root, { cultures = introCultures, random = M
  function sceneFor(id){if(!scenes[id])return null;if(!hosts.has(id)){const host=document.createElement('div');host.className='post-scene';hosts.set(id,{host,scene:scenes[id](host)});}return hosts.get(id);}
  function open(id,trigger){const country=cultures.find(c=>c.id===id);if(!country)return;current=country;lastFocus=trigger;
   $('country').textContent=country.name;$('title').textContent=country.title;$('description').textContent=country.description;$('result').textContent='';$('action-label').textContent=country.action;
+  const link=$('link');if(link){link.hidden=!country.link;if(country.link){link.href=country.link.href;link.textContent=country.link.text;}}
   const art=$('art');art.setAttribute('aria-label',country.action);art.dataset.country=country.id;art.dataset.variant='';art.classList.remove('is-playing');
   const entry=sceneFor(id);art.replaceChildren(...(entry?[entry.host]:[]));entry?.scene.reset();steps[id]=0;
   for(const b of pins.children)b.setAttribute('aria-expanded',String(b.dataset.country===id));

@@ -12,8 +12,24 @@
 - `js/components/intro-scenes.js`：三章紙雕卡片；`js/data/intro-stories.js` 只放配置座標。
 - `js/components/intro-map.js`、`intro-scroll.js`：地圖、雪橇航線、捲軸。
 - `js/components/intro-harbor.js`：地圖後方的紙雕海港，快捲到才生成圖層，離開畫面暫停。風由左向右、光源在左上；船與浮冰的吃水線對齊前一層浪。
-- `js/components/intro-postcard-art.js`：六張明信片的互動紙雕；文案與抽獎內容在 `js/data/intro-cultures.js`。
+- `js/components/intro-postcard-art.js`：九張明信片的互動紙雕；文案與抽獎內容在 `js/data/intro-cultures.js`。
 - `js/data/intro-map-shapes.js`：由 `scripts/build-intro-map.py` 描 `christmas_map.jpg` 產生，需要 opencv，不要手改。
+
+## 九個國家（2026-11-21 加上芬蘭、英國、墨西哥）
+
+地圖原本六國：冰島、台灣、日本、紐西蘭、加拿大、巴西。11/6 規劃時說好再加三國，11/21 Santa 頁的降臨小屋要連到芬蘭時才發現還沒加，於是補上：
+
+| 國家 | 地圖座標（1728×947） | 明信片 | 點了會怎樣 |
+| --- | --- | --- | --- |
+| 英國 | 192,304 | 砰！拉開聖誕拉炮 | 第一下兩人用力拉；第二下「砰」，拉炮斷成兩半飛開，跳出紅／綠／金色紙皇冠，冷笑話的紙條飄下來（四則笑話隨機） |
+| 芬蘭 | 305,245 | 跨過北極圈的那條線 | 羅瓦涅米聖誕老人村，北極光下。小朋友走到白線前、一步跨進北極圈、聖誕老人開門揮手；明信片下方多一條「去拜訪聖誕老人 →」連到 Santa 頁 |
+| 墨西哥 | 1200,448 | 敲破星星彩罐 | Las Posadas 的廣場，頭上掛著剪紙旗。第一下彩罐晃、第二下裂開、第三下破掉，糖果和水果撒滿地 |
+
+- 描出來的地圖沒有大不列顛，`intro-map.js` 另外手剪了一座小島（`BRITAIN`）；`intro-map-shapes.js` 是產出檔，沒有動。
+- 英國緊挨著冰島，英國的名字寫在球的上方；手機上冰島、英國兩顆球各往外推一點，才點得準。
+- 雪橇航線依序經過：冰島、英國、芬蘭、台灣、日本、紐西蘭、巴西、墨西哥、加拿大。
+- 從別頁連到某一國：`intro.html#finland`（國家代號）。頁面載入動畫結束後，地圖自己展開，地圖落定（約 1.3 秒）再打開那一國的明信片。Santa 頁降臨小屋的吊牌就是這樣連過來的。
+- 國家代號：`iceland`、`uk`、`finland`、`taiwan`、`japan`、`newzealand`、`canada`、`brazil`、`mexico`。
 
 每片紙只轉成圖片一次。紙片各自帶 `perspective()` 往後倒下，不共用 3D 空間：往後倒只會縮小，不會超出書頁，也不會互相穿過；前後順序交給 z-index。
 

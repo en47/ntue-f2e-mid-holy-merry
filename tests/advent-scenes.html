@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>降臨小屋的 25 個紙雕場景</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+body{margin:0;padding:16px;background:#dcc6a2;font:14px/1.6 system-ui;color:#3b2a24}
+h1{font-size:20px;margin:0 0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:12px}
+figure{margin:0}
+figcaption{font-size:13px;margin-top:4px}
+.view{position:relative;width:100%;aspect-ratio:280/240;overflow:hidden;border-radius:50% 50% 6px 6px/22% 22% 6px 6px;background:#2b3d58;cursor:pointer;perspective:700px}
+.view > div{position:absolute;inset:0}
+.advent-cut{pointer-events:none}
+</style>
+<script type="module">
+import { ADVENT_SCENES, coverScene } from '../js/components/cabin-advent-scenes.js';
+import { WINDOWS } from '../js/data/cabin-advent.js';
+const grid = document.querySelector('.grid');
+const scenes = [['封面', coverScene, '讓雪下大一點'], ...ADVENT_SCENES.map((scene, i) => [`12/${i + 1}`, scene, WINDOWS[i].play])];
+for (const [label, make, play] of scenes) {
+  const figure = document.createElement('figure'), view = document.createElement('div'), host = document.createElement('div'), caption = document.createElement('figcaption');
+  view.className = 'view'; view.append(host); caption.textContent = `${label}：${play}`; figure.append(view, caption); grid.append(figure);
+  const api = make(host); let step = 0;
+  view.addEventListener('click', () => { api.play(step % api.steps); step++; });
+  view.dataset.label = label;
+}
+document.body.dataset.ready = 'true';
+</script></head><body><h1>降臨小屋的紙雕場景（cabin-advent-scenes.js）</h1><p>點一下場景播放一次，有步驟的場景會往下一步。透過 HTTP 伺服器開啟。</p><div class="grid"></div></body></html>
