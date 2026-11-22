@@ -37,6 +37,9 @@ export const SLOTS = [
   [10, 'drawer', 308, 718, 84, 116, 'frame', 'down', WOOD], [22, 'drawer', 400, 718, 84, 116, 'frame', 'down', WOOD], [15, 'drawer', 492, 718, 84, 116, 'frame', 'down', WOOD],
 ].map(([day, kind, x, y, w, h, layer, hinge, colour]) => ({ day, kind, x, y, w, h, layer, hinge, colour }));
 const ROUND = new Set(['bauble', 'round']);
+// The front door stops this far above its slot's foot, just under the snow drift's line (front()): shut, the snow hides
+// what is left of its slot; open, the door would otherwise hang down through the snow.
+const ARCH_FOOT = 14;
 // Where a door's opening is cut: dark inside, a little lighter at the foot.
 function hole(g, { kind, x, y, w, h }) {
   if (ROUND.has(kind)) { shape('circle', { cx: x + w / 2, cy: y + h / 2, r: w / 2, fill: INSIDE }, g); shape('path', { d: `M${x + w * .12} ${y + h * .62}A${w / 2} ${h / 2} 0 0 0 ${x + w * .88} ${y + h * .62}Z`, fill: '#5e4434' }, g); return; }
@@ -131,8 +134,9 @@ const FACES = {
     shape('circle', { cx: w / 2, cy: h / 2, r: w / 2 - 5, fill: 'none', stroke: GOLD, 'stroke-width': 3 }, g);
   },
   arch(g, w, h, colour) {
-    shape('path', { d: `M0 ${h}V${w / 2}A${w / 2} ${w / 2} 0 0 1 ${w} ${w / 2}V${h}Z`, fill: colour }, g);
-    for (let i = 1; i < 4; i++) line(`M${w * i / 4} ${i === 2 ? 8 : 18}V${h - 4}`, '#00000022', g, 2);
+    const foot = h - ARCH_FOOT;
+    shape('path', { d: `M0 ${foot}V${w / 2}A${w / 2} ${w / 2} 0 0 1 ${w} ${w / 2}V${foot}Z`, fill: colour }, g);
+    for (let i = 1; i < 4; i++) line(`M${w * i / 4} ${i === 2 ? 8 : 18}V${foot - 4}`, '#00000022', g, 2);
     for (const y of [h * .38, h * .82]) line(`M2 ${y}H${w * .3}`, GOLD_DARK, g, 5);
     shape('circle', { cx: w * .82, cy: h * .62, r: 4.5, fill: GOLD }, g);
     shape('circle', { cx: w / 2, cy: h * .3, r: w * .2, fill: 'none', stroke: GREEN, 'stroke-width': w * .1 }, g);
@@ -160,11 +164,18 @@ const FACES = {
     shape('ellipse', { cx: w * .32, cy: h * .28, rx: w * .1, ry: w * .06, fill: '#ffffff88', transform: `rotate(-35 ${w * .32} ${h * .28})` }, g);
   },
 };
-// A door's back, plain kraft in its own shape; and the gold paper star stuck by today's door.
+// A door's back, plain kraft in its own shape; and the gold paper star stuck by today's door. The front door's is its
+// inside, a darker red: planks, the hinges' straps from the hinge (on the right, seen from behind) and a ring to pull it
+// to by, near its free edge.
 function back(g, kind, w, h) {
   if (ROUND.has(kind)) shape('circle', { cx: w / 2, cy: h / 2, r: w / 2, fill: '#e6d3ad' }, g);
-  else if (kind === 'arch') shape('path', { d: `M0 ${h}V${w / 2}A${w / 2} ${w / 2} 0 0 1 ${w} ${w / 2}V${h}Z`, fill: '#e6d3ad' }, g);
-  else shape('rect', { x: 0, y: 0, width: w, height: h, rx: 4, fill: '#e6d3ad' }, g);
+  else if (kind === 'arch') {
+    const foot = h - ARCH_FOOT;
+    shape('path', { d: `M0 ${foot}V${w / 2}A${w / 2} ${w / 2} 0 0 1 ${w} ${w / 2}V${foot}Z`, fill: RED_DARK }, g);
+    for (let i = 1; i < 4; i++) line(`M${w * i / 4} ${i === 2 ? 8 : 18}V${foot - 4}`, '#00000026', g, 2);
+    for (const y of [h * .38, h * .82]) line(`M${w * .7} ${y}H${w - 2}`, GOLD_DARK, g, 5);
+    shape('circle', { cx: w * .2, cy: h * .62, r: 6, fill: 'none', stroke: GOLD, 'stroke-width': 2.4 }, g);
+  } else shape('rect', { x: 0, y: 0, width: w, height: h, rx: 4, fill: '#e6d3ad' }, g);
 }
 const todayStar = g => shape('path', { d: 'M20 2L25 14 38 15 28 23 31 36 20 29 9 36 12 23 2 15 15 14Z', fill: GOLD, stroke: CREAM, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, g);
 const LAYERS = [['sky', sky], ['house', house], ['front', front], ['frame', frame]];

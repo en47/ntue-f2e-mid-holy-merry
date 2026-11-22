@@ -1183,6 +1183,8 @@ html.theatre-open { overflow: hidden; }
 .advent-slot[data-hinge="right"][data-state="open"] .advent-door { transform: rotateY(118deg); }
 .advent-slot[data-hinge="down"][data-state="open"] .advent-door { transform: rotateX(-100deg); }
 .advent-slot[data-kind="drawer"][data-state="open"] .advent-door { transform: translateZ(14px) rotateX(-78deg); }
+/* 大門（平安夜）又高又在正中間：打開時站得跟房子差不多垂直，不再往外翻到旁邊的小樹和禮物上。 */
+.advent-slot[data-kind="arch"][data-state="open"] .advent-door { transform: rotateY(-106deg); }
 .advent-slot[data-state="later"] .advent-door { cursor: default; }
 /* 今天那扇：角落貼一顆紙雕金星（盒子變小時跟著號碼一起縮小，不會蓋住號碼）。 */
 .advent-star, .advent-star img { position: absolute; width: max(calc(22px * var(--num-scale, 1)), 34%); aspect-ratio: 1; height: auto; }

@@ -342,12 +342,12 @@ export const ADVENT_ART = {
     shape('path', { d: 'M23 9A11 11 0 1 0 31 25A9 9 0 1 1 23 9Z', fill: '#f3e6b8' }, g);
     for (const [x, y, r] of [[12, 12, 1.2], [10, 22, 1], [16, 29, 1.3]]) shape('circle', { cx: x, cy: y, r, fill: SNOW }, g);
   },
-  // Christmas Eve: the sleigh and a reindeer across a full moon.
+  // Christmas Eve: the sleigh and a reindeer across a full moon, a few stars about it.
   flight(g) {
     shape('circle', { cx: 21, cy: 19, r: 14, fill: '#f3e6b8' }, g);
     shape('path', { d: 'M7 25Q7 21 10 21H13V23H19Q21 23 21 25Z', fill: INK }, g); line('M7 27H20Q22 27 22 25.5', INK, g, 1.2);
     shape('ellipse', { cx: 27.5, cy: 21, rx: 3.6, ry: 1.8, fill: INK }, g); line('M25.5 22L24.5 25M29.5 22L30.5 25M31 20L32.5 17.5M31 20L33.5 19M21 23.5L24 21.5', INK, g, 1.1);
-    for (const [x, y] of [[33, 8], [8, 9], [36, 28]]) shape('circle', { cx: x, cy: y, r: 1, fill: GOLD }, g);
+    for (const [x, y] of [[33, 8], [8, 9], [36, 28]]) star(g, x, y, 2.6);
   },
 };
 
