@@ -18,15 +18,26 @@
 import { paperLayer, shape } from './paper-art.js';
 import { lamp, roofHouse, snowyFir, star } from './paper-props.js';
 import { ornament } from './cabin-ornaments.js';
+import { polaroid } from './cabin-photo.js';
+import { endingStamps } from './cabin-ending-stamps.js';
 import { CLUE_ICON, clueIcon, goalPicture, postmark, stampArt, stampFrame } from './cabin-clue-art.js';
 import { CHAPTERS, GIFTS, TASKS, YARD, chaptersDone, goal, knowsSantas, points, signedUp } from '../services/cabin-story.js';
 import { ever } from '../services/cabin-bag.js';
 import { CLUE_PLACES, GIFT_HINTS, GIFT_ORDER, GOALS, GOAL_CLUES, NEXT, NOTEBOOK, RESTART, WONDER } from '../data/cabin-clues.js';
-import { JOBS } from '../data/cabin-secret.js';
+import { JOBS, NOTES } from '../data/cabin-secret.js';
 import { resetProgress } from '../services/cabin-progress.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const PAPER = { paper: { scale: .25, grain: .4, shadow: .3 }, eager: true }, GIFT_PAPER = { paper: { scale: .3, grain: .45, shadow: .25, rim: '#fbf6ea' }, eager: true };
+// The snowman's polaroid from the hat rack (cabin-photo.js), taped in under its sticker so he can be dressed by it: cut
+// once, the same picture each time the book is laid out again.
+let photoCut = null;
+function snapshot(parent) {
+  const photo = element('div', 'clue-photo', parent); photo.setAttribute('role', 'img'); photo.setAttribute('aria-label', NOTES.photo);
+  if (photoCut) photo.append(photoCut.cloneNode(true));
+  else photoCut = paperLayer(photo, '-4 -12 128 166', '', g => { polaroid(g); shape('path', { d: 'M43 -9L79 -7 78 6 42 4Z', fill: '#eadcb8', opacity: .9 }, g); }, { paper: { scale: .3, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true }).cloneNode(true);
+  return photo;
+}
 // Between the parts of a page: a wavering pencil line with a little star in the middle.
 const RULE = { paper: { scale: .2, grain: .6, shadow: 0, rim: '#ffffff00' }, eager: true };
 const divider = parent => paperLayer(element('div', 'notebook-rule', parent), '0 0 240 14', '', g => { shape('path', { d: 'M4 7C40 4 70 10 104 7M136 7C170 4 200 10 236 7', fill: 'none', stroke: '#d8c49c', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, g); star(g, 120, 7, 5.5); }, RULE);
@@ -94,7 +105,8 @@ export function share(ends, room, joins = []) {
   }
 }
 
-export function mountNotebook(stage, { progress, save, sound }) {
+// `watch(kind)`: an ending pressed in the book's row of stamps (on "now", once one has been reached), the book shut first.
+export function mountNotebook(stage, { progress, save, sound, watch = () => {} }) {
   const button = element('button', 'notebook-button', stage); button.type = 'button'; button.setAttribute('aria-label', '線索本');
   paperLayer(button, '0 0 48 56', 'notebook-icon', cover, PAPER);
   const dot = element('span', 'notebook-new', button); dot.hidden = true;
@@ -146,9 +158,10 @@ export function mountNotebook(stage, { progress, save, sound }) {
     if (card) render();
   }
 
+  const see = async kind => { sound.play('pick'); await close(); watch(kind); };
   // A clue as a sticker, at the end of the page's list (a new list if the page does not end in one): the picture of the
   // thing it was found on, its name, and where it was seen; tapped, what it said opens under it (one just found is open
-  // already).
+  // already), the snowman's polaroid with it.
   function sticker(page, id) {
     const list = page.lastElementChild?.matches('.notebook-clues') ? page.lastElementChild : element('ul', 'notebook-clues', page);
     const item = element('li', fresh.has(id) ? 'clue-item is-fresh' : 'clue-item', list);
@@ -156,8 +169,9 @@ export function mountNotebook(stage, { progress, save, sound }) {
     const picture = element('span', 'clue-icon', tag); picture.style.backgroundImage = clueIcon(CLUE_ICON[id]); picture.setAttribute('aria-hidden', 'true');
     const words = element('span', 'clue-words', tag); element('span', 'notebook-place', words, NOTEBOOK[id].name); element('span', 'clue-where', words, NOTEBOOK[id].place);
     const text = element('p', 'clue-text', item, NOTEBOOK[id].text); text.hidden = !fresh.has(id);
+    const photo = id === 'snowman-photo' ? snapshot(item) : null; if (photo) photo.hidden = text.hidden;
     tag.setAttribute('aria-expanded', String(!text.hidden));
-    tag.addEventListener('click', () => { text.hidden = !text.hidden; tag.setAttribute('aria-expanded', String(!text.hidden)); sound.play(text.hidden ? 'remove' : 'pick'); });
+    tag.addEventListener('click', () => { text.hidden = !text.hidden; if (photo) photo.hidden = text.hidden; tag.setAttribute('aria-expanded', String(!text.hidden)); sound.play(text.hidden ? 'remove' : 'pick'); });
     return item;
   }
   // The clues found among `ids`, in the order they were found.
@@ -231,6 +245,8 @@ export function mountNotebook(stage, { progress, save, sound }) {
         if (wonder) element('p', 'notebook-wonder', help, wonder);
         return head;
       },
+      // Once an ending has been reached, all three are here to watch (cabin-story.js `canWatch`).
+      ...(progress.finale.endings.length ? [page => { const box = element('section', 'notebook-endings', page); endingStamps(box, progress.finale, see); return box; }] : []),
       ...(signedUp(progress.volunteer) ? jobs() : []),
       ...clues(found(GOAL_CLUES[now] ?? []), page => element('p', 'book-label', page, '用得上的線索')),
       page => hints(page, now),

@@ -7,12 +7,13 @@ import { SUBSTITUTES, workMark } from './cabin-art.js';
 import { inked } from './cabin-paper.js';
 import { paperLayer, shape } from './paper-art.js';
 import { NOTEBOOK } from '../data/cabin-clues.js';
-import { CLUES, ENDING_KINDS, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
+import { CLUES, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
 import { COLOUR_NAMES, DUTY, INK, JOBS, LOG, LOG_FILES, MARKS, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
 import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { polaroid } from './cabin-photo.js';
 import { showOrnament } from './cabin-ornaments.js';
-import { CORD, PENCIL, RECORD, SEEN, STAY, TRUTH, WISH, WISHES } from '../data/cabin-finale.js';
+import { endingStamps } from './cabin-ending-stamps.js';
+import { CORD, PENCIL, RECORD, STAY, WISH, WISHES } from '../data/cabin-finale.js';
 
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const noise = index => { const value = Math.sin(index * 12.9898) * 43758.5453; return value - Math.floor(value); };
@@ -178,7 +179,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     else if (id === 'rack' && signedUp(volunteer)) sorting(page);
     // On the hat rack, an old polaroid of the snowman, dressed; its back says to dress him so again.
     if (id === 'hats') {
-      const picture = element('div', 'hats-polaroid', page); picture.setAttribute('role', 'img'); picture.setAttribute('aria-label', '舊拍立得：雪人戴著耳罩、格紋圍巾、圓框眼鏡，手裡提著燈');
+      const picture = element('div', 'hats-polaroid', page); picture.setAttribute('role', 'img'); picture.setAttribute('aria-label', NOTES.photo);
       paperLayer(picture, '-4 -4 128 158', '', polaroid, { paper: { scale: .3, grain: .45, shadow: .3, rim: '#fbf6ea' }, eager: true });
       element('p', 'secret-note', page, NOTES.polaroid); clue('snowman-photo');
       element('p', 'secret-note', page, finale.stayed ? NOTES.hatsMine : NOTES.hats); hat(page);
@@ -363,6 +364,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   }
   // The register's newest page: the season, then each substitute's initial, the year they joined and their stamps this
   // season, then the visitor's row, or a blank one (to sign once Santa has told you what it is for).
+  // An ending pressed in the register's row of stamps: watched (cabin-play.js tells it again).
+  const watch = kind => { sound.play('pick'); onReplay(kind); };
   function register(card, from) {
     element('h3', 'secret-title', card, REGISTER.title); element('p', 'register-season', card, REGISTER.season); clue('register-years');
     const list = element('ul', 'register-rows', card);
@@ -410,18 +413,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
           confirm(make, { ...WISH, sure: WISH.sure(WISHES.find(wish => wish.id === chosen).name) }, () => { sound.play('thud'); closeCard(); onWish(chosen); }, () => { for (const choice of choices.children) choice.disabled = false; });
         });
       } else if (finale.wish) element('p', 'secret-note', card, WISH.made(WISHES.find(wish => wish.id === finale.wish).name));
-      const seen = element('p', 'register-endings', card); element('span', '', seen, `${SEEN}：`);
-      // A stamp for each ending seen, and a gold star once one was told true: press it to watch that again.
-      for (const ending of [...ENDING_KINDS, 'truth']) {
-        const got = ending === 'truth' ? finale.truth : finale.endings.includes(ending), name = ending === 'truth' ? TRUTH.star : `結局 ${ending}`;
-        const mark = element(got ? 'button' : 'span', `${got ? 'is-seen' : ''}${ending === 'truth' ? ' ending-truth' : ''}`, seen); mark.setAttribute('aria-label', got ? `再看一次${name}` : `${name}，還沒看過`);
-        if (got) { mark.type = 'button'; on(mark, 'click', () => { sound.play('pick'); onReplay(ending); }); }
-        if (ending === 'truth') {
-          inked(element('span', 'truth-star', mark), '0 0 30 30', ink => shape('path', { d: 'M15 2L18.6 10.6 27.8 11.2 20.6 17 23 26 15 21 7 26 9.4 17 2.2 11.2 11.4 10.6Z', ...(got ? { fill: '#d9a93c' } : { fill: 'none', stroke: '#d6c6a4', 'stroke-width': 1.6, 'stroke-linejoin': 'round' }) }, ink));
-          element('span', 'ending-letter', mark, TRUTH.star); continue;
-        }
-        inked(mark, '0 0 30 30', ink => shape('circle', got ? { cx: 15, cy: 15, r: 13, fill: '#b5443c' } : { cx: 15, cy: 15, r: 12, fill: 'none', stroke: '#d6c6a4', 'stroke-width': 1.8 }, ink)); element('span', 'ending-letter', mark, ending);
-      }
+      // A stamp for each ending (cabin-ending-stamps.js): press one to watch it.
+      endingStamps(card, finale, watch);
       // Leaving takes a second press, and keeps the stamps.
       const leave = element('button', 'register-leave', card, REGISTER.leave); leave.type = 'button';
       on(leave, 'click', () => {
@@ -431,6 +424,8 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       return;
     }
     element('p', 'secret-note', card, REGISTER.invite); onInvite();
+    // Not signed up (gone home, or crossed out), the endings are still here to watch once one has been reached.
+    if (finale.endings.length) endingStamps(card, finale, watch);
     const grid = element('div', 'register-letters', card); grid.setAttribute('aria-label', '選一個字母當你的縮寫');
     const sign = element('button', 'register-sign', card, REGISTER.sign); sign.type = 'button'; sign.disabled = true;
     let chosen = '';

@@ -38,20 +38,55 @@ export function showOrnament(parent, mark, before = null) {
   parent.insertBefore(found, before); parent.insertBefore(note, before);
   return found;
 }
-// The cabin's little tree with all five hung on it, and at the top a red one with the visitor's initial (any letter, so
-// it is written over the paper, not cut).
+// The cabin's tree, trimmed, as a little paper show: it stands up in a warm glow, the five ornaments are hung on it one
+// after another (a spark as each catches), its lights come on tier by tier, the star at its top shines, and last a red
+// one with the visitor's initial comes down on its string to the top (any letter, so it is written over the paper, not
+// cut) while a few gold stars drift down. Each piece is a layer of its own, moved by santa.css from its `--at` (seconds);
+// under reduced motion the tree simply stands trimmed. `TRIM` is when each part lands, for the sounds (cabin-play.js).
 const SPOTS = { N: [70, 92], K: [130, 104], H: [94, 140], E: [150, 152], O: [58, 158] };
+// Each tier's string of lights, draped across it: [left x, y, right x, y, bulbs].
+const STRANDS = [[74, 73, 126, 79, 5], [63, 120, 137, 128, 6], [52, 165, 148, 174, 7]];
+const BULBS = [GOLD, '#c63a33', '#fff1c4', '#7cb8ec'];
+// When each part comes in (seconds): the five ornaments one after another, the lights, the star, the red one lowered, the
+// falling stars; an ornament catches `hang` after it comes in, the red one `lower` after (cabin-play.js plays a sound).
+export const TRIM = { drop: [1, 1.35, 1.7, 2.05, 2.4], hang: .55, lit: 2.9, star: 3.5, mine: 3.9, lower: 1, fall: 4.9 };
+const GLASS = { paper: null, eager: true };
+// A gold spark where something has just caught on the tree, centred at (x, y) in % of the tree.
+function spark(card, x, y, seconds) {
+  const glint = element('span', 'tree-spark', card); Object.assign(glint.style, { left: `${x - 6}%`, top: `${y - 5}%` }); glint.style.setProperty('--at', `${seconds}s`);
+  paperLayer(glint, '0 0 40 40', '', g => star(g, 20, 20, 18, '#ffd76a'), GLASS);
+  return glint;
+}
 export function treeCard(parent, mark) {
-  const card = element('div', 'ornament-tree');
-  paperLayer(card, '0 0 200 240', '', g => {
+  const card = element('div', 'ornament-tree'), at = (node, seconds) => { node.style.setProperty('--at', `${seconds}s`); return node; };
+  paperLayer(card, '0 0 200 240', 'tree-halo', g => { for (const [r, fill] of [[92, '#fff4dc'], [62, '#ffe9bf']]) shape('circle', { cx: 100, cy: 128, r, fill }, g); }, PAPER);
+  paperLayer(card, '0 0 200 240', 'tree-body', g => {
     shape('rect', { x: 92, y: 200, width: 16, height: 26, fill: '#6b4a33' }, g);
     for (const [top, half, base, fill] of [[30, 46, 104, '#3f6653'], [70, 64, 158, '#4f7d68'], [112, 84, 206, '#3f6653']]) shape('path', { d: `M100 ${top}L${100 + half} ${base}Q100 ${base + 10} ${100 - half} ${base}Z`, fill }, g);
-    star(g, 100, 26, 16, GOLD);
   }, PAPER);
-  for (const [who, [x, y]] of Object.entries(SPOTS)) { const hung = element('span', 'ornament-hung', card); Object.assign(hung.style, { left: `${(x - 13) / 2}%`, top: `${(y - 6) / 2.4}%` }); paperLayer(hung, '-6 -4 112 140', '', g => ornament(who, g), PAPER); }
-  const mine = element('span', 'ornament-hung is-mine', card); Object.assign(mine.style, { left: '43.5%', top: '17%' });
+  STRANDS.forEach(([x1, y1, x2, y2, count], i) => at(paperLayer(card, '0 0 200 240', 'tree-strand', g => {
+    const sag = (x1 + x2) / 2, low = Math.max(y1, y2) + 9, point = t => [(1 - t) ** 2 * x1 + 2 * (1 - t) * t * sag + t * t * x2, (1 - t) ** 2 * y1 + 2 * (1 - t) * t * low + t * t * y2];
+    shape('path', { d: `M${x1} ${y1}Q${sag} ${low} ${x2} ${y2}`, fill: 'none', stroke: '#2f5240', 'stroke-width': 1.2 }, g);
+    for (let k = 0; k < count; k++) { const [x, y] = point((k + .5) / count); shape('circle', { cx: x, cy: y + 2, r: 3.6, fill: BULBS[(k + i) % BULBS.length] }, g); shape('circle', { cx: x - 1.1, cy: y + .9, r: 1, fill: '#fff', opacity: .7 }, g); }
+  }, GLASS), TRIM.lit + i * .2));
+  at(paperLayer(card, '0 0 200 240', 'tree-rays', g => {
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, ray = (turn, r) => `${(100 + Math.cos(a + turn) * r).toFixed(1)} ${(26 + Math.sin(a + turn) * r).toFixed(1)}`; shape('path', { d: `M${ray(-.16, 10)}L${ray(0, k % 2 ? 26 : 36)}L${ray(.16, 10)}Z`, fill: '#ffe2a0' }, g); }
+  }, PAPER), TRIM.star);
+  at(paperLayer(card, '0 0 200 240', 'tree-star', g => star(g, 100, 26, 16, GOLD), PAPER), TRIM.star);
+  Object.entries(SPOTS).forEach(([who, [x, y]], i) => {
+    const hung = at(element('span', 'ornament-hung', card), TRIM.drop[i]); Object.assign(hung.style, { left: `${x / 2 - 7.5}%`, top: `${(y - 8) / 2.4}%` }); paperLayer(hung, '-6 -4 112 140', '', g => ornament(who, g), PAPER);
+    spark(card, x / 2, (y - 8) / 2.4 + 8.7, TRIM.drop[i] + TRIM.hang);
+  });
+  const mine = at(element('span', 'ornament-hung is-mine', card), TRIM.mine); Object.assign(mine.style, { left: '42.5%', top: '15%' });
   paperLayer(mine, '-6 -4 112 140', '', g => { shape('path', { d: 'M50 0V24', stroke: '#8f6a4c', 'stroke-width': 1.6 }, g); shape('rect', { x: 42, y: 22, width: 16, height: 10, rx: 2, fill: GOLD }, g); shape('circle', { cx: 50, cy: 74, r: 36, fill: '#b5443c' }, g); star(g, 72, 50, 8, GOLD); }, PAPER);
   element('span', 'ornament-mine', mine, mark ? `${mark}.` : '★');
+  spark(card, 50, 23.7, TRIM.mine + TRIM.lower).classList.add('is-mine');
+  // A few gold stars and flakes of snow drift down past it, once.
+  const fall = element('div', 'tree-fall', card);
+  [[8, 0, 3.2, 14], [20, .5, 2.8, -10], [33, .2, 3.4, 8], [47, .8, 3, -14], [60, .3, 3.3, 12], [72, .9, 2.9, -8], [84, .4, 3.5, 10], [92, 1.1, 3.1, -12], [14, 1.3, 3.2, 6], [66, 1.5, 3, -6]].forEach(([left, delay, length, drift], k) => {
+    const bit = at(element('span', 'tree-bit', fall), TRIM.fall + delay); bit.style.left = `${left}%`; bit.style.setProperty('--dur', `${length}s`); bit.style.setProperty('--drift', `${drift * 10}%`);
+    paperLayer(bit, '0 0 20 20', '', g => (k % 3 === 2 ? shape('circle', { cx: 10, cy: 10, r: 5, fill: '#fffaf0' }, g) : star(g, 10, 10, 8, GOLD)), PAPER);
+  });
   parent.append(card);
   return card;
 }
