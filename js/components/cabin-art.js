@@ -1374,13 +1374,16 @@ function doorFrame(parent) {
   shape('path', { d: `M${x - 30} ${y - 30}H${x + w + 30}`, stroke: WOOD, 'stroke-width': 6 }, parent);
   swag(parent, x - 50, x + w + 50, y - 34, 18);
 }
+// Every cut sheet has a paper edge: a copy of it this far behind it (cabin-scene.js), seen past its rim as the paper's
+// thickness. Sheets that overlap must not share a plane, their edges included, or the two flicker against each other.
+export const EDGE = .012;
 // A sheet hung on a room wall: `box` is where it is drawn on that wall's own picture ([left, top, right, bottom], in the
-// wall's art units), `out` how far it stands off the wall. Centred on its box, or hung from its top (`hang`: it can sway),
-// or standing on its bottom edge (`stand`: on a shelf).
+// wall's art units), `out` how far it stands off the wall (more than EDGE, so its edge stands off the wall too). Centred
+// on its box, or hung from its top (`hang`: it can sway), or standing on its bottom edge (`stand`: on a shelf).
 const WALLS = { back: [HOUSE.width, HOUSE.ridge], 'front-in': [HOUSE.width, HOUSE.ridge], left: [HOUSE.depth, HOUSE.wall], right: [HOUSE.depth, HOUSE.wall] };
 // `pad`: a margin (art units) left round the drawing, so the paper's rim and shadow are never cut off at the sheet's edge
 // (none along the bottom of what stands on a shelf or the floor: `stand`, `floor`).
-function onWall(side, box, { out = .012, hang = false, stand = false, floor = false, pad = 0, ...extra } = {}) {
+function onWall(side, box, { out = .014, hang = false, stand = false, floor = false, pad = 0, ...extra } = {}) {
   const below = stand || floor ? 0 : pad, [x0, y0, x1, y1] = [box[0] - pad, box[1] - pad, box[2] + pad, box[3] + below];
   const [width, height] = WALLS[side], u = (x0 + x1) / 2 / PX - width / 2, v = height - (hang ? y0 : stand ? y1 : (y0 + y1) / 2) / PX;
   const at = { back: [u, v, BACK + out], 'front-in': [-u, v, HOUSE.depth / 2 - out], left: [-HOUSE.width / 2 + out, v, -u], right: [HOUSE.width / 2 - out, v, u] }[side];
@@ -1408,7 +1411,8 @@ export const DECOR = ([
   ...wallWindow('left', [560, 210, 860, 510], [505, 150, 915, 560]),
   ...wallWindow('right', [150, 230, 410, 490], [100, 160, 460, 535]),
   ...wallWindow('front-in', [175, 660, 425, 910], [125, 595, 475, 950]),
-  { id: 'decor-advent', ...onWall('left', [630, 372, 790, 527], { out: .028, stand: true, pad: 14 }), detail: 3, advent: ADVENT_WINDOWS, draw: adventHouseSheet },
+  // On the sill in front of the window, its paper edge too: clear of the window's frame (.016) and lights (.019).
+  { id: 'decor-advent', ...onWall('left', [630, 372, 790, 527], { out: .034, stand: true, pad: 14 }), detail: 3, advent: ADVENT_WINDOWS, draw: adventHouseSheet },
   { id: 'decor-calendar', ...onWall('left', [120, 290, 260, 500], { hang: true, sway: true, pad: 14 }), detail: 3, draw: calendar },
   { id: 'decor-bunting', ...onWall('left', [60, 130, 500, 250], { hang: true, sway: true, pad: 16 }), detail: 2, draw: snowflakeBunting },
   { id: 'decor-picture', ...onWall('back', [70, 570, 290, 780], { out: .014, pad: 16 }), detail: 2.6, draw: framedReindeer },
