@@ -153,9 +153,12 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       element('p', 'secret-note', page, finale.stayed ? STAY.tag : NOTES.tags);
     } else if (id === 'log') {
       element('h3', 'secret-title', page, LOG.title);
-      shiftLog(page);
+      // The log on the left and the notes it needs clipped on beside it, on the right (one under the other on a phone):
+      // all of it in sight together, nothing waiting further down to be scrolled to.
+      const desk = element('div', 'shift-desk', page), main = element('div', 'shift-main', desk);
+      shiftLog(main, desk);
       // Under the four nights, the early shift on Christmas morning.
-      const list = element('ul', 'secret-log', page);
+      const list = element('ul', 'secret-log', main);
       const morning = element('li', finale.stayed ? 'is-morning is-you' : 'is-morning', list); morning.textContent = `${MORNING.date}　${MORNING.shift}　${finale.stayed ? `${volunteer.mark || ''}${volunteer.mark ? '.' : ''}（你）` : progress.combos.includes('santa') ? MORNING.snowman : MORNING.empty}`;
       // Every job done: the early shift can be signed, and the visitor stays on.
       if (canStay(volunteer, finale)) {
@@ -212,9 +215,9 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
   // that initial in. A cell that still shows its writer (a blot in their colour, their work mark) dries the moment the right
   // initial goes in, and stays. Filled in, the whole is checked by the rules (cabin-story.js): put right, the ink comes back
   // and it counts as read; otherwise it says only how many cells are wrong. The notes the washed-out cells need are clipped
-  // on underneath, the ones found so far to open and read as they look, each line in its writer's ink (and its colour
-  // named, as the blots are); one not found yet is a blank slip.
-  function shiftLog(page) {
+  // on beside it (`desk`), the ones found so far to open and read as they look, the first already open, each line in its
+  // writer's ink (and its colour named, as the blots are); one not found yet is a blank slip.
+  function shiftLog(page, desk = page) {
     const log = story.log, solved = () => logSolved(log);
     // Santa's slip, taped on above it.
     const pin = element('p', 'shift-pin', page), plea = element('span', '', pin, solved() ? LOG.pin.thanks : cabin.santaHome ? LOG.pin.home : LOG.pin.away);
@@ -260,26 +263,30 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     };
     for (const mark of WHO) { const pick = element('button', 'shift-pick', picks, `${mark}.`); pick.type = 'button'; pick.style.color = COLOURS[mark]; pick.setAttribute('aria-label', `寫上 ${mark}.（${NAMES[mark]}）`); draggable(pick, '.shift-cell', cell => { pick.style.translate = ''; write(mark, cells.indexOf(cell)); }); on(pick, 'click', () => write(mark)); }
     const erase = element('button', 'shift-pick shift-erase', picks, LOG.erase); erase.type = 'button';
-    const files = element('div', 'shift-files', page), reading = element('p', 'shift-read', page); reading.hidden = true;
+    const side = element('aside', 'shift-side', desk); side.setAttribute('aria-label', LOG.files); desk.classList.add('has-side');
+    element('p', 'shift-side-title', side, LOG.files);
+    const files = element('div', 'shift-files', side), reading = element('p', 'shift-read', side); reading.hidden = true;
+    const read = (file, lines, open) => {
+      for (const each of files.querySelectorAll('[aria-pressed]')) each.setAttribute('aria-pressed', String(each === file && open));
+      reading.hidden = !open; reading.replaceChildren();
+      if (open) for (const [text, who] of lines) {
+        const line = element('span', who ? 'shift-read-line' : 'shift-read-line is-plain', reading, text);
+        if (who) { line.style.color = COLOURS[who]; element('span', 'shift-ink', line, `${COLOUR_NAMES[who]}色`); }
+      }
+    };
+    let first = null;
     for (const [id, name, lines] of LOG_FILES) {
       const found = progress.clues.includes(id), file = element('button', found ? 'shift-file' : 'shift-file is-missing', files, name); file.type = 'button';
       if (!found) { file.disabled = true; element('span', 'shift-file-where', file, LOG.missing(NOTEBOOK[id].place)); continue; }
-      file.setAttribute('aria-pressed', 'false');
-      on(file, 'click', () => {
-        const open = file.getAttribute('aria-pressed') !== 'true'; sound.play('pick');
-        for (const each of files.querySelectorAll('[aria-pressed]')) each.setAttribute('aria-pressed', String(each === file && open));
-        reading.hidden = !open; reading.replaceChildren();
-        if (open) for (const [text, who] of lines) {
-          const line = element('span', who ? 'shift-read-line' : 'shift-read-line is-plain', reading, text);
-          if (who) { line.style.color = COLOURS[who]; element('span', 'shift-ink', line, `${COLOUR_NAMES[who]}色`); }
-        }
-      });
+      file.setAttribute('aria-pressed', 'false'); first ??= () => read(file, lines, true);
+      on(file, 'click', () => { sound.play('pick'); read(file, lines, file.getAttribute('aria-pressed') !== 'true'); });
     }
+    first?.();
     on(erase, 'click', () => { if (chosen >= 0 && log[chosen]) { log[chosen] = ''; save(); cells[chosen].show(); sound.play('remove'); } });
     function check() {
       if (!logSolved(log)) { note.textContent = LOG.wrong(logWrong(log)); sound.play('nope'); grid.classList.remove('is-wrong'); void grid.offsetWidth; grid.classList.add('is-wrong'); return; }
       // Put right: the ink comes back a row at a time, and the log counts as read.
-      grid.classList.add('is-solved'); picks.remove(); files.remove(); reading.remove(); cells.forEach(cell => { cell.disabled = true; cell.removeAttribute('aria-pressed'); });
+      grid.classList.add('is-solved'); picks.remove(); side.remove(); desk.classList.remove('has-side'); cells.forEach(cell => { cell.disabled = true; cell.removeAttribute('aria-pressed'); });
       note.textContent = LOG.solved; plea.textContent = LOG.pin.thanks; sound.play('cheer'); learn('log'); clue('shift-log');
     }
   }

@@ -2,7 +2,13 @@
 // Each has a front (who it is from, and the letter itself) and a back, where whoever dealt with it wrote a line and signed
 // with an initial. The initials are in different hands (`hand`): a first small clue that more than one person works here.
 // `paper` is what it was written on (a child's lined page, or a squared work pad), `doodle` the crayon drawing in its corner.
+// The work pad with Christmas Eve's route comes first, on top of the pile: its back is a note the shift log needs.
 export const DESK_LETTERS = [
+  {
+    id: 'route', from: '工作筆記', to: '平安夜路線', paper: 'pad',
+    body: '台北 → 東京 → 雷克雅維克 → 多倫多。\n冰島風大，記得多帶一條圍巾。雪橇第三個座位的扣環有點鬆。',
+    back: { note: '收到，扣環修好了。12/23 前半夜換我飛，12/22 晚上我先睡飽。', sign: 'H.', date: '12/22', hand: 'h' },
+  },
   {
     id: 'mia', from: '小米（7 歲）', to: '北極　聖誕老人 收', paper: 'kid', doodle: 'sled',
     body: '親愛的聖誕老人：\n奶奶的膝蓋不好，冬天出門很辛苦。可以送她一台會自己滑的雪橇嗎？我會每天幫忙掃門口的雪。',
@@ -12,11 +18,6 @@ export const DESK_LETTERS = [
     id: 'ole', from: '奧勒（北邊的麋鹿牧場）', to: '北極　聖誕老人 收', paper: 'kid', doodle: 'reindeer',
     body: '謝謝您上個月幫忙找回走失的小麋鹿。牠現在每天都跟在媽媽後面，連吃地衣都要搶第一口。',
     back: { note: '回信寄出了，附上一包地衣。', sign: 'K.', date: '12/21', hand: 'k' },
-  },
-  {
-    id: 'route', from: '工作筆記', to: '平安夜路線', paper: 'pad',
-    body: '台北 → 東京 → 雷克雅維克 → 多倫多。\n冰島風大，記得多帶一條圍巾。雪橇第三個座位的扣環有點鬆。',
-    back: { note: '收到，扣環修好了。12/23 前半夜換我飛，12/22 晚上我先睡飽。', sign: 'H.', date: '12/22', hand: 'h' },
   },
   {
     id: 'lumi', from: '露米（10 歲）', to: '北極　聖誕老人 收', paper: 'kid', doodle: 'book',

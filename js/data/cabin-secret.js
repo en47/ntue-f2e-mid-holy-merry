@@ -19,8 +19,8 @@ export const DUTY = { title: '值班須知', lines: ['一、每一晚分前半�
 export const LOG = {
   title: '夜班交接表', halves: ['前半夜', '後半夜'],
   how: '點一格，再點下面的名牌，把縮寫補回去。',
-  // A note it needs, clipped on beside it (LOG_FILES), not found yet.
-  missing: place => `還沒讀到・${place}`,
+  // The notes it needs, clipped on beside it (LOG_FILES); one not found yet.
+  files: '夾在旁邊的紀錄', missing: place => `還沒讀到・${place}`,
   wrong: count => `墨水乾了一點……有 ${count} 格的筆跡好像對不上。`,
   solved: '最後一格補上，墨水乾了，字一行一行回來：每一晚，都是兩個人接力飛完的。',
   erase: '擦掉',

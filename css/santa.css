@@ -21,6 +21,10 @@
 .cabin-back:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
 .cabin-tip { position: absolute; z-index: 3; left: 50%; top: 14%; margin: 0; padding: .55rem 1.2rem; translate: -50% 0; color: var(--ink); background: #fffbedee; border: 2px solid #ad3c3b55; border-radius: 14px; box-shadow: 0 6px 0 -2px #dccaa9; font-size: var(--fs-small); pointer-events: none; transition: opacity .6s ease; }
 .cabin-tip.is-gone { opacity: 0; }
+/* 第一次來、郵筒還沒打開：歡迎的提示大一點、一直留著，輕輕上下晃，直到走去郵筒（或任何地方）。 */
+.cabin-tip.is-welcome { width: max-content; max-width: min(30rem, calc(100% - 2rem)); font-size: var(--fs-body); text-align: center; line-height: 1.7; white-space: pre-line; }
+@media (prefers-reduced-motion: no-preference) { .cabin-tip.is-welcome:not(.is-gone) { animation: tip-bob 2.6s ease-in-out infinite; } }
+@keyframes tip-bob { 50% { translate: -50% -4px; } }
 .cabin-explore { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .cabin-explore:focus-within { z-index: 5; top: 1rem; right: 1rem; width: auto; height: auto; overflow: visible; clip-path: none; display: grid; gap: .3rem; padding: .7rem; background: var(--cream); border-radius: 14px; box-shadow: 0 6px 0 -2px #dccaa9; }
 .cabin-explore button { padding: .3rem .8rem; border: 1px solid var(--line); border-radius: 10px; background: none; font-size: var(--fs-small); text-align: left; }
@@ -367,6 +371,8 @@
 .secret-thing.is-read { animation: none; opacity: .55; }
 .secret-thing:focus-visible, .books-enter:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .books-enter { position: absolute; left: 50%; bottom: 1rem; padding: .5rem 1.1rem; translate: -50% 0; color: var(--cream); background: var(--red); border: 0; border-radius: 10px; font-size: var(--fs-small); font-weight: 700; pointer-events: auto; }
+/* 線索本打開時，「離開，關上書櫃」先藏起來，不會和線索本底下的「從頭再玩一次」疊在一起。 */
+#cabin-stage:has(.notebook-card) .books-enter { visibility: hidden; }
 .secret-card { max-height: calc(100% - 2rem); overflow: auto; }
 /* 卡片本身不捲動：字在內頁裡捲，不會跑到封面、木板或夾板的邊上；放回去的按鈕留在底下。 */
 .cabin .secret-card { display: flex; flex-direction: column; overflow: hidden; }
@@ -914,6 +920,19 @@ html.theatre-open { overflow: hidden; }
 .shift-grid:not(.is-solved) .shift-cell:not(.is-dry):not(:disabled) .shift-mark { opacity: .7; }
 @media (prefers-reduced-motion: no-preference) { .shift-cell.is-dry .shift-mark { animation: shift-dry .7s ease-out both; } }
 /* 夾在交接表下面的紀錄：找到的貼著紙條、點開來讀；還沒找到的是一張空白的紙。 */
+/* 交接表和要對照的紀錄放在一起：寬螢幕左邊是交接表、右邊一欄是夾在旁邊的紀錄（第一張先打開），不用往下捲；手機上下排。 */
+.shift-desk { display: grid; gap: .2rem 1.6rem; }
+.shift-side-title { margin: 0 0 .45rem; color: var(--muted); font-family: var(--font-hand); font-size: var(--fs-small); }
+@media (min-width: 900px) {
+  .cabin .secret-card[data-thing="log"]:has(.shift-desk.has-side) { width: min(54rem, calc(100% - 2rem)); }
+  .shift-desk.has-side { grid-template-columns: minmax(0, 26rem) minmax(0, 1fr); align-items: start; }
+  .shift-side { padding-top: .2rem; }
+  /* 兩欄時左欄矮一點：班表的格子和間距收緊，交接表整張不用捲。 */
+  .shift-desk.has-side .shift-pin { margin-bottom: .4rem; }
+  .shift-desk.has-side .shift-grid { gap: .2rem .5rem; margin-bottom: .55rem; }
+  .shift-desk.has-side .shift-cell { height: 2.5rem; }
+  .shift-desk.has-side .shift-picks { margin-bottom: .5rem; }
+}
 .shift-files { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 .5rem; }
 .shift-file { min-width: 4.8rem; min-height: 2.6rem; padding: .7rem .8rem .45rem; color: var(--ink); background: #fbf3df; border: 0; font-family: var(--font-hand); font-size: var(--fs-small); cursor: pointer; transition: translate .2s ease; }
 .shift-file:hover:not(:disabled), .shift-file[aria-pressed="true"] { translate: 0 -3px; }
@@ -966,6 +985,8 @@ html.theatre-open { overflow: hidden; }
 .drawer-card, .lens-card { width: min(22rem, calc(100% - 2rem)); }
 /* 抽屜卡片蓋在桌上的火漆印與郵戳上面。 */
 .drawer-card { z-index: 6; }
+/* 抽屜裡的紙條一點就疊在抽屜卡片上面，不必先關上抽屜才看得到。 */
+.drawer-card ~ .cabin-note { z-index: 7; }
 .drawer-things { display: flex; justify-content: center; gap: 1.2rem; margin: .4rem 0 1.4rem; }
 .drawer-thing, .secret-pin { position: relative; width: 6.5rem; aspect-ratio: 1; padding: 0; border: 0; background: none; cursor: pointer; }
 .drawer-thing .art-layer, .secret-pin .art-layer, .lens-view .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -1152,7 +1173,8 @@ html.theatre-open { overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) { .bag-pocket.is-new, .bag-finger, .bag-ghost.is-fitted, .inspect-card { animation: none; } .bag-item, .bag-item .art-layer, .bag-ring, .inspect-object { transition: none; } }
 /* 第四章替身工作：穀倉牆上的餵食表（做完打勾）、雪橇的窄貨架（由下往上疊）與禮物袋。 */
-.feed-table { animation: none; background: none; }
+/* 餵食表：米黃色的舊紙、深色圖釘，稍微斜斜地釘在穀倉門上，看起來是穀倉的一部分，不是貼上去的白色便條。 */
+.feed-table { animation: none; background: none; rotate: -4deg; }
 .feed-table .art-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 .feed-table .feed-ticks { opacity: 0; }
 .feed-table.is-done .feed-ticks { opacity: 1; }
