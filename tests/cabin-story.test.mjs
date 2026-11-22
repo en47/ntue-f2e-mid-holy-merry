@@ -87,6 +87,14 @@ test('the end: three stamps buy a wish, all four let you stay; told true once th
   assert.equal(canGoHome({ volunteer: { mark: '', tasks: [] }, finale: { ...finale, endings: ['A'] } }), true, 'chosen again, it is told again: nothing else ever tells it');
   assert.equal(allEndings({ ...finale, endings: ['A', 'B', 'C'] }), false, 'the three, and the truth too'); assert.equal(allEndings({ ...finale, endings: ['C', 'A', 'B'], truth: true }), true);
 });
+test('one ending reached opens the other two to watch; the true telling only once reached', async () => {
+  const { canWatch } = await import('../js/services/cabin-story.js');
+  const finale = { endings: [], truth: false };
+  assert.deepEqual(['A', 'B', 'C', 'truth'].filter(kind => canWatch(finale, kind)), [], 'nothing before any ending');
+  assert.deepEqual(['A', 'B', 'C', 'truth'].filter(kind => canWatch({ ...finale, endings: ['A'] }, kind)), ['A', 'B', 'C'], 'after A, B and C can be watched too');
+  assert.deepEqual(['A', 'B', 'C', 'truth'].filter(kind => canWatch({ endings: ['C'], truth: true }, kind)), ['A', 'B', 'C', 'truth']);
+  assert.equal(canWatch({ endings: ['B'], truth: false }, 'D'), false, 'only the three');
+});
 test('the clue book hints at the first thing the story is still waiting on', () => {
   const story = { left: false, opened: false, seen: [] }, volunteer = { mark: '', tasks: [] }, finale = { invited: false, twist: false, wish: null, stayed: false, endings: [] };
   // The yard's four things found (the lichen fed, the handle on the winch, the key and matches still in the pocket).

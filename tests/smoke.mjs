@@ -421,14 +421,14 @@ await test('Santa 故事結尾：紅繩舊紀錄簿（第二次反轉）、三�
 });
 await test('Santa 第五章最終選擇：世界路標回家、許願與早班都要確認、聖誕老人只問一次、帽架第六鉤、紀念明信片', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
-  const [play, secret, santa, card, css, art] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-secret.js', 'js/santa.js', 'js/components/cabin-postcard.js', 'css/santa.css', 'js/components/cabin-art.js'].map(read));
+  const [play, secret, santa, card, css, art, stamps] = await Promise.all(['js/components/cabin-play.js', 'js/components/cabin-secret.js', 'js/santa.js', 'js/components/cabin-postcard.js', 'css/santa.css', 'js/components/cabin-art.js', 'js/components/cabin-ending-stamps.js'].map(read));
   const { WISH, STAY, SIGNPOST, ASK, POSTCARD, TRUTH } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href);
   for (const [name, words] of Object.entries({ WISH, STAY, SIGNPOST })) assert.ok(words.sure && words.yes && words.no, `${name}: asked once more, yes or not yet`);
   assert.deepEqual(ASK.options.map(([id]) => id), ['explore', 'wish', 'stay']); assert.ok(TRUTH.star && POSTCARD.truth[0] === 'Dear Christmas Traveler,' && ['A', 'B', 'C'].every(kind => POSTCARD.lines[kind]?.length && POSTCARD.sign[kind]));
   assert.ok(santa.includes("else if (id === 'world-sign') play?.signpost(note);") && play.includes('    signpost,'), 'The world signpost in the yard is the way home');
   assert.ok(play.includes("yes.addEventListener('click', () => { node.remove(); card = null; ending('A'); });") && play.includes("SIGNPOST.volunteer : note"), 'Going home is confirmed; a volunteer finds the card on the signpost instead');
   assert.ok(play.includes('points(progress.volunteer) === TASKS.length && !progress.finale.asked && cabin.santaHome') && play.includes('finale.asked = true; save();'), 'Santa asks once, all four jobs done, and never again');
-  assert.ok(secret.includes('confirm(sign, STAY, ') && secret.includes('confirm(make, { ...WISH, sure: WISH.sure(') && secret.includes("for (const ending of [...ENDING_KINDS, 'truth'])") && css.includes('.register-sign[hidden] { display: none; }'), 'The wish and the early shift are each confirmed; the register stamps A, B, C and a gold star for the truth');
+  assert.ok(secret.includes('confirm(sign, STAY, ') && secret.includes('confirm(make, { ...WISH, sure: WISH.sure(') && secret.includes('endingStamps(card, finale, watch);') && stamps.includes("for (const kind of [...ENDING_KINDS, 'truth'])") && css.includes('.register-sign[hidden] { display: none; }'), 'The wish and the early shift are each confirmed; the register stamps A, B, C and a gold star for the truth');
   assert.ok(art.includes("SUBSTITUTES[i]?.[0] ?? (state.mine ? 'mine' : null)") && secret.includes('finale.stayed ? NOTES.hatsMine : NOTES.hats'), 'Staying on, your hat hangs on the sixth peg');
   assert.ok(card.includes("import { holly, rasterize, shape, paperFilter } from './paper-art.js';") && card.includes("canvas.toDataURL('image/png')") && card.includes('link.download = POSTCARD.file(kind)') && card.includes("home.href = 'index.html'") && !card.includes('innerHTML'), 'The postcard is cut from paper, saved as the very PNG shown, and leads back Home');
   assert.ok(play.includes('if (!replay) card = postcard({') && play.includes("theatre = null; card = null; cleanup();"), 'A postcard after each ending reached (not after a replay); leaving clears it');
@@ -500,7 +500,7 @@ await test('Santa 結局劇場：全螢幕紙雕立體書、逐字寫出、跳�
   assert.ok(stage.includes("event.preventDefault(); event.stopPropagation(); escape();") && stage.includes("theatre.classList.add('is-skipped')") && stage.includes("matchMedia('(prefers-reduced-motion: reduce)')"), 'Esc and 跳過 put everything where it ends, without leaving the room behind; reduced motion stands finished');
   assert.ok(stage.includes("element('span', 'sr-only', line, text)") && stage.includes("element('span', 'theatre-char', ink, char)"), 'The words are written in a character at a time; screen readers get each line whole');
   for (const key of ['ending-a', 'ending-b', 'ending-c']) assert.ok(glyphs.includes(`"${key}"`) && build.includes(`'${key}'`), `${key}: the title is paper letters made by the glyph script`);
-  assert.ok(play.includes('ending(kind, { replay: true })') && secret.includes("onReplay(ending)") && play.includes('theatre?.close(); theatre = null;'), 'Endings seen are replayed from the register; leaving closes the theatre');
+  assert.ok(play.includes('ending(kind, { replay: true })') && secret.includes("const watch = kind => { sound.play('pick'); onReplay(kind); };") && play.includes('theatre?.close(); theatre = null;'), 'Endings seen are replayed from the register; leaving closes the theatre');
   const theatre = css.slice(css.indexOf('/* 結局劇場'));
   assert.ok(theatre.includes('.ending-theatre.is-skipped') && theatre.includes('@media (prefers-reduced-motion: reduce) { .ending-theatre[open], .ending-theatre :is(*, *::before, *::after) { animation: none !important; }') && !/gradient|dashed|clip-path|border-radius: 50%/.test(theatre), 'The theatre moves only paper pieces: no CSS gradients, dashes or round CSS shapes');
   assert.ok(backdrop.includes('export function flakeDot()') && backdrop.includes('flake.append(dot.cloneNode(true))') && /\.cabin-flake \{ position: absolute; top: -12px; width: 9px; height: 9px; animation:/.test(css), 'The sky\'s snow is round dots cut from paper, not CSS circles');
@@ -521,7 +521,7 @@ await test('Santa 線索本：看到的線索自動記下、分段提示依故�
   assert.ok(book.includes('export function mountNotebook') && book.includes("paperLayer(button, '0 0 48 56', 'notebook-icon', cover, PAPER)") && !book.includes('innerHTML'), 'The clue book is a paper notebook; words only through textContent');
   assert.ok(book.includes('const now = goal(progress)') && book.includes('progress.hints[now] = shown + 1; save();'), 'Hints follow the story (cabin-story.js goal) and get plainer one at a time, kept between visits');
   assert.ok(book.includes("if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); }"), 'Esc closes the book without leaving the room');
-  assert.ok(play.includes('notebook = mountNotebook(stage, { progress, save, sound }); const clue = id => notebook.add(id);') && play.includes("if (id === 'wish-board') clue('wish-board');"), 'Games write into the book through one function');
+  assert.ok(play.includes('notebook = mountNotebook(stage, { progress, save, sound, watch: kind => replay(kind) }); const clue = id => notebook.add(id);') && play.includes("if (id === 'wish-board') clue('wish-board');"), 'Games write into the book through one function');
   // Every clue the games write is one the book knows, and every clue in the book is written somewhere.
   const written = [...games.join('\n').matchAll(/clue\((?:'([\w-]+)'|current\.entry\.id === 'route' \? 'route-note' : 'letter-backs'|id)\)/g)];
   assert.ok(written.length >= 6, 'The games record their clues where they are seen');
@@ -772,6 +772,24 @@ await test('Santa 房間的紙片不共用一個平面：窗台小屋的紙邊�
   }
   assert.ok(layers.some(layer => layer.id === 'decor-advent' && layer.edge) && layers.some(layer => layer.id === 'left'), 'The walls and the sheets on them are all looked at');
   assert.deepEqual(shared, [], 'No two overlapping sheets on a wall (or a sheet and the wall) share a plane, their paper edges included');
+});
+await test('Santa 11/22 回饋：線索本貼著雪人拍立得；找齊五個吊飾是一段小紙劇場；走到一個結局，其他結局也打開', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [book, ornaments, play, css, secret, stamps] = await Promise.all(['js/components/cabin-notebook.js', 'js/components/cabin-ornaments.js', 'js/components/cabin-play.js', 'css/santa.css', 'js/components/cabin-secret.js', 'js/components/cabin-ending-stamps.js'].map(read));
+  const { GOALS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  // The polaroid from the hat rack, taped in under its sticker (cut once), opened and shut with its words.
+  assert.ok(book.includes("const photo = id === 'snowman-photo' ? snapshot(item) : null; if (photo) photo.hidden = text.hidden;") && book.includes('if (photoCut) photo.append(photoCut.cloneNode(true));') && book.includes('if (photo) photo.hidden = text.hidden;') && secret.includes("picture.setAttribute('aria-label', NOTES.photo);"), 'The snowman polaroid is in the clue book with its picture, read out the same as on the hat rack');
+  // The tree: the room dims; each part is a layer of its own with its own time; a tick as each ornament catches, a jingle
+  // for yours; what it says about yours waits until it is there.
+  assert.ok(ornaments.includes('export const TRIM = { drop: [1, 1.35, 1.7, 2.05, 2.4], hang: .55, lit: 2.9, star: 3.5, mine: 3.9, lower: 1, fall: 4.9 };') && ['tree-halo', 'tree-body', 'tree-strand', 'tree-rays', 'tree-star'].every(name => ornaments.includes(`'0 0 200 240', '${name}'`)) && ornaments.includes("const glint = element('span', 'tree-spark', card);") && ornaments.includes("element('span', 'tree-bit', fall)"), 'The tree is trimmed in layers, each with its time');
+  assert.ok(play.includes("const dusk = element('div', 'tree-dusk', layer)") && play.includes("TRIM.drop.forEach(at => later((at + TRIM.hang) * 1000, () => sound.play('pick')));") && play.includes("later(landed * 1000, () => sound.play('jingle'));") && play.includes("then(' tree-last', '從今天起，你也是我們的一員。', landed + .7);"), 'Sounds as the ornaments catch; the last words once yours is on');
+  const tree = css.slice(css.indexOf('/* 找齊五個吊飾'), css.indexOf('@keyframes ornament-in')), calm = tree.indexOf('@media (prefers-reduced-motion: no-preference) {');
+  assert.ok(calm > 0 && !tree.slice(0, calm).includes('animation'), 'It moves only without reduced motion; with it, the tree stands trimmed');
+  const frames = css.match(/@keyframes tree-[a-z]+ \{[^\n]*\}/g) ?? [];
+  assert.ok(frames.length >= 10 && frames.every(frame => !/(top|left|width|height|filter|background|margin)\s*:/.test(frame)), 'Only opacity and transforms move');
+  // One ending reached opens the other two, in the clue book and the register (for anyone, signed up or not).
+  assert.ok(stamps.includes('open = canWatch(finale, kind)') && book.includes("...(progress.finale.endings.length ? [page => { const box = element('section', 'notebook-endings', page); endingStamps(box, progress.finale, see); return box; }] : []),") && secret.includes('if (finale.endings.length) endingStamps(card, finale, watch);') && play.includes('if (!canWatch(finale, kind)) return;'), 'The row of endings in the book and the register; watching reaches nothing');
+  assert.ok(GOALS.endings.task.includes('結局章') && GOALS.endings.hints[0].includes('結局章'), 'The book says the endings can be watched');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');

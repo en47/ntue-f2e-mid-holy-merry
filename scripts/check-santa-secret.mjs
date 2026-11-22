@@ -6,7 +6,7 @@
 //   二、先開舊紀錄（只讀得懂表面）、再補交接表：聖誕老人提醒、書角發光，再翻一次才理解。
 //   三、補好交接表但一直不開舊紀錄：主線照常，可以加入。
 //   四、加入前就開過，加入後拿到空白紙條（收進口袋）放在烘熱的石板上：字幕說你已經知道了。
-// 也檢查最小那頂帽子隨時翻得開、用放大鏡讀出 H. 2003。手機尺寸用真的觸控事件。只讀寫這個瀏覽器的 localStorage，不連雲端。
+// 也檢查最小那頂帽子隨時翻得開、用放大鏡讀出 H. 2003；線索本裡的雪人拍立得點開有照片。手機尺寸用真的觸控事件。只讀寫這個瀏覽器的 localStorage，不連雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
 // 執行：BASE=http://127.0.0.1:5511 node scripts/check-santa-secret.mjs（WIDTH=390 HEIGHT=844 是手機；SHOTS=資料夾 會存截圖）
 import { chromium } from 'playwright';
@@ -103,6 +103,19 @@ await thing('hats'); await press('.secret-card .register-sign'); await wait(900)
 check((await saved()).ornaments.includes('H'), '最小的帽子翻過來：荷莉的見面禮（不必先讀舊紀錄）');
 await openPocket(); await drag('.bag-item[data-item="magnifier"]', '.hat-inside'); await wait(600);
 check((await saved()).clues.includes('hat-2003') && (await text('.hat-inside')).includes('H. 2003'), '放大鏡讀出帽子裡的「H. 2003」'); await shot('hat'); await putBack();
+// The snowman's polaroid is in the clue book with its picture: its sticker opened, the photo is taped in under the words.
+// (On a phone the pages are shorter: the little room's clues run on over more of them, so turn on until it is there.)
+await press('.notebook-button'); await wait(2400); await press('.book-tab[data-section="room"]'); await wait(1800);
+const onPage = () => page.evaluate(() => [...document.querySelectorAll('.book-page .clue-sticker')].some(b => b.textContent.includes('雪人拍立得')));
+for (let i = 0; i < 6 && !(await onPage()); i++) { await page.evaluate(() => [...document.querySelectorAll('.book-turn')].find(b => b.textContent.startsWith('下一頁'))?.click()); await wait(1600); }
+const photo = await page.evaluate(() => {
+  const tag = [...document.querySelectorAll('.book-page .clue-sticker')].find(b => b.textContent.includes('雪人拍立得')); if (!tag) return null;
+  if (tag.getAttribute('aria-expanded') !== 'true') tag.click();
+  const picture = tag.parentElement.querySelector('.clue-photo'), box = picture?.getBoundingClientRect(), image = picture?.querySelector('img');
+  return picture && { shown: !picture.hidden && box.width > 60 && box.height > box.width, drawn: Boolean(image?.complete && image.naturalWidth), label: picture.getAttribute('aria-label') };
+});
+check(Boolean(photo?.shown && photo.drawn && photo.label.includes('雪人')), '線索本點開「雪人拍立得」：下面貼著帽架上那張照片');
+await page.evaluate(() => document.querySelector('.book-page .clue-photo:not([hidden])')?.scrollIntoView({ block: 'nearest' })); await shot('book-photo'); await press('.notebook-close'); await wait(1500);
 
 // Order one: the log, then the old record: understood on reading it.
 await load(opened); await enter();

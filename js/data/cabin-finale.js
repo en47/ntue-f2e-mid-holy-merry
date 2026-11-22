@@ -84,7 +84,8 @@ export const HOLLY = {
   one: '願望實現以後還願意幫忙的人，就是真正的聖誕老人。',
   sign: '—— H.',
 };
-export const SEEN = '看過的結局';
+// The row of ending stamps (cabin-ending-stamps.js), in the register and the clue book.
+export const SEEN = '結局';
 // What Santa has to say once the old page is known: his portrait in the corner calls you over, and it is the first thing
 // he says when you come (nothing pops up after a stamp to say where to go: the clue book hops, and he says it when asked).
 export const SANTA_ON_HOLLY = '聖誕老人看著你，笑了笑：「你讀了荷莉的紀錄了吧。她呀，是我們這裡最可靠的人。」';

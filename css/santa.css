@@ -450,6 +450,11 @@
 .ending-letter, .ink-words { position: relative; }
 .register-endings > .ending-truth:not(:first-child) { width: auto; aspect-ratio: auto; display: inline-flex; align-items: center; gap: .2rem; margin-left: .3rem; padding: 0; color: #b9a585; font-family: var(--font-body); font-weight: 700; rotate: none; }
 .register-endings .ending-truth.is-seen { color: #9a6b2f; }
+/* 走到過任何一個結局以後，還沒走到的也能按：紅色的空心章。線索本「現在」那頁也有同一排。 */
+.register-endings .is-open { color: #b5443c; padding: 0; border: 0; background: none; cursor: pointer; }
+.register-endings button.is-open:hover { translate: 0 -2px; }
+.register-endings button.is-open:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.notebook-endings .register-endings { margin: .2rem 0 .4rem; }
 .truth-star { position: relative; width: 1.7rem; aspect-ratio: 1; }
 .register-sign[hidden] { display: none; }
 .register-wishes { margin-bottom: .6rem; }
@@ -817,6 +822,9 @@ html.theatre-open { overflow: hidden; }
 .clue-where { color: #6b5a4c; font-size: var(--fs-small); font-weight: 400; }
 .notebook-clues .is-fresh .notebook-place::after { content: ' ★ 新'; color: #c08a3e; }
 .clue-text { margin: .35rem .5rem .15rem; font-family: var(--font-hand); font-size: var(--fs-small); line-height: 1.7; }
+/* 雪人拍立得：點開這張貼紙時，帽架上那張照片用一小段紙膠帶貼在字下面，換裝時可以對照。 */
+.clue-photo { position: relative; width: min(9.5rem, 62%); aspect-ratio: 128 / 166; margin: .3rem auto .7rem; rotate: -3deg; }
+.clue-photo[hidden] { display: none; }
 .notebook-hints, .notebook-gifts { display: grid; gap: .4rem; }
 .notebook-rule { position: relative; height: .9rem; margin: .4rem 0; }
 .notebook-rule + .notebook-hints .book-label { margin-top: 0; }
@@ -1020,19 +1028,55 @@ html.theatre-open { overflow: hidden; }
 .piece-card { width: min(21rem, calc(100% - 2rem)); }
 .piece-words { margin: 0 0 .6rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; }
 /* 五位替身留給新替身的見面禮：各自顏色的紙雕吊飾，綁著一張手寫小卡片；找齊了掛上小屋的聖誕樹。 */
-.ornament-found { position: relative; width: min(7.5rem, 40%); aspect-ratio: 112 / 140; margin: .2rem auto .3rem; transform-origin: 50% 0; animation: ornament-in 1.1s cubic-bezier(.3,1.4,.5,1) both, ornament-sway 2.6s ease-in-out 1.1s infinite alternate; }
-@keyframes ornament-in { from { translate: 0 -30%; opacity: 0; rotate: -18deg; } }
-@keyframes ornament-sway { from { rotate: -4deg; } to { rotate: 4deg; } }
+.ornament-found { position: relative; width: min(7.5rem, 40%); aspect-ratio: 112 / 140; margin: .2rem auto .3rem; transform-origin: 50% 0; }
 .ornament-note { margin: 0 0 .8rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; text-align: center; }
 .ornament-note[data-hand="n"] { color: #8f3b36; } .ornament-note[data-hand="k"] { color: #3f5a7a; } .ornament-note[data-hand="h"] { color: #3f6653; } .ornament-note[data-hand="e"] { color: #6e4a6b; } .ornament-note[data-hand="o"] { color: #9a6b2f; }
-.tree-card { width: min(22rem, calc(100% - 2rem)); }
-.ornament-tree { position: relative; width: min(13rem, 70%); aspect-ratio: 200 / 240; margin: .2rem auto .6rem; }
-.ornament-hung { position: absolute; width: 13%; aspect-ratio: 112 / 140; transform-origin: 50% 0; animation: ornament-sway 2.6s ease-in-out infinite alternate; }
-.ornament-hung:nth-of-type(2n) { animation-delay: -1.3s; }
-.ornament-hung.is-mine { width: 13%; animation: ornament-in 1.2s cubic-bezier(.3,1.4,.5,1) .6s both, ornament-sway 2.6s ease-in-out 1.8s infinite alternate; }
+/* 找齊五個吊飾：房間稍微暗下來，聖誕樹在暖光裡立起來，五個吊飾一個個掛上去（掛上時閃一下），燈串一層層亮起，頂端星星發光，
+   最後你的紅色吊飾沿著繩子降到樹頂，幾顆金星和雪片飄下來；每一片都是自己的圖層，只動 transform／opacity。減少動態時直接是掛好的樣子。 */
+.tree-card { width: min(25rem, calc(100% - 2rem)); }
+.tree-dusk { position: absolute; inset: 0; background: #1f2a3d; opacity: .34; pointer-events: none; }
+.tree-dusk.is-gone { opacity: 0; }
+.ornament-tree { position: relative; width: min(17rem, 84%); aspect-ratio: 200 / 240; margin: .2rem auto .6rem; }
+.tree-halo { opacity: .85; }
+.tree-body { transform-origin: 50% 92%; }
+.tree-rays { opacity: .7; transform-origin: 50% 10.8%; }
+.tree-star { transform-origin: 50% 10.8%; }
+.ornament-hung { position: absolute; width: 15%; aspect-ratio: 112 / 140; transform-origin: 50% 0; }
 .ornament-mine { position: absolute; left: 0; right: 0; top: 47%; color: #fffaf0; font-family: var(--font-display); font-size: var(--fs-small); font-weight: 700; text-align: center; pointer-events: none; }
+.tree-spark { position: absolute; width: 12%; aspect-ratio: 1; opacity: 0; pointer-events: none; }
+.tree-fall { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.tree-bit { position: absolute; top: -8%; width: 6%; aspect-ratio: 1; opacity: 0; }
 .tree-last { color: #b5443c; font-weight: 700; text-align: center; }
-@media (prefers-reduced-motion: reduce) { .ornament-found, .ornament-hung, .ornament-hung.is-mine { animation: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .ornament-found { animation: ornament-in 1.1s cubic-bezier(.3,1.4,.5,1) both, ornament-sway 2.6s ease-in-out 1.1s infinite alternate; }
+  .tree-dusk { animation: tree-dusk .6s ease-out backwards; transition: opacity .45s ease-in; }
+  .tree-halo { animation: tree-glow 1s ease-out .2s both; }
+  .tree-body { animation: tree-rise .8s cubic-bezier(.3, 1.3, .5, 1) .3s both; }
+  .tree-strand { animation: tree-on .45s ease-out var(--at) both, tree-twinkle 2.2s ease-in-out calc(var(--at) + .45s) infinite alternate; }
+  .tree-rays { animation: tree-rays .7s ease-out var(--at) both, tree-turn 36s linear var(--at) infinite; }
+  .tree-star { animation: tree-pop .7s cubic-bezier(.3, 1.6, .5, 1) var(--at) both; }
+  .ornament-hung { animation: tree-hang .75s cubic-bezier(.3, 1.35, .5, 1) var(--at) both, ornament-sway 2.6s ease-in-out calc(var(--at) + .75s) infinite alternate; }
+  .ornament-hung.is-mine { animation: tree-lower 1s cubic-bezier(.25, 1.15, .5, 1) var(--at) both, ornament-sway 2.6s ease-in-out calc(var(--at) + 1s) infinite alternate; }
+  .tree-spark { animation: tree-spark .7s ease-out var(--at) both; }
+  .tree-spark.is-mine { animation-duration: 1.1s; }
+  .tree-bit { animation: tree-fall var(--dur) ease-in var(--at) both; }
+  .tree-then { animation: tree-words .6s ease-out var(--at) both; }
+}
+@keyframes ornament-in { from { translate: 0 -30%; opacity: 0; rotate: -18deg; } }
+@keyframes ornament-sway { from { rotate: -4deg; } to { rotate: 4deg; } }
+@keyframes tree-dusk { from { opacity: 0; } }
+@keyframes tree-glow { from { opacity: 0; scale: .6; } }
+@keyframes tree-rise { from { opacity: 0; scale: 1 .15; } 55% { opacity: 1; } }
+@keyframes tree-on { from { opacity: 0; } }
+@keyframes tree-twinkle { to { opacity: .72; } }
+@keyframes tree-rays { from { opacity: 0; scale: .4; } }
+@keyframes tree-turn { to { rotate: 360deg; } }
+@keyframes tree-pop { from { opacity: 0; scale: 0; } }
+@keyframes tree-hang { from { opacity: 0; translate: 0 -150%; rotate: -24deg; } 35% { opacity: 1; } }
+@keyframes tree-lower { from { opacity: 0; translate: 0 -170%; } 25% { opacity: 1; } }
+@keyframes tree-spark { from { opacity: 0; scale: .2; rotate: -30deg; } 35% { opacity: 1; scale: 1.15; } to { opacity: 0; scale: 1.4; rotate: 20deg; } }
+@keyframes tree-fall { from { opacity: 0; translate: 0 0; rotate: 0deg; } 12% { opacity: 1; } 80% { opacity: 1; } to { opacity: 0; translate: var(--drift) 1900%; rotate: 300deg; } }
+@keyframes tree-words { from { opacity: 0; translate: 0 .4rem; } }
 /* 線索本裡的見面禮：五個位置，找到的是彩色吊飾，還沒找到的是淡淡的問號。 */
 .notebook-gifts { display: grid; gap: .35rem; }
 .gift-row { display: flex; justify-content: center; gap: .5rem; }

@@ -95,6 +95,9 @@ export const trueMiracle = finale => finale.twist && Boolean(finale.wish || fina
 export const canGoHome = ({ volunteer, finale }) => finale.invited && !signedUp(volunteer);
 export const ENDING_KINDS = ['A', 'B', 'C'];
 export const allEndings = finale => ENDING_KINDS.every(kind => finale.endings.includes(kind)) && finale.truth === true;
+// Once any ending has been reached, all three can be watched (from the register or the clue book), as an ending seen is
+// watched again: nothing is reached by watching, and there is no postcard. The truer telling only once it was reached.
+export const canWatch = (finale, kind) => kind === 'truth' ? finale.truth === true : ENDING_KINDS.includes(kind) && finale.endings.length > 0;
 // The yard, where the story starts: four things to find there, each shown the way by something else (the mailbox's
 // parcel, the trough, the snowman's drift, the barn's drawer). The house needs the last two (the hearth, the desk).
 export const YARD = ['lichen', 'key', 'handle', 'matches'];

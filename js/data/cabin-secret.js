@@ -58,6 +58,8 @@ export const NOTES = {
   hatInside: '帽子內側用紅線繡著一行小字，太小了，看不清楚。', hatsKnown: '最小的那頂聖誕帽內側，用紅線繡著「H. 2003」。',
   rack: '分揀架上塞滿了信，每一格的郵戳都不一樣。',
   polaroid: '帽架上夾著一張舊拍立得：一個打扮好的雪人。翻到背面，有人寫著：「照這樣打扮，它會想起來。」',
+  // The polaroid itself, read out to screen readers (on the hat rack, and taped into the clue book under its sticker).
+  photo: '舊拍立得：雪人戴著耳罩、格紋圍巾、圓框眼鏡，手裡提著燈',
   hatLook: '把最小的那頂帽子翻過來看看', hatGift: '帽子裡藏著一個綠色的紙鈴鐺吊飾，綁著一張小卡片。',
   known: '最後一格補上，墨水一行一行乾回來……每一晚，都是兩個人接力飛完的。原來，聖誕老人不只一位。',
   // Heard in the little room once the log is put right: Santa on his way home (what he says then: data/cabin-talk.js).

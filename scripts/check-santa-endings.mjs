@@ -1,7 +1,7 @@
 // Santa 第五章（最終選擇）的瀏覽器驗收：走出小屋不會觸發任何結局；院子的世界路標（點場景裡的路標，或鍵盤用探索清單）
 // 選「踏上回家的路」再確認才是 A，「再逛逛」什麼都不發生；已加入的人看到路標上的小卡，還不知道秘密的人只看到說明。
 // 登記簿許願、交接表簽早班都要再確認一次；四件工作都做完，聖誕老人只問一次。每個選擇只播一段結局，理解第二次反轉後
-// 是真相版（第二幕），演完有紀念明信片（存成 PNG、回到 Home、留在村子），重看不給明信片。結局 C 名牌與帽子掛上第六鉤；
+// 是真相版（第二幕），演完有紀念明信片（存成 PNG、回到 Home、留在村子），重看不給明信片。走到過一個結局，其他結局也能從線索本或登記簿直接看。結局 C 名牌與帽子掛上第六鉤；
 // 舊存檔的結局 D 換成真相金星。最後從線索本「從頭再玩一次」（先問一次），只清聖誕村的進度。手機尺寸用真的觸控事件。只讀寫這個瀏覽器的 localStorage，不連任何雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
 // 執行：BASE=http://127.0.0.1:5511 node scripts/check-santa-endings.mjs（WIDTH=390 HEIGHT=844 是手機；SHOTS=資料夾 會存截圖）
@@ -96,6 +96,15 @@ await postcard('A', false);
 await load(await saved()); await listSign();
 check((await saved()).finale.endings.join() === 'A' && await exists('.signpost-card') && (await text('.signpost-card')).includes('踏上回家的路'), '重新整理：A 記住了，路標還是回家的路');
 await must('好'); await wait(300);
+// One ending reached opens the other two: the clue book's first page has the row of endings, and B, not reached, plays
+// when pressed as a replay (nothing reached, no postcard); a visitor not signed up finds the row in the register too.
+await press('.notebook-button'); await wait(2500);
+const row = await page.evaluate(() => [...document.querySelectorAll('.book-page .register-endings > :is(span, button):not(:first-child)')].map(mark => `${mark.tagName}:${mark.className}`));
+check(row.length === 4 && /^BUTTON:is-seen/.test(row[0]) && /^BUTTON:is-open/.test(row[1]) && /^BUTTON:is-open/.test(row[2]) && /^SPAN/.test(row[3]), `看過 A：線索本「現在」那頁的結局章，B、C 也能按，真相還沒有（${row.join(' ')}）`);
+await shot('book-endings'); await tap('.book-page .register-endings button.is-open');
+const watched = await ending(); check(watched.kind === 'B' && !watched.truth && (await saved()).finale.endings.join() === 'A' && !(await exists('.postcard-card')), '點線索本的 B：播結局 B，不算走到、沒有明信片');
+await enter(); await thing('register');
+check((await page.evaluate(() => [...document.querySelectorAll('.secret-card .register-endings button')].map(b => b.querySelector('.ending-letter')?.textContent).join())) === 'A,B,C', '沒有加入的人，登記簿下方也有結局章（A、B、C 都能按）'); await putBack();
 // Anyone else at the signpost: a volunteer reads the card hung on it; before the secret, only what it says.
 await load({ ...base, volunteer: { mark: 'J', tasks: ['wheel'] }, finale: { invited: true } }); await listSign();
 check((await text('.signpost-card')).includes('劃掉縮寫') && !(await exists('.signpost-card .register-sign')), '已加入：路標上掛著「替身要先劃掉縮寫」的小卡，不觸發結局'); await must('好');
