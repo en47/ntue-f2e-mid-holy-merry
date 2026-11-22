@@ -20,14 +20,14 @@ function folded(parent) {
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 // One full turn of the crank winds in this much of the way up.
 const PER_TURN = Math.PI * 2 * WINCH.spool / HOIST.lift;
-// The feeding table as pinned up: a sheet with a red pin, lines of writing, a small reindeer in the corner; and the red
-// ticks once the job is done (a layer of its own).
+// The feeding table as pinned up: an old cream sheet with a brown tack, its heading and lines of writing in faded ink, a
+// small reindeer in the corner; and the red ticks once the job is done (a layer of its own).
 function notice(parent) {
-  shape('path', { d: 'M8 10L92 6 94 92 6 94Z', fill: '#fffaf0' }, parent);
-  shape('rect', { x: 14, y: 14, width: 52, height: 7, rx: 3, fill: '#b5443c', opacity: .8 }, parent);
-  for (const y of [34, 50, 66]) shape('path', { d: `M14 ${y}h10M30 ${y}q12 -3 24 0t24 0`, fill: 'none', stroke: '#6f5a48', 'stroke-width': 3, 'stroke-linecap': 'round' }, parent);
-  shape('path', { d: 'M70 84q4-10 12-8 6 2 4 8M74 78l-3-8m6 8l2-8', fill: 'none', stroke: '#8f5a3c', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, parent);
-  shape('circle', { cx: 50, cy: 8, r: 5, fill: '#c63a33' }, parent);
+  shape('path', { d: 'M8 10L92 6 94 92 6 94Z', fill: '#f1e4c6' }, parent);
+  shape('path', { d: 'M14 17q16-3 34 0', fill: 'none', stroke: '#9a4a3c', 'stroke-width': 4, 'stroke-linecap': 'round', opacity: .75 }, parent);
+  for (const y of [34, 50, 66]) shape('path', { d: `M14 ${y}h10M30 ${y}q12 -3 24 0t24 0`, fill: 'none', stroke: '#8a7058', 'stroke-width': 2.6, 'stroke-linecap': 'round' }, parent);
+  shape('path', { d: 'M70 84q4-10 12-8 6 2 4 8M74 78l-3-8m6 8l2-8', fill: 'none', stroke: '#8f5a3c', 'stroke-width': 2.2, 'stroke-linecap': 'round' }, parent);
+  shape('circle', { cx: 50, cy: 9, r: 4, fill: '#7a5236' }, parent);
 }
 const ticks = parent => { for (const y of [34, 50, 66]) shape('path', { d: `M84 ${y - 2}l4 5 8-11`, fill: 'none', stroke: '#b5443c', 'stroke-width': 3.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, parent); };
 
@@ -54,7 +54,7 @@ export function pulleyGame({ layer, stage, cabin, say, later, sound, progress, s
     // The drawer is a real one in the barn's wall (cabin-scene.js `drawer`): this button is where its front is.
     const front = cabin.drawerRect('barn'); if (front) place(drawer, front, 6);
     // Pinned on the barn door's left leaf: in sight on a phone too, where the view shows only the barn's left half.
-    const pinned = cabin.sheetRect('stable', [.375, .5, .485, .66]); if (pinned) place(table, pinned);
+    const pinned = cabin.sheetRect('stable', [.385, .52, .465, .635]); if (pinned) place(table, pinned);
     const right = rects.crank.left + rects.crank.width + 10;
     Object.assign(hint.style, { left: `${right}px`, top: `${rects.crank.top + rects.crank.height * .3}px` });
     Object.assign(hook.style, { left: `${right}px`, top: `${rects.crank.top + rects.crank.height / 2}px` });

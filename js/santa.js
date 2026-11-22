@@ -62,13 +62,14 @@ document.querySelectorAll('.cabin-explore [data-touch]').forEach(button => butto
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !event.defaultPrevented && cabin && cabin.view !== 'outside') { cabin.back(); stage.querySelector('.cabin-gesture').focus(); } });
 markExplore();
 
-// A one-time hint, gone after the first touch of the scene: on a first visit it points at the mailbox's raised flag
-// (where the yard begins), afterwards at how to look around.
+// A one-time hint. On a first visit, before the mailbox has been opened, it welcomes the visitor and sends them to the
+// mailbox (where the yard begins), and stays until they go there (or anywhere else); afterwards it says how to look
+// around, gone after the first touch of the scene.
 function showTip() {
   let seen = false; try { seen = sessionStorage.getItem(TIP) === '1'; sessionStorage.setItem(TIP, '1'); } catch { /* show it anyway */ }
   if (seen) return;
-  if (!found.has('mailbox')) tip.textContent = '郵筒的旗子豎起來了，點它看看';
   tip.hidden = false;
+  if (!found.has('mailbox')) { tip.textContent = '歡迎來到聖誕小村！\n聖誕老人在郵筒裡留了一封信，先點郵筒打開看看。'; tip.classList.add('is-welcome'); return; }
   const hide = () => tip.classList.add('is-gone');
   stage.addEventListener('pointerdown', hide, { once: true }); setTimeout(hide, 8000);
 }

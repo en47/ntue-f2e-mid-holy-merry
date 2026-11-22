@@ -833,12 +833,13 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
       const delta = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), reindeerTurn[0] + extraYaw).multiply(new THREE.Quaternion().setFromAxisAngle(across, reindeerTurn[1] + extraPitch));
       reindeerHead.quaternion.premultiply(parent.clone().invert().multiply(delta).multiply(parent));
     }
-    // The mailbox calling: its flag springs up (overshooting a little), then every four seconds the box hops and rattles.
+    // The mailbox calling: its flag springs up (overshooting a little), then every 2.6 seconds the box hops high, twice, and
+    // rattles, so it is seen from anywhere in the yard.
     if (flag.mesh) {
-      const since = flag.rise === null ? -1 : t - flag.rise, beat = since > 1.6 ? (since - 1.6) % 4 / .7 : 1, hop = still ? 1 : flag.up && beat < 1 ? beat : moving('mailbox') ?? 1;
+      const since = flag.rise === null ? -1 : t - flag.rise, beat = since > 1.6 ? (since - 1.6) % 2.6 : 1, hop = still ? 1 : flag.up && beat < 1 ? beat : moving('mailbox') ?? 1;
       flag.mesh.rotation.z = still ? 0 : since < 0 ? -Math.PI / 2 : since < .8 ? -Math.PI / 2 * Math.exp(-7.5 * since) * Math.cos(since * 12.5) : hop < 1 ? Math.sin(hop * Math.PI * 4) * .35 * (1 - hop) : 0;
-      mail.holder.position.y = mail.home.y + (hop < 1 ? Math.abs(Math.sin(hop * Math.PI * 2)) * .09 * (1 - hop * .4) : 0);
-      mail.holder.rotation.z = hop < 1 ? Math.sin(hop * Math.PI * 6) * .07 * (1 - hop) : 0;
+      mail.holder.position.y = mail.home.y + (hop < 1 ? Math.abs(Math.sin(hop * Math.PI * 2)) * .17 * (1 - hop * .4) : 0);
+      mail.holder.rotation.z = hop < 1 ? Math.sin(hop * Math.PI * 6) * .1 * (1 - hop) : 0;
     }
     // The barn's repair tag swings for a moment; its drawer, pulled open, stands a little out of the wall.
     if (hoist.tag) { const u = (t - hoist.swing) / 1.4; hoist.tag.rotation.z = !still && u < 1 ? Math.sin(u * Math.PI * 5) * .35 * (1 - u) : 0; }

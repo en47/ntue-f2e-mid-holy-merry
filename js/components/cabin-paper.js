@@ -151,20 +151,15 @@ function bauble(parent, x, y, drop, r, fill) {
   shape('circle', { cx: x, cy, r, fill }, parent);
   shape('path', { d: `M${x - r * .6} ${cy - r * .05}A${r * .6} ${r * .6} 0 0 1 ${x - r * .1} ${cy - r * .6}`, fill: 'none', stroke: '#fffaf0', 'stroke-width': 1.3, 'stroke-linecap': 'round', opacity: .8 }, parent);
 }
-// A pine garland swagged across the top of a sheet: tied at both ends and in the middle (with a bow), dipping between,
-// berries along it and baubles hanging from it.
-function garland(paper, width, seed) {
-  const top = 9, at = x => top + 10 * Math.abs(Math.sin(x / width * Math.PI * 2));
+// A string of baubles swagged across the top of a sheet: a thin cord tied at both ends and in the middle (with a small
+// bow), dipping between, and little glass baubles hung along it at even steps. Kept plain: no needles, no berries.
+function garland(paper, width) {
+  const top = 10, at = x => top + 8 * Math.abs(Math.sin(x / width * Math.PI * 2));
   let d = '';
-  for (let x = 5; x <= width - 5; x += 6) d += `${d ? 'L' : 'M'}${x.toFixed(1)} ${at(x).toFixed(1)}`;
-  shape('path', { d, fill: 'none', stroke: '#2f5240', 'stroke-width': 9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, paper);
-  for (let x = 7, i = 0; x < width - 6; x += 4.5, i++) {
-    const y = at(x), lean = (noise(seed + i) - .5) * 4;
-    shape('path', { d: `M${x.toFixed(1)} ${y.toFixed(1)}l${(lean - 3).toFixed(1)} -7M${x.toFixed(1)} ${y.toFixed(1)}l${(lean + 3).toFixed(1)} 7`, stroke: i % 3 ? '#3f6653' : '#5f8a70', 'stroke-width': 2.4, 'stroke-linecap': 'round', fill: 'none' }, paper);
-  }
-  for (let x = 16, i = 0; x < width - 12; x += 21, i++) shape('circle', { cx: x + noise(seed + i * 3) * 6, cy: at(x) + (noise(seed + i * 5) - .5) * 6, r: 2.3, fill: '#c63a33' }, paper);
-  for (const [f, drop, r, fill] of [[.13, 5, 4.6, '#9dbfd0'], [.25, 2, 6, '#c63a33'], [.37, 6, 4.6, '#e0b04f'], [.63, 6, 4.6, '#9dbfd0'], [.75, 2, 6, '#e0b04f'], [.87, 5, 4.6, '#c63a33']]) bauble(paper, width * f, at(width * f) + 4, drop, r, fill);
-  bow(paper, width / 2, top, .72);
+  for (let x = 6; x <= width - 6; x += 6) d += `${d ? 'L' : 'M'}${x.toFixed(1)} ${at(x).toFixed(1)}`;
+  shape('path', { d, fill: 'none', stroke: '#3f6653', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, paper);
+  for (let i = 1; i < 12; i++) if (i !== 6) bauble(paper, width * i / 12, at(width * i / 12), 3, 4.2, ['#c63a33', '#e0b04f', '#9dbfd0'][i % 3]);
+  bow(paper, width / 2, top, .6);
 }
 // A paper snowflake, six arms with a pair of twigs on each.
 function snowflake(paper, x, y, r) {
@@ -362,12 +357,13 @@ const OBJECTS = {
     for (let i = 0; i < 14; i++) shape('circle', { cx: noise(seed + i) * width, cy: noise(seed + i * 5) * height, r: 2 + noise(seed + i * 9) * 6, fill: '#e2c98f', opacity: .45 }, paper);
     ink(`M4 20Q22 34 12 56Q4 76 22 92Q34 104 18 122`, '#b5443c', paper, 3);
   },
-  // Talking with Santa: the card is his stationery (a red line and a green one inside its edge) with a pine garland swagged
-  // across the top and a few paper snowflakes low behind the words; its head has a string of little lights along its foot.
+  // Talking with Santa: the card is his stationery (a red line and a green one inside its edge) with a string of baubles
+  // swagged across the top and a few paper snowflakes low behind the words; its head has a string of little lights along
+  // its foot.
   chatcard(paper, width, height, seed) {
     OBJECTS.stationery(paper, width, height, seed);
     for (const [x, y, r] of [[30, height - 42, 10], [56, height - 24, 6.5], [width * .5, height - 22, 5]]) snowflake(paper, x, y, r);
-    garland(paper, width, seed);
+    garland(paper, width);
   },
   chathead(paper, width, height, seed) {
     const wire = height - 17, at = x => wire + 4 * Math.sin(x / width * Math.PI * 3) ** 2;

@@ -791,6 +791,20 @@ await test('Santa 11/22 回饋：線索本貼著雪人拍立得；找齊五個�
   assert.ok(stamps.includes('open = canWatch(finale, kind)') && book.includes("...(progress.finale.endings.length ? [page => { const box = element('section', 'notebook-endings', page); endingStamps(box, progress.finale, see); return box; }] : []),") && secret.includes('if (finale.endings.length) endingStamps(card, finale, watch);') && play.includes('if (!canWatch(finale, kind)) return;'), 'The row of endings in the book and the register; watching reaches nothing');
   assert.ok(GOALS.endings.task.includes('結局章') && GOALS.endings.hints[0].includes('結局章'), 'The book says the endings can be watched');
 });
+await test('Santa 11/22 試玩回饋（二）：開場歡迎提示指向郵筒、郵筒跳得明顯；餵食表像釘在穀倉上；抽屜紙條直接疊上；交接表和紀錄並排；路線筆記是第一封；線索本打開時藏起離開鈕；聊天框的花圈改簡潔', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [santa, scene, css, secret, paper, pulley] = await Promise.all(['js/santa.js', 'js/components/cabin-scene.js', 'css/santa.css', 'js/components/cabin-secret.js', 'js/components/cabin-paper.js', 'js/components/cabin-pulley.js'].map(read));
+  const { DESK_LETTERS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href);
+  assert.ok(santa.includes("tip.textContent = '歡迎來到聖誕小村！\\n聖誕老人在郵筒裡留了一封信，先點郵筒打開看看。'; tip.classList.add('is-welcome'); return;") && css.includes('.cabin-tip.is-welcome {'), 'A first visit is welcomed and sent to the mailbox, and the words stay until they go');
+  assert.ok(scene.includes('beat = since > 1.6 ? (since - 1.6) % 2.6 : 1,') && scene.includes('Math.abs(Math.sin(hop * Math.PI * 2)) * .17'), 'The mailbox hops higher and more often');
+  assert.ok(pulley.includes("cabin.sheetRect('stable', [.385, .52, .465, .635])") && css.includes('.feed-table { animation: none; background: none; rotate: -4deg; }'), 'The feeding table is a small sheet pinned on the barn door');
+  assert.ok(css.includes('.drawer-card ~ .cabin-note { z-index: 7; }'), 'The note from the barn drawer opens over the drawer at once');
+  assert.ok(secret.includes("const side = element('aside', 'shift-side', desk);") && secret.includes('first?.();') && css.includes('.shift-desk.has-side { grid-template-columns: minmax(0, 26rem) minmax(0, 1fr); align-items: start; }'), 'The notes the shift log needs are beside it, the first one open');
+  assert.equal(DESK_LETTERS[0].id, 'route', "Christmas Eve's route is the first letter on the desk");
+  assert.ok(css.includes('#cabin-stage:has(.notebook-card) .books-enter { visibility: hidden; }'), 'The leave button is out of the way while the clue book is open');
+  const garland = paper.slice(paper.indexOf('function garland('), paper.indexOf('// A paper snowflake'));
+  assert.ok(garland.includes("bauble(paper, width * i / 12, at(width * i / 12), 3, 4.2,") && !garland.includes('noise(') && !garland.includes("'stroke-width': 9"), 'The chat card has a plain string of baubles, no fuzzy garland');
+});
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [bagUi, inspectUi, play, paper, css] = await Promise.all(['js/components/cabin-bag.js', 'js/components/cabin-inspect.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'css/santa.css'].map(read));
