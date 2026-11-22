@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
-import { BOARDS, BOOKCASE, BOOKMARKS, BOOK_SHEETS, CHAIR, DESK, DOOR, DRAWERS, GLOBE, MAIL_FLAG, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS, PX, adventLit, drawerPieces } from './cabin-art.js';
+import { BOARDS, BOOKCASE, BOOKMARKS, BOOK_SHEETS, CHAIR, DESK, DOOR, DRAWERS, GLOBE, MAIL_FLAG, MUSICBOX, SECRET, FIRE, GROUND, HOIST, WINCH, HOUSE, INSIDE, LANTERN, LETTER_BOOKS, PLAIN_BOOKS, REINDEER, ROOM_PROPS, ROOM_RIGS, ROOM_SPOTS, SHELF_LAYOUT, SIGN, SPOTS, PX, EDGE, adventLit, drawerPieces } from './cabin-art.js';
 import { BALLOONS, COASTER, CAROUSEL, FLOATS, LIFT, LIGHTHOUSE, POND, PROPS, RIGS, RUNS, SHORE, TRACK, WHEEL, WORLD } from './cabin-world.js';
 import { PLACES, itemFor } from './cabin-wardrobe.js';
 import { PIECES, cutBoard, cutSet, outfitBoard } from './cabin-paint.js';
@@ -281,7 +281,7 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     const holders = Array.from({ length: board.clones ?? 1 }, () => {
       const holder = new THREE.Group(), mesh = new THREE.Mesh(geometry, material);
       mesh.position.z = board.nudge ?? 0; holder.add(mesh);
-      if (edges) { const edge = new THREE.Mesh(geometry, edges); edge.position.z = -.012; holder.add(edge); }
+      if (edges) { const edge = new THREE.Mesh(geometry, edges); edge.position.z = -EDGE; holder.add(edge); }
       if (board.roof) {
         const roof = roofFrame(board.roof, board.layer);
         holder.position.copy(roof.center); holder.quaternion.copy(roof.quaternion);

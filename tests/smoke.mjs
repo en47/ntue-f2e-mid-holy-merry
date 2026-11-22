@@ -738,6 +738,25 @@ await test('Santa 降臨小屋第三版的動態：全部關上由上往下一�
   assert.ok(css.includes('.advent-scene.is-leaving::before { animation: advent-dawn .9s ease-in-out forwards; }') && css.includes('@keyframes advent-dawn { to { opacity: 0; } }') && !css.includes('advent-dip') && css.includes('.advent-scene.is-leaving .advent-tilt { animation: advent-fold .9s cubic-bezier(.45, 0, .55, 1) forwards; }') && box.includes("scene.classList.add('is-leaving'); setTimeout(() => scene.remove(), 950);"), 'The box folds away as the room brightens, with no dark in between');
   assert.ok(scene.includes("if (VIEWS[from]?.glide && !VIEWS[name]?.glide) { travelRate = 2.2; glideTimer = setTimeout(() => { toEye(true); turnTimer = setTimeout(() => turn(true), 1100); }, 900); return; }") && scene.includes('aim(name, from); onView(name); wake();') && scene.includes('Math.min(1, (clock - eased) / .6)') && scene.includes('clearTimeout(turnTimer); clearTimeout(returnTimer);'), 'The eye waits for the box, backs away from standing, then turns slowly; a drag takes the turn back');
 });
+await test('Santa 房間的紙片不共用一個平面：窗台小屋的紙邊不再和窗框、月曆和雪花吊飾的紙邊不再和牆疊在同一個深度，鏡頭一動就互相搶著閃', async () => {
+  const { BOARDS, EDGE } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
+  const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8');
+  assert.ok(EDGE > 0 && scene.includes('edge.position.z = -EDGE;'), "Each sheet's paper edge lies EDGE behind it");
+  // Each sheet standing square to a room wall, and the walls: the plane it is drawn in, its edge's, and the patch it covers
+  // (not what turns: the tree faces the eye, the chair rocks, rigs swing).
+  const layers = BOARDS.filter(board => board.room && board.at && !board.flat && !board.rig && !board.chair && !board.secret && !board.clones && !board.billboard && !board.texture && Math.abs(Math.sin((board.turn ?? 0) * 2)) < 1e-9).flatMap(board => {
+    const turn = board.turn ?? 0, side = Math.round(Math.sin(turn)) ? 0 : 2, sign = Math.round(Math.sin(turn) + Math.cos(turn)), mid = board.at[2 - side], y = board.at[1];
+    const span = [mid - board.w / 2, mid + board.w / 2, ...(board.center ? [y - board.h / 2, y + board.h / 2] : board.hang ? [y - board.h, y] : [y, y + board.h])];
+    return [{ id: board.id, side, plane: board.at[side] + sign * (board.nudge ?? 0), span }, ...(board.kind ? [] : [{ id: board.id, edge: true, side, plane: board.at[side] - sign * EDGE, span }])];
+  });
+  const shared = [];
+  for (const [i, a] of layers.entries()) for (const b of layers.slice(i + 1)) {
+    const [a0, a1, a2, a3] = a.span, [b0, b1, b2, b3] = b.span;
+    if (a.id !== b.id && a.side === b.side && Math.abs(a.plane - b.plane) < .0009 && a0 < b1 && b0 < a1 && a2 < b3 && b2 < a3) shared.push(`${a.id}${a.edge ? '（紙邊）' : ''} × ${b.id}${b.edge ? '（紙邊）' : ''}`);
+  }
+  assert.ok(layers.some(layer => layer.id === 'decor-advent' && layer.edge) && layers.some(layer => layer.id === 'left'), 'The walls and the sheets on them are all looked at');
+  assert.deepEqual(shared, [], 'No two overlapping sheets on a wall (or a sheet and the wall) share a plane, their paper edges included');
+});
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [bagUi, inspectUi, play, paper, css] = await Promise.all(['js/components/cabin-bag.js', 'js/components/cabin-inspect.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'css/santa.css'].map(read));
