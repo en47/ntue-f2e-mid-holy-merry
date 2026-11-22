@@ -738,6 +738,22 @@ await test('Santa 降臨小屋第三版的動態：全部關上由上往下一�
   assert.ok(css.includes('.advent-scene.is-leaving::before { animation: advent-dawn .9s ease-in-out forwards; }') && css.includes('@keyframes advent-dawn { to { opacity: 0; } }') && !css.includes('advent-dip') && css.includes('.advent-scene.is-leaving .advent-tilt { animation: advent-fold .9s cubic-bezier(.45, 0, .55, 1) forwards; }') && box.includes("scene.classList.add('is-leaving'); setTimeout(() => scene.remove(), 950);"), 'The box folds away as the room brightens, with no dark in between');
   assert.ok(scene.includes("if (VIEWS[from]?.glide && !VIEWS[name]?.glide) { travelRate = 2.2; glideTimer = setTimeout(() => { toEye(true); turnTimer = setTimeout(() => turn(true), 1100); }, 900); return; }") && scene.includes('aim(name, from); onView(name); wake();') && scene.includes('Math.min(1, (clock - eased) / .6)') && scene.includes('clearTimeout(turnTimer); clearTimeout(returnTimer);'), 'The eye waits for the box, backs away from standing, then turns slowly; a drag takes the turn back');
 });
+await test('Santa 降臨小屋第 24 扇（大門）：打開時站得跟房子差不多垂直、背面是門的內側，門板停在雪地線下方一點；月亮旁的小金點是星星', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [box, css, art] = await Promise.all(['js/components/cabin-advent.js', 'css/santa.css', 'js/components/cabin-clue-art.js'].map(read));
+  const { SLOTS } = await import(pathToFileURL(path.join(project, 'js/components/cabin-advent.js')).href);
+  const door = SLOTS.find(slot => slot.day === 24), foot = Number(/const ARCH_FOOT = (\d+);/.exec(box)?.[1]);
+  // The snow drift's line under the front door (front(): its smooth curve on from the first bend), and the door's foot.
+  const [, , , cx, cy, x1, y1, x2, y2] = /d: 'M(\d+) (\d+)Q(\d+) (\d+) (\d+) (\d+)T(\d+) (\d+)Q/.exec(box).map(Number), [qx, qy] = [2 * x1 - cx, 2 * y1 - cy];
+  const snow = Array.from({ length: 201 }, (_, i) => i / 200).map(t => [(1 - t) ** 2 * x1 + 2 * (1 - t) * t * qx + t * t * x2, (1 - t) ** 2 * y1 + 2 * (1 - t) * t * qy + t * t * y2]).filter(([x]) => x >= door.x && x <= door.x + door.w);
+  const lowest = Math.max(...snow.map(([, y]) => y)), bottom = door.y + door.h - foot;
+  assert.ok(snow.length > 50 && bottom - lowest >= 4 && bottom - lowest <= 10, `Shut, the snow hides the door's foot even leaning; open, the door ends just under the snow line (${(bottom - lowest).toFixed(1)})`);
+  assert.ok(box.includes('const foot = h - ARCH_FOOT;') && box.includes("shape('path', { d: `M0 ${foot}V${w / 2}A${w / 2} ${w / 2} 0 0 1 ${w} ${w / 2}V${foot}Z`, fill: colour }, g);") && box.includes("shape('path', { d: `M0 ${foot}V${w / 2}A${w / 2} ${w / 2} 0 0 1 ${w} ${w / 2}V${foot}Z`, fill: RED_DARK }, g);"), 'The front door and its inside both stop at the foot; its inside is a darker red');
+  assert.ok(box.includes("line(`M${w * .7} ${y}H${w - 2}`, GOLD_DARK, g, 5);") && box.includes("shape('circle', { cx: w * .2, cy: h * .62, r: 6, fill: 'none', stroke: GOLD, 'stroke-width': 2.4 }, g);"), 'Seen from behind, the hinges are on the right and the ring by the free edge');
+  const arch = '.advent-slot[data-kind="arch"][data-state="open"] .advent-door { transform: rotateY(-106deg); }', left = '.advent-slot[data-hinge="left"][data-state="open"] .advent-door { transform: rotateY(-118deg); }';
+  assert.ok(css.includes(arch) && css.indexOf(arch) > css.indexOf(left), 'The front door opens to about square with the house, after the rule for the other doors');
+  assert.ok(art.includes('for (const [x, y] of [[33, 8], [8, 9], [36, 28]]) star(g, x, y, 2.6);'), 'The stars round the full moon are stars, not dots that look like handles');
+});
 await test('Santa 房間的紙片不共用一個平面：窗台小屋的紙邊不再和窗框、月曆和雪花吊飾的紙邊不再和牆疊在同一個深度，鏡頭一動就互相搶著閃', async () => {
   const { BOARDS, EDGE } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
   const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8');
