@@ -650,7 +650,7 @@ await test('Santa 試玩回饋（11/20）：做完一件事，線索本旁滑出
   assert.ok(css.includes('.sleigh-card { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 1rem; max-height: calc(100% - 1.2rem); overflow-y: auto; }'), 'The sleigh\'s card fits the stage');
   // The shift log, put right, is a clue: who flew each half of each night, as the log has it.
   const log = NOTEBOOK['shift-log'];
-  assert.ok(log && NIGHTS.every(([night, first, second]) => log.text.includes(`${night} 前半夜 ${first}.、後半夜 ${second}.`)) && CLUE_ICON['shift-log'] === 'clipboard' && CLUE_PLACES.find(([id]) => id === 'room')[2].includes('shift-log') && GOAL_CLUES.jobs.includes('shift-log'), 'The shift log as a clue, with its picture, for the letters');
+  assert.ok(log && NIGHTS.every(([night, first, second]) => log.text.includes(`${night} 晚上 前半夜 ${first}.、後半夜 ${second}.`)) && CLUE_ICON['shift-log'] === 'clipboard' && CLUE_PLACES.find(([id]) => id === 'room')[2].includes('shift-log') && GOAL_CLUES.jobs.includes('shift-log'), 'The shift log as a clue, with its picture, for the letters');
   assert.ok(secret.includes("learn('log'); clue('shift-log');"), 'Written in the clue book when the log is put right');
   // The rack: letters already in a pigeonhole stay there while something else is looked at.
   assert.ok(secret.includes("const keep = () => { desk.rack = desk.sorted ? {} : { ...placed }; save(); };") && secret.includes('const was = desk.sorted ? mailFor(id) : desk.rack[id];'), 'Sorting half done is kept');
@@ -810,6 +810,17 @@ await test('Santa 書櫃修正：走出門的路上小房間不先消失（門�
   assert.ok(scene.includes("secret.visible = story.open > 0 && (indoorView(view) || Boolean(trip && trip.direction !== 'fly'));"), 'The little room stays while the eye walks out through the front door');
   assert.ok(scene.includes('const rocking = THREE.MathUtils.clamp((Math.hypot(eye.x - CHAIR.x, eye.z - CHAIR.z) - .7) / .4, 0, 1);') && scene.includes('* .09) * rocking;'), 'The rocking chair comes to rest with the eye right beside it');
   assert.ok(scene.includes("if (kind === 'bookcase' && view === 'shelf') return false;"), 'Up at the bookcase, it does not call');
+});
+await test('Santa 前半夜、後半夜說清楚：值班須知與分信守則寫明一晚從天黑到隔天天亮、以午夜分兩段、過了午夜還算前一晚；交接表欄名附時間、每列是「某天晚上」', async () => {
+  const { DUTY, LOG, RACK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href);
+  const { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
+  const { flyer } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const secret = await fs.readFile(path.join(project, 'js/components/cabin-secret.js'), 'utf8');
+  assert.ok(DUTY.lines[0].includes('前半夜是天黑到午夜，後半夜是午夜到天亮') && DUTY.lines[1].includes('過了午夜') && RACK.sign.includes('過了午夜到天亮，還算前一晚，是前一晚的後半夜') && NOTEBOOK['rack-rule'].text === RACK.sign && NOTEBOOK.duty.text.includes('過了午夜還算前一晚'), 'The rules say where a night starts and ends, and where it is cut in two');
+  assert.deepEqual(LOG.spans, ['天黑～午夜', '午夜～天亮']); assert.equal(LOG.night('12/21'), '12/21 晚上');
+  assert.ok(secret.includes("element('span', 'shift-span', element('span', 'shift-head', grid, half), LOG.spans[i])") && secret.includes("element('span', 'shift-date', grid, LOG.night(date));"), 'The shift log shows each half with its hours, each row as an evening');
+  // As the rules say: an evening postmark is that night's first half; one after midnight, the night before's second half.
+  assert.equal(flyer('12/21', '20:10'), 'E'); assert.equal(flyer('12/22', '02:40'), 'O');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
