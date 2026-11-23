@@ -341,7 +341,7 @@ await test('Santa 書櫃可以再玩一次：開著時近看可進小房間或�
   assert.ok(books.includes("push.hidden = !replay || done || !solved(shelf)") && books.includes('toggle(true); later(2800, restart)'), 'It can simply be pushed open only while the books still spell MORE');
   assert.ok(books.includes('story.opened = true; story.shut = false; save(); onOpen()'), 'Spelling MORE again opens it again, with the same flash and creak');
   assert.ok(play.includes("restart: () => start('shelf')") && play.includes('enter: start') && !play.includes('swing: () => swing()'), 'The shelf game restarts in place; the bookcase is no longer worked from afar');
-  assert.ok(page.includes("onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (id === 'sleigh' && play?.canLoad) play.loadSleigh(); else if (id === 'window') cabin?.setView('advent'); else if (note) play?.note(note, id); }") && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
+  assert.ok(page.includes("onTouch: (id, note) => { if (id === 'wheel' && play?.wheelOpen) play.enter('wheel'); else if (id === 'world-sign') play?.signpost(note); else if (id === 'santa') play?.chat(); else if (id === 'sleigh' && play?.canLoad) play.loadSleigh(); else if (note) play?.note(note, id); }") && page.includes('cabin?.setView(button.dataset.spot); back.focus()'), 'The page sends 看看書櫃 to the bookcase itself, open or shut');
 });
 await test('Santa 拖曳不會卡住：放開被攔下時（例如瀏覽器擴充功能）仍會結束拖曳，書一次只拿一本、Esc 只放回書', async () => {
   const dir = path.join(project, 'js/components'), files = (await fs.readdir(dir)).filter(name => name.startsWith('cabin-') && name.endsWith('.js'));
@@ -650,7 +650,7 @@ await test('Santa 試玩回饋（11/20）：做完一件事，線索本旁滑出
   assert.ok(css.includes('.sleigh-card { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 1rem; max-height: calc(100% - 1.2rem); overflow-y: auto; }'), 'The sleigh\'s card fits the stage');
   // The shift log, put right, is a clue: who flew each half of each night, as the log has it.
   const log = NOTEBOOK['shift-log'];
-  assert.ok(log && NIGHTS.every(([night, first, second]) => log.text.includes(`${night} 晚上 前半夜 ${first}.、後半夜 ${second}.`)) && CLUE_ICON['shift-log'] === 'clipboard' && CLUE_PLACES.find(([id]) => id === 'room')[2].includes('shift-log') && GOAL_CLUES.jobs.includes('shift-log'), 'The shift log as a clue, with its picture, for the letters');
+  assert.ok(log && NIGHTS.every(([night, first, second]) => log.text.includes(`${night} 前半夜 ${first}.、後半夜 ${second}.`)) && CLUE_ICON['shift-log'] === 'clipboard' && CLUE_PLACES.find(([id]) => id === 'room')[2].includes('shift-log') && GOAL_CLUES.jobs.includes('shift-log'), 'The shift log as a clue, with its picture, for the letters');
   assert.ok(secret.includes("learn('log'); clue('shift-log');"), 'Written in the clue book when the log is put right');
   // The rack: letters already in a pigeonhole stay there while something else is looked at.
   assert.ok(secret.includes("const keep = () => { desk.rack = desk.sorted ? {} : { ...placed }; save(); };") && secret.includes('const was = desk.sorted ? mailFor(id) : desk.rack[id];'), 'Sorting half done is kept');
@@ -668,7 +668,9 @@ await test('Santa 降臨小屋：走到窗台前，小屋彈出成立體的倒�
   assert.equal(adventLit(new Date(2026, 11, 7)), 7, 'The house on the sill lights as many windows as can be opened');
   assert.deepEqual(readProgress(null).advent, [], 'A new save has no window opened');
   // A place in the room of its own: the window, the list and the little house all lead there.
-  assert.ok(ROOM_SPOTS.some(spot => spot.id === 'advent') && page.includes("else if (id === 'window') cabin?.setView('advent');") && page.includes("'secret', 'advent']") && html.includes('data-spot="advent"') && play.includes("advent: () => { say(''); return adventGame("), 'The window sill is a place to walk up to');
+  // 2026-11-23: the advent calendar is off the Santa page (kept for the vending machine page): the module is still here,
+  // nothing on this page leads to it, and the window sill's little house is a decoration.
+  assert.ok(!ROOM_SPOTS.some(spot => spot.id === 'advent') && !page.includes("setView('advent')") && !page.includes("'advent'") && !html.includes('data-spot="advent"') && !play.includes('adventGame') && box.includes('export function adventGame('), 'The advent calendar is kept, but not on the Santa page');
   // The box: twenty-four doors of all sorts and sizes, out of order, inside the box, none overlapping, none too small to tap.
   assert.deepEqual(SLOTS.map(slot => slot.day).sort((a, b) => a - b), Array.from({ length: 24 }, (_, i) => i + 1));
   assert.ok(new Set(SLOTS.map(slot => slot.kind)).size >= 6 && new Set(SLOTS.map(slot => slot.w * slot.h)).size >= 10, 'Doors of many kinds and sizes');
@@ -811,16 +813,16 @@ await test('Santa 書櫃修正：走出門的路上小房間不先消失（門�
   assert.ok(scene.includes('const rocking = THREE.MathUtils.clamp((Math.hypot(eye.x - CHAIR.x, eye.z - CHAIR.z) - .7) / .4, 0, 1);') && scene.includes('* .09) * rocking;'), 'The rocking chair comes to rest with the eye right beside it');
   assert.ok(scene.includes("if (kind === 'bookcase' && view === 'shelf') return false;"), 'Up at the bookcase, it does not call');
 });
-await test('Santa 前半夜、後半夜說清楚：值班須知與分信守則寫明一晚從天黑到隔天天亮、以午夜分兩段、過了午夜還算前一晚；交接表欄名附時間、每列是「某天晚上」', async () => {
+await test('Santa 前半夜、後半夜說清楚：聖誕村早上六點換日，郵戳日期就是那一晚；值班須知、分信守則、交接表欄名都寫鐘點；開場說今天是聖誕節早上', async () => {
   const { DUTY, LOG, RACK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href);
   const { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
-  const { flyer } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
-  const secret = await fs.readFile(path.join(project, 'js/components/cabin-secret.js'), 'utf8');
-  assert.ok(DUTY.lines[0].includes('前半夜是天黑到午夜，後半夜是午夜到天亮') && DUTY.lines[1].includes('過了午夜') && RACK.sign.includes('過了午夜到天亮，還算前一晚，是前一晚的後半夜') && NOTEBOOK['rack-rule'].text === RACK.sign && NOTEBOOK.duty.text.includes('過了午夜還算前一晚'), 'The rules say where a night starts and ends, and where it is cut in two');
-  assert.deepEqual(LOG.spans, ['天黑～午夜', '午夜～天亮']); assert.equal(LOG.night('12/21'), '12/21 晚上');
-  assert.ok(secret.includes("element('span', 'shift-span', element('span', 'shift-head', grid, half), LOG.spans[i])") && secret.includes("element('span', 'shift-date', grid, LOG.night(date));"), 'The shift log shows each half with its hours, each row as an evening');
-  // As the rules say: an evening postmark is that night's first half; one after midnight, the night before's second half.
-  assert.equal(flyer('12/21', '20:10'), 'E'); assert.equal(flyer('12/22', '02:40'), 'O');
+  const { flyer, MAIL } = await import(pathToFileURL(path.join(project, 'js/services/cabin-story.js')).href);
+  const [secret, santa] = await Promise.all(['js/components/cabin-secret.js', 'js/santa.js'].map(name => fs.readFile(path.join(project, name), 'utf8')));
+  assert.ok(DUTY.lines[0].includes('聖誕村的一天從早上六點算起') && DUTY.lines[0].includes('前半夜 18:00～24:00，後半夜 00:00～06:00') && RACK.sign.includes('00:00～06:00 交給後半夜的人') && NOTEBOOK['rack-rule'].text === RACK.sign && NOTEBOOK.duty.text.includes('早上六點算起'), 'The rules say the day turns at six, and when each half is flown');
+  assert.deepEqual(LOG.spans, ['18:00～24:00', '00:00～06:00']);
+  assert.ok(secret.includes("element('span', 'shift-span', element('span', 'shift-head', grid, half), LOG.spans[i])") && secret.includes("element('span', 'shift-date', grid, date);"), 'The shift log shows each half with its hours; each row is its date');
+  assert.equal(flyer('12/21', '02:40'), 'O'); assert.ok(MAIL.every(([, date, time]) => flyer(date, time)), 'Every postmark falls in a night on the log');
+  assert.ok(santa.includes("'今天是聖誕節早上。聖誕老人在郵筒裡留了一封信，點郵筒打開看看'"), 'The welcome says the village is on Christmas morning');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
@@ -964,7 +966,7 @@ await test('Santa 分揀架：依郵戳時間對交接表分信，分好兩封�
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [secret, desk, css] = await Promise.all(['js/components/cabin-secret.js', 'js/components/cabin-desk.js', 'css/santa.css'].map(read));
   const { JOBS, RACK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href), { NOTEBOOK } = await import(pathToFileURL(path.join(project, 'js/data/cabin-clues.js')).href);
-  assert.ok(JOBS.letters[1].includes('分揀架') && RACK.sign.includes('午夜') && NOTEBOOK['rack-rule'].text === RACK.sign, 'The job says to start at the rack; its rule is on its sign and in the clue book');
+  assert.ok(JOBS.letters[1].includes('分揀架') && RACK.sign.includes('早上六點') && NOTEBOOK['rack-rule'].text === RACK.sign, 'The job says to start at the rack; its rule is on its sign and in the clue book');
   assert.ok(desk.includes("pending(volunteer, 'letters') && desk.sorted ?") && secret.includes('const wrong = sortWrong(placed);') && secret.includes("gift('O');"), 'The rules check the sorting; only then do the new letters reach the desk; Ola\'s ornament is in the oldest envelope');
   assert.ok(secret.includes("else if (id === 'rack' && signedUp(volunteer)) sorting(page);") && !secret.slice(secret.indexOf('function sorting'), secret.indexOf('function showPiece')).includes('innerHTML'), 'The rack is for a signed-up substitute; words only through textContent');
   assert.ok(Object.values(RACK.places).every(place => place.length <= 3) && css.includes('.rack-letter[aria-pressed="true"]'), 'Short place names fit the envelope; a picked letter lifts');

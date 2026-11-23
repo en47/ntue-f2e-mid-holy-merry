@@ -136,9 +136,10 @@ test('the music box drawer opens to the order the substitutes first flew, as the
   assert.equal(playsOpen(['E', 'O', 'N', 'K', 'H']), true); assert.equal(playsOpen(['E', 'O', 'K', 'N', 'H']), false); assert.equal(playsOpen('EONKH'), false);
   assert.deepEqual(GIFTS, ['N', 'K', 'H', 'E', 'O'], 'a welcome ornament from each substitute');
 });
-test('the sorting rack: a letter goes to whoever was flying when it was postmarked; past midnight is still the night before', () => {
-  assert.equal(flyer('12/21', '20:10'), 'E'); assert.equal(flyer('12/22', '02:40'), 'O', 'after midnight: the second half of 12/21');
-  assert.equal(flyer('12/24', '04:05'), 'N'); assert.equal(flyer('12/20', '22:00'), null, 'no night on the log');
+test('the sorting rack: a letter goes to whoever was flying when it was postmarked; the day turns at six in the morning', () => {
+  assert.equal(flyer('12/21', '20:10'), 'E'); assert.equal(flyer('12/21', '02:40'), 'O', 'after midnight, the same date: the second half of 12/21');
+  assert.equal(flyer('12/23', '04:05'), 'N'); assert.equal(flyer('12/21', '05:59'), 'O'); assert.equal(flyer('12/20', '22:00'), null, 'no night on the log');
+  assert.ok(MAIL.every(([, , time]) => Number(time.split(':')[0]) >= 18 || Number(time.split(':')[0]) < 6), 'every postmark is in a night');
   assert.equal(mailFor('tomas'), 'you'); assert.equal(mailFor('aya'), 'you');
   const right = Object.fromEntries([...MAIL.map(([id]) => [id, mailFor(id)]), ['tomas', 'you'], ['aya', 'you']]);
   assert.equal(sortWrong(right), 0); assert.equal(sortWrong({ ...right, m2: 'E' }), 1);

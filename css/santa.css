@@ -904,7 +904,7 @@ html.theatre-open { overflow: hidden; }
 .cabin[data-paper] .shift-pin { padding: 1rem 1.5rem .8rem; background: transparent no-repeat 0 0 / 100% 100%; border-radius: 0; box-shadow: none; }
 .shift-grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: .35rem .5rem; align-items: center; margin: 0 0 .8rem; }
 .shift-head { color: var(--muted); font-size: var(--fs-small); text-align: center; }
-/* 欄名下面寫這一段飛的時間，每一列是「某天晚上」，從天黑飛到隔天天亮。 */
+/* 欄名下面寫這一段飛的時間：聖誕村早上六點才換日，所以同一列的前後半夜都是同一個日期。 */
 .shift-span { display: block; font-size: var(--fs-small); line-height: 1.3; opacity: .75; }
 .shift-date { color: var(--ink); font-family: var(--font-hand); font-size: var(--fs-small); }
 .shift-cell { position: relative; height: 2.9rem; padding: 0; border: 0; border-radius: 0; background: none; cursor: pointer; }
