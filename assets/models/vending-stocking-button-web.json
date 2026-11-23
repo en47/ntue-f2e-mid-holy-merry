@@ -1,0 +1,8 @@
+{
+  "source": "assets/models/source/vending-stocking-button.glb",
+  "sourceBytes": 27361252,
+  "sourceSha256": "4c97977332a9ee8f6f0f3e654abaafd2eeaec489e61c58f0cedde97bc0f01930",
+  "model": "vending-stocking-button-web.glb",
+  "bytes": 118444,
+  "sha256": "32e784c80a4ee60d619735429e560208ddc5e2ea23fe61ccee11b641aa7dec05"
+}

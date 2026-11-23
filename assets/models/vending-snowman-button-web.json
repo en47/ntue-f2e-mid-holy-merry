@@ -1,0 +1,8 @@
+{
+  "source": "assets/models/source/vending-snowman-button.glb",
+  "sourceBytes": 27560864,
+  "sourceSha256": "77641042847dd7ccdb93ffbc0f7bdbd18eff7b4367e9e058baf83306cbb7023d",
+  "model": "vending-snowman-button-web.glb",
+  "bytes": 120304,
+  "sha256": "693d07affa448ef85d99cb68a79236a64d3d873355986fdb9679069ee0224d74"
+}

@@ -1,0 +1,8 @@
+{
+  "source": "assets/models/source/vending-snowman.glb",
+  "sourceBytes": 27231184,
+  "sourceSha256": "c9b3ecd611157f19513f99d29c9b1e0d55f62344606106159ac81877b11f3475",
+  "model": "vending-snowman-web.glb",
+  "bytes": 361364,
+  "sha256": "66708faa765a1df21a99f715c3ebf1c182a2fedc547842cc5e28f010b1ad8fd8"
+}
