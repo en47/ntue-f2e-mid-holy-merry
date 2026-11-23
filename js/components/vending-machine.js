@@ -1,5 +1,5 @@
 // The vending machine in Three.js: Tripo3D's machine (assets/models/vending-*-web.glb), the four little things in its
-// window and a round button for each on its panel, lit warm by the lamp post on a snowy night. A button pressed sinks in,
+// window and a round button for each on its panel, lit to look as it did where it was made. A button pressed sinks in,
 // the machine gives a little shudder as it runs, and the thing tips off its shelf and drops into the tray at its foot,
 // where it hops now and then until it is taken out (`takeOut`); then a new one stands on the shelf again. The buttons
 // glow softly while they wait. Each button and the tray have a plain HTML button laid over them (`.machine-hit`), so a
@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from '../../vendor/three/examples/jsm/environments/RoomEnvironment.js';
 import { ITEMS, VENDING } from '../data/vending.js';
 
 // Where things are on the machine, in its own units (foot at y 0, 0.98 tall, its front face at z FRONT): measured off a
@@ -23,17 +24,20 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
   const canvas = element('canvas', 'machine-canvas', stage); canvas.setAttribute('aria-hidden', 'true');
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { canvas.remove(); fail(); return null; }
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NeutralToneMapping; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = .5; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(26, 1, .05, 20);
-  // Lit nearly white, so its own colours show true (the warm lights made it all look yellow): the night sky and the snow
-  // all round, a soft key from the front, only a touch of the lamp post's warmth from the left, moonlight from behind.
-  scene.add(new THREE.HemisphereLight('#e6edf7', '#4b4d58', 1.7));
-  const key = new THREE.DirectionalLight('#f6f3ec', 1.6); key.position.set(-1.1, 2.2, 2.6); scene.add(key);
-  const lamp = new THREE.PointLight('#ffd9a0', .6, 3.2); lamp.position.set(-.6, 1.05, .8); scene.add(lamp);
-  const rim = new THREE.DirectionalLight('#a9c2ee', .9); rim.position.set(2, 1.2, -1); scene.add(rim);
+  // Lit the way it looked in Tripo3D's viewer, where it was made: a soft, even studio light all round (a neutral room as
+  // its environment), a white key from the front, filmic tone mapping (ACES) at half exposure, so its matte red, cream,
+  // butter yellow and olive green match that view (measured against the user's screenshot of it); a little moonlight from
+  // behind. Warm lamps and no environment had made it dark, glossy and yellow.
+  const studio = new THREE.PMREMGenerator(renderer); scene.environment = studio.fromScene(new RoomEnvironment(), .04).texture; studio.dispose();
+  const key = new THREE.DirectionalLight('#ffffff', 1.7); key.position.set(-.8, 2, 2.6); scene.add(key);
+  const rim = new THREE.DirectionalLight('#a9c2ee', .4); rim.position.set(2, 1.2, -1); scene.add(rim);
   const machine = new THREE.Group(); scene.add(machine);
   const things = new Map(), buttons = new Map(), loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-  const load = name => loader.loadAsync(`assets/models/${name}-web.glb`).then(({ scene: model }) => model);
+  // Every model as Tripo3D shows it, clay-like and matte: none of the metal its texture hints at, an even satin finish.
+  const matte = model => { model.traverse(node => { if (node.isMesh) Object.assign(node.material, { metalness: 0, metalnessMap: null, roughness: .72, roughnessMap: null }); }); return model; };
+  const load = name => loader.loadAsync(`assets/models/${name}-web.glb`).then(({ scene: model }) => matte(model));
   // Scaled to a height (or a width, for the buttons) and centred in a holder, which is what moves.
   const fit = (model, size, by = 'y') => { const box = new THREE.Box3().setFromObject(model), dims = box.getSize(new THREE.Vector3()); model.scale.setScalar(size / dims[by]); box.setFromObject(model); model.position.sub(box.getCenter(new THREE.Vector3())); const holder = new THREE.Group(); holder.add(model); return holder; };
   let state = 'loading', drop = null, chosen = null, frame = 0, visible = true, held = false;
@@ -50,7 +54,7 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     ITEMS.forEach(({ id, name: label }, i) => {
       const thing = fit(rest[i * 2], ITEM_HEIGHT), [x, y] = SHELVES[id]; thing.position.set(x, y, FRONT + .03); thing.userData.home = thing.position.clone(); machine.add(thing); things.set(id, thing);
       const button = fit(rest[i * 2 + 1], BUTTON_SIZE, 'x'), [bx, by] = BUTTONS[id]; button.position.set(bx, by, FRONT + .012); button.userData.home = button.position.clone(); machine.add(button); buttons.set(id, button);
-      button.traverse(node => { if (node.isMesh) { node.material = node.material.clone(); node.material.emissive = new THREE.Color('#ffcf6a'); node.material.emissiveIntensity = 0; } });
+      button.traverse(node => { if (node.isMesh) { node.material = node.material.clone(); node.material.emissive = new THREE.Color('#fff3dc'); node.material.emissiveIntensity = 0; } });
       const hit = element('button', 'machine-hit machine-button', stage); hit.type = 'button'; hit.disabled = true; hit.dataset.item = id; hit.setAttribute('aria-label', VENDING.button(label));
       on(hit, 'click', () => select(id)); hits.set(id, hit);
     });
@@ -103,7 +107,7 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     // The things on their shelves turn a little to and fro; not the one dropping, nor the one waiting in the tray.
     const away = drop?.thing ?? (state === 'ready' ? things.get(chosen) : null);
     for (const [id, thing] of things) if (thing !== away) thing.rotation.y = moving ? Math.sin(t * .8 + id.length) * .28 : 0;
-    for (const [id, button] of buttons) button.traverse(node => { if (node.isMesh) node.material.emissiveIntensity = waiting ? (moving ? .16 + Math.sin(t * 2.2 + id.length) * .1 : .2) : 0; });
+    for (const [id, button] of buttons) button.traverse(node => { if (node.isMesh) node.material.emissiveIntensity = waiting ? (moving ? .06 + Math.sin(t * 2.2 + id.length) * .04 : .06) : 0; });
     machine.rotation.z = 0; machine.position.y = 0;
     if (drop) {
       const u = drop.length ? Math.min(1, (now - drop.start) / drop.length) : 1, { thing, button, from, to } = drop;
@@ -134,7 +138,7 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     destroy() {
       events.abort(); cancelAnimationFrame(frame); timers.forEach(clearTimeout); resizing.disconnect(); watch?.disconnect();
       scene.traverse(node => { if (node.isMesh) { node.geometry.dispose(); for (const material of [].concat(node.material)) { for (const value of Object.values(material)) if (value?.isTexture) value.dispose(); material.dispose(); } } });
-      renderer.dispose(); stage.querySelectorAll('.machine-hit, .machine-canvas').forEach(node => node.remove());
+      scene.environment?.dispose(); renderer.dispose(); stage.querySelectorAll('.machine-hit, .machine-canvas').forEach(node => node.remove());
     },
   };
 }
