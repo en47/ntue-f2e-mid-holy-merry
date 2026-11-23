@@ -67,6 +67,7 @@ const KINDS = [
   ['.feed-slip', 'pinned'],
   ['.advent-link, .advent-fold', 'tag'],
   ['.advent-shut', 'kraft'],
+  ['.welcome-note', 'kraft'],
   ['.feed-slip-box', 'kraft'],
   ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin, .shift-file, .notebook-next', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
