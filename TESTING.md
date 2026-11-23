@@ -1640,3 +1640,10 @@ node --experimental-vm-modules tests/smoke.mjs
   - smoke 的守則那一組改寫。原本三項跟著結構更新：分信守則改檢查「早上六點」、交接表線索文字改回「12/21 前半夜」、Santa 頁的降臨曆接線改成檢查「沒有接在 Santa 頁、元件還在」。
   - 拍了一張交接表確認表頭和日期。
 - `scripts/check-santa-advent.mjs` 暫停（Santa 頁沒有入口），檔案保留，開頭註明搬到販賣機頁後改入口再跑；完整回歸暫時是八支。
+
+## 2026-11-23：販賣機頁的 3D 模型（Tripo3D）壓縮
+
+- 使用者放進九個 Tripo3D 模型：販賣機、四樣商品（聖誕襪、聖誕樹、薑餅人、雪人）、四顆按鈕。原檔每個約 76 萬面、三張 4096 貼圖、約 27MB，九個約 250MB。
+- 使用者同意原檔不進版本控制：改名搬到 `assets/models/source/`（`.gitignore`），GitHub 只放壓縮後的 `*-web.glb`。說明見 `docs/VENDING-MODELS.md`。
+- `scripts/build-vending-models.mjs` 壓成：販賣機 0.86MB（5.2 萬面）、商品 0.32～0.42MB（約 2.3 萬面）、按鈕約 0.12MB（約 6 千面），合計約 3.2MB。
+- 驗收：`npm test` 通過，smoke 新增一組（雜湊、大小上限、meshopt 與 WebP、原檔不進版本控制）；預覽台 `tests/vending-models.html` 截圖看過，九個模型形狀和貼圖都正常。

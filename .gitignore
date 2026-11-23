@@ -13,3 +13,6 @@ node_modules/
 tools/firebase-admin/credentials/
 screenshots/
 .DS_Store
+
+# 販賣機頁的 Tripo3D 原始模型（每個約 27MB）：只留在本機，GitHub 只放壓縮後的 *-web.glb（雜湊表記著原檔的 SHA-256）
+assets/models/source/

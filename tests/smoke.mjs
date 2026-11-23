@@ -824,6 +824,18 @@ await test('Santa 前半夜、後半夜說清楚：聖誕村早上六點換日�
   assert.equal(flyer('12/21', '02:40'), 'O'); assert.ok(MAIL.every(([, date, time]) => flyer(date, time)), 'Every postmark falls in a night on the log');
   assert.ok(santa.includes("'今天是聖誕節早上。聖誕老人在郵筒裡留了一封信，點郵筒打開看看'"), 'The welcome says the village is on Christmas morning');
 });
+await test('販賣機頁的 3D 模型：九個壓縮後的網頁版與雜湊表相符、大小在上限內、用 meshopt 壓縮與 WebP 貼圖；原檔只留在本機', async () => {
+  const names = ['vending-machine', ...['stocking', 'tree', 'gingerbread', 'snowman'].flatMap(name => [`vending-${name}`, `vending-${name}-button`])];
+  for (const name of names) {
+    const bytes = await fs.readFile(path.join(project, `assets/models/${name}-web.glb`)), meta = JSON.parse(await fs.readFile(path.join(project, `assets/models/${name}-web.json`), 'utf8'));
+    const limit = name === 'vending-machine' ? 1.5e6 : name.endsWith('-button') ? .3e6 : .8e6, data = JSON.parse(bytes.toString('utf8', 20, 20 + bytes.readUInt32LE(12)).trim());
+    assert.equal(meta.sha256, createHash('sha256').update(bytes).digest('hex'), `${name}-web.glb is the one scripts/build-vending-models.mjs wrote`);
+    assert.ok(meta.bytes === bytes.length && bytes.length < limit && /^[0-9a-f]{64}$/.test(meta.sourceSha256) && meta.source === `assets/models/source/${name}.glb`, `${name}: light enough for the web (${(bytes.length / 1e6).toFixed(2)} MB), its original recorded`);
+    assert.ok(data.extensionsUsed?.includes('EXT_meshopt_compression') && data.images?.every(image => image.mimeType === 'image/webp'), `${name}: meshopt-compressed, WebP textures`);
+  }
+  const ignore = await fs.readFile(path.join(project, '.gitignore'), 'utf8');
+  assert.ok(ignore.includes('assets/models/source/'), 'The 27 MB originals stay on this computer, out of version control');
+});
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [bagUi, inspectUi, play, paper, css] = await Promise.all(['js/components/cabin-bag.js', 'js/components/cabin-inspect.js', 'js/components/cabin-play.js', 'js/components/cabin-paper.js', 'css/santa.css'].map(read));

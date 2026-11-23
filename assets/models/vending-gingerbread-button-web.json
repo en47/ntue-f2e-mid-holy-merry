@@ -1,0 +1,8 @@
+{
+  "source": "assets/models/source/vending-gingerbread-button.glb",
+  "sourceBytes": 27946060,
+  "sourceSha256": "b7e71f953c3b359f32ef16373766bed7c33fbef71a70b2bd7405ec5ee34e08d8",
+  "model": "vending-gingerbread-button-web.glb",
+  "bytes": 117940,
+  "sha256": "3bd380a62a2a8d0823724fae68fec53c0d457d14beee9fe5612b7e9bb425daf8"
+}
