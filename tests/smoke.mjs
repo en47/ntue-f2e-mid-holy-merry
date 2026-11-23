@@ -82,7 +82,7 @@ export function environment(overrides = {}) {
 const results = [];
 async function test(name, run) { await run(); results.push(name); console.log(`PASS ${name}`); }
 
-await test('全部模組語法、HTML 本機資源及五頁導覽', async () => {
+await test('全部模組語法、HTML 本機資源及六頁導覽', async () => {
   async function walk(dir) {
     for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
       const filename = path.join(dir, entry.name);
@@ -91,9 +91,9 @@ await test('全部模組語法、HTML 本機資源及五頁導覽', async () => 
     }
   }
   await walk(path.join(project, 'js'));
-  for (const page of ['index.html', 'intro.html', 'game.html', 'wish.html', 'santa.html']) {
+  for (const page of ['index.html', 'intro.html', 'game.html', 'wish.html', 'vending.html', 'santa.html']) {
     const html = await fs.readFile(path.join(project, page), 'utf8');
-    for (const target of ['index.html', 'intro.html', 'game.html', 'wish.html', 'santa.html']) assert.ok(html.includes(`href="${target}"`));
+    for (const target of ['index.html', 'intro.html', 'game.html', 'wish.html', 'vending.html', 'santa.html']) assert.ok(html.includes(`href="${target}"`));
     assert.equal((html.match(/aria-current="page"/g) ?? []).length, 1);
     for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
       const file = localRef(match[1]);
@@ -835,6 +835,24 @@ await test('Santa 開場是一張立體書故事卡：緞帶標題和聖誕早�
   assert.ok(moves.indexOf('welcome-stand 1s') > 0 && moves.indexOf('welcome-stand 1s') < moves.indexOf('\n}\n') && css.includes('@keyframes welcome-fold'), 'It stands up and folds down like a pop-up page, only without reduced motion');
   assert.ok(paper.includes("['.welcome-card', 'storycard'],") && paper.includes('storycard(paper, width, height, seed) {'), 'A cream page on kraft, cut from the same paper as the yard\'s other cards');
 });
+await test('第五頁 Christmas Vending：雪夜、3D 販賣機（按鈕直接按、不用投幣）、吊在小攤子的降臨曆、從取物口展開的紙雕著色桌', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [html, entry, machine, coloring, advent, scene, css, paper, loader] = await Promise.all(['vending.html', 'js/vending.js', 'js/components/vending-machine.js', 'js/components/vending-coloring.js', 'js/components/vending-advent.js', 'js/components/vending-scene.js', 'css/vending.css', 'js/components/cabin-paper.js', 'js/site-loader.js'].map(read));
+  const { ITEMS, CRAYONS, ADVENT, VENDING } = await import(pathToFileURL(path.join(project, 'js/data/vending.js')).href);
+  assert.ok(html.includes('data-loader="vending"') && html.includes('data-foreground="vending" data-tone="night"') && html.includes('<a href="vending.html" aria-current="page">Vending</a>') && html.includes('id="vending-stage" data-state="loading"') && html.includes('id="color-desk" hidden'), 'Its own page in the navigation, loader and night ground');
+  assert.deepEqual(ITEMS.map(item => item.id), ['gingerbread', 'snowman', 'tree', 'stocking']); assert.ok(CRAYONS.length >= 9 && ADVENT.days.length === 24 && ADVENT.art.length === 24);
+  for (const name of ['vending-machine', ...ITEMS.flatMap(({ id }) => [`vending-${id}`, `vending-${id}-button`])]) await fs.access(path.join(project, `assets/models/${name}-web.glb`));
+  assert.ok(machine.includes("hit.disabled = next !== 'idle'") && !machine.includes('insertCoin') && machine.includes("load(`vending-${id}-button`)") && machine.includes('hold(on)') && machine.includes('setMeshoptDecoder(MeshoptDecoder)'), 'The buttons work at once (no coin), each a model of its own with a hit area over it');
+  assert.ok(entry.includes("if (event.target.closest('.machine-tray'))") && entry.includes("desk.style.setProperty('--from-x'") && css.includes('transform-origin: var(--from-x, 50%) var(--from-y, 80%);'), 'Taken out of the tray, the desk opens out of it');
+  assert.ok(['undo', 'redo', 'reset', 'finish', 'save', 'back'].every(key => VENDING[key]) && coloring.includes("svg('feTurbulence', { type: 'fractalNoise', baseFrequency: '.9 .55'") && coloring.includes('feDisplacementMap') && coloring.includes('context.drawImage(under, 0, 0') && coloring.includes('context.drawImage(over, 0, 0') && !coloring.includes('innerHTML'), 'Undo, redo, reset, finish, save and back; crayon grain and a hand\'s waver; the PNG keeps the paper');
+  assert.ok(advent.includes("const KEY = 'holy-merry:vending:advent'") && advent.includes('ADVENT_SCENES[day - 1](host)') && advent.includes('note.showModal()') && advent.includes("bob.animate(") && !advent.includes('innerHTML'), 'Any door opens, the calendar bobs, and the day\'s paper scene comes up on a card');
+  assert.ok(scene.includes('facetedPeak(') && scene.includes('snowyFir(') && css.includes('.vending-snow { left: 0; right: 0; bottom: 0; height: 40%; }'), 'One flat field of snow under a paper night, pines at both edges');
+  const moves = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference) {'));
+  assert.ok(['cal-sway 6.5s', 'desk-open .6s', 'vending-snowfall 13s'].every(move => moves.indexOf(move) > 0 && moves.indexOf(move) < moves.indexOf('\n}\n')), 'Everything moves only without reduced motion');
+  assert.ok(paper.includes("['.cal-note', 'letter'],") && paper.includes("['.color-tool, .cal-back, .cal-inside, .vending-picker button', 'pale'],") && loader.includes("vending: function () { var stage = document.querySelector('#vending-stage');"), 'The same paper as Santa\'s page; the loader waits for the machine');
+  const words = await read('js/data/vending.js');
+  assert.ok(!/替身|[NKHEO]\.[」）]|\b[NKHEO]\.\s/.test(words), 'Nothing on this page gives away the story on Santa\'s page');
+});
 await test('Santa 12/25 是聖誕季的收尾日：加入是見習、四件收尾工作、留下是簽明年的夜班；不再說平安夜前收到或明天早上出發', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const components = (await fs.readdir(path.join(project, 'js/components'))).filter(name => name.startsWith('cabin-') && !name.startsWith('cabin-advent')).map(name => `js/components/${name}`);
@@ -1073,7 +1091,7 @@ await test('頁尾互動主角：五頁各一個，遵守減少動態，全頁�
   const toys = await fs.readFile(path.join(project, 'js/components/foreground-toys.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/shared.css'), 'utf8');
   assert.ok(/const TOYS = \{ home: sled, intro: globe, game: surpriseBox, wish: wishingStar, santa: jingleBell \}/.test(toys));
   assert.ok((toys.match(/motion\(\)\.matches/g) ?? []).length >= 3); assert.ok(css.includes('.toy-button:focus-visible'));
-  for (const page of ['index', 'intro', 'game', 'wish', 'santa']) assert.ok((await fs.readFile(path.join(project, `${page}.html`), 'utf8')).includes('data-foreground='), page);
+  for (const page of ['index', 'intro', 'game', 'wish', 'vending', 'santa']) assert.ok((await fs.readFile(path.join(project, `${page}.html`), 'utf8')).includes('data-foreground='), page);
 });
 await test('導覽燈串：五頁共用、等 Loading 結束才跑光、沒有 JS 時仍是一般連結', async () => {
   const shared = await fs.readFile(path.join(project, 'js/shared.js'), 'utf8'), lights = await fs.readFile(path.join(project, 'js/components/nav-lights.js'), 'utf8');
@@ -1095,8 +1113,8 @@ await test('首頁壓縮模型：骨架與動畫和原檔一致，體積明顯�
   const scene = await fs.readFile(path.join(project, 'js/components/characters-scene.js'), 'utf8');
   assert.ok(scene.includes('santa-dance-web.glb') && scene.includes('reindeer-web.glb') && scene.includes('setMeshoptDecoder'));
 });
-await test('背景音樂：五頁選單一致、不寫死 autoplay、壓縮音檔與清單相符、原檔保留', async () => {
-  const blocks = []; for (const page of ['index', 'intro', 'game', 'wish', 'santa']) { const html = await fs.readFile(path.join(project, `${page}.html`), 'utf8'); blocks.push(html.match(/<div class="music-widget">[\s\S]*?<\/audio>\s*<\/div>/)[0]); assert.ok(!html.includes('music-file') && !/<audio[^>]*autoplay/.test(html), page); }
+await test('背景音樂：六頁選單一致、不寫死 autoplay、壓縮音檔與清單相符、原檔保留', async () => {
+  const blocks = []; for (const page of ['index', 'intro', 'game', 'wish', 'vending', 'santa']) { const html = await fs.readFile(path.join(project, `${page}.html`), 'utf8'); blocks.push(html.match(/<div class="music-widget">[\s\S]*?<\/audio>\s*<\/div>/)[0]); assert.ok(!html.includes('music-file') && !/<audio[^>]*autoplay/.test(html), page); }
   assert.equal(new Set(blocks).size, 1, 'The widget markup must stay identical on every page');
   const manifest = JSON.parse(await fs.readFile(path.join(project, 'docs/AUDIO-ASSETS.json'), 'utf8'));
   assert.equal(manifest.tracks.length, 5);
@@ -1153,9 +1171,9 @@ await test('讀信：信封開啟動畫、同款信紙、保留原生對話框�
   assert.ok(reader.includes("'cancel'") && reader.includes('prefers-reduced-motion') && reader.includes('airmailLetter') && !reader.includes('innerHTML'));
   assert.ok(/@media \(prefers-reduced-motion: no-preference\)[\s\S]*\.is-opening/.test(css), 'The letter must stay readable without animation');
 });
-await test('Loading：五頁各自主題、有時間上限、頁面動畫等它結束、畫面不依賴下載', async () => {
+await test('Loading：六頁各自主題、有時間上限、頁面動畫等它結束、畫面不依賴下載', async () => {
   const js = await fs.readFile(path.join(project, 'js/site-loader.js'), 'utf8'), css = await fs.readFile(path.join(project, 'css/loader.css'), 'utf8');
-  for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish'], ['santa', 'santa']]) {
+  for (const [page, kind] of [['index', 'home'], ['intro', 'intro'], ['game', 'game'], ['wish', 'wish'], ['vending', 'vending'], ['santa', 'santa']]) {
     const html = await fs.readFile(path.join(project, `${page}.html`), 'utf8');
     assert.ok(html.includes(`data-loader="${kind}"`), page); assert.match(html, /<body[^>]*>\s*<script src="js\/site-loader\.js/, 'Runs before the page paints');
     assert.ok(new RegExp(`\\b${kind}: (function|')`).test(js), kind);
@@ -1724,7 +1742,7 @@ await test('最終紙雕清理：新素材完整性、單一村落、三種樹�
   assert.ok(/<a class="paper-button" href="intro\.html">Explore the Story/.test(html)); assert.ok(/<a class="paper-button cream" href="wish\.html">Make a Wish/.test(html));
   assert.ok(html.includes('聖誕老人的小信')&&html.includes('麋鹿的小信')); assert.ok(homeScene.includes('buttonArt(')&&homeScene.includes('airmailLetter('));
   assert.ok(css.includes('.paper-button:hover')&&css.includes('.paper-button:active')&&css.includes('.paper-button:focus-visible'));
-  for (const page of ['index.html', 'intro.html', 'game.html', 'wish.html', 'santa.html']) { const text = (await fs.readFile(path.join(project, page), 'utf8')); assert.ok(text.includes("Holy Moly! It's Christmas!"), page); assert.ok(!/HANDMADE/.test(text), page); }
+  for (const page of ['index.html', 'intro.html', 'game.html', 'wish.html', 'vending.html', 'santa.html']) { const text = (await fs.readFile(path.join(project, page), 'utf8')); assert.ok(text.includes("Holy Moly! It's Christmas!"), page); assert.ok(!/HANDMADE/.test(text), page); }
   assert.ok(homeScene.includes('mountTagline(') && html.includes('data-tagline-art'));
   // 遊戲框只是外圍裝飾：不擋點擊，也不能改動面板內距。
   const gameCss=await fs.readFile(path.join(project,'css/game.css'),'utf8');

@@ -1,6 +1,6 @@
 // Paper-cut ground shared by all five pages: same hills and layout, different objects and one toy per page.
 import { holly, paperLayer, pauseOffscreen, pine, shape } from './paper-art.js';
-import { snowyFir } from './paper-props.js';
+import { lamp, snowyFir } from './paper-props.js';
 import { mountToy } from './foreground-toys.js';
 
 const LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220';
@@ -164,6 +164,11 @@ const THEMES = {
       groundShadow(parent, 246, 192, 52); groundShadow(parent, 96, 200, 30);
       snowyFir(parent, 246, 192, 140, 1, .62); northPole(parent, 96, 200);
     }); },
+  },
+  // Christmas Vending: a street lamp in the snow, and a present left by it.
+  vending: {
+    left: ({ tree, still }) => { tree(70, 216, 130, -1); tree(150, 224, 90, -2.2); still(parent => lamp(parent, 300, 228)); },
+    right: ({ tree, bob }) => { tree(236, 190, 120, -2); bob(-1.2, parent => gift(parent, 84, 150, 84, 50, '#b5625a', '#efdcae')); },
   },
   wish: {
     left: ({ tree, still, bob }) => { tree(70, 216, 130, -1); still(parent => mailbox(parent, 226, 228)); bob(-.6, parent => envelope(parent, 350, 96, 9)); bob(-2.2, parent => envelope(parent, 118, 86, -11)); },
