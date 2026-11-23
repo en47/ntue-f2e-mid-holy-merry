@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1c2f43">
+  <meta name="description" content="Holy Merry! 聖誕販賣機：雪夜裡挑一樣聖誕小東西，帶到著色桌親手上色，還有一座可以打開的降臨曆。">
+  <title>Christmas Vending — Holy Merry!</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='14' fill='%23ad3c3b'/%3E%3Ctext x='20' y='29' text-anchor='middle' font-size='29' fill='%23fffbed' font-family='Georgia'%3Eh%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/shared.css?v=213c15557c">
+  <link rel="stylesheet" href="css/loader.css?v=dd9387a358">
+  <link rel="stylesheet" href="css/vending.css?v=a8db964f4d">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","./js/components/back-to-top.js":"./js/components/back-to-top.js?v=0f43fbd21d","./js/components/cabin-advent-scenes.js":"./js/components/cabin-advent-scenes.js?v=3cec68c68d","./js/components/cabin-art.js":"./js/components/cabin-art.js?v=5f5a1c7887","./js/components/cabin-clue-art.js":"./js/components/cabin-clue-art.js?v=7b3fc6aa12","./js/components/cabin-decor.js":"./js/components/cabin-decor.js?v=ad14c7f50f","./js/components/cabin-ornaments.js":"./js/components/cabin-ornaments.js?v=01cf587144","./js/components/cabin-paper.js":"./js/components/cabin-paper.js?v=3b5fa162e8","./js/components/cabin-sound.js":"./js/components/cabin-sound.js?v=d1c86fa609","./js/components/foreground-toys.js":"./js/components/foreground-toys.js?v=f776e6dd90","./js/components/info-dialog.js":"./js/components/info-dialog.js?v=6ea5fbc23b","./js/components/music-player.js":"./js/components/music-player.js?v=bcb3ab1242","./js/components/nav-lights.js":"./js/components/nav-lights.js?v=de2c05f127","./js/components/page-foreground.js":"./js/components/page-foreground.js?v=f240e95b31","./js/components/paper-art.js":"./js/components/paper-art.js?v=f0722c5277","./js/components/paper-props.js":"./js/components/paper-props.js?v=451f560414","./js/components/santa-placeholder.js":"./js/components/santa-placeholder.js?v=8c938caad4","./js/components/title-art.js":"./js/components/title-art.js?v=b005d8b41d","./js/components/vending-advent.js":"./js/components/vending-advent.js?v=ef3c3c1a0e","./js/components/vending-coloring.js":"./js/components/vending-coloring.js?v=01a77f8531","./js/components/vending-machine.js":"./js/components/vending-machine.js?v=35eaf9812d","./js/components/vending-scene.js":"./js/components/vending-scene.js?v=7f29caa790","./js/data/cabin-glyphs.js":"./js/data/cabin-glyphs.js?v=f397e42dc3","./js/data/contact.js":"./js/data/contact.js?v=1e249d29e2","./js/data/faq.js":"./js/data/faq.js?v=05dd1e4623","./js/data/heading-glyphs.js":"./js/data/heading-glyphs.js?v=e6c7b56a81","./js/data/music-tracks.js":"./js/data/music-tracks.js?v=00ef109c3c","./js/data/nav-string.js":"./js/data/nav-string.js?v=23b0fc3b7d","./js/data/paper-envelope-style.js":"./js/data/paper-envelope-style.js?v=c5c7ce17e7","./js/data/title-glyphs.js":"./js/data/title-glyphs.js?v=677b830c80","./js/data/vending.js":"./js/data/vending.js?v=27ab79e572","./js/services/cabin-advent.js":"./js/services/cabin-advent.js?v=f94a65c2e7"}}</script>
+  <script type="module" src="js/shared.js?v=d2805c572c"></script>
+  <script type="module" src="js/vending.js?v=70f46c938c"></script>
+</head>
+<body class="vending-page" data-loader="vending">
+  <script src="js/site-loader.js?v=7d048e2ed2"></script>
+<a class="skip-link" href="#main">跳至主要內容</a>
+<header class="site-header"><div class="shell header-inner">
+  <a class="brand" href="index.html" aria-label="Holy Merry! 首頁"><span class="brand-mark" aria-hidden="true">h</span><span><span class="brand-name">Holy Merry!</span><span class="brand-small">Holy Moly! It's Christmas!</span></span></a>
+  <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="site-nav">選單 ☰</button>
+  <nav class="site-nav" id="site-nav" aria-label="主要導覽"><a href="index.html">Home</a><a href="intro.html">Intro</a><a href="game.html">Game</a><a href="wish.html">Wish</a><a href="vending.html" aria-current="page">Vending</a><a href="santa.html">Santa</a></nav>
+</div></header>
+<main id="main">
+<section class="vending" id="vending" data-mode="machine" aria-labelledby="vending-title">
+  <header class="vending-heading"><h1 id="vending-title" lang="en">Christmas Vending</h1></header>
+  <div class="vending-scene" aria-hidden="true"></div>
+  <div class="vending-stage" id="vending-stage" data-state="loading"><div class="machine-light" aria-hidden="true"></div></div>
+  <div class="vending-picker" id="vending-picker" hidden></div>
+  <div class="advent-stand" id="advent-stand"></div>
+  <p class="sr-only" id="vending-status" role="status"></p>
+  <section class="color-desk" id="color-desk" hidden aria-labelledby="color-title">
+    <h2 class="sr-only" id="color-title">著色桌</h2>
+    <div class="color-wood" aria-hidden="true"></div>
+    <div class="color-work"></div>
+  </section>
+  <svg class="vending-edge" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 26C90 12 170 34 262 24S430 6 540 22s190 18 300 4 176-20 292-2 208 20 308 2V48H0Z"/></svg>
+</section>
+<noscript><p class="shell">請啟用 JavaScript，才能使用聖誕販賣機、著色桌與降臨曆。</p></noscript>
+</main>
+<div class="page-foreground" data-foreground="vending" data-tone="night" aria-hidden="true"></div>
+<footer class="site-footer"><div class="shell footer-inner"><div class="footer-links"><button class="text-button" data-info="accessibility">Site Accessibility</button><span>/</span><button class="text-button" data-info="faq">FAQ</button></div><p>© 2026 Holy Merry! <span aria-hidden="true">✧</span></p><div><button class="text-button" data-info="contact">Contact us</button></div></div></footer>
+<div class="music-widget">
+    <section class="music-panel" id="music-panel" hidden aria-labelledby="music-title">
+      <h2 id="music-title" lang="en">Christmas Songs</h2>
+      <fieldset class="music-options"><legend class="sr-only">選擇背景音樂</legend><div id="music-options"></div></fieldset>
+      <fieldset class="music-modes" id="music-modes"><legend class="sr-only">播放方式</legend><label><input type="radio" name="music-mode" value="next"><span>自動下一首</span></label><label><input type="radio" name="music-mode" value="repeat"><span>重複這首</span></label></fieldset>
+      <label class="music-volume" for="music-volume">音量</label><input id="music-volume" type="range" min="0" max="1" step=".05" value=".3">
+      <p class="hint" id="music-status" role="status">音樂已關閉。</p>
+    </section><button class="music-toggle" id="music-toggle" type="button" aria-expanded="false" aria-controls="music-panel" aria-label="開啟音樂選單"></button><audio id="site-audio" preload="none"></audio>
+  </div>
+<dialog id="info-dialog" aria-labelledby="info-title"><button class="dialog-close" data-close-dialog aria-label="關閉說明">×</button><h2 id="info-title"></h2><p id="info-content"></p></dialog>
+</body>
+</html>

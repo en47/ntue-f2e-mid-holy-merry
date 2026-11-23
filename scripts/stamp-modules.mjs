@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Iframe documents come first: the host page versions each frame from the frame's already-stamped file.
-export const PAGES = ['vendor/game1-frameless/index.html', 'games/christmas-matching.html', 'index.html', 'intro.html', 'game.html', 'wish.html', 'santa.html', 'admin.html'];
+export const PAGES = ['vendor/game1-frameless/index.html', 'games/christmas-matching.html', 'index.html', 'intro.html', 'game.html', 'wish.html', 'vending.html', 'santa.html', 'admin.html'];
 // The flying game keeps its own classic scripts beside the page, so only those plain references are versioned.
 const PLAIN = new Set(['vendor/game1-frameless/index.html']);
 // A page in a subfolder reaches js/ and css/ through ../, and its import map resolves from that folder.
