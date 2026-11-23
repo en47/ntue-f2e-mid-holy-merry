@@ -452,7 +452,7 @@ await test('Santa 回饋修正：真的抽屜（書桌、音樂盒）、卡片�
   const things = secret.slice(secret.indexOf('const THINGS = {'), secret.indexOf('};', secret.indexOf('const THINGS = {')));
   assert.ok(things.indexOf("rack: ['secret-rack'") < things.indexOf("record: ['secret-desk'"), 'The old record book comes after the rack, so it is over the rack and under any card');
   assert.ok(art.includes("const [ox, oy, ox2, oy2] = box('outbox'), ocx = (ox + ox2) / 2, foot = oy2 - 30, lean = `rotate(-3 ${ocx} ${foot})`;"), 'The reply stands in its letter rack, its foot hidden by the front board');
-  assert.ok(progress.includes("export const FOUND = 'holy-merry:cabin:found';") && santa.includes("FOUND = 'holy-merry:cabin:found'") && notebook.includes("yes.addEventListener('click', () => { resetProgress(); location.reload(); });") && notebook.includes('RESTART.ask'), 'Starting over is at the bottom of the clue book, asked once more, and forgets only the village');
+  assert.ok(progress.includes("export const FOUND = 'holy-merry:cabin:found';") && santa.includes("FOUND = 'holy-merry:cabin:found'") && progress.includes("export const TIP = 'holy-merry:cabin:tip';") && santa.includes("TIP = 'holy-merry:cabin:tip'") && notebook.includes("yes.addEventListener('click', () => { resetProgress(); location.reload(); });") && notebook.includes('RESTART.ask'), 'Starting over is at the bottom of the clue book, asked once more, forgets only the village, and shows the welcome again');
 });
 await test('Santa 房間牆面佈置：每件裝飾與聖誕樹是自己的紙板（比牆細），會動的是獨立圖層，只在走進屋時才下載，流量有上限', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
