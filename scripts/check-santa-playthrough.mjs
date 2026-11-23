@@ -157,7 +157,7 @@ await enterSecret();
 await thing('register'); await page.evaluate(() => [...document.querySelectorAll('.register-wishes .compose-choice')].find(b => b.textContent.includes('禮物')).click()); await must('蓋章許願'); await wait(400); await must('確定許願'); await wait(900);
 await page.click('.wish-gift'); await wait(2600); await must('好 ✓'); await wait(800);
 log.push(`ending: ${await told()}`);
-await thing('log'); await must('簽上早班'); await wait(400); await must('確定簽名'); await wait(900); log.push(`ending: ${await told()}`); await putBack();
+await thing('log'); await must('簽下明年的夜班'); await wait(400); await must('確定簽名'); await wait(900); log.push(`ending: ${await told()}`); await putBack();
 await thing('register'); await must('離開替身工作'); await wait(300); await must('確定離開'); await wait(800); await putBack();
 await must('離開，關上書櫃'); await wait(4500); await toRoom(); await page.evaluate(() => document.querySelector('.cabin-back:not([hidden])')?.click()); await wait(8000);
 log.push(`walked out: ${await page.evaluate(() => document.querySelector('.ending-theatre') ? 'an ending (wrong)' : 'nothing told')}`);

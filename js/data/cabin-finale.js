@@ -39,17 +39,18 @@ export const WISHES = [
   { id: 'blessing', name: '把祝福送給重要的人', by: 'N.', hand: 'n', note: '你的願望，交給我了。熱氣球會把它送到。', blessings: ['祝你今年冬天，每天都暖暖的。', '謝謝你，一直陪在我身邊。', '希望你的願望，也都會實現。'] },
 ];
 
-// Once all four jobs are done: the early shift on Christmas morning, still unsigned.
-export const STAY = { invite: '12/25 早班還沒有人簽名。四件工作你都做過了，要簽上你的縮寫，留下來幫忙嗎？', sign: '簽上早班', tag: '最右邊的掛勾上，掛著你的名牌；帽架的第六個掛鉤，掛著你的帽子。', sure: '簽了 12/25 早班，明天早上就換你出發。確定要留下來嗎？', yes: '確定簽名', no: '再想想' };
+// Once all four jobs are done: next season's night shift, at the foot of the shift log, still unsigned. Signed, you are on
+// next Christmas's roster (a learner's first season: one half of one night, with the others).
+export const STAY = { invite: '交接表最下面，2027 年聖誕季的夜班還沒有人簽名。今天的收尾工作你都做完了，要簽上你的縮寫，正式留下來嗎？', sign: '簽下明年的夜班', tag: '最右邊的掛勾上，掛著你的名牌；帽架的第六個掛鉤，掛著你的帽子。', sure: '簽了名，就正式排進明年的夜班了：下一個聖誕季，你會跟著前輩，飛你的第一段。確定要留下來嗎？', yes: '確定簽名', no: '再想想' };
 // The world signpost in the yard: the only way home (ending A), and only for a visitor who knows the secret and is not
 // signed up; a volunteer finds a card hung on it; anyone else reads only what the signpost says.
 export const SIGNPOST = { title: '世界路標', home: '踏上回家的路', sure: '要離開聖誕村、踏上回家的路了嗎？村子的小秘密，會一直放在你心裡。', yes: '確定回家', no: '再逛逛', volunteer: '路標上掛著一張小卡：「替身要先在登記簿劃掉縮寫，才能踏上回家的路。」', close: '好 ✓' };
 // All four jobs done, back in the middle of the room: Santa asks, once, what comes next. Nothing ends until it is chosen
 // at the register or the shift log.
 export const ASK = {
-  question: '聖誕老人放下茶杯：「你的工作已經完成了。想再看看這間小屋，還是準備繼續旅程呢？」',
-  options: [['explore', '繼續探索', '「慢慢逛，不急。小屋的門一直開著。」'], ['wish', '帶著願望離開', '「那就到小房間的登記簿，用你的章許一個願望吧。」'], ['stay', '自願留下', '「交接表上 12/25 的早班還空著。簽上你的名字，明天早上就換你出發。」']],
-  wished: '「你已經許過願了。想留下來的話，交接表上的早班還空著。」',
+  question: '聖誕老人放下茶杯：「今天的收尾工作，你都做完了。想再看看這間小屋，還是準備繼續旅程呢？」',
+  options: [['explore', '繼續探索', '「慢慢逛，不急。小屋的門一直開著。」'], ['wish', '帶著願望離開', '「那就到小房間的登記簿，用你的章許一個願望吧。」'], ['stay', '自願留下', '「交接表最下面，明年的夜班還空著。簽上你的名字，下一個聖誕節，我們一起出發。」']],
+  wished: '「你已經許過願了。想留下來的話，交接表最下面，明年的夜班還空著。」',
 };
 
 // The endings. A: you knew, and went home; B: a wish granted; C: staying on. Each is told once each time it is chosen, in
@@ -58,7 +59,7 @@ export const ASK = {
 export const ENDINGS = {
   A: { title: '結局 A　普通訪客', en: 'Going Home', lines: ['聖誕老人送你到門口，塞給你一張明信片：', '「謝謝你來小屋作客。村子的小秘密，就放在你心裡吧。」', '「哪天想回來幫忙，登記簿最下面那一格，永遠留給你。」'], sign: '—— S.' },
   B: { title: '結局 B　願望旅人', en: 'Wish Granted', lines: ['你用三個章，換了一個願望。', '替身們把它送到了。你帶著實現的願望，和一段北極的回憶回家。'] },
-  C: { title: '結局 C　自願留下', en: 'Staying On', lines: ['你在 12/25 早班簽上了自己的縮寫。', '名牌板最右邊的空掛勾掛上了你的名牌，帽架的第六個掛鉤，也掛上了你的帽子。明天早上，換你出發。'] },
+  C: { title: '結局 C　自願留下', en: 'Staying On', lines: ['你在交接表上，簽下了明年的夜班。', '聖誕老人把你的名牌掛上第六個掛勾；旁邊，一頂新的紅色帽子，也有了屬於自己的位置。', '「今年辛苦了。下一個聖誕節，我們一起把願望送出去吧。」'], sign: '—— S.' },
 };
 // The truer telling of B or C, for whoever understood what Holly knew: after it, the village at night, every name lit and
 // the light passed on to every window, with Holly's letter (the old ending D, no longer told on its own).
@@ -70,7 +71,7 @@ export const POSTCARD = {
   lines: {
     A: ['謝謝你來小屋作客。', '村子的小秘密，就放在你心裡吧。'],
     B: ['你的願望，替身們送到了。', '帶著它，和一段北極的回憶回家。'],
-    C: ['12/25 早班，換你出發。', '你的名牌和帽子，掛在第六個掛鉤上。'],
+    C: ['下一個聖誕節，我們一起出發。', '你的名牌和帽子，掛在第六個掛鉤上。'],
   },
   truth: ['Dear Christmas Traveler,', 'Santa was never just one person.', '原來，聖誕老人從來不只是一個人。'],
   sign: { A: '—— S.', B: '—— S.', C: '—— S.', truth: '—— H.' },

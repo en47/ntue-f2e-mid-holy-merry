@@ -26,7 +26,7 @@
 .cabin-welcome { position: absolute; z-index: 3; left: 50%; top: 6%; width: min(34rem, calc(100% - 2rem)); translate: -50% 0; pointer-events: none; text-align: center; transition: opacity .6s ease; }
 .cabin-welcome.is-gone { opacity: 0; }
 .welcome-banner { position: relative; aspect-ratio: 520 / 160; }
-.welcome-note { width: fit-content; max-width: 92%; margin: -.2rem auto 0; padding: .55rem 1.3rem .6rem; color: var(--ink); background: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.6; rotate: -1.2deg; transform-origin: 50% 0; }
+.welcome-note { width: fit-content; max-width: 92%; margin: -.2rem auto 0; padding: .55rem 1.3rem .6rem; color: var(--ink); background: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.6; white-space: pre-line; rotate: -1.2deg; transform-origin: 50% 0; }
 .cabin[data-paper] .welcome-note { background: transparent no-repeat 0 0 / 100% 100%; }
 .mail-marker { position: absolute; z-index: 3; width: 3.2rem; aspect-ratio: 64 / 52; padding: 0; border: 0; background: none; translate: -50% -112%; cursor: pointer; }
 .mail-marker[hidden] { display: none; }
@@ -397,7 +397,7 @@
 .secret-tags { display: grid; grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr)); gap: .4rem; margin: 0 0 .8rem; padding: 0; list-style: none; font-family: var(--font-hand); font-size: var(--fs-body); }
 .secret-initial { margin-right: .3rem; font-family: var(--font-display); }
 .secret-log { margin: 0 0 1rem; padding-left: 0; list-style: none; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 2; }
-.secret-log [data-hand="n"] { color: #8f3b36; rotate: -1deg; } .secret-log [data-hand="k"] { color: #3f5a7a; letter-spacing: .05em; } .secret-log [data-hand="h"] { color: #3f6653; } .secret-log [data-hand="e"] { color: #6e4a6b; } .secret-log .is-morning { color: #8a7a6a; }
+.secret-log [data-hand="n"] { color: #8f3b36; rotate: -1deg; } .secret-log [data-hand="k"] { color: #3f5a7a; letter-spacing: .05em; } .secret-log [data-hand="h"] { color: #3f6653; } .secret-log [data-hand="e"] { color: #6e4a6b; } .secret-log .is-next { color: #8a7a6a; }
 .secret-rule, .secret-note { margin: 0 0 .5rem; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.8; }
 .secret-note { color: #6b5a4c; }
 /* 小房間裡的東西各是各的樣子：登記簿是皮面帳本（金邊、紅書籤絲帶、橫線），名牌掛在木板上，班表夾在夾板上，
@@ -673,18 +673,16 @@ html.theatre-open { overflow: hidden; }
 @keyframes b-note { from { scale: 0; rotate: -40deg; opacity: 0; } }
 .b-balloon { animation: b-balloon 7s ease-in-out 11.2s both; }
 @keyframes b-balloon { from { translate: -540% 340%; scale: .4; opacity: 0; } 12% { opacity: 1; } }
-/* 結局 C：天慢慢亮，你的名牌晃進第六個掛勾，禮物袋一個個丟進雪橇；其他五位跳著送你出發，雪橇往太陽飛。 */
-.c-dawn { animation: theatre-appear 6s ease-in 4s both; }
-.c-sun { animation: c-sun 9s cubic-bezier(.3,.6,.4,1) 4s both; }
-@keyframes c-sun { from { translate: 0 95%; } }
+/* 結局 C：聖誕節這一天快過完了，太陽慢慢下山、星星出來；你的名牌晃進第六個掛勾，新的紅帽子掛上旁邊的木釘，其他五位圍著你跳。裝好備用禮物的雪橇停在雪地上，等下一個聖誕夜。 */
+.c-glow { animation: theatre-appear 6s ease-in 4s both; }
+.c-sun { translate: 0 95%; animation: c-sun 9s cubic-bezier(.5,0,.7,1) 4s both; }
+@keyframes c-sun { from { translate: 0 0; } }
+.c-star { animation: a-star 1.6s cubic-bezier(.3,1.5,.5,1) var(--at) both; }
 .c-tag { transform-origin: 50% 0; animation: c-tag 2.4s ease-out 2.2s both; }
 @keyframes c-tag { 0% { translate: 0 -320%; rotate: 0deg; opacity: 0; } 22% { translate: 0 0; rotate: 26deg; opacity: 1; } 42% { rotate: -17deg; } 60% { rotate: 10deg; } 78% { rotate: -5deg; } 100% { translate: 0 0; rotate: 0deg; } }
-.c-sack { animation: c-sack .7s cubic-bezier(.3,1.5,.5,1) var(--at) both; }
-@keyframes c-sack { from { translate: 0 -260%; opacity: 0; } 40% { opacity: 1; } }
+.c-hat { transform-origin: 54% 22%; animation: c-tag 2.4s ease-out 3.6s both; }
 .c-friend { animation: c-hop .45s ease-in-out var(--hop) 8 alternate both; }
 @keyframes c-hop { to { translate: 0 -1.4%; } }
-.c-flight { transform-origin: 36.667% 83%; translate: 41.667% -51.333%; scale: .36; rotate: -4deg; animation: c-fly 6s ease-in 8.6s both; }
-@keyframes c-fly { 0% { translate: 0 0; scale: 1; rotate: 0deg; } 15% { translate: 4% -1%; scale: .97; rotate: -5deg; } 40% { translate: 17% -14%; scale: .78; rotate: -10deg; } 70% { translate: 32% -35%; scale: .52; rotate: -8deg; } 100% { translate: 41.667% -51.333%; scale: .36; rotate: -4deg; } }
 /* 真相版的第二幕（B／C 演完才接上，原本的結局 D）：夜裡的村子，六個名牌一個一個亮起來，光從小屋的門口傳到村裡每一扇窗。 */
 .theatre-act { position: absolute; inset: 0; z-index: 8; animation: theatre-appear 1.2s ease-out both; }
 .d-glow { animation: d-glow 1.2s ease-out var(--at) both; }

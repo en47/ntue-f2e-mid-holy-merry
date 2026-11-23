@@ -76,7 +76,7 @@ const load4 = async cities => { for (const city of cities) { await tap(`.sleigh-
 await load4(['台北', '東京', '雷克雅維克', '多倫多']);
 check((await caption()).includes('不在最上面') && !(await saved()).volunteer.tasks.includes('hay'), `照路線順序裝：退回來 ${await caption()}`);
 await load4(['多倫多', '雷克雅維克', '東京', '台北']); await wait(1600);
-check((await saved()).volunteer.tasks.includes('hay'), '最後一站放最下面、第一站放最上面：裝好雪橇（第二件工作）'); await shot('sleigh-loaded');
+check((await saved()).volunteer.tasks.includes('hay'), '最後一站放最下面、第一站放最上面：疊好雪橇（第二件工作）'); await shot('sleigh-loaded');
 await press('.sleigh-card .cabin-letter-close'); await wait(400);
 // Feeding him by the barn's table: the favourite first is wrong; by the clock, oats, carrot, lichen.
 await toYard(); await spot('stable');
@@ -118,7 +118,7 @@ const done = await saved();
 await load(done);
 await toYard(); await spot('stable'); check(await page.evaluate(() => document.querySelector('.feed-table').classList.contains('is-done')), '重新整理：餵食表打上勾了');
 await toYard(); await spot('reindeer'); await tap('.sleigh-spot'); await wait(700);
-check((await text('.sleigh-card')).includes('已經裝好') && (await page.evaluate(() => document.querySelectorAll('.sleigh-rack .sleigh-sack').length)) === 4, '重新整理：雪橇還是裝好的');
+check((await text('.sleigh-card')).includes('收拾好了') && (await page.evaluate(() => document.querySelectorAll('.sleigh-rack .sleigh-sack').length)) === 4, '重新整理：雪橇還是收拾好的');
 await press('.sleigh-card .cabin-letter-close'); await wait(400);
 await openWheel(); check(!(await visible('.gearbox-snow')) && (await page.evaluate(() => [...document.querySelectorAll('.gearbox-piece')].some(b => !b.hidden && b.getAttribute('aria-label').startsWith('特大齒輪')))), '重新整理：特大齒輪在動力箱裡，雪地不再發亮');
 // On a cold stone, before the fire is lit, the slip springs back.

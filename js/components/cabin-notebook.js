@@ -184,7 +184,7 @@ export function mountNotebook(stage, { progress, save, sound, watch = () => {} }
       let list = page.lastElementChild?.matches('.notebook-work') && page.lastElementChild.querySelector('.notebook-jobs');
       if (!list) {
         const work = element('section', 'notebook-work', page);
-        if (!i) element('h4', 'notebook-goal', work, `替身工作：完成 ${points(progress.volunteer)}／${TASKS.length}`);
+        if (!i) element('h4', 'notebook-goal', work, `收尾工作：完成 ${points(progress.volunteer)}／${TASKS.length}`);
         list = element('ul', 'notebook-jobs', work);
       }
       const done = tasks.includes(task), item = element('li', done ? `is-done${ticked.has(task) ? ' is-fresh' : ''}` : '', list);

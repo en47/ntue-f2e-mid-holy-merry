@@ -8,7 +8,7 @@
 import { mountTitleArt } from './title-art.js';
 import { PASS, VILLAGE, frame, goingHome, miracle, stayingOn, wishGranted } from './cabin-ending-art.js';
 import { ENDINGS, HOLLY, THEATRE, TRUTH, WISHES } from '../data/cabin-finale.js';
-import { MORNING } from '../data/cabin-secret.js';
+import { NEXT_SEASON } from '../data/cabin-secret.js';
 
 const SCENES = { A: goingHome, B: wishGranted, C: stayingOn };
 // The second act's length and when its last window is lit (cabin-ending-art.js `miracle`).
@@ -44,10 +44,10 @@ export function endingTheatre({ host, ending, truth = false, mark = '', both = f
     let at = play.text;
     for (const line of lines) at = write(words, 'theatre-line', line, at);
     if (sign) at = write(words, 'theatre-line theatre-sign', sign, at);
-    // B: the note left by whoever granted the wish, once it is pinned up. C: the early shift, signed. Told true: Holly's
+    // B: the note left by whoever granted the wish, once it is pinned up. C: next season's night shift, signed. Told true: Holly's
     // letter in the second act, then the last line, slowly, once the whole village is lit.
     if (ending === 'B') { const given = WISHES.find(each => each.id === wish) || WISHES[2]; at = write(words, 'theatre-line theatre-note', `「${given.note}」——\u00a0${given.by}`, Math.max(at, play.note), { hand: given.hand }); }
-    if (ending === 'C') at = write(words, 'theatre-line theatre-log', `${MORNING.date}　${MORNING.shift}　${mark}.`, Math.max(at, play.log), { hand: 'you' });
+    if (ending === 'C') at = write(words, 'theatre-line theatre-log', `${NEXT_SEASON.date}　${NEXT_SEASON.shift}　${mark}.`, Math.max(at, play.log), { hand: 'you' });
     let over = play.length;
     if (truth) {
       const start = play.length - .5;

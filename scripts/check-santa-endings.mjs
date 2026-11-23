@@ -1,6 +1,6 @@
 // Santa 第五章（最終選擇）的瀏覽器驗收：走出小屋不會觸發任何結局；院子的世界路標（點場景裡的路標，或鍵盤用探索清單）
 // 選「踏上回家的路」再確認才是 A，「再逛逛」什麼都不發生；已加入的人看到路標上的小卡，還不知道秘密的人只看到說明。
-// 登記簿許願、交接表簽早班都要再確認一次；四件工作都做完，聖誕老人只問一次。每個選擇只播一段結局，理解第二次反轉後
+// 登記簿許願、交接表簽明年的夜班都要再確認一次；四件工作都做完，聖誕老人只問一次。每個選擇只播一段結局，理解第二次反轉後
 // 是真相版（第二幕），演完有紀念明信片（存成 PNG、回到 Home、留在村子），重看不給明信片。走到過一個結局，其他結局也能從線索本或登記簿直接看。結局 C 名牌與帽子掛上第六鉤；
 // 舊存檔的結局 D 換成真相金星。最後從線索本「從頭再玩一次」（先問一次），只清聖誕村的進度。手機尺寸用真的觸控事件。只讀寫這個瀏覽器的 localStorage，不連任何雲端。
 // 先啟動：python3 -m http.server 5511 --bind 127.0.0.1
@@ -122,16 +122,16 @@ const b = await ending(); check(b.kind === 'B' && !b.truth && !b.kicker.includes
 await postcard('B', false);
 check((await saved()).finale.endings.join() === 'B' && (await saved()).finale.truth === false, '存檔：B，沒有真相');
 
-// All four jobs and the second twist understood: Santa asks once; the early shift confirmed; C told true.
+// All four jobs and the second twist understood: Santa asks once; next season's night shift confirmed; C told true.
 const four = { ...base, volunteer: { mark: 'J', tasks: ['wheel', 'hay', 'lichen', 'letters'] }, desk: { sorted: true }, finale: { invited: true, unlocked: true, twist: true } };
 await load(four); await spot('inside'); await wait(1500);
-check(await exists('.cabin-chat:not(.is-folded)') && (await text('.chat-log')).includes('你的工作已經完成了') && (await text('.chat-asks')).includes('自願留下'), '四件工作都做完：回到房間中間，聖誕老人在對話框問一次，回答是禮物吊牌'); await shot('ask');
-await must('自願留下'); check((await text('.chat-log')).includes('早班') && (await saved()).finale.asked && !(await saved()).finale.endings?.length, '選「自願留下」：只說去交接表簽名，不直接結束');
+check(await exists('.cabin-chat:not(.is-folded)') && (await text('.chat-log')).includes('今天的收尾工作，你都做完了') && (await text('.chat-asks')).includes('自願留下'), '四件工作都做完：回到房間中間，聖誕老人在對話框問一次，回答是禮物吊牌'); await shot('ask');
+await must('自願留下'); check((await text('.chat-log')).includes('明年的夜班') && (await saved()).finale.asked && !(await saved()).finale.endings?.length, '選「自願留下」：只說去交接表簽名，不直接結束');
 await load(await saved()); await spot('inside'); await wait(1800); check(!(await exists('.cabin-chat:not(.is-folded)')), '重新整理後再回房間：不再問');
 await enter(); await thing('log');
-await must('簽上早班'); check((await text('.secret-card')).includes('確定要留下來嗎'), '簽上早班：先問一次');
+await must('簽下明年的夜班'); check((await text('.secret-card')).includes('確定要留下來嗎'), '簽下明年的夜班：先問一次');
 await must('再想想'); check(!(await saved()).finale.stayed, '再想想：還沒簽');
-await must('簽上早班'); await must('確定簽名'); await wait(600);
+await must('簽下明年的夜班'); await must('確定簽名'); await wait(600);
 const c = await ending(); check(c.kind === 'C' && c.truth && c.kicker.includes('＋真相') && !c.again, `確定簽名：只播結局 C，真相版接第二幕（${c.kicker}）`);
 await postcard('C', true);
 const after = (await saved()).finale; check(after.stayed && after.truth && after.endings.join() === 'C', '存檔：C 與真相');
