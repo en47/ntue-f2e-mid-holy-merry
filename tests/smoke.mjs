@@ -874,7 +874,8 @@ await test('販賣機頁的 3D 模型：九個壓縮後的網頁版與雜湊表�
   const names = ['vending-machine', ...['stocking', 'tree', 'gingerbread', 'snowman'].flatMap(name => [`vending-${name}`, `vending-${name}-button`])];
   for (const name of names) {
     const bytes = await fs.readFile(path.join(project, `assets/models/${name}-web.glb`)), meta = JSON.parse(await fs.readFile(path.join(project, `assets/models/${name}-web.json`), 'utf8'));
-    const limit = name === 'vending-machine' ? 1.5e6 : name.endsWith('-button') ? .3e6 : .8e6, data = JSON.parse(bytes.toString('utf8', 20, 20 + bytes.readUInt32LE(12)).trim());
+    // 2026-11-23 為了清楚（使用者嫌商品和按鈕糊）放寬：機器 4096 顏色貼圖、商品 2048、按鈕 1024。
+    const limit = name === 'vending-machine' ? 2e6 : name.endsWith('-button') ? .6e6 : 1.3e6, data = JSON.parse(bytes.toString('utf8', 20, 20 + bytes.readUInt32LE(12)).trim());
     assert.equal(meta.sha256, createHash('sha256').update(bytes).digest('hex'), `${name}-web.glb is the one scripts/build-vending-models.mjs wrote`);
     assert.ok(meta.bytes === bytes.length && bytes.length < limit && /^[0-9a-f]{64}$/.test(meta.sourceSha256) && meta.source === `assets/models/source/${name}.glb`, `${name}: light enough for the web (${(bytes.length / 1e6).toFixed(2)} MB), its original recorded`);
     assert.ok(data.extensionsUsed?.includes('EXT_meshopt_compression') && data.images?.every(image => image.mimeType === 'image/webp'), `${name}: meshopt-compressed, WebP textures`);
