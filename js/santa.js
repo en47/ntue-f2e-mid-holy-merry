@@ -74,7 +74,8 @@ function showTip() {
   const hide = () => tip.classList.add('is-gone');
   stage.addEventListener('pointerdown', hide, { once: true }); setTimeout(hide, 8000);
 }
-// The welcome: a red paper ribbon across the top of the village with a tag hung under it saying what to do first, and a
+// The welcome: a red paper ribbon across the top of the village (its words in English, as the cabin's sign and the advent
+// calendar's title are) with a tag hung under it saying what to do first, and a
 // little envelope bobbing over the mailbox to point it out (pressed, it opens the mailbox). Both stay until the visitor
 // goes to the mailbox (or anywhere else), the envelope following the mailbox as the view turns, hidden when it is out
 // of sight.
@@ -101,7 +102,7 @@ let welcome = null;
 function welcomeIn() {
   const sign = el('div', 'cabin-welcome', stage), banner = el('div', 'welcome-banner', sign);
   paperLayer(banner, '0 0 420 92', 'welcome-ribbon', ribbon, PAPER);
-  el('span', 'welcome-title', banner, '歡迎來到聖誕小村');
+  el('span', 'welcome-title', banner, 'Welcome to Christmas Village').lang = 'en';
   el('p', 'welcome-note', sign, '聖誕老人在郵筒裡留了一封信，點郵筒打開看看');
   const marker = el('button', 'mail-marker', stage); marker.type = 'button'; marker.hidden = true; marker.setAttribute('aria-label', '打開郵筒');
   paperLayer(marker, '0 0 64 52', '', envelope, PAPER);
