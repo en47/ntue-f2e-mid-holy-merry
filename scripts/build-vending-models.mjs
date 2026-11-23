@@ -11,15 +11,19 @@ import sharp from 'sharp';
 
 await MeshoptEncoder.ready; await MeshoptSimplifier.ready;
 const io = new NodeIO().registerExtensions([...KHRONOS_EXTENSIONS, EXTMeshoptCompression]).registerDependencies({ 'meshopt.encoder': MeshoptEncoder });
-// Tripo 匯出的每個模型約 76 萬面、三張 4096 貼圖。販賣機是主角，留多一點；四樣商品中等；按鈕在畫面上很小。
-const SIZES = { machine: { size: 2048, ratio: .07, error: .006 }, item: { size: 1024, ratio: .03, error: .01 }, button: { size: 512, ratio: .008, error: .02 } };
+// Tripo 匯出的每個模型約 76 萬面、三張 4096 貼圖（顏色、法線、粗糙度）。2026-11-23 使用者嫌商品和按鈕糊、凹凸變形：
+// 顏色貼圖留大一點（`color`），法線與粗糙度小一點（`other`），面數也多留一些（`ratio`、`error`）。也嫌太黃：販賣機和按鈕的
+// 顏色貼圖降一點飽和度（`muted`），接近網站低飽和的紅、綠、金；商品照原本的顏色。
+const SIZES = { machine: { color: 4096, other: 2048, ratio: .12, error: .003, muted: .86 }, item: { color: 2048, other: 1024, ratio: .1, error: .004, muted: 1 }, button: { color: 1024, other: 512, ratio: .05, error: .004, muted: .86 } };
 const JOBS = [['vending-machine', 'machine'], ...['stocking', 'tree', 'gingerbread', 'snowman'].flatMap(name => [[`vending-${name}`, 'item'], [`vending-${name}-button`, 'button']])];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 for (const [name, kind] of JOBS) {
-  const source = `assets/models/source/${name}.glb`, output = `assets/models/${name}-web.glb`, { size, ratio, error } = SIZES[kind];
+  const source = `assets/models/source/${name}.glb`, output = `assets/models/${name}-web.glb`, { color, other, ratio, error, muted } = SIZES[kind];
   const original = await fs.readFile(source), document = await io.readBinary(original);
+  if (muted < 1) for (const material of document.getRoot().listMaterials()) { const texture = material.getBaseColorTexture(); if (texture) texture.setImage(new Uint8Array(await sharp(Buffer.from(texture.getImage())).modulate({ saturation: muted }).png().toBuffer())).setMimeType('image/png'); }
   await document.transform(dedup(), weld(), simplify({ simplifier: MeshoptSimplifier, ratio, error }), prune({ keepAttributes: true }),
-    textureCompress({ encoder: sharp, targetFormat: 'webp', quality: 82, resize: [size, size] }), meshopt({ encoder: MeshoptEncoder, level: 'medium' }));
+    textureCompress({ encoder: sharp, targetFormat: 'webp', quality: 86, resize: [color, color], slots: /^baseColor/ }),
+    textureCompress({ encoder: sharp, targetFormat: 'webp', quality: 80, resize: [other, other], slots: /^(?!baseColor)/ }), meshopt({ encoder: MeshoptEncoder, level: 'medium' }));
   await io.write(output, document);
   const bytes = await fs.readFile(output);
   await fs.writeFile(output.replace('.glb', '.json'), `${JSON.stringify({ source, sourceBytes: original.length, sourceSha256: sha256(original), model: output.split('/').pop(), bytes: bytes.length, sha256: sha256(bytes) }, null, 2)}\n`);

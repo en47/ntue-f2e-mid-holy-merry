@@ -23,13 +23,14 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
   const canvas = element('canvas', 'machine-canvas', stage); canvas.setAttribute('aria-hidden', 'true');
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { canvas.remove(); fail(); return null; }
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NeutralToneMapping; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(26, 1, .05, 20);
-  // A cool night all round, the lamp post's warm light from the left, a little moonlight from behind.
-  scene.add(new THREE.HemisphereLight('#c9d8ef', '#3b3438', 1.25));
-  const lamp = new THREE.DirectionalLight('#ffd9a4', 1.9); lamp.position.set(-1.6, 2.1, 2.2); scene.add(lamp);
-  const glow = new THREE.PointLight('#ffcf86', 1.4, 3.2); glow.position.set(-.55, 1.05, .75); scene.add(glow);
-  const rim = new THREE.DirectionalLight('#9fb8e6', .7); rim.position.set(2, 1.2, -1); scene.add(rim);
+  // Lit nearly white, so its own colours show true (the warm lights made it all look yellow): the night sky and the snow
+  // all round, a soft key from the front, only a touch of the lamp post's warmth from the left, moonlight from behind.
+  scene.add(new THREE.HemisphereLight('#e6edf7', '#4b4d58', 1.7));
+  const key = new THREE.DirectionalLight('#f6f3ec', 1.6); key.position.set(-1.1, 2.2, 2.6); scene.add(key);
+  const lamp = new THREE.PointLight('#ffd9a0', .6, 3.2); lamp.position.set(-.6, 1.05, .8); scene.add(lamp);
+  const rim = new THREE.DirectionalLight('#a9c2ee', .9); rim.position.set(2, 1.2, -1); scene.add(rim);
   const machine = new THREE.Group(); scene.add(machine);
   const things = new Map(), buttons = new Map(), loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const load = name => loader.loadAsync(`assets/models/${name}-web.glb`).then(({ scene: model }) => model);
