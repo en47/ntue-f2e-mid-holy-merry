@@ -1,6 +1,8 @@
 import { mountCabinBackdrop } from './components/cabin-backdrop.js';
 import { mountCabinPaper } from './components/cabin-paper.js';
 import { mountCabinChat } from './components/cabin-chat.js';
+import { paperLayer, shape } from './components/paper-art.js';
+import { star } from './components/paper-props.js';
 
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
@@ -35,7 +37,7 @@ function onFound(id) {
   status.textContent = found.size === SPOTS.length ? '招牌上的星星全亮了！院子裡的秘密你全找到了。' : `發現了一個角落（${found.size}/${SPOTS.length}），招牌上又亮了一顆星。`;
 }
 function onView(view) {
-  if (view !== 'outside') { tip.classList.add('is-gone'); fitSideways(); }
+  if (view !== 'outside') { tip.classList.add('is-gone'); welcome?.stop(); fitSideways(); }
   back.hidden = view === 'outside'; back.textContent = view === 'inside' ? '← 走出門外' : ROOMS.includes(view) ? '← 回到房間' : '← 回到小屋前'; clearTimeout(enterTimer); play?.leave();
   // The window sill is turned toward and walked up to more slowly (cabin-scene.js `glide`): its box opens as the walk ends.
   if (SPOTS.includes(view) || ROOMS.includes(view)) enterTimer = setTimeout(() => play?.enter(view), motion.matches ? 0 : view === 'advent' ? 1600 : 1000);
@@ -62,16 +64,57 @@ document.querySelectorAll('.cabin-explore [data-touch]').forEach(button => butto
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !event.defaultPrevented && cabin && cabin.view !== 'outside') { cabin.back(); stage.querySelector('.cabin-gesture').focus(); } });
 markExplore();
 
-// A one-time hint. On a first visit, before the mailbox has been opened, it welcomes the visitor and sends them to the
-// mailbox (where the yard begins), and stays until they go there (or anywhere else); afterwards it says how to look
-// around, gone after the first touch of the scene.
+// A one-time hint. On a first visit, before the mailbox has been opened, the visitor is welcomed instead (`welcomeIn`);
+// afterwards it says how to look around, gone after the first touch of the scene.
 function showTip() {
   let seen = false; try { seen = sessionStorage.getItem(TIP) === '1'; sessionStorage.setItem(TIP, '1'); } catch { /* show it anyway */ }
   if (seen) return;
+  if (!found.has('mailbox')) { welcomeIn(); return; }
   tip.hidden = false;
-  if (!found.has('mailbox')) { tip.textContent = '歡迎來到聖誕小村！\n聖誕老人在郵筒裡留了一封信，先點郵筒打開看看。'; tip.classList.add('is-welcome'); return; }
   const hide = () => tip.classList.add('is-gone');
   stage.addEventListener('pointerdown', hide, { once: true }); setTimeout(hide, 8000);
+}
+// The welcome: a red paper ribbon across the top of the village with a tag hung under it saying what to do first, and a
+// little envelope bobbing over the mailbox to point it out (pressed, it opens the mailbox). Both stay until the visitor
+// goes to the mailbox (or anywhere else), the envelope following the mailbox as the view turns, hidden when it is out
+// of sight.
+const el = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent.append(node); return node; };
+const PAPER = { paper: { scale: .3, grain: .45, shadow: .3 }, eager: true };
+// The ribbon: a red band, its two ends folded back behind it and notched.
+function ribbon(g) {
+  for (const side of [v => v, v => 420 - v]) {
+    shape('path', { d: `M${side(4)} 38H${side(62)}V84H${side(4)}L${side(20)} 61Z`, fill: '#8f3530' }, g);
+    shape('path', { d: `M${side(50)} 72L${side(62)} 84V72Z`, fill: '#6b2724' }, g);
+  }
+  shape('path', { d: 'M50 18H370V72H50Z', fill: '#b5443c' }, g);
+  shape('path', { d: 'M58 25H362M58 65H362', fill: 'none', stroke: '#e9a8a0', 'stroke-width': 1.4, opacity: .7 }, g);
+}
+// The envelope over the mailbox: cream, its flap folded down, a red wax seal and a gold glint.
+function envelope(g) {
+  shape('rect', { x: 4, y: 12, width: 56, height: 36, rx: 3, fill: '#fbf3df' }, g);
+  shape('path', { d: 'M5 47L25 30M59 47L39 30', fill: 'none', stroke: '#e0cfa8', 'stroke-width': 1.6 }, g);
+  shape('path', { d: 'M5 14L32 34 59 14', fill: 'none', stroke: '#c9a46a', 'stroke-width': 2, 'stroke-linejoin': 'round' }, g);
+  shape('circle', { cx: 32, cy: 33, r: 6, fill: '#b5443c' }, g);
+  star(g, 55, 8, 7, '#e0b04f');
+}
+let welcome = null;
+function welcomeIn() {
+  const sign = el('div', 'cabin-welcome', stage), banner = el('div', 'welcome-banner', sign);
+  paperLayer(banner, '0 0 420 92', 'welcome-ribbon', ribbon, PAPER);
+  el('span', 'welcome-title', banner, '歡迎來到聖誕小村');
+  el('p', 'welcome-note', sign, '聖誕老人在郵筒裡留了一封信，點郵筒打開看看');
+  const marker = el('button', 'mail-marker', stage); marker.type = 'button'; marker.hidden = true; marker.setAttribute('aria-label', '打開郵筒');
+  paperLayer(marker, '0 0 64 52', '', envelope, PAPER);
+  marker.addEventListener('click', () => cabin?.setView('mailbox'));
+  let frame = 0;
+  const follow = () => {
+    const box = stage.dataset.view === 'outside' ? cabin?.sheetRect('mailbox', [.3, .15, .7, .15]) : null;
+    const shown = Boolean(box && box.left + box.width > 0 && box.left < stage.clientWidth && box.top > 0 && box.top < stage.clientHeight);
+    marker.hidden = !shown; if (shown) Object.assign(marker.style, { left: `${box.left + box.width / 2}px`, top: `${box.top}px` });
+    frame = requestAnimationFrame(follow);
+  };
+  follow();
+  welcome = { stop() { cancelAnimationFrame(frame); marker.remove(); sign.classList.add('is-gone'); setTimeout(() => sign.remove(), 700); welcome = null; } };
 }
 
 // The first visit opens with a flight down over the village, once the loader has faded; a page back from the cache does not.
@@ -107,6 +150,6 @@ async function mountCabin(fly = true) {
     if (run === generation) stage.setAttribute('aria-busy', 'false');
   }
 }
-window.addEventListener('pagehide', () => { generation++; clearTimeout(enterTimer); play?.destroy(); play = null; cabin?.destroy(); cabin = null; });
+window.addEventListener('pagehide', () => { generation++; clearTimeout(enterTimer); welcome?.stop(); play?.destroy(); play = null; cabin?.destroy(); cabin = null; });
 window.addEventListener('pageshow', event => { if (event.persisted) mountCabin(false); });
 mountCabin();

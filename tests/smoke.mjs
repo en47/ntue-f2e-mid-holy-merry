@@ -795,7 +795,7 @@ await test('Santa 11/22 試玩回饋（二）：開場歡迎提示指向郵筒�
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [santa, scene, css, secret, paper, pulley] = await Promise.all(['js/santa.js', 'js/components/cabin-scene.js', 'css/santa.css', 'js/components/cabin-secret.js', 'js/components/cabin-paper.js', 'js/components/cabin-pulley.js'].map(read));
   const { DESK_LETTERS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href);
-  assert.ok(santa.includes("tip.textContent = '歡迎來到聖誕小村！\\n聖誕老人在郵筒裡留了一封信，先點郵筒打開看看。'; tip.classList.add('is-welcome'); return;") && css.includes('.cabin-tip.is-welcome {'), 'A first visit is welcomed and sent to the mailbox, and the words stay until they go');
+  assert.ok(santa.includes("if (!found.has('mailbox')) { welcomeIn(); return; }") && santa.includes("el('span', 'welcome-title', banner, '歡迎來到聖誕小村');") && santa.includes("marker.addEventListener('click', () => cabin?.setView('mailbox'));") && santa.includes('welcome?.stop();') && css.includes('.cabin-welcome {'), 'A first visit is welcomed by a paper ribbon and a tag, with an envelope over the mailbox; they stay until the visitor goes');
   assert.ok(scene.includes('beat = since > 1.6 ? (since - 1.6) % 2.6 : 1,') && scene.includes('Math.abs(Math.sin(hop * Math.PI * 2)) * .17'), 'The mailbox hops higher and more often');
   assert.ok(pulley.includes("cabin.sheetRect('stable', [.385, .52, .465, .635])") && css.includes('.feed-table { animation: none; background: none; rotate: -4deg; }'), 'The feeding table is a small sheet pinned on the barn door');
   assert.ok(css.includes('.drawer-card ~ .cabin-note { z-index: 7; }'), 'The note from the barn drawer opens over the drawer at once');
