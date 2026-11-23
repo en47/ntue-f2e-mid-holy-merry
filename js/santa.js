@@ -111,7 +111,7 @@ function welcomeIn() {
   const sign = el('div', 'cabin-welcome', stage), banner = el('div', 'welcome-banner', sign);
   paperLayer(banner, '0 0 520 160', 'welcome-ribbon', ribbon, PAPER);
   el('span', 'sr-only', banner, 'Welcome to Christmas Village').lang = 'en';
-  el('p', 'welcome-note', sign, '今天是聖誕節早上。聖誕老人在郵筒裡留了一封信，點郵筒打開看看');
+  el('p', 'welcome-note', sign, '今天是聖誕節的早晨。\n經過一整夜的忙碌，聖誕老人終於回到了村莊。\n聽說他在郵筒裡留了一封信，要不要去看看呢？');
   const marker = el('button', 'mail-marker', stage); marker.type = 'button'; marker.hidden = true; marker.setAttribute('aria-label', '打開郵筒');
   paperLayer(marker, '0 0 64 52', '', envelope, PAPER);
   marker.addEventListener('click', () => cabin?.setView('mailbox'));

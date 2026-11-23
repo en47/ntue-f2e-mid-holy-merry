@@ -244,7 +244,7 @@ export function deskGame({ layer, stage, cabin, say, later, sound, progress, sav
     if (entry.letter) { delete desk.answers[entry.letter]; desk.sealed = desk.sealed.filter(id => id !== entry.id); desk.marked = desk.marked.filter(id => id !== entry.id); }
     save(); sound.play('drop'); later(220, () => sound.play('jingle'));
     pop(envelope, 'is-sent'); pop(mailbag, 'is-taking'); count.textContent = `已寄出 ${desk.sent.length} 封`;
-    say(`寄出去了！${entry.name}會在平安夜前收到${entry.id === REPLY.id ? '聖誕老人的' : '你寫的'}回信。`);
+    say(`寄出去了！${entry.name}過幾天就會收到${entry.id === REPLY.id ? '聖誕老人的' : '你寫的'}回信。`);
     // One reply written and sent does the job (the other letter can be answered too, for its own sake).
     if (VOLUNTEER_LETTERS.some(each => desk.sent.includes(`reply-${each.id}`))) onTask();
     later(still() ? 300 : 1300, () => { if (current?.entry !== entry) return; const { source } = current; current = null; envelope.classList.remove('is-sent'); fly(local(source.getBoundingClientRect()), true); source.focus({ preventScroll: true }); });

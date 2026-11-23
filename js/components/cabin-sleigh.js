@@ -1,6 +1,7 @@
-// Loading the sleigh, a volunteer job. Beside the reindeer stands the sleigh; its rack is narrow, so the four sacks of
-// presents go one on another, and at each stop only the top one can be got at. The route is on the desk (the work note
-// in the bundle): the first stop has to go on last. Tap a sack to put it on top of the rack, tap the top one to take it
+// Putting the sleigh away, one of Christmas Day's closing jobs. Beside the reindeer stands the sleigh, home from the night
+// and wiped clean; the four sacks of spare presents nobody needed go back on its rack for the next time out. The rack is
+// narrow, so they go one on another, and at each stop only the top one can be got at. The route is on the desk (the work
+// note in the bundle): the first stop has to go on last. Tap a sack to put it on top of the rack, tap the top one to take it
 // back off; all four on, the rules check (cabin-story.js `loadedRight`). Loaded right, the job is stamped (the first
 // time, cabin-play.js) and the sleigh in the yard stands loaded from then on; wrong, the sacks come back off. The sleigh
 // stands behind the reindeer: for a volunteer he steps aside to make room (as he does once fed at his trough), and only
@@ -59,7 +60,7 @@ export function sleighGame({ layer, stage, cabin, say, sound, later, progress, o
       for (let i = shown.length; i < ROUTE.length; i++) element('li', 'sleigh-slot is-empty', rack).setAttribute('aria-hidden', 'true');
       if (loaded()) return;
       for (const city of PILE.filter(each => !stack.includes(each))) {
-        const node = button(city, pile); node.setAttribute('aria-label', `要送到${city}的禮物袋：放上貨架`);
+        const node = button(city, pile); node.setAttribute('aria-label', `給${city}的備用禮物袋：放上貨架`);
         on(node, 'click', () => put(city));
       }
     }

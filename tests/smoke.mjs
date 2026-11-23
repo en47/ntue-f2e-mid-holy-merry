@@ -822,7 +822,24 @@ await test('Santa 前半夜、後半夜說清楚：聖誕村早上六點換日�
   assert.deepEqual(LOG.spans, ['18:00～24:00', '00:00～06:00']);
   assert.ok(secret.includes("element('span', 'shift-span', element('span', 'shift-head', grid, half), LOG.spans[i])") && secret.includes("element('span', 'shift-date', grid, date);"), 'The shift log shows each half with its hours; each row is its date');
   assert.equal(flyer('12/21', '02:40'), 'O'); assert.ok(MAIL.every(([, date, time]) => flyer(date, time)), 'Every postmark falls in a night on the log');
-  assert.ok(santa.includes("'今天是聖誕節早上。聖誕老人在郵筒裡留了一封信，點郵筒打開看看'"), 'The welcome says the village is on Christmas morning');
+  assert.ok(santa.includes('今天是聖誕節的早晨。') && santa.includes('聖誕老人終於回到了村莊。'), 'The welcome says the village is on Christmas morning, Santa home from the night');
+});
+await test('Santa 12/25 是聖誕季的收尾日：加入是見習、四件收尾工作、留下是簽明年的夜班；不再說平安夜前收到或明天早上出發', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const components = (await fs.readdir(path.join(project, 'js/components'))).filter(name => name.startsWith('cabin-') && !name.startsWith('cabin-advent')).map(name => `js/components/${name}`);
+  const data = (await fs.readdir(path.join(project, 'js/data'))).filter(name => name.startsWith('cabin-') && !['cabin-advent.js', 'cabin-cuts.js', 'cabin-glyphs.js'].includes(name)).map(name => `js/data/${name}`);
+  const words = (await Promise.all(['js/santa.js', ...components, ...data].map(read))).join('');
+  for (const old of ['明天早上', '平安夜前收到', '平安夜就會', '12/25 早班', '簽上早班']) assert.ok(!words.includes(old), `Christmas Eve is over and nobody flies today: no "${old}"`);
+  const { NEXT_SEASON, REGISTER, JOBS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-secret.js')).href);
+  const { STAY, ENDINGS, POSTCARD } = await import(pathToFileURL(path.join(project, 'js/data/cabin-finale.js')).href);
+  const { SLEIGH } = await import(pathToFileURL(path.join(project, 'js/data/cabin-jobs.js')).href);
+  assert.ok(REGISTER.welcome('J').includes('見習') && REGISTER.jobs.includes('收尾'), 'Signing the register starts a learner on Christmas Day\'s closing jobs');
+  assert.ok(NEXT_SEASON.date === `${REGISTER.year + 1} 年聖誕季` && STAY.sign.includes('明年') && STAY.sure.includes('下一個聖誕季'), 'Staying on is signing next season\'s night shift, not flying today');
+  assert.ok(JOBS.hay[0] === '整理雪橇' && SLEIGH.rule.includes('備用禮物') && SLEIGH.rule.includes('最上面'), 'The sleigh is put away with the spare presents, the first stop on top for next time');
+  assert.ok(ENDINGS.C.lines.join('').includes('下一個聖誕節') && POSTCARD.lines.C.join('').includes('下一個聖誕節'), 'Ending C looks to next Christmas');
+  const [art, css, secret] = await Promise.all(['js/components/cabin-ending-art.js', 'css/santa.css', 'js/components/cabin-secret.js'].map(read));
+  assert.ok(!art.includes('c-flight') && !css.includes('@keyframes c-fly') && css.includes('.c-sun { translate: 0 95%;') && art.includes("'c-hat'") && art.includes('{ rider: false, sacks: true }'), 'Staying on: the sun goes down, the sleigh rests loaded till next Christmas Eve, a new red hat by your tag');
+  assert.ok(secret.includes('if (REGISTER.year - year < 5) {'), 'Your own row in the register is stamped as a learner too');
 });
 await test('販賣機頁的 3D 模型：九個壓縮後的網頁版與雜湊表相符、大小在上限內、用 meshopt 壓縮與 WebP 貼圖；原檔只留在本機', async () => {
   const names = ['vending-machine', ...['stocking', 'tree', 'gingerbread', 'snowman'].flatMap(name => [`vending-${name}`, `vending-${name}-button`])];

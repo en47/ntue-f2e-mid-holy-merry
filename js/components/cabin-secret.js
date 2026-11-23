@@ -8,7 +8,7 @@ import { inked } from './cabin-paper.js';
 import { paperLayer, shape } from './paper-art.js';
 import { NOTEBOOK } from '../data/cabin-clues.js';
 import { CLUES, LOG_GIVEN, MAIL, NIGHTS, SUBSTITUTES as WHO, TASKS, canSign, canStay, canWish, knowsSantas, logSolved, logWrong, mailFor, opens, points, signedUp, sortWrong } from '../services/cabin-story.js';
-import { COLOUR_NAMES, DUTY, INK, JOBS, LOG, LOG_FILES, MARKS, MORNING, NAMES, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
+import { COLOUR_NAMES, DUTY, INK, JOBS, LOG, LOG_FILES, MARKS, NAMES, NEXT_SEASON, NOTES, RACK, REGISTER, RULES } from '../data/cabin-secret.js';
 import { VOLUNTEER_LETTERS } from '../data/cabin-letters.js';
 import { polaroid } from './cabin-photo.js';
 import { showOrnament } from './cabin-ornaments.js';
@@ -157,10 +157,10 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       // all of it in sight together, nothing waiting further down to be scrolled to.
       const desk = element('div', 'shift-desk', page), main = element('div', 'shift-main', desk);
       shiftLog(main, desk);
-      // Under the four nights, the early shift on Christmas morning.
+      // Under the four nights, next season's night shift, for whoever stays on.
       const list = element('ul', 'secret-log', main);
-      const morning = element('li', finale.stayed ? 'is-morning is-you' : 'is-morning', list); morning.textContent = `${MORNING.date}　${MORNING.shift}　${finale.stayed ? `${volunteer.mark || ''}${volunteer.mark ? '.' : ''}（你）` : progress.combos.includes('santa') ? MORNING.snowman : MORNING.empty}`;
-      // Every job done: the early shift can be signed, and the visitor stays on.
+      const season = element('li', finale.stayed ? 'is-next is-you' : 'is-next', list); season.textContent = `${NEXT_SEASON.date}　${NEXT_SEASON.shift}　${finale.stayed ? `${volunteer.mark || ''}${volunteer.mark ? '.' : ''}（你）` : progress.combos.includes('santa') ? NEXT_SEASON.snowman : NEXT_SEASON.empty}`;
+      // Every job done: next season can be signed, and the visitor stays on.
       if (canStay(volunteer, finale)) {
         element('p', 'secret-note', page, STAY.invite);
         const sign = element('button', 'register-sign', page, STAY.sign); sign.type = 'button';
@@ -380,7 +380,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
       const item = element('li', you ? 'is-you' : '', list); item.dataset.hand = you ? 'you' : mark.toLowerCase();
       element('span', 'register-mark', item, `${mark}.${you ? REGISTER.you : ''}`);
       const joined = element('span', 'register-year', item, `${REGISTER.joined} ${year}`);
-      if (!you && REGISTER.year - year < 5) {
+      if (REGISTER.year - year < 5) {
         const seal = element('span', 'register-learner', joined); seal.setAttribute('aria-label', REGISTER.learner);
         inked(seal, '0 0 60 32', ink => shape('rect', { x: 3, y: 3, width: 54, height: 26, rx: 5, fill: 'none', stroke: '#b5443c', 'stroke-width': 2.4 }, ink));
         element('span', 'ink-words', seal, REGISTER.learner);

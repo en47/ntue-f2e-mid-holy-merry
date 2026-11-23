@@ -398,13 +398,14 @@ export function stayingOn(scene, { mark }) {
     shape('path', { d: 'M-40 190Q140 172 320 188T640 182V640H-40Z', fill: '#d3d6e3' }, paper);
     shape('path', { d: 'M-40 280Q140 262 320 278T640 272V640H-40Z', fill: '#e2d8df' }, paper);
   });
-  // The dawn coming up warm behind the hills, the sun after it.
-  sheet(sky, 'c-dawn', paper => {
+  // Christmas Day's evening: the glow coming up warm behind the hills as the sun goes down, then the first stars.
+  sheet(sky, 'c-glow', paper => {
     shape('path', { d: 'M-40 230Q140 212 320 228T640 222V640H-40Z', fill: '#f1d8d0' }, paper);
     shape('path', { d: 'M-40 300Q140 284 320 298T640 292V640H-40Z', fill: '#f8e3c3' }, paper);
   });
   piece(sky, [370, 250, 100, 100], 'c-sun', paper => { shape('circle', { cx: 420, cy: 300, r: 40, fill: '#fbe1ab' }, paper); shape('circle', { cx: 420, cy: 300, r: 28, fill: '#fdf0cf' }, paper); }, { paper: { scale: .5, grain: .3, shadow: 0, rim: '#fdf3dc' } });
   piece(sky, [86, 92, 140, 60], '', paper => cloud(paper, 156, 120, .42, '#fbf3ec'), { paper: SMALL });
+  [[132, 70, 9, 11.4], [300, 46, 12, 12], [486, 84, 8, 12.6]].forEach(([x, y, size, at]) => piece(sky, [x - 16, y - 16, 32, 32], 'c-star', paper => star(paper, x, y, size), { paper: SMALL }).style.setProperty('--at', `${at}s`));
   sheet(far, '', paper => {
     const tones = { cream: '#f4e9e2', ice: '#d5dde8', sky: '#b4c4d8', dusk: '#97abc4' };
     facetedPeak(paper, 90, 280, 400, 160, 150, tones); facetedPeak(paper, 560, 300, 400, 150, 140, tones);
@@ -416,18 +417,12 @@ export function stayingOn(scene, { mark }) {
     shape('path', { d: 'M-40 430Q140 416 320 430T640 424V640H-40Z', fill: '#f4f1eb' }, paper);
     shape('path', { d: 'M-40 520Q120 500 300 516T640 508V640H-40Z', fill: '#fbf8f1' }, paper);
     for (const [x, b, h, v] of [[30, 470, 100, 2], [372, 452, 64, 0]]) snowyFir(paper, x, b, h, v);
-    // The runners' tracks, left in the snow once the sleigh is up.
+    // The runners' tracks, from the sleigh's way home this morning.
     for (const d of ['M-10 488Q110 484 226 494', 'M-6 499Q110 496 226 504']) shape('path', { d, stroke: '#d3dee7', 'stroke-width': 2.6, fill: 'none', 'stroke-linecap': 'round' }, paper);
   });
-  // The sleigh on the snow, sacks dropped in one after another; then it flies.
-  const flight = mover(mid, 'c-flight');
-  sleigh(flight, 220, 498, 1.45, { rider: true });
-  [[188, 455, 0], [203, 456, 1], [176, 457, 2]].forEach(([x, y, i]) => piece(flight, [x - 14, y - 16, 28, 28], 'c-sack', paper => {
-    if (i === 1) { shape('rect', { x: x - 9, y: y - 8, width: 18, height: 16, rx: 2, fill: GREEN }, paper); shape('path', { d: `M${x} ${y - 8}V${y + 8}M${x - 9} ${y}H${x + 9}`, stroke: GOLD, 'stroke-width': 2.6 }, paper); }
-    else { shape('path', { d: `M${x - 11} ${y + 9}C${x - 13} ${y - 4} ${x - 6} ${y - 11} ${x} ${y - 9}C${x + 6} ${y - 11} ${x + 13} ${y - 4} ${x + 11} ${y + 9}Z`, fill: i ? '#b5443c' : '#c9a46a' }, paper); shape('path', { d: `M${x - 4} ${y - 8}Q${x} ${y - 5} ${x + 4} ${y - 8}`, stroke: '#8f6a4c', 'stroke-width': 1.6, fill: 'none' }, paper); }
-  }, { paper: SMALL }).style.setProperty('--at', `${4.4 + i * .5}s`));
-  // The other five see you off.
-  // The other five gather round to see you off.
+  // The sleigh resting on the snow, the spare presents stacked on it, ready for next Christmas Eve.
+  sleigh(mid, 220, 498, 1.45, { rider: false, sacks: true });
+  // The other five gather round you, hopping for joy.
   [[64, 516, .7], [110, 524, .72], [196, 566, .78], [256, 572, .8], [318, 562, .78]].forEach(([x, y, size], i) => { const friend = mover(mid, 'c-friend'); friend.style.setProperty('--hop', `${9 + i * .13}s`); visitor(friend, x, y, size, false, '', { coat: HANDS[TAKEN[i]], scarf: '#fbf3df', tail: '#e9dcc4', lantern: false }); });
   snow(scene, 14);
   // The name board: five tags and the empty sixth hook, until yours swings onto it.
@@ -442,6 +437,13 @@ export function stayingOn(scene, { mark }) {
   });
   TAKEN.forEach((letter, i) => nameTag(near, [409 + i * 30, 426, 26, 42], { letter, ink: HANDS[letter], className: 'theatre-sway' }).style.setProperty('--sway', `${-i * .9}s`));
   nameTag(near, [559, 426, 26, 42], { letter: mark || '?', ink: '#fffaf0', fill: RED, mine: true, className: 'c-tag' });
+  // Your new red hat, on a peg on the board's post just under your tag.
+  piece(near, [546, 482, 28, 32], 'c-hat', paper => {
+    shape('rect', { x: 560, y: 485, width: 8, height: 4, rx: 1.5, fill: TIMBER }, paper);
+    shape('path', { d: 'M561 489C555 493 550 500 549 508H569C568 500 566 493 561 489Z', fill: RED }, paper);
+    shape('rect', { x: 548, y: 506, width: 22, height: 6, rx: 3, fill: SNOW }, paper);
+    shape('circle', { cx: 561, cy: 489, r: 3.2, fill: SNOW }, paper);
+  }, { paper: SMALL });
   return { length: 15.6, text: 3, log: 5.4 };
 }
 

@@ -256,7 +256,7 @@ export function mountPlay(stage, cabin, { onFound = () => {}, announce = () => {
       const stamp = element('div', 'volunteer-stamp', layer); stamp.setAttribute('aria-hidden', 'true'); paperLayer(stamp, '0 0 120 144', '', postage, STAMP);
       inked(element('span', 'stamp-postmark', stamp), '0 0 120 80', postmark);
       const words = element('div', 'stamp-words', stamp);
-      element('span', 'stamp-kicker', words).textContent = '替身工作'; element('span', 'stamp-done', words).textContent = '完成！';
+      element('span', 'stamp-kicker', words).textContent = '收尾工作'; element('span', 'stamp-done', words).textContent = '完成！';
       const stars = element('span', 'stamp-stars', words);
       for (let i = 0; i < TASKS.length; i++) element('span', i < count - 1 ? 'is-on' : i === count - 1 ? 'is-on is-new' : '', stars).textContent = '★';
       later(520, () => sound.play('snap')); later(950, () => sound.play('pick'));

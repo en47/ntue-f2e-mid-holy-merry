@@ -37,7 +37,7 @@ export const BELLS = '窗外傳來一陣叮叮噹噹的麋鹿鈴鐺聲。';
 export const GOING = '聖誕老人站起來，往窗外看了看：「哎呀，麋鹿好像又把飼料弄翻了！我出去看看。」';
 // The sorting rack, once signed up: the rule on its sign, and what is said as the letters go in (cabin-story.js decides).
 export const RACK = {
-  title: '分揀架', sign: '分信守則：看郵戳。日期就是那一晚；18:00～24:00 交給前半夜的人，00:00～06:00 交給後半夜的人（聖誕村早上六點才換日）。',
+  title: '分揀架', sign: '分信守則：這幾晚寄到的信，照郵戳分給當時值班的人。日期就是那一晚；18:00～24:00 交給前半夜的人，00:00～06:00 交給後半夜的人（聖誕村早上六點才換日）。',
   how: '點一封信，再點要放的格子。放好的信可以再點一下，換到別的格子，或點信堆放回去。',
   wrong: count => `有 ${count} 封放錯了，被退了回來。對照交接表，再分一次。`,
   done: '分好了！交給你的兩封信，送到書桌上了。',
@@ -46,8 +46,9 @@ export const RACK = {
   places: { m1: '台北', m2: '東京', m3: '冰島', m4: '多倫多', m5: '奧斯陸', m6: '開普敦', tomas: '北極', aya: '北極' },
   fresh: '新替身收',
 };
-// The early shift on Christmas morning: nobody has signed yet (unless the snowman has been dressed as Santa).
-export const MORNING = { date: '12/25', shift: '早班', empty: '（還沒有人簽名）', snowman: '雪人？（實習）' };
+// Under the four nights, next season's night shift: this season's presents are all delivered, so whoever stays on signs
+// for next Christmas (nobody yet, unless the snowman has been dressed as Santa).
+export const NEXT_SEASON = { date: '2027 年聖誕季', shift: '夜班', empty: '（還沒有人簽名）', snowman: '雪人？（實習）' };
 export const RULES = { title: '聖誕老人替身守則', lines: ['一、自願加入，隨時都可以離開。', '二、每替別人傳遞一個願望，就在登記簿上蓋一個章。', '三、集到三個章，就能許一個願望，帶著它回家。'], margin: '（最下面有人用鉛筆加了一行小字，太淡了，看不清楚。）' };
 export const NOTES = {
   tags: '名牌板上掛著五個名牌，每個人的字是自己的顏色，旁邊畫著一個小記號。最右邊還有一個空掛勾。',
@@ -79,19 +80,20 @@ export const REGISTER = {
   blank: '（空白）',
   invite: '最下面還空著一格。想一起幫忙，把願望送到大家手上嗎？選一個字母當你的縮寫，蓋上章就加入了。不加入也沒關係。',
   taken: '已經有人用了', sign: '蓋章加入',
-  jobs: '今天可以幫忙的事', you: '（你）',
-  welcome: mark => `蓋好了。從今天起，你也是一位替身：${mark}.。登記簿上寫著今天可以幫忙的事。`,
+  jobs: '今天的收尾工作', you: '（你）',
+  welcome: mark => `蓋好了。從今天起，你是見習的替身：${mark}.。今年的禮物都送完了，登記簿上寫著今天的收尾工作。`,
   leave: '離開替身工作', sure: '確定要離開嗎？蓋過的章會留著，想回來隨時可以。', left: '你把縮寫輕輕劃掉了。蓋過的章，還留在登記簿上。',
   hint: '登記簿最新的一頁，最下面好像還空著一格。',
 };
-// The four jobs, each with where to go. Done while signed up, each earns a stamp (a wish point) once (cabin-story.js).
+// Christmas Day's four closing jobs for a new substitute, each with where to go. Done while signed up, each earns a stamp
+// (a wish point) once (cabin-story.js).
 export const JOBS = {
-  lichen: ['照顧麋鹿', '穀倉門上貼著今天的餵食表：照上面的時間，一樣一樣餵麋鹿。'],
-  hay: ['裝載雪橇', '麋鹿旁的雪橇：照書桌上的平安夜路線，把四袋禮物裝上去。'],
-  letters: ['處理信件', '小房間的分揀架：先把信分給對的人；交給你的信，挑一封拿到書桌回信、寄出去。'],
-  wheel: ['修摩天輪', '遊樂場的摩天輪停了，去看看哪裡壞了。'],
+  lichen: ['照顧麋鹿', '麋鹿昨晚飛了一整夜：照穀倉門上餵食表的時間，一樣一樣餵牠補充體力。'],
+  hay: ['整理雪橇', '麋鹿旁的雪橇：昨晚沒用上的四袋備用禮物，照書桌上的平安夜路線疊回貨架收好。'],
+  letters: ['整理信件', '小房間的分揀架：這幾晚寄到的信，照郵戳分給當時值班的人；聖誕老人交給你的兩封，挑一封拿到書桌回信、寄出去。'],
+  wheel: ['修摩天輪', '遊樂場的摩天輪停了：修好它，讓大家好好過聖誕節。'],
 };
-export const DONE = (job, count, of) => `替身工作完成：${job}。登記簿上多了一個章（${count}／${of}）。`;
+export const DONE = (job, count, of) => `收尾工作完成：${job}。登記簿上多了一個章（${count}／${of}）。`;
 // The notes the shift log's washed-out cells need, clipped on beside it once found (clue ids, data/cabin-clues.js): each as
 // it looks, line by line, in the hand that wrote it, so the ink says whose it is (an initial: that substitute's colour,
 // named too; none: plain ink).
