@@ -33,6 +33,9 @@ const headings = {
   'ending-b': heading([['Wish Granted', 150]], 220),
   'ending-c': heading([['Staying On', 150]], 220),
   'ending-d': heading([['Christmas', 150], ['Miracle', 290]], 360),
+  // Santa 頁第一次來的歡迎緞帶：小字一行、大字一行。
+  'welcome-to': heading([['Welcome to', 150]], 220),
+  'christmas-village': heading([['Christmas Village', 150]], 220),
 };
 const tagline = layout([["Holy Moly! It's Christmas!", 76]], 720, 50).map(glyph => glyph.d).join('');
 await fs.writeFile('js/data/tagline-glyphs.js', `${header}\nexport const TAGLINE_TEXT = "Holy Moly! It's Christmas!";\nexport const taglinePath = ${JSON.stringify(tagline)};\n`);
