@@ -283,7 +283,7 @@ await test('Santa 隱藏故事 P4：聖誕老人出門（固定規則）、MORE 
   assert.ok(books.includes('const home = cabin.santaHome') && books.includes('button.disabled = home || done') && books.includes('solved(shelf)') && books.includes("'需要提示嗎？'") && books.includes('真的要看答案嗎？'), 'Books stay put while Santa is home; MORE is checked by the rules; hints come one at a time and the answer only when asked twice');
   assert.ok(books.includes('setPointerCapture') && books.includes("event.key === 'Escape' && picked >= 0") && books.includes('events.abort()') && !books.includes('innerHTML'), 'Drag or tap-then-place, Escape puts a picked book back, every listener let go');
   assert.ok(scene.includes("restyle('decor-coat', { coat: false })") && scene.includes('story.scripted = true') && scene.includes('if (!santaModel || story.away) return false') && scene.includes('storyTimers.forEach(clearTimeout)'), 'Going out: the coat leaves its peg, the controls wait for the little scene, an empty chair cannot be talked to, timers go with the page');
-  assert.ok(scene.includes("restyle('back', open ? { secret: true } : undefined)") && scene.includes('secret.visible = story.open > 0 && indoorView(view)'), 'The back wall opens behind the bookcase, and the little room is drawn only from indoors');
+  assert.ok(scene.includes("restyle('back', open ? { secret: true } : undefined)") && scene.includes("secret.visible = story.open > 0 && (indoorView(view) || Boolean(trip && trip.direction !== 'fly'));"), 'The back wall opens behind the bookcase, and the little room is drawn only from indoors (and on the walk through the front door)');
   const { SECRET, BOOKCASE } = await import(pathToFileURL(path.join(project, 'js/components/cabin-art.js')).href);
   assert.ok(SECRET.left >= BOOKCASE.left && SECRET.left + SECRET.width <= BOOKCASE.left + BOOKCASE.width, 'The doorway is hidden behind the closed bookcase');
   const paint = await fs.readFile(path.join(project, 'js/components/cabin-paint.js'), 'utf8');
@@ -804,6 +804,12 @@ await test('Santa 11/22 試玩回饋（二）：開場歡迎提示指向郵筒�
   assert.ok(css.includes('#cabin-stage:has(.notebook-card) .books-enter { visibility: hidden; }'), 'The leave button is out of the way while the clue book is open');
   const garland = paper.slice(paper.indexOf('function garland('), paper.indexOf('// A paper snowflake'));
   assert.ok(garland.includes("bauble(paper, width * i / 12, at(width * i / 12), 3, 4.2,") && !garland.includes('noise(') && !garland.includes("'stroke-width': 9"), 'The chat card has a plain string of baubles, no fuzzy garland');
+});
+await test('Santa 書櫃修正：走出門的路上小房間不先消失（門洞不會變成屋外）；書櫃近看時旁邊的搖椅停下、書櫃不招手（左邊不會閃出牆）', async () => {
+  const scene = await fs.readFile(path.join(project, 'js/components/cabin-scene.js'), 'utf8');
+  assert.ok(scene.includes("secret.visible = story.open > 0 && (indoorView(view) || Boolean(trip && trip.direction !== 'fly'));"), 'The little room stays while the eye walks out through the front door');
+  assert.ok(scene.includes('const rocking = THREE.MathUtils.clamp((Math.hypot(eye.x - CHAIR.x, eye.z - CHAIR.z) - .7) / .4, 0, 1);') && scene.includes('* .09) * rocking;'), 'The rocking chair comes to rest with the eye right beside it');
+  assert.ok(scene.includes("if (kind === 'bookcase' && view === 'shelf') return false;"), 'Up at the bookcase, it does not call');
 });
 await test('Santa 口袋：撿起、檢查、拖到要用的地方；用錯會彈回、用對才算用掉', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');

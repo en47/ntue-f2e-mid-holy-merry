@@ -707,20 +707,24 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
   const tilt = new THREE.Quaternion(), side = new THREE.Vector3(1, 0, 0);
   function pose() {
     const still = motion.matches, t = clock;
-    // The chair rocks; just after Santa has got up from it, it rocks harder for a while on its own.
-    chair.rotation.x = still ? 0 : Math.sin(t * 1.7) * .028 + Math.exp(-(t - story.kick) * .7) * Math.sin((t - story.kick) * 4) * .09;
+    // The chair rocks; just after Santa has got up from it, it rocks harder for a while on its own. With the eye right beside
+    // it (up at the bookcase) it comes to rest, and rocks again as the eye moves off: so near, its back swinging in and out
+    // at the edge of the view would flash the wall behind it.
+    const rocking = THREE.MathUtils.clamp((Math.hypot(eye.x - CHAIR.x, eye.z - CHAIR.z) - .7) / .4, 0, 1);
+    chair.rotation.x = still ? 0 : (Math.sin(t * 1.7) * .028 + Math.exp(-(t - story.kick) * .7) * Math.sin((t - story.kick) * 4) * .09) * rocking;
     if (santaModel) santaModel.visible = !story.away;
     // The seat and the note on it show only while he is out: sitting, his thighs slope down below the seat's front edge.
     for (const id of ['chair-note', 'chair-seat']) { const holder = sheets.get(id)?.holder; if (holder) holder.visible = story.away; }
     if (story.door && !trip) { const u = THREE.MathUtils.clamp((t - story.door.start) / story.door.length, 0, 1); rigs.get('door').rotation.y = lerp(story.door.from, story.door.to, ease(u)); }
     // Calling: the shut door rattles in its frame, as in a gust.
     const knock = moving('door'); if (knock !== null && !story.door && !trip) rigs.get('door').rotation.y = shiver(knock, 6, .035);
-    // The bookcase swings on its hinge into the room.
+    // The bookcase swings on its hinge into the room. The little room behind it stays while the eye walks out through the
+    // front door (the view is already 'outside' then): hidden at once, its doorway would show the village behind the house.
     if (story.opening) { const u = THREE.MathUtils.clamp((t - story.opening.start) / 2.6, 0, 1); story.open = story.opening.from + (story.opening.to - story.opening.from) * ease(u); }
     // Hinged at its left edge, it swings out into the room toward the left wall, about 55°.
     // Calling, standing open, it swings a little further on its hinge and back (shut, it gives the shake below).
     const creak = moving('bookcase');
-    rigs.get('bookcase').rotation.y = -.95 * story.open + (creak === null || story.opening ? 0 : shiver(creak, 3, .05) * story.open); secret.visible = story.open > 0 && indoorView(view);
+    rigs.get('bookcase').rotation.y = -.95 * story.open + (creak === null || story.opening ? 0 : shiver(creak, 3, .05) * story.open); secret.visible = story.open > 0 && (indoorView(view) || Boolean(trip && trip.direction !== 'fly'));
     // A gold book calling hops twice where it stands (one held in the hand is left alone).
     const bounce = moving('book'), hopping = bounce === null ? null : letterBooks.get(calling.id);
     if (hopping && !hopping.userData.held && hopping.userData.goal) hopping.position.y = hopping.userData.goal.y + Math.abs(Math.sin(bounce * Math.PI * 2)) * .02 * (1 - bounce * .5);
@@ -1424,6 +1428,8 @@ export async function mountCabin(stage, { onProgress = () => {}, onView = () => 
     beckon(id) {
       const kind = id.startsWith('book-') ? 'book' : id, thing = beckoning(id);
       if (motion.matches || calling || trip || story.scripted || !BECKON[kind] || !thing || !showing(thing)) return false;
+      // Up at the bookcase already, it does not call: right in front of the eye its swing would bare the wall beside it.
+      if (kind === 'bookcase' && view === 'shelf') return false;
       calling = { id, kind, at: clock, length: BECKON[kind] };
       if (kind === 'hoist-tag') hoist.swing = clock;
       if (kind === 'chair') story.kick = clock;
