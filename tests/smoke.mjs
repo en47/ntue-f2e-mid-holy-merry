@@ -824,14 +824,16 @@ await test('Santa 前半夜、後半夜說清楚：聖誕村早上六點換日�
   assert.equal(flyer('12/21', '02:40'), 'O'); assert.ok(MAIL.every(([, date, time]) => flyer(date, time)), 'Every postmark falls in a night on the log');
   assert.ok(santa.includes('今天是聖誕節的早晨。') && santa.includes('聖誕老人終於回到了村莊。'), 'The welcome says the village is on Christmas morning, Santa home from the night');
 });
-await test('Santa 開場像翻開立體書：先看村子，再細緞帶標題、再牛皮紙吊牌，兩樣不同時出現、不擋點擊，碰一下場景或按鍵就略過', async () => {
+await test('Santa 開場是一張立體書故事卡：緞帶標題和聖誕早晨的話在同一張卡上，立起來、讀完倒回去；碰一下就收起、卡片接住那一下、收起後只剩信封', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [santa, css, paper] = await Promise.all(['js/santa.js', 'css/santa.css', 'js/components/cabin-paper.js'].map(read));
-  assert.ok(santa.includes('const OPENING = { first: .6, ribbon: 3.4, tag: 8.5, fade: 1 };') && santa.includes("at(t, () => step('ribbon'));") && santa.includes("at(t, () => { point(); step('tag'); });") && santa.includes('at(t, () => end());'), 'The village alone, then the ribbon, then the tag, then the village again');
-  assert.ok(santa.includes("stage.addEventListener('pointerdown', skip, { signal: events.signal }); document.addEventListener('keydown', skip, { signal: events.signal });") && santa.includes('function end() { events.abort(); sign.remove(); }'), 'A touch of the scene or a key skips it, and nothing is left behind');
-  assert.ok(css.includes('.cabin-welcome { position: absolute; z-index: 3; top: 0; left: 1rem; right: 1rem; pointer-events: none; }') && css.includes('.cabin-welcome[data-step="ribbon"] .welcome-banner, .cabin-welcome[data-step="tag"] .welcome-note { opacity: 1; visibility: visible; }'), 'Neither takes a click, and only one is up at a time');
-  assert.ok(css.includes('.welcome-banner { position: relative; width: clamp(15rem, 26vw, 22rem);') && !css.includes('welcome-drop') && !css.includes('welcome-swing') && css.includes('@media (prefers-reduced-motion: no-preference) {\n  .cabin-welcome { transition: opacity .6s ease; }'), 'The ribbon is a third smaller; it only fades, and not at all under reduced motion');
-  assert.ok(paper.includes("['.welcome-note', 'welcometag'],") && paper.includes('welcometag(paper, width, height, seed) {'), 'The words are on a kraft hang tag on its twine');
+  assert.ok(santa.includes("card = el('div', 'welcome-card', sign), banner = el('div', 'welcome-banner', card);"), 'The ribbon and its words belong to the card');
+  assert.ok(santa.includes('const OPENING = { first: .6, read: 9, fold: .7, quick: .4 };') && santa.includes("at(OPENING.first, () => { step('open'); tell(); });") && santa.includes('const done = () => { sign.remove(); follow(); };'), 'It stands, is read, then folds away; the envelope comes after');
+  assert.ok(santa.includes("stage.addEventListener('pointerdown', () => fold(true), { signal: events.signal }); document.addEventListener('keydown', () => fold(true), { signal: events.signal });"), 'A touch or a key folds it at once');
+  assert.ok(css.includes('.cabin-welcome { --card: clamp(19rem, 28vw, 25rem); position: absolute; z-index: 3; inset: 0; pointer-events: none; }') && css.includes('.cabin-welcome[data-step="close"]:not(.is-quick) .welcome-card { pointer-events: none; }') && css.includes('.welcome-banner { position: absolute; left: -11.3%;'), 'Only the standing card takes a touch; the ribbon sits on its top edge');
+  const moves = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference) {\n  .cabin-welcome { transition'));
+  assert.ok(moves.indexOf('welcome-stand 1s') > 0 && moves.indexOf('welcome-stand 1s') < moves.indexOf('\n}\n') && css.includes('@keyframes welcome-fold'), 'It stands up and folds down like a pop-up page, only without reduced motion');
+  assert.ok(paper.includes("['.welcome-card', 'storycard'],") && paper.includes('storycard(paper, width, height, seed) {'), 'A cream page on kraft, cut from the same paper as the yard\'s other cards');
 });
 await test('Santa 12/25 是聖誕季的收尾日：加入是見習、四件收尾工作、留下是簽明年的夜班；不再說平安夜前收到或明天早上出發', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');

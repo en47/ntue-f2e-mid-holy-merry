@@ -67,7 +67,7 @@ const KINDS = [
   ['.feed-slip', 'pinned'],
   ['.advent-link, .advent-fold', 'tag'],
   ['.advent-shut', 'kraft'],
-  ['.welcome-note', 'welcometag'],
+  ['.welcome-card', 'storycard'],
   ['.feed-slip-box', 'kraft'],
   ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin, .shift-file, .notebook-next', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
@@ -391,13 +391,12 @@ const OBJECTS = {
     shape('circle', { cx: end + 5, cy: mid, r: 4.6, fill: '#e2cc9f' }, paper); shape('circle', { cx: end + 5, cy: mid, r: 2.1, fill: '#7a5236' }, paper);
     ink(`M${end + 5} ${mid}C${end - 4} ${mid - 9} 9 ${mid - 9} 2 ${mid - 4}M${end + 5} ${mid}C${end - 6} ${mid + 5} 10 ${mid + 9} 3 ${mid + 8}`, '#b5443c', paper, 1.8);
   },
-  // The first visit's story tag (santa.js): kraft card, its top corners cut, a ringed eyelet, hung from the top of the yard
-  // on a red twine (the card starts 22px down; css/santa.css keeps the words below the eyelet).
-  welcometag(paper, width, height, seed) {
-    const top = 22, c = 11, bottom = height - SHADOW - 2, j = i => (noise(seed + i) - .5) * 1.2;
-    cut(paper, `M${2 + c} ${top + j(1)}H${width - 2 - c}L${width - 2} ${top + c}V${bottom + j(2)}H2V${top + c}Z`, '#e6d3ad', '#bfa274');
-    shape('circle', { cx: width / 2, cy: top + 9, r: 5.2, fill: '#f6ead0' }, paper); shape('circle', { cx: width / 2, cy: top + 9, r: 2.4, fill: '#7a5236' }, paper);
-    ink(`M${width / 2} ${top + 9}V0`, '#b5443c', paper, 1.6);
+  // The first visit's story card (santa.js): a cream page laid on a kraft one a little larger, so the paper's thickness
+  // shows at its edge, and a sprig of holly in a lower corner (the ribbon round its top is a paper of its own).
+  storycard(paper, width, height, seed) {
+    cut(paper, rounded(2, 5, width - 2, height - SHADOW - 1, seed, 12), '#e6d3ad', '#bfa274');
+    cut(paper, rounded(7, 2, width - 7, height - SHADOW - 6, seed + 5, 10), '#fffaf0', '#e8dcc6');
+    holly(paper, width - 32, height - SHADOW - 19);
   },
   // A name tag hung under a food in the basket: a little card with its top corners cut, an eyelet, and its red thread.
   hangtag(paper, width, height, seed) {
