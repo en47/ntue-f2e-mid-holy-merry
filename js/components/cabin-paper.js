@@ -67,7 +67,7 @@ const KINDS = [
   ['.feed-slip', 'pinned'],
   ['.advent-link, .advent-fold', 'tag'],
   ['.advent-shut', 'kraft'],
-  ['.welcome-note', 'kraft'],
+  ['.welcome-note', 'welcometag'],
   ['.feed-slip-box', 'kraft'],
   ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin, .shift-file, .notebook-next', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],
@@ -390,6 +390,14 @@ const OBJECTS = {
     cut(paper, `M${end} ${2 + j(1)}H${width - 2 + j(2)}V${bottom + j(3)}H${end}L14 ${mid}Z`, '#f3e3c3', '#c9ae80');
     shape('circle', { cx: end + 5, cy: mid, r: 4.6, fill: '#e2cc9f' }, paper); shape('circle', { cx: end + 5, cy: mid, r: 2.1, fill: '#7a5236' }, paper);
     ink(`M${end + 5} ${mid}C${end - 4} ${mid - 9} 9 ${mid - 9} 2 ${mid - 4}M${end + 5} ${mid}C${end - 6} ${mid + 5} 10 ${mid + 9} 3 ${mid + 8}`, '#b5443c', paper, 1.8);
+  },
+  // The first visit's story tag (santa.js): kraft card, its top corners cut, a ringed eyelet, hung from the top of the yard
+  // on a red twine (the card starts 22px down; css/santa.css keeps the words below the eyelet).
+  welcometag(paper, width, height, seed) {
+    const top = 22, c = 11, bottom = height - SHADOW - 2, j = i => (noise(seed + i) - .5) * 1.2;
+    cut(paper, `M${2 + c} ${top + j(1)}H${width - 2 - c}L${width - 2} ${top + c}V${bottom + j(2)}H2V${top + c}Z`, '#e6d3ad', '#bfa274');
+    shape('circle', { cx: width / 2, cy: top + 9, r: 5.2, fill: '#f6ead0' }, paper); shape('circle', { cx: width / 2, cy: top + 9, r: 2.4, fill: '#7a5236' }, paper);
+    ink(`M${width / 2} ${top + 9}V0`, '#b5443c', paper, 1.6);
   },
   // A name tag hung under a food in the basket: a little card with its top corners cut, an eyelet, and its red thread.
   hangtag(paper, width, height, seed) {

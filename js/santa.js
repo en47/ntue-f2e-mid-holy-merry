@@ -73,16 +73,16 @@ function showTip() {
   const hide = () => tip.classList.add('is-gone');
   stage.addEventListener('pointerdown', hide, { once: true }); setTimeout(hide, 8000);
 }
-// The welcome: a paper ribbon across the top of the village, its words in English paper letters (as the cabin's sign),
-// with a tag hung under it saying what to do first, and a
-// little envelope bobbing over the mailbox to point it out (pressed, it opens the mailbox). Both stay until the visitor
-// goes to the mailbox (or anywhere else), the envelope following the mailbox as the view turns, hidden when it is out
-// of sight.
+// The welcome, told like the first pages of a pop-up book once the village has been seen: first a small paper ribbon in
+// the sky, its words in English paper letters (as the cabin's sign); once it has gone, a kraft tag hung on a twine from
+// the top of the yard over the mailbox, saying it is Christmas morning and where to start; then that goes too, and the
+// village is left clear. Neither takes a click: a touch of the scene or a key ends them early. From the tag on, a little
+// envelope bobs over the mailbox to point it out (pressed, it opens the mailbox), following the mailbox as the view
+// turns and hidden when it is out of sight, until the visitor goes to the mailbox (or anywhere else).
 const el = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent.append(node); return node; };
 const PAPER = { paper: { scale: .3, grain: .45, shadow: .3 }, eager: true };
-// The welcome's words in paper letters, each its own colour with a thick cream rim, as on the cabin's sign: "Welcome to"
-// small above, "Christmas Village" large across a red ribbon (its ends folded back and notched), standing out above and
-// below it.
+// The welcome's words in paper letters, each its own colour with a cream rim, as on the cabin's sign: "Welcome to" small
+// above, "Christmas Village" across a slim red ribbon (its ends folded back and notched), standing out above and below it.
 const SIGN_INKS = ['#b5443c', '#c08a3e', '#3f6653', '#b5604a', '#3f6653'];
 function words(g, key, cx, top, width, rim) {
   const { box, glyphs } = headingGlyphs[key], scale = width / Number(box.split(' ')[2]);
@@ -91,12 +91,12 @@ function words(g, key, cx, top, width, rim) {
 }
 function ribbon(g) {
   for (const side of [v => v, v => 520 - v]) {
-    shape('path', { d: `M${side(4)} 106H${side(56)}V148H${side(4)}L${side(20)} 127Z`, fill: '#8f3530' }, g);
-    shape('path', { d: `M${side(44)} 134L${side(56)} 148V134Z`, fill: '#6b2724' }, g);
+    shape('path', { d: `M${side(14)} 104H${side(58)}V136H${side(14)}L${side(26)} 120Z`, fill: '#8f3530' }, g);
+    shape('path', { d: `M${side(48)} 128L${side(58)} 136V128Z`, fill: '#6b2724' }, g);
   }
-  shape('path', { d: 'M44 92H476V134H44Z', fill: '#b5443c' }, g);
-  words(g, 'welcome-to', 260, 2, 196, 22);
-  words(g, 'christmas-village', 260, 46, 472, 22);
+  shape('path', { d: 'M48 96H472V128H48Z', fill: '#b5443c' }, g);
+  words(g, 'welcome-to', 260, 2, 196, 16);
+  words(g, 'christmas-village', 260, 46, 472, 16);
 }
 // The envelope over the mailbox: cream, its flap folded down, a red wax seal and a gold glint.
 function envelope(g) {
@@ -106,24 +106,46 @@ function envelope(g) {
   shape('circle', { cx: 32, cy: 33, r: 6, fill: '#b5443c' }, g);
   star(g, 55, 8, 7, '#e0b04f');
 }
+// How long (seconds) the village is seen alone first, the ribbon stays up and the tag stays up to be read; each fades in
+// and out over `fade` (css/santa.css), and under reduced motion simply comes and goes.
+const OPENING = { first: .6, ribbon: 3.4, tag: 8.5, fade: 1 };
+const WELCOME_NOTE = '今天是聖誕節的早晨。\n經過一整夜的忙碌，\n聖誕老人終於回到了村莊。\n聽說他在郵筒裡留了一封信，\n要不要去看看呢？';
 let welcome = null;
 function welcomeIn() {
   const sign = el('div', 'cabin-welcome', stage), banner = el('div', 'welcome-banner', sign);
   paperLayer(banner, '0 0 520 160', 'welcome-ribbon', ribbon, PAPER);
   el('span', 'sr-only', banner, 'Welcome to Christmas Village').lang = 'en';
-  el('p', 'welcome-note', sign, '今天是聖誕節的早晨。\n經過一整夜的忙碌，聖誕老人終於回到了村莊。\n聽說他在郵筒裡留了一封信，要不要去看看呢？');
+  const note = el('p', 'welcome-note', sign, WELCOME_NOTE);
   const marker = el('button', 'mail-marker', stage); marker.type = 'button'; marker.hidden = true; marker.setAttribute('aria-label', '打開郵筒');
   paperLayer(marker, '0 0 64 52', '', envelope, PAPER);
   marker.addEventListener('click', () => cabin?.setView('mailbox'));
-  let frame = 0;
+  let frame = 0, pointing = false;
   const follow = () => {
     const box = stage.dataset.view === 'outside' ? cabin?.sheetRect('mailbox', [.3, .15, .7, .15]) : null;
     const shown = Boolean(box && box.left + box.width > 0 && box.left < stage.clientWidth && box.top > 0 && box.top < stage.clientHeight);
     marker.hidden = !shown; if (shown) Object.assign(marker.style, { left: `${box.left + box.width / 2}px`, top: `${box.top}px` });
     frame = requestAnimationFrame(follow);
   };
-  follow();
-  welcome = { stop() { cancelAnimationFrame(frame); marker.remove(); sign.classList.add('is-gone'); setTimeout(() => sign.remove(), 700); welcome = null; } };
+  // The tag hangs over the mailbox's side of the yard (kept on screen), its words read out once; the envelope from then on.
+  const point = () => {
+    if (pointing) return; pointing = true; follow(); status.textContent = WELCOME_NOTE.replace(/\n/g, '');
+    const box = cabin?.sheetRect('mailbox', [.3, .15, .7, .15]), half = note.offsetWidth / 2, wide = sign.clientWidth;
+    note.style.setProperty('--x', `${Math.max(half, Math.min(wide - half, box ? box.left + box.width / 2 - sign.offsetLeft : wide / 2))}px`);
+  };
+  // One after another: the ribbon, then the tag, then nothing over the village.
+  const timers = [], events = new AbortController(), fade = motion.matches ? 0 : OPENING.fade, step = name => { sign.dataset.step = name; };
+  const at = (seconds, fn) => timers.push(setTimeout(fn, seconds * 1000));
+  let t = OPENING.first;
+  at(t, () => step('ribbon')); t += fade + OPENING.ribbon;
+  at(t, () => step('')); t += fade;
+  at(t, () => { point(); step('tag'); }); t += fade + OPENING.tag;
+  at(t, () => step('')); t += fade;
+  at(t, () => end());
+  // A touch of the scene or a key: whatever is up fades at once, and the envelope is left pointing.
+  const skip = () => { timers.forEach(clearTimeout); sign.classList.add('is-skipped'); step(''); point(); at(motion.matches ? 0 : .4, end); events.abort(); };
+  stage.addEventListener('pointerdown', skip, { signal: events.signal }); document.addEventListener('keydown', skip, { signal: events.signal });
+  function end() { events.abort(); sign.remove(); }
+  welcome = { stop() { timers.forEach(clearTimeout); events.abort(); cancelAnimationFrame(frame); marker.remove(); sign.classList.add('is-gone'); setTimeout(() => sign.remove(), 700); welcome = null; } };
 }
 
 // The first visit opens with a flight down over the village, once the loader has faded; a page back from the cache does not.

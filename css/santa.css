@@ -21,24 +21,30 @@
 .cabin-back:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
 .cabin-tip { position: absolute; z-index: 3; left: 50%; top: 14%; margin: 0; padding: .55rem 1.2rem; translate: -50% 0; color: var(--ink); background: #fffbedee; border: 2px solid #ad3c3b55; border-radius: 14px; box-shadow: 0 6px 0 -2px #dccaa9; font-size: var(--fs-small); pointer-events: none; transition: opacity .6s ease; }
 .cabin-tip.is-gone { opacity: 0; }
-/* 第一次來、郵筒還沒打開：上方是紙片字「Welcome to／Christmas Village」（像 Santa's Cabin 招牌，每個字母一種顏色、厚厚的米白紙邊），大字橫在紅色緞帶上、超出緞帶，下面掛一張小紙籤說先做什麼；郵筒上方浮著一封小信封，
-   上下輕晃指出郵筒（點它也能打開）。走去郵筒（或任何地方）時一起收起來。 */
-.cabin-welcome { position: absolute; z-index: 3; left: 50%; top: 6%; width: min(34rem, calc(100% - 2rem)); translate: -50% 0; pointer-events: none; text-align: center; transition: opacity .6s ease; }
+/* 第一次來、郵筒還沒打開：像翻開立體書，先看村子，再一樣一樣出現。先是天空裡一條細細的紅緞帶，紙片字「Welcome to／Christmas Village」（像 Santa's Cabin 招牌，
+   每個字母一種顏色、米白紙邊）；它淡出後，郵筒那一側的天空垂下一張牛皮紙吊牌，寫今天是聖誕節早上、先去看郵筒；吊牌也淡出，村子就完整留給玩家。兩樣都不接收點擊，
+   碰一下場景或按任一鍵就提早收起。郵筒上方的小信封從吊牌出現起上下輕晃（點它也能打開郵筒），走去郵筒（或任何地方）時才收起。減少動態時直接出現、直接收起。 */
+.cabin-welcome { position: absolute; z-index: 3; top: 0; left: 1rem; right: 1rem; pointer-events: none; }
 .cabin-welcome.is-gone { opacity: 0; }
-.welcome-banner { position: relative; aspect-ratio: 520 / 160; }
-.welcome-note { width: fit-content; max-width: 92%; margin: -.2rem auto 0; padding: .55rem 1.3rem .6rem; color: var(--ink); background: #fbf3df; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.6; white-space: pre-line; rotate: -1.2deg; transform-origin: 50% 0; }
+.welcome-banner { position: relative; width: clamp(15rem, 26vw, 22rem); margin: clamp(.8rem, 4%, 2rem) auto 0; aspect-ratio: 520 / 160; }
+.welcome-note { position: absolute; top: 0; left: var(--x, 50%); width: max-content; max-width: 100%; margin: 0; padding: 2.7rem 1.1rem .9rem; translate: -50% 0; color: var(--ink); background: #e6d3ad; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.65; white-space: pre-line; }
 .cabin[data-paper] .welcome-note { background: transparent no-repeat 0 0 / 100% 100%; }
+.welcome-banner, .welcome-note { opacity: 0; visibility: hidden; }
+.cabin-welcome[data-step="ribbon"] .welcome-banner, .cabin-welcome[data-step="tag"] .welcome-note { opacity: 1; visibility: visible; }
 .mail-marker { position: absolute; z-index: 3; width: 3.2rem; aspect-ratio: 64 / 52; padding: 0; border: 0; background: none; translate: -50% -112%; cursor: pointer; }
 .mail-marker[hidden] { display: none; }
 .mail-marker:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
-@media (max-width: 700px) { .welcome-note { font-size: var(--fs-small); } }
 @media (prefers-reduced-motion: no-preference) {
-  .welcome-banner { animation: welcome-drop .8s cubic-bezier(.3, 1.3, .5, 1) both; }
-  .welcome-note { animation: welcome-drop .8s cubic-bezier(.3, 1.3, .5, 1) .25s both, welcome-swing 3.2s ease-in-out 1.05s infinite alternate; }
+  .cabin-welcome { transition: opacity .6s ease; }
+  .welcome-banner { translate: 0 -.3rem; }
+  .welcome-note { translate: -50% -.5rem; }
+  .welcome-banner, .welcome-note { transition: opacity 1s ease, translate 1s ease, visibility 0s 1s; }
+  .cabin-welcome[data-step="ribbon"] .welcome-banner { translate: 0 0; }
+  .cabin-welcome[data-step="tag"] .welcome-note { translate: -50% 0; }
+  .cabin-welcome[data-step="ribbon"] .welcome-banner, .cabin-welcome[data-step="tag"] .welcome-note { transition: opacity 1s ease, translate 1s ease, visibility 0s; }
+  .cabin-welcome.is-skipped :is(.welcome-banner, .welcome-note) { transition: opacity .35s ease, translate .35s ease, visibility 0s .35s; }
   .mail-marker { animation: marker-bob 1.1s ease-in-out infinite alternate; }
 }
-@keyframes welcome-drop { from { opacity: 0; translate: 0 -1.2rem; } }
-@keyframes welcome-swing { from { rotate: -1.2deg; } to { rotate: 1deg; } }
 @keyframes marker-bob { to { translate: -50% -132%; } }
 .cabin-explore { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .cabin-explore:focus-within { z-index: 5; top: 1rem; right: 1rem; width: auto; height: auto; overflow: visible; clip-path: none; display: grid; gap: .3rem; padding: .7rem; background: var(--cream); border-radius: 14px; box-shadow: 0 6px 0 -2px #dccaa9; }

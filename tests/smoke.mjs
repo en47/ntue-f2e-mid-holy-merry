@@ -797,7 +797,7 @@ await test('Santa 11/22 試玩回饋（二）：開場歡迎提示指向郵筒�
   const read = name => fs.readFile(path.join(project, name), 'utf8');
   const [santa, scene, css, secret, paper, pulley] = await Promise.all(['js/santa.js', 'js/components/cabin-scene.js', 'css/santa.css', 'js/components/cabin-secret.js', 'js/components/cabin-paper.js', 'js/components/cabin-pulley.js'].map(read));
   const { DESK_LETTERS } = await import(pathToFileURL(path.join(project, 'js/data/cabin-letters.js')).href);
-  assert.ok(santa.includes("if (!found.has('mailbox')) { welcomeIn(); return; }") && santa.includes("words(g, 'christmas-village', 260, 46, 472, 22);") && santa.includes("marker.addEventListener('click', () => cabin?.setView('mailbox'));") && santa.includes('welcome?.stop();') && css.includes('.cabin-welcome {'), 'A first visit is welcomed by a paper ribbon and a tag, with an envelope over the mailbox; they stay until the visitor goes');
+  assert.ok(santa.includes("if (!found.has('mailbox')) { welcomeIn(); return; }") && santa.includes("words(g, 'christmas-village', 260, 46, 472, 16);") && santa.includes("marker.addEventListener('click', () => cabin?.setView('mailbox'));") && santa.includes('welcome?.stop();') && css.includes('.cabin-welcome {'), 'A first visit is welcomed by a paper ribbon, then a tag, with an envelope over the mailbox until the visitor goes there');
   assert.ok(scene.includes('beat = since > 1.6 ? (since - 1.6) % 2.6 : 1,') && scene.includes('Math.abs(Math.sin(hop * Math.PI * 2)) * .17'), 'The mailbox hops higher and more often');
   assert.ok(pulley.includes("cabin.sheetRect('stable', [.385, .52, .465, .635])") && css.includes('.feed-table { animation: none; background: none; rotate: -4deg; }'), 'The feeding table is a small sheet pinned on the barn door');
   assert.ok(css.includes('.drawer-card ~ .cabin-note { z-index: 7; }'), 'The note from the barn drawer opens over the drawer at once');
@@ -823,6 +823,15 @@ await test('Santa 前半夜、後半夜說清楚：聖誕村早上六點換日�
   assert.ok(secret.includes("element('span', 'shift-span', element('span', 'shift-head', grid, half), LOG.spans[i])") && secret.includes("element('span', 'shift-date', grid, date);"), 'The shift log shows each half with its hours; each row is its date');
   assert.equal(flyer('12/21', '02:40'), 'O'); assert.ok(MAIL.every(([, date, time]) => flyer(date, time)), 'Every postmark falls in a night on the log');
   assert.ok(santa.includes('今天是聖誕節的早晨。') && santa.includes('聖誕老人終於回到了村莊。'), 'The welcome says the village is on Christmas morning, Santa home from the night');
+});
+await test('Santa 開場像翻開立體書：先看村子，再細緞帶標題、再牛皮紙吊牌，兩樣不同時出現、不擋點擊，碰一下場景或按鍵就略過', async () => {
+  const read = name => fs.readFile(path.join(project, name), 'utf8');
+  const [santa, css, paper] = await Promise.all(['js/santa.js', 'css/santa.css', 'js/components/cabin-paper.js'].map(read));
+  assert.ok(santa.includes('const OPENING = { first: .6, ribbon: 3.4, tag: 8.5, fade: 1 };') && santa.includes("at(t, () => step('ribbon'));") && santa.includes("at(t, () => { point(); step('tag'); });") && santa.includes('at(t, () => end());'), 'The village alone, then the ribbon, then the tag, then the village again');
+  assert.ok(santa.includes("stage.addEventListener('pointerdown', skip, { signal: events.signal }); document.addEventListener('keydown', skip, { signal: events.signal });") && santa.includes('function end() { events.abort(); sign.remove(); }'), 'A touch of the scene or a key skips it, and nothing is left behind');
+  assert.ok(css.includes('.cabin-welcome { position: absolute; z-index: 3; top: 0; left: 1rem; right: 1rem; pointer-events: none; }') && css.includes('.cabin-welcome[data-step="ribbon"] .welcome-banner, .cabin-welcome[data-step="tag"] .welcome-note { opacity: 1; visibility: visible; }'), 'Neither takes a click, and only one is up at a time');
+  assert.ok(css.includes('.welcome-banner { position: relative; width: clamp(15rem, 26vw, 22rem);') && !css.includes('welcome-drop') && !css.includes('welcome-swing') && css.includes('@media (prefers-reduced-motion: no-preference) {\n  .cabin-welcome { transition: opacity .6s ease; }'), 'The ribbon is a third smaller; it only fades, and not at all under reduced motion');
+  assert.ok(paper.includes("['.welcome-note', 'welcometag'],") && paper.includes('welcometag(paper, width, height, seed) {'), 'The words are on a kraft hang tag on its twine');
 });
 await test('Santa 12/25 是聖誕季的收尾日：加入是見習、四件收尾工作、留下是簽明年的夜班；不再說平安夜前收到或明天早上出發', async () => {
   const read = name => fs.readFile(path.join(project, name), 'utf8');
