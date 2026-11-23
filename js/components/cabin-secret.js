@@ -224,11 +224,11 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
     element('span', 'shift-pin-sign', pin, LOG.pin.sign);
     const note = element('p', 'secret-note shift-note', page, solved() ? LOG.solved : LOG.how);
     const grid = element('div', solved() ? 'shift-grid is-solved' : 'shift-grid', page); grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', LOG.title);
-    element('span', 'shift-head', grid); for (const half of LOG.halves) element('span', 'shift-head', grid, half);
+    element('span', 'shift-head', grid); LOG.halves.forEach((half, i) => element('span', 'shift-span', element('span', 'shift-head', grid, half), LOG.spans[i]));
     let chosen = -1;
     const cells = [];
     NIGHTS.forEach(([date], night) => {
-      element('span', 'shift-date', grid, date);
+      element('span', 'shift-date', grid, LOG.night(date));
       for (const half of [0, 1]) {
         // The blot keeps the colour of whoever really wrote there.
         const index = night * 2 + half, state = INK[index], writer = NIGHTS[night][half + 1], legible = state === 'blot' || state === 'mark';
@@ -240,7 +240,7 @@ export function secretGame({ layer, stage, cabin, say, later, sound, progress, s
         const hint = state === 'blot' ? `暈開的${COLOUR_NAMES[writer]}色墨水` : state === 'washed' ? '整個洗掉了' : state === 'mark' ? `顏色洗掉了，只剩一個小小的${MARKS[writer][1]}記號` : '還看得清楚';
         if (state === 'blot') element('span', 'shift-ink', cell, `${COLOUR_NAMES[writer]}色`);
         const dry = () => legible && log[index] === writer;
-        const show = () => { const value = log[index]; mark.textContent = value ? `${value}.` : ''; mark.style.color = value ? COLOURS[value] : ''; cell.classList.toggle('is-dry', dry()); cell.setAttribute('aria-label', `${date} ${LOG.halves[half]}：${hint}${value ? `，寫著 ${value}.${dry() ? '（墨水乾了）' : ''}` : '，空著'}`); };
+        const show = () => { const value = log[index]; mark.textContent = value ? `${value}.` : ''; mark.style.color = value ? COLOURS[value] : ''; cell.classList.toggle('is-dry', dry()); cell.setAttribute('aria-label', `${LOG.night(date)} ${LOG.halves[half]}：${hint}${value ? `，寫著 ${value}.${dry() ? '（墨水乾了）' : ''}` : '，空著'}`); };
         show(); cell.show = show; cell.dry = dry;
         if (index === LOG_GIVEN || solved() || dry()) { cell.disabled = true; continue; }
         cell.setAttribute('aria-pressed', 'false');

@@ -904,6 +904,8 @@ html.theatre-open { overflow: hidden; }
 .cabin[data-paper] .shift-pin { padding: 1rem 1.5rem .8rem; background: transparent no-repeat 0 0 / 100% 100%; border-radius: 0; box-shadow: none; }
 .shift-grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: .35rem .5rem; align-items: center; margin: 0 0 .8rem; }
 .shift-head { color: var(--muted); font-size: var(--fs-small); text-align: center; }
+/* 欄名下面寫這一段飛的時間，每一列是「某天晚上」，從天黑飛到隔天天亮。 */
+.shift-span { display: block; font-size: var(--fs-small); line-height: 1.3; opacity: .75; }
 .shift-date { color: var(--ink); font-family: var(--font-hand); font-size: var(--fs-small); }
 .shift-cell { position: relative; height: 2.9rem; padding: 0; border: 0; border-radius: 0; background: none; cursor: pointer; }
 .shift-cell .ink-layer { pointer-events: none; transition: opacity .8s ease; }
@@ -945,7 +947,7 @@ html.theatre-open { overflow: hidden; }
   /* 兩欄時左欄矮一點：班表的格子和間距收緊，交接表整張不用捲。 */
   .shift-desk.has-side .shift-pin { margin-bottom: .4rem; }
   .shift-desk.has-side .shift-grid { gap: .2rem .5rem; margin-bottom: .55rem; }
-  .shift-desk.has-side .shift-cell { height: 2.5rem; }
+  .shift-desk.has-side .shift-cell { height: 2.3rem; }
   .shift-desk.has-side .shift-picks { margin-bottom: .5rem; }
 }
 .shift-files { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 .5rem; }

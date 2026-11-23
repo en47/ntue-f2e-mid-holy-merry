@@ -15,9 +15,11 @@ export const COLOUR_NAMES = { N: '深紅', K: '藍', H: '綠', E: '紫', O: '金
 export const MARKS = { N: ['spanner', '扳手'], K: ['sleigh', '雪橇'], H: ['star', '星星'], E: ['snowflake', '雪花'], O: ['envelope', '信封'] };
 // The booklet on the desk: its first page, the duty rules, can be read from the start; the pages after are stuck together
 // with snowmelt until Santa opens them for you (the rules for substitutes, below). Neither page says who they are for.
-export const DUTY = { title: '值班須知', lines: ['一、每一晚分前半夜、後半夜兩段，兩個人接力；交接時在交接表上簽名。', '二、同一個人不能連著值兩段，要讓下一位接手：前半夜接後半夜不行，後半夜接下一晚的前半夜也不行。', '三、新夥伴的前五年是見習期：一季只負責一段，其他時間跟著前輩學。'], margin: '（登記簿上的加入年份，就是見習期從哪一年算起。）', stuck: '後面幾頁被雪水黏在一起，翻不開。' };
+export const DUTY = { title: '值班須知', lines: ['一、每一晚從天黑飛到隔天天亮，分成兩段：前半夜是天黑到午夜，後半夜是午夜到天亮。兩個人接力，交接時在交接表上簽名。', '二、過了午夜，日期換了，還是算前一晚：12/22 天亮以前飛的，是「12/21 晚上」的後半夜。', '三、同一個人不能連著值兩段，要讓下一位接手：前半夜接後半夜不行，後半夜接下一晚的前半夜也不行。', '四、新夥伴的前五年是見習期：一季只負責一段，其他時間跟著前輩學。'], margin: '（登記簿上的加入年份，就是見習期從哪一年算起。）', stuck: '後面幾頁被雪水黏在一起，翻不開。' };
 export const LOG = {
   title: '夜班交接表', halves: ['前半夜', '後半夜'],
+  // Under each half, when it is flown; each row is a night, named by the evening it starts (it runs on to the next morning).
+  spans: ['天黑～午夜', '午夜～天亮'], night: date => `${date} 晚上`,
   how: '點一格，再點下面的名牌，把縮寫補回去。',
   // The notes it needs, clipped on beside it (LOG_FILES); one not found yet.
   files: '夾在旁邊的紀錄', missing: place => `還沒讀到・${place}`,
@@ -35,7 +37,7 @@ export const BELLS = '窗外傳來一陣叮叮噹噹的麋鹿鈴鐺聲。';
 export const GOING = '聖誕老人站起來，往窗外看了看：「哎呀，麋鹿好像又把飼料弄翻了！我出去看看。」';
 // The sorting rack, once signed up: the rule on its sign, and what is said as the letters go in (cabin-story.js decides).
 export const RACK = {
-  title: '分揀架', sign: '分信守則：信交給郵戳上那個時間正在飛的人。過了午夜，還算前一晚。',
+  title: '分揀架', sign: '分信守則：看郵戳上的日期和時間，交給那時正在飛的人。天黑到午夜，是那一晚的前半夜；過了午夜到天亮，還算前一晚，是前一晚的後半夜。',
   how: '點一封信，再點要放的格子。放好的信可以再點一下，換到別的格子，或點信堆放回去。',
   wrong: count => `有 ${count} 封放錯了，被退了回來。對照交接表，再分一次。`,
   done: '分好了！交給你的兩封信，送到書桌上了。',
