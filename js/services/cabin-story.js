@@ -40,11 +40,12 @@ export const readLog = saved => LOG_ANSWER.map((mark, i) => i === LOG_GIVEN ? ma
 export const logWrong = log => log.filter((mark, i) => mark !== LOG_ANSWER[i]).length;
 export const logSolved = log => logWrong(log) === 0;
 // The sorting rack, where the letters job starts: a letter goes to whoever was flying when it was postmarked, by the shift
-// log; past midnight still counts as the night before (its second half). The two for the new substitute go to them.
-export const MAIL = [['m1', '12/21', '20:10'], ['m2', '12/22', '02:40'], ['m3', '12/22', '22:30'], ['m4', '12/23', '01:15'], ['m5', '12/23', '19:50'], ['m6', '12/24', '04:05']];
-const dayBefore = date => { const [month, day] = date.split('/').map(Number); return `${month}/${day - 1}`; };
+// log. The village's day turns at six in the morning, when the night shift hands over (data/cabin-secret.js DUTY), so a
+// postmark's date is its night: 18:00 to midnight is that night's first half, midnight to 06:00 its second. The two for the
+// new substitute go to them.
+export const MAIL = [['m1', '12/21', '20:10'], ['m2', '12/21', '02:40'], ['m3', '12/22', '22:30'], ['m4', '12/22', '01:15'], ['m5', '12/23', '19:50'], ['m6', '12/23', '04:05']];
 export function flyer(date, time) {
-  const late = Number(time.split(':')[0]) < 12, night = NIGHTS.find(([day]) => day === (late ? dayBefore(date) : date));
+  const late = Number(time.split(':')[0]) < 6, night = NIGHTS.find(([day]) => day === date);
   return night ? night[late ? 2 : 1] : null;
 }
 export const mailFor = id => { const letter = MAIL.find(([each]) => each === id); return letter ? flyer(letter[1], letter[2]) : 'you'; };
