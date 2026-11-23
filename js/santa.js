@@ -3,6 +3,7 @@ import { mountCabinPaper } from './components/cabin-paper.js';
 import { mountCabinChat } from './components/cabin-chat.js';
 import { paperLayer, shape } from './components/paper-art.js';
 import { star } from './components/paper-props.js';
+import { headingGlyphs } from './data/heading-glyphs.js';
 
 // The cabin loads on its own: the page, title and footer work even when WebGL or the model does not.
 const stage = document.querySelector('#cabin-stage'), status = document.querySelector('#cabin-status'), away = document.querySelector('#cabin-away');
@@ -74,21 +75,30 @@ function showTip() {
   const hide = () => tip.classList.add('is-gone');
   stage.addEventListener('pointerdown', hide, { once: true }); setTimeout(hide, 8000);
 }
-// The welcome: a red paper ribbon across the top of the village (its words in English, as the cabin's sign and the advent
-// calendar's title are) with a tag hung under it saying what to do first, and a
+// The welcome: a paper ribbon across the top of the village, its words in English paper letters (as the cabin's sign),
+// with a tag hung under it saying what to do first, and a
 // little envelope bobbing over the mailbox to point it out (pressed, it opens the mailbox). Both stay until the visitor
 // goes to the mailbox (or anywhere else), the envelope following the mailbox as the view turns, hidden when it is out
 // of sight.
 const el = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent.append(node); return node; };
 const PAPER = { paper: { scale: .3, grain: .45, shadow: .3 }, eager: true };
-// The ribbon: a red band, its two ends folded back behind it and notched.
+// The welcome's words in paper letters, each its own colour with a thick cream rim, as on the cabin's sign: "Welcome to"
+// small above, "Christmas Village" large across a red ribbon (its ends folded back and notched), standing out above and
+// below it.
+const SIGN_INKS = ['#b5443c', '#c08a3e', '#3f6653', '#b5604a', '#3f6653'];
+function words(g, key, cx, top, width, rim) {
+  const { box, glyphs } = headingGlyphs[key], scale = width / Number(box.split(' ')[2]);
+  const group = shape('g', { transform: `translate(${cx - width / 2} ${top}) scale(${scale})` }, g);
+  glyphs.filter(({ char }) => char !== ' ').forEach(({ d }, i) => shape('path', { d, fill: SIGN_INKS[i % SIGN_INKS.length], stroke: '#fffaf0', 'stroke-width': rim, 'paint-order': 'stroke', 'stroke-linejoin': 'round' }, group));
+}
 function ribbon(g) {
-  for (const side of [v => v, v => 420 - v]) {
-    shape('path', { d: `M${side(4)} 38H${side(62)}V84H${side(4)}L${side(20)} 61Z`, fill: '#8f3530' }, g);
-    shape('path', { d: `M${side(50)} 72L${side(62)} 84V72Z`, fill: '#6b2724' }, g);
+  for (const side of [v => v, v => 520 - v]) {
+    shape('path', { d: `M${side(4)} 106H${side(56)}V148H${side(4)}L${side(20)} 127Z`, fill: '#8f3530' }, g);
+    shape('path', { d: `M${side(44)} 134L${side(56)} 148V134Z`, fill: '#6b2724' }, g);
   }
-  shape('path', { d: 'M50 18H370V72H50Z', fill: '#b5443c' }, g);
-  shape('path', { d: 'M58 25H362M58 65H362', fill: 'none', stroke: '#e9a8a0', 'stroke-width': 1.4, opacity: .7 }, g);
+  shape('path', { d: 'M44 92H476V134H44Z', fill: '#b5443c' }, g);
+  words(g, 'welcome-to', 260, 2, 196, 22);
+  words(g, 'christmas-village', 260, 46, 472, 22);
 }
 // The envelope over the mailbox: cream, its flap folded down, a red wax seal and a gold glint.
 function envelope(g) {
@@ -101,8 +111,8 @@ function envelope(g) {
 let welcome = null;
 function welcomeIn() {
   const sign = el('div', 'cabin-welcome', stage), banner = el('div', 'welcome-banner', sign);
-  paperLayer(banner, '0 0 420 92', 'welcome-ribbon', ribbon, PAPER);
-  el('span', 'welcome-title', banner, 'Welcome to Christmas Village').lang = 'en';
+  paperLayer(banner, '0 0 520 160', 'welcome-ribbon', ribbon, PAPER);
+  el('span', 'sr-only', banner, 'Welcome to Christmas Village').lang = 'en';
   el('p', 'welcome-note', sign, '聖誕老人在郵筒裡留了一封信，點郵筒打開看看');
   const marker = el('button', 'mail-marker', stage); marker.type = 'button'; marker.hidden = true; marker.setAttribute('aria-label', '打開郵筒');
   paperLayer(marker, '0 0 64 52', '', envelope, PAPER);
