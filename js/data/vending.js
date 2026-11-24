@@ -1,7 +1,8 @@
-// The fifth page, Christmas Vending (vending.html): a red vending machine out in the snow on a winter night, a lamp post
-// beside it and a little roofed stand with an advent calendar hung in it. A button pressed, the little thing on it drops
-// into the tray; taken out, it is on the coloring desk as a line drawing to colour in with crayons. The models are
-// Tripo3D's (docs/VENDING-MODELS.md), the drawings are in components/vending-coloring.js. None of it is tied to the story
+// The fifth page, Christmas Vending (vending.html): a paper slot machine out in the snow on a winter night, a lamp post
+// beside it and a little roofed stand with an advent calendar hung in it. A button picks a little thing, the lever pulled
+// all the way down brings it onto the machine's little stage; taken from there, it is on the coloring desk as a line
+// drawing to colour in with crayons. The four things are Tripo3D's models (docs/VENDING-MODELS.md), the drawings are in
+// components/vending-coloring.js. None of it is tied to the story
 // on Santa's page.
 export const ITEMS = [
   { id: 'gingerbread', name: '薑餅人' },
@@ -13,8 +14,15 @@ export const ITEMS = [
 export const CRAYONS = [['#a8423b', '深紅'], ['#f4ead3', '奶油白'], ['#9db59a', '鼠尾草綠'], ['#3f6653', '松樹綠'], ['#e2b65a', '暖黃'], ['#9fbdd2', '淡藍'], ['#e9b6b0', '淺粉'], ['#a8744a', '焦糖棕'], ['#9a9894', '柔和灰'], ['#4a5f80', '夜空藍']];
 export const VENDING = {
   button: name => `按下${name}的按鈕`,
-  drop: name => `${name}掉進取物口了，點取物口把它拿出來。`,
-  tray: name => `從取物口拿出${name}`,
+  // The lever, and what the machine says (to screen readers only) as it goes.
+  lever: '拉桿：往下拉到底再放開',
+  chosen: name => `選了${name}。拉桿鬆開了，往下拉到底再放開。`,
+  locked: '拉桿還扣著，先按一顆按鈕選一樣。',
+  short: '沒有拉到底，拉桿彈回去了。',
+  drag: '拉桿要往下拖，一路拉到底再放開。',
+  running: name => `${name}出發了。`,
+  drop: name => `${name}到舞台上了，點舞台把它拿出來。`,
+  tray: name => `從舞台拿出${name}`,
   desk: name => `著色桌上是${name}的線稿：選一支蠟筆，點一塊就塗上顏色。`,
   region: (name, i) => `${name}的第 ${i} 塊`,
   crayon: name => `${name}的蠟筆`,

@@ -1,7 +1,8 @@
 // The Christmas Vending page (vending.html): a snowy night (components/vending-scene.js), the vending machine in the
 // middle (vending-machine.js), the advent calendar on its stand to the right (vending-advent.js), and the coloring desk
-// (vending-coloring.js) a little thing taken out of the tray is carried to. The desk opens out of the tray like a sheet
-// of paper unfolding, and folds back into it on the way back to the machine; under reduced motion it simply comes and goes.
+// (vending-coloring.js) a little thing taken off the machine's stage is carried to. The desk opens out of the stage's tray
+// like a sheet of paper unfolding, and folds back into it on the way back to the machine; under reduced motion it simply
+// comes and goes.
 // The page's paper (buttons, the desk's tin, the advent card) is drawn by cabin-paper.js, as on Santa's page.
 import { mountTitleArt } from './components/title-art.js';
 import { mountCabinPaper } from './components/cabin-paper.js';
@@ -32,6 +33,9 @@ paperLayer(desk.querySelector('.color-wood'), '0 0 1200 800', '', wood, { paper:
 // Under the machine, its blue shadow on the snow and the lamp's warm light round it (placed by the machine's own foot).
 const pool = g => { shape('ellipse', { cx: 300, cy: 74, rx: 140, ry: 20, fill: '#8fa3b9', opacity: .28 }, g); for (const [rx, ry, opacity] of [[290, 60, .12], [210, 44, .14]]) shape('ellipse', { cx: 300, cy: 70, rx, ry, fill: '#ffd68c', opacity }, g); };
 paperLayer(stage.querySelector('.machine-light'), '0 0 600 140', '', pool, { paper: null, eager: true });
+// The stage's own light spilling onto the snow in front of it, there only while a thing stands on the stage.
+const spill = g => { for (const [rx, ry, opacity] of [[230, 44, .14], [150, 28, .2]]) shape('ellipse', { cx: 250, cy: 60, rx, ry, fill: '#ffd68c', opacity }, g); };
+paperLayer(stage.querySelector('.machine-glow'), '0 0 500 120', '', spill, { paper: null, eager: true });
 // Should the 3D machine not come (no WebGL, a model missing), the four things are offered plainly instead.
 function offer() {
   if (picker.childElementCount) { picker.hidden = false; return; }
@@ -45,8 +49,10 @@ function start() {
   sound = createSound();
   advent = mountAdvent(page.querySelector('#advent-stand'), { sound });
   coloring = mountColoring(desk.querySelector('.color-work'), { sound, onBack: closeDesk });
-  machine = mountMachine(stage, { sound, onState: (state, id) => {
-    if (state === 'ready') status.textContent = VENDING.drop(nameOf(id));
+  // What the machine is doing, read out: a pick, the delivery setting off, the thing on the stage; or why the lever did not go.
+  machine = mountMachine(stage, { sound, onState: (state, id, note) => {
+    const words = note ? VENDING[note] : { chosen: VENDING.chosen, running: VENDING.running, ready: VENDING.drop }[state];
+    if (words) status.textContent = typeof words === 'function' ? words(nameOf(id)) : words;
     if (state === 'failed') offer();
   } });
   if (!machine) offer();

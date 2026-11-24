@@ -53,6 +53,13 @@ export const DRAWINGS = {
     ink: [circle(134, 142, 4.5), circle(166, 142, 4.5), 'M76 238L30 206M46 216L38 198', 'M224 238L270 206M254 216L262 198'],
   },
 };
+// Each drawing coloured in, for the vending machine's round buttons (vending-papercraft.js): a colour for every part, in order.
+export const ICONS = {
+  stocking: ['#b5443c', '#fbf3df', '#fbf3df', '#e0b04f', '#fbf3df', '#3f6653'],
+  tree: ['#3f6653', '#4f7d68', '#3f6653', '#8a5a3c', '#b5443c', '#e0b04f', '#b5443c', '#e0b04f', '#9fbdd2', '#b5443c', '#e0b04f', '#9fbdd2', '#b5443c'],
+  gingerbread: ['#c0864f', '#e9b6b0', '#e9b6b0', '#b5443c', '#b5443c', '#a8423b', '#fbf3df', '#fbf3df', '#fbf3df'],
+  snowman: ['#fbf8f1', '#fbf8f1', '#b5443c', '#a8423b', '#3b3438', '#b5443c', '#3b3438', '#d9844d', '#3b3438', '#3b3438', '#3b3438'],
+};
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const svg = (name, attributes, parent) => { const node = document.createElementNS(NS, name); for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value); parent?.append(node); return node; };
 let count = 0;
@@ -95,6 +102,17 @@ const crayon = fill => g => {
   shape('rect', { x: 6, y: 40, width: 20, height: 34, fill: '#f6ecd6', opacity: .9 }, g);
   shape('path', { d: 'M9 46H23M9 68H23', stroke: fill, 'stroke-width': 2.4 }, g);
 };
+
+// A drawing coloured in (ICONS), with the same hand-drawn lines and crayon grain as on the desk, as SVG source.
+export function drawingSvg(id) {
+  const art = svg('svg', { xmlns: NS, viewBox: '0 0 300 360', width: 300, height: 360 }), key = `icon-${id}`, drawing = DRAWINGS[id];
+  filters(art, key);
+  const fills = svg('g', { filter: `url(#${key}-grain)` }, art);
+  drawing.parts.forEach((d, i) => svg('path', { d, fill: ICONS[id][i] ?? BLANK }, fills));
+  const lines = svg('g', { fill: 'none', stroke: INK, 'stroke-width': 7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', filter: `url(#${key}-hand)` }, art);
+  for (const d of [...drawing.parts, ...drawing.ink]) svg('path', { d, ...(d.endsWith('Z') && drawing.ink.includes(d) ? { fill: INK } : {}) }, lines);
+  return new XMLSerializer().serializeToString(art);
+}
 
 export function mountColoring(host, { onBack = () => {}, sound = null } = {}) {
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal }), id = `color-${++count}`;

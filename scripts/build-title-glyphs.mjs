@@ -49,4 +49,7 @@ const letters = Object.fromEntries([...'HOLYMERSANTK'].map(char => {
   return [char, { d: path.toPathData(1), box: [box.x1, box.y1, box.x2, box.y2].map(value => +value.toFixed(1)) }];
 }));
 await fs.writeFile('js/data/cabin-glyphs.js', `${header}\nexport const cabinGlyphs = ${JSON.stringify(letters)};\n`);
+// 販賣機招牌的立體字（vending-papercraft.js 照輪廓擠出）：每個字母在原點、字級 100、基線在 y = 0，另記前進寬度，好加字距。
+const marquee = ['CHRISTMAS', 'VENDING'].map(text => [...text].map(char => ({ char, d: font.getPath(char, 0, 0, 100).toPathData(1), advance: +font.getAdvanceWidth(char, 100).toFixed(1) })));
+await fs.writeFile('js/data/marquee-glyphs.js', `${header}\nexport const marqueeGlyphs = ${JSON.stringify(marquee)};\n`);
 console.log(title.length, story.length, 'glyphs');
