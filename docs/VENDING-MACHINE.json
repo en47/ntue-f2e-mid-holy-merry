@@ -1,0 +1,33 @@
+{
+ "date": "2026-11-24",
+ "branch": "vending-papercraft（從 final 708164b）",
+ "design": "docs/VENDING-MACHINE.md：紙雕聖誕拉霸機，出貨用紙幕剪影，按鈕用紙按鈕",
+ "tests": {
+  "npm test": "通過",
+  "smoke": "100 組通過（販賣機那組的斷言改成新結構：紙按鈕選、拉桿是可拖曳的 slider、商品以剪影降到舞台、拉桿熱區不捲動頁面）",
+  "node:test": "122 項通過（新增 tests/vending-lever.test.mjs 4 項：拉桿角度、五顆燈、狀態、出貨時間的順序）"
+ },
+ "browser": {
+  "note": "本機伺服器 127.0.0.1:5511、Playwright Chromium（Metal），真的用滑鼠按按鈕、拖拉桿",
+  "desktop1440x900": {
+   "steps": [
+    ["還沒選就拉", "idle", "拉桿還扣著，先按一顆按鈕選一樣。"],
+    ["按雪人", "chosen", "aria-pressed=true"],
+    ["拉到一半", "pulling", "aria-valuenow=47"],
+    ["放開", "chosen", "aria-valuenow=0（彈回）"],
+    ["拉到底", "pulling", "aria-valuenow=100"],
+    ["放開後 4.3 秒", "ready", "雪人到舞台上了，點舞台把它拿出來。"],
+    ["點舞台", "著色桌展開（data-mode=desk）"],
+    ["Esc", "回到販賣機，idle（已補貨）"]
+   ],
+   "pageErrors": 0
+  },
+  "phone390x844": { "steps": "同上，每一步結果相同", "pageErrors": 0 }
+ },
+ "fixedWhileChecking": [
+  "左下格的聖誕樹不見：四個窗洞貼著深綠底板的邊緣，三角化失敗蓋住了一格 → 底板四邊各多留 0.006",
+  "機器右後方的地面影子被地面邊界切成矩形 → 影子往外慢慢淡出",
+  "待機時紙幕又平又暗 → 褶子加深，紙幕不接收台口的陰影"
+ ],
+ "known": "手機上路燈大半被機器擋住；背景之後可能改成聖誕市集夜景，到時一起處理"
+}

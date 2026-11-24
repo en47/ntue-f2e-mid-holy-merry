@@ -9,7 +9,10 @@
 | `vending.html` | 頁面：標題、夜景、3D 舞台、降臨曆攤子、著色桌（平常藏著） |
 | `js/vending.js` | 進入點：掛上夜景、販賣機、降臨曆、著色桌；從取物口拿出東西，著色桌就從取物口展開，回販賣機時收回去；bfcache 離開時釋放、回來時重建 |
 | `js/components/vending-scene.js` | 紙雕夜景：夜空、紙月亮與星星、遠山與山下的小村、平平一整片雪地、兩邊的松樹、路燈和它照在雪上的暖光、前景雪堆、少量飄雪 |
-| `js/components/vending-machine.js` | Three.js 販賣機：模型是 `assets/models/vending-*-web.glb`（見 `docs/VENDING-MODELS.md`），按鈕與取物口各疊一個 HTML 熱區，運作動畫與音效 |
+| `js/components/vending-machine.js` | Three.js 販賣機的燈光、鏡頭與互動：載入四個商品模型（`assets/models/vending-*-web.glb`，見 `docs/VENDING-MODELS.md`），按鈕、拉桿、小劇場各疊一個 HTML 熱區，選擇、拉桿、出貨與復位的動畫和音效 |
+| `js/components/vending-papercraft.js` | 紙雕拉霸機本體：用程式疊出來的卡紙（招牌、展示格、按鍵板、小劇場、拉桿組、底座），尺寸都在 `MACHINE`（見 `docs/VENDING-MACHINE.md`） |
+| `js/services/vending-lever.js` | 拉桿與出貨的純邏輯：指標角度換成拉動幅度、五顆燈的亮度、狀態怎麼走、出貨每一段的時間（`tests/vending-lever.test.mjs`） |
+| `js/data/marquee-glyphs.js` | 招牌 CHRISTMAS VENDING 的字形輪廓，由 `scripts/build-title-glyphs.mjs` 產生，不要手改 |
 | `js/components/vending-advent.js` | 降臨曆攤子：紙雕小屋頂與橫木、用繩子吊著的曆、24 扇小門、開門後的小卡 |
 | `js/components/vending-coloring.js` | 著色桌：四張線稿、蠟筆盒、復原／重做／重設／完成作品／存成圖片／回到販賣機 |
 | `js/data/vending.js` | 文字：四樣東西、蠟筆顏色、降臨曆 24 天的一句話與小圖 |
@@ -19,11 +22,14 @@
 
 ## 販賣機
 
-- 一進頁面就能按，不用投幣。按下去：按鈕往內縮 → 機身輕輕震一下、喀一聲 → 那一格的東西往前倒、掉進取物口、彈一下 → 在取物口裡每 2.4 秒輕跳一下，提示可以拿出來。
-- 四顆按鈕平常微微發亮。3D 模型和按鈕分開：每顆按鈕是自己的 GLB（`vending-*-button-web.glb`），上面疊一個透明的 HTML 按鈕接收滑鼠、觸控和鍵盤。
-- 掉下來的只是代表物，不在 3D 模型上著色。
-- 著色桌開著時，販賣機停止繪製（`hold`）。
-- WebGL 或模型載入失敗時，改成直接列出四個選項。
+2026-11-24 改成紙雕聖誕拉霸機（設計與尺寸見 `docs/VENDING-MACHINE.md`）。原本 Tripo3D 的機器和按鈕模型不再載入，檔案留在 `assets/models/`。
+
+- 不用投幣。先按一顆按鈕選一樣：按鈕停在半沉的位置，那一格變亮、商品跳一下，拉桿的卡榫鬆開。
+- 再把右邊的拉桿往下拉（拖曳，或方向鍵一次 20%），五顆燈泡沿著弧線一顆顆亮。拉到底放開才出貨；沒拉到底放開會彈回去。還沒選就拉，拉桿被卡住、按鈕輕輕浮一下。
+- 出貨（約 4 秒）：展示門落下 → 紅紙幕後面的燈亮起，商品的剪影從上方降下 → 燈熄、紙幕拉開 → 托盤推出、商品轉身、鈴聲。
+- 點舞台上的商品，著色桌就從托盤的位置展開；回來時機器已經補貨、拉桿重新扣上。
+- 著色桌開著時，販賣機停止繪製（`hold`）。WebGL 或模型載入失敗時，改成直接列出四個選項。
+- 讀屏軟體會聽到每一步（選了什麼、拉桿彈回、出發、到舞台上），畫面上不出現提示字。
 
 ## 降臨曆
 
@@ -42,7 +48,7 @@
 
 ## 之後替換素材
 
-- 正式 GLB：照 `docs/VENDING-MODELS.md` 換 `assets/models/source/` 的原檔，再跑 `node scripts/build-vending-models.mjs`。機身上按鈕、層架、取物口的位置寫在 `vending-machine.js` 開頭的 `BUTTONS`、`SHELVES`、`TRAY`（用機器自己的座標）。
+- 商品 GLB：照 `docs/VENDING-MODELS.md` 換 `assets/models/source/` 的原檔，再跑 `node scripts/build-vending-models.mjs`。機器本體是程式疊的紙板，展示格、按鈕、拉桿、舞台的位置都在 `vending-papercraft.js` 的 `MACHINE`。
 - 手繪 SVG：改 `vending-coloring.js` 的 `DRAWINGS`。每張有 `parts`（可以塗色的區塊，由下往上疊）和 `ink`（不塗色的細節線），viewBox 300×360。換成手繪稿時，把每個封閉區塊存成一個 path 放進 `parts` 就好，抖動與顆粒濾鏡會自動套上。
 
 ## 目前還是示意的部分

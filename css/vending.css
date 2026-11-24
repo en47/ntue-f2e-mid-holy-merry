@@ -29,14 +29,23 @@
 .vending-flakes { position: absolute; inset: 0; overflow: hidden; }
 .vending-flake { position: absolute; top: -2%; width: 6px; aspect-ratio: 1; border-radius: 50%; background: #f4f7fa; opacity: .7; }
 
-/* 販賣機：3D 畫布填滿舞台，按鈕和取物口各疊一個看不見的按鈕；腳下是自己的影子和路燈的暖光。 */
+/* 販賣機（紙雕的拉桿販賣機）：3D 畫布填滿舞台，按鈕、拉桿、小劇場各疊一個看不見的熱區；招牌燈泡的光暈在畫布上面慢慢明暗；
+   腳下是自己的影子和路燈的暖光，舞台亮著時雪地上多一片暖光。 */
 .vending-stage { position: absolute; z-index: 2; left: 33%; width: 32%; top: 9%; bottom: 6%; }
 .machine-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
-.machine-light { position: absolute; z-index: -1; left: 50%; top: var(--foot-y, 92%); width: calc(var(--machine-w, 18rem) * 2.4); aspect-ratio: 600 / 140; translate: -50% -55%; pointer-events: none; }
+.machine-light { position: absolute; z-index: -1; left: var(--foot-x, 50%); top: var(--foot-y, 92%); width: calc(var(--machine-w, 18rem) * 2.4); aspect-ratio: 600 / 140; translate: -50% -55%; pointer-events: none; }
+.machine-glow { position: absolute; z-index: -1; left: var(--tray-x, 50%); top: var(--foot-y, 92%); width: calc(var(--machine-w, 18rem) * 1.7); aspect-ratio: 500 / 120; translate: -50% -50%; opacity: 0; pointer-events: none; }
+.vending-stage[data-lit] .machine-glow { opacity: 1; }
+.machine-bulb { position: absolute; z-index: 1; width: var(--bulb, 16px); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, #fff4d0e0, #ffd88a55 48%, #ffd88a00); opacity: .8; pointer-events: none; }
+.vending-stage:is([data-state="loading"], [data-state="failed"]) .machine-bulb { display: none; }
 .machine-hit { position: absolute; z-index: 1; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
 .machine-hit:disabled { cursor: default; }
 .machine-hit:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
 .machine-tray { border-radius: 14px; }
+.machine-lever { border-radius: 18px; cursor: grab; touch-action: none; }
+.machine-lever:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
+.machine-lever[aria-disabled="true"] { cursor: default; }
+.vending-stage.is-pulling .machine-lever { cursor: grabbing; }
 .vending-picker { position: absolute; z-index: 3; left: 50%; top: 38%; display: grid; gap: .5rem; width: min(18rem, 80vw); padding: 1rem; translate: -50% 0; background: #fbf3df; text-align: center; }
 .vending-picker[hidden] { display: none; }
 .vending-picker p { margin: 0 0 .3rem; font-size: var(--fs-small); }
@@ -96,6 +105,8 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .vending-twinkle { animation: vending-twinkle 2.8s ease-in-out infinite alternate; }
+  .machine-bulb { animation: machine-twinkle 4.6s ease-in-out var(--delay, 0s) infinite alternate; }
+  .machine-glow { transition: opacity .6s ease; }
   .vending-glow { animation: vending-glow 5s ease-in-out infinite alternate; }
   .vending-flake { animation: vending-snowfall 13s linear var(--delay) infinite; }
   .cal-hang { animation: cal-sway 6.5s ease-in-out infinite alternate; }
@@ -112,6 +123,7 @@
 }
 @keyframes vending-twinkle { from { opacity: .25; } to { opacity: 1; } }
 @keyframes vending-glow { from { opacity: .78; } to { opacity: 1; } }
+@keyframes machine-twinkle { from { opacity: .45; } to { opacity: .95; } }
 @keyframes vending-snowfall { from { translate: 0 0; } to { translate: var(--drift) 105vh; } }
 @keyframes cal-sway { from { rotate: -.7deg; } to { rotate: .7deg; } }
 @keyframes cal-note-in { from { opacity: 0; transform: translateY(1rem) scale(.96); } }
@@ -127,7 +139,7 @@
 }
 /* 手機：標題、販賣機、降臨曆由上往下排，雪地一路鋪到底；著色桌是紙、蠟筆、按鈕由上往下。 */
 @media (max-width: 760px) {
-  .vending { height: auto; min-height: 1180px; }
+  .vending { height: auto; min-height: 1240px; }
   .vending-heading { left: 1rem; top: 1rem; }
   .vending-heading .title-art { width: 12.5rem; }
   .vending-stars, .vending-twinkle { height: 16%; }
@@ -136,7 +148,7 @@
   .vending-snow { height: 74%; }
   .vending-pines { bottom: auto; top: 20%; width: 9.5rem; }
   .vending-lamp { left: -6%; bottom: auto; top: 300px; width: 130px; }
-  .vending-stage { left: 3%; width: 94%; top: 96px; bottom: auto; height: 540px; }
+  .vending-stage { left: 3%; width: 94%; top: 96px; bottom: auto; height: 600px; }
   .advent-stand { left: 50%; bottom: 3%; width: min(21rem, 90vw); translate: -50% 0; }
   .color-desk { place-items: start center; overflow-y: auto; }
   .color-work { grid-template: "sheet" auto "tin" auto "tools" auto / auto; justify-items: center; padding: 1.2rem 1rem 2rem; }
