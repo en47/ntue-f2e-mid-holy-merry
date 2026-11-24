@@ -33,8 +33,7 @@ export const VENDING = {
   crayon: name => `${name}的蠟筆`,
   crayons: '蠟筆盒',
   undo: '復原', redo: '重做', reset: '重新上色', finish: '完成', save: '存成圖片', back: '回到市集', again: '再修改',
-  // The craft booth: its sign, the shelf of works, the swatch cards, the stickers, a gentle word, the card when it is done.
-  craft: '走進手作工坊，替商品上色', sign: '手作工坊',
+  // The workshop: the shelf of works, the swatch cards, the stickers, a gentle word, the card when it is done.
   shelf: '我的作品', frame: (name, work) => `${name}${work?.finished ? '（完成了）' : work ? '（畫到一半）' : ''}，點一下來畫`,
   presets: '配色卡', cards: [['classic', '經典'], ['snowy', '雪夜'], ['candy', '糖果']], preset: name => `套用「${name}」配色`,
   stickers: '貼紙', sticker: { star: '星星', flake: '雪花', holly: '冬青' }, stick: name => `拿起${name}貼紙`, holding: name => `拿著${name}貼紙：點畫紙貼上去，再按一次就放下。`,

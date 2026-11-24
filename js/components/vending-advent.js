@@ -28,7 +28,7 @@ function booth(g) {
   shape('path', { d: 'M26 90L150 28L274 90Z', fill: '#e6d3ad' }, g);
   for (let x = 46; x < 260; x += 22) shape('path', { d: `M${x} ${90 - Math.max(0, 62 - Math.abs(x - 150) * .52)}V90`, stroke: '#bfa274', 'stroke-width': 2 }, g);
   shape('circle', { cx: 150, cy: 64, r: 13, fill: '#f4c66e' }, g); shape('path', { d: 'M150 51V77M137 64H163', stroke: '#8a5a3c', 'stroke-width': 3 }, g);
-  shape('path', { d: 'M-4 90C14 74 34 82 52 70S90 52 108 42 136 22 150 8 168 24 186 36 222 54 244 66 280 72 304 88 288 86 274 82 258 86 238 76 220 78 198 64 178 54 160 42 150 30 138 42 120 54 100 64 82 78 62 82 44 76 28 84 12 92Z', fill: '#f8f5ee' }, g);
+  shape('path', { d: 'M-4 90C14 74 34 82 52 70S90 52 108 42 136 22 150 8 168 24 186 36 222 54 244 66 280 72 304 88 288 86 274 82 258 86 238 76 220 78 198 64 178 54 160 42 150 30 138 42 120 54 100 64 82 78 62 82 44 76 28 84 20 90 12 92Z', fill: '#f8f5ee' }, g);
   star(g, 150, 6, 11);
   shape('path', { d: 'M8 102V114', stroke: '#3b2a24', 'stroke-width': 2 }, g);
   shape('path', { d: 'M0 114H16L14 120H2Z', fill: '#3c3238' }, g); shape('path', { d: 'M2 120H14L16 144H0Z', fill: '#f6d38a' }, g); shape('path', { d: 'M0 144H16L13 150H3Z', fill: '#3c3238' }, g);
