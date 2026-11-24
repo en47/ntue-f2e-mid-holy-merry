@@ -114,6 +114,12 @@ function doorTexture() {
   g.fillStyle = C.gold; g.beginPath(); g.arc(128, 226, 36, Math.PI, 0); g.fill(); g.fillRect(0, 226, 256, 30);
   return texture(node);
 }
+// A beam of light: bright at its top, fading to nothing at its foot (its UVs run with the shape, in metres).
+function beamTexture() {
+  const node = canvas(32, 128), g = node.getContext('2d'), light = g.createLinearGradient(0, 0, 0, 128);
+  light.addColorStop(0, 'rgba(255, 255, 255, .9)'); light.addColorStop(1, 'rgba(255, 255, 255, 0)'); g.fillStyle = light; g.fillRect(0, 0, 32, 128);
+  const map = texture(node); map.repeat.set(1 / .24, 1 / .17); map.offset.set(.5, -.08 / .17); return map;
+}
 // The stage's boards: warm planks running across.
 function woodTexture() {
   const node = canvas(256, 128), g = node.getContext('2d');
@@ -233,8 +239,9 @@ export function buildMachine({ redraw = () => {} } = {}) {
   const buttons = new Map();
   for (const [id, [x, y]] of Object.entries(MACHINE.buttons)) {
     disc(.032, .006, C.wine, C.wineEdge, group, x, y, F + .011);
-    layer(cut(circle(x, y, .03, 48), [circle(x, y, .0245, 48)]), .008, [C.gold, C.goldEdge], F + .014);
-    const holder = new THREE.Group(); holder.position.set(x, y, F + .016); group.add(holder);
+    const ring = own(new THREE.MeshLambertMaterial({ color: C.gold, map: grain, toneMapped: false }));
+    mesh(sheet(cut(circle(x, y, .03, 48), [circle(x, y, .0245, 48)]), .008), [ring, paper(C.goldEdge)], group, 0, 0, F + .014);
+    const holder = new THREE.Group(); holder.position.set(x, y, F + .016); holder.userData.ring = ring; group.add(holder);
     mesh(sheet(circle(0, 0, MACHINE.button, 48), .012), [own(new THREE.MeshLambertMaterial({ map: keep(iconTexture(id, redraw)), toneMapped: false })), paper(C.creamEdge)], holder);
     holder.userData.home = holder.position.z; buttons.set(id, holder);
   }
@@ -255,6 +262,10 @@ export function buildMachine({ redraw = () => {} } = {}) {
   mesh(new THREE.BoxGeometry(.33, .024, .004), faces(C.goldEdge, C.gold, C.goldEdge, C.gold), tray, 0, floor - .012, .149);
   const pool = own(new THREE.MeshBasicMaterial({ color: '#ffd98a', map: round, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
   flat(mesh(new THREE.PlaneGeometry(.24, .12), pool, tray, 0, floor + .0008, .1)).rotation.x = -Math.PI / 2;
+  // When the curtains part: a soft beam of light from the valance onto the floor, and a few paper stars let fall.
+  const fall = keep(beamTexture()), beam = own(new THREE.MeshBasicMaterial({ color: '#ffe2a8', map: fall, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
+  flat(mesh(new THREE.ShapeGeometry(new THREE.Shape([v2(-.03, .25), v2(.03, .25), v2(.12, floor), v2(-.12, floor)])), beam, group, 0, 0, .06));
+  const confetti = Array.from({ length: 6 }, (_, i) => { const node = mesh(sheet(star(0, 0, .011, .0048), .0015), card(i % 2 ? C.cream : C.gold, C.goldEdge), group); node.visible = false; node.castShadow = false; return node; });
   const backlight = own(new THREE.MeshBasicMaterial({ color: '#2a2023', toneMapped: false }));
   flat(mesh(new THREE.PlaneGeometry(.31, .224), backlight, group, 0, floor + .112, back + .002));
   const cloth = own(new THREE.MeshLambertMaterial({ color: C.curtain, map: grain, transparent: true, toneMapped: false }));
@@ -313,7 +324,7 @@ export function buildMachine({ redraw = () => {} } = {}) {
 
   return {
     group, buttons, cells, marquee,
-    stage: { tray, curtains, cloth, backlight, pool },
+    stage: { tray, curtains, cloth, backlight, pool, beam, confetti },
     lever: { arm, hub, pawl, bulbs },
     dispose() { geometries.forEach(each => each.dispose()); materials.forEach(each => each.dispose()); textures.forEach(each => each.dispose()); },
   };

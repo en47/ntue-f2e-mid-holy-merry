@@ -29,6 +29,7 @@ const headings = {
   'the-wish-room': heading([['The Wish Room', 150]], 220),
   'santas-cabin': heading([["Santa's Cabin", 150]], 220),
   'christmas-vending': heading([['Christmas', 150], ['Vending', 290]], 360),
+  'christmas-market': heading([['Christmas', 150], ['Market', 290]], 360),
   // Santa 頁四個結局劇場的標題。
   'ending-a': heading([['Going Home', 150]], 220),
   'ending-b': heading([['Wish Granted', 150]], 220),

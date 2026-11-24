@@ -71,7 +71,14 @@ const KINDS = [
   // The Christmas Vending page's paper (vending.js mounts this there too): the coloring desk's buttons and crayon tin, the
   // advent calendar's doors and card, and the plain picker shown when the 3D machine cannot come.
   ['.color-tool.is-main, .cal-close, .cal-face[data-tone="red"]', 'tag'],
-  ['.cal-face[data-tone="green"], .color-crayons', 'pine'],
+  ['.cal-face[data-tone="green"]', 'pine'],
+  // The craft booth's workshop: its name on a board, the shelf of works, the crayon's name slip, the swatch cards, the
+  // sticker tray, the pencilled note, the card once a work is done.
+  ['.shop-title, .shop-shelf', 'wood'],
+  ['.color-name, .shop-note', 'slip'],
+  ['.shop-stickers', 'kraft'],
+  ['.shop-card', 'letter'],
+  ['.shop-preset', 'pale'],
   ['.cal-face[data-tone="gold"]', 'gold'],
   ['.cal-face[data-tone="kraft"]', 'kraft'],
   ['.cal-note', 'letter'],

@@ -15,14 +15,17 @@ import { MACHINE, buildMachine } from './vending-papercraft.js';
 import { ITEMS, VENDING } from '../data/vending.js';
 import { DELIVERY, angle, bulbs as brightness, lit, next, pull } from '../services/vending-lever.js';
 
-// The cells' light while waiting, and the stage light's strength once the thing is shown.
-const IDLE = .35, SPOT = .07;
+// The cells' light while waiting, the stage light's strength once the thing is shown, how much bigger the thing is on the
+// stage than in its cell, and where the lever's ratchet catches as it is pulled down.
+const IDLE = .35, SPOT = .07, SHOW = 1.15, NOTCHES = [.2, .4, .6, .8];
 const element = (tag, className, parent) => { const node = document.createElement(tag); node.className = className; parent?.append(node); return node; };
 const ease = t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 const settle = t => 1 - (1 - t) ** 3;
 const linear = t => t;
+// A spring let go: from 1 back through its rest, a little past it and back again, settling at 0 (t 0–1).
+const spring = t => Math.exp(-5 * t) * Math.cos(t * Math.PI * 3.2) * (1 - t ** 8);
 const tone = colour => new THREE.Color(colour);
-const DARK = tone('#2a2023'), LIT = tone('#f6e2b4'), DIM = tone('#5a4436'), CLOTH = tone('#8f3530'), GLOWING = tone('#c65b48'), GLASS = tone('#6b5646'), BRIGHT = tone('#fff2c4'), WARM = tone('#ffc766');
+const GOLD = tone('#e0b04f'), FLASH = tone('#fff1b8'), DARK = tone('#2a2023'), LIT = tone('#f6e2b4'), DIM = tone('#5a4436'), CLOTH = tone('#8f3530'), GLOWING = tone('#c65b48'), GLASS = tone('#6b5646'), BRIGHT = tone('#fff2c4'), WARM = tone('#ffc766');
 
 export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
   const still = matchMedia('(prefers-reduced-motion: reduce)'), events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
@@ -53,7 +56,7 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec2 vGround;').replace('opacity * ( 1.0 - getShadowMask() )', 'opacity * ( 1.0 - getShadowMask() ) * smoothstep( .9, .12, length( vGround * vec2( 1.0, 1.45 ) - vec2( .08, .1 ) ) )');
   };
 
-  let state = 'loading', chosen = null, progress = 0, shown = 0, frame = 0, visible = true, held = false, ticking = false, until = 0, grip = null, bumping = false, sway = 0;
+  let state = 'loading', chosen = null, progress = 0, target = 0, pending = null, before = 0, shown = 0, frame = 0, visible = true, held = false, ticking = false, until = 0, grip = null, bumping = false, sway = 0;
   const machine = buildMachine({ redraw: () => refresh() }); scene.add(machine.group);
   const { buttons, cells, marquee, stage: theatre, lever } = machine, things = new Map(), shade = new THREE.MeshBasicMaterial({ color: '#3a1d1b', toneMapped: false });
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
@@ -71,7 +74,7 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
   handle.tabIndex = 0; handle.setAttribute('role', 'slider'); handle.setAttribute('aria-label', VENDING.lever); handle.setAttribute('aria-orientation', 'vertical');
   handle.setAttribute('aria-valuemin', '0'); handle.setAttribute('aria-valuemax', '100'); handle.setAttribute('aria-valuenow', '0');
   for (const { id, name } of ITEMS) { const hit = element('button', 'machine-hit machine-button', stage); hit.type = 'button'; hit.disabled = true; hit.dataset.item = id; hit.setAttribute('aria-label', VENDING.button(name)); hit.setAttribute('aria-pressed', 'false'); on(hit, 'click', () => select(id)); hits.set(id, hit); }
-  const halos = marquee.map((_, i) => { const node = element('span', 'machine-bulb', stage); node.setAttribute('aria-hidden', 'true'); node.style.setProperty('--delay', `${(-i * .73).toFixed(2)}s`); return node; });
+  const halos = marquee.map((_, i) => { const node = element('span', 'machine-bulb', stage); node.setAttribute('aria-hidden', 'true'); node.style.setProperty('--delay', `${(-i * .73).toFixed(2)}s`); node.style.setProperty('--k', i); return node; });
   const nameOf = () => ITEMS.find(({ id }) => id === chosen)?.name ?? '';
   function set(value, note = '') {
     state = value; stage.dataset.state = state;
@@ -139,6 +142,8 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
   // The lever, pulled to `value` (0–1): the arm's angle and, unless they are held as they are, the five bulbs.
   function pullTo(value, { bulbs = true, audible = true } = {}) {
     progress = value; lever.arm.rotation.z = -angle(value); handle.setAttribute('aria-valuenow', String(Math.round(Math.max(0, value) * 100)));
+    // The hub's gear turns with the lever while it is worked (once the machine starts, it runs on by itself).
+    if (['chosen', 'pulling'].includes(state)) lever.hub.rotation.z = -value * 2.4;
     if (bulbs) light(Math.max(0, value), audible);
     refresh();
   }
@@ -160,7 +165,9 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     tween(90, t => { holder.position.z = rest - .008 * t; }, { curve: linear }); tween(220, t => { holder.position.z = rest - .008 + .004 * t; }, { delay: 90 });
     if (before) { const other = buttons.get(before), from = other.position.z; tween(240, t => { other.position.z = from + (other.userData.home - from) * t; }); }
     for (const [other, hit] of hits) hit.setAttribute('aria-pressed', String(other === id));
-    for (const { id: other } of ITEMS) glowTo(other, other === id ? .95 : .14);
+    const ring = holder.userData.ring; tween(360, t => { ring.color.copy(GOLD).lerp(FLASH, Math.sin(t * Math.PI)); }, { curve: linear });
+    for (const { id: other } of ITEMS) if (other !== id) glowTo(other, .14);
+    const glow = cells[id].glow; tween(340, t => { glow.opacity = .95 * (t < .3 ? t / .3 * .78 : t < .45 ? .78 - (t - .3) / .15 * .4 : .38 + (t - .45) / .55 * .62); }, { curve: linear });
     const thing = things.get(id), base = home(id).y;
     tween(560, t => { thing.position.y = base + Math.sin(t * Math.PI) * .012; thing.rotation.y = Math.sin(t * Math.PI * 2) * .2; }, { curve: linear });
     if (first) { latch(false); tween(420, t => pullTo(Math.sin(t * Math.PI) * .05, { bulbs: false }), { delay: 200, curve: linear }); }
@@ -175,8 +182,8 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     onState(state, chosen, 'locked');
   }
   function springBack() {
-    const from = progress; sound?.play('spring');
-    tween(140 + 360 * from, t => pullTo(from * (1 - t), { audible: false }));
+    const from = progress; target = 0; sound?.play('spring');
+    tween(650, t => pullTo(from * spring(t), { audible: false }), { curve: linear });
     set(next(state, 'short'), 'short');
   }
 
@@ -186,18 +193,20 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     event.preventDefault();
     if (state === 'idle') { bump(); return; }
     if (state !== 'chosen') return;
-    handle.setPointerCapture(event.pointerId); grip = { x: event.clientX, y: event.clientY, moved: 0 }; stage.classList.add('is-pulling'); set(next(state, 'grab'));
+    handle.setPointerCapture(event.pointerId); grip = { x: event.clientX, y: event.clientY, moved: 0 }; target = progress; stage.classList.add('is-pulling'); set(next(state, 'grab'));
   });
   on(handle, 'pointermove', event => {
     if (!grip) return;
     grip.moved = Math.max(grip.moved, Math.hypot(event.clientX - grip.x, event.clientY - grip.y));
-    const hub = hubOnScreen(), value = pull(event.clientX - hub.x, event.clientY - hub.y, progress);
-    if (value >= 1 && progress < 1) sound?.play('ratchet');
-    pullTo(value);
+    // The hand sets where the lever is wanted; the lever follows a moment behind (in `tick`), and pulled down it catches at
+    // each notch of its ratchet until the hand is a little past it, then catches up.
+    const hub = hubOnScreen(), wanted = pull(event.clientX - hub.x, event.clientY - hub.y, target), notch = NOTCHES.find(at => progress < at && wanted > at && wanted < at + .045);
+    if (wanted >= 1 && target < 1) sound?.play('ratchet');
+    target = notch === undefined ? wanted : notch - .004; animate(performance.now() + 160);
   });
   const letGo = () => {
     if (!grip) return; const { moved } = grip; grip = null; stage.classList.remove('is-pulling');
-    if (progress >= 1) { fire(); return; }
+    if (target >= 1) { pullTo(1); fire(); return; }
     if (moved < 5 && progress < .05) { tween(420, t => pullTo(Math.sin(t * Math.PI) * .07, { bulbs: false }), { curve: linear }); set(next(state, 'short'), 'drag'); return; }
     springBack();
   };
@@ -232,13 +241,12 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     const id = chosen, thing = things.get(id), cell = cells[id], d = DELIVERY, stand = onStage();
     set(next(state, 'full')); sound?.play('clack'); light(1, false); latch(true);
     // The lever springs back a little past its rest and settles; the machine shudders; the hub turns all the while.
-    tween(span(d.back) * .75, t => pullTo(1 - 1.06 * t, { bulbs: false }));
-    tween(span(d.back) * .25, t => pullTo(-.06 + .06 * t, { bulbs: false }), { delay: span(d.back) * .75 });
+    tween(span(d.back) + 240, t => pullTo(spring(t), { bulbs: false }), { curve: linear });
     tween(span(d.shudder), t => { machine.group.rotation.z = Math.sin(t * Math.PI * 6) * .005 * (1 - t); }, { delay: d.shudder[0], curve: linear });
-    tween(d.ready, t => { lever.hub.rotation.z = -t * Math.PI * 3; }, { curve: ease });
+    const turned = lever.hub.rotation.z; tween(d.ready, t => { lever.hub.rotation.z = turned - t * Math.PI * 3; }, { curve: ease });
     // The cell's door comes down and its light goes out; behind it, the thing is taken up above the stage as a shadow.
     later(d.door[0], () => { cell.door.visible = true; cue('creak'); });
-    tween(span(d.door), t => { cell.door.position.y = cell.door.userData.open + (cell.door.userData.shut - cell.door.userData.open) * t; }, { delay: d.door[0], curve: ease });
+    const sunk = home(id).y; tween(span(d.door), t => { cell.door.position.y = cell.door.userData.open + (cell.door.userData.shut - cell.door.userData.open) * t; thing.position.y = sunk - .02 * t; }, { delay: d.door[0], curve: ease });
     glowTo(id, 0, { delay: d.door[0], length: 300 });
     later(d.door[1], () => { silhouette(thing, true); theatre.tray.add(thing); thing.position.copy(stand).setY(stand.y + .2); thing.rotation.set(0, 0, 0); });
     // The curtains light up from behind and the shadow comes down onto the stage, landing with a little bob.
@@ -252,12 +260,19 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     tween(span(d.dim), t => { theatre.backlight.color.copy(LIT).lerp(DIM, t); theatre.cloth.color.copy(GLOWING).lerp(CLOTH, t); theatre.cloth.opacity = .58 + .42 * t; }, { delay: d.dim[0], curve: linear });
     later(d.dim[1], () => silhouette(thing, false));
     later(d.curtains[0], () => cue('whoosh'));
-    tween(span(d.curtains), t => { curtains(1 - .78 * t); spot.intensity = SPOT * t; theatre.pool.opacity = .8 * t; }, { delay: d.curtains[0], curve: ease });
+    tween(span(d.curtains), t => { curtains(1 - .78 * t); spot.intensity = SPOT * t; theatre.pool.opacity = .8 * t; theatre.beam.opacity = .5 * t; }, { delay: d.curtains[0], curve: ease });
+    theatre.confetti.forEach((star, i) => {
+      const x = -.1 + i * .04 + (i % 2 ? .008 : -.006), z = .09 + (i % 3) * .012;
+      later(d.curtains[0] + 80 + i * 90, () => { star.visible = true; });
+      tween(1500 + i * 110, t => { star.position.set(x + Math.sin(t * Math.PI * 2 + i) * .012, .3 - (.3 - MACHINE.stage.floor - .004) * ease(t), z); star.rotation.set(-Math.PI / 2 * t ** 3, 0, t * (3 + i)); }, { delay: d.curtains[0] + 80 + i * 90, curve: linear });
+    });
     // The tray slides out with it and it turns to you, with a little bell; the stage's light falls on the snow.
     later(d.tray[0], () => { stage.dataset.lit = ''; });
-    tween(span(d.tray), t => { theatre.tray.position.z = MACHINE.stage.slide * t; }, { delay: d.tray[0] });
-    later(d.turn[0], () => sound?.play('jingle'));
-    tween(span(d.turn), t => { thing.rotation.y = Math.sin(t * Math.PI * 2) * .26 * (1 - t); thing.position.y = stand.y + Math.sin(t * Math.PI) * .01; }, { delay: d.turn[0], curve: linear });
+    const lift = (SHOW - 1) * MACHINE.item / 2;
+    tween(span(d.tray), t => { theatre.tray.position.z = MACHINE.stage.slide * t; thing.scale.setScalar(1 + (SHOW - 1) * t); thing.position.y = stand.y + lift * t; }, { delay: d.tray[0] });
+    later(d.turn[0], () => { sound?.play('jingle'); stage.dataset.show = ''; });
+    later(d.turn[0] + 1700, () => { delete stage.dataset.show; });
+    tween(span(d.turn), t => { thing.rotation.y = Math.sin(t * Math.PI * 2) * .26 * (1 - t); thing.position.y = stand.y + lift + Math.sin(t * Math.PI) * .01; }, { delay: d.turn[0], curve: linear });
     // The bulbs go out one by one meanwhile, the last of the pull spent.
     d.bulbs.forEach((delay, i) => tween(280, t => bulb(4 - i, 1 - t), { delay }));
     later(d.ready, () => { shown = 0; set(next(state, 'done')); waiting(); });
@@ -267,23 +282,33 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     clearTimeout(sway); if (still.matches) return;
     sway = setTimeout(() => { if (state !== 'ready') return; const thing = things.get(chosen); tween(700, t => { thing.rotation.y = Math.sin(t * Math.PI * 2) * .12 * (1 - t); }, { curve: linear }); waiting(); }, 3200);
   }
-  // Taken out: everything is put back as it was while the coloring desk covers the machine (the thing on its stand again,
-  // its door up, the curtains closed and dark, the tray in, the buttons up, the lever caught at its rest, the bulbs out).
+  // Taken off the stage: it pops up a little in the hand; everything is put back once the workshop covers the machine.
   function takeOut() {
-    if (state !== 'ready') return null; const id = chosen; sound?.play('pick'); clearTimeout(sway); moves.clear();
+    if (state !== 'ready') return null; const id = chosen, thing = things.get(id); sound?.play('pick'); clearTimeout(sway); moves.clear();
+    tween(240, t => thing.scale.setScalar(SHOW * (1 + Math.sin(t * Math.PI) * .16)), { curve: linear });
+    pending = id; set('taken');
+    return id;
+  }
+  // Back as it was: the thing on its stand again, its door up, the curtains closed and dark, the tray in, the stars and the
+  // beam gone, the buttons up, the lever caught at its rest, the bulbs out.
+  function putBack() {
+    moves.clear();
     for (const { id: each } of ITEMS) {
       const thing = things.get(each), cell = cells[each], holder = buttons.get(each);
-      silhouette(thing, false); machine.group.add(thing); thing.position.copy(home(each)); thing.rotation.set(0, 0, 0);
-      cell.door.visible = false; cell.door.position.y = cell.door.userData.open; cell.glow.opacity = IDLE; holder.position.z = holder.userData.home; hits.get(each).setAttribute('aria-pressed', 'false');
+      silhouette(thing, false); machine.group.add(thing); thing.position.copy(home(each)); thing.rotation.set(0, 0, 0); thing.scale.setScalar(1);
+      cell.door.visible = false; cell.door.position.y = cell.door.userData.open; cell.glow.opacity = IDLE; holder.position.z = holder.userData.home; holder.userData.ring.color.copy(GOLD); hits.get(each).setAttribute('aria-pressed', 'false');
     }
-    curtains(1); theatre.cloth.color.copy(CLOTH); theatre.cloth.opacity = 1; theatre.backlight.color.copy(DARK); theatre.pool.opacity = 0; theatre.tray.position.z = 0; spot.intensity = 0;
-    machine.group.rotation.z = 0; lever.hub.rotation.z = 0; lever.pawl.rotation.z = 0; pullTo(0, { audible: false }); delete stage.dataset.lit;
-    chosen = null; set(next(state, 'take'));
-    return id;
+    curtains(1); theatre.cloth.color.copy(CLOTH); theatre.cloth.opacity = 1; theatre.backlight.color.copy(DARK); theatre.pool.opacity = 0; theatre.beam.opacity = 0; theatre.tray.position.z = 0; spot.intensity = 0;
+    for (const star of theatre.confetti) star.visible = false;
+    machine.group.rotation.z = 0; lever.hub.rotation.z = 0; lever.pawl.rotation.z = 0; target = 0; pullTo(0, { audible: false }); delete stage.dataset.lit; delete stage.dataset.show;
+    pending = null; chosen = null; set(next('ready', 'take'));
   }
 
   function tick(now) {
     frame = 0; ticking = true;
+    // While the lever is held, it follows the hand a moment behind.
+    const dt = Math.min(64, now - (before || now)); before = now;
+    if (grip && Math.abs(target - progress) > .0005) pullTo(progress + (target - progress) * (1 - Math.exp(-dt / 45)));
     for (const move of [...moves]) { if (now < move.start) continue; const t = move.length ? Math.min(1, (now - move.start) / move.length) : 1; move.step(move.curve(t)); if (t >= 1) moves.delete(move); }
     ticking = false; renderer.render(scene, camera);
     if ((now < until || moves.size) && visible && !held && !document.hidden) frame = requestAnimationFrame(tick);
@@ -303,7 +328,7 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
   return {
     select, takeOut, trayPoint, get state() { return state; },
     // While the coloring desk covers it, the machine does not draw.
-    hold(covered) { held = covered; if (covered) { cancelAnimationFrame(frame); frame = 0; } else { animate(until); draw(); } },
+    hold(covered) { held = covered; if (pending) putBack(); if (covered) { cancelAnimationFrame(frame); frame = 0; before = 0; } else { animate(until); draw(); } },
     destroy: stop,
   };
 }

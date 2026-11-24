@@ -10,8 +10,13 @@ export const ITEMS = [
   { id: 'tree', name: '聖誕樹' },
   { id: 'stocking', name: '聖誕襪' },
 ];
-// The crayons in their tin: soft Christmas colours, each named for screen readers.
-export const CRAYONS = [['#a8423b', '深紅'], ['#f4ead3', '奶油白'], ['#9db59a', '鼠尾草綠'], ['#3f6653', '松樹綠'], ['#e2b65a', '暖黃'], ['#9fbdd2', '淡藍'], ['#e9b6b0', '淺粉'], ['#a8744a', '焦糖棕'], ['#9a9894', '柔和灰'], ['#4a5f80', '夜空藍']];
+// The crayons in their tin: twelve soft Christmas colours, each with its name (read out, and on the slip under the tin)
+// and its English one.
+export const CRAYONS = [
+  ['#b03f37', '聖誕紅', 'Christmas Red'], ['#3f6653', '松綠', 'Pine Green'], ['#f4ead3', '奶油白', 'Cream'], ['#e2b65a', '暖金', 'Warm Gold'],
+  ['#fbfaf5', '雪白', 'Snow White'], ['#7a5238', '可可棕', 'Cocoa Brown'], ['#e2aaa3', '灰粉', 'Dusty Pink'], ['#9fbdd2', '冬藍', 'Winter Blue'],
+  ['#9db59a', '鼠尾草綠', 'Sage'], ['#b97c4a', '焦糖', 'Caramel'], ['#4a5f80', '夜藍', 'Night Blue'], ['#4a4245', '煤灰', 'Charcoal'],
+];
 export const VENDING = {
   button: name => `按下${name}的按鈕`,
   // The lever, and what the machine says (to screen readers only) as it goes.
@@ -23,19 +28,25 @@ export const VENDING = {
   running: name => `${name}出發了。`,
   drop: name => `${name}到舞台上了，點舞台把它拿出來。`,
   tray: name => `從舞台拿出${name}`,
-  desk: name => `著色桌上是${name}的線稿：選一支蠟筆，點一塊就塗上顏色。`,
+  desk: name => `工作桌上是${name}的線稿：選一支蠟筆，點一塊就塗上顏色。`,
   region: (name, i) => `${name}的第 ${i} 塊`,
   crayon: name => `${name}的蠟筆`,
-  crayons: '蠟筆',
-  undo: '復原', redo: '重做', reset: '重設', finish: '完成作品', save: '存成圖片', back: '回到販賣機',
-  finished: '完成了！可以存成圖片，或回到販賣機再挑一樣。',
+  crayons: '蠟筆盒',
+  undo: '復原', redo: '重做', reset: '重新上色', finish: '完成', save: '存成圖片', back: '回到市集', again: '再修改',
+  // The craft booth: its sign, the shelf of works, the swatch cards, the stickers, a gentle word, the card when it is done.
+  craft: '走進手作工坊，替商品上色', sign: '手作工坊',
+  shelf: '我的作品', frame: (name, work) => `${name}${work?.finished ? '（完成了）' : work ? '（畫到一半）' : ''}，點一下來畫`,
+  presets: '配色卡', cards: [['classic', '經典'], ['snowy', '雪夜'], ['candy', '糖果']], preset: name => `套用「${name}」配色`,
+  stickers: '貼紙', sticker: { star: '星星', flake: '雪花', holly: '冬青' }, stick: name => `拿起${name}貼紙`, holding: name => `拿著${name}貼紙：點畫紙貼上去，再按一次就放下。`,
+  empty: '先替它塗上一點顏色吧。', full: '貼紙已經貼滿了。',
+  doneTitle: '完成了！', doneLine: name => `${name}已經放上工坊的展示架了。`, finished: name => `${name}完成了，放上展示架。`,
   file: id => `holy-merry-${id}.png`,
   pick: '挑一樣來畫', failed: '3D 販賣機暫時無法顯示，可以直接挑一樣來畫。',
 };
 // The advent calendar in its stand: any door may be opened (this page keeps no story date), each with a little paper
 // scene behind it (components/cabin-advent-scenes.js) and one line; `play` is what a tap on the scene does, read out.
 export const ADVENT = {
-  title: 'Advent Calendar', door: day => `第 ${day} 扇小門`,
+  title: 'Advent Calendar', door: day => `第 ${day} 扇小門`, lift: '打開降臨曆，看 24 扇小門', hang: '把降臨曆掛回攤子上',
   // Each door's little picture inside (components/cabin-clue-art.js adventPicture).
   art: ['room', 'sleigh', 'fell', 'reindeer', 'musicbox', 'boot', 'cake', 'gear', 'poinsettia', 'rack', 'gift-K', 'photo', 'candles', 'letter', 'card', 'hearth', 'gift-E', 'gift-N', 'gingerhouse', 'gift-H', 'moon', 'feed', 'sleigh', 'flight'], opened: day => `第 ${day} 扇小門，再看一次`, date: day => `12 月 ${day} 日`, close: '收好 ✓',
   days: [
