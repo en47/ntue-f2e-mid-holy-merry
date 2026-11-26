@@ -44,8 +44,6 @@ export function mountMachine(stage, { world, place, onState = () => {}, sound = 
   // Everything below is in the machine's own units (vending-papercraft.js): its place in the square, `rig`, is scaled up
   // to its height there, set where it stands and turned as it stands.
   const rig = new THREE.Group(); rig.position.set(place.at[0], 0, place.at[1]); rig.rotation.y = place.turn; rig.scale.setScalar(scale); world.scene.add(rig);
-  // (it stands up with the rest of the square when the page opens)
-  world.pop?.(rig, -place.at[1]);
   // The card takes its colours as they are (its materials skip tone mapping); the four models, as Tripo3D showed them, go
   // through filmic tone mapping at half exposure (the street's renderer does), each with a soft studio room as its own
   // environment map (set on their materials only: as the scene's environment it would light the card too).

@@ -65,22 +65,8 @@ export function mountScene(host, front) {
     return map;
   };
   const glows = [];
-  // The opening, as the other pages' pop-up books open: once the loader has gone, each board, lying flat behind its foot,
-  // stands up (a little past upright, then back), the far ones first and the near ones last; the booths' awnings fold
-  // out once they stand, the shadows come; then the strings of lights are hung and the lights come on one by one. Only
-  // when the page comes in with its loader, and never under reduced motion.
-  const POP = 1.05, opening = { on: !motion.matches && Boolean(document.querySelector('.site-loader')), start: Infinity, last: 0 }, rising = [];
-  const after = depth => 1.25 * (1 - Math.min(1, Math.max(0, (depth - 5) / 35)));
-  // (`hidden`: not there at all until its turn comes, as an awning folded against a booth still lying down)
-  function pop(object, delay, from = -86 * DEG, to = object.rotation.x, hidden = false) {
-    if (!opening.on) return;
-    object.rotation.order = 'YXZ'; object.rotation.x = from; rising.push([object, delay, from, to, hidden]); opening.last = Math.max(opening.last, delay);
-    if (hidden) object.scale.y = 1e-3;
-  }
-  // How far up a board is, `u` of the way through its rise: up past upright by 5°, then settling back.
-  const lean = (u, from, to) => { if (u < .74) { const e = 1 - (1 - u / .74) ** 3; return from + (to + 5 * DEG - from) * e; } const v = (u - .74) / .26; return to + 5 * DEG - 5 * DEG * v * v * (3 - 2 * v); };
-  // The strings of lights, hung once everything stands.
-  const strings = new THREE.Group(); strings.visible = !opening.on;
+  // The strings of lights (a group of their own).
+  const strings = new THREE.Group();
   // What a drawing really covers: its box, grown to take in all that is drawn past it, with room for the paper's rim.
   const reach = new Map();
   function extent(art) {
@@ -105,14 +91,13 @@ export function mountScene(host, front) {
   // metres wide; its picture comes when it is cut. Whatever is drawn past the box (snow drifting over an edge, a leaf, a
   // bow) is cut with it: the board grows to take it in, the box staying where it was put. Its glow (if it has one) lies
   // just in front of it and adds its light. `far` boards keep their colours, out of the haze.
-  function board(art, { at: [x, y, z], width, height = width * art.box[3] / art.box[2], turn = 0, paper = PAPER, px = 1024, write, glow = null, far = false, parent = scene, rise = true }) {
+  function board(art, { at: [x, y, z], width, height = width * art.box[3] / art.box[2], turn = 0, paper = PAPER, px = 1024, write, glow = null, far = false, parent = scene }) {
     const [bx, by, bw, bh] = art.box, whole = extent(art), [ex, ey, ew, eh] = whole, sx = width / bw, sy = height / bh;
     const geometry = keep(geometries, new THREE.PlaneGeometry(ew * sx, eh * sy));
     geometry.translate((ex + ew / 2 - bx - bw / 2) * sx, (by + bh - ey - eh / 2) * sy, 0);
     art = { ...art, box: whole }; px = Math.min(4096, Math.round(px * ew / bw));
     const material = keep(materials, new THREE.MeshBasicMaterial({ transparent: true, alphaTest: .35, toneMapped: false, fog: !far }));
     const mesh = new THREE.Mesh(geometry, material); mesh.position.set(x, y, z); mesh.rotation.y = turn; mesh.visible = false; parent.add(mesh);
-    if (rise && parent === scene) pop(mesh, after(-z));
     picture(art, { paper, px, write }).then(map => { if (disposed) return; material.map = map; material.needsUpdate = true; mesh.visible = true; wake(); }).catch(error => console.error('Market board failed', error));
     if (glow) {
       const light = keep(materials, new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false, opacity: .9 }));
@@ -154,11 +139,11 @@ export function mountScene(host, front) {
   const sharp = art => Math.min(4096, Math.max(256, Math.round(art.box[2] * 2)));
   // A board of the picture: standing where the layout put it (`foot` its height off the ground, if any), as wide and tall
   // as the picture shows it.
-  function put(art, spot, { paper = PAPER, far = false, glow = art.glow ?? null, write, parent, rise } = {}) {
-    return board(art, { at: [spot.at[0], spot.foot ?? 0, spot.at[1]], width: spot.width, height: spot.height, turn: spot.turn ?? 0, paper, px: sharp(art), glow, far, write, parent, rise });
+  function put(art, spot, { paper = PAPER, far = false, glow = art.glow ?? null, write, parent } = {}) {
+    return board(art, { at: [spot.at[0], spot.foot ?? 0, spot.at[1]], width: spot.width, height: spot.height, turn: spot.turn ?? 0, paper, px: sharp(art), glow, far, write, parent });
   }
   scene.add(strings);
-  put(ART.SKY, SKY_AT, { paper: { scale: 2.4, grain: .3, shadow: .03, rim: '#e8e2ea' }, far: true, rise: false });
+  put(ART.SKY, SKY_AT, { paper: { scale: 2.4, grain: .3, shadow: .03, rim: '#e8e2ea' }, far: true });
   put(ART.MOUNTAINS, MOUNTAINS_AT, { paper: { scale: 1.4, grain: .35, shadow: .08, rim: '#eef1f8' }, far: true });
   put(ART.FOREST, FOREST_AT, { paper: FAR });
   put(ART.TOWN, TOWN_AT, { paper: FAR });
@@ -176,10 +161,8 @@ export function mountScene(host, front) {
     put(front, stall, { glow: front.glow });
     const end = stall.turn > 0 ? -1 : 1;
     put(ART.boothSide(look, d * 100, h * .8 * 100), { at: along(stall, end * (w / 2 - .02), -d / 2), width: d, height: h * .8, turn: stall.turn + end * Math.PI / 2 });
-    const reach = .62, awning = put(ART.boothAwning(look, (w + .1) * 100, reach * 100), { at: along(stall, 0, .015), foot: h * ART.HINGE, width: w + .1, height: reach, turn: stall.turn, rise: false });
+    const reach = .62, awning = put(ART.boothAwning(look, (w + .1) * 100, reach * 100), { at: along(stall, 0, .015), foot: h * ART.HINGE, width: w + .1, height: reach, turn: stall.turn });
     awning.rotation.order = 'YXZ'; awning.rotation.x = 118 * DEG; awning.material.side = THREE.DoubleSide;
-    // (it hangs folded down against the front until the booth stands, then folds out)
-    pop(awning, after(-stall.at[1]) + .75, 178 * DEG, 118 * DEG, true);
     shadow(along(stall, 0, -d / 2 + .3), w + .6, d + .9, stall.turn);
     drifts.push([along(stall, 0, .3), w * 1.05, .6, stall.turn], [along(stall, end * (w / 2 + .1), -d / 2), .7, d * 1.1, stall.turn]);
   }
@@ -223,7 +206,7 @@ export function mountScene(host, front) {
     cut(art, { paper: elfPaper, px }).then(canvas => { if (disposed) return; material.map = texture(canvas); material.needsUpdate = true; mesh.visible = true; wake(); });
     return mesh;
   }
-  const stand = ([x, z]) => { const group = new THREE.Group(); group.position.set(x, 0, z); scene.add(group); pop(group, after(-z)); return group; };
+  const stand = ([x, z]) => { const group = new THREE.Group(); group.position.set(x, 0, z); scene.add(group); return group; };
   const shoulder = (mesh, z = .01) => mesh.position.set((SHOULDER[0] - 50) * unit, H - SHOULDER[1] * unit, z);
   { const group = stand(ELVES.cocoa), body = piece(elf({}), W, [50, 162], group), hand = piece(arm('cup'), 22 * unit, [0, 0], group); shoulder(hand);
     shadow([ELVES.cocoa[0], ELVES.cocoa[1] + .05], .6, .25);
@@ -291,13 +274,6 @@ export function mountScene(host, front) {
       if (u < 1) more = true; else { const done = trip.done; trip = null; done(); }
     }
     for (const mover of movers) if (mover(dt, clock)) more = true; else movers.delete(mover);
-    if (opening.on && clock >= opening.start) {
-      const t = clock - opening.start;
-      for (const [object, delay, from, to, hidden] of rising) { object.rotation.x = lean(Math.min(1, Math.max(0, (t - delay) / POP)), from, to); if (hidden) object.scale.y = t >= delay ? 1 : 1e-3; }
-      shadowMaterial.opacity = Math.min(1, Math.max(0, (t - .5) / 1.6));
-      renderer.shadowMap.needsUpdate = true; more = true;
-      if (t > opening.last + POP) { for (const [object, , , to, hidden] of rising) { object.rotation.x = to; if (hidden) object.scale.y = 1; } opening.on = false; strings.visible = true; shadowMaterial.opacity = 1; lit = clock; }
-    }
     if (!motion.matches) {
       glows.forEach((glow, i) => { const on = Math.min(1, Math.max(0, (clock - lit - (glow.last ? 1.7 : Math.min(i * .045, 1.2))) / .4)); glow.material.opacity = on * (.72 + .28 * Math.sin(clock * 1.6 + glow.phase)); });
       if (clock < lit + 2.2) more = true;
@@ -324,12 +300,8 @@ export function mountScene(host, front) {
   const resizing = new ResizeObserver(() => { frame(); wake(); }); resizing.observe(host);
   const watch = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) wake(); }); watch.observe(host);
   on(document, 'visibilitychange', () => { if (!document.hidden) wake(); });
-  // Once the page has shown (or soon, if no loader says so): the opening, or with none, the lights one after another.
-  if (opening.on) shadowMaterial.opacity = 0;
-  const light = () => {
-    if (opening.on && opening.start === Infinity) { opening.start = clock; host.closest('.vending')?.classList.add('is-opening'); wake(); }
-    else if (!opening.on && lit === Infinity) { lit = clock; wake(); }
-  };
+  // The lights come on one after another once the page has shown (or soon, if no loader says so).
+  const light = () => { if (lit === Infinity) { lit = clock; wake(); } };
   on(window, 'site-loader:done', light); const lateLight = setTimeout(light, 6000);
 
   wake();
@@ -347,8 +319,6 @@ export function mountScene(host, front) {
     onFrame(hook) { hooks.add(hook); return () => hooks.delete(hook); },
     // Hang a string of bulbs and pennants from one point of the square to another (the Advent House ties one end).
     hang,
-    // Stand something up with the rest when the page opens (the machine, the Advent House), `depth` metres away.
-    pop: (object, depth) => pop(object, after(depth)),
     // A light that breathes with the square's lights (and comes on with them).
     glow(material) { glows.splice(glows.findIndex(glow => glow.last), 0, { material, phase: glows.length * 1.7 }); },
     animate(mover) { movers.add(mover); wake(); },

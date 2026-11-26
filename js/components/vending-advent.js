@@ -45,7 +45,7 @@ export function mountAdvent(layer, { world, sound = null, onLift = () => {} } = 
   let byKeys = false;
   on(document, 'keydown', () => { byKeys = true; }); on(document, 'pointerdown', () => { byKeys = false; });
   const settle = node => node?.focus({ preventScroll: true, focusVisible: byKeys });
-  const house = new THREE.Group(); house.position.set(...HOUSE.at); house.rotation.y = HOUSE.turn; world.scene.add(house); world.pop?.(house, -HOUSE.at[2]);
+  const house = new THREE.Group(); house.position.set(...HOUSE.at); house.rotation.y = HOUSE.turn; world.scene.add(house);
   let gone = false;
   // A flat sheet `width` by `height` metres, its picture coming when cut; light adds itself (and never hides what is behind).
   function sheet(width, height, { light = false, double = false } = {}) {

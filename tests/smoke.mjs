@@ -876,10 +876,6 @@ await test('第五頁 Christmas Market：黃昏雪地的老城聖誕市集（照
   // past its edges for a wide screen and the turn to the house; the hills' firs stand in snow; the chalkboard in the
   // title's letters.
   assert.ok(layout.includes('export const WINGS') && layout.includes("{ look: 'cocoa',") && plaza.includes("cocoa: { roof: 'gable',") && !/LEFT_TOWN = \{[^\n]*\n[^\n]*pine\(/.test(plaza) && scene.includes("context.font = `700 ${size}px StorySign,") && scene.includes('const end = stall.turn > 0 ? -1 : 1;'), 'Wide screens and the turn to the house see more of the square, never its edge; the chalkboard in the title\'s letters');
-  // The opening, as the other pages' pop-up books: once the loader has gone the boards stand up far to near (the machine
-  // and the house with them), the awnings fold out, then the strings are hung and the lights come on; not under reduced
-  // motion, nor when the page comes back from the back-forward cache (no loader).
-  assert.ok(scene.includes("opening = { on: !motion.matches && Boolean(document.querySelector('.site-loader'))") && scene.includes('if (rise && parent === scene) pop(mesh, after(-z));') && scene.includes('pop(awning, after(-stall.at[1]) + .75, 178 * DEG, 118 * DEG, true);') && machine.includes('world.pop?.(rig, -place.at[1]);') && advent.includes('world.pop?.(house, -HOUSE.at[2]);') && css.includes('.vending.is-opening .vending-heading { transform-origin: 50% 100%; animation: pop-up 1.05s'), 'The square opens like a pop-up book, far to near, then its lights');
   assert.ok(craftDepth === layoutDepth && craftDepth > .6 && craft.includes('layer(crest, body,') && layout.includes('{ turn: MACHINE.turn }') && square.includes('function sleeve(') && square.includes('export const arm = (thing, tunic = TUNIC)') && art.includes('rounds over the rear edge in lumps') && advent.includes('const rim = sheet(DEEP + .1,'), 'A deep machine, the board turned with it, elves with two arms, a roof that ends in snow');
   // The Advent House is layered paper, its front flat and its right side and roof pieces of their own (no picture bent by
   // CSS 3D); the house stands in the square and the view goes up to it.
