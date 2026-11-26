@@ -1,66 +1,111 @@
-// The Christmas Market page (vending.html, docs/VENDING-MARKET.md): a little market square on a snowy night
-// (components/vending-scene.js): the vending machine on the left of the street (vending-machine.js), the advent calendar in
-// its stall on the right (vending-advent.js), and behind the machine the workshop (vending-coloring.js) where a thing
-// from the machine is coloured in. Taken off the machine's stage, the street leans in toward it and fades as the workshop
-// comes up out of that same spot; back to the market, it all runs the other way. While the machine is being worked, or
-// the calendar is lifted down, the rest of the street dims a little. With a mouse its layers shift a few pixels with the
-// pointer, the far ones least. Under reduced motion all of it simply comes and goes.
+// The Christmas Market page (vending.html, docs/VENDING-MARKET.md): an old town's Christmas square in the snow at dusk,
+// stood up in paper the way Santa's page is (components/vending-scene.js, laid out by services/market-layout.js): the
+// vending machine in front (vending-machine.js, in the same scene), the Advent House on the right turned toward it
+// (vending-advent.js), elves shopping at the stalls behind; and behind the machine the workshop (vending-coloring.js)
+// where a thing from the machine is coloured in. Its title, in the coloured paper letters of the daytime pages, is on a
+// cream sign that hangs where the string of stars across the sky begins, on any screen. Taken off the machine's stage,
+// the street leans in toward it and fades as the workshop comes up out of that same spot; back to the market, it all runs
+// the other way. Touched, the machine or the Advent House is looked at closer: the view turns to it and draws in; there it
+// is worked. Under reduced motion all of it simply comes and goes.
 import { mountTitleArt } from './components/title-art.js';
+import { paperLayer } from './components/paper-art.js';
+import { SIGN_VIEW, signBoard } from './components/vending-plaza-art.js';
 import { mountCabinPaper } from './components/cabin-paper.js';
 import { createSound } from './components/cabin-sound.js';
 import { mountScene } from './components/vending-scene.js';
 import { mountMachine } from './components/vending-machine.js';
 import { mountAdvent } from './components/vending-advent.js';
 import { mountWorkshop } from './components/vending-coloring.js';
-import { paperLayer, shape } from './components/paper-art.js';
+import { MACHINE, SIGN } from './services/market-layout.js';
 import { ITEMS, VENDING } from './data/vending.js';
 
 const page = document.querySelector('#vending'), market = page.querySelector('#market'), stage = page.querySelector('#vending-stage'), shop = page.querySelector('#workshop');
-const status = page.querySelector('#vending-status'), picker = page.querySelector('#vending-picker'), veil = page.querySelector('.market-veil');
-const motion = matchMedia('(prefers-reduced-motion: reduce)'), fine = matchMedia('(hover: hover) and (pointer: fine)');
+const status = page.querySelector('#vending-status'), picker = page.querySelector('#vending-picker');
+const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const nameOf = id => ITEMS.find(item => item.id === id)?.name ?? '';
-mountTitleArt(page.querySelector('#vending-title'), 'christmas-market', { palette: ['#fbecc4', '#f4d581', '#fbecc4', '#e8b84f'], rim: '#33526f' });
-mountScene(page.querySelector('.vending-scene'), page.querySelector('.market-front'));
+mountTitleArt(page.querySelector('#vending-title'), 'christmas-market');
 mountCabinPaper(page);
+// The title's sign: its board under the letters (drawn a little past it, SIGN_VIEW, for its snow and holly), set each
+// frame where the square shows SIGN, the end of the string of stars.
+const heading = page.querySelector('.vending-heading');
+{ const sign = document.createElement('div'), [x, y, width, height] = SIGN_VIEW; sign.className = 'market-sign'; sign.setAttribute('aria-hidden', 'true'); heading.prepend(sign);
+  Object.assign(sign.style, { left: `${x / 5}%`, top: `${y / 2.2}%`, width: `${width / 5}%`, height: `${height / 2.2}%` });
+  paperLayer(sign, SIGN_VIEW.join(' '), 'market-sign-board', signBoard, { paper: { scale: .8, grain: .4, shadow: .25, rim: '#f7efe2' }, eager: true }); }
+let signAt = '';
+function hangSign() {
+  const [x, z] = SIGN.at, left = world.project([x - SIGN.width / 2, SIGN.foot + SIGN.height, z]), right = world.project([x + SIGN.width / 2, SIGN.foot, z]);
+  const at = [left.x, left.y, right.x - left.x, right.y - left.y].map(value => value.toFixed(1)).join(' ');
+  if (at === signAt) return; signAt = at;
+  const [l, t, w, h] = at.split(' '); Object.assign(heading.style, { left: `${l}px`, top: `${t}px`, width: `${w}px`, height: `${h}px` });
+}
 
-// Under the machine, its round wooden dais and the warm light round it (placed by the machine's own foot); and the stage's
-// own light spilling onto the cobbles in front of it, there only while a thing stands on the stage.
-const pool = g => { for (const [rx, ry, opacity] of [[290, 60, .14], [210, 44, .16]]) shape('ellipse', { cx: 300, cy: 70, rx, ry, fill: '#ffd68c', opacity }, g); };
-paperLayer(stage.querySelector('.machine-light'), '0 0 600 140', '', pool, { paper: null, eager: true });
-const dais = g => {
-  shape('path', { d: 'M20 66A280 40 0 0 0 580 66V92A280 40 0 0 1 20 92Z', fill: '#5e3d2c' }, g); shape('ellipse', { cx: 300, cy: 66, rx: 280, ry: 40, fill: '#7a5238' }, g);
-  shape('path', { d: 'M70 48A230 30 0 0 0 530 48V64A230 30 0 0 1 70 64Z', fill: '#8a5a3c' }, g); shape('ellipse', { cx: 300, cy: 48, rx: 230, ry: 30, fill: '#a8774d' }, g);
-  shape('ellipse', { cx: 300, cy: 48, rx: 230, ry: 30, fill: 'none', stroke: '#e0b04f', 'stroke-width': 4 }, g); shape('ellipse', { cx: 300, cy: 66, rx: 280, ry: 40, fill: 'none', stroke: '#e0b04f', 'stroke-width': 3, 'stroke-dasharray': '2 0' }, g);
-};
-paperLayer(stage.querySelector('.machine-dais'), '0 0 600 110', '', dais, { paper: { scale: .6, grain: .45, shadow: .24 }, eager: true });
-const spill = g => { for (const [rx, ry, opacity] of [[230, 44, .14], [150, 28, .2]]) shape('ellipse', { cx: 250, cy: 60, rx, ry, fill: '#ffd68c', opacity }, g); };
-paperLayer(stage.querySelector('.machine-glow'), '0 0 500 120', '', spill, { paper: null, eager: true });
-// Should the 3D machine not come (no WebGL, a model missing), the four things are offered plainly instead.
+// Should the street or the machine not come (no WebGL, a model missing), the four things are offered plainly instead.
 function offer() {
   if (picker.childElementCount) { picker.hidden = false; return; }
   const words = document.createElement('p'); words.textContent = VENDING.failed; picker.append(words);
   for (const { id, name } of ITEMS) { const button = document.createElement('button'); button.type = 'button'; button.dataset.item = id; button.textContent = name; picker.append(button); }
   picker.hidden = false;
 }
-// The street dims round what is being used: the machine while it is worked, the calendar while it is lifted down.
-function focus(kind) { if (kind) page.dataset.focus = kind; else delete page.dataset.focus; }
+// The machine is walked up to as the Advent House is (vending-advent.js): from the street its buttons, lever and stage are
+// out of reach (their layer is inert); a touch on it, or Enter on the button laid over it, walks up to it, square to its
+// front, and there they take a press. Esc, ✕ or a touch beside it goes back into the square.
+const spot = document.createElement('div'); spot.className = 'machine-spot'; market.append(spot);
+// Focus moved for the visitor shows its ring only when they are using the keyboard (a touch or a click leaves no box).
+let byKeys = false;
+addEventListener('keydown', () => { byKeys = true; }, true); addEventListener('pointerdown', () => { byKeys = false; }, true);
+const settle = node => node?.focus({ preventScroll: true, focusVisible: byKeys });
+const lift = document.createElement('button'), shut = document.createElement('button');
+lift.type = shut.type = 'button'; lift.className = 'machine-lift'; shut.className = 'machine-shut'; shut.textContent = '✕'; shut.hidden = true;
+lift.setAttribute('aria-label', VENDING.near); shut.setAttribute('aria-label', VENDING.away); spot.append(lift, shut);
+let atMachine = false, leaving = false, offs = [];
+const placeBox = (node, { left, top, width, height }) => Object.assign(node.style, { left: `${left.toFixed(1)}px`, top: `${top.toFixed(1)}px`, width: `${width.toFixed(1)}px`, height: `${height.toFixed(1)}px` });
+const onMachine = event => { const box = machine?.frame(), rect = world.host.getBoundingClientRect(), x = event.clientX - rect.left, y = event.clientY - rect.top; return Boolean(box) && x >= box.left && x <= box.left + box.width && y >= box.top && y <= box.top + box.height; };
+function up() {
+  if (atMachine || leaving || !machine || world?.mode !== 'street') return;
+  atMachine = true; lift.hidden = true; shut.hidden = false; world.host.classList.remove('is-pointing-machine'); sound?.play('whoosh');
+  const [x, , z] = machine.middle();
+  world.walk({ look: [x, MACHINE.height * .5, z], size: MACHINE.height / .9, wide: 1.5 }).then(() => {
+    if (!atMachine) return; stage.inert = false;
+    settle(stage.querySelector('.machine-button:not(:disabled)') ?? stage.querySelector('.machine-lever'));
+  });
+}
+function away() {
+  if (!atMachine) return; atMachine = false; leaving = true; stage.inert = true; shut.hidden = true; sound?.play('whoosh');
+  world.walk(null).then(() => { leaving = false; if (atMachine) return; lift.hidden = false; settle(lift); });
+}
+lift.addEventListener('click', up); shut.addEventListener('click', away);
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && atMachine && shop.hidden && !event.defaultPrevented) { event.preventDefault(); away(); } });
+function watchMachine() {
+  stage.inert = true;
+  offs.push(world.onFrame(hangSign));
+  offs.push(world.onFrame(() => {
+    const box = machine?.frame(); if (!box) return;
+    if (!atMachine) placeBox(lift, box);
+    else Object.assign(shut.style, { left: `${Math.min(box.left + box.width + 10, market.clientWidth - 60).toFixed(1)}px`, top: `${Math.max(box.top + 10, 12).toFixed(1)}px` });
+  }));
+  offs.push(world.onTap(event => {
+    if (atMachine) { if (!onMachine(event)) away(); return true; }
+    if (world.mode === 'street' && onMachine(event)) { up(); return true; }
+    return false;
+  }));
+  const hover = event => world.host.classList.toggle('is-pointing-machine', event.pointerType !== 'touch' && world?.mode === 'street' && !atMachine && onMachine(event));
+  world.host.addEventListener('pointermove', hover); offs.push(() => world.host.removeEventListener('pointermove', hover));
+}
 
-let sound = null, machine = null, advent = null, workshop = null, timer = 0;
+let world = null, sound = null, machine = null, advent = null, workshop = null, timer = 0;
 function start() {
   sound = createSound();
-  advent = mountAdvent(page.querySelector('#advent-stand'), { sound, onLift: lifted => focus(lifted ? 'advent' : busy() ? 'machine' : '') });
   workshop = mountWorkshop(shop.querySelector('.shop-work'), { room: shop.querySelector('.shop-room'), sound, onBack: leaveShop });
+  try { world = mountScene(page.querySelector('.vending-scene'), page.querySelector('.market-front')); } catch (error) { console.error('The market could not be drawn', error); stage.dataset.state = 'failed'; offer(); return; }
+  advent = mountAdvent(page.querySelector('#advent-stand'), { world, sound, onLift: near => { if (near) page.dataset.view = 'advent'; else delete page.dataset.view; } });
   // What the machine is doing, read out: a pick, the delivery setting off, the thing on the stage; or why the lever did not go.
-  machine = mountMachine(stage, { sound, onState: (state, id, note) => {
+  machine = mountMachine(stage, { world, place: MACHINE, sound, onState: (state, id, note) => {
     const words = note ? VENDING[note] : { chosen: VENDING.chosen, running: VENDING.running, ready: VENDING.drop }[state];
     if (words) status.textContent = typeof words === 'function' ? words(nameOf(id)) : words;
     if (state === 'failed') offer();
-    if (page.dataset.focus !== 'advent') focus(busy(state) ? 'machine' : '');
   } });
-  if (!machine) offer();
+  watchMachine();
 }
-const busy = (state = machine?.state) => ['chosen', 'pulling', 'running', 'ready'].includes(state);
-veil.addEventListener('click', () => advent?.close());
 
 // Into the workshop from a point on the page (the stage's tray): the street leans in toward it and fades, the
 // workshop comes up out of it; once it covers the square the machine stops drawing (and puts itself back in order).
@@ -68,13 +113,13 @@ function enterShop(id, at) {
   clearTimeout(timer);
   const box = page.getBoundingClientRect();
   page.style.setProperty('--zoom-x', `${at.x - box.left}px`); page.style.setProperty('--zoom-y', `${at.y - box.top}px`);
-  workshop.open(id); shop.hidden = false; shop.classList.remove('is-leaving'); page.classList.remove('is-returning'); page.dataset.mode = 'workshop'; focus(''); sound?.play('whoosh');
+  workshop.open(id); shop.hidden = false; shop.classList.remove('is-leaving'); page.classList.remove('is-returning'); page.dataset.mode = 'workshop'; sound?.play('whoosh');
   if (page.getBoundingClientRect().top < 0) page.scrollIntoView({ block: 'start', behavior: motion.matches ? 'auto' : 'smooth' });
-  timer = setTimeout(() => { market.inert = true; machine?.hold(true); workshop.focus(); }, motion.matches ? 0 : 760);
+  timer = setTimeout(() => { market.inert = true; machine?.hold(true); world?.hold(true); workshop.focus(); }, motion.matches ? 0 : 760);
 }
 function leaveShop() {
-  clearTimeout(timer); market.inert = false; machine?.hold(false); workshop.close(); sound?.play('whoosh'); page.dataset.mode = 'market';
-  const done = () => { shop.hidden = true; shop.classList.remove('is-leaving'); page.classList.remove('is-returning'); (stage.querySelector('.machine-button:not(:disabled)') ?? stage.querySelector('.machine-hit'))?.focus({ preventScroll: true }); };
+  clearTimeout(timer); market.inert = false; world?.hold(false); machine?.hold(false); workshop.close(); sound?.play('whoosh'); page.dataset.mode = 'market';
+  const done = () => { shop.hidden = true; shop.classList.remove('is-leaving'); page.classList.remove('is-returning'); settle(stage.querySelector('.machine-button:not(:disabled)') ?? stage.querySelector('.machine-hit')); };
   if (motion.matches) { done(); return; }
   shop.classList.add('is-leaving'); page.classList.add('is-returning'); timer = setTimeout(done, 650);
 }
@@ -87,16 +132,13 @@ stage.addEventListener('click', event => {
 });
 picker.addEventListener('click', event => { const id = event.target.closest('[data-item]')?.dataset.item; if (id) enterShop(id, centreOf(picker)); });
 shop.addEventListener('keydown', event => { if (event.key === 'Escape' && !shop.hidden && !event.defaultPrevented) { event.preventDefault(); leaveShop(); } });
-// With a mouse, the street's layers shift a few pixels with the pointer (css uses --tilt-x and --tilt-y).
-market.addEventListener('pointermove', event => {
-  if (!fine.matches || motion.matches || page.dataset.mode !== 'market') return;
-  const box = market.getBoundingClientRect();
-  market.style.setProperty('--tilt-x', ((event.clientX - box.left) / box.width - .5).toFixed(3)); market.style.setProperty('--tilt-y', ((event.clientY - box.top) / box.height - .5).toFixed(3));
-});
-
 // The page leaves and comes back through the back-forward cache: everything holding a WebGL context or timers goes, and
 // is built again.
-function stop() { clearTimeout(timer); machine?.destroy(); advent?.destroy(); workshop?.destroy(); sound?.destroy(); machine = advent = workshop = sound = null; shop.hidden = true; market.inert = false; page.dataset.mode = 'market'; focus(''); }
+function stop() {
+  clearTimeout(timer); offs.forEach(off => off()); offs = []; machine?.destroy(); advent?.destroy(); workshop?.destroy(); sound?.destroy(); world?.destroy();
+  machine = advent = workshop = sound = world = null; signAt = ''; atMachine = leaving = false; lift.hidden = false; shut.hidden = true; stage.inert = false;
+  shop.hidden = true; market.inert = false; page.dataset.mode = 'market'; delete page.dataset.view;
+}
 window.addEventListener('pagehide', stop);
 window.addEventListener('pageshow', event => { if (event.persisted) start(); });
 start();

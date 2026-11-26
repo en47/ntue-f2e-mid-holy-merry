@@ -41,13 +41,16 @@ export const VENDING = {
   doneTitle: '完成了！', doneLine: name => `${name}已經放上工坊的展示架了。`, finished: name => `${name}完成了，放上展示架。`,
   file: id => `holy-merry-${id}.png`,
   pick: '挑一樣來畫', failed: '3D 販賣機暫時無法顯示，可以直接挑一樣來畫。',
+  // Walking up to the machine from the street, and back.
+  near: '走近販賣機，選一樣來拉', away: '回到市集',
 };
-// The advent calendar in its stand: any door may be opened (this page keeps no story date), each with a little paper
-// scene behind it (components/cabin-advent-scenes.js) and one line; `play` is what a tap on the scene does, read out.
+// The Advent House: any drawer may be pulled out (this page keeps no story date), each with a little thing in it that
+// brings up a card with its paper scene (components/cabin-advent-scenes.js) and one line; `play` is what a tap on the
+// scene does, read out.
 export const ADVENT = {
-  title: 'Advent Calendar', door: day => `第 ${day} 扇小門`, lift: '打開降臨曆，看 24 扇小門', hang: '把降臨曆掛回攤子上',
+  title: 'Advent Calendar', door: day => `第 ${day} 個抽屜`, lift: '走近降臨曆小屋，看 24 個小抽屜', back: '回到市集', gift: day => `打開 12 月 ${day} 日的小卡`,
   // Each door's little picture inside (components/cabin-clue-art.js adventPicture).
-  art: ['room', 'sleigh', 'fell', 'reindeer', 'musicbox', 'boot', 'cake', 'gear', 'poinsettia', 'rack', 'gift-K', 'photo', 'candles', 'letter', 'card', 'hearth', 'gift-E', 'gift-N', 'gingerhouse', 'gift-H', 'moon', 'feed', 'sleigh', 'flight'], opened: day => `第 ${day} 扇小門，再看一次`, date: day => `12 月 ${day} 日`, close: '收好 ✓',
+  art: ['room', 'sleigh', 'fell', 'reindeer', 'musicbox', 'boot', 'cake', 'gear', 'poinsettia', 'rack', 'gift-K', 'photo', 'candles', 'letter', 'card', 'hearth', 'gift-E', 'gift-N', 'gingerhouse', 'gift-H', 'moon', 'feed', 'sleigh', 'flight'], opened: day => `第 ${day} 個抽屜，打開過了，再拉出來看一次`, date: day => `12 月 ${day} 日`, close: '收好 ✓',
   days: [
     { text: '降臨曆是從德國流行起來的：從 12/1 起每天開一扇窗，一路數到平安夜。', play: '打開小日曆的下一扇窗' },
     { text: '雪橇的鈴鐺擦得亮亮的，叮叮噹噹，整條街都聽得見。', play: '搖搖雪橇的鈴鐺' },

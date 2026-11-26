@@ -54,3 +54,13 @@ await fs.writeFile('js/data/cabin-glyphs.js', `${header}\nexport const cabinGlyp
 const marquee = ['CHRISTMAS', 'VENDING'].map(text => [...text].map(char => ({ char, d: font.getPath(char, 0, 0, 100).toPathData(1), advance: +font.getAdvanceWidth(char, 100).toFixed(1) })));
 await fs.writeFile('js/data/marquee-glyphs.js', `${header}\nexport const marqueeGlyphs = ${JSON.stringify(marquee)};\n`);
 console.log(title.length, story.length, 'glyphs');
+// 聖誕市集降臨曆小屋（vending-advent-art.js）：招牌一行字與抽屜上的數字，字級 100、基線在 y = 0；招牌記下寬度與上下緣，數字記前進寬度。
+// 這兩樣自己寫路徑：toPathData 遇到四捨五入成 -0 的值會黏在前一個數字後面（例如 181.50Q），透視時要逐點讀回來。
+const num = value => { const text = String(Math.round(value * 10) / 10); return text === '-0' ? '0' : text; };
+const pathData = path => path.commands.map(({ type, x, y, x1, y1, x2, y2 }) => type === 'Z' ? 'Z' : type + (type === 'C' ? [x1, y1, x2, y2, x, y] : type === 'Q' ? [x1, y1, x, y] : [x, y]).map(num).join(' ')).join('');
+const signPath = font.getPath('Advent Calendar', 0, 0, 100), signBox = signPath.getBoundingBox();
+const advent = {
+  sign: { d: pathData(signPath), box: [signBox.x1, signBox.y1, signBox.x2, signBox.y2].map(value => +value.toFixed(1)) },
+  digits: Object.fromEntries([...'0123456789'].map(char => [char, { d: pathData(font.getPath(char, 0, 0, 100)), advance: +font.getAdvanceWidth(char, 100).toFixed(1) }])),
+};
+await fs.writeFile('js/data/advent-glyphs.js', `${header}\nexport const adventGlyphs = ${JSON.stringify(advent)};\n`);

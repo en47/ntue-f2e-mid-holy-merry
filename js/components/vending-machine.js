@@ -1,12 +1,15 @@
 // The vending machine in Three.js (docs/VENDING-MACHINE.md): the slot machine of card from vending-papercraft.js and the
-// four little things in its cells, Tripo3D's models (assets/models/vending-*-web.glb). A button picks one: it stays half
-// down, its cell lights up, the lever's catch lets go. Pulled all the way down and let go (five bulbs light along its arc
-// as it goes, services/vending-lever.js), the lever sets the delivery going: the cell's door comes down, the curtains light
-// up from behind and the thing's shadow is let down onto the stage, the light goes out and the curtains part on the thing
-// itself, the tray slides out and it turns to you. Taken out (`takeOut`), everything is put back while the coloring desk
-// covers the machine. Plain HTML elements lie over the buttons, the lever (a slider: drag it, or the arrow keys) and the
-// stage, so a mouse, a finger or the keyboard all work. It is drawn only when something moves; under reduced motion each
-// thing goes straight to where it ends (the lever still follows a drag).
+// four little things in its cells, Tripo3D's models (assets/models/vending-*-web.glb), standing in the market street
+// itself (vending-scene.js): as tall as a big vending machine is, standing in its own wooden booth, its back a hand's
+// width off the booth's back boards (services/market-layout.js), lit from the upper left where its lamp stands; its
+// shadow falls on the cobbles and on the boards behind it. A button picks one: it stays half down, its cell lights up, the lever's catch lets go. Pulled all the
+// way down and let go (five bulbs light along its arc as it goes, services/vending-lever.js), the lever sets the delivery
+// going: the cell's door comes down, the curtains light up from behind and the thing's shadow is let down onto the stage,
+// the light goes out and the curtains part on the thing itself, the tray slides out and it turns to you, the stage's
+// light spilling onto the cobbles. Taken out (`takeOut`), everything is put back while the coloring desk covers the
+// machine. Plain HTML elements lie over the buttons, the lever (a slider: drag it, or the arrow keys) and the stage
+// wherever the street's view shows them, so a mouse, a finger or the keyboard all work. The street is drawn only when
+// something moves; under reduced motion each thing goes straight to where it ends (the lever still follows a drag).
 import * as THREE from 'three';
 import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from '../../vendor/three/examples/jsm/libs/meshopt_decoder.module.js';
@@ -26,38 +29,50 @@ const linear = t => t;
 const spring = t => Math.exp(-5 * t) * Math.cos(t * Math.PI * 3.2) * (1 - t ** 8);
 const tone = colour => new THREE.Color(colour);
 const GOLD = tone('#e0b04f'), FLASH = tone('#fff1b8'), DARK = tone('#2a2023'), LIT = tone('#f6e2b4'), DIM = tone('#5a4436'), CLOTH = tone('#8f3530'), GLOWING = tone('#c65b48'), GLASS = tone('#6b5646'), BRIGHT = tone('#fff2c4'), WARM = tone('#ffc766');
-
-export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
-  const still = matchMedia('(prefers-reduced-motion: reduce)'), events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
-  const canvas = element('canvas', 'machine-canvas', stage); canvas.setAttribute('aria-hidden', 'true');
-  let renderer;
-  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { canvas.remove(); fail(); return null; }
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.localClippingEnabled = true;
-  // The card takes its colours as they are (its materials skip tone mapping); the four models, as Tripo3D showed them, go
-  // through filmic tone mapping at half exposure, each with a soft studio room as its own environment map (set on their
-  // materials only: as the scene's environment it would light the card too).
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = .5;
-  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(26, 1, .05, 20);
-  const studio = new THREE.PMREMGenerator(renderer), room = studio.fromScene(new RoomEnvironment(), .04).texture; studio.dispose();
-  // Lit as the page is: from the left, where the lamp post stands, by a light only a little warm, the night sky above and
-  // the snow below for the rest, a cool rim of moonlight from behind. The key light throws the card's soft shadows.
-  scene.add(new THREE.HemisphereLight('#c9d6ea', '#efe8dc', 2.1));
-  const key = new THREE.DirectionalLight('#fff3e6', 2.5); key.position.set(-1.3, 1.9, 2.2); scene.add(key);
-  key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 3; key.shadow.bias = -.0004; key.shadow.normalBias = .004;
-  Object.assign(key.shadow.camera, { left: -.9, right: 1.1, top: 1.6, bottom: -.5, near: .5, far: 6 }); key.shadow.camera.updateProjectionMatrix();
-  const rim = new THREE.DirectionalLight('#a9c2ee', .5); rim.position.set(2, 1.2, -1); scene.add(rim);
-  // A warm light over the stage, on only while the thing is shown there.
-  const spot = new THREE.SpotLight('#ffe7c4', 0, .7, .8, .6, 2); spot.position.set(0, .29, .15); spot.target.position.set(0, .1, .11); scene.add(spot, spot.target);
-  // Its shadow on the snow, so it stands rather than floats; it fades out round the machine, never ending in an edge.
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), new THREE.ShadowMaterial({ color: '#2c3e55', opacity: .32 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-  ground.material.onBeforeCompile = shader => {
-    shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vGround;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvGround = position.xy;');
-    shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec2 vGround;').replace('opacity * ( 1.0 - getShadowMask() )', 'opacity * ( 1.0 - getShadowMask() ) * smoothstep( .9, .12, length( vGround * vec2( 1.0, 1.45 ) - vec2( .08, .1 ) ) )');
+// A shadow that fades out round where it falls, never ending in an edge: `fade` is the shader's falloff over the plane.
+function fading(material, fade) {
+  material.onBeforeCompile = shader => {
+    shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vPlane;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvPlane = position.xy;');
+    shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec2 vPlane;').replace('opacity * ( 1.0 - getShadowMask() )', `opacity * ( 1.0 - getShadowMask() ) * ${fade}`);
   };
+  return material;
+}
 
-  let state = 'loading', chosen = null, progress = 0, target = 0, pending = null, before = 0, shown = 0, frame = 0, visible = true, held = false, ticking = false, until = 0, grip = null, bumping = false, sway = 0;
-  const machine = buildMachine({ redraw: () => refresh() }); scene.add(machine.group);
+export function mountMachine(stage, { world, place, onState = () => {}, sound = null } = {}) {
+  const still = matchMedia('(prefers-reduced-motion: reduce)'), events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal });
+  const renderer = world.renderer, scale = place.height / MACHINE.bounds[3];
+  // Everything below is in the machine's own units (vending-papercraft.js): its place in the square, `rig`, is scaled up
+  // to its height there, set where it stands and turned as it stands.
+  const rig = new THREE.Group(); rig.position.set(place.at[0], 0, place.at[1]); rig.rotation.y = place.turn; rig.scale.setScalar(scale); world.scene.add(rig);
+  // (it stands up with the rest of the square when the page opens)
+  world.pop?.(rig, -place.at[1]);
+  // The card takes its colours as they are (its materials skip tone mapping); the four models, as Tripo3D showed them, go
+  // through filmic tone mapping at half exposure (the street's renderer does), each with a soft studio room as its own
+  // environment map (set on their materials only: as the scene's environment it would light the card too).
+  const studio = new THREE.PMREMGenerator(renderer), room = studio.fromScene(new RoomEnvironment(), .04).texture; studio.dispose();
+  // Lit as the street is round it: from the upper left, where its lamp stands, by a light only a little warm, the night sky
+  // above and the snow below for the rest (in the street itself, so that up is up), a cool rim of moonlight from behind.
+  // The key light throws the card's soft shadows; its reach is the machine's (all the way back), in the street's metres.
+  const sky = new THREE.HemisphereLight('#c9d6ea', '#efe8dc', 2.1); world.scene.add(sky);
+  const key = new THREE.DirectionalLight('#fff3e6', 2.5); key.position.set(-1.3, 1.9, 2.2); rig.add(key, key.target);
+  key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 3; key.shadow.bias = -.0004; key.shadow.normalBias = .004 * scale;
+  Object.assign(key.shadow.camera, { left: -1.4 * scale, right: 1.5 * scale, top: 2.1 * scale, bottom: -1 * scale, near: .5 * scale, far: 7 * scale }); key.shadow.camera.updateProjectionMatrix();
+  const rim = new THREE.DirectionalLight('#a9c2ee', .5); rim.position.set(2, 1.2, -1); rig.add(rim, rim.target);
+  // A warm light over the stage, on only while the thing is shown there (as strong, at the machine's size, as it was made).
+  const spot = new THREE.SpotLight('#ffe7c4', 0, .7 * scale, .8, .6, 2); spot.position.set(0, .29, .15); spot.target.position.set(0, .1, .11); rig.add(spot, spot.target);
+  const glare = SPOT * scale * scale;
+  // Its shadow on the snow, lavender as shadows on snow are, so it stands rather than floats; it fades out round the
+  // machine. The stage's light, when it is lit, spills onto the cobbles in front.
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), fading(new THREE.ShadowMaterial({ color: '#5d5794', opacity: .2 }), 'smoothstep( .9, .12, length( vPlane * vec2( 1.0, 1.45 ) - vec2( .08, .1 ) ) )')); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; rig.add(ground);
+  // (It hides nothing behind it, and is laid on after the square's paper.)
+  ground.material.depthWrite = false; ground.renderOrder = 1;
+  const warmth = document.createElement('canvas'); warmth.width = warmth.height = 128;
+  { const context = warmth.getContext('2d'), gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64); gradient.addColorStop(0, 'rgba(255, 214, 140, .7)'); gradient.addColorStop(.5, 'rgba(255, 214, 140, .25)'); gradient.addColorStop(1, 'rgba(255, 214, 140, 0)'); context.fillStyle = gradient; context.fillRect(0, 0, 128, 128); }
+  const spill = new THREE.Mesh(new THREE.PlaneGeometry(.9, .55), new THREE.MeshBasicMaterial({ map: world.texture(warmth), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, opacity: 0 }));
+  spill.rotation.x = -Math.PI / 2; spill.position.set(0, .004, .42); rig.add(spill);
+
+  let state = 'loading', chosen = null, progress = 0, target = 0, pending = null, before = 0, shown = 0, held = false, stepping = false, until = 0, grip = null, bumping = false, sway = 0;
+  const machine = buildMachine({ redraw: () => refresh() }); rig.add(machine.group);
   const { buttons, cells, marquee, stage: theatre, lever } = machine, things = new Map(), shade = new THREE.MeshBasicMaterial({ color: '#3a1d1b', toneMapped: false });
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   // Each little thing as Tripo3D shows it, a little less glossy: none of the metal its texture hints at, a satin finish.
@@ -87,47 +102,48 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
 
   Promise.all(ITEMS.map(({ id }) => load(`vending-${id}`))).then(models => {
     ITEMS.forEach(({ id }, i) => { const thing = fit(models[i]); thing.position.copy(home(id)); machine.group.add(thing); things.set(id, thing); });
-    resize(); set('idle');
+    draw(); set('idle');
   }).catch(() => { stop(); fail(); });
 
-  // The camera frames the machine with the lever all the way down, a little from above; the hit areas and the crest's glows
-  // follow what they cover on screen, and the page learns where the machine's foot, width and tray are (for the light on
-  // the snow and the desk opening).
-  function resize() {
-    const width = stage.clientWidth || 1, height = stage.clientHeight || 1; renderer.setSize(width, height, false); camera.aspect = width / height;
-    const [x0, x1, y0, y1] = MACHINE.bounds, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, half = Math.max((y1 - y0) / 2, (x1 - x0) / 2 / camera.aspect) * 1.06;
-    camera.position.set(cx, cy + .12, half / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) + MACHINE.front); camera.lookAt(cx, cy, 0); camera.updateProjectionMatrix();
+  // Wherever the street's view shows the machine, the hit areas and the crest's glows follow what they cover on the page
+  // (worked out again each time the street is drawn; written only when they move).
+  const corners = new THREE.Box3(), point = new THREE.Vector3(), placed = new Map();
+  const project = (x, y, z) => { point.set(x, y, z); rig.localToWorld(point); return world.project(point.toArray()); };
+  const put = (node, styles) => { const key = Object.values(styles).join(' '); if (placed.get(node) === key) return; placed.set(node, key); Object.assign(node.style, styles); };
+  function layout() {
     const [bx, by] = MACHINE.buttons.gingerbread, [, below] = MACHINE.buttons.tree, [across] = MACHINE.buttons.snowman, F = MACHINE.front;
-    const room = Math.min(44, Math.abs(project(0, by, F).y - project(0, below, F).y) - 2, Math.abs(project(across, by, F).x - project(bx, by, F).x) - 2);
-    for (const [id, hit] of hits) place(hit, buttons.get(id), null, room);
-    place(tray, null, [-.17, .055, .14, .17, .305, .2]);
+    const least = Math.min(44, Math.abs(project(0, by, F).y - project(0, below, F).y) - 2, Math.abs(project(across, by, F).x - project(bx, by, F).x) - 2);
+    for (const [id, hit] of hits) cover(hit, buttons.get(id), null, least);
+    cover(tray, null, [-.17, .055, .14, .17, .305, .2]);
     placeLever();
-    marquee.forEach((point, i) => { const at = project(point.x, point.y, point.z); Object.assign(halos[i].style, { left: `${at.x}px`, top: `${at.y}px` }); });
-    stage.style.setProperty('--bulb', `${(project(.02, 0, F).x - project(-.02, 0, F).x).toFixed(1)}px`);
-    const foot = project(0, 0, F), left = project(-MACHINE.width / 2, 0, F), right = project(MACHINE.width / 2, 0, F), at = trayPoint();
-    stage.style.setProperty('--foot-x', `${foot.x}px`); stage.style.setProperty('--foot-y', `${foot.y}px`); stage.style.setProperty('--machine-w', `${right.x - left.x}px`);
-    stage.style.setProperty('--tray-x', `${at.x}px`); stage.style.setProperty('--tray-y', `${at.y}px`);
-    draw();
+    marquee.forEach((bulb, i) => { const at = project(bulb.x, bulb.y, bulb.z); put(halos[i], { left: `${at.x.toFixed(1)}px`, top: `${at.y.toFixed(1)}px` }); });
+    const size = `${(project(.02, 0, F).x - project(-.02, 0, F).x).toFixed(1)}px`; if (stage.style.getPropertyValue('--bulb') !== size) stage.style.setProperty('--bulb', size);
   }
-  const corners = new THREE.Box3(), point = new THREE.Vector3();
-  const project = (x, y, z) => { point.set(x, y, z).project(camera); return { x: (point.x + 1) / 2 * stage.clientWidth, y: (1 - point.y) / 2 * stage.clientHeight }; };
-  function place(hit, object, box, least = 0) {
-    if (object) corners.setFromObject(object); else corners.set(new THREE.Vector3(box[0], box[1], box[2]), new THREE.Vector3(box[3], box[4], box[5]));
+  function cover(hit, object, box, least = 0) {
     const xs = [], ys = [];
-    for (const x of [corners.min.x, corners.max.x]) for (const y of [corners.min.y, corners.max.y]) for (const z of [corners.min.z, corners.max.z]) { const at = project(x, y, z); xs.push(at.x); ys.push(at.y); }
+    if (object) { corners.setFromObject(object); for (const x of [corners.min.x, corners.max.x]) for (const y of [corners.min.y, corners.max.y]) for (const z of [corners.min.z, corners.max.z]) { const at = world.project([x, y, z]); xs.push(at.x); ys.push(at.y); } }
+    else for (const x of [box[0], box[3]]) for (const y of [box[1], box[4]]) for (const z of [box[2], box[5]]) { const at = project(x, y, z); xs.push(at.x); ys.push(at.y); }
     let left = Math.min(...xs), top = Math.min(...ys), width = Math.max(...xs) - left, height = Math.max(...ys) - top;
     if (width < least) { left -= (least - width) / 2; width = least; } if (height < least) { top -= (least - height) / 2; height = least; }
-    Object.assign(hit.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` });
+    put(hit, { left: `${left.toFixed(1)}px`, top: `${top.toFixed(1)}px`, width: `${width.toFixed(1)}px`, height: `${height.toFixed(1)}px` });
   }
   // The lever's hit area covers the whole arc its knob can sweep, from its hub out.
   function placeLever() {
     const [hx, hy] = MACHINE.hub, reach = MACHINE.arm + MACHINE.knob, z = MACHINE.front + .02, xs = [], ys = [];
     for (let degrees = 20; degrees <= 160; degrees += 10) for (const r of [0, reach]) { const at = project(hx + Math.sin(degrees * Math.PI / 180) * r, hy + Math.cos(degrees * Math.PI / 180) * r, z); xs.push(at.x); ys.push(at.y); }
     const left = Math.min(...xs) - 4, top = Math.min(...ys) - 6;
-    Object.assign(handle.style, { left: `${left}px`, top: `${top}px`, width: `${Math.max(...xs) + 6 - left}px`, height: `${Math.max(...ys) + 6 - top}px` });
+    put(handle, { left: `${left.toFixed(1)}px`, top: `${top.toFixed(1)}px`, width: `${(Math.max(...xs) + 6 - left).toFixed(1)}px`, height: `${(Math.max(...ys) + 6 - top).toFixed(1)}px` });
   }
+  const offFrame = world.onFrame(layout);
+  // Where the machine is on the page (a touch on it from the street walks up to it), and its middle in the street.
+  function frame() {
+    const [x0, x1, y0, y1] = MACHINE.bounds, xs = [], ys = [];
+    for (const x of [x0, x1]) for (const y of [y0, y1]) for (const z of [-.12, MACHINE.front]) { const at = project(x, y, z); xs.push(at.x); ys.push(at.y); }
+    return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+  }
+  const middle = () => { const [x0, x1, y0, y1] = MACHINE.bounds; return rig.localToWorld(new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, 0)).toArray(); };
   const hubOnScreen = () => { const box = stage.getBoundingClientRect(), at = project(MACHINE.hub[0], MACHINE.hub[1], MACHINE.front + .02); return { x: box.left + at.x, y: box.top + at.y }; };
-  // Where the thing stands once the tray is out, in the stage's own pixels.
+  // Where the thing stands once the tray is out, in the street's pixels (the stage's layer covers the street).
   const trayPoint = () => project(0, MACHINE.stage.floor + .06, MACHINE.stage.stand[2] + MACHINE.stage.slide);
 
   // Everything that moves is a tween: a step called with its eased progress from its start (after `delay`) for `length`
@@ -260,14 +276,14 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     tween(span(d.dim), t => { theatre.backlight.color.copy(LIT).lerp(DIM, t); theatre.cloth.color.copy(GLOWING).lerp(CLOTH, t); theatre.cloth.opacity = .58 + .42 * t; }, { delay: d.dim[0], curve: linear });
     later(d.dim[1], () => silhouette(thing, false));
     later(d.curtains[0], () => cue('whoosh'));
-    tween(span(d.curtains), t => { curtains(1 - .78 * t); spot.intensity = SPOT * t; theatre.pool.opacity = .8 * t; theatre.beam.opacity = .5 * t; }, { delay: d.curtains[0], curve: ease });
+    tween(span(d.curtains), t => { curtains(1 - .78 * t); spot.intensity = glare * t; theatre.pool.opacity = .8 * t; theatre.beam.opacity = .5 * t; }, { delay: d.curtains[0], curve: ease });
     theatre.confetti.forEach((star, i) => {
       const x = -.1 + i * .04 + (i % 2 ? .008 : -.006), z = .09 + (i % 3) * .012;
       later(d.curtains[0] + 80 + i * 90, () => { star.visible = true; });
       tween(1500 + i * 110, t => { star.position.set(x + Math.sin(t * Math.PI * 2 + i) * .012, .3 - (.3 - MACHINE.stage.floor - .004) * ease(t), z); star.rotation.set(-Math.PI / 2 * t ** 3, 0, t * (3 + i)); }, { delay: d.curtains[0] + 80 + i * 90, curve: linear });
     });
     // The tray slides out with it and it turns to you, with a little bell; the stage's light falls on the snow.
-    later(d.tray[0], () => { stage.dataset.lit = ''; });
+    tween(span(d.tray), t => { spill.material.opacity = .9 * t; }, { delay: d.tray[0] });
     const lift = (SHOW - 1) * MACHINE.item / 2;
     tween(span(d.tray), t => { theatre.tray.position.z = MACHINE.stage.slide * t; thing.scale.setScalar(1 + (SHOW - 1) * t); thing.position.y = stand.y + lift * t; }, { delay: d.tray[0] });
     later(d.turn[0], () => { sound?.play('jingle'); stage.dataset.show = ''; });
@@ -300,35 +316,34 @@ export function mountMachine(stage, { onState = () => {}, sound = null } = {}) {
     }
     curtains(1); theatre.cloth.color.copy(CLOTH); theatre.cloth.opacity = 1; theatre.backlight.color.copy(DARK); theatre.pool.opacity = 0; theatre.beam.opacity = 0; theatre.tray.position.z = 0; spot.intensity = 0;
     for (const star of theatre.confetti) star.visible = false;
-    machine.group.rotation.z = 0; lever.hub.rotation.z = 0; lever.pawl.rotation.z = 0; target = 0; pullTo(0, { audible: false }); delete stage.dataset.lit; delete stage.dataset.show;
+    machine.group.rotation.z = 0; lever.hub.rotation.z = 0; lever.pawl.rotation.z = 0; target = 0; pullTo(0, { audible: false }); spill.material.opacity = 0; delete stage.dataset.show;
     pending = null; chosen = null; set(next('ready', 'take'));
   }
 
-  function tick(now) {
-    frame = 0; ticking = true;
-    // While the lever is held, it follows the hand a moment behind.
-    const dt = Math.min(64, now - (before || now)); before = now;
+  // Each frame the street draws while something moves: the lever follows the hand a moment behind, the tweens step on,
+  // and the key light's shadow is drawn again.
+  function step() {
+    const now = performance.now(), dt = Math.min(64, now - (before || now)); before = now;
     if (grip && Math.abs(target - progress) > .0005) pullTo(progress + (target - progress) * (1 - Math.exp(-dt / 45)));
     for (const move of [...moves]) { if (now < move.start) continue; const t = move.length ? Math.min(1, (now - move.start) / move.length) : 1; move.step(move.curve(t)); if (t >= 1) moves.delete(move); }
-    ticking = false; renderer.render(scene, camera);
-    if ((now < until || moves.size) && visible && !held && !document.hidden) frame = requestAnimationFrame(tick);
+    renderer.shadowMap.needsUpdate = true;
+    if ((now < until || moves.size) && !held) return true;
+    stepping = false; before = 0; return false;
   }
-  // Drawn once now; or kept moving until `end` (a timestamp) while something moves; `refresh` asks for one more frame.
-  function draw() { if (!frame && !ticking) renderer.render(scene, camera); }
-  function animate(end) { until = Math.max(until, end); if (!frame && !ticking && visible && !held) frame = requestAnimationFrame(tick); }
+  // Drawn once more now; or kept moving until `end` (a timestamp) while something moves; `refresh` asks for one more frame.
+  function draw() { renderer.shadowMap.needsUpdate = true; world.wake(); }
+  function animate(end) { until = Math.max(until, end); if (!stepping && !held) { stepping = true; world.animate(step); } }
   const refresh = () => animate(performance.now());
-  const resizing = new ResizeObserver(() => resize()); resizing.observe(stage);
-  const watch = 'IntersectionObserver' in window ? new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) animate(until); }) : null; watch?.observe(stage);
-  on(document, 'visibilitychange', () => { if (!document.hidden) animate(until); });
   function stop() {
-    events.abort(); cancelAnimationFrame(frame); clearTimeout(sway); moves.clear(); resizing.disconnect(); watch?.disconnect(); machine.dispose(); shade.dispose();
+    events.abort(); clearTimeout(sway); moves.clear(); held = true; offFrame(); world.scene.remove(rig, sky); machine.dispose(); shade.dispose();
     for (const thing of things.values()) thing.traverse(node => { if (node.isMesh) { node.geometry.dispose(); for (const value of Object.values(node.userData.material)) if (value?.isTexture) value.dispose(); node.userData.material.dispose(); } });
-    ground.geometry.dispose(); ground.material.dispose(); room.dispose(); renderer.dispose(); stage.querySelectorAll('.machine-hit, .machine-canvas, .machine-bulb').forEach(node => node.remove());
+    for (const mesh of [ground, spill]) { mesh.geometry.dispose(); mesh.material.dispose(); }
+    key.shadow.dispose(); room.dispose(); stage.querySelectorAll('.machine-hit, .machine-bulb').forEach(node => node.remove());
   }
   return {
-    select, takeOut, trayPoint, get state() { return state; },
-    // While the coloring desk covers it, the machine does not draw.
-    hold(covered) { held = covered; if (pending) putBack(); if (covered) { cancelAnimationFrame(frame); frame = 0; before = 0; } else { animate(until); draw(); } },
+    select, takeOut, trayPoint, frame, middle, get state() { return state; },
+    // While the coloring desk covers it, the machine does not move (the street is not drawn either).
+    hold(covered) { held = covered; if (pending) putBack(); if (!covered) { animate(until); draw(); } },
     destroy: stop,
   };
 }

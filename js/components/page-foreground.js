@@ -1,6 +1,6 @@
 // Paper-cut ground shared by all five pages: same hills and layout, different objects and one toy per page.
 import { holly, paperLayer, pauseOffscreen, pine, shape } from './paper-art.js';
-import { lamp, snowyFir } from './paper-props.js';
+import { snowyFir } from './paper-props.js';
 import { mountToy } from './foreground-toys.js';
 
 const LEFT_BOX = '0 0 420 250', RIGHT_BOX = '0 0 340 220';
@@ -125,6 +125,38 @@ function northPole(parent, x, base) {
   shape('ellipse', { cx: x, cy: base, rx: 28, ry: 8, fill: '#fbf8f1' }, parent);
 }
 
+// The market's hot cocoa cart: two wheels, a red body with a cream band, mugs on its counter, posts holding a
+// scalloped red and cream awning with a star on top; its middle at x, its wheels on the snow at `base`.
+function cocoaCart(parent, x, base) {
+  for (const dx of [-46, 46]) { shape('circle', { cx: x + dx, cy: base - 16, r: 16, fill: '#6e4a33' }, parent); shape('circle', { cx: x + dx, cy: base - 16, r: 6, fill: '#e0b04f' }, parent); }
+  shape('rect', { x: x - 66, y: base - 70, width: 132, height: 48, rx: 6, fill: '#b5544c' }, parent);
+  shape('rect', { x: x - 66, y: base - 54, width: 132, height: 12, fill: '#efdcae' }, parent);
+  shape('rect', { x: x - 72, y: base - 76, width: 144, height: 9, rx: 3, fill: '#8a5a3c' }, parent);
+  for (const dx of [-36, -6, 24]) { shape('rect', { x: x + dx, y: base - 92, width: 16, height: 16, rx: 3, fill: dx === -6 ? '#5f8a70' : '#fbf8f1' }, parent); shape('path', { d: `M${x + dx + 16} ${base - 88}q7 2 0 9`, stroke: dx === -6 ? '#5f8a70' : '#fbf8f1', 'stroke-width': 3, fill: 'none' }, parent); }
+  for (const dx of [-62, 58]) shape('rect', { x: x + dx, y: base - 136, width: 5, height: 62, fill: '#8a5a3c' }, parent);
+  const n = 6, left = x - 74, step = 148 / n;
+  shape('rect', { x: left, y: base - 146, width: 148, height: 14, fill: '#b5544c' }, parent);
+  for (let k = 0; k < n; k++) shape('path', { d: `M${left + k * step} ${base - 133}h${step}v4q${-step / 2} ${step * .5} ${-step} 0Z`, fill: k % 2 ? '#efdcae' : '#b5544c' }, parent);
+  shape('path', { d: `M${left - 4} ${base - 146}C${x - 30} ${base - 156} ${x + 30} ${base - 156} ${left + 152} ${base - 146}V${base - 140}H${left - 4}Z`, fill: '#fbf8f1' }, parent);
+  shape('path', { d: `M${x} ${base - 172}l5 10 11 1 -8 7 3 11 -11 -6 -11 6 3 -11 -8 -7 11 -1Z`, fill: '#e0b04f' }, parent);
+}
+// Steam off the mugs: three soft curls rising.
+function steam(parent, x, top) {
+  for (const dx of [-28, 2, 32]) shape('path', { d: `M${x + dx} ${top + 52}c-6 -8 6 -14 0 -22s6 -14 0 -22`, stroke: '#ffffff', 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none', opacity: .85 }, parent);
+}
+// The workshop's box of crayons, open, eight standing in it, and a rolled sheet leaning on it; its middle at x.
+function crayonBox(parent, x, base) {
+  shape('path', { d: `M${x + 36} ${base}L${x + 84} ${base - 84}L${x + 108} ${base - 72}L${x + 62} ${base}Z`, fill: '#fbf3df' }, parent);
+  shape('ellipse', { cx: x + 96, cy: base - 78, rx: 13, ry: 7, fill: '#e9dcc4', transform: `rotate(26 ${x + 96} ${base - 78})` }, parent);
+  shape('path', { d: `M${x + 55} ${base - 44}L${x + 78} ${base - 32}`, stroke: '#b5443c', 'stroke-width': 5, fill: 'none' }, parent);
+  shape('path', { d: `M${x + 66} ${base - 38}c-10 -14 -20 -2 -8 2c-4 10 10 12 8 -2z`, fill: '#b5443c' }, parent);
+  const colours = ['#b5443c', '#d9823f', '#e0b04f', '#6f9676', '#4f7d68', '#7fa3a8', '#5b5f99', '#a8693f'];
+  colours.forEach((colour, i) => { const cx = x - 44 + i * 11, top = base - 92 + (i % 3) * 6; shape('rect', { x: cx - 4.5, y: top + 8, width: 9, height: 60, fill: colour }, parent); shape('path', { d: `M${cx - 4.5} ${top + 8}L${cx} ${top - 4}L${cx + 4.5} ${top + 8}Z`, fill: colour }, parent); shape('rect', { x: cx - 4.5, y: top + 18, width: 9, height: 4, fill: '#fbf8f1', opacity: .7 }, parent); });
+  shape('rect', { x: x - 54, y: base - 54, width: 100, height: 54, rx: 4, fill: '#4f7d68' }, parent);
+  shape('rect', { x: x - 44, y: base - 42, width: 80, height: 26, rx: 3, fill: '#efdcae' }, parent);
+  for (const [dx, colour] of [[-28, '#b5443c'], [-8, '#e0b04f'], [12, '#7fa3a8']]) shape('circle', { cx: x + dx + 4, cy: base - 29, r: 6, fill: colour }, parent);
+}
+
 // A soft bluish shadow on the snow, thrown to the right of whatever stands there (the sun is low on the left).
 function groundShadow(parent, x, base, width) {
   shape('ellipse', { cx: x + width * .28, cy: base - 2, rx: width * .62, ry: width * .12, fill: '#c9d7e1', opacity: .7 }, parent);
@@ -165,10 +197,11 @@ const THEMES = {
       snowyFir(parent, 246, 192, 140, 1, .62); northPole(parent, 96, 200);
     }); },
   },
-  // Christmas Vending: a street lamp in the snow, and a present left by it.
+  // Christmas Market: on the left a hot cocoa cart from the market, its mugs steaming; on the right the workshop's open
+  // box of crayons and a rolled sheet to colour (the lottery drum stands between them, foreground-toys.js).
   vending: {
-    left: ({ tree, still }) => { tree(70, 216, 130, -1); tree(150, 224, 90, -2.2); still(parent => lamp(parent, 300, 228)); },
-    right: ({ tree, bob }) => { tree(236, 190, 120, -2); bob(-1.2, parent => gift(parent, 84, 150, 84, 50, '#b5625a', '#efdcae')); },
+    left: ({ tree, still, sway }) => { tree(64, 216, 124, -1); still(parent => { groundShadow(parent, 262, 230, 80); cocoaCart(parent, 262, 230); }); sway([262, 150], -.6, parent => steam(parent, 262, 150)); },
+    right: ({ tree, still }) => { tree(270, 192, 116, -2); still(parent => { groundShadow(parent, 120, 200, 70); crayonBox(parent, 120, 200); }); },
   },
   wish: {
     left: ({ tree, still, bob }) => { tree(70, 216, 130, -1); still(parent => mailbox(parent, 226, 228)); bob(-.6, parent => envelope(parent, 350, 96, 9)); bob(-2.2, parent => envelope(parent, 118, 86, -11)); },

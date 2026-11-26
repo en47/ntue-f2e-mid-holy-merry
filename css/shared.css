@@ -172,6 +172,10 @@ dialog::backdrop { background: #263d4870; backdrop-filter: blur(3px); }
 .toy-wish .toy-button { --toy-ratio: 1; left: 50%; bottom: -14px; width: clamp(46px, 5.4vw, 72px); margin-left: calc(clamp(46px, 5.4vw, 72px) / -2); }
 .toy-star { animation: foreground-bob 2.4s ease-in-out infinite alternate; }
 .toy-meteor { inset: auto; left: 20%; bottom: 10px; width: 60%; aspect-ratio: 220 / 70; opacity: 0; pointer-events: none; }
+.toy-vending { --toy: clamp(130px, 15vw, 210px); --toy-ratio: 240 / 220; bottom: 6%; }
+.toy-vending .toy-button { touch-action: none; }
+.toy-lottery-ball, .toy-lottery-prize { opacity: 0; }
+.toy-lottery-drum { will-change: rotate; }
 @media (max-width: 600px) {
   .foreground-left { left: -16%; }
   .foreground-right { right: -12%; }

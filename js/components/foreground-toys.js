@@ -164,7 +164,98 @@ function jingleBell(host) {
   });
 }
 
-const TOYS = { home: sled, intro: globe, game: surpriseBox, wish: wishingStar, santa: jingleBell };
+// Christmas Market: a lottery drum of paper on a wooden stand. A press turns it once round (or it is turned by hand,
+// dragged round its hub: once all the way round does it); a ball drops out of its mouth, rolls into the tray, and the
+// prize it stands for comes up out of the tray: the four things the vending machine sells, or, now and then, a gold star.
+const VIEW = [240, 220], HUB = [104, 92], MOUTH = [104, 160];
+const BALLS = [
+  { colour: '#e0b04f', name: '金色', prize: '金星', odds: .1 },
+  { colour: '#b5443c', name: '紅色', prize: '聖誕襪', odds: .225 },
+  { colour: '#4f7d68', name: '綠色', prize: '聖誕樹', odds: .225 },
+  { colour: '#fbf7ee', name: '白色', prize: '雪人', odds: .225 },
+  { colour: '#a8693f', name: '棕色', prize: '薑餅人', odds: .225 },
+];
+const LOTTERY_PRIZES = [
+  parent => star(parent, 180, 108, 22, '#f2c75c'),
+  parent => { shape('path', { d: 'M170 84H190V112L198 120C204 126 196 136 188 130L172 118C168 115 170 110 170 106Z', fill: '#b5443c' }, parent); shape('rect', { x: 166, y: 78, width: 28, height: 10, rx: 4, fill: '#fbf7ee' }, parent); },
+  parent => { for (const [y, w] of [[82, 16], [96, 24], [110, 32]]) shape('path', { d: `M180 ${y - 14}L${180 + w / 2} ${y + 6}H${180 - w / 2}Z`, fill: '#4f7d68' }, parent); shape('rect', { x: 176, y: 116, width: 8, height: 8, fill: '#8a5a3c' }, parent); star(parent, 180, 66, 6, '#f2c75c'); },
+  parent => { shape('circle', { cx: 180, cy: 112, r: 13, fill: '#fbf7ee' }, parent); shape('circle', { cx: 180, cy: 90, r: 9, fill: '#fbf7ee' }, parent); for (const x of [177, 183]) shape('circle', { cx: x, cy: 88, r: 1.4, fill: '#3b2a22' }, parent); shape('path', { d: 'M180 91L187 93 180 94Z', fill: '#d9823f' }, parent); shape('path', { d: 'M171 98H189V101H171Z', fill: '#b5443c' }, parent); },
+  parent => { shape('path', { d: 'M180 74A8 8 0 1 1 179.9 74ZM172 86H188L198 96 194 100 188 96V108L194 124 188 126 180 112 172 126 166 124 172 108V96L166 100 162 96Z', fill: '#a8693f' }, parent); for (const y of [92, 100]) shape('circle', { cx: 180, cy: y, r: 1.6, fill: '#fbf7ee' }, parent); },
+];
+function lottery(host) {
+  const button = toyButton(host, '轉動抽獎機'), paper = { paper: PAPER, eager: true }, box = `0 0 ${VIEW.join(' ')}`;
+  const note = element('p', 'sr-only', host); note.setAttribute('aria-live', 'polite');
+  // Behind: the wooden stand under snow, the upright that holds the drum, the back of the tray.
+  paperLayer(button, box, 'toy-lottery-stand', parent => {
+    shape('ellipse', { cx: 132, cy: 214, rx: 104, ry: 7, fill: '#c9d7e1', opacity: .7 }, parent);
+    shape('path', { d: 'M96 92L84 196H124L112 92Z', fill: '#a9845b' }, parent);
+    shape('rect', { x: 26, y: 192, width: 196, height: 20, rx: 4, fill: '#b98a5e' }, parent);
+    shape('path', { d: 'M24 194C60 184 100 190 132 186S196 184 224 194L222 200H26Z', fill: '#fbf8f1' }, parent);
+    shape('ellipse', { cx: 172, cy: 186, rx: 48, ry: 13, fill: '#e9dcc4' }, parent);
+  }, paper);
+  // The drum: an octagon of red card with a cream face, a gold rim, the arrow that says which way it goes, the crank
+  // on its hub; all of it turns about the hub.
+  const drum = paperLayer(button, box, 'toy-lottery-drum', parent => {
+    const octagon = r => Array.from({ length: 8 }, (_, i) => { const a = (i + .5) * Math.PI / 4; return `${(HUB[0] + Math.cos(a) * r).toFixed(1)} ${(HUB[1] + Math.sin(a) * r).toFixed(1)}`; }).join('L');
+    shape('path', { d: `M${octagon(72)}Z`, fill: '#b5443c' }, parent);
+    shape('path', { d: `M${octagon(64)}Z`, fill: '#fbf3df' }, parent);
+    shape('path', { d: `M${octagon(58)}Z`, fill: 'none', stroke: '#e0b04f', 'stroke-width': 3 }, parent);
+    shape('path', { d: `M${HUB[0] - 36} ${HUB[1] - 30}Q${HUB[0]} ${HUB[1] - 56} ${HUB[0] + 34} ${HUB[1] - 32}L${HUB[0] + 30} ${HUB[1] - 42}L${HUB[0] + 48} ${HUB[1] - 26}L${HUB[0] + 26} ${HUB[1] - 20}L${HUB[0] + 30} ${HUB[1] - 26}Q${HUB[0]} ${HUB[1] - 44} ${HUB[0] - 32} ${HUB[1] - 22}Z`, fill: '#b5443c' }, parent);
+    holly(parent, HUB[0] - 30, HUB[1] + 34, .55); holly(parent, HUB[0] + 30, HUB[1] + 34, .55);
+    shape('path', { d: `M${HUB[0]} ${HUB[1]}L${HUB[0] - 40} ${HUB[1] + 22}`, stroke: '#8a6a4a', 'stroke-width': 7, 'stroke-linecap': 'round' }, parent);
+    shape('circle', { cx: HUB[0] - 40, cy: HUB[1] + 22, r: 9, fill: '#fbf3df' }, parent);
+  }, { ...paper, origin: HUB });
+  // The hub's cap stays put (gold, with a star).
+  paperLayer(button, box, 'toy-lottery-hub', parent => { shape('circle', { cx: HUB[0], cy: HUB[1], r: 13, fill: '#e0b04f' }, parent); star(parent, HUB[0], HUB[1], 7, '#fbf3df'); }, paper);
+  // The prizes (each comes up over the tray, clear of the drum), a ball of each colour (one shown at a time), the tray's
+  // front lip over it.
+  const prizes = LOTTERY_PRIZES.map(draw => paperLayer(button, box, 'toy-lottery-prize', parent => draw(shape('g', { transform: 'translate(204 100) scale(1.35) translate(-180 -100)' }, parent)), paper));
+  const balls = BALLS.map(({ colour }) => paperLayer(button, box, 'toy-lottery-ball', parent => { shape('circle', { cx: MOUTH[0], cy: MOUTH[1], r: 7, fill: colour }, parent); shape('circle', { cx: MOUTH[0] - 2.4, cy: MOUTH[1] - 2.4, r: 2.2, fill: '#ffffff', opacity: .7 }, parent); }, { paper: { ...PAPER, shadow: .1 }, eager: true }));
+  paperLayer(button, box, 'toy-lottery-lip', parent => { shape('path', { d: 'M124 188C140 204 204 204 220 186L220 194C204 210 140 210 124 196Z', fill: '#fbf3df' }, parent); }, paper);
+  const pct = ([x, y]) => `${(x / VIEW[0] * 100).toFixed(2)}% ${(y / VIEW[1] * 100).toFixed(2)}%`;
+  // Where the ball goes: out of the mouth, a bounce on the tray, rolling to rest at its far side.
+  const path = [[0, 0], [22, 16], [44, 28], [56, 24], [66, 30], [72, 30]];
+  let angle = 0, busy = false, shown = -1, grip = null;
+  const turnTo = value => { angle = value; drum.style.rotate = `${angle}deg`; };
+  const pick = () => { let r = Math.random(); for (const [i, ball] of BALLS.entries()) { r -= ball.odds; if (r < 0) return i; } return BALLS.length - 1; };
+  async function drop() {
+    const index = pick(), ball = balls[index], { name, prize } = BALLS[index]; busy = true;
+    if (shown >= 0) { balls[shown].style.opacity = 0; prizes[shown].style.opacity = 0; }
+    note.textContent = `抽到${name}的球：${prize}`;
+    shown = index; ball.style.opacity = 1;
+    if (motion().matches) { ball.style.translate = pct(path.at(-1)); prizes[index].style.opacity = 1; busy = false; return; }
+    const roll = ball.animate(path.map(point => ({ translate: pct(point) })), { duration: 900, easing: 'cubic-bezier(.4,0,.7,1)', fill: 'forwards' });
+    await roll.finished.catch(() => {}); ball.style.translate = pct(path.at(-1)); roll.cancel();
+    if (index === 0) for (let scrap = 0; scrap < 14; scrap++) throwScrap(host, scrap);
+    const up = prizes[index].animate([{ opacity: 0, translate: '0 20%', scale: .6 }, { opacity: 1, translate: '0 -6%', scale: 1.08, offset: .35 }, { opacity: 1, translate: '0 0', scale: 1 }], { duration: 700, easing: 'ease-out', fill: 'forwards' });
+    await up.finished.catch(() => {}); prizes[index].style.opacity = 1; up.cancel(); busy = false;
+  }
+  async function spin() {
+    if (busy) return;
+    if (motion().matches) { drop(); return; }
+    busy = true;
+    const from = angle, run = drum.animate([{ rotate: `${from}deg` }, { rotate: `${from + 360}deg` }], { duration: 1300, easing: 'cubic-bezier(.45,0,.3,1)' });
+    await run.finished.catch(() => {}); turnTo((from + 360) % 360); busy = false; drop();
+  }
+  // Turned by hand: the drum follows the pointer round its hub, only forward; once all the way round, a ball comes.
+  const hubOnScreen = () => { const rect = button.getBoundingClientRect(); return [rect.left + rect.width * HUB[0] / VIEW[0], rect.top + rect.height * HUB[1] / VIEW[1]]; };
+  const bearingOf = event => { const [x, y] = hubOnScreen(); return Math.atan2(event.clientY - y, event.clientX - x) * 180 / Math.PI; };
+  button.addEventListener('pointerdown', event => { if (busy || motion().matches) return; grip = { id: event.pointerId, at: bearingOf(event), turned: 0, moved: false, x: event.clientX, y: event.clientY }; });
+  button.addEventListener('pointermove', event => {
+    if (!grip || event.pointerId !== grip.id) return;
+    if (!grip.moved && Math.hypot(event.clientX - grip.x, event.clientY - grip.y) < 6) return;
+    if (!grip.moved) { grip.moved = true; button.setPointerCapture(event.pointerId); }
+    const now = bearingOf(event); let delta = now - grip.at; if (delta > 180) delta -= 360; if (delta < -180) delta += 360; grip.at = now;
+    if (delta <= 0) return;
+    grip.turned += delta; turnTo((angle + delta) % 360);
+    if (grip.turned >= 360) { grip = null; drop(); }
+  });
+  const letGo = event => { if (grip && event.pointerId === grip.id) { if (grip.moved) { grip = null; button.dataset.turned = '1'; } else grip = null; } };
+  button.addEventListener('pointerup', letGo); button.addEventListener('pointercancel', letGo);
+  button.addEventListener('click', () => { if (button.dataset.turned) { delete button.dataset.turned; return; } spin(); });
+}
+
+const TOYS = { home: sled, intro: globe, game: surpriseBox, wish: wishingStar, santa: jingleBell, vending: lottery };
 export function mountToy(root, kind) {
   const draw = TOYS[kind]; if (!draw) return;
   const host = element('div', `foreground-scene foreground-toy toy-${kind}`, root);

@@ -13,7 +13,9 @@ import { LEVER } from '../services/vending-lever.js';
 import { drawingSvg } from './vending-coloring.js';
 
 export const MACHINE = {
-  width: .5, front: .105, item: .13,
+  // How wide it is, where its front stands, how far back from there it runs (deep, so that turned a little its red side
+  // shows), how tall a thing in a cell is.
+  width: .5, front: .105, depth: .78, item: .13,
   // Where the crest's half circle is centred (its radius is half the width); the outline with the lever all the way down.
   arch: .91, bounds: [-.29, .49, 0, 1.27],
   // Each cell's foot (its middle), a cell's width and height, and how high its stand's top is above its foot.
@@ -26,7 +28,7 @@ export const MACHINE = {
   stage: { floor: .08, back: -.045, slide: .04, stand: [0, .08, .1] },
 };
 const C = {
-  red: '#b5443c', redEdge: '#7a2f2a', wine: '#7f2f2a', wineEdge: '#5a201d', gold: '#e0b04f', goldEdge: '#a8803a', goldDeep: '#c99a3c',
+  red: '#b5443c', redEdge: '#7a2f2a', side: '#9a3d35', wine: '#7f2f2a', wineEdge: '#5a201d', gold: '#e0b04f', goldEdge: '#a8803a', goldDeep: '#c99a3c',
   cream: '#fbf3df', creamEdge: '#d8c8a8', pale: '#f1ddb0', pine: '#3f6653', pineEdge: '#2c4a3d', liner: '#243b34', cell: '#36564c',
   snow: '#fbf8f1', snowEdge: '#d7e0e6', hollyLight: '#5f8a70', berry: '#b5443c', berryEdge: '#7f312c', curtain: '#8f3530',
   stage: '#251c21', woodEdge: '#8f6342', glass: '#6b5646', door: '#efe1c2',
@@ -156,9 +158,11 @@ export function buildMachine({ redraw = () => {} } = {}) {
   const flat = node => { node.castShadow = node.receiveShadow = false; return node; };
 
   // The plinth: two green steps, a gold line along each, snow drifted against the corners.
-  for (const [width, y, depth] of [[.56, 0, .27], [.53, .025, .25]]) {
-    mesh(new THREE.BoxGeometry(width, .025, depth), faces(C.pineEdge, C.pine, C.pineEdge, C.pine), group, 0, y + .0125, .0125);
-    mesh(new THREE.BoxGeometry(width + .002, .0035, .004), paper(C.gold), group, 0, y + .0228, .0125 + depth / 2 + .001);
+  // (each step reaching as far back as the cabinet, plus its lip in front)
+  for (const [width, y, lip] of [[.56, 0, .04], [.53, .025, .02]]) {
+    const depth = MACHINE.depth + lip + .02, middle = F + lip - depth / 2;
+    mesh(new THREE.BoxGeometry(width, .025, depth), faces(C.pineEdge, C.pine, C.pineEdge, C.pine), group, 0, y + .0125, middle);
+    mesh(new THREE.BoxGeometry(width + .002, .0035, .004), paper(C.gold), group, 0, y + .0228, F + lip + .001);
   }
   const drift = Array.from({ length: 17 }, (_, i) => v2(-.045 + i / 16 * .09, Math.sin(i / 16 * Math.PI) ** .8 * (.017 + noise(i + 3) * .006)));
   for (const x of [-.262, .262]) layer(drift, .06, [C.snow, C.snowEdge], .095).position.x = x;
@@ -166,7 +170,10 @@ export function buildMachine({ redraw = () => {} } = {}) {
   // The cabinet, open at the front (the cells and the stage reach into it), and over it the front board: red card cut to the
   // machine's outline with its round crest, the display and the stage cut through it.
   const none = own(new THREE.MeshBasicMaterial({ visible: false }));
-  mesh(new THREE.BoxGeometry(.49, A - .05, .15), [paper(C.redEdge), paper(C.redEdge), paper(C.redEdge), paper(C.redEdge), none, paper(C.redEdge)], group, 0, (A + .05) / 2, F - .135);
+  // (its sides a red a little deeper than the front's, the half round of its crest running back as far)
+  const body = MACHINE.depth - .06;
+  mesh(new THREE.BoxGeometry(.49, A - .05, body), [paper(C.side), paper(C.side), paper(C.redEdge), paper(C.redEdge), none, paper(C.redEdge)], group, 0, (A + .05) / 2, F - .06 - body / 2);
+  { const crest = [v2(-.245, A)]; for (let i = 0; i <= 48; i++) { const a = Math.PI - i / 48 * Math.PI; crest.push(v2(Math.cos(a) * .245, A + Math.sin(a) * .245)); } layer(crest, body, [C.side, C.side], F - .06 - body); }
   const outline = [v2(-R, .05), v2(R, .05)];
   for (let i = 1; i < 30; i++) outline.push(v2(R + (noise(i + 40) - .5) * .0012, .05 + (A - .05) * i / 30));
   for (let i = 0; i <= 72; i++) { const a = i / 72 * Math.PI, r = R + (noise(i + 7) - .5) * .0012; outline.push(v2(Math.cos(a) * r, A + Math.sin(a) * r)); }
