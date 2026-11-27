@@ -75,9 +75,8 @@ const KINDS = [
   // The craft booth's workshop: its name on a board, the shelf of works, the crayon's name slip, the swatch cards, the
   // sticker tray, the pencilled note, the card once a work is done.
   ['.shop-title, .shop-shelf', 'wood'],
-  ['.color-name, .shop-note, .machine-tag', 'slip'],
-  ['.shop-card, .shop-album', 'letter'],
-  ['.shop-album-card, .shop-album-blank', 'pale'],
+  ['.color-name, .shop-note', 'slip'],
+  ['.shop-card, .machine-tag', 'letter'],
   ['.shop-preset', 'pale'],
   ['.cal-face[data-tone="gold"]', 'gold'],
   ['.cal-face[data-tone="kraft"]', 'kraft'],

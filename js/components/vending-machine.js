@@ -364,12 +364,12 @@ export function mountMachine(stage, { world, place, onState = () => {}, sound = 
   }
   return {
     select, takeOut, trayPoint, frame, middle, get state() { return state; },
-    // Where on the stage's layer the visitor's next step is (for the paper tag that shows it): the keypad, the lever's
-    // knob at its rest, the tray.
+    // Where on the stage's layer the visitor's next step is, at its outer edge (for the paper tag that points at it from
+    // beside it, never over it): the keypad's left edge, the lever's knob at its rest, the stage's right edge.
     point(name) {
-      if (name === 'keypad') return project(0, (MACHINE.buttons.gingerbread[1] + MACHINE.buttons.tree[1]) / 2, MACHINE.front + .02);
-      if (name === 'lever') { const [hx, hy] = MACHINE.hub, reach = MACHINE.arm + MACHINE.knob, a = angle(0); return project(hx + Math.sin(a) * reach, hy + Math.cos(a) * reach, MACHINE.front + .02); }
-      return trayPoint();
+      if (name === 'keypad') return project(MACHINE.buttons.gingerbread[0] - MACHINE.button - .04, (MACHINE.buttons.gingerbread[1] + MACHINE.buttons.tree[1]) / 2, MACHINE.front + .02);
+      if (name === 'lever') { const [hx, hy] = MACHINE.hub, reach = MACHINE.arm + MACHINE.knob, a = angle(0); return project(hx + Math.sin(a) * reach + MACHINE.knob, hy + Math.cos(a) * reach, MACHINE.front + .02); }
+      return project(.18, MACHINE.stage.floor + .1, MACHINE.stage.stand[2] + MACHINE.stage.slide);
     },
     // While the coloring desk covers it, the machine does not move (the street is not drawn either).
     hold(covered) { held = covered; if (pending) putBack(); if (!covered) { animate(until); draw(); } },

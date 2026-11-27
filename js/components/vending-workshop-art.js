@@ -187,3 +187,68 @@ export function corkboard(g) {
   P(g, 'M160 112H236V150H160Z', '#f6dfa8', { transform: 'rotate(-3 198 131)' });
   for (const [x, y, fill] of [[73, 26, '#b5443c'], [188, 32, '#4f7d68'], [200, 116, '#e0b04f']]) shape('circle', { cx: x, cy: y, r: 6, fill }, g);
 }
+
+// The album, an open scrapbook (1000 × 640): a red cloth cover round two cream pages, the spine's shadow between them,
+// a sprig of holly in the top corners.
+export function albumSpread(g) {
+  P(g, 'M18 14H982Q996 14 996 28V612Q996 626 982 626H18Q4 626 4 612V28Q4 14 18 14Z', '#7f2f2a');
+  P(g, 'M26 24H974Q984 24 984 34V604Q984 614 974 614H26Q16 614 16 604V34Q16 24 26 24Z', '#a33a33');
+  P(g, 'M40 38Q270 30 494 46V600Q270 590 40 602Z', '#fbf5e8');
+  P(g, 'M506 46Q730 30 960 38V602Q730 590 506 600Z', '#fdf8ec');
+  P(g, 'M470 46H530V600H470Z', '#e8dcc4', { opacity: .55 });
+  P(g, 'M494 46H506V600H494Z', '#d6c6a6', { opacity: .8 });
+  holly(g, 76, 72, .8); holly(g, 924, 72, .8);
+}
+// The album's name on a red paper ribbon (320 × 70) with its ends folded under.
+export function albumRibbon(g) {
+  P(g, 'M4 22H44L36 38L44 54H4L16 38Z', '#7f2f2a');
+  P(g, 'M316 22H276L284 38L276 54H316L304 38Z', '#7f2f2a');
+  P(g, 'M30 12H290V58H30Z', '#b5443c');
+  P(g, 'M30 58L44 66V58ZM290 58L276 66V58Z', '#5a201d');
+  P(g, 'M40 20H280', 'none', { stroke: '#e0b04f', 'stroke-width': 2, opacity: .8 });
+  P(g, 'M40 50H280', 'none', { stroke: '#e0b04f', 'stroke-width': 2, opacity: .8 });
+}
+// A strip of paper tape (60 × 18), see-through, its ends torn.
+export const washi = fill => g => P(g, 'M2 3L58 1L56 5L59 9L56 13L58 17L2 17L4 13L1 9L4 5Z', fill, { opacity: .8 });
+// Photo corners (100 × 120) holding a picture at its four corners.
+export function photoCorners(g) {
+  for (const [x, y, dx, dy] of [[0, 0, 1, 1], [100, 0, -1, 1], [0, 120, 1, -1], [100, 120, -1, -1]]) P(g, `M${x} ${y}H${x + dx * 18}L${x} ${y + dy * 18}Z`, '#4a3a33');
+}
+// A red ribbon bookmark (20 × 44) with a notched end.
+export const bookmark = g => P(g, 'M2 0H18V44L10 36L2 44Z', '#b5443c');
+// The album's little buttons' pictures (40 × 40): a pencil (to go on with a work), a cross (to let it go), a question mark
+// (asked again before it goes).
+export function pencil(g) {
+  P(g, 'M10 30L28 12L33 17L15 35Z', '#e2b65a');
+  P(g, 'M28 12L31 9Q33 7 35 9L36 10Q38 12 36 14L33 17Z', '#e2aaa3');
+  P(g, 'M10 30L15 35L7 38Z', '#f3e2c4'); P(g, 'M7 38L8.5 34.5L10.5 36.5Z', '#4a4245');
+}
+export const cross = g => P(g, 'M11 14L14 11L20 17L26 11L29 14L23 20L29 26L26 29L20 23L14 29L11 26L17 20Z', '#a8423b');
+export const query = g => { P(g, 'M14 15Q14 8 20 8Q27 8 27 14Q27 19 21 21V25H18V19Q24 17 24 14Q24 11 20 11Q17 11 17 15Z', '#a8423b'); shape('circle', { cx: 19.5, cy: 30, r: 2.4, fill: '#a8423b' }, g); };
+// Nothing in the album yet (200 × 160): an empty frame on the page, a pencil by it, a star.
+export function emptyAlbum(g) {
+  P(g, 'M44 18H156V142H44Z', '#c0905f'); P(g, 'M56 30H144V130H56Z', '#fbf5e8');
+  P(g, 'M118 120L170 68L178 76L126 128Z', '#e2b65a'); P(g, 'M118 120L126 128L112 134Z', '#f3e2c4');
+  star(g, 100, 80, 14, '#e8dcc4');
+}
+// The album on a phone, one page at a time (600 × 1000): the same red cover round a single cream page.
+export function albumPage(g) {
+  P(g, 'M18 10H582Q594 10 594 22V978Q594 990 582 990H18Q6 990 6 978V22Q6 10 18 10Z', '#7f2f2a');
+  P(g, 'M24 18H576Q586 18 586 28V970Q586 980 576 980H24Q14 980 14 970V28Q14 18 24 18Z', '#a33a33');
+  P(g, 'M34 30Q300 22 566 30V966Q300 958 34 966Z', '#fdf8ec');
+  holly(g, 64, 60, .8); holly(g, 536, 60, .8);
+}
+// The done card's prize (120 × 150): a rosette of pleated red paper, a cream middle with a gold star, two ribbon tails.
+export function rosette(g) {
+  P(g, 'M46 92L30 146L44 136L54 148L62 96Z', '#3f6653'); P(g, 'M74 92L90 146L76 136L66 148L58 96Z', '#b5443c');
+  const points = Array.from({ length: 36 }, (_, i) => { const a = i / 36 * Math.PI * 2, r = i % 2 ? 44 : 52; return `${(60 + Math.cos(a) * r).toFixed(1)} ${(58 + Math.sin(a) * r).toFixed(1)}`; });
+  P(g, `M${points.join('L')}Z`, '#b5443c');
+  shape('circle', { cx: 60, cy: 58, r: 38, fill: '#a33a33' }, g);
+  shape('circle', { cx: 60, cy: 58, r: 31, fill: '#fbf3df' }, g);
+  shape('circle', { cx: 60, cy: 58, r: 26, fill: 'none', stroke: '#e0b04f', 'stroke-width': 2.5 }, g);
+  star(g, 60, 58, 17, '#e0b04f');
+}
+// The done card's buttons' pictures (40 × 40): an arrow down into a tray (save it as a picture), an arrow back (to the
+// market); the pencil (go on) is the album's.
+export function keepIt(g) { P(g, 'M17 6H23V20H29L20 30L11 20H17Z', '#4f7d68'); P(g, 'M6 26V34H34V26H30V30H10V26Z', '#7a5238'); }
+export function goBack(g) { P(g, 'M6 20L18 9V16H34V24H18V31Z', '#b5443c'); }

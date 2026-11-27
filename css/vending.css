@@ -4,7 +4,7 @@
    會動的只有 transform 和 opacity，而且只在沒有減少動態時。 */
 .vending-page main { padding: 0; }
 .vending-page .page-foreground { height: clamp(170px, 17vw, 250px); margin-top: 0; background: #fff9eb; }
-.vending { position: relative; isolation: isolate; overflow: hidden; overflow: clip; height: clamp(680px, calc(100svh - 96px), max(940px, 52vw)); background: #9aa3c0; }
+.vending { position: relative; isolation: isolate; overflow: hidden; overflow: clip; height: clamp(600px, calc(100svh - 96px), max(940px, 52vw)); background: #9aa3c0; }
 .vending-edge { position: absolute; z-index: 12; left: 0; bottom: -1px; width: 100%; height: clamp(18px, 2.6vw, 34px); fill: #fff9eb; pointer-events: none; }
 /* 標題掛在米白木框招牌上（vending.js 每一幀把它放到星星燈串起點的位置，任何螢幕比例都連在一起）；招牌紙板比框大一點，容得下積雪和冬青。 */
 .vending-heading { position: absolute; z-index: 9; left: 3%; top: 3%; width: 24%; aspect-ratio: 332 / 144; display: grid; place-items: center; pointer-events: none; }
@@ -42,14 +42,14 @@
 .machine-lift[hidden], .machine-shut[hidden] { display: none; }
 .machine-shut { position: absolute; z-index: 2; width: 44px; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; color: #fbf3df; background: #b5443c; font-size: var(--fs-body); line-height: 1; cursor: pointer; pointer-events: auto; box-shadow: 0 3px 0 #7f312c; }
 .machine-shut:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
-/* 走近販賣機時，下一步旁邊掛著一張紙吊牌（紅線綁著）：先選一樣 → 往下拉到底 → 點這裡去上色。 */
-.machine-tag { position: absolute; z-index: 3; margin: 0; padding: .3rem .8rem .4rem; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); white-space: nowrap; pointer-events: none; transform-origin: 50% -1.2rem; }
+/* 走近販賣機時，下一步旁邊有一張信紙小卡（米白紙、冬青），用一個小尖角指著它：先選一樣 → 往下拉到底 → 點這裡去上色。 */
+.machine-tag { position: absolute; z-index: 3; margin: 0; padding: .5rem 1.1rem .55rem; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); letter-spacing: .06em; white-space: nowrap; pointer-events: none; filter: drop-shadow(0 2px 2px #3a261b40); }
 .machine-tag[hidden] { display: none; }
-.machine-tag[data-side="left"] { translate: calc(-100% - 2.6rem) -50%; }
-.machine-tag[data-side="right"] { translate: 2.6rem -50%; }
-.machine-tag::before { content: ''; position: absolute; top: 50%; width: 2.4rem; height: 2px; background: #b5443c; }
-.machine-tag[data-side="left"]::before { left: 100%; }
-.machine-tag[data-side="right"]::before { right: 100%; }
+.machine-tag[data-side="left"] { translate: calc(-100% - 1rem) -50%; transform-origin: 100% 50%; }
+.machine-tag[data-side="right"] { translate: 1rem -50%; transform-origin: 0 50%; }
+.machine-tag::after { content: ''; position: absolute; top: 50%; width: .7rem; aspect-ratio: 1; background: #fffdf6; translate: 0 -50%; rotate: 45deg; }
+.machine-tag[data-side="left"]::after { right: -.32rem; }
+.machine-tag[data-side="right"]::after { left: -.32rem; }
 .vending-scene.is-pointing-machine { cursor: pointer; }
 .machine-bulb { position: absolute; z-index: 1; width: var(--bulb, 16px); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, #fff4d0e0, #ffd88a55 48%, #ffd88a00); opacity: .8; pointer-events: none; }
 .vending-stage:is([data-state="loading"], [data-state="failed"]) .machine-bulb { display: none; }
@@ -102,37 +102,47 @@
 .shop-room .shop-table { inset: auto 0 0; height: 41.25%; }
 .shop-title { position: absolute; z-index: 2; left: 50%; top: 2.6%; translate: -50% 0; margin: 0; padding: .45rem 1.8rem .6rem; color: #fbecc4; font: 700 var(--fs-title)/1.05 var(--font-display); text-shadow: 0 2px 0 #4a3022; white-space: nowrap; }
 .shop-work { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 1.5rem; padding: 7.2rem clamp(1rem, 2.6vw, 2.6rem) 1.8rem; }
-.shop-shelf { position: absolute; z-index: 2; right: 2.4%; top: 2.4%; display: flex; align-items: flex-end; gap: .6rem; padding: .45rem .8rem 1.5rem; border: 0; color: inherit; cursor: pointer; }
+.shop-shelf { position: absolute; z-index: 2; right: 2.4%; top: 9.5%; display: flex; align-items: flex-end; gap: .6rem; padding: .45rem .8rem .7rem; border: 0; color: inherit; cursor: pointer; }
 .shop-shelf:focus-visible { outline: 3px solid #fff3cf; outline-offset: 3px; }
-.shop-shelf-name { position: absolute; left: .7rem; top: -1.5rem; margin: 0; color: #fbecc4; font-family: var(--font-hand); font-size: var(--fs-small); letter-spacing: .08em; text-shadow: 0 1px 0 #4a3022; }
-/* 展示架：兩幅精靈示範作品、一幅自己最新的作品（還沒有就放第三幅示範）；點架子打開作品集。 */
+.shop-shelf-name { position: absolute; left: .8rem; top: -1.8rem; margin: 0; color: #fbecc4; font: 700 var(--fs-body)/1 var(--font-display); letter-spacing: .04em; text-shadow: 0 1px 0 #4a3022; }
+/* 展示架（My Gallery）：兩幅精靈畫的作品、一幅自己最新的作品（框角夾一條紅色書籤；還沒有就放第三幅精靈的）；點架子打開作品集。 */
 .shop-frame { position: relative; display: block; width: clamp(3.4rem, 4.4vw, 4.4rem); aspect-ratio: 100 / 124; }
 .shop-frame:nth-child(3) { rotate: -2deg; } .shop-frame:nth-child(4) { rotate: 1.5deg; }
 .shop-mini { position: absolute; left: 15%; top: 12%; width: 70%; height: 76%; }
-.shop-frame-tag { position: absolute; left: 50%; top: calc(100% + .15rem); translate: -50% 0; color: #fbecc4; font-family: var(--font-hand); font-size: var(--fs-small); white-space: nowrap; text-shadow: 0 1px 0 #4a3022; }
-.shop-frame.is-mine .shop-frame-tag { color: #ffe39a; }
-/* 作品集：一張信紙蓋在畫室上，上面一排「畫一張新的」，下面是這個瀏覽器裡的每一件作品。 */
-.shop-album { position: absolute; z-index: 6; left: 50%; top: 52%; width: min(46rem, calc(100% - 2rem)); max-height: calc(100% - 6rem); overflow: auto; translate: -50% -50%; padding: 1.4rem 1.6rem 1.6rem; color: var(--ink); }
+.shop-frame-mark { position: absolute; right: 12%; top: -6%; width: 16%; aspect-ratio: 20 / 44; display: none; }
+.shop-frame.is-mine .shop-frame-mark { display: block; }
+/* 作品集：一本攤開的紙雕相簿（紅色書封、兩頁米白內頁），標題 My Gallery 在紅紙緞帶上。左頁四張用紙膠帶貼著的空白畫紙；
+   右頁每件作品是拍立得照片（相角、手寫日期、完成的有金星、正在畫的夾紅色書籤），鉛筆是繼續畫、叉叉是刪除（按第二次才刪）。字都只給螢幕報讀器。 */
+.shop-album { position: absolute; z-index: 6; left: 50%; top: 52%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 4.6rem; width: min(54rem, calc(100% - 2rem)); height: min(34rem, calc(100% - 4rem)); translate: -50% -50%; padding: 3.6rem 2.6rem 2.2rem; color: var(--ink); }
 .shop-album[hidden] { display: none; }
-.shop-album-title { margin: 0 0 .8rem; color: #a8423b; font-family: var(--font-hand); font-size: var(--fs-title); line-height: 1.2; text-align: center; }
-.shop-album-shut { position: absolute; right: .9rem; top: .9rem; width: 2.4rem; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; color: #fbf3df; background: #b5443c; font-size: var(--fs-body); cursor: pointer; }
+.shop-album-spread { position: absolute; z-index: -1; inset: 0; }
+.shop-album-spread.is-single { display: none; }
+.shop-album-spread .art-layer, .shop-album-ribbon .art-layer, .shop-album-tape .art-layer, .shop-album-corners .art-layer, .shop-album-mark .art-layer, .shop-album-icon .art-layer, .shop-album-empty .art-layer, .shop-frame-mark .art-layer { position: absolute; inset: 0; }
+.shop-album-ribbon { position: absolute; left: 50%; top: -1.6rem; width: 21rem; aspect-ratio: 320 / 70; translate: -50% 0; display: grid; place-items: center; }
+.shop-album-title { position: relative; margin: 0 0 .3rem; color: #fbecc4; font: 700 var(--fs-title)/1 var(--font-display); letter-spacing: .04em; text-shadow: 0 1px 0 #5a201d; }
+.shop-album-shut { position: absolute; right: -.7rem; top: -.7rem; width: 2.4rem; aspect-ratio: 1; padding: 0; border: 3px solid #e0b04f; border-radius: 50%; color: #fbf3df; background: #b5443c; font-size: var(--fs-body); cursor: pointer; }
 .shop-album-shut:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
-.shop-album-label { margin: 0 0 .4rem; color: #7a5a48; font-family: var(--font-hand); font-size: var(--fs-small); }
-.shop-album-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; margin-bottom: 1.2rem; }
-.shop-album-blank { display: grid; justify-items: center; gap: .2rem; padding: .5rem .4rem .45rem; border: 0; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); cursor: pointer; }
-.shop-album-blank:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
-.shop-album-blank .shop-album-mini { width: 3.4rem; opacity: .9; }
-.shop-album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .9rem; margin: 0; padding: 0; list-style: none; }
-.shop-album-card { display: grid; justify-items: center; gap: .15rem; padding: .7rem .6rem .7rem; }
-.shop-album-mini { display: block; width: 6.2rem; aspect-ratio: 300 / 360; background: #fbf3e1; box-shadow: 0 2px 0 #e2d4b8; }
-.shop-album-name { margin: .35rem 0 0; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-body); }
-.shop-album-when { margin: 0 0 .35rem; color: #7a5a48; font-family: var(--font-hand); font-size: var(--fs-small); }
-.shop-album-actions { display: flex; gap: .4rem; }
-.shop-album-actions .color-tool { padding: .35rem .7rem; }
-.color-tool.is-quiet { color: #a8423b; }
-.shop-album-empty { margin: .4rem 0 0; color: #7a5a48; font-family: var(--font-hand); font-size: var(--fs-body); text-align: center; }
+.shop-album-new { grid-row: 1 / -1; display: grid; grid-template-columns: repeat(2, 1fr); align-content: center; gap: 1.4rem 1.1rem; padding: .4rem; }
+.shop-album-blank { position: relative; justify-self: center; padding: 0; border: 0; background: none; cursor: pointer; }
+.shop-album-blank:nth-child(odd) { rotate: -3deg; } .shop-album-blank:nth-child(even) { rotate: 2.5deg; }
+.shop-album-blank .shop-album-mini { width: 5.6rem; }
+.shop-album-tape { position: absolute; left: 50%; top: -.55rem; width: 3.2rem; aspect-ratio: 60 / 18; translate: -50% 0; }
+.shop-album-blank:focus-visible { outline: 3px solid #f4c668; outline-offset: 4px; }
+.shop-album-grid { grid-row: 1 / -1; grid-column: 2; display: grid; grid-template-columns: repeat(auto-fill, minmax(7.4rem, 1fr)); align-content: start; gap: 1.3rem 1rem; margin: 0; padding: .6rem .4rem 1rem; overflow-y: auto; list-style: none; }
+.shop-album-card { display: grid; justify-items: center; gap: .25rem; }
+.shop-album-card:nth-child(3n + 1) { rotate: -2deg; } .shop-album-card:nth-child(3n + 2) { rotate: 1.5deg; } .shop-album-card:nth-child(3n) { rotate: -.8deg; }
+.shop-album-photo { position: relative; padding: .45rem .45rem 1.1rem; background: #fffdf8; box-shadow: 0 2px 4px #3a261b33; }
+.shop-album-mini { display: block; width: 5.8rem; aspect-ratio: 300 / 360; background: #fbf3e1; }
+.shop-album-corners { position: absolute; inset: .2rem .2rem .85rem; }
+.shop-album-mark { position: absolute; right: .5rem; top: -.35rem; width: .9rem; aspect-ratio: 20 / 44; }
+.shop-album-when { margin: -.95rem 0 0; position: relative; color: #7a5a48; font-family: var(--font-hand); font-size: var(--fs-small); }
+.shop-album-actions { display: flex; gap: .5rem; margin-top: .2rem; }
+.shop-album-icon { position: relative; width: 2.1rem; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: #f3e8d2; box-shadow: 0 2px 0 #d8c4a0; cursor: pointer; }
+.shop-album-icon.is-asking { background: #f6d9d2; }
+.shop-album-icon:focus-visible { outline: 3px solid #f4c668; outline-offset: 2px; }
+.shop-album-empty { grid-row: 1 / -1; grid-column: 2; align-self: center; justify-self: center; position: relative; width: 12rem; aspect-ratio: 200 / 160; opacity: .85; }
 .shop-album-empty[hidden] { display: none; }
-.shop-work.is-browsing > :not(.shop-album, .sr-only) { filter: brightness(.7); }
+.shop-work.is-browsing > :not(.shop-album, .sr-only) { filter: brightness(.65); }
 .shop-left { justify-self: start; align-self: center; display: grid; gap: .7rem; justify-items: start; }
 .color-crayons { position: relative; width: clamp(17rem, 23vw, 22.5rem); aspect-ratio: 300 / 190; }
 .color-row { position: absolute; left: 5%; right: 5%; top: 21%; height: 62%; display: flex; align-items: flex-end; justify-content: space-between; }
@@ -170,6 +180,8 @@
 .shop-cork { position: absolute; right: 16.5%; top: 25%; width: 13.5rem; aspect-ratio: 260 / 170; }
 .shop-elf { position: absolute; left: 26.2%; top: 51%; width: 4.4rem; aspect-ratio: 100 / 162; }
 .shop-work.is-done .shop-decor { opacity: .9; }
+.shop-cork { transition: opacity .4s ease; }
+.shop-work.is-done .shop-cork { opacity: 0; } /* 完成卡放在畫紙右邊時，軟木板先收起來，不疊在一起。 */
 .shop-lamp, .shop-glow { position: absolute; right: -6.5rem; top: -2.5rem; width: 9rem; aspect-ratio: 200 / 260; pointer-events: none; }
 .shop-glow { z-index: 2; opacity: .55; }
 .shop-stand { position: absolute; left: 50%; bottom: -2.2rem; width: 118%; aspect-ratio: 400 / 100; translate: -50% 0; opacity: 0; pointer-events: none; }
@@ -202,21 +214,30 @@
 .shop-sticker { position: relative; width: 2.7rem; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
 .shop-sticker[aria-pressed="true"] { outline: 3px solid #b5443c; outline-offset: 2px; }
 .shop-sticker:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
-.shop-card { position: absolute; z-index: 4; left: 50%; bottom: 1.4rem; width: min(25rem, calc(100% - 2rem)); padding: 1.1rem 1.3rem 1.2rem; translate: -50% 0; color: var(--ink); text-align: center; }
+/* 完成卡：放在展示台上的畫紙右邊（工具這時已收起），頂端別著一枚紅色紙雕獎章、兩角貼紙膠帶；三顆按鈕各有小圖。 */
+.shop-card { position: absolute; z-index: 4; right: 6%; top: 52%; width: min(18rem, calc(100% - 2rem)); padding: 3.4rem 1.4rem 1.4rem; translate: 0 -50%; color: var(--ink); text-align: center; }
+.shop-card .art-layer { position: absolute; inset: 0; }
+.shop-card-rosette { position: absolute; left: 50%; top: -2.8rem; width: 4.8rem; aspect-ratio: 120 / 150; translate: -50% 0; filter: drop-shadow(0 3px 2px #3a261b40); }
+.shop-card-tape { position: absolute; top: -.35rem; width: 3.4rem; aspect-ratio: 60 / 18; }
+.shop-card-tape.is-left { left: -.6rem; rotate: -32deg; } .shop-card-tape.is-right { right: -.6rem; rotate: 32deg; }
 .shop-card[hidden] { display: none; }
 .shop-card-title { margin: 0; color: #a8423b; font-family: var(--font-hand); font-size: var(--fs-title); line-height: 1.2; }
-.shop-card-line { margin: .3rem 0 .9rem; font-family: var(--font-hand); font-size: var(--fs-body); }
-.shop-card-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+.shop-card-line { margin: .3rem 0 1rem; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-body); line-height: 1.6; }
+.shop-card-actions { display: grid; gap: .5rem; }
+.shop-card-actions .color-tool { display: flex; flex-direction: row-reverse; justify-content: center; align-items: center; gap: .5rem; padding: .5rem 1rem; }
+.shop-card-icon { position: relative; display: block; width: 1.5rem; aspect-ratio: 1; }
+.shop-card-actions .color-tool.is-main .shop-card-icon { filter: brightness(0) invert(.95); }
 .shop-work.is-done :is(.shop-left, .shop-right, .shop-shelf) { opacity: 0; translate: 0 1.2rem; pointer-events: none; }
 .shop-work.is-done .color-sheet { translate: 0 -1.6rem; scale: 1.03; rotate: 0deg; }
 .shop-work.is-done .shop-stand { opacity: 1; }
 .shop-work.is-done .shop-glow { opacity: 1; }
 /* 紙張由 cabin-paper.js 依每個元素的大小畫好，蓋過上面的底色。 */
-.vending[data-paper] :is(.vending-picker, .vending-picker button, .cal-note, .cal-close, .color-tool, .color-name, .shop-preset, .shop-stickers, .shop-card, .shop-note, .shop-title, .shop-shelf, .shop-album, .shop-album-card, .shop-album-blank) { background: transparent no-repeat 0 0 / 100% 100%; }
+.vending[data-paper] :is(.vending-picker, .vending-picker button, .cal-note, .cal-close, .color-tool, .color-name, .shop-preset, .shop-stickers, .shop-card, .shop-note, .shop-title, .shop-shelf) { background: transparent no-repeat 0 0 / 100% 100%; }
 
 @media (prefers-reduced-motion: no-preference) {
   .market-flake { animation: market-snowfall 13s linear var(--delay) infinite; }
   .machine-tag { animation: tag-sway 2.6s ease-in-out infinite alternate; }
+  .machine-tag:not([hidden]) { animation: tag-sway 2.6s ease-in-out infinite alternate, card-up .4s cubic-bezier(.2, .8, .3, 1.1); }
   .machine-bulb { animation: machine-twinkle 4.6s ease-in-out var(--delay, 0s) infinite alternate; }
   .vending-stage[data-show] .machine-bulb { animation: machine-cheer .9s ease-in-out calc(var(--k, 0) * 70ms) 2 alternate; }
   .vending-heading { transition: opacity .6s ease; }
@@ -255,7 +276,7 @@
   .shop-work.is-done .shop-sparks i { animation: spark-fall 1.6s calc(.9s + var(--i) * 90ms) ease-out; }
   .shop-card:not([hidden]) { animation: card-up .5s cubic-bezier(.2, .8, .3, 1.1); }
 }
-@keyframes tag-sway { from { rotate: -2deg; } to { rotate: 2deg; } }
+@keyframes tag-sway { from { rotate: -1.2deg; } to { rotate: 1.2deg; } }
 @keyframes market-snowfall { from { translate: 0 0; } to { translate: var(--drift) 105vh; } }
 @keyframes machine-twinkle { from { opacity: .45; } to { opacity: .95; } }
 @keyframes machine-cheer { from { opacity: .6; scale: 1; } to { opacity: 1; scale: 1.7; } }
@@ -301,6 +322,11 @@
   .shop-title { position: relative; left: auto; top: auto; translate: none; display: block; width: max-content; margin: 1rem auto 0; font-size: var(--fs-body); }
   .shop-work { position: relative; inset: auto; grid-template-columns: minmax(0, 1fr); justify-items: center; align-items: start; gap: 1.1rem; padding: 2.6rem 1rem 2rem; }
   .shop-shelf { position: relative; right: auto; top: auto; order: 5; }
+  .shop-album { grid-template-columns: 1fr; grid-template-rows: auto auto; height: auto; max-height: none; padding: 3.2rem 1.4rem 1.8rem; }
+  .shop-album-spread { display: none; } .shop-album-spread.is-single { display: block; }
+  .shop-album-new { grid-row: auto; grid-template-columns: repeat(4, 1fr); gap: .6rem; }
+  .shop-album-blank .shop-album-mini { width: 3.8rem; }
+  .shop-album-grid, .shop-album-empty { grid-row: auto; grid-column: 1; margin-top: 1.4rem; overflow: visible; }
   .shop-center { order: 1; }
   .shop-left { order: 2; justify-self: center; justify-items: center; }
   .shop-right { order: 3; justify-self: center; justify-items: center; }
@@ -309,5 +335,5 @@
   .color-crayons { width: min(19rem, 92vw); }
   .color-tools { grid-template-columns: repeat(2, minmax(7.5rem, auto)); }
   .color-tool.is-back { grid-column: 1 / -1; }
-  .shop-card { position: fixed; bottom: 1rem; }
+  .shop-card { position: fixed; left: 50%; right: auto; top: auto; bottom: 1rem; translate: -50% 0; }
 }

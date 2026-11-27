@@ -35,8 +35,8 @@ export const VENDING = {
   undo: '復原', redo: '重做', reset: '重新上色', finish: '完成', save: '存成圖片', back: '回到市集', again: '再修改',
   // The workshop: the shelf of works, the swatch cards, the stickers, a gentle word, the card when it is done.
   // The shelf on the wall (two works the elves made, the newest of one's own) and the album it opens.
-  sample: '精靈示範', mine: '我的作品', albumCount: n => (n ? `作品集・${n} 件` : '作品集'), albumOpen: n => `打開作品集（${n} 件作品）`,
-  album: '作品集', albumClose: '關上作品集', albumNew: '畫一張新的', albumBlank: name => `畫一張新的${name}`,
+  albumOpen: n => `打開作品集（${n} 件作品）`,
+  album: 'My Gallery', albumClose: '關上作品集', albumNew: '畫一張新的', albumBlank: name => `畫一張新的${name}`,
   albumEmpty: '還沒有作品。從販賣機拿一樣，或在上面挑一張新的來畫吧。', albumDone: '完成', albumHalf: '畫到一半',
   albumGo: '繼續畫', albumHere: '正在畫', albumDrop: '刪除', albumSure: '確定刪除？',
   presets: '配色卡', cards: [['classic', '經典'], ['snowy', '雪夜'], ['candy', '糖果']], preset: name => `套用「${name}」配色`,

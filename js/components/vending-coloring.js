@@ -15,7 +15,7 @@ import { titleGlyphs } from '../data/title-glyphs.js';
 import { CRAYONS, ITEMS, VENDING } from '../data/vending.js';
 import { PAGES } from '../data/coloring-pages.js';
 import { BLANK, MOST, STICKERS, dropWork, keepWork, newKey, presetFills, readWorks, touched, writeWorks } from '../services/vending-works.js';
-import { STICKER_ART, corkboard, crayon, doorSign, eraser, frame, lamp, lampGlow, paperFlake, peg, roomBulbs, seal, stand, stickerSheet, table, tinBack, tinFront, token, wall } from './vending-workshop-art.js';
+import { STICKER_ART, goBack, keepIt, rosette, albumPage, albumRibbon, albumSpread, bookmark, cross, emptyAlbum, pencil, photoCorners, query, washi, corkboard, crayon, doorSign, eraser, frame, lamp, lampGlow, paperFlake, peg, roomBulbs, seal, stand, stickerSheet, table, tinBack, tinFront, token, wall } from './vending-workshop-art.js';
 import { elf } from './vending-square-art.js';
 
 // The sheet is 340 × 440: the drawing's own 300 × 360 box sits 20 in from the top and the sides, the stamp in the margin
@@ -151,6 +151,10 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
     paperLayer(walls, '0 0 1440 330', 'shop-table', table, { paper: { scale: .9, grain: .45, shadow: .2 }, eager: true, preserveAspectRatio: 'xMidYMin slice' });
   }
   const status = element('p', 'sr-only', host); status.setAttribute('role', 'status');
+  // Focus moved for the visitor shows its ring only when they are using the keyboard (a click leaves no box round anything).
+  let byKeys = false;
+  on(document, 'keydown', () => { byKeys = true; }); on(document, 'pointerdown', () => { byKeys = false; });
+  const quiet = (node, scroll = false) => node?.focus({ preventScroll: !scroll, focusVisible: byKeys });
   // On the wall, under everything: paper snowflakes hung from the ceiling, the corkboard (a snowman the elves coloured in,
   // the day's colours), and an elf on the table by the sheet (who hops when a work is done).
   const decor = element('div', 'shop-decor', host); decor.setAttribute('aria-hidden', 'true');
@@ -166,55 +170,65 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   const shelf = element('button', 'shop-shelf', host); shelf.type = 'button';
   element('span', 'shop-shelf-name', shelf).setAttribute('aria-hidden', 'true');
   const SAMPLES = ['tree', 'gingerbread', 'snowman'];
-  const showcase = SAMPLES.map(() => { const spot = element('span', 'shop-frame', shelf); paperLayer(spot, '0 0 100 124', 'shop-frame-wood', frame, small); const mini = svg('svg', { viewBox: '0 0 300 360', class: 'shop-mini', 'aria-hidden': 'true' }, spot); const tag = element('span', 'shop-frame-tag', spot); return { spot, mini, tag }; });
+  const showcase = SAMPLES.map(() => { const spot = element('span', 'shop-frame', shelf); paperLayer(spot, '0 0 100 124', 'shop-frame-wood', frame, small); const mini = svg('svg', { viewBox: '0 0 300 360', class: 'shop-mini', 'aria-hidden': 'true' }, spot); const tag = element('span', 'shop-frame-mark', spot); paperLayer(tag, '0 0 20 44', '', bookmark, small); return { spot, mini, tag }; });
   function show() {
     const mine = works.find(work => work.finished) ?? works[0] ?? null;
     showcase.forEach(({ spot, mini, tag }, i) => {
       const own = i === 2 && mine, each = own ? mine.item : SAMPLES[i];
       miniature(mini, PAGES[each], own ? mine : { fills: PAGES[each].colours, stickers: [], finished: true });
-      tag.textContent = own ? VENDING.mine : VENDING.sample; spot.classList.toggle('is-mine', Boolean(own));
+      spot.classList.toggle('is-mine', Boolean(own));
     });
-    shelf.querySelector('.shop-shelf-name').textContent = VENDING.albumCount(works.length);
+    shelf.querySelector('.shop-shelf-name').textContent = VENDING.album;
     shelf.setAttribute('aria-label', VENDING.albumOpen(works.length));
   }
   on(shelf, 'click', () => album(true));
 
-  // The album: every work kept here, newest first, each in little with what it is, how far along and when, to go on with
-  // it or to let it go (asked twice); above them, a new sheet of any of the four.
+  // The album, an open scrapbook: its name on a red ribbon; on the left page four blank sheets taped in (a tap begins a new
+  // one), on the right every work kept here, newest first, as a snapshot in photo corners with the day under it, a gold
+  // star once finished, a red bookmark on the one being coloured; a pencil goes on with it, a cross lets it go (asked
+  // twice). Nothing in it yet: an empty frame and a pencil. All the words are for screen readers.
   const book = element('div', 'shop-album', host); book.hidden = true; book.setAttribute('role', 'dialog'); book.setAttribute('aria-modal', 'true'); book.setAttribute('aria-labelledby', `${id}-album`);
-  const bookTitle = element('p', 'shop-album-title', book, VENDING.album); bookTitle.id = `${id}-album`;
+  paperLayer(element('span', 'shop-album-spread', book), '0 0 1000 640', '', albumSpread, { paper: { scale: .7, grain: .45, shadow: .25, rim: '#f7efe2' }, eager: true, preserveAspectRatio: 'none' });
+  paperLayer(element('span', 'shop-album-spread is-single', book), '0 0 600 1000', '', albumPage, { paper: { scale: .7, grain: .45, shadow: .25, rim: '#f7efe2' }, eager: true, preserveAspectRatio: 'none' });
+  const ribbon = element('div', 'shop-album-ribbon', book); paperLayer(ribbon, '0 0 320 70', '', albumRibbon, small);
+  const bookTitle = element('p', 'shop-album-title', ribbon, VENDING.album); bookTitle.id = `${id}-album`; bookTitle.lang = 'en';
   const shut = element('button', 'shop-album-shut', book, '✕'); shut.type = 'button'; shut.setAttribute('aria-label', VENDING.albumClose);
-  const fresh = element('div', 'shop-album-new', book); element('p', 'shop-album-label', fresh, VENDING.albumNew);
-  const freshRow = element('div', 'shop-album-row', fresh);
-  for (const { id: each, name } of ITEMS) {
-    const button = element('button', 'shop-album-blank', freshRow); button.type = 'button'; button.setAttribute('aria-label', VENDING.albumBlank(name));
+  const fresh = element('div', 'shop-album-new', book); fresh.setAttribute('role', 'group'); fresh.setAttribute('aria-label', VENDING.albumNew);
+  const TAPES = ['#e2aaa3', '#9db59a', '#9fbdd2', '#e2b65a'];
+  ITEMS.forEach(({ id: each, name }, i) => {
+    const button = element('button', 'shop-album-blank', fresh); button.type = 'button'; button.setAttribute('aria-label', VENDING.albumBlank(name));
     miniature(svg('svg', { viewBox: '0 0 300 360', class: 'shop-album-mini', 'aria-hidden': 'true' }, button), PAGES[each], null);
-    element('span', 'shop-album-name', button, name);
+    paperLayer(element('span', 'shop-album-tape', button), '0 0 60 18', '', washi(TAPES[i]), small);
     on(button, 'click', () => { album(false); open(each, { quick: true }); });
-  }
-  const grid = element('ul', 'shop-album-grid', book), empty = element('p', 'shop-album-empty', book, VENDING.albumEmpty);
+  });
+  const grid = element('ul', 'shop-album-grid', book);
+  const empty = element('div', 'shop-album-empty', book); paperLayer(empty, '0 0 200 160', '', emptyAlbum, small); element('p', 'sr-only', empty, VENDING.albumEmpty);
+  const icon = (parent, draw, label, className = '') => { const button = element('button', `shop-album-icon ${className}`.trim(), parent); button.type = 'button'; button.setAttribute('aria-label', label); button.title = label; paperLayer(button, '0 0 40 40', '', draw, small); return button; };
   let asked = null;
   function fill() {
     grid.replaceChildren(); empty.hidden = works.length > 0; asked = null;
     for (const work of works) {
-      const { name } = ITEMS.find(each => each.id === work.item), card = element('li', 'shop-album-card', grid);
-      miniature(svg('svg', { viewBox: '0 0 300 360', class: 'shop-album-mini', 'aria-hidden': 'true' }, card), PAGES[work.item], work);
-      element('p', 'shop-album-name', card, name); element('p', 'shop-album-when', card, `${work.finished ? VENDING.albumDone : VENDING.albumHalf}・${day(work.at)}`);
+      const { name } = ITEMS.find(each => each.id === work.item), card = element('li', 'shop-album-card', grid), here = work.key === current?.key;
+      card.setAttribute('aria-label', `${name}，${work.finished ? VENDING.albumDone : VENDING.albumHalf}，${day(work.at)}${here ? `，${VENDING.albumHere}` : ''}`);
+      const photo = element('div', 'shop-album-photo', card);
+      miniature(svg('svg', { viewBox: '0 0 300 360', class: 'shop-album-mini', 'aria-hidden': 'true' }, photo), PAGES[work.item], work);
+      paperLayer(element('span', 'shop-album-corners', photo), '0 0 100 120', '', photoCorners, small);
+      if (here) paperLayer(element('span', 'shop-album-mark', photo), '0 0 20 44', '', bookmark, small);
+      element('p', 'shop-album-when', card, day(work.at)).setAttribute('aria-hidden', 'true');
       const actions = element('div', 'shop-album-actions', card);
-      const go = element('button', 'color-tool', actions, work.key === current?.key ? VENDING.albumHere : VENDING.albumGo); go.type = 'button'; go.setAttribute('aria-label', `${VENDING.albumGo}：${name}`);
-      const drop = element('button', 'color-tool is-quiet', actions, VENDING.albumDrop); drop.type = 'button'; drop.setAttribute('aria-label', `${VENDING.albumDrop}：${name}`);
-      on(go, 'click', () => { album(false); if (work.key !== current?.key) open(work.item, { quick: true, key: work.key }); });
+      const go = icon(actions, pencil, `${VENDING.albumGo}：${name}`), drop = icon(actions, cross, `${VENDING.albumDrop}：${name}`, 'is-drop');
+      on(go, 'click', () => { album(false); if (!here) open(work.item, { quick: true, key: work.key }); });
       on(drop, 'click', () => {
-        if (asked !== work.key) { asked = work.key; drop.textContent = VENDING.albumSure; return; }
+        if (asked !== work.key) { asked = work.key; drop.replaceChildren(); paperLayer(drop, '0 0 40 40', '', query, small); drop.classList.add('is-asking'); drop.setAttribute('aria-label', `${VENDING.albumSure}（${name}）`); drop.title = VENDING.albumSure; return; }
         works = dropWork(works, work.key); writeWorks(storage, works); if (current?.key === work.key) current = { key: null };
-        sound?.play('remove'); fill(); show(); (grid.querySelector('button') ?? shut).focus({ preventScroll: true });
+        sound?.play('remove'); fill(); show(); quiet(grid.querySelector('button') ?? shut);
       });
     }
   }
   function album(on_) {
     // (on a phone the shelf is at the foot of the workshop: the album is brought into view, and the shelf again after)
-    if (on_) { fill(); book.hidden = false; host.classList.add('is-browsing'); if (innerWidth <= 760) book.scrollIntoView({ block: 'start', behavior: still.matches ? 'auto' : 'smooth' }); shut.focus({ preventScroll: true }); sound?.play('pick'); }
-    else if (!book.hidden) { book.hidden = true; host.classList.remove('is-browsing'); shelf.focus(); }
+    if (on_) { fill(); book.hidden = false; host.classList.add('is-browsing'); if (innerWidth <= 760) book.scrollIntoView({ block: 'start', behavior: still.matches ? 'auto' : 'smooth' }); quiet(shut); sound?.play('pick'); }
+    else if (!book.hidden) { book.hidden = true; host.classList.remove('is-browsing'); quiet(shelf, true); }
   }
   on(shut, 'click', () => album(false));
 
@@ -278,9 +292,13 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
 
   // The card once it is done: save it, go on with it, or go back to the market.
   const card = element('div', 'shop-card', host); card.hidden = true; card.setAttribute('role', 'dialog'); card.setAttribute('aria-labelledby', `${id}-done`);
+  // (a red paper rosette pinned at its top, paper tape at two corners; a picture on each of its buttons)
+  paperLayer(element('span', 'shop-card-rosette', card), '0 0 120 150', '', rosette, { paper: { scale: .4, grain: .45, shadow: .3, rim: '#f7efe2' }, eager: true });
+  for (const [side, fill] of [['left', '#9fbdd2'], ['right', '#e2aaa3']]) paperLayer(element('span', `shop-card-tape is-${side}`, card), '0 0 60 18', '', washi(fill), small);
   const title = element('p', 'shop-card-title', card, VENDING.doneTitle); title.id = `${id}-done`;
   const line = element('p', 'shop-card-line', card), choices = element('div', 'shop-card-actions', card);
-  const save = tool(VENDING.save, 'color-tool', choices), again = tool(VENDING.again, 'color-tool', choices), leave = tool(`← ${VENDING.back}`, 'color-tool is-main', choices);
+  const save = tool(VENDING.save, 'color-tool', choices), again = tool(VENDING.again, 'color-tool', choices), leave = tool(VENDING.back, 'color-tool is-main', choices);
+  for (const [button, draw] of [[save, keepIt], [again, pencil], [leave, goBack]]) paperLayer(element('span', 'shop-card-icon', button), '0 0 40 40', '', draw, small);
 
   let current = { key: null }, tidy = 0, colour = CRAYONS[0][0], item = null, parts = [], hover = null, stickers = null, lines = null, state = { fills: [], stickers: [] }, done = [], undone = [], finished = false, holding = null;
   function choose(i, quiet = false) {
@@ -403,9 +421,9 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
     if (!touched(state)) { hint(VENDING.empty); return; }
     hold(null); finished = true; keep(); settle(); sound?.play('cheer'); status.textContent = VENDING.finished(item.name);
     host.classList.remove('is-done'); void host.offsetWidth; host.classList.add('is-done');
-    later(1500, () => { line.textContent = VENDING.doneLine(item.name); card.hidden = false; save.focus({ preventScroll: true }); });
+    later(1500, () => { line.textContent = VENDING.doneLine(item.name); card.hidden = false; quiet(save); });
   });
-  on(again, 'click', () => { card.hidden = true; host.classList.remove('is-done'); (parts[0] ?? crayons[0]).focus({ preventScroll: true }); });
+  on(again, 'click', () => { card.hidden = true; host.classList.remove('is-done'); quiet(parts[0] ?? crayons[0]); });
   on(back, 'click', () => onBack());
   on(leave, 'click', () => onBack());
   on(host, 'keydown', event => {
@@ -431,7 +449,7 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
     // Closed: it is left just as it is while the workshop folds away (it would jump back to the table and fade in again
     // on the way out), and put back to rights once it is out of sight.
     close() { hold(null); album(false); clearTimeout(tidy); tidy = setTimeout(() => { card.hidden = true; host.classList.remove('is-done', 'is-arriving'); }, still.matches ? 0 : 700); },
-    focus: () => (parts[0] ?? crayons[0]).focus({ preventScroll: true }),
+    focus: () => quiet(parts[0] ?? crayons[0]),
     destroy() { events.abort(); clearTimeout(tidy); clearTimeout(noteTimer); timers.forEach(clearTimeout); host.replaceChildren(); walls?.replaceChildren(); },
   };
 }
