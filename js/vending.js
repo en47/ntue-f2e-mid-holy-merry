@@ -59,6 +59,9 @@ const settle = node => node?.focus({ preventScroll: true, focusVisible: byKeys }
 const lift = document.createElement('button'), shut = document.createElement('button');
 lift.type = shut.type = 'button'; lift.className = 'machine-lift'; shut.className = 'machine-shut'; shut.textContent = '✕'; shut.hidden = true;
 lift.setAttribute('aria-label', VENDING.near); shut.setAttribute('aria-label', VENDING.away); spot.append(lift, shut);
+// Up at the machine, a paper tag on a red thread hangs by what to do next: the buttons, then the lever, then the tray.
+const tag = document.createElement('p'); tag.className = 'machine-tag'; tag.hidden = true; tag.setAttribute('aria-hidden', 'true'); spot.append(tag);
+const TAG_AT = { idle: ['keypad', 'left'], chosen: ['lever', 'right'], ready: ['tray', 'right'] };
 let atMachine = false, leaving = false, offs = [];
 const placeBox = (node, { left, top, width, height }) => Object.assign(node.style, { left: `${left.toFixed(1)}px`, top: `${top.toFixed(1)}px`, width: `${width.toFixed(1)}px`, height: `${height.toFixed(1)}px` });
 const onMachine = event => { const box = machine?.frame(), rect = world.host.getBoundingClientRect(), x = event.clientX - rect.left, y = event.clientY - rect.top; return Boolean(box) && x >= box.left && x <= box.left + box.width && y >= box.top && y <= box.top + box.height; };
@@ -80,6 +83,11 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape' && at
 function watchMachine() {
   stage.inert = true;
   offs.push(world.onFrame(hangSign));
+  offs.push(world.onFrame(() => {
+    const next = atMachine && !leaving && !stage.inert && shop.hidden ? TAG_AT[machine?.state] : null;
+    tag.hidden = !next;
+    if (next) { const at = machine.point(next[0]); if (tag.textContent !== VENDING.next[machine.state]) tag.textContent = VENDING.next[machine.state]; tag.dataset.side = next[1]; Object.assign(tag.style, { left: `${at.x.toFixed(1)}px`, top: `${at.y.toFixed(1)}px` }); }
+  }));
   offs.push(world.onFrame(() => {
     const box = machine?.frame(); if (!box) return;
     if (!atMachine) placeBox(lift, box);
@@ -123,7 +131,8 @@ function leaveShop() {
   clearTimeout(timer); market.inert = false; world?.hold(false); machine?.hold(false); workshop.close(); sound?.play('whoosh'); page.dataset.mode = 'market';
   const done = () => { shop.hidden = true; shop.classList.remove('is-leaving'); page.classList.remove('is-returning'); settle(stage.querySelector('.machine-button:not(:disabled)') ?? stage.querySelector('.machine-hit')); };
   if (motion.matches) { done(); return; }
-  shop.classList.add('is-leaving'); page.classList.add('is-returning'); timer = setTimeout(done, 650);
+  // (the workshop folds down first, then the square comes back: both together are just under a second)
+  shop.classList.add('is-leaving'); page.classList.add('is-returning'); timer = setTimeout(done, 1000);
 }
 const centreOf = node => { const box = node.getBoundingClientRect(); return { x: box.left + box.width / 2, y: box.top + box.height * .55 }; };
 // Taken off the stage: it pops up a little, then off to the workshop with it.

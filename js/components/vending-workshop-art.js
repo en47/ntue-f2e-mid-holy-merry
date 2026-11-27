@@ -8,12 +8,17 @@ import { roofHouse, star } from './paper-props.js';
 const WOOD = '#8a5a3c', DARK = '#6b4430', SNOW = '#fbf8f1';
 
 // The wall, 1440 × 470 (shown cropped to fit): warm planks under a beam, a rail along it, the window onto the market.
+// The cord the bulbs hang from: three swags along the beam, each sagging between the hooks it hangs from; and how high it
+// is at x, so that a bulb hangs from it and never in the air beside it.
+const HOOKS = [[0, 68], [480, 72], [960, 72], [1440, 68]], SAG = 118;
+const CORD = `M${HOOKS[0].join(' ')}${HOOKS.slice(1).map(([x, y], i) => `Q${(HOOKS[i][0] + x) / 2} ${SAG} ${x} ${y}`).join('')}`;
+const cordAt = x => { const k = Math.min(2, Math.floor(x / 480)), [[x0, y0], [x1, y1]] = [HOOKS[k], HOOKS[k + 1]], t = (x - x0) / (x1 - x0); return (1 - t) ** 2 * y0 + 2 * (1 - t) * t * SAG + t * t * y1; };
 export function wall(g) {
   for (let x = 0; x < 1440; x += 60) shape('rect', { x, y: 0, width: 60, height: 470, fill: (x / 60) % 2 ? '#8f5f3f' : '#986846' }, g);
   for (let x = 60; x < 1440; x += 60) shape('path', { d: `M${x} 0V470`, stroke: '#5e3d2c', 'stroke-width': 3, 'stroke-opacity': .45 }, g);
   shape('rect', { x: 0, y: 0, width: 1440, height: 44, fill: DARK }, g);
   shape('rect', { x: 0, y: 330, width: 1440, height: 16, fill: '#7a5238' }, g);
-  shape('path', { d: 'M0 68Q240 118 480 72T960 72T1440 68', fill: 'none', stroke: '#2c2a33', 'stroke-width': 2.4 }, g);
+  shape('path', { d: CORD, fill: 'none', stroke: '#2c2a33', 'stroke-width': 2.4 }, g);
   // The window onto the market: night blue, chalets with lit windows, snow, a few stars; a wreath hung on its frame.
   shape('rect', { x: 70, y: 96, width: 260, height: 196, rx: 6, fill: '#5e3d2c' }, g);
   shape('rect', { x: 84, y: 110, width: 232, height: 168, fill: '#2b3d58' }, g);
@@ -26,9 +31,10 @@ export function wall(g) {
   shape('circle', { cx: 200, cy: 194, r: 34, fill: 'none', stroke: '#3f6653', 'stroke-width': 13 }, g);
   for (const a of [.4, 1.6, 2.8, 4, 5.2]) shape('circle', { cx: 200 + Math.cos(a) * 34, cy: 194 + Math.sin(a) * 34, r: 4.2, fill: '#c63a33' }, g);
   shape('path', { d: 'M188 160L200 170L212 160', fill: 'none', stroke: '#b5443c', 'stroke-width': 6, 'stroke-linecap': 'round' }, g);
-  // A holly garland swagged along the rail on the right.
-  shape('path', { d: 'M1000 330Q1100 372 1200 334T1400 330', fill: 'none', stroke: '#3f6653', 'stroke-width': 12, 'stroke-linecap': 'round' }, g);
-  for (const x of [1050, 1150, 1250, 1350]) shape('circle', { cx: x, cy: 346 + (x % 200 ? 6 : 0), r: 5, fill: '#c63a33' }, g);
+  // A holly garland swagged along the rail on the right
+  // (ending short of the tools on the right, so that it never runs behind them)
+  shape('path', { d: 'M980 330Q1060 368 1140 334T1250 326', fill: 'none', stroke: '#3f6653', 'stroke-width': 12, 'stroke-linecap': 'round' }, g);
+  for (const x of [1020, 1100, 1180]) shape('circle', { cx: x, cy: 346 + (x % 160 ? 4 : 0), r: 5, fill: '#c63a33' }, g);
 }
 // The table, 1440 × 330 (shown cropped to fit): planks running across, its front edge darker, and on its corners a spool
 // of red ribbon, pine cones and a cup of pencils.
@@ -48,10 +54,10 @@ export function table(g) {
   shape('rect', { x: 1206, y: 210, width: 48, height: 64, rx: 6, fill: '#3f6653' }, g);
   for (const [dx, fill] of [[-12, '#b5443c'], [-2, '#e0b04f'], [8, '#9fbdd2'], [16, '#f6ecd6']]) shape('rect', { x: 1228 + dx, y: 166 + Math.abs(dx), width: 6, height: 50, rx: 2, fill, transform: `rotate(${dx / 2} ${1230 + dx} 216)` }, g);
 }
-// The bulbs along the beam (their own layer, softly lit in turn).
+// The bulbs along the beam (their own layer, softly lit in turn), each hung right on the cord.
 export function roomBulbs(g) {
   for (let i = 1; i < 18; i++) {
-    const x = i * 80, y = 68 + Math.sin((i * 80 / 480) * Math.PI) ** 2 * 34 * (i * 80 % 960 < 480 ? 1 : 1);
+    const x = i * 80, y = cordAt(x);
     shape('circle', { cx: x, cy: y + 12, r: 16, fill: '#ffd98a', opacity: .2 }, g);
     shape('rect', { x: x - 3, y: y - 1, width: 6, height: 6, fill: '#3e3640' }, g);
     shape('ellipse', { cx: x, cy: y + 12, rx: 6, ry: 8.5, fill: i % 5 === 2 ? '#f2a08f' : '#ffe4a3' }, g);

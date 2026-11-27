@@ -42,6 +42,14 @@
 .machine-lift[hidden], .machine-shut[hidden] { display: none; }
 .machine-shut { position: absolute; z-index: 2; width: 44px; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; color: #fbf3df; background: #b5443c; font-size: var(--fs-body); line-height: 1; cursor: pointer; pointer-events: auto; box-shadow: 0 3px 0 #7f312c; }
 .machine-shut:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
+/* 走近販賣機時，下一步旁邊掛著一張紙吊牌（紅線綁著）：先選一樣 → 往下拉到底 → 點這裡去上色。 */
+.machine-tag { position: absolute; z-index: 3; margin: 0; padding: .3rem .8rem .4rem; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); white-space: nowrap; pointer-events: none; transform-origin: 50% -1.2rem; }
+.machine-tag[hidden] { display: none; }
+.machine-tag[data-side="left"] { translate: calc(-100% - 2.6rem) -50%; }
+.machine-tag[data-side="right"] { translate: 2.6rem -50%; }
+.machine-tag::before { content: ''; position: absolute; top: 50%; width: 2.4rem; height: 2px; background: #b5443c; }
+.machine-tag[data-side="left"]::before { left: 100%; }
+.machine-tag[data-side="right"]::before { right: 100%; }
 .vending-scene.is-pointing-machine { cursor: pointer; }
 .machine-bulb { position: absolute; z-index: 1; width: var(--bulb, 16px); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, #fff4d0e0, #ffd88a55 48%, #ffd88a00); opacity: .8; pointer-events: none; }
 .vending-stage:is([data-state="loading"], [data-state="failed"]) .machine-bulb { display: none; }
@@ -94,34 +102,58 @@
 .shop-room .shop-table { inset: auto 0 0; height: 41.25%; }
 .shop-title { position: absolute; z-index: 2; left: 50%; top: 2.6%; translate: -50% 0; margin: 0; padding: .45rem 1.8rem .6rem; color: #fbecc4; font: 700 var(--fs-title)/1.05 var(--font-display); text-shadow: 0 2px 0 #4a3022; white-space: nowrap; }
 .shop-work { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 1.5rem; padding: 7.2rem clamp(1rem, 2.6vw, 2.6rem) 1.8rem; }
-.shop-shelf { position: absolute; z-index: 2; right: 2.4%; top: 2.4%; display: flex; align-items: flex-end; gap: .5rem; padding: .45rem .7rem .7rem; }
-.shop-shelf-name { position: absolute; left: .7rem; top: -1.5rem; margin: 0; color: #fbecc4; font-family: var(--font-hand); font-size: var(--fs-small); letter-spacing: .08em; }
-.shop-frame { position: relative; width: clamp(3.4rem, 4.4vw, 4.4rem); aspect-ratio: 100 / 124; padding: 0; border: 0; background: none; cursor: pointer; }
+.shop-shelf { position: absolute; z-index: 2; right: 2.4%; top: 2.4%; display: flex; align-items: flex-end; gap: .6rem; padding: .45rem .8rem 1.5rem; border: 0; color: inherit; cursor: pointer; }
+.shop-shelf:focus-visible { outline: 3px solid #fff3cf; outline-offset: 3px; }
+.shop-shelf-name { position: absolute; left: .7rem; top: -1.5rem; margin: 0; color: #fbecc4; font-family: var(--font-hand); font-size: var(--fs-small); letter-spacing: .08em; text-shadow: 0 1px 0 #4a3022; }
+/* 展示架：兩幅精靈示範作品、一幅自己最新的作品（還沒有就放第三幅示範）；點架子打開作品集。 */
+.shop-frame { position: relative; display: block; width: clamp(3.4rem, 4.4vw, 4.4rem); aspect-ratio: 100 / 124; }
+.shop-frame:nth-child(3) { rotate: -2deg; } .shop-frame:nth-child(4) { rotate: 1.5deg; }
 .shop-mini { position: absolute; left: 15%; top: 12%; width: 70%; height: 76%; }
-.shop-frame[aria-current="true"] { outline: 3px solid #f4c668; outline-offset: 2px; border-radius: 4px; }
-.shop-frame:focus-visible { outline: 3px solid #fff3cf; outline-offset: 3px; }
-.shop-frame.is-blank .shop-mini { opacity: .55; }
+.shop-frame-tag { position: absolute; left: 50%; top: calc(100% + .15rem); translate: -50% 0; color: #fbecc4; font-family: var(--font-hand); font-size: var(--fs-small); white-space: nowrap; text-shadow: 0 1px 0 #4a3022; }
+.shop-frame.is-mine .shop-frame-tag { color: #ffe39a; }
+/* 作品集：一張信紙蓋在畫室上，上面一排「畫一張新的」，下面是這個瀏覽器裡的每一件作品。 */
+.shop-album { position: absolute; z-index: 6; left: 50%; top: 52%; width: min(46rem, calc(100% - 2rem)); max-height: calc(100% - 6rem); overflow: auto; translate: -50% -50%; padding: 1.4rem 1.6rem 1.6rem; color: var(--ink); }
+.shop-album[hidden] { display: none; }
+.shop-album-title { margin: 0 0 .8rem; color: #a8423b; font-family: var(--font-hand); font-size: var(--fs-title); line-height: 1.2; text-align: center; }
+.shop-album-shut { position: absolute; right: .9rem; top: .9rem; width: 2.4rem; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; color: #fbf3df; background: #b5443c; font-size: var(--fs-body); cursor: pointer; }
+.shop-album-shut:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
+.shop-album-label { margin: 0 0 .4rem; color: #7a5a48; font-family: var(--font-hand); font-size: var(--fs-small); }
+.shop-album-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; margin-bottom: 1.2rem; }
+.shop-album-blank { display: grid; justify-items: center; gap: .2rem; padding: .5rem .4rem .45rem; border: 0; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); cursor: pointer; }
+.shop-album-blank:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
+.shop-album-blank .shop-album-mini { width: 3.4rem; opacity: .9; }
+.shop-album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .9rem; margin: 0; padding: 0; list-style: none; }
+.shop-album-card { display: grid; justify-items: center; gap: .15rem; padding: .7rem .6rem .7rem; }
+.shop-album-mini { display: block; width: 6.2rem; aspect-ratio: 300 / 360; background: #fbf3e1; box-shadow: 0 2px 0 #e2d4b8; }
+.shop-album-name { margin: .35rem 0 0; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-body); }
+.shop-album-when { margin: 0 0 .35rem; color: #7a5a48; font-family: var(--font-hand); font-size: var(--fs-small); }
+.shop-album-actions { display: flex; gap: .4rem; }
+.shop-album-actions .color-tool { padding: .35rem .7rem; }
+.color-tool.is-quiet { color: #a8423b; }
+.shop-album-empty { margin: .4rem 0 0; color: #7a5a48; font-family: var(--font-hand); font-size: var(--fs-body); text-align: center; }
+.shop-album-empty[hidden] { display: none; }
+.shop-work.is-browsing > :not(.shop-album, .sr-only) { filter: brightness(.7); }
 .shop-left { justify-self: start; align-self: center; display: grid; gap: .7rem; justify-items: start; }
-.color-crayons { position: relative; width: clamp(15rem, 20vw, 19.5rem); aspect-ratio: 300 / 190; }
+.color-crayons { position: relative; width: clamp(17rem, 23vw, 22.5rem); aspect-ratio: 300 / 190; }
 .color-row { position: absolute; left: 5%; right: 5%; top: 21%; height: 62%; display: flex; align-items: flex-end; justify-content: space-between; }
 .color-crayon { position: relative; width: 7%; aspect-ratio: 32 / 100; padding: 0; border: 0; background: none; cursor: pointer; }
 .color-crayon:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
-.color-crayon[aria-checked="true"] { translate: 0 -38%; filter: drop-shadow(0 0 4px #fff3cf); }
+.color-crayon[aria-checked="true"] { translate: 0 -58%; filter: drop-shadow(0 0 5px #fff3cf) drop-shadow(0 3px 2px #3a261b55); }
 .color-tin-front { pointer-events: none; }
 .color-name { display: flex; align-items: baseline; gap: .6rem; margin: 0; padding: .35rem 1rem .45rem; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-body); }
-.color-name-en { font-size: var(--fs-small); opacity: .7; }
+.color-name-en { color: #7a5a48; font-size: var(--fs-small); }
 .shop-presets { display: flex; gap: .5rem; }
 .shop-preset { display: grid; justify-items: center; gap: .3rem; padding: .5rem .7rem .55rem; border: 0; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); cursor: pointer; }
 .shop-preset:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
 .shop-dots { position: relative; display: block; width: 4.4rem; aspect-ratio: 104 / 28; }
 .shop-center { position: relative; align-self: end; }
-.color-sheet { position: relative; z-index: 1; width: min(27rem, calc((min(100svh, 940px) - 230px) * 340 / 440)); aspect-ratio: 340 / 440; rotate: -1deg; }
+.color-sheet { position: relative; z-index: 1; width: min(29rem, calc((min(100svh, 940px) - 215px) * 340 / 440)); aspect-ratio: 340 / 440; rotate: -1deg; }
 .color-drawing { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .color-part { cursor: pointer; }
 .color-part:focus { outline: none; } /* 點選時不畫藍色方框；用鍵盤時才顯示金邊。 */
 .color-part:focus-visible { outline: none; stroke: #e0b04f; stroke-width: 6; }
 .color-sheet.is-placing .color-drawing { cursor: copy; }
-.color-hover { stroke: #f4c668; stroke-width: 7; stroke-linejoin: round; opacity: 0; }
+.color-hover { stroke: #f4c668; stroke-width: 7; stroke-linejoin: round; fill-opacity: .32; opacity: 0; }
 .color-hover.is-on { opacity: .85; }
 .color-sticker { cursor: pointer; }
 .shop-lamp, .shop-glow { position: absolute; right: -6.5rem; top: -2.5rem; width: 9rem; aspect-ratio: 200 / 260; pointer-events: none; }
@@ -135,7 +167,7 @@
 .color-tools { display: grid; grid-template-columns: minmax(7.5rem, auto); gap: .55rem; }
 .color-tool { padding: .55rem 1rem; border: 0; background: #f6efe0; color: var(--ink); font-family: var(--font-hand); font-size: var(--fs-small); cursor: pointer; }
 .color-tool.is-main { color: var(--cream); background: #b5443c; }
-.color-tool:disabled { opacity: .45; cursor: default; }
+.color-tool:disabled { color: #b9a58c; cursor: default; } /* 停用時紙還是實的（不透出後面的木牆），只把字調淡。 */
 .color-tool:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
 .shop-stickers { position: relative; display: flex; gap: .45rem; padding: 1.6rem .6rem .55rem; }
 .shop-stickers-name { position: absolute; left: .7rem; top: .4rem; margin: 0; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); }
@@ -152,30 +184,34 @@
 .shop-work.is-done .shop-stand { opacity: 1; }
 .shop-work.is-done .shop-glow { opacity: 1; }
 /* 紙張由 cabin-paper.js 依每個元素的大小畫好，蓋過上面的底色。 */
-.vending[data-paper] :is(.vending-picker, .vending-picker button, .cal-note, .cal-close, .color-tool, .color-name, .shop-preset, .shop-stickers, .shop-card, .shop-note, .shop-title, .shop-shelf) { background: transparent no-repeat 0 0 / 100% 100%; }
+.vending[data-paper] :is(.vending-picker, .vending-picker button, .cal-note, .cal-close, .color-tool, .color-name, .shop-preset, .shop-stickers, .shop-card, .shop-note, .shop-title, .shop-shelf, .shop-album, .shop-album-card, .shop-album-blank) { background: transparent no-repeat 0 0 / 100% 100%; }
 
 @media (prefers-reduced-motion: no-preference) {
   .market-flake { animation: market-snowfall 13s linear var(--delay) infinite; }
+  .machine-tag { animation: tag-sway 2.6s ease-in-out infinite alternate; }
   .machine-bulb { animation: machine-twinkle 4.6s ease-in-out var(--delay, 0s) infinite alternate; }
   .vending-stage[data-show] .machine-bulb { animation: machine-cheer .9s ease-in-out calc(var(--k, 0) * 70ms) 2 alternate; }
   .vending-heading { transition: opacity .6s ease; }
   .cal-note[open] { animation: cal-note-in .45s cubic-bezier(.2, .8, .3, 1.1); }
-  /* 進出工坊：廣場往那一點拉近、淡出，工坊從那一點展開；回來時倒過來。 */
-  .vending[data-mode="workshop"] .market { animation: market-lean .75s cubic-bezier(.4, 0, .6, 1) both; }
-  .vending.is-returning .market { animation: market-back .65s cubic-bezier(.2, .8, .3, 1) both; }
-  .vending[data-mode="workshop"] .workshop:not(.is-leaving) { animation: shop-in .75s cubic-bezier(.2, .8, .3, 1) both; }
-  .workshop.is-leaving { animation: shop-out .6s ease-in both; }
-  /* 工坊的開場：畫紙落到桌上、線稿一筆筆畫出來、蠟筆從盒子裡升起、吊牌和貼紙晃進來。 */
-  .shop-work.is-arriving .color-sheet { animation: sheet-drop .6s .3s cubic-bezier(.2, .8, .3, 1.1) backwards; }
-  .shop-work.is-arriving .color-lines path { stroke-dasharray: 1; animation: line-draw .9s .5s ease-out backwards; }
-  .shop-work.is-arriving .color-crayon { animation: crayon-up .45s calc(.55s + var(--i) * 40ms) cubic-bezier(.2, .8, .3, 1.2) backwards; }
-  .shop-work.is-arriving :is(.color-tool, .shop-preset, .shop-sticker, .shop-frame) { animation: tag-in .5s .8s cubic-bezier(.2, .8, .3, 1.1) backwards; }
-  .shop-work.is-arriving :is(.shop-lamp, .shop-glow) { animation: fade-in .6s .2s backwards; }
+  /* 進出工坊：分兩段，兩個畫面不同時半透明疊在一起。進去時廣場先往取物口拉近、淡出，工坊再從那一點展開；
+     回來時工坊像紙板一樣往下收起，收完廣場才從取物口退回來。 */
+  .vending[data-mode="workshop"] .market { animation: market-lean .45s cubic-bezier(.4, 0, .6, 1) both; }
+  .vending.is-returning .market { animation: market-back .55s .42s cubic-bezier(.2, .8, .3, 1) both; }
+  .vending[data-mode="workshop"] .workshop:not(.is-leaving) { animation: shop-in .65s .32s cubic-bezier(.2, .8, .3, 1) both; }
+  .workshop.is-leaving { transform-origin: 50% 100%; animation: shop-out .45s cubic-bezier(.5, 0, .75, 0) both; }
+  /* 工坊的開場：畫紙（一直是完整不透明的，線稿和顏色一起）輕輕落到桌上、蠟筆從盒子裡升起、吊牌和貼紙晃進來；
+     這段時間指到區塊也不亮金邊（畫紙出現在游標底下時不會閃一圈金邊）。 */
+  .shop-work.is-arriving .color-sheet { animation: sheet-drop .55s .45s cubic-bezier(.2, .8, .3, 1.1) backwards; }
+  .shop-work.is-arriving .color-hover.is-on { opacity: 0; }
+  .shop-work.is-arriving .color-crayon { animation: crayon-up .45s calc(.75s + var(--i) * 40ms) cubic-bezier(.2, .8, .3, 1.2) backwards; }
+  .shop-work.is-arriving :is(.color-tool, .shop-preset, .shop-sticker, .shop-frame) { animation: tag-in .5s .95s cubic-bezier(.2, .8, .3, 1.1) backwards; }
+  .shop-work.is-arriving :is(.shop-lamp, .shop-glow) { animation: fade-in .5s 1s backwards; }
   .color-sheet.is-new { animation: sheet-unfold .7s cubic-bezier(.2, .8, .3, 1) .1s backwards; }
   .color-sheet.is-nudged { animation: sheet-nudge .5s ease-in-out; }
   .color-crayon, .shop-preset, .color-tool, .shop-sticker, .shop-frame { transition: translate .2s ease, rotate .2s ease, scale .2s ease; }
   .color-crayon:not([aria-checked="true"]):hover { translate: 0 -14%; }
-  .shop-preset:hover, .shop-frame:hover { translate: 0 -3px; }
+  .shop-preset:hover, .shop-shelf:hover .shop-frame { translate: 0 -3px; }
+  .shop-album:not([hidden]) { animation: card-up .45s cubic-bezier(.2, .8, .3, 1.1); }
   .color-tool:not(:disabled):hover { rotate: -2deg; }
   .shop-sticker:hover { scale: 1.1; }
   .color-part { transition: fill .25s ease; }
@@ -188,6 +224,7 @@
   .shop-work.is-done .shop-sparks i { animation: spark-fall 1.6s calc(.9s + var(--i) * 90ms) ease-out; }
   .shop-card:not([hidden]) { animation: card-up .5s cubic-bezier(.2, .8, .3, 1.1); }
 }
+@keyframes tag-sway { from { rotate: -2deg; } to { rotate: 2deg; } }
 @keyframes market-snowfall { from { translate: 0 0; } to { translate: var(--drift) 105vh; } }
 @keyframes machine-twinkle { from { opacity: .45; } to { opacity: .95; } }
 @keyframes machine-cheer { from { opacity: .6; scale: 1; } to { opacity: 1; scale: 1.7; } }
@@ -195,8 +232,8 @@
 @keyframes market-lean { to { transform: scale(1.3); opacity: 0; } }
 @keyframes market-back { from { transform: scale(1.3); opacity: 0; } }
 @keyframes shop-in { from { opacity: 0; transform: scale(.08); } 45% { opacity: 1; } }
-@keyframes shop-out { to { opacity: 0; transform: scale(.08); } }
-@keyframes sheet-drop { from { opacity: 0; transform: translateY(-3rem) rotate(-5deg); } }
+@keyframes shop-out { 85% { opacity: 1; } to { opacity: 0; transform: perspective(1200px) rotateX(-88deg); } }
+@keyframes sheet-drop { from { transform: translateY(-1.6rem) rotate(-3deg); } }
 @keyframes line-draw { from { stroke-dashoffset: 1; } }
 @keyframes crayon-up { from { opacity: 0; transform: translateY(2.4rem); } }
 @keyframes tag-in { from { opacity: 0; transform: translateY(-.8rem) rotate(-6deg); } }

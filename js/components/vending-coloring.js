@@ -1,16 +1,20 @@
 // The craft booth's workshop, Santa's Little Art Workshop (docs/VENDING-MARKET.md): a little thing from the vending
-// machine as a line drawing on a thick cream sheet on the workshop table, coloured part by part with crayons from an old
-// tin (a part tapped, or reached with Tab and Enter, fills with the crayon's grain, flecks of the paper showing through).
-// Swatch cards colour the whole sheet at once; stickers (a star, a snowflake, holly) are picked up and pressed on; undo
-// and redo go a step at a time, 重新上色 starts the sheet over (and can be undone too). Each thing's sheet is kept in this
-// browser (services/vending-works.js), so it is there again next time, and the shelf on the wall shows all four as they
-// stand; a frame tapped opens that one. 完成 folds the tools away, sets the sheet on a little stand under the lamp, turns
-// it to the light and presses a stamp in its corner, then a card offers to save it as a picture, to go on, or to go back
-// to the market. Every line wavers a little like a hand's (an SVG displacement) and is drawn twice, faintly offset.
+// machine as a coloring page (data/coloring-pages.js: the thing in a little scene) on a thick cream sheet on the workshop
+// table, coloured part by part with crayons from an old tin (a part tapped, or reached with Tab and Enter, fills with the
+// crayon's grain, flecks of the paper showing through). Swatch cards colour the whole sheet at once; stickers (a star, a
+// snowflake, holly) are picked up and pressed on; undo and redo go a step at a time, 重新上色 starts the sheet over (and
+// can be undone too). Every thing from the machine is a new sheet, kept in this browser as a work of its own once
+// anything is on it (services/vending-works.js), so the same thing may be coloured as often as one likes. On the wall a
+// little shelf shows works in frames, two the elves made and the newest of one's own; it opens the album of every work
+// kept here, to go on with one, to let one go, or to begin a new sheet. 完成 folds the tools away, sets the sheet on a
+// little stand under the lamp, turns it to the light and presses a stamp in its corner, then a card offers to save it as
+// a picture, to go on, or to go back to the market. Every line wavers a little like a hand's (an SVG displacement) and is
+// drawn twice, faintly offset; each part's edge is drawn with it, so a thing in front hides the edges of what is behind.
 import { NS, paperLayer, shape } from './paper-art.js';
 import { titleGlyphs } from '../data/title-glyphs.js';
 import { CRAYONS, ITEMS, VENDING } from '../data/vending.js';
-import { BLANK, MOST, STICKERS, presetFills, readWorks, touched, writeWorks } from '../services/vending-works.js';
+import { PAGES } from '../data/coloring-pages.js';
+import { BLANK, MOST, STICKERS, dropWork, keepWork, newKey, presetFills, readWorks, touched, writeWorks } from '../services/vending-works.js';
 import { STICKER_ART, crayon, frame, lamp, lampGlow, roomBulbs, stand, table, tinBack, tinFront, wall } from './vending-workshop-art.js';
 
 // The sheet is 340 × 440: the drawing's own 300 × 360 box sits 20 in from the top and the sides, the stamp in the margin
@@ -18,7 +22,8 @@ import { STICKER_ART, crayon, frame, lamp, lampGlow, roomBulbs, stand, table, ti
 const SHEET = [340, 440], AT = 20, INK = '#5b3d2e';
 const circle = (cx, cy, r) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0Z`;
 const star = (cx, cy, outer, inner) => `M${Array.from({ length: 10 }, (_, i) => { const a = Math.PI * i / 5 - Math.PI / 2, r = i % 2 ? inner : outer; return `${(cx + Math.cos(a) * r).toFixed(1)} ${(cy + Math.sin(a) * r).toFixed(1)}`; }).join('L')}Z`;
-// Each drawing: its parts to colour, bottom to top, and its ink lines (not coloured: eyes, smiles, icing, twigs).
+// The machine's own little pictures of the four things (its round buttons, vending-papercraft.js): each its parts, bottom
+// to top, and its ink lines (not coloured: eyes, smiles, icing, twigs). The workshop's pages are data/coloring-pages.js.
 export const DRAWINGS = {
   stocking: {
     parts: [
@@ -65,9 +70,8 @@ export const ICONS = {
   gingerbread: ['#c0864f', '#e9b6b0', '#e9b6b0', '#b5443c', '#b5443c', '#a8423b', '#fbf3df', '#fbf3df', '#fbf3df'],
   snowman: ['#fbf8f1', '#fbf8f1', '#b5443c', '#a8423b', '#3b3438', '#b5443c', '#3b3438', '#d9844d', '#3b3438', '#3b3438', '#3b3438'],
 };
-// The drawings in the crayons' own colours, for the classic swatch card: each of ICONS' colours traded for its crayon.
-const NEAREST = { '#b5443c': '#b03f37', '#a8423b': '#b03f37', '#fbf3df': '#f4ead3', '#fbf8f1': '#fbfaf5', '#e0b04f': '#e2b65a', '#3f6653': '#3f6653', '#4f7d68': '#9db59a', '#8a5a3c': '#7a5238', '#9fbdd2': '#9fbdd2', '#c0864f': '#b97c4a', '#e9b6b0': '#e2aaa3', '#3b3438': '#4a4245', '#d9844d': '#b97c4a' };
-const classic = id => ICONS[id].map(fill => NEAREST[fill] ?? fill);
+// Each page in the crayons' own colours, for the classic swatch card.
+const classic = id => PAGES[id].colours;
 const SWATCH = ['#b03f37', '#3f6653', '#e2b65a', '#f4ead3'];
 const element = (tag, className, parent, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; parent?.append(node); return node; };
 const svg = (name, attributes, parent) => { const node = document.createElementNS(NS, name); for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value); parent?.append(node); return node; };
@@ -93,7 +97,25 @@ function filters(art, id) {
   svg('feColorMatrix', { in: 'noise', type: 'matrix', values: '0 0 0 0 .98  0 0 0 0 .95  0 0 0 0 .88  0 0 0 -3.4 1.62', result: 'flecks' }, grain);
   svg('feComposite', { in: 'flecks', in2: 'drawn', operator: 'in', result: 'paper' }, grain);
   const merge = svg('feMerge', {}, grain); svg('feMergeNode', { in: 'drawn' }, merge); svg('feMergeNode', { in: 'paper' }, merge);
+  // (and the grain alone, for a part under the hand's waver already)
+  const flecks = svg('filter', { id: `${id}-flecks`, x: '-3%', y: '-3%', width: '106%', height: '106%' }, defs);
+  svg('feTurbulence', { type: 'fractalNoise', baseFrequency: '.9 .55', numOctaves: 3, seed: 11, result: 'noise' }, flecks);
+  svg('feColorMatrix', { in: 'noise', type: 'matrix', values: '0 0 0 0 .98  0 0 0 0 .95  0 0 0 0 .88  0 0 0 -3.4 1.62', result: 'specks' }, flecks);
+  svg('feComposite', { in: 'specks', in2: 'SourceGraphic', operator: 'in', result: 'paper' }, flecks);
+  const over = svg('feMerge', {}, flecks); svg('feMergeNode', { in: 'SourceGraphic' }, over); svg('feMergeNode', { in: 'paper' }, over);
 }
+// A work in little (on the shelf, in the album): each part filled and edged in turn, the ink over them, its stickers, a
+// gold star once it is finished.
+function miniature(mini, page, work) {
+  mini.replaceChildren();
+  const edges = { fill: 'none', stroke: INK, 'stroke-width': 7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+  page.parts.forEach((d, i) => { svg('path', { d, fill: work?.fills[i] ?? BLANK }, mini); svg('path', { d, ...edges }, mini); });
+  const ink = svg('g', edges, mini);
+  for (const d of page.ink) svg('path', { d, ...(d.endsWith('Z') ? { fill: INK } : {}) }, ink);
+  for (const [kind, x, y, turn] of work?.stickers ?? []) STICKER_ART[kind](svg('g', { transform: `translate(${x} ${y}) rotate(${turn}) scale(1.3)` }, mini));
+  if (work?.finished) STICKER_ART.star(svg('g', { transform: 'translate(262 324) scale(1.9)' }, mini));
+}
+const day = at => { const date = new Date(at); return `${date.getMonth() + 1}/${date.getDate()}`; };
 // The ink stamp pressed when the work is done: a little postmark-like frame with "Merry Christmas" in the Home title's
 // letters (paths, so a saved picture needs no font), a few stars, in red ink that took unevenly.
 function stamp(art, id) {
@@ -120,7 +142,7 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   const events = new AbortController(), on = (node, type, handler) => node.addEventListener(type, handler, { signal: events.signal }), id = `color-${++count}`, still = matchMedia('(prefers-reduced-motion: reduce)');
   const timers = new Set(), later = (ms, fn) => { const timer = setTimeout(() => { timers.delete(timer); fn(); }, still.matches ? 0 : ms); timers.add(timer); };
   const storage = (() => { try { return globalThis.localStorage ?? null; } catch { return null; } })();
-  const works = readWorks(storage, Object.fromEntries(ITEMS.map(each => [each.id, DRAWINGS[each.id].parts.length])));
+  let works = readWorks(storage, Object.fromEntries(ITEMS.map(each => [each.id, PAGES[each.id].parts.length])));
   const small = { paper: { scale: .3, grain: .5, shadow: .3 }, eager: true };
   if (walls) {
     paperLayer(walls, '0 0 1440 470', 'shop-wall', wall, { paper: { scale: .9, grain: .45, shadow: .2 }, eager: true, preserveAspectRatio: 'xMidYMax slice' });
@@ -129,27 +151,62 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   }
   const status = element('p', 'sr-only', host); status.setAttribute('role', 'status');
 
-  // The shelf: four frames, each thing as it stands (a gold ribbon once it is finished); one tapped opens it.
-  const shelf = element('div', 'shop-shelf', host); shelf.setAttribute('role', 'group'); shelf.setAttribute('aria-label', VENDING.shelf);
-  element('p', 'shop-shelf-name', shelf, VENDING.shelf).setAttribute('aria-hidden', 'true');
-  const frames = new Map(ITEMS.map(({ id: each, name }) => {
-    const button = element('button', 'shop-frame', shelf); button.type = 'button'; button.dataset.item = each;
-    paperLayer(button, '0 0 100 124', 'shop-frame-wood', frame, small);
-    const mini = svg('svg', { viewBox: '0 0 300 360', class: 'shop-mini', 'aria-hidden': 'true' }, button);
-    on(button, 'click', () => { if (item?.id !== each) open(each, { quick: true }); });
-    return [each, { button, mini, name }];
-  }));
-  function miniature(each) {
-    const { button, mini, name } = frames.get(each), drawing = DRAWINGS[each], work = works[each];
-    mini.replaceChildren();
-    drawing.parts.forEach((d, i) => svg('path', { d, fill: work?.fills[i] ?? BLANK }, mini));
-    const lines = svg('g', { fill: 'none', stroke: INK, 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, mini);
-    for (const d of [...drawing.parts, ...drawing.ink]) svg('path', { d, ...(d.endsWith('Z') && drawing.ink.includes(d) ? { fill: INK } : {}) }, lines);
-    for (const [kind, x, y, turn] of work?.stickers ?? []) STICKER_ART[kind](svg('g', { transform: `translate(${x} ${y}) rotate(${turn}) scale(1.3)` }, mini));
-    if (work?.finished) STICKER_ART.star(svg('g', { transform: 'translate(262 324) scale(1.9)' }, mini));
-    button.classList.toggle('is-done', Boolean(work?.finished)); button.classList.toggle('is-blank', !touched(work));
-    button.setAttribute('aria-label', VENDING.frame(name, work)); button.setAttribute('aria-current', String(each === item?.id));
+  // The shelf on the wall: three works in frames, two the elves made (in the classic colours) and the newest of one's own
+  // (or a third of the elves', before there is one); a tap on it opens the album.
+  const shelf = element('button', 'shop-shelf', host); shelf.type = 'button';
+  element('span', 'shop-shelf-name', shelf).setAttribute('aria-hidden', 'true');
+  const SAMPLES = ['tree', 'gingerbread', 'snowman'];
+  const showcase = SAMPLES.map(() => { const spot = element('span', 'shop-frame', shelf); paperLayer(spot, '0 0 100 124', 'shop-frame-wood', frame, small); const mini = svg('svg', { viewBox: '0 0 300 360', class: 'shop-mini', 'aria-hidden': 'true' }, spot); const tag = element('span', 'shop-frame-tag', spot); return { spot, mini, tag }; });
+  function show() {
+    const mine = works.find(work => work.finished) ?? works[0] ?? null;
+    showcase.forEach(({ spot, mini, tag }, i) => {
+      const own = i === 2 && mine, each = own ? mine.item : SAMPLES[i];
+      miniature(mini, PAGES[each], own ? mine : { fills: PAGES[each].colours, stickers: [], finished: true });
+      tag.textContent = own ? VENDING.mine : VENDING.sample; spot.classList.toggle('is-mine', Boolean(own));
+    });
+    shelf.querySelector('.shop-shelf-name').textContent = VENDING.albumCount(works.length);
+    shelf.setAttribute('aria-label', VENDING.albumOpen(works.length));
   }
+  on(shelf, 'click', () => album(true));
+
+  // The album: every work kept here, newest first, each in little with what it is, how far along and when, to go on with
+  // it or to let it go (asked twice); above them, a new sheet of any of the four.
+  const book = element('div', 'shop-album', host); book.hidden = true; book.setAttribute('role', 'dialog'); book.setAttribute('aria-modal', 'true'); book.setAttribute('aria-labelledby', `${id}-album`);
+  const bookTitle = element('p', 'shop-album-title', book, VENDING.album); bookTitle.id = `${id}-album`;
+  const shut = element('button', 'shop-album-shut', book, '✕'); shut.type = 'button'; shut.setAttribute('aria-label', VENDING.albumClose);
+  const fresh = element('div', 'shop-album-new', book); element('p', 'shop-album-label', fresh, VENDING.albumNew);
+  const freshRow = element('div', 'shop-album-row', fresh);
+  for (const { id: each, name } of ITEMS) {
+    const button = element('button', 'shop-album-blank', freshRow); button.type = 'button'; button.setAttribute('aria-label', VENDING.albumBlank(name));
+    miniature(svg('svg', { viewBox: '0 0 300 360', class: 'shop-album-mini', 'aria-hidden': 'true' }, button), PAGES[each], null);
+    element('span', 'shop-album-name', button, name);
+    on(button, 'click', () => { album(false); open(each, { quick: true }); });
+  }
+  const grid = element('ul', 'shop-album-grid', book), empty = element('p', 'shop-album-empty', book, VENDING.albumEmpty);
+  let asked = null;
+  function fill() {
+    grid.replaceChildren(); empty.hidden = works.length > 0; asked = null;
+    for (const work of works) {
+      const { name } = ITEMS.find(each => each.id === work.item), card = element('li', 'shop-album-card', grid);
+      miniature(svg('svg', { viewBox: '0 0 300 360', class: 'shop-album-mini', 'aria-hidden': 'true' }, card), PAGES[work.item], work);
+      element('p', 'shop-album-name', card, name); element('p', 'shop-album-when', card, `${work.finished ? VENDING.albumDone : VENDING.albumHalf}・${day(work.at)}`);
+      const actions = element('div', 'shop-album-actions', card);
+      const go = element('button', 'color-tool', actions, work.key === current?.key ? VENDING.albumHere : VENDING.albumGo); go.type = 'button'; go.setAttribute('aria-label', `${VENDING.albumGo}：${name}`);
+      const drop = element('button', 'color-tool is-quiet', actions, VENDING.albumDrop); drop.type = 'button'; drop.setAttribute('aria-label', `${VENDING.albumDrop}：${name}`);
+      on(go, 'click', () => { album(false); if (work.key !== current?.key) open(work.item, { quick: true, key: work.key }); });
+      on(drop, 'click', () => {
+        if (asked !== work.key) { asked = work.key; drop.textContent = VENDING.albumSure; return; }
+        works = dropWork(works, work.key); writeWorks(storage, works); if (current?.key === work.key) current = { key: null };
+        sound?.play('remove'); fill(); show(); (grid.querySelector('button') ?? shut).focus({ preventScroll: true });
+      });
+    }
+  }
+  function album(on_) {
+    // (on a phone the shelf is at the foot of the workshop: the album is brought into view, and the shelf again after)
+    if (on_) { fill(); book.hidden = false; host.classList.add('is-browsing'); if (innerWidth <= 760) book.scrollIntoView({ block: 'start', behavior: still.matches ? 'auto' : 'smooth' }); shut.focus({ preventScroll: true }); sound?.play('pick'); }
+    else if (!book.hidden) { book.hidden = true; host.classList.remove('is-browsing'); shelf.focus(); }
+  }
+  on(shut, 'click', () => album(false));
 
   // On the left: the tin of crayons (the one picked stands up out of it, its name on a slip below) and the swatch cards.
   const left = element('div', 'shop-left', host);
@@ -206,7 +263,7 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   const line = element('p', 'shop-card-line', card), choices = element('div', 'shop-card-actions', card);
   const save = tool(VENDING.save, 'color-tool', choices), again = tool(VENDING.again, 'color-tool', choices), leave = tool(`← ${VENDING.back}`, 'color-tool is-main', choices);
 
-  let tidy = 0, colour = CRAYONS[0][0], item = null, parts = [], hover = null, stickers = null, lines = null, state = { fills: [], stickers: [] }, done = [], undone = [], finished = false, holding = null;
+  let current = { key: null }, tidy = 0, colour = CRAYONS[0][0], item = null, parts = [], hover = null, stickers = null, lines = null, state = { fills: [], stickers: [] }, done = [], undone = [], finished = false, holding = null;
   function choose(i, quiet = false) {
     colour = CRAYONS[i][0]; crayons.forEach((button, j) => { button.setAttribute('aria-checked', String(i === j)); button.tabIndex = i === j ? 0 : -1; });
     named.replaceChildren(); element('span', '', named, CRAYONS[i][1]); element('span', 'color-name-en', named, CRAYONS[i][2]).lang = 'en';
@@ -218,7 +275,9 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   });
   function hold(kind) {
     holding = kind; for (const [each, button] of pegs) button.setAttribute('aria-pressed', String(each === kind));
-    sheet.classList.toggle('is-placing', Boolean(kind)); if (kind) { sound?.play('pick'); status.textContent = VENDING.holding(VENDING.sticker[kind]); }
+    sheet.classList.toggle('is-placing', Boolean(kind));
+    // (held, the note by the sheet says what to do with it until it is put down)
+    if (kind) { sound?.play('pick'); status.textContent = VENDING.holding(VENDING.sticker[kind]); tell(VENDING.holding(VENDING.sticker[kind]), 0); } else if (note.dataset.held) tell('', -1);
   }
 
   const snapshot = () => ({ fills: [...state.fills], stickers: state.stickers.map(each => [...each]) });
@@ -233,10 +292,11 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
     });
     settle();
   }
-  // Kept in this browser after every change, and the shelf's frame drawn again.
+  // Kept in this browser after every change (a new sheet only once anything is on it), and the shelf drawn again.
   function keep() {
-    if (!item) return;
-    works[item.id] = { ...snapshot(), finished, at: Date.now() }; writeWorks(storage, works); miniature(item.id);
+    if (!item || (!current.key && !touched(state))) return;
+    current = { ...snapshot(), key: current.key ?? newKey(), item: item.id, finished, at: Date.now() };
+    works = keepWork(works, current); writeWorks(storage, works); show();
   }
   function commit(next) { done.push(snapshot()); undone = []; state = next; finished = false; render(); keep(); }
   function paint(index) {
@@ -251,8 +311,15 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   }
   // A word pencilled by the sheet for a moment (and read out), the sheet giving a little shake.
   function hint(words) {
-    note.textContent = words; status.textContent = words; note.classList.add('is-shown'); sheet.classList.remove('is-nudged'); void sheet.offsetWidth; sheet.classList.add('is-nudged');
-    later(2600, () => note.classList.remove('is-shown'));
+    tell(words, 2600); status.textContent = words; sheet.classList.remove('is-nudged'); void sheet.offsetWidth; sheet.classList.add('is-nudged');
+  }
+  // The pencilled note by the sheet: `ms` long, until put away (0), or put away now (-1).
+  let noteTimer = 0;
+  function tell(words, ms) {
+    clearTimeout(noteTimer); delete note.dataset.held;
+    if (ms < 0) { note.classList.remove('is-shown'); return; }
+    note.textContent = words; note.classList.add('is-shown');
+    if (ms) noteTimer = setTimeout(() => note.classList.remove('is-shown'), still.matches ? ms + 1500 : ms); else note.dataset.held = '';
   }
   const pointIn = event => { const point = art.createSVGPoint(); point.x = event.clientX; point.y = event.clientY; const local = point.matrixTransform(drawn.getScreenCTM().inverse()); return [Math.min(300, Math.max(0, local.x)), Math.min(360, Math.max(0, local.y))]; };
   on(art, 'click', event => {
@@ -262,46 +329,49 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
     if (stuck) { const at = +stuck.dataset.index; commit({ fills: state.fills, stickers: state.stickers.filter((_, i) => i !== at) }); sound?.play('remove'); return; }
     const index = parts.indexOf(event.target.closest('.color-part')); if (index >= 0) paint(index);
   });
-  // A part pointed at is outlined in gold, so it is clear which one a tap will fill.
-  on(art, 'pointerover', event => { const part = event.target.closest('.color-part'); if (part && hover) { hover.setAttribute('d', part.getAttribute('d')); hover.classList.add('is-on'); } });
+  // Pointed at with a mouse, a part shows faintly in the crayon's colour (what a click would do), its edge lit.
+  on(art, 'pointerover', event => { if (event.pointerType === 'touch') return; const part = event.target.closest('.color-part'); if (part && hover) { hover.setAttribute('d', part.getAttribute('d')); hover.setAttribute('fill', holding ? 'none' : colour); hover.classList.add('is-on'); } });
   on(art, 'pointerout', event => { if (!event.relatedTarget?.closest?.('.color-part') && hover) hover.classList.remove('is-on'); });
 
-  // A new sheet: `drawing`'s parts (each a button), the lines over them, the stickers over those.
-  function build(drawing) {
+  // A new sheet: the page's parts (each a button), each with its edge, bottom to top, all of it wavering like a hand's
+  // line; the ink over them; the stickers over that.
+  function build(page) {
     drawn.replaceChildren(); parts = [];
-    const fills = svg('g', { class: 'color-parts', filter: `url(#${id}-grain)` }, drawn);
-    parts = drawing.parts.map((d, i) => {
-      const part = svg('path', { d, fill: BLANK, class: 'color-part', tabindex: 0, role: 'button', 'aria-label': VENDING.region(item.name, i + 1) }, fills);
+    const sheetArt = svg('g', { class: 'color-parts', filter: `url(#${id}-hand)` }, drawn);
+    const edge = d => { for (const [width, opacity, shift] of [[3, 1, 0], [1.3, .5, .9]]) svg('path', { d, fill: 'none', stroke: INK, 'stroke-width': width, opacity, transform: `translate(${shift} ${shift * .6})`, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'pointer-events': 'none' }, sheetArt); };
+    parts = page.parts.map((d, i) => {
+      const part = svg('path', { d, fill: BLANK, class: 'color-part', filter: `url(#${id}-flecks)`, tabindex: 0, role: 'button', 'aria-label': VENDING.region(item.name, i + 1) }, sheetArt);
       on(part, 'keydown', event => {
         if (event.key !== 'Enter' && event.key !== ' ') return; event.preventDefault();
         if (holding) { const box = part.getBBox(); place(box.x + box.width / 2, box.y + box.height / 2); } else paint(i);
       });
+      edge(d);
       return part;
     });
     hover = svg('path', { class: 'color-hover', fill: 'none', 'pointer-events': 'none' }, drawn);
-    // The lines over the colours: each part's edge and the drawing's details, then the same again, thin and a little off.
     lines = svg('g', { class: 'color-lines', fill: 'none', stroke: INK, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'pointer-events': 'none', filter: `url(#${id}-hand)` }, drawn);
     for (const [width, opacity, shift] of [[3, 1, 0], [1.3, .5, .9]]) {
       const pass = svg('g', { 'stroke-width': width, opacity, transform: `translate(${shift} ${shift * .6})` }, lines);
-      for (const d of drawing.parts) svg('path', { d, pathLength: 1 }, pass);
-      for (const d of drawing.ink) svg('path', { d, pathLength: 1, ...(d.endsWith('Z') ? { fill: INK } : {}) }, pass);
+      for (const d of page.ink) svg('path', { d, ...(d.endsWith('Z') ? { fill: INK } : {}) }, pass);
     }
     stickers = svg('g', { class: 'color-stickers' }, drawn);
     art.removeAttribute('aria-hidden'); art.setAttribute('role', 'group'); art.setAttribute('aria-label', item.name);
   }
-  // Opens a thing's sheet (`next`, or the one last worked on, or the first): as it was left, or blank. The way in from the
-  // market plays the table's little show (`quick` skips it, as when a frame is tapped).
-  function open(next = null, { quick = false } = {}) {
-    clearTimeout(tidy); hold(null); card.hidden = true; host.classList.remove('is-done');
-    const last = Object.entries(works).sort((a, b) => b[1].at - a[1].at)[0]?.[0];
-    item = ITEMS.find(each => each.id === (next ?? last ?? ITEMS[0].id)) ?? ITEMS[0];
-    const drawing = DRAWINGS[item.id], work = works[item.id];
-    state = work ? { fills: [...work.fills], stickers: work.stickers.map(each => [...each]) } : { fills: drawing.parts.map(() => BLANK), stickers: [] };
+  // Opens a sheet: a new one of `next` (as everything from the machine is), or the work called `key` as it was left. The
+  // way in from the market plays the table's little show (`quick` skips it, as from the album).
+  function open(next = null, { quick = false, key = null } = {}) {
+    clearTimeout(tidy); hold(null); album(false); card.hidden = true; host.classList.remove('is-done');
+    const work = key ? works.find(each => each.key === key) : null;
+    item = ITEMS.find(each => each.id === (work?.item ?? next)) ?? ITEMS[0];
+    const page = PAGES[item.id];
+    current = work ? { ...work } : { key: null };
+    state = work ? { fills: [...work.fills], stickers: work.stickers.map(each => [...each]) } : { fills: page.parts.map(() => BLANK), stickers: [] };
     finished = work?.finished ?? false; done = []; undone = [];
-    build(drawing); render(); sheet.dataset.item = item.id;
-    for (const each of frames.keys()) miniature(each);
+    build(page); render(); sheet.dataset.item = item.id; show();
     sheet.classList.remove('is-new'); void sheet.offsetWidth; sheet.classList.add('is-new');
     if (!quick) { host.classList.remove('is-arriving'); void host.offsetWidth; host.classList.add('is-arriving'); later(1700, () => host.classList.remove('is-arriving')); }
+    // A sheet not yet touched: how it is done, pencilled by it once it has settled.
+    if (touched(state)) tell('', -1); else later(quick ? 300 : 1300, () => { if (!touched(state)) tell(VENDING.howTo, 4200); });
     status.textContent = VENDING.desk(item.name);
     return item.id;
   }
@@ -319,7 +389,10 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   on(again, 'click', () => { card.hidden = true; host.classList.remove('is-done'); (parts[0] ?? crayons[0]).focus({ preventScroll: true }); });
   on(back, 'click', () => onBack());
   on(leave, 'click', () => onBack());
-  on(host, 'keydown', event => { if (event.key === 'Escape' && holding) { event.preventDefault(); event.stopPropagation(); hold(null); } });
+  on(host, 'keydown', event => {
+    if (event.key === 'Escape' && !book.hidden) { event.preventDefault(); event.stopPropagation(); album(false); return; }
+    if (event.key === 'Escape' && holding) { event.preventDefault(); event.stopPropagation(); hold(null); }
+  });
   // Saved as it looks: the paper (its own picture, grain and rim), then the drawing, stickers and stamp over it, three
   // times the sheet's size.
   on(save, 'click', async () => {
@@ -333,14 +406,13 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
     context.drawImage(under, 0, 0, canvas.width, canvas.height); context.drawImage(over, 0, 0, canvas.width, canvas.height);
     const link = document.createElement('a'); link.href = canvas.toDataURL('image/png'); link.download = VENDING.file(item.id); link.click(); sound?.play('jingle');
   });
-  choose(0, true);
-  for (const each of frames.keys()) miniature(each);
+  choose(0, true); show();
   return {
     open, get item() { return item?.id ?? null; },
     // Closed: it is left just as it is while the workshop folds away (it would jump back to the table and fade in again
     // on the way out), and put back to rights once it is out of sight.
-    close() { hold(null); clearTimeout(tidy); tidy = setTimeout(() => { card.hidden = true; host.classList.remove('is-done', 'is-arriving'); }, still.matches ? 0 : 700); },
+    close() { hold(null); album(false); clearTimeout(tidy); tidy = setTimeout(() => { card.hidden = true; host.classList.remove('is-done', 'is-arriving'); }, still.matches ? 0 : 700); },
     focus: () => (parts[0] ?? crayons[0]).focus({ preventScroll: true }),
-    destroy() { events.abort(); clearTimeout(tidy); timers.forEach(clearTimeout); host.replaceChildren(); walls?.replaceChildren(); },
+    destroy() { events.abort(); clearTimeout(tidy); clearTimeout(noteTimer); timers.forEach(clearTimeout); host.replaceChildren(); walls?.replaceChildren(); },
   };
 }

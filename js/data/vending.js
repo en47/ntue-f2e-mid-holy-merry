@@ -34,15 +34,21 @@ export const VENDING = {
   crayons: '蠟筆盒',
   undo: '復原', redo: '重做', reset: '重新上色', finish: '完成', save: '存成圖片', back: '回到市集', again: '再修改',
   // The workshop: the shelf of works, the swatch cards, the stickers, a gentle word, the card when it is done.
-  shelf: '我的作品', frame: (name, work) => `${name}${work?.finished ? '（完成了）' : work ? '（畫到一半）' : ''}，點一下來畫`,
+  // The shelf on the wall (two works the elves made, the newest of one's own) and the album it opens.
+  sample: '精靈示範', mine: '我的作品', albumCount: n => (n ? `作品集・${n} 件` : '作品集'), albumOpen: n => `打開作品集（${n} 件作品）`,
+  album: '作品集', albumClose: '關上作品集', albumNew: '畫一張新的', albumBlank: name => `畫一張新的${name}`,
+  albumEmpty: '還沒有作品。從販賣機拿一樣，或在上面挑一張新的來畫吧。', albumDone: '完成', albumHalf: '畫到一半',
+  albumGo: '繼續畫', albumHere: '正在畫', albumDrop: '刪除', albumSure: '確定刪除？',
   presets: '配色卡', cards: [['classic', '經典'], ['snowy', '雪夜'], ['candy', '糖果']], preset: name => `套用「${name}」配色`,
-  stickers: '貼紙', sticker: { star: '星星', flake: '雪花', holly: '冬青' }, stick: name => `拿起${name}貼紙`, holding: name => `拿著${name}貼紙：點畫紙貼上去，再按一次就放下。`,
-  empty: '先替它塗上一點顏色吧。', full: '貼紙已經貼滿了。',
+  stickers: '貼紙・點一下再點畫紙', sticker: { star: '星星', flake: '雪花', holly: '冬青' }, stick: name => `拿起${name}貼紙`, holding: name => `拿著${name}貼紙：點畫紙貼上去，再按一次就放下。`,
+  empty: '先替它塗上一點顏色吧。', full: '貼紙已經貼滿了。', howTo: '選一支蠟筆，點一塊就塗上顏色',
   doneTitle: '完成了！', doneLine: name => `${name}已經放上工坊的展示架了。`, finished: name => `${name}完成了，放上展示架。`,
   file: id => `holy-merry-${id}.png`,
   pick: '挑一樣來畫', failed: '3D 販賣機暫時無法顯示，可以直接挑一樣來畫。',
   // Walking up to the machine from the street, and back.
   near: '走近販賣機，選一樣來拉', away: '回到市集',
+  // The paper tag at the machine saying what to do next (shown, not read out: the status says it in full).
+  next: { idle: '先選一樣', chosen: '往下拉到底', ready: '點這裡去上色' },
 };
 // The Advent House: any drawer may be pulled out (this page keeps no story date), each with a little thing in it that
 // brings up a card with its paper scene (components/cabin-advent-scenes.js) and one line; `play` is what a tap on the
