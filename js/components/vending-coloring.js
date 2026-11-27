@@ -15,7 +15,8 @@ import { titleGlyphs } from '../data/title-glyphs.js';
 import { CRAYONS, ITEMS, VENDING } from '../data/vending.js';
 import { PAGES } from '../data/coloring-pages.js';
 import { BLANK, MOST, STICKERS, dropWork, keepWork, newKey, presetFills, readWorks, touched, writeWorks } from '../services/vending-works.js';
-import { STICKER_ART, crayon, frame, lamp, lampGlow, roomBulbs, stand, table, tinBack, tinFront, wall } from './vending-workshop-art.js';
+import { STICKER_ART, corkboard, crayon, doorSign, eraser, frame, lamp, lampGlow, paperFlake, peg, roomBulbs, seal, stand, stickerSheet, table, tinBack, tinFront, token, wall } from './vending-workshop-art.js';
+import { elf } from './vending-square-art.js';
 
 // The sheet is 340 × 440: the drawing's own 300 × 360 box sits 20 in from the top and the sides, the stamp in the margin
 // below it.
@@ -150,6 +151,15 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
     paperLayer(walls, '0 0 1440 330', 'shop-table', table, { paper: { scale: .9, grain: .45, shadow: .2 }, eager: true, preserveAspectRatio: 'xMidYMin slice' });
   }
   const status = element('p', 'sr-only', host); status.setAttribute('role', 'status');
+  // On the wall, under everything: paper snowflakes hung from the ceiling, the corkboard (a snowman the elves coloured in,
+  // the day's colours), and an elf on the table by the sheet (who hops when a work is done).
+  const decor = element('div', 'shop-decor', host); decor.setAttribute('aria-hidden', 'true');
+  [[26.5, 2.4], [30.5, 5.2], [67.5, 3.4], [86.5, 7.2]].forEach(([left, drop], i) => {
+    const flake = element('span', 'shop-flake', decor); flake.style.left = `${left}%`; flake.style.top = `${11 + drop}%`; flake.style.setProperty('--thread', `${drop * 1.6 + 1.5}rem`); flake.style.animationDelay = `${-i * 1.3}s`;
+    paperLayer(flake, '0 0 100 100', '', paperFlake, { paper: { scale: .3, grain: .4, shadow: .25, rim: '#ffffff' }, eager: true });
+  });
+  paperLayer(element('span', 'shop-cork', decor), '0 0 260 170', '', corkboard, { paper: { scale: .45, grain: .45, shadow: .3, rim: '#f7efe2' }, eager: true });
+  paperLayer(element('span', 'shop-elf', decor), '0 0 100 162', '', elf({ tunic: '#4f7d68' }).draw, { paper: { scale: .25, grain: .35, shadow: .25, rim: '#fbf3e3' }, eager: true });
 
   // The shelf on the wall: three works in frames, two the elves made (in the classic colours) and the newest of one's own
   // (or a third of the elves', before there is one); a tap on it opens the album.
@@ -227,6 +237,7 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
     const chips = presetFills(SWATCH, key);
     paperLayer(element('span', 'shop-dots', card), '0 0 104 28', '', g => chips.forEach((fill, i) => shape('rect', { x: 4 + i * 25, y: 4, width: 21, height: 20, rx: 4, fill }, g)), { paper: { scale: .2, grain: .45, shadow: .25 }, eager: true });
     element('span', 'shop-preset-name', card, name);
+    paperLayer(element('span', 'shop-peg', card), '0 0 40 40', '', peg, small);
     on(card, 'click', () => { if (!item) return; commit({ fills: presetFills(classic(item.id), key), stickers: state.stickers }); sound?.play('snap'); });
   }
 
@@ -247,8 +258,16 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   // On the right: the tags (undo, redo, start over, done, back to the market) and the stickers.
   const right = element('div', 'shop-right', host), tools = element('div', 'color-tools', right);
   const tool = (text, className = 'color-tool', parent = tools) => { const button = element('button', className, parent, text); button.type = 'button'; return button; };
-  const undo = tool(`↶ ${VENDING.undo}`), redo = tool(`↷ ${VENDING.redo}`), reset = tool(VENDING.reset), finish = tool(`${VENDING.finish} ✓`, 'color-tool is-main'), back = tool(`← ${VENDING.back}`, 'color-tool is-back');
+  // The desk's tools are things: wooden tokens to go back and forward again, an eraser to start over, a wax seal to finish,
+  // a door sign back to the market; each with its name under it (or on it).
+  const thing = (text, draw, box = '0 0 100 100', className = '') => {
+    const button = element('button', `color-tool is-thing ${className}`.trim(), tools); button.type = 'button';
+    paperLayer(element('span', 'tool-art', button), box, '', draw, { paper: { scale: .45, grain: .45, shadow: .3, rim: '#f7efe2' }, eager: true });
+    element('span', 'tool-name', button, text); return button;
+  };
+  const undo = thing(VENDING.undo, token(1)), redo = thing(VENDING.redo, token(-1)), reset = thing(VENDING.reset, eraser), finish = thing(VENDING.finish, seal, '0 0 100 100', 'is-main'), back = thing(VENDING.back, doorSign, '0 0 140 86', 'is-back');
   const stickerBox = element('div', 'shop-stickers', right); stickerBox.setAttribute('role', 'group'); stickerBox.setAttribute('aria-label', VENDING.stickers);
+  paperLayer(element('span', 'shop-sticker-sheet', stickerBox), '0 0 196 102', '', stickerSheet, { paper: { scale: .4, grain: .3, shadow: .22 }, eager: true });
   element('p', 'shop-stickers-name', stickerBox, VENDING.stickers).setAttribute('aria-hidden', 'true');
   const pegs = new Map(STICKERS.map(kind => {
     const button = element('button', 'shop-sticker', stickerBox); button.type = 'button'; button.dataset.kind = kind; button.setAttribute('aria-pressed', 'false'); button.setAttribute('aria-label', VENDING.stick(VENDING.sticker[kind]));

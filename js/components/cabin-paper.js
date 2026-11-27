@@ -70,13 +70,12 @@ const KINDS = [
   ['.welcome-card', 'storycard'],
   // The Christmas Vending page's paper (vending.js mounts this there too): the coloring desk's buttons and crayon tin, the
   // advent calendar's doors and card, and the plain picker shown when the 3D machine cannot come.
-  ['.color-tool.is-main, .cal-close, .cal-face[data-tone="red"]', 'tag'],
+  ['.color-tool.is-main:not(.is-thing), .cal-close, .cal-face[data-tone="red"]', 'tag'],
   ['.cal-face[data-tone="green"]', 'pine'],
   // The craft booth's workshop: its name on a board, the shelf of works, the crayon's name slip, the swatch cards, the
   // sticker tray, the pencilled note, the card once a work is done.
   ['.shop-title, .shop-shelf', 'wood'],
   ['.color-name, .shop-note, .machine-tag', 'slip'],
-  ['.shop-stickers', 'kraft'],
   ['.shop-card, .shop-album', 'letter'],
   ['.shop-album-card, .shop-album-blank', 'pale'],
   ['.shop-preset', 'pale'],
@@ -84,7 +83,7 @@ const KINDS = [
   ['.cal-face[data-tone="kraft"]', 'kraft'],
   ['.cal-note', 'letter'],
   ['.vending-picker', 'note'],
-  ['.color-tool, .cal-back, .cal-inside, .vending-picker button', 'pale'],
+  ['.color-tool:not(.is-thing), .cal-back, .cal-inside, .vending-picker button', 'pale'],
   ['.feed-slip-box', 'kraft'],
   ['.cabin-caption, .cabin-tip, .cabin-away, .books-found, .shift-pin, .shift-file, .notebook-next', 'pinned'],
   ['.gearbox-hint, .desk-guide', 'pine'],

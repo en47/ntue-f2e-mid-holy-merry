@@ -110,3 +110,80 @@ export function stand(g) {
   shape('path', { d: 'M20 31H380', stroke: '#e0b04f', 'stroke-width': 3 }, g);
   shape('path', { d: 'M60 70H340L330 96H70Z', fill: WOOD }, g);
 }
+
+// The tools as things on the workshop's wall and table (each drawn in a 100 × 100 box unless said): a round wooden token
+// with a cream arrow round it (`turn` 1: back, -1: forward again), an eraser in its blue sleeve, a red wax seal with a
+// star pressed in it, and (140 × 86) a wooden door sign on a red thread with an arrow, holly at its corner.
+const P = (g, d, fill, extra = {}) => shape('path', { d, fill, ...extra }, g);
+export const token = turn => g => {
+  shape('circle', { cx: 50, cy: 52, r: 44, fill: DARK }, g);
+  shape('circle', { cx: 50, cy: 49, r: 41, fill: '#c0905f' }, g);
+  for (const r of [29, 17]) shape('circle', { cx: 50, cy: 49, r, fill: 'none', stroke: '#a8774d', 'stroke-width': 2.5, opacity: .7 }, g);
+  P(g, `M${50 + turn * 20} 61A22 22 0 1 ${turn > 0 ? 0 : 1} ${50 - turn * 16} 35`, 'none', { stroke: '#fbf3df', 'stroke-width': 8, 'stroke-linecap': 'round' });
+  P(g, `M${50 - turn * 30} 31L${50 - turn * 12} 27L${50 - turn * 18} 45Z`, '#fbf3df');
+};
+export function eraser(g) {
+  P(g, 'M10 58L52 20L92 44L50 84Z', '#e8a7a0');
+  P(g, 'M34 37L74 62L50 84L10 58Z', '#6f9fb0');
+  P(g, 'M10 58L50 84L50 92L10 66Z', '#5b8796');
+  P(g, 'M74 62L92 44L92 52L50 92L50 84Z', '#c98a84');
+  P(g, 'M52 20L92 44L74 62L34 37Z', '#f2c2bb', { opacity: .55 });
+  for (const [x, y] of [[66, 90], [78, 84], [72, 96]]) shape('circle', { cx: x, cy: y, r: 2.6, fill: '#e8a7a0' }, g);
+}
+export function seal(g) {
+  const points = Array.from({ length: 28 }, (_, i) => { const a = i / 28 * Math.PI * 2, r = i % 2 ? 40 : 46; return `${(50 + Math.cos(a) * r).toFixed(1)} ${(52 + Math.sin(a) * r).toFixed(1)}`; });
+  P(g, `M${points.join('L')}Z`, '#a33a33');
+  P(g, 'M28 88Q30 98 36 96Q40 92 38 86ZM70 90Q72 99 78 96Q80 90 76 86Z', '#a33a33');
+  shape('circle', { cx: 50, cy: 52, r: 30, fill: '#b5443c' }, g);
+  shape('circle', { cx: 50, cy: 52, r: 25, fill: 'none', stroke: '#8f2f2a', 'stroke-width': 3 }, g);
+  star(g, 50, 52, 15, '#8f2f2a');
+  P(g, 'M32 36Q40 28 52 30', 'none', { stroke: '#d9726a', 'stroke-width': 4, 'stroke-linecap': 'round', opacity: .8 });
+}
+export function doorSign(g) {
+  P(g, 'M70 6L44 34M70 6L96 34', 'none', { stroke: '#b5443c', 'stroke-width': 3 });
+  shape('circle', { cx: 70, cy: 6, r: 4, fill: '#7b5440' }, g);
+  P(g, 'M8 34H132Q138 34 138 40V76Q138 82 132 82H8Q2 82 2 76V40Q2 34 8 34Z', '#a8774d');
+  for (const y of [48, 62]) P(g, `M8 ${y}H132`, 'none', { stroke: WOOD, 'stroke-width': 2, opacity: .6 });
+  P(g, 'M14 58L30 46V54H44V62H30V70Z', '#fbf3df');
+  holly(g, 126, 38, .5);
+}
+// A wooden clothes peg (40 × 40) for a swatch card on its string.
+export function peg(g) {
+  P(g, 'M14 0H26V40H14Z', '#c0905f');
+  P(g, 'M20 0V40', 'none', { stroke: WOOD, 'stroke-width': 1.5 });
+  shape('circle', { cx: 20, cy: 18, r: 4, fill: '#8a8f96' }, g);
+}
+// The sticker sheet (196 × 102): white, a corner peeling, pale rings where the stickers sit.
+export function stickerSheet(g) {
+  P(g, 'M6 4H186Q192 4 192 10V82L176 98H10Q4 98 4 92V10Q4 4 6 4Z', '#fffdf6');
+  P(g, 'M176 98L192 82H180Q176 82 176 86Z', '#e4d6bf');
+  for (const x of [40, 98, 156]) shape('circle', { cx: x, cy: 58, r: 22, fill: '#f3ead8' }, g);
+}
+// A paper snowflake hung from the ceiling.
+export function paperFlake(g) {
+  for (let i = 0; i < 6; i++) {
+    const a = i * Math.PI / 3, c = Math.cos(a), s = Math.sin(a);
+    P(g, `M50 50L${(50 + c * 40).toFixed(1)} ${(50 + s * 40).toFixed(1)}`, 'none', { stroke: SNOW, 'stroke-width': 7, 'stroke-linecap': 'round' });
+    for (const t of [.55, .8]) { const x = 50 + c * 40 * t, y = 50 + s * 40 * t; for (const side of [-1, 1]) { const b = a + side * .7; P(g, `M${x.toFixed(1)} ${y.toFixed(1)}l${(Math.cos(b) * 10).toFixed(1)} ${(Math.sin(b) * 10).toFixed(1)}`, 'none', { stroke: SNOW, 'stroke-width': 5, 'stroke-linecap': 'round' }); } }
+  }
+  shape('circle', { cx: 50, cy: 50, r: 8, fill: SNOW }, g);
+}
+// The corkboard on the wall (260 × 170): pinned to it, a snowman the elves coloured in and a card of the day's three
+// colours, and a blank slip.
+export function corkboard(g) {
+  P(g, 'M0 0H260V170H0Z', '#7b5440');
+  P(g, 'M10 10H250V160H10Z', '#c79a6b');
+  for (let i = 0; i < 90; i++) shape('circle', { cx: 20 + (i * 53) % 220, cy: 18 + (i * 37) % 136, r: 1.6, fill: '#a87b52', opacity: .6 }, g);
+  const card = shape('g', { transform: 'rotate(-4 73 84)' }, g);
+  P(card, 'M26 22H120V146H26Z', '#fffdf6');
+  shape('circle', { cx: 73, cy: 112, r: 22, fill: '#f7f4ee', stroke: '#5a3e30', 'stroke-width': 2.4 }, card);
+  shape('circle', { cx: 73, cy: 76, r: 16, fill: '#f7f4ee', stroke: '#5a3e30', 'stroke-width': 2.4 }, card);
+  P(card, 'M58 58H88V62H58ZM63 38H83V58H63Z', '#3c3238');
+  P(card, 'M58 90Q73 98 88 90V96Q73 104 58 96Z', '#b5443c');
+  P(card, 'M73 78L86 81L73 83Z', '#d9823f');
+  const swatch = shape('g', { transform: 'rotate(5 188 63)' }, g);
+  P(swatch, 'M142 30H234V96H142Z', '#fffdf6');
+  ['#b5443c', '#4f7d68', '#e0b04f'].forEach((fill, i) => P(swatch, `M${152 + i * 26} 42H${172 + i * 26}V82H${152 + i * 26}Z`, fill));
+  P(g, 'M160 112H236V150H160Z', '#f6dfa8', { transform: 'rotate(-3 198 131)' });
+  for (const [x, y, fill] of [[73, 26, '#b5443c'], [188, 32, '#4f7d68'], [200, 116, '#e0b04f']]) shape('circle', { cx: x, cy: y, r: 6, fill }, g);
+}

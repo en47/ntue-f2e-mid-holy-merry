@@ -142,7 +142,13 @@
 .color-tin-front { pointer-events: none; }
 .color-name { display: flex; align-items: baseline; gap: .6rem; margin: 0; padding: .35rem 1rem .45rem; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-body); }
 .color-name-en { color: #7a5a48; font-size: var(--fs-small); }
-.shop-presets { display: flex; gap: .5rem; }
+.shop-presets { position: relative; display: flex; gap: .9rem; padding-top: 1.1rem; }
+/* 配色卡用木夾子夾在一條細繩上，微微歪著。 */
+.shop-presets::before { content: ''; position: absolute; left: -.6rem; right: -.6rem; top: .55rem; height: 2px; border-radius: 2px; background: #e9d3a8; rotate: -.6deg; }
+.shop-preset { position: relative; transform-origin: 50% 0; }
+.shop-preset:nth-child(1) { rotate: -3deg; } .shop-preset:nth-child(2) { rotate: 2deg; } .shop-preset:nth-child(3) { rotate: -1.5deg; }
+.shop-peg { position: absolute; z-index: 1; left: 50%; top: -1.15rem; width: 1rem; height: 2rem; translate: -50% 0; }
+.shop-peg .art-layer { position: absolute; inset: 0; }
 .shop-preset { display: grid; justify-items: center; gap: .3rem; padding: .5rem .7rem .55rem; border: 0; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); cursor: pointer; }
 .shop-preset:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
 .shop-dots { position: relative; display: block; width: 4.4rem; aspect-ratio: 104 / 28; }
@@ -156,6 +162,14 @@
 .color-hover { stroke: #f4c668; stroke-width: 7; stroke-linejoin: round; fill-opacity: .32; opacity: 0; }
 .color-hover.is-on { opacity: .85; }
 .color-sticker { cursor: pointer; }
+/* 牆上的裝飾（在所有東西下面、不接收點擊）：天花板垂下的紙雪花、軟木板（精靈塗好的雪人、今天的配色）、桌上畫紙旁的小精靈。 */
+.shop-decor { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
+.shop-decor .art-layer { position: absolute; inset: 0; }
+.shop-flake { position: absolute; width: 3.4rem; aspect-ratio: 1; transform-origin: 50% calc(-1 * var(--thread)); }
+.shop-flake::before { content: ''; position: absolute; left: 50%; bottom: 95%; width: 1px; height: var(--thread); background: #f0e3c8; }
+.shop-cork { position: absolute; right: 16.5%; top: 25%; width: 13.5rem; aspect-ratio: 260 / 170; }
+.shop-elf { position: absolute; left: 26.2%; top: 51%; width: 4.4rem; aspect-ratio: 100 / 162; }
+.shop-work.is-done .shop-decor { opacity: .9; }
 .shop-lamp, .shop-glow { position: absolute; right: -6.5rem; top: -2.5rem; width: 9rem; aspect-ratio: 200 / 260; pointer-events: none; }
 .shop-glow { z-index: 2; opacity: .55; }
 .shop-stand { position: absolute; left: 50%; bottom: -2.2rem; width: 118%; aspect-ratio: 400 / 100; translate: -50% 0; opacity: 0; pointer-events: none; }
@@ -164,13 +178,27 @@
 .shop-sparks { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 .shop-sparks i { position: absolute; left: calc(10% + var(--i) * 12.5%); top: 6%; width: 1.5rem; aspect-ratio: 1; opacity: 0; }
 .shop-right { justify-self: end; align-self: center; display: grid; gap: 1.2rem; justify-items: end; }
-.color-tools { display: grid; grid-template-columns: minmax(7.5rem, auto); gap: .55rem; }
+.color-tools { display: grid; grid-template-columns: repeat(2, 5.2rem); justify-items: center; gap: .9rem .6rem; }
+/* 工具是紙雕道具：木片（復原、重做）、粉藍色的擦子（重新上色）、紅色封蠟（完成）、掛在紅線上的木門牌（回到市集）；名字寫在下面（門牌寫在牌子上）。 */
+.color-tool.is-thing { position: relative; display: grid; justify-items: center; gap: .15rem; padding: 0; border: 0; color: #fbecc4; background: none; text-shadow: 0 1px 0 #4a3022, 0 0 6px #4a3022; }
+.color-tool.is-thing .tool-art { position: relative; display: block; width: 3.6rem; aspect-ratio: 1; }
+.color-tool.is-thing .tool-art .art-layer { position: absolute; inset: 0; }
+.color-tool.is-thing .tool-name { white-space: nowrap; }
+.color-tool.is-thing:disabled { color: #e5d3b3; }
+.color-tool.is-thing:disabled .tool-art { filter: saturate(.3) brightness(.9); opacity: .7; }
+.color-tool.is-thing.is-back { grid-column: 1 / -1; }
+.color-tool.is-thing.is-back .tool-art { width: 9rem; aspect-ratio: 140 / 86; }
+.color-tool.is-thing.is-back .tool-name { position: absolute; left: 60%; top: 66%; translate: -50% -50%; color: #fbf3df; text-shadow: none; }
 .color-tool { padding: .55rem 1rem; border: 0; background: #f6efe0; color: var(--ink); font-family: var(--font-hand); font-size: var(--fs-small); cursor: pointer; }
-.color-tool.is-main { color: var(--cream); background: #b5443c; }
-.color-tool:disabled { color: #b9a58c; cursor: default; } /* 停用時紙還是實的（不透出後面的木牆），只把字調淡。 */
+.color-tool.is-main:not(.is-thing) { color: var(--cream); background: #b5443c; }
+.color-tool:disabled { color: #b9a58c; cursor: default; }
+.color-tool.is-thing:disabled { cursor: default; } /* 停用時紙還是實的（不透出後面的木牆），只把字調淡。 */
 .color-tool:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
-.shop-stickers { position: relative; display: flex; gap: .45rem; padding: 1.6rem .6rem .55rem; }
-.shop-stickers-name { position: absolute; left: .7rem; top: .4rem; margin: 0; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); }
+.shop-stickers { position: relative; isolation: isolate; display: flex; gap: .45rem; padding: 1.9rem .8rem .7rem; }
+/* 貼紙放在一張右下角翹起來的貼紙紙片上。 */
+.shop-sticker-sheet { position: absolute; z-index: -1; inset: 0; }
+.shop-sticker-sheet .art-layer { position: absolute; inset: 0; }
+.shop-stickers-name { position: absolute; left: .8rem; top: .5rem; margin: 0; color: #5b3d2e; font-family: var(--font-hand); font-size: var(--fs-small); }
 .shop-sticker { position: relative; width: 2.7rem; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
 .shop-sticker[aria-pressed="true"] { outline: 3px solid #b5443c; outline-offset: 2px; }
 .shop-sticker:focus-visible { outline: 3px solid #f4c668; outline-offset: 3px; }
@@ -214,6 +242,9 @@
   .shop-album:not([hidden]) { animation: card-up .45s cubic-bezier(.2, .8, .3, 1.1); }
   .color-tool:not(:disabled):hover { rotate: -2deg; }
   .shop-sticker:hover { scale: 1.1; }
+  .shop-flake { animation: flake-sway 5s ease-in-out infinite alternate; }
+  .shop-work.is-done .shop-elf { animation: elf-hop .5s 1.1s ease-out 3; }
+  .color-tool.is-thing:not(:disabled):hover .tool-art { scale: 1.06; }
   .color-part { transition: fill .25s ease; }
   .color-part.is-filled { animation: fill-pop .35s ease-out; }
   .color-hover { transition: opacity .15s ease; }
@@ -244,9 +275,17 @@
 @keyframes sheet-turn { 30% { transform: perspective(1100px) rotateY(-12deg); } 65% { transform: perspective(1100px) rotateY(9deg); } }
 @keyframes stamp-press { from { opacity: 0; transform: scale(1.6); } }
 @keyframes spark-fall { from { opacity: 0; transform: translateY(-1rem) rotate(0deg); } 20% { opacity: 1; } to { opacity: 0; transform: translateY(18rem) rotate(240deg); } }
+@keyframes flake-sway { from { rotate: -4deg; } to { rotate: 4deg; } }
+@keyframes elf-hop { 40% { translate: 0 -.8rem; } }
 @keyframes card-up { from { opacity: 0; transform: translateY(1.4rem); } }
 
 /* 平板：工坊的工具排在畫紙右邊。 */
+@media (max-width: 1100px) {
+  .shop-cork, .shop-elf { display: none; }
+}
+@media (max-width: 760px) {
+  .shop-decor { display: none; }
+}
 @media (max-width: 1100px) and (min-width: 761px) {
   .shop-work { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "center left" "center right"; }
   .shop-center { grid-area: center; } .shop-left { grid-area: left; justify-self: end; } .shop-right { grid-area: right; }
