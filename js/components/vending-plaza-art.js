@@ -13,11 +13,21 @@ const smooth = points => { let d = `M${f(points[0][0])} ${f(points[0][1])}`; for
 const rect = (g, x, y, w, h, fill, extra = {}) => shape('rect', { x: f(x), y: f(y), width: f(w), height: f(h), fill, ...extra }, g);
 const P = (g, d, fill, extra = {}) => shape('path', { d, fill, ...extra }, g);
 const C = { snow: '#fbf7f2', snowShade: '#e4e0e8', red: '#c95a4c', redDark: '#a8473c', cream: '#f4e6cf', wood: '#a7754f', woodLight: '#c08a5f', woodDark: '#7b5440', glow: '#eec488', glowDeep: '#e2a866', pine: '#5f7a64', pineDark: '#4f6a56', green: '#3f6b55', gold: '#e2b354', slate: '#7d7f92', ink: '#3c3238', lit: '#f7d58e' };
-// A lumpy cap of snow along a line from (x0, y0) to (x1, y1), `deep` thick, drooping over the edge.
+// A cap of snow along a line from (x0, y0) to (x1, y1), `deep` thick, as snow lies on an eave: its top smooth, swelling
+// a little in the middle and only gently uneven; both ends rounding over the edge; its underside a little shaded (it
+// has a thickness), and here and there a short icicle hanging from it.
 export function snowLine(g, x0, y0, x1, y1, deep, seed = 1) {
-  const n = Math.max(3, Math.round(Math.hypot(x1 - x0, y1 - y0) / 18)), top = [], low = [];
-  for (let i = 0; i <= n; i++) { const t = i / n, x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t; top.push([x, y - deep * (.5 + noise(seed + i * 1.3) * .5)]); low.push([x, y + deep * (i % 3 === 1 ? .95 : .3)]); }
-  P(g, `${path([[x0 - 5, y0 + deep * .3], ...top, [x1 + 5, y1 + deep * .3], ...low.reverse()])}Z`, C.snow);
+  const length = Math.hypot(x1 - x0, y1 - y0), n = Math.max(4, Math.round(length / 24)), [dx, dy] = [(x1 - x0) / length, (y1 - y0) / length], top = [], low = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t, swell = .72 + .22 * Math.sin(t * Math.PI) + .1 * (noise(seed + i * 1.3) - .5);
+    top.push([x, y - deep * swell]); low.push([x, y + deep * (.24 + .06 * Math.sin(i * 2.1 + seed))]);
+  }
+  const ends = side => { const [x, y] = side < 0 ? [x0, y0] : [x1, y1]; return [[x + side * dx * deep * .45, y + side * dy * deep * .45 - deep * .2], [x + side * dx * deep * .3, y + side * dy * deep * .3 + deep * .3]]; };
+  const [a0, a1] = ends(-1), [b0, b1] = ends(1);
+  P(g, `${smooth([a1, a0, ...top, b0, b1, ...low.slice().reverse(), a1])}Z`, C.snow);
+  // (the shade along its underside)
+  P(g, `${smooth([...low.map(([x, y]) => [x, y - deep * .32]), b1, ...low.slice().reverse(), a1])}Z`, C.snowShade, { opacity: .55 });
+  for (let i = 1; i < n; i++) if (noise(seed * 7 + i) > .78) { const [x, y] = low[i], w = deep * .16, h = deep * (.45 + noise(seed + i * 5) * .35); P(g, `M${f(x - w)} ${f(y - 1)}Q${f(x)} ${f(y + h * 1.1)} ${f(x + w)} ${f(y - 1)}Z`, C.snow); }
 }
 const star = (g, x, y, r, fill = C.gold, extra = {}) => { const pts = []; for (let j = 0; j < 10; j++) { const a = -Math.PI / 2 + j * Math.PI / 5, rr = j % 2 ? r * .45 : r; pts.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr]); } P(g, `${path(pts)}Z`, fill, extra); };
 const bow = (g, x, y, s = 1, fill = C.red) => {
@@ -264,9 +274,9 @@ export const BUSHES = { box: [900, 462, 92, 80], draw: g => { for (const [x, y, 
 // (running on past the picture's right edge, beyond what the widest screen shows)
 const STAR_POINTS = [[535, 195], [628, 185], [720, 165], [800, 148], [903, 172], [988, 185], [1072, 188], [1163, 188], [1248, 178], [1343, 160], [1440, 178], [1535, 190], [1630, 176], [1725, 186], [1820, 170], [1915, 182]];
 const cordAt = x => { let best = STAR_POINTS[0]; for (const p of STAR_POINTS) if (Math.abs(p[0] - x) < Math.abs(best[0] - x)) best = p; const i = STAR_POINTS.indexOf(best), next = STAR_POINTS[Math.min(STAR_POINTS.length - 1, i + (x > best[0] ? 1 : 0))], prev = STAR_POINTS[Math.max(0, i - (x > best[0] ? 0 : 1))]; const t = next[0] === prev[0] ? 0 : (x - prev[0]) / (next[0] - prev[0]); return prev[1] + (next[1] - prev[1]) * t - 30; };
-export const STARS = { box: [362, 128, 1608, 90], draw: g => {
-  // (from under the title's sign, whose right edge is at x 372, SIGN in market-layout.js)
-  const cord = []; for (let x = 364; x <= 1965; x += 12) cord.push([x, cordAt(Math.max(535, x)) + (x < 535 ? (535 - x) * .1 : 0)]);
+export const STARS = { box: [332, 128, 1638, 90], draw: g => {
+  // (from under the title's sign, whose right edge is at x 342, SIGN in market-layout.js)
+  const cord = []; for (let x = 334; x <= 1965; x += 12) cord.push([x, cordAt(Math.max(535, x)) + (x < 535 ? (535 - x) * .1 : 0)]);
   P(g, smooth(cord), 'none', { stroke: '#4a4048', 'stroke-width': 3 });
   for (let k = 1; k < cord.length; k += 3) shape('ellipse', { cx: f(cord[k][0]), cy: f(cord[k][1] - 3), rx: 9, ry: 4, fill: C.snow }, g);
   for (const [x, y] of STAR_POINTS) { P(g, `M${x} ${cordAt(x)}V${y - 14}`, 'none', { stroke: '#4a4048', 'stroke-width': 2 }); star(g, x, y, 17, '#f8d673', { stroke: '#e2ae45', 'stroke-width': 2 }); }

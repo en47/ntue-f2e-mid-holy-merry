@@ -118,6 +118,7 @@
 .color-sheet { position: relative; z-index: 1; width: min(27rem, calc((min(100svh, 940px) - 230px) * 340 / 440)); aspect-ratio: 340 / 440; rotate: -1deg; }
 .color-drawing { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .color-part { cursor: pointer; }
+.color-part:focus { outline: none; } /* 點選時不畫藍色方框；用鍵盤時才顯示金邊。 */
 .color-part:focus-visible { outline: none; stroke: #e0b04f; stroke-width: 6; }
 .color-sheet.is-placing .color-drawing { cursor: copy; }
 .color-hover { stroke: #f4c668; stroke-width: 7; stroke-linejoin: round; opacity: 0; }

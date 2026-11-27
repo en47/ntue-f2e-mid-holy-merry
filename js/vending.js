@@ -36,7 +36,9 @@ function hangSign() {
   const [x, z] = SIGN.at, left = world.project([x - SIGN.width / 2, SIGN.foot + SIGN.height, z]), right = world.project([x + SIGN.width / 2, SIGN.foot, z]);
   const at = [left.x, left.y, right.x - left.x, right.y - left.y].map(value => value.toFixed(1)).join(' ');
   if (at === signAt) return; signAt = at;
-  const [l, t, w, h] = at.split(' '); Object.assign(heading.style, { left: `${l}px`, top: `${t}px`, width: `${w}px`, height: `${h}px` });
+  // (never nearer the edge of the view than a margin: pushed in, it still covers the start of the string of stars)
+  const [l, t, w, h] = at.split(' ').map(Number), margin = Math.max(18, world.host.clientWidth * .02);
+  Object.assign(heading.style, { left: `${Math.max(l, margin).toFixed(1)}px`, top: `${Math.max(t, margin * .7).toFixed(1)}px`, width: `${w}px`, height: `${h}px` });
 }
 
 // Should the street or the machine not come (no WebGL, a model missing), the four things are offered plainly instead.

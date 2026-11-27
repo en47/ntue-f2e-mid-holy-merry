@@ -77,8 +77,8 @@ export const SKY = backdrop([-700, -260, 2100, 470], 140);
 // The title's sign hangs at the top left, and the string of stars runs from under its right edge across the sky: both
 // at the same depth, so that they meet on any screen (vending.js sets the sign where this rectangle shows). It hangs low
 // enough for the snow on it to clear the top of the view, and ends short of the star on the machine's crest.
-export const SIGN = backdrop([40, 128, 372, 272], 7.5);
-export const STARS = backdrop([362, 128, 1970, 218], 7.5);
+export const SIGN = backdrop([10, 150, 342, 294], 7.5);
+export const STARS = backdrop([332, 128, 1970, 218], 7.5);
 // The string of bulbs and pennants across the lane, tied to the front post of the ornament stall's far end (and, at the
 // other end, by vending-advent.js, to the bracket of the Advent House's left lantern).
 export const PENNANT_FROM = (([x, z]) => [x, STALLS[1].height * .8, z])(along(STALLS[1], STALLS[1].width / 2 - .06, .02));

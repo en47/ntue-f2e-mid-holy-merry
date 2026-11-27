@@ -20,13 +20,15 @@ export const bulbs = progress => Array.from({ length: LEVER.bulbs }, (_, k) => M
 export const lit = progress => Math.min(LEVER.bulbs, Math.floor(Math.max(0, progress) * LEVER.bulbs + 1e-9));
 
 // What a thing done leads to: a pick unlocks the lever; a grab before that does nothing; let go short of the bottom and it
-// springs back, all the way down and the delivery runs; when it is done the thing waits on the stage until it is taken.
+// springs back, all the way down and the delivery runs; when it is done the thing waits on the stage until it is taken,
+// or until another is picked instead (it goes back to its cell first: `change`, then the new pick).
 const MOVES = {
   idle: { pick: 'chosen' },
   chosen: { pick: 'chosen', grab: 'pulling' },
   pulling: { short: 'chosen', full: 'running' },
   running: { done: 'ready' },
-  ready: { take: 'idle' },
+  ready: { take: 'idle', change: 'returning' },
+  returning: { back: 'idle' },
 };
 export const next = (state, event) => MOVES[state]?.[event] ?? state;
 
@@ -36,6 +38,6 @@ export const next = (state, event) => MOVES[state]?.[event] ?? state;
 // turns to you. The five bulbs go out one by one meanwhile, as if the pull's strength were being spent.
 export const DELIVERY = {
   back: [0, 380], shudder: [50, 650], door: [200, 650], glow: [600, 1000], lower: [1000, 1900], land: [1900, 2100],
-  dim: [2200, 2350], curtains: [2350, 2950], tray: [2950, 3450], turn: [3450, 3950], ready: 3950,
+  dim: [2100, 2500], curtains: [2500, 3050], tray: [3050, 3450], turn: [3450, 3950], ready: 3950,
   bulbs: [700, 1200, 1700, 2200, 2700],
 };

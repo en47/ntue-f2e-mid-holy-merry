@@ -91,7 +91,7 @@ export function mountMachine(stage, { world, place, onState = () => {}, sound = 
   const nameOf = () => ITEMS.find(({ id }) => id === chosen)?.name ?? '';
   function set(value, note = '') {
     state = value; stage.dataset.state = state;
-    for (const hit of hits.values()) hit.disabled = !['idle', 'chosen'].includes(state);
+    for (const hit of hits.values()) hit.disabled = !['idle', 'chosen', 'ready'].includes(state);
     tray.disabled = state !== 'ready'; tray.setAttribute('aria-label', VENDING.tray(nameOf()));
     handle.setAttribute('aria-disabled', String(!['idle', 'chosen', 'pulling'].includes(state)));
     onState(state, chosen, note);
@@ -173,6 +173,7 @@ export function mountMachine(stage, { world, place, onState = () => {}, sound = 
   // A button pressed: it sinks and comes back half way, staying down while its thing is the one picked; the one picked
   // before comes up. Its cell lights up, the others dim, the thing hops and looks round. The first pick lets the lever go.
   function select(id) {
+    if (state === 'ready') { change(id); return; }
     if (!['idle', 'chosen'].includes(state) || id === chosen) return;
     const before = chosen, first = state === 'idle'; chosen = id; sound?.play('click');
     const holder = buttons.get(id), rest = holder.userData.home;
@@ -262,19 +263,25 @@ export function mountMachine(stage, { world, place, onState = () => {}, sound = 
     later(d.door[0], () => { cell.door.visible = true; cue('creak'); });
     const sunk = home(id).y; tween(span(d.door), t => { cell.door.position.y = cell.door.userData.open + (cell.door.userData.shut - cell.door.userData.open) * t; thing.position.y = sunk - .02 * t; }, { delay: d.door[0], curve: ease });
     glowTo(id, 0, { delay: d.door[0], length: 300 });
-    later(d.door[1], () => { silhouette(thing, true); theatre.tray.add(thing); thing.position.copy(stand).setY(stand.y + .2); thing.rotation.set(0, 0, 0); });
+    // (Its shadow is flat against the lit paper at the back of the stage, as a shadow puppet's is on its screen: well
+    // behind the front, so that coming down from above the stage it is hidden by the machine's face, and clear of where the
+    // two curtains meet.)
+    const screen = MACHINE.stage.back + .014;
+    later(d.door[1], () => { silhouette(thing, true); theatre.tray.add(thing); thing.position.set(stand.x, stand.y + .2, screen); thing.rotation.set(0, 0, 0); thing.scale.set(1, 1, .06); });
     // The curtains light up from behind and the shadow comes down onto the stage, landing with a little bob.
     later(d.glow[0], () => cue('hum'));
     tween(span(d.glow), t => { theatre.backlight.color.copy(DARK).lerp(LIT, t); theatre.cloth.color.copy(CLOTH).lerp(GLOWING, t); theatre.cloth.opacity = 1 - .42 * t; }, { delay: d.glow[0] });
     tween(span(d.lower), t => { thing.position.y = stand.y + .2 * (1 - t); }, { delay: d.lower[0], curve: ease });
     later(d.land[0], () => cue('thud'));
     tween(span(d.land), t => { thing.position.y = stand.y + Math.sin(t * Math.PI) * .008; }, { delay: d.land[0], curve: linear });
-    // The light goes out, the curtains dark again, and behind them the thing is itself; then they part on it.
+    // The light goes out slowly, the curtains dark again; as they part, the thing is itself, on the tray.
     later(d.dim[0], () => cue('ding'));
-    tween(span(d.dim), t => { theatre.backlight.color.copy(LIT).lerp(DIM, t); theatre.cloth.color.copy(GLOWING).lerp(CLOTH, t); theatre.cloth.opacity = .58 + .42 * t; }, { delay: d.dim[0], curve: linear });
-    later(d.dim[1], () => silhouette(thing, false));
+    tween(span(d.dim), t => { theatre.backlight.color.copy(LIT).lerp(DIM, t); theatre.cloth.color.copy(GLOWING).lerp(CLOTH, t); theatre.cloth.opacity = .58 + .42 * t; }, { delay: d.dim[0], curve: ease });
+    // (once the curtains have parted enough to show it whole: a narrow slit would show only a speck of it)
+    later(d.curtains[0] + 90, () => { silhouette(thing, false); thing.scale.setScalar(1); thing.position.copy(stand); });
     later(d.curtains[0], () => cue('whoosh'));
-    tween(span(d.curtains), t => { curtains(1 - .78 * t); spot.intensity = glare * t; theatre.pool.opacity = .8 * t; theatre.beam.opacity = .5 * t; }, { delay: d.curtains[0], curve: ease });
+    // (they are drawn apart briskly and come to rest slowly)
+    tween(span(d.curtains), t => { curtains(1 - .78 * t); spot.intensity = glare * t; theatre.pool.opacity = .8 * t; theatre.beam.opacity = .5 * t; }, { delay: d.curtains[0], curve: t => 1 - (1 - t) ** 3 });
     theatre.confetti.forEach((star, i) => {
       const x = -.1 + i * .04 + (i % 2 ? .008 : -.006), z = .09 + (i % 3) * .012;
       later(d.curtains[0] + 80 + i * 90, () => { star.visible = true; });
@@ -290,6 +297,23 @@ export function mountMachine(stage, { world, place, onState = () => {}, sound = 
     // The bulbs go out one by one meanwhile, the last of the pull spent.
     d.bulbs.forEach((delay, i) => tween(280, t => bulb(4 - i, 1 - t), { delay }));
     later(d.ready, () => { shown = 0; set(next(state, 'done')); waiting(); });
+  }
+  // Another pressed while the thing waits on the stage (a change of mind): the stage's light goes out, the tray slides back
+  // and it shrinks to its own size, the curtains close on it; behind them it goes back to its cell, whose door rises on it
+  // and whose light comes back; its button comes up; then the new one is picked, and the lever is to be pulled again.
+  function change(id) {
+    if (state !== 'ready' || id === chosen) return;
+    const old = chosen, thing = things.get(old), cell = cells[old], button = buttons.get(old), tray = theatre.tray.position.z, size = thing.scale.x, rise = thing.position.y, stand = onStage().y;
+    clearTimeout(sway); moves.clear(); delete stage.dataset.show; set(next(state, 'change')); sound?.play('whoosh');
+    tween(500, t => { spot.intensity = glare * (1 - t); theatre.pool.opacity = .8 * (1 - t); theatre.beam.opacity = .5 * (1 - t); spill.material.opacity = .9 * (1 - t); theatre.tray.position.z = tray * (1 - t); thing.scale.setScalar(size + (1 - size) * t); thing.position.y = rise + (stand - rise) * t; thing.rotation.y *= 1 - t; });
+    later(200, () => { for (const star of theatre.confetti) star.visible = false; });
+    tween(550, t => curtains(.22 + .78 * t), { delay: 300 });
+    later(880, () => { machine.group.add(thing); thing.position.copy(home(old)); thing.rotation.set(0, 0, 0); thing.scale.setScalar(1); sound?.play('creak'); });
+    const { open: up, shut: down } = cell.door.userData;
+    tween(450, t => { cell.door.position.y = down + (up - down) * t; }, { delay: 900 }); later(1360, () => { cell.door.visible = false; });
+    glowTo(old, IDLE, { delay: 900, length: 400 });
+    const from = button.position.z; tween(300, t => { button.position.z = from + (button.userData.home - from) * t; }, { delay: 900 });
+    later(1400, () => { chosen = null; set(next(state, 'back')); select(id); });
   }
   // While it waits on the stage, every few seconds it sways a little.
   function waiting() {

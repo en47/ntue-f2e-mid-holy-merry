@@ -327,8 +327,8 @@ export function mountScene(host, front) {
     // While something covers the square (the workshop), it is not drawn at all.
     hold(covered) { held = covered; if (covered) { cancelAnimationFrame(ticking); ticking = 0; clearTimeout(idle); last = 0; } else wake(); },
     // Up to a thing and back: the view never leaves where it stands; it turns to the thing and draws in on it, as one
-    // looks closer at a picture (`look`: the thing's middle; `size`, `wide`: how tall and wide it is, to fill the view),
-    // and with nothing given turns back and draws out again.
+    // looks closer at a picture (`look`: the thing's middle; `size`, `wide`: how tall and wide it is, to fill what of the
+    // view is on the screen), and with nothing given turns back and draws out again.
     walk(to) {
       return new Promise(done => {
         if (trip && mode === 'street') trip = null;
@@ -336,8 +336,12 @@ export function mountScene(host, front) {
         let target, zoom;
         if (to?.look) {
           const [ex, ey, ez] = home().eye, [lx, ly, lz] = to.look, dx = lx - ex, dz = lz - ez, flat = Math.hypot(dx, dz), dist = Math.hypot(flat, ly - ey);
-          target = { eye: [ex, ey, ez], heading: Math.atan2(dx, -dz), pitch: Math.atan2(ey - ly, flat) };
-          zoom = [camera.fov, Math.max(8, Math.min(base, 2 * Math.atan(Math.max(to.size / 2, (to.wide ?? 0) / 2 / camera.aspect) / dist) / DEG))];
+          // (Fitted to the part of the square actually on the screen: on a short window the square runs on below its bottom
+          // edge, so the thing is drawn in to fill what shows and the view tips to put it in the middle of that.)
+          const box = host.getBoundingClientRect(), H = host.clientHeight || 1, top = Math.min(H, Math.max(0, -box.top)), bottom = Math.max(top, Math.min(H, innerHeight - box.top)), seen = Math.max(H * .4, bottom - top), middle = (top + bottom) / 2;
+          const fov = Math.max(8 * DEG, Math.min(base * DEG, 2 * Math.atan(Math.max(to.size / 2 * H / seen, (to.wide ?? 0) / 2 / camera.aspect) / dist)));
+          target = { eye: [ex, ey, ez], heading: Math.atan2(dx, -dz), pitch: Math.atan2(ey - ly, flat) + Math.atan((H / 2 - middle) / (H / 2) * Math.tan(fov / 2)) };
+          zoom = [camera.fov, fov / DEG];
         } else { target = home(); zoom = [camera.fov, base]; }
         mode = to ? 'near' : 'leaving'; host.dataset.mode = mode;
         const back = !to, arrive = () => { if (back) { mode = 'street'; host.dataset.mode = mode; } done(); };

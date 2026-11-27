@@ -277,10 +277,12 @@ export function buildMachine({ redraw = () => {} } = {}) {
   flat(mesh(new THREE.PlaneGeometry(.31, .224), backlight, group, 0, floor + .112, back + .002));
   const cloth = own(new THREE.MeshLambertMaterial({ color: C.curtain, map: grain, transparent: true, toneMapped: false }));
   const curtains = [-1, 1].map(side => {
-    const geometry = new THREE.PlaneGeometry(.158, .19, 56, 1), at = geometry.attributes.position;
-    for (let i = 0; i < at.count; i++) { const u = (at.getX(i) + .079) / .158, fold = Math.abs((u * 7) % 1 * 2 - 1); at.setZ(i, fold * .011); if (at.getY(i) < 0) at.setY(i, at.getY(i) - fold * .005); }
-    geometry.translate(-side * .079, 0, 0); geometry.computeVertexNormals();
-    const pivot = new THREE.Group(); pivot.position.set(side * .155, floor + .095, .122); group.add(pivot);
+    const geometry = new THREE.PlaneGeometry(.17, .198, 60, 1), at = geometry.attributes.position;
+    for (let i = 0; i < at.count; i++) { const u = (at.getX(i) + .085) / .17, fold = Math.abs((u * 7) % 1 * 2 - 1); at.setZ(i, fold * .011); if (at.getY(i) < 0) at.setY(i, at.getY(i) - fold * .005); }
+    geometry.translate(-side * .085, 0, 0); geometry.computeVertexNormals();
+    // (their hems a little below the floor, and the two well over each other in the middle, so that nothing on the stage
+    // shows under or between them)
+    const pivot = new THREE.Group(); pivot.position.set(side * .155, floor + .091, .122); group.add(pivot);
     const node = mesh(geometry, cloth, pivot); node.castShadow = node.receiveShadow = false;
     return pivot;
   });

@@ -38,6 +38,9 @@ test('only a pick unlocks the lever, and only a full pull let go starts the deli
   assert.equal(next('running', 'pick'), 'running', 'no picking while it runs');
   assert.equal(next('running', 'done'), 'ready');
   assert.equal(next('ready', 'take'), 'idle');
+  assert.equal(next('ready', 'change'), 'returning', 'with the thing on the stage another may be picked instead: it goes back first');
+  assert.equal(next('returning', 'pick'), 'returning', 'no picking while it goes back');
+  assert.equal(next('returning', 'back'), 'idle');
   assert.equal(next('loading', 'pick'), 'loading');
 });
 

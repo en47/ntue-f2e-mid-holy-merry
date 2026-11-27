@@ -206,7 +206,7 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   const line = element('p', 'shop-card-line', card), choices = element('div', 'shop-card-actions', card);
   const save = tool(VENDING.save, 'color-tool', choices), again = tool(VENDING.again, 'color-tool', choices), leave = tool(`← ${VENDING.back}`, 'color-tool is-main', choices);
 
-  let colour = CRAYONS[0][0], item = null, parts = [], hover = null, stickers = null, lines = null, state = { fills: [], stickers: [] }, done = [], undone = [], finished = false, holding = null;
+  let tidy = 0, colour = CRAYONS[0][0], item = null, parts = [], hover = null, stickers = null, lines = null, state = { fills: [], stickers: [] }, done = [], undone = [], finished = false, holding = null;
   function choose(i, quiet = false) {
     colour = CRAYONS[i][0]; crayons.forEach((button, j) => { button.setAttribute('aria-checked', String(i === j)); button.tabIndex = i === j ? 0 : -1; });
     named.replaceChildren(); element('span', '', named, CRAYONS[i][1]); element('span', 'color-name-en', named, CRAYONS[i][2]).lang = 'en';
@@ -292,7 +292,7 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   // Opens a thing's sheet (`next`, or the one last worked on, or the first): as it was left, or blank. The way in from the
   // market plays the table's little show (`quick` skips it, as when a frame is tapped).
   function open(next = null, { quick = false } = {}) {
-    hold(null); card.hidden = true; host.classList.remove('is-done');
+    clearTimeout(tidy); hold(null); card.hidden = true; host.classList.remove('is-done');
     const last = Object.entries(works).sort((a, b) => b[1].at - a[1].at)[0]?.[0];
     item = ITEMS.find(each => each.id === (next ?? last ?? ITEMS[0].id)) ?? ITEMS[0];
     const drawing = DRAWINGS[item.id], work = works[item.id];
@@ -337,8 +337,10 @@ export function mountWorkshop(host, { room: walls = null, onBack = () => {}, sou
   for (const each of frames.keys()) miniature(each);
   return {
     open, get item() { return item?.id ?? null; },
-    close() { hold(null); card.hidden = true; host.classList.remove('is-done', 'is-arriving'); },
+    // Closed: it is left just as it is while the workshop folds away (it would jump back to the table and fade in again
+    // on the way out), and put back to rights once it is out of sight.
+    close() { hold(null); clearTimeout(tidy); tidy = setTimeout(() => { card.hidden = true; host.classList.remove('is-done', 'is-arriving'); }, still.matches ? 0 : 700); },
     focus: () => (parts[0] ?? crayons[0]).focus({ preventScroll: true }),
-    destroy() { events.abort(); timers.forEach(clearTimeout); host.replaceChildren(); walls?.replaceChildren(); },
+    destroy() { events.abort(); clearTimeout(tidy); timers.forEach(clearTimeout); host.replaceChildren(); walls?.replaceChildren(); },
   };
 }

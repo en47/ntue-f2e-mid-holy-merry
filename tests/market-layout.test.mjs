@@ -64,7 +64,8 @@ test('the title\'s sign hangs where the string of stars begins, at the same dept
   assert.equal(SIGN.depth, STARS.depth);
   const signRight = SIGN.box[2], cordStart = STARS.box[0];
   assert.ok(cordStart < signRight && signRight - cordStart < 20, 'the cord starts just under the sign\'s right edge');
-  assert.ok(SIGN.box[3] < MACHINE.box[1] + 15, 'the sign clear of the machine\'s crest');
+  const [star] = picture([MACHINE.at[0], MACHINE.height, MACHINE.at[1]]);
+  assert.ok(SIGN.box[3] < MACHINE.box[1] || SIGN.box[2] < star - 30, 'the sign clear of the star on the machine\'s crest');
   for (const bank of BANKS) assert.ok(bank.depth > 3, 'every bank of snow out on the cobbles');
 });
 

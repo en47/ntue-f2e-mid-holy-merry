@@ -26,7 +26,7 @@ export const VENDING = {
   short: '沒有拉到底，拉桿彈回去了。',
   drag: '拉桿要往下拖，一路拉到底再放開。',
   running: name => `${name}出發了。`,
-  drop: name => `${name}到舞台上了，點舞台把它拿出來。`,
+  drop: name => `${name}到舞台上了，點舞台把它拿出來，或按別的按鈕換一個。`,
   tray: name => `從舞台拿出${name}`,
   desk: name => `工作桌上是${name}的線稿：選一支蠟筆，點一塊就塗上顏色。`,
   region: (name, i) => `${name}的第 ${i} 塊`,
